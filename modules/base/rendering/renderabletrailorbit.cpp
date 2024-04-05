@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -354,7 +354,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     }
 
     using namespace std::chrono;
-    double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
+    const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // How much time has passed since the last permanent point
     const double delta = data.time.j2000Seconds() - _lastPointTime;
@@ -378,7 +378,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         }
 
         // See how many points we need to drop
-        const int nNewPoints = static_cast<int>(floor(delta / secondsPerPoint));
+        const uint64_t nNewPoints = static_cast<uint64_t>(floor(delta / secondsPerPoint));
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
@@ -387,7 +387,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             return { false, true, UpdateReport::All };
         }
 
-        for (int i = 0; i < nNewPoints; ++i) {
+        for (int i = 0; i < nNewPoints; i++) {
             _lastPointTime += secondsPerPoint;
 
             // Get the new permanent point and write it into the (previously) floating
@@ -412,12 +412,13 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // future
         _firstPointTime += nNewPoints * secondsPerPoint;
 
-        return { false, true, nNewPoints };
+        return { false, true, static_cast<int>(nNewPoints) };
     }
     else {
         // See how many new points needs to be generated. Delta is negative, so we need
         // to invert the ratio
-        const int nNewPoints = -(static_cast<int>(floor(delta / secondsPerPoint)));
+        const uint64_t nNewPoints =
+            -(static_cast<uint64_t>(floor(delta / secondsPerPoint)));
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
@@ -426,7 +427,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             return { false, true, UpdateReport::All };
         }
 
-        for (int i = 0; i < nNewPoints; ++i) {
+        for (int i = 0; i < nNewPoints; i++) {
             _firstPointTime -= secondsPerPoint;
 
             // Get the new permanent point and write it into the (previously) floating
@@ -453,7 +454,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // The previously youngest point has become nNewPoints steps older
         _lastPointTime -= nNewPoints * secondsPerPoint;
 
-        return { false, true, -nNewPoints };
+        return { false, true, static_cast<int>(-nNewPoints) };
     }
 }
 
@@ -477,7 +478,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
-    for (int i = 1; i < _resolution; ++i) {
+    for (int i = 1; i < _resolution; i++) {
         const glm::vec3 p = _translation->position({ {}, Time(time), Time(0.0) });
         _vertexArray[i] = { p.x, p.y, p.z };
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,11 +31,12 @@ FileSystemAccess::FileSystemAccess(std::string fileExtension,
     , _useCheckboxes(useCheckboxes)
 {}
 
-std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(std::string dir,
-                                                                bool userAssets) {
+std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(const std::string& dir,
+                                                                bool userAssets)
+{
     _filesystemModel.setRootPath(QString::fromStdString(dir));
-    QModelIndex index = _filesystemModel.index(_filesystemModel.rootPath());
-    QFileInfo fileInfo = _filesystemModel.fileInfo(index);
+    const QModelIndex index = _filesystemModel.index(_filesystemModel.rootPath());
+    const QFileInfo fileInfo = _filesystemModel.fileInfo(index);
     std::vector<std::string> dirsNested;
     std::vector<std::string> out;
     parseChildDirElements(fileInfo, "", 0, dirsNested, out, userAssets);
@@ -46,32 +47,38 @@ std::string FileSystemAccess::useQtFileSystemModelToTraverseDir(std::string dir,
     return combined;
 }
 
-void FileSystemAccess::parseChildDirElements(QFileInfo fileInfo, std::string space,
-                                             int level,
+void FileSystemAccess::parseChildDirElements(const QFileInfo& fileInfo,
+                                             const std::string& space, int level,
                                              std::vector<std::string>& dirNames,
                                              std::vector<std::string>& output,
                                              bool userAssets)
 {
-    QDir dir(fileInfo.filePath());
+    const QDir dir = QDir(fileInfo.filePath());
     bool hasDirHeaderBeenAdded = false;
 
-    QFileInfoList fileList = dir.entryInfoList(_fileFilterOptions);
-    for (int i = 0; i < fileList.size(); i++) {
-        QFileInfo fi = fileList[i];
+    const QFileInfoList fileList = dir.entryInfoList(_fileFilterOptions);
+    for (const QFileInfo& fi : fileList) {
         std::string res = space + fi.fileName().toStdString();
         if (level == 0 && userAssets) {
-            res = "${USER_ASSETS}/" + res;
+            res = std::format("${{USER_ASSETS}}/{}", res);
         }
         if (fi.isDir()) {
             dirNames.push_back(res);
-            parseChildDirElements(fi, (space + " "), level + 1, dirNames, output, userAssets);
+            parseChildDirElements(
+                fi,
+                (space + " "),
+                level + 1,
+                dirNames,
+                output,
+                userAssets
+            );
         }
         else {
             parseChildFile(res, hasDirHeaderBeenAdded, dirNames, output);
         }
     }
-    bool isThisDirAnEmptyDeadEnd = !hasDirHeaderBeenAdded;
-    if (isThisDirAnEmptyDeadEnd && (dirNames.size() != 0)) {
+    const bool isThisDirAnEmptyDeadEnd = !hasDirHeaderBeenAdded;
+    if (isThisDirAnEmptyDeadEnd && !dirNames.empty()) {
         dirNames.pop_back();
     }
 }
@@ -80,12 +87,12 @@ void FileSystemAccess::parseChildFile(std::string filename, bool& hasDirHeaderBe
                                       std::vector<std::string>& dirNames,
                                       std::vector<std::string>& output)
 {
-    std::string cbox = (_useCheckboxes) ? "0" : "";
+    const std::string cbox = _useCheckboxes ? "0" : "";
     if (filename.length() <= _fileExtension.length()) {
         return;
     }
     else {
-        std::string extension = filename.substr(filename.length()
+        const std::string extension = filename.substr(filename.length()
             - _fileExtension.length());
         if (extension != _fileExtension) {
             return;

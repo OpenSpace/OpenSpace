@@ -16,8 +16,9 @@ local speck = asset.resource({
 local Object = {
   Identifier = "Exoplanets",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "expl.speck",
     Labels = {
       File = speck .. "expl.label",
       Color = { 0.3, 0.3, 0.8 },
@@ -25,16 +26,16 @@ local Object = {
       MinMaxSize = { 10, 100 },
       Unit = "pc"
     },
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 1.0,
-    Texture = textures .. "target-blue.png",
-    File = speck .. "expl.speck",
+    Texture = {
+      File = textures .. "target-blue.png",
+    },
     Unit = "pc",
-    ScaleFactor = 388.67923,
-    CorrectionSizeEndDistance = 15.23,
-    CorrectionSizeFactor = 13.3,
-    BillboardMinMaxSize = { 0.0, 75.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 16.9,
+      MaxSize = 2.8,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Exoplanets",
@@ -64,7 +65,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Exoplanets",
-  Version = "1.1",
+  Version = "2.0",
   Description = "Digital Universe asset for Exoplanets",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

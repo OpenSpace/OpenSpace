@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,14 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/space/labelscomponent.h>
+#include <openspace/data/dataloader.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/rendering/labelscomponent.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -111,7 +112,7 @@ private:
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 
-    speck::Dataset _dataset;
+    dataloader::Dataset _dataset;
 
     // Everything related to the labels is handled by LabelsComponent
     std::unique_ptr<LabelsComponent> _labels;

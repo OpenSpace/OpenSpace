@@ -16,18 +16,22 @@ local speck = asset.resource({
 local Object = {
   Identifier = "PlanetaryCandidates",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
-    Color = { 1.0, 1.0, 0.0 },
     Opacity = 0.99,
-    ScaleFactor = 410.0,
     File = speck .. "exoplanet_candidates.speck",
     Unit = "pc",
-    Texture = textures .. "halo.png",
-    CorrectionSizeEndDistance = 15.86,
-    CorrectionSizeFactor = 8.59,
-    BillboardMinMaxSize = { 0.0, 30.0 },
-    EnablePixelSizeControl = true
+    Texture = {
+      File = textures .. "halo.png",
+    },
+    Coloring = {
+      FixedColor = { 1.0, 1.0, 0.0 }
+    },
+    SizeSettings = {
+      ScaleExponent = 17.8,
+      MaxSize = 1.0,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Planetary Candidates",
@@ -60,7 +64,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Planetary Candidates",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for Planetary Candidates",
   Author = "Brian Abbott, Emily Rice, and Jason No (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #include <modules/kameleon/include/kameleonhelper.h>
 
 #include <openspace/util/time.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 
 #ifdef _MSC_VER
@@ -50,17 +50,17 @@ namespace openspace::kameleonHelper {
 
 std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath) {
     auto kameleon = std::make_unique<ccmc::Kameleon>();
-    LDEBUG(fmt::format("\tOpening the cdf file: {}", cdfFilePath));
+    LDEBUG(std::format("Opening the CDF file '{}'", cdfFilePath));
     long kamStatus = kameleon->open(cdfFilePath);
 
     if (kamStatus != ccmc::FileReader::OK) {
-        LERROR(fmt::format(
-            "Failed to create a Kameleon Object from file: {}",
+        LERROR(std::format(
+            "Failed to create a Kameleon Object from file '{}'",
             cdfFilePath
         ));
        return nullptr;
     }
-    LDEBUG(fmt::format("\tSuccessfully opened: {}", cdfFilePath));
+    LDEBUG(std::format("Successfully opened '{}'", cdfFilePath));
     return kameleon;
 }
 

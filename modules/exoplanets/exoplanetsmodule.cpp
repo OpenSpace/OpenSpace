@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -113,9 +113,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ComparisonCircleColorInfo = {
         "ComparisonCircleColor",
         "Comparison Circle Color",
-        "Decides the color of the 1 AU size comparison circles that are generated as part "
-        "of an exoplanet system. Changing the color will not modify already existing "
-        "circles",
+        "Decides the color of the 1 AU size comparison circles that are generated as "
+        "part of an exoplanet system. Changing the color will not modify already "
+        "existing circles",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -268,7 +268,7 @@ std::string ExoplanetsModule::exoplanetsDataPath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
     return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
+        std::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
     ).string();
 }
 
@@ -276,14 +276,14 @@ std::string ExoplanetsModule::lookUpTablePath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
     return absPath(
-        fmt::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
+        std::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
     ).string();
 }
 
 std::string ExoplanetsModule::teffToBvConversionFilePath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
-    return absPath(fmt::format(
+    return absPath(std::format(
         "{}/{}", _exoplanetsDataFolder.value(), TeffToBvConversionFileName
     )).string();
 }

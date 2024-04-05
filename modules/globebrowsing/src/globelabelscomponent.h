@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,7 +69,6 @@ private:
     bool saveCachedFile(const std::filesystem::path& file) const;
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         float distToCamera, float fadeInVariable);
-    bool isLabelInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position) const;
 
     // Labels Structures
     struct LabelEntry {

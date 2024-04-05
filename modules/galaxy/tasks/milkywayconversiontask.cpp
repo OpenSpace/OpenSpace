@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,7 @@
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumesampler.h>
-#include <modules/volume/textureslicevolumereader.h>
-
-#include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/documentation.h>
-
 #include <ghoul/misc/dictionary.h>
 
 namespace {
@@ -45,10 +41,7 @@ namespace {
 
 namespace openspace {
 
-MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary)
-    : _inFirstIndex(0)
-    , _inNSlices(0)
-{
+MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
     if (dictionary.hasKey(KeyInFilenamePrefix)) {
         _inFilenamePrefix = dictionary.value<std::string>(KeyInFilenamePrefix);
     }
@@ -92,17 +85,16 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
     const glm::vec3 resolutionRatio = static_cast<glm::vec3>(sliceReader.dimensions()) /
                                       static_cast<glm::vec3>(rawWriter.dimensions());
 
-    VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(
+    const VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(
         &sliceReader,
         resolutionRatio
     );
-    std::function<glm::tvec4<GLfloat>(glm::ivec3)> sampleFunction =
-        [resolutionRatio, sampler](glm::ivec3 outCoord) {
-            const glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5f)) *
-                                      resolutionRatio) - glm::vec3(0.5f);
-            const glm::tvec4<GLfloat> value = sampler.sample(inCoord);
-            return value;
-        };
+    auto sampleFunction = [resolutionRatio, sampler](const glm::ivec3& outCoord) {
+        const glm::vec3 inCoord =
+            ((glm::vec3(outCoord) + glm::vec3(0.5f)) * resolutionRatio) - glm::vec3(0.5f);
+        const glm::tvec4<GLfloat> value = sampler.sample(inCoord);
+        return value;
+    };
 
     rawWriter.write(sampleFunction, onProgress);
 }

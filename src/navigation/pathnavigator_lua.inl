@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -173,7 +173,7 @@ namespace {
     }
     catch (const documentation::SpecificationError& e) {
         logError(e, "flyToNavigationState");
-        throw ghoul::lua::LuaError(fmt::format("Unable to create a path: {}", e.what()));
+        throw ghoul::lua::LuaError(std::format("Unable to create a path: {}", e.what()));
     }
 
     ghoul::Dictionary instruction;
@@ -304,6 +304,81 @@ namespace {
 
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
+    }
+}
+
+/**
+ * Fade rendering to black, jump to the specified node, and then fade in. This is done by
+ * triggering another script that handles the logic.
+ *
+ * If no fade duration is specified, use the property from Navigation Handler
+ */
+[[codegen::luawrap]] void jumpToNavigationState(ghoul::Dictionary navigationState,
+                                                std::optional<double> fadeDuration)
+{
+    using namespace openspace;
+    try {
+        documentation::testSpecificationAndThrow(
+            interaction::NavigationState::Documentation(),
+            navigationState,
+            "NavigationState"
+        );
+    }
+    catch (const documentation::SpecificationError& e) {
+        logError(e, "jumpToNavigationState");
+        throw ghoul::lua::LuaError(std::format(
+            "Unable to jump to navigation state: {}", e.what()
+        ));
+    }
+
+    // When copy pasting a printed navigation state from the console, the formatting of
+    // the navigation state dictionary won't be completely correct if using the
+    // dictionary directly, due to the number keys for arrays. We solve this by first
+    // creating an object of the correct datatype
+    // (@TODO emmbr 2024-04-03, This formatting problem should probably be fixed)
+    interaction::NavigationState ns = interaction::NavigationState(navigationState);
+
+    const std::string script = std::format(
+        "openspace.navigation.setNavigationState({})", ghoul::formatLua(ns.dictionary())
+    );
+
+    if (fadeDuration.has_value()) {
+        global::navigationHandler->triggerFadeToTransition(
+            std::move(script),
+            static_cast<float>(*fadeDuration)
+        );
+    }
+    else {
+        global::navigationHandler->triggerFadeToTransition(script);
+    }
+}
+
+/**
+ * Fade rendering to black, jump to the specified navigation state, and then fade in.
+ * This is done by triggering another script that handles the logic.
+ *
+ * If no fade duration is specified, use the property from Navigation Handler
+ */
+[[codegen::luawrap]] void jumpTo(std::string nodeIdentifier,
+                                 std::optional<double> fadeDuration)
+{
+    using namespace openspace;
+    if (SceneGraphNode* n = sceneGraphNode(nodeIdentifier);  !n) {
+        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
+    }
+
+    const std::string script = std::format(
+        "openspace.pathnavigation.flyTo('{}', 0)", nodeIdentifier
+    );
+
+    if (fadeDuration.has_value()) {
+        global::navigationHandler->triggerFadeToTransition(
+            std::move(script),
+            static_cast<float>(*fadeDuration)
+        );
+    }
+    else {
+        global::navigationHandler->triggerFadeToTransition(script);
     }
 }
 

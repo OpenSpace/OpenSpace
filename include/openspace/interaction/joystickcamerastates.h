@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,14 +88,14 @@ public:
     void updateStateFromInput(
         const JoystickInputStates& joystickInputStates, double deltaTime);
 
-    void setAxisMapping(std::string joystickName, int axis, AxisType mapping,
+    void setAxisMapping(const std::string& joystickName, int axis, AxisType mapping,
         AxisInvert shouldInvert = AxisInvert::No,
         JoystickType joystickType = JoystickType::JoystickLike,
         bool isSticky = false, AxisFlip shouldFlip = AxisFlip::No,
         double sensitivity = 0.0
     );
 
-    void setAxisMappingProperty(std::string joystickName, int axis,
+    void setAxisMappingProperty(const std::string& joystickName, int axis,
         std::string propertyUri, float min = 0.f, float max = 1.f,
         AxisInvert shouldInvert = AxisInvert::No, bool isRemote = true
     );
@@ -196,7 +196,7 @@ from_string(std::string_view string)
     if (string == "Pan Y") { return T::PanY; }
     if (string == "Property") { return T::Property; }
 
-    throw RuntimeError(fmt::format("Unknown axis type '{}'", string), "Joystick");
+    throw RuntimeError(std::format("Unknown axis type '{}'", string), "Joystick");
 }
 
 template <>
@@ -220,7 +220,7 @@ from_string(std::string_view string)
     if (string == "JoystickLike") { return T::JoystickLike; }
     if (string == "TriggerLike") { return T::TriggerLike; }
 
-    throw RuntimeError(fmt::format("Unknown joystick type '{}'", string), "Joystick");
+    throw RuntimeError(std::format("Unknown joystick type '{}'", string), "Joystick");
 }
 
 } // namespace ghoul

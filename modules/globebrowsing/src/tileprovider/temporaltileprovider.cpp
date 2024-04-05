@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -197,7 +197,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     if (p.prototyped.has_value()) {
         _mode = Mode::Prototype;
 
-        Time start = Time(p.prototyped->time.start);
+        const Time start = Time(p.prototyped->time.start);
         Time end = Time::now();
         _prototyped.startTimeJ2000 = start.j2000Seconds();
         _prototyped.endTimeJ2000 = Time(p.prototyped->time.end).j2000Seconds();
@@ -217,13 +217,13 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             _prototyped.temporalResolution = p.prototyped->temporalResolution;
         }
         catch (const ghoul::RuntimeError& e) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Could not create time quantizer for Temporal GDAL dataset. {}", e.message
+            throw ghoul::RuntimeError(std::format(
+                "Could not create time quantizer for Temporal GDAL dataset: {}", e.message
             ));
         }
 
         if (p.prototyped->timeFormat.size() >= 64) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Time format string '{}' too large. Maximum length of 64 is allowed",
                 p.prototyped->timeFormat
             ));
@@ -244,8 +244,8 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                 continue;
             }
 
-            std::string file = path.path().filename().string();
-            std::istringstream ss(file);
+            const std::string file = path.path().filename().string();
+            std::istringstream ss = std::istringstream(file);
 
             std::tm tm = {};
             ss >> std::get_time(&tm, p.folder->format.c_str());
@@ -257,7 +257,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                     // unfortunately.  Luckily, Spice understands DOY date formats, so
                     // we can specify those directly and noone would use a DOY and a DOM
                     // time string in the same format string, right?  Right?!
-                    date = fmt::format(
+                    date = std::format(
                         "{}-{}T{}:{}:{}",
                         tm.tm_year + 1900,
                         tm.tm_yday,
@@ -267,7 +267,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                     );
                 }
                 else {
-                    date = fmt::format(
+                    date = std::format(
                         "{}-{}-{} {}:{}:{}",
                         tm.tm_year + 1900,
                         tm.tm_mon + 1,
@@ -278,8 +278,8 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
                     );
                 }
 
-                double et = SpiceManager::ref().ephemerisTimeFromDate(date);
-                _folder.files.push_back({ et, path.path().string() });
+                const double et = SpiceManager::ref().ephemerisTimeFromDate(date);
+                _folder.files.emplace_back(et, path.path().string());
             }
         }
 
@@ -294,8 +294,8 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         );
 
         if (_folder.files.empty()) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Error loading layer '{}'. Folder {} does not contain any files that "
+            throw ghoul::RuntimeError(std::format(
+                "Error loading layer '{}'. Folder '{}' does not contain any files that "
                 "matched the time format",
                 _identifier, _folder.folder
             ));
@@ -345,8 +345,8 @@ void TemporalTileProvider::update() {
     try {
         if (_useFixedTime && !_fixedTime.value().empty()) {
             if (_fixedTimeDirty) {
-                std::string fixedTime = _fixedTime.value();
-                double et = SpiceManager::ref().ephemerisTimeFromDate(fixedTime);
+                const std::string fixedTime = _fixedTime.value();
+                const double et = SpiceManager::ref().ephemerisTimeFromDate(fixedTime);
                 newCurr = retrieveTileProvider(Time(et));
                 _fixedTimeDirty = false;
             }
@@ -398,7 +398,7 @@ DefaultTileProvider TemporalTileProvider::createTileProvider(
         case Mode::Prototype: {
             static const std::vector<std::string> IgnoredTokens = {
                 // From: http://www.gdal.org/frmt_wms.html
-                "${x}", "${y}", "${z}", "${version}" "${format}", "${layer}"
+                "${x}", "${y}", "${z}", "${version}", "${format}", "${layer}"
             };
 
             value = _prototyped.prototype;
@@ -434,7 +434,7 @@ DefaultTileProvider* TemporalTileProvider::retrieveTileProvider(const Time& t) {
         return &it->second;
     }
 
-    std::string_view timeStr = [this, time]() {
+    const std::string_view timeStr = [this, time]() {
         switch (_mode) {
             case Mode::Prototype:
                 return timeStringify(_prototyped.timeFormat, Time(time));
@@ -472,8 +472,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
     // Find the most current image that matches the current time. We can't pass the `time`
     // variable into the retrieveTileProvider function as it would generate a new
     // non-existing TileProvider for every new frame
-    using It = std::vector<std::pair<double, std::string>>::const_iterator;
-    It it = std::lower_bound(
+    auto it = std::lower_bound(
         _folder.files.begin(),
         _folder.files.end(),
         time.j2000Seconds(),
@@ -486,7 +485,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
         it -= 1;
     }
 
-    double t = it->first;
+    const double t = it->first;
     return retrieveTileProvider(Time(t));
 }
 
@@ -495,8 +494,7 @@ TileProvider*
 TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
                                                                          const Time& time)
 {
-    using It = std::vector<std::pair<double, std::string>>::const_iterator;
-    It next = std::lower_bound(
+    auto next = std::lower_bound(
         _folder.files.begin(),
         _folder.files.end(),
         time.j2000Seconds(),
@@ -505,8 +503,8 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
         }
     );
 
-    It curr = next != _folder.files.begin() ? next - 1 : next;
-    It nextNext = next != _folder.files.end() ? next + 1 : curr;
+    auto curr = next != _folder.files.begin() ? next - 1 : next;
+    auto nextNext = next != _folder.files.end() ? next + 1 : curr;
 
     if (next == _folder.files.end()) {
         curr = _folder.files.end() - 1;
@@ -514,14 +512,14 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
         nextNext = curr;
     }
 
-    It prev = curr != _folder.files.begin() ? curr - 1 : curr;
+    auto prev = curr != _folder.files.begin() ? curr - 1 : curr;
 
     _interpolateTileProvider->t1 = retrieveTileProvider(Time(curr->first));
     _interpolateTileProvider->t2 = retrieveTileProvider(Time(next->first));
     _interpolateTileProvider->future = retrieveTileProvider(Time(nextNext->first));
     _interpolateTileProvider->before = retrieveTileProvider(Time(prev->first));
 
-    float factor = static_cast<float>(
+    const float factor = static_cast<float>(
         (time.j2000Seconds() - curr->first) / (next->first - curr->first)
     );
 
@@ -678,7 +676,7 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
     glBindVertexArray(vaoQuad);
     glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
     // Quad for fullscreen with vertex (xy) and texture coordinates (uv)
-    const GLfloat vertexData[] = {
+    constexpr std::array<GLfloat, 24> VertexData = {
         // x    y    u    v
         -1.f, -1.f, 0.f, 0.f,
          1.f,  1.f, 1.f, 1.f,
@@ -687,7 +685,7 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
          1.f, -1.f, 1.f, 0.f,
          1.f,  1.f, 1.f, 1.f
     };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     // vertex coordinates at location 0
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
@@ -721,21 +719,21 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     TracyGpuZone("tile");
 
     // prev and next are the two tiles to interpolate between
-    Tile prev = t1->tile(tileIndex);
-    Tile next = t2->tile(tileIndex);
+    const Tile prev = t1->tile(tileIndex);
+    const Tile next = t2->tile(tileIndex);
     // the tile before and the tile after the interpolation interval are loaded so the
     // interpolation goes smoother. It is on purpose that we are not actually storing the
     // return tile here, we just want to trigger the load already
     before->tile(tileIndex);
     future->tile(tileIndex);
-    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
 
     if (!prev.texture || !next.texture) {
         return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
     }
 
     // The data for initializing the texture
-    TileTextureInitData initData(
+    const TileTextureInitData initData(
         prev.texture->dimensions().x,
         prev.texture->dimensions().y,
         prev.texture->dataType(),
@@ -747,7 +745,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     // Initializing the tile that will contian the interpolated texture
     Tile ourTile;
     // The texture that will contain the interpolated image
-    ghoul::opengl::Texture* writeTexture;
+    ghoul::opengl::Texture* writeTexture = nullptr;
     cache::MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     if (tileCache->exist(key)) {
@@ -762,24 +760,24 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     }
 
     // Saves current state
-    GLint currentFBO;
-    GLint viewport[4];
+    GLint currentFBO = 0;
+    std::array<GLint, 4> viewport;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
-    global::renderEngine->openglStateCache().viewport(viewport);
+    global::renderEngine->openglStateCache().viewport(viewport.data());
     // Bind render texture to FBO
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
     glDisable(GL_BLEND);
-    GLenum textureBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, textureBuffers);
+    const GLenum textureBuffers = GL_COLOR_ATTACHMENT0;
+    glDrawBuffers(1, &textureBuffers);
 
     // Setup our own viewport settings
-    GLsizei w = static_cast<GLsizei>(writeTexture->width());
-    GLsizei h = static_cast<GLsizei>(writeTexture->height());
+    const GLsizei w = static_cast<GLsizei>(writeTexture->width());
+    const GLsizei h = static_cast<GLsizei>(writeTexture->height());
     glViewport(0, 0, w, h);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
-    GLint id;
+    GLint id = 0;
     glGetIntegerv(GL_CURRENT_PROGRAM, &id);
     // Activate shader and bind uniforms
     shaderProgram->activate();

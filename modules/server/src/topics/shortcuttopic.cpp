@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,7 +55,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
     );
 
     for (const interaction::Action& action : actions) {
-        nlohmann::json shortcutJson = {
+        const nlohmann::json shortcutJson = {
             { "identifier", action.identifier },
             { "name", action.name },
             { "script", action.command },
@@ -84,7 +84,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
             keyBinding.second
         );
 
-        nlohmann::json shortcutJson = {
+        const nlohmann::json shortcutJson = {
             { "key", ghoul::to_string(k.key) },
             { "modifiers",
                 {
@@ -102,7 +102,7 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
 }
 
 void ShortcutTopic::sendData() const {
-    nlohmann::json data = { {"shortcuts", shortcutsJson()} };
+    const nlohmann::json data = { {"shortcuts", shortcutsJson()} };
     _connection->sendJson(wrappedPayload(data));
 }
 

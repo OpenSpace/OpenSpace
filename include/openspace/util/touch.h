@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace openspace {
  */
 struct TouchInput {
     TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y, double timestamp);
-    glm::vec2 screenCoordinates(glm::vec2 resolution) const;
+    glm::vec2 screenCoordinates(const glm::vec2& resolution) const;
     glm::vec2 currentWindowCoordinates() const;
     bool isMoving() const;
     float distanceToPos(float otherX, float otherY) const;

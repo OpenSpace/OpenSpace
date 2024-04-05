@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,11 +59,11 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
 }
 
 void OptionProperty::addOption(int value, std::string desc) {
-    Option option = { .value = std::move(value), .description = std::move(desc) };
+    Option option = { .value = value, .description = std::move(desc) };
 
     for (const Option& o : _options) {
         if (o.value == option.value) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "The value of option {{ {} -> {} }} was already registered when trying "
                 "to add option {{ {} -> {} }}",
                 o.value, o.description, option.value, option.description
@@ -79,12 +79,12 @@ void OptionProperty::addOption(int value, std::string desc) {
 
 void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {
     for (std::pair<int, std::string>& p : options) {
-        addOption(std::move(p.first), std::move(p.second));
+        addOption(p.first, std::move(p.second));
     }
 }
 
 void OptionProperty::addOptions(std::vector<std::string> options) {
-    for (int i = 0; i < static_cast<int>(options.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(options.size()); i++) {
         addOption(i, std::move(options[i]));
     }
 }
@@ -96,9 +96,8 @@ void OptionProperty::clearOptions() {
 
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
-    for (size_t i = 0; i < _options.size(); ++i) {
-        const Option& o = _options[i];
-        if (o.value == value) {
+    for (const Option& option : _options) {
+        if (option.value == value) {
             // If it does, set it by calling the superclasses setValue method
             // @TODO(abock): This should be setValue(value) instead or otherwise the
             //               stored indices and option values start to drift if the
@@ -109,7 +108,7 @@ void OptionProperty::setValue(int value) {
     }
 
     // Otherwise, log an error
-    LERROR(fmt::format("Could not find an option for value '{}'", value));
+    LERROR(std::format("Could not find an option for value '{}'", value));
 }
 
 bool OptionProperty::hasOption() const {
@@ -154,17 +153,16 @@ std::string OptionProperty::getDescriptionByValue(int value) {
 
 std::string OptionProperty::generateAdditionalJsonDescription() const {
     // @REFACTOR from selectionproperty.cpp, possible refactoring? ---abock
-    std::string result =
-        "{ \"" + OptionsKey + "\": [";
-    for (size_t i = 0; i < _options.size(); ++i) {
+    std::string result = "{ \"" + OptionsKey + "\": [";
+    for (size_t i = 0; i < _options.size(); i++) {
         const Option& o = _options[i];
-        std::string v = std::to_string(o.value);
-        std::string vSan = escapedJson(v);
-        std::string d = o.description;
-        std::string dSan = escapedJson(d);
+        const std::string v = std::to_string(o.value);
+        const std::string vSan = escapedJson(v);
+        const std::string d = o.description;
+        const std::string dSan = escapedJson(d);
 
         result += '{';
-        result += fmt::format(R"("{}": "{}")", vSan, dSan);
+        result += std::format(R"("{}": "{}")", vSan, dSan);
         result += '}';
 
         if (i != _options.size() - 1) {

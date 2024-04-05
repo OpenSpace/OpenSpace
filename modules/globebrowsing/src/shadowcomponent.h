@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,11 +81,11 @@ public:
 private:
     void createDepthTexture();
     void createShadowFBO();
-    void updateDepthTexture();
+    void updateDepthTexture() const;
     void buildDDepthTexture();
 
     // Debug
-    void saveDepthBuffer();
+    void saveDepthBuffer() const;
 
     ShadowMapData _shadowData;
 
@@ -105,7 +105,7 @@ private:
     GLuint _positionInLightSpaceTexture = 0;
     GLuint _shadowFBO = 0;
     GLint _currentFBO = 0;
-    GLint _mViewport[4];
+    std::array<GLint, 4> _viewport;
 
     GLboolean _faceCulling;
     GLboolean _polygonOffSet;

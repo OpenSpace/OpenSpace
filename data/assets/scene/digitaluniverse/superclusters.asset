@@ -16,8 +16,9 @@ local speck = asset.resource({
 local Object = {
   Identifier = "GalaxySuperclusters",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "superclust.speck",
     Labels = {
       Enabled = true,
       File = speck .. "superclust.label",
@@ -27,14 +28,16 @@ local Object = {
       Unit = "Mpc"
     },
     DrawElements = false,
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    File = speck .. "superclust.speck",
-    Texture = textures .. "point3A.png",
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Unit = "Mpc",
-    ScaleFactor = 531.0,
-    -- BillboardMinMaxSize = { 0.0, 7.2 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 23.1,
+      MaxSize = 0.2,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Galaxy Superclusters",
@@ -63,7 +66,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Galaxy Superclusters",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for Galaxy Superclusters",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

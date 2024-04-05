@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,10 +24,11 @@
 
 #include <openspace/scene/asset.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/scene/assetmanager.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/profiling.h>
@@ -278,10 +279,10 @@ void Asset::initialize() {
         return;
     }
     if (!isSynchronized()) {
-        LERROR(fmt::format("Cannot initialize unsynchronized asset {}", _assetPath));
+        LERROR(std::format("Cannot initialize unsynchronized asset '{}'", _assetPath));
         return;
     }
-    LDEBUG(fmt::format("Initializing asset {}", _assetPath));
+    LDEBUG(std::format("Initializing asset '{}'", _assetPath));
 
     // 1. Initialize requirements
     for (Asset* child : _requiredAssets) {
@@ -292,9 +293,15 @@ void Asset::initialize() {
     try {
         _manager.callOnInitialize(this);
     }
+    catch (const documentation::SpecificationError& e) {
+        LERROR(std::format("Failed to initialize asset '{}'", path()));
+        documentation::logError(e);
+        setState(State::InitializationFailed);
+        return;
+    }
     catch (const ghoul::RuntimeError& e) {
-        LERROR(fmt::format("Failed to initialize asset {}", path()));
-        LERROR(fmt::format("{}: {}", e.component, e.message));
+        LERROR(std::format("Failed to initialize asset '{}'", path()));
+        LERROR(std::format("{}: {}", e.component, e.message));
         setState(State::InitializationFailed);
         return;
     }
@@ -307,7 +314,7 @@ void Asset::deinitialize() {
     if (!isInitialized()) {
         return;
     }
-    LDEBUG(fmt::format("Deinitializing asset {}", _assetPath));
+    LDEBUG(std::format("Deinitializing asset '{}'", _assetPath));
 
     // Perform inverse actions as in initialize, in reverse order (3 - 1)
 
@@ -319,8 +326,8 @@ void Asset::deinitialize() {
         _manager.callOnDeinitialize(this);
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERROR(fmt::format("Failed to deinitialize asset {}", _assetPath));
-        LERROR(fmt::format("{}: {}", e.component, e.message));
+        LERROR(std::format("Failed to deinitialize asset '{}'", _assetPath));
+        LERROR(std::format("{}: {}", e.component, e.message));
         return;
     }
 

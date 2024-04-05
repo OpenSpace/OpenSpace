@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ struct UpdateData;
 class RenderablePlaneProjection : public Renderable {
 public:
     RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
-    ~RenderablePlaneProjection() override;
+    ~RenderablePlaneProjection() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;

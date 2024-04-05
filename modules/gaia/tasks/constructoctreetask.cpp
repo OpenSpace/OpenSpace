@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <filesystem>
@@ -295,9 +295,9 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
 }
 
 std::string ConstructOctreeTask::description() {
-    return fmt::format(
-        "Read bin file (or files in folder): {} and write octree data file (or files) "
-        "into: {}", _inFileOrFolderPath, _outFileOrFolderPath
+    return std::format(
+        "Read bin file (or files in folder) '{}' and write octree data file (or files) "
+        "into '{}'", _inFileOrFolderPath, _outFileOrFolderPath
     );
 }
 
@@ -325,9 +325,9 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
 
     _octreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
-    LINFO(fmt::format("Reading data file: {}", _inFileOrFolderPath));
+    LINFO(std::format("Reading data file '{}'", _inFileOrFolderPath));
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "MAX DIST: {} - MAX STARS PER NODE: {}",
         _octreeManager->maxDist(), _octreeManager->maxStarsPerNode()
     ));
@@ -390,8 +390,8 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         for (size_t i = 0; i < fullData.size(); i += nValuesPerStar) {
             auto first = fullData.begin() + i;
             auto last = fullData.begin() + i + nValuesPerStar;
-            std::vector<float> filterValues(first, last);
-            std::vector<float> renderValues(first, first + RENDER_VALUES);
+            const std::vector<float> filterValues(first, last);
+            const std::vector<float> renderValues(first, first + RENDER_VALUES);
 
             // Filter data by parameters.
             if (checkAllFilters(filterValues)) {
@@ -405,16 +405,16 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         inFileStream.close();
     }
     else {
-        LERROR(fmt::format(
-            "Error opening file {} for loading preprocessed file", _inFileOrFolderPath
+        LERROR(std::format(
+            "Error opening file '{}' for loading preprocessed file", _inFileOrFolderPath
         ));
     }
-    LINFO(fmt::format("{} of {} read stars were filtered", nFilteredStars, nTotalStars));
+    LINFO(std::format("{} of {} read stars were filtered", nFilteredStars, nTotalStars));
 
     // Slice LOD data before writing to files.
     _octreeManager->sliceLodData();
 
-    LINFO(fmt::format("Writing octree to: {}", _outFileOrFolderPath));
+    LINFO(std::format("Writing octree to '{}'", _outFileOrFolderPath));
     std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
     if (outFileStream.good()) {
         if (nValues == 0) {
@@ -425,8 +425,8 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         outFileStream.close();
     }
     else {
-        LERROR(fmt::format(
-            "Error opening file: {} as output data file", _outFileOrFolderPath
+        LERROR(std::format(
+            "Error opening file '{}' as output data file", _outFileOrFolderPath
         ));
     }
 }
@@ -468,18 +468,18 @@ void ConstructOctreeTask::constructOctreeFromFolder(
 
     _indexOctreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
-    float processOneFile = 1.f / allInputFiles.size();
+    const float processOneFile = 1.f / allInputFiles.size();
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "MAX DIST: {} - MAX STARS PER NODE: {}",
         _indexOctreeManager->maxDist(), _indexOctreeManager->maxStarsPerNode()
     ));
 
-    for (size_t idx = 0; idx < allInputFiles.size(); ++idx) {
+    for (size_t idx = 0; idx < allInputFiles.size(); idx++) {
         std::filesystem::path inFilePath = allInputFiles[idx];
         int nStarsInfile = 0;
 
-        LINFO(fmt::format("Reading data file: {}", inFilePath));
+        LINFO(std::format("Reading data file '{}'", inFilePath));
 
         std::ifstream inFileStream(inFilePath, std::ifstream::binary);
         if (inFileStream.good()) {
@@ -506,7 +506,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
                 //}
 
                 // If all filters passed then insert render values into Octree.
-                std::vector<float> renderValues(
+                const std::vector<float> renderValues(
                     filterValues.begin(),
                     filterValues.begin() + RENDER_VALUES
                 );
@@ -536,8 +536,8 @@ void ConstructOctreeTask::constructOctreeFromFolder(
             inFileStream.close();
         }
         else {
-            LERROR(fmt::format(
-                "Error opening file {} for loading preprocessed file", inFilePath
+            LERROR(std::format(
+                "Error opening file '{}' for loading preprocessed file", inFilePath
             ));
         }
 
@@ -548,8 +548,8 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         progressCallback((idx + 1) * processOneFile);
         nStars += nStarsInfile;
 
-        LINFO(fmt::format("Writing {} stars to octree files", nStarsInfile));
-        LINFO(fmt::format(
+        LINFO(std::format("Writing {} stars to octree files", nStarsInfile));
+        LINFO(std::format(
             "Number leaf nodes: {}\n Number inner nodes: {}\n Total depth of tree: {}",
             _indexOctreeManager->numLeafNodes(),
             _indexOctreeManager->numInnerNodes(),
@@ -567,7 +567,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         writeThreads[idx] = std::move(t);
     }
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "A total of {} stars were read from files and distributed into {} total nodes",
         nStars, _indexOctreeManager->totalNodes()
     ));
@@ -591,7 +591,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     //    " - 5000kPc is " + std::to_string(starsOutside5000));
 
     // Write index file of Octree structure.
-    std::filesystem::path indexFileOutPath = fmt::format(
+    std::filesystem::path indexFileOutPath = std::format(
         "{}/index.bin", _outFileOrFolderPath.string()
     );
     std::ofstream outFileStream(indexFileOutPath, std::ofstream::binary);
@@ -602,13 +602,13 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         outFileStream.close();
     }
     else {
-        LERROR(fmt::format(
-            "Error opening file: {} as index output file", indexFileOutPath
+        LERROR(std::format(
+            "Error opening file '{}' as index output file", indexFileOutPath
         ));
     }
 
     // Make sure all threads are done.
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 8; i++) {
         writeThreads[i].join();
     }
 }
@@ -646,10 +646,11 @@ bool ConstructOctreeTask::filterStar(const glm::vec2& range, float filterValue,
 {
     // Return true if star should be filtered away, i.e. if min = max = filterValue or
     // if filterValue < min (when min != 0.0) or filterValue > max (when max != 0.0).
-    return (fabs(range.x - range.y) < FLT_EPSILON &&
-        fabs(range.x - filterValue) < FLT_EPSILON) ||
-        (fabs(range.x - normValue) > FLT_EPSILON && filterValue < range.x) ||
-        (fabs(range.y - normValue) > FLT_EPSILON && filterValue > range.y);
+    constexpr float eps = std::numeric_limits<float>::epsilon();
+    return (std::abs(range.x - range.y) < eps &&
+        std::abs(range.x - filterValue) < eps) ||
+        (std::abs(range.x - normValue) > eps && filterValue < range.x) ||
+        (std::abs(range.y - normValue) > eps && filterValue > range.y);
 }
 
 documentation::Documentation ConstructOctreeTask::Documentation() {

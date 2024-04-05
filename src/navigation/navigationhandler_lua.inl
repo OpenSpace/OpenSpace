@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,18 +27,24 @@ namespace {
 /**
  * Load a navigation state from file. The file should be a lua file returning the
  * navigation state as a table formatted as a Navigation State, such as the output files
- * of saveNavigationState.
+ * of saveNavigationState. If usetimeStamp is set to true and the provided navigation
+ * state has a timestamp, time will be set as well.
  */
-[[codegen::luawrap]] void loadNavigationState(std::string cameraStateFilePath) {
+[[codegen::luawrap]] void loadNavigationState(std::string cameraStateFilePath,
+                                              bool useTimeStamp = false)
+{
     if (cameraStateFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
-    openspace::global::navigationHandler->loadNavigationState(cameraStateFilePath);
+    openspace::global::navigationHandler->loadNavigationState(
+        cameraStateFilePath,
+        useTimeStamp
+    );
 }
 
 /**
- * Return the current navigation state as a lua table. The optional argument is the scene
+ * Return the current navigation state as a Lua table. The optional argument is the scene
  * graph node to use as reference frame. By default, the reference frame will picked based
  * on whether the orbital navigator is currently following the anchor node rotation. If it
  * is, the anchor will be chosen as reference frame. If not, the reference frame will be
@@ -54,7 +60,7 @@ namespace {
         const SceneGraphNode* referenceFrame = sceneGraphNode(*frame);
         if (!referenceFrame) {
             throw ghoul::lua::LuaError(
-                fmt::format("Could not find node '{}' as reference frame", *frame)
+                std::format("Could not find node '{}' as reference frame", *frame)
             );
         }
         state = global::navigationHandler->navigationState(*referenceFrame);
@@ -66,13 +72,21 @@ namespace {
     return state.dictionary();
 }
 
-// Set the navigation state. The argument must be a valid Navigation State.
-[[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState) {
+// Set the navigation state. The first argument must be a valid Navigation State. If
+// useTimeStamp is set to true and the provided navigation state has a timestamp, time
+// will be set as well.
+[[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState,
+                                             bool useTimeStamp = false)
+{
     using namespace openspace;
 
-    global::navigationHandler->setNavigationStateNextFrame(
-        interaction::NavigationState(navigationState)
-    );
+    interaction::NavigationState ns = interaction::NavigationState(navigationState);
+
+    global::navigationHandler->setNavigationStateNextFrame(ns);
+
+    if (useTimeStamp && ns.timestamp.has_value()) {
+        global::timeManager->setTimeNextFrame(Time(*ns.timestamp));
+    }
 }
 
 /**

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -153,10 +153,8 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
         if (SceneGraphNode* n = sceneGraphNode(_targetName);  n) {
             _targetNode = n;
             _targetPosition = _targetNode->worldPosition();
-            _lightTravelTime = calculateLightTravelTime(
-                _sourcePosition,
-                _targetPosition
-            );
+            _lightTravelTime =
+                glm::distance(_targetPosition, _sourcePosition) / _travelSpeed;
             calculateDirectionVector();
             reinitiateTravel();
         }
@@ -164,9 +162,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
 
     _travelSpeed = p.travelSpeed.value_or(_travelSpeed);
     addProperty(_travelSpeed);
-    _travelSpeed.onChange([this]() {
-        reinitiateTravel();
-    });
+    _travelSpeed.onChange([this]() { reinitiateTravel(); });
 }
 
 void RenderableTravelSpeed::initialize() {
@@ -203,11 +199,6 @@ void RenderableTravelSpeed::deinitializeGL() {
     );
     glDeleteVertexArrays(1, &_vaoId);
     glDeleteBuffers(1, &_vBufferId);
-}
-
-double RenderableTravelSpeed::calculateLightTravelTime(glm::dvec3 startPosition,
-    glm::dvec3 targetPosition) {
-    return glm::distance(targetPosition, startPosition) / _travelSpeed;
 }
 
 void RenderableTravelSpeed::calculateDirectionVector() {
@@ -273,10 +264,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     ghoul_assert(mySGNPointer, "Renderable have to be owned by scene graph node");
     _sourcePosition = mySGNPointer->worldPosition();
 
-    _lightTravelTime = calculateLightTravelTime(
-        _sourcePosition,
-        _targetPosition
-    );
+    _lightTravelTime = glm::distance(_targetPosition, _sourcePosition) / _travelSpeed;
 
     const double currentTime = data.time.j2000Seconds();
     // Unless we've reached the target

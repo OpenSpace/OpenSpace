@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___NAVIGATIONSTATE___H__
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/json.h>
 #include <optional>
 
 namespace openspace {
@@ -37,12 +38,15 @@ namespace openspace::interaction {
 struct NavigationState {
     NavigationState() = default;
     explicit NavigationState(const ghoul::Dictionary& dictionary);
+    explicit NavigationState(const nlohmann::json& json);
     NavigationState(std::string anchor, std::string aim, std::string referenceFrame,
         glm::dvec3 position, std::optional<glm::dvec3> up = std::nullopt,
-        double yaw = 0.0, double pitch = 0.0);
+        double yaw = 0.0, double pitch = 0.0,
+        std::optional<double> timestamp = std::nullopt);
 
     CameraPose cameraPose() const;
     ghoul::Dictionary dictionary() const;
+    nlohmann::json toJson() const;
     static documentation::Documentation Documentation();
 
     std::string anchor;
@@ -52,6 +56,8 @@ struct NavigationState {
     std::optional<glm::dvec3> up;
     double yaw = 0.0;
     double pitch = 0.0;
+
+    std::optional<double> timestamp;
 };
 
 } // namespace openspace::interaction

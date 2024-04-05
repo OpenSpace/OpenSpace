@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -212,13 +212,13 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
     _secondsAfter = p.secondsAfter;
 
-    ghoul::Dictionary clipPlanesDictionary = p.clipPlanes.value_or(ghoul::Dictionary());
-    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
+    const ghoul::Dictionary clipPlanesDict = p.clipPlanes.value_or(ghoul::Dictionary());
+    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDict);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
     if (p.gridType.has_value()) {
-        VolumeGridType gridType = volume::parseGridType(*p.gridType);
+        const VolumeGridType gridType = volume::parseGridType(*p.gridType);
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
 
@@ -232,7 +232,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     std::filesystem::path sequenceDir = absPath(_sourceDirectory);
 
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(fmt::format("Could not load sequence directory {}", sequenceDir));
+        LERROR(std::format("Could not load sequence directory '{}'", sequenceDir));
         return;
     }
 
@@ -246,21 +246,21 @@ void RenderableTimeVaryingVolume::initializeGL() {
     // TODO: defer loading of data to later (separate thread or at least not when loading)
     for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
-        std::string path = fmt::format(
+        const std::string path = std::format(
             "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
         );
         RawVolumeReader<float> reader(path, t.metadata.dimensions);
         t.rawVolume = reader.read(_invertDataAtZ);
 
-        float min = t.metadata.minValue;
-        float diff = t.metadata.maxValue - t.metadata.minValue;
+        const float min = t.metadata.minValue;
+        const float diff = t.metadata.maxValue - t.metadata.minValue;
         float* data = t.rawVolume->data();
-        for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
+        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
             data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
         }
 
         t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-        for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
+        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
             t.histogram->add(data[i]);
         }
         // TODO: handle normalization properly for different timesteps + transfer function
@@ -291,13 +291,13 @@ void RenderableTimeVaryingVolume::initializeGL() {
     );
 
     _raycaster->initialize();
-    global::raycasterManager->attachRaycaster(*_raycaster.get());
+    global::raycasterManager->attachRaycaster(*_raycaster);
     onEnabledChange([this](bool enabled) {
         if (enabled) {
-            global::raycasterManager->attachRaycaster(*_raycaster.get());
+            global::raycasterManager->attachRaycaster(*_raycaster);
         }
         else {
-            global::raycasterManager->detachRaycaster(*_raycaster.get());
+            global::raycasterManager->detachRaycaster(*_raycaster);
         }
     });
 
@@ -338,7 +338,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     RawVolumeMetadata metadata;
 
     try {
-        ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
+        const ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
         metadata = RawVolumeMetadata::createFromDictionary(dictionary);
     }
     catch (const ghoul::RuntimeError& e) {
@@ -362,23 +362,23 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimes
     if (_volumeTimesteps.empty()) {
         return nullptr;
     }
-    double currentTime = global::timeManager->time().j2000Seconds();
+    const double currentTime = global::timeManager->time().j2000Seconds();
 
     // Get the first item with time > currentTime
     auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
     if (currentTimestepIt == _volumeTimesteps.end()) {
         // No such timestep was found: show last timestep if it is within the time margin.
         Timestep* lastTimestep = &(_volumeTimesteps.rbegin()->second);
-        double threshold = lastTimestep->metadata.time +
-            static_cast<double>(_secondsAfter);
+        const double threshold =
+            lastTimestep->metadata.time + static_cast<double>(_secondsAfter);
         return currentTime < threshold ? lastTimestep : nullptr;
     }
 
     if (currentTimestepIt == _volumeTimesteps.begin()) {
         // No such timestep was found: show first timestep if it is within the time margin
         Timestep* firstTimestep = &(_volumeTimesteps.begin()->second);
-        double threshold = firstTimestep->metadata.time -
-            static_cast<double>(_secondsBefore);
+        const double threshold =
+            firstTimestep->metadata.time - static_cast<double>(_secondsBefore);
         return currentTime >= threshold ? firstTimestep : nullptr;
     }
 
@@ -398,7 +398,7 @@ int RenderableTimeVaryingVolume::timestepIndex(
         if (&(it.second) == t) {
             return index;
         }
-        ++index;
+        index++;
     }
     return -1;
 }
@@ -415,7 +415,7 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFrom
         if (index == target) {
             return &(it.second);
         }
-        ++index;
+        index++;
     }
     return nullptr;
 }
@@ -438,13 +438,13 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
         // ie with lower bound from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
         if (t && t->texture) {
             if (_raycaster->gridType() == volume::VolumeGridType::Cartesian) {
-                glm::dvec3 scale = t->metadata.upperDomainBound -
-                    t->metadata.lowerDomainBound;
-                glm::dvec3 translation =
+                const glm::dvec3 scale =
+                    t->metadata.upperDomainBound - t->metadata.lowerDomainBound;
+                const glm::dvec3 translation =
                     (t->metadata.lowerDomainBound + t->metadata.upperDomainBound) * 0.5f;
 
                 glm::dmat4 modelTransform = glm::translate(glm::dmat4(1.0), translation);
-                glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
+                const glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
                 modelTransform = modelTransform * scaleMatrix;
                 _raycaster->setModelTransform(glm::mat4(modelTransform));
             }
@@ -482,7 +482,7 @@ bool RenderableTimeVaryingVolume::isReady() const {
 
 void RenderableTimeVaryingVolume::deinitializeGL() {
     if (_raycaster) {
-        global::raycasterManager->detachRaycaster(*_raycaster.get());
+        global::raycasterManager->detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
 }

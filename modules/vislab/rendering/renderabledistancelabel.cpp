@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -130,32 +130,32 @@ void RenderableDistanceLabel::update(const UpdateData&) {
         std::string distanceText = std::to_string(
             std::round(nodeline->distance() / scale)
         );
-        int pos = static_cast<int>(distanceText.find("."));
-        std::string subStr = distanceText.substr(pos);
+        const int pos = static_cast<int>(distanceText.find('.'));
+        const std::string subStr = distanceText.substr(pos);
         distanceText.erase(pos, subStr.size());
 
         // Create final label text and set it
-        const std::string finalText = fmt::format("{} {}", distanceText, unitDescriptor);
+        const std::string finalText = std::format("{} {}", distanceText, unitDescriptor);
         setLabelText(finalText);
 
         // Update placement of label with transformation matrix
         SceneGraphNode* startNode = RE.scene()->sceneGraphNode(nodeline->start());
         SceneGraphNode* endNode = RE.scene()->sceneGraphNode(nodeline->end());
         if (startNode && endNode) {
-            glm::dvec3 start = startNode->worldPosition();
-            glm::dvec3 end = endNode->worldPosition();
-            glm::dvec3 goalPos = start + (end - start) / 2.0;
+            const glm::dvec3 start = startNode->worldPosition();
+            const glm::dvec3 end = endNode->worldPosition();
+            const glm::dvec3 goalPos = start + (end - start) / 2.0;
             _transformationMatrix = glm::translate(glm::dmat4(1.0), goalPos);
         }
         else {
-            LERROR(fmt::format(
-                "Could not find scene graph node {} or {}",
+            LERROR(std::format(
+                "Could not find scene graph node '{}' or '{}'",
                 nodeline->start(), nodeline->end()
             ));
         }
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "There is no scenegraph node with id {}", _nodelineId.value()
         ));
         _errorThrown = true;

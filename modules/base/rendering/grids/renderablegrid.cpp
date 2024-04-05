@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -92,7 +92,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid"
@@ -122,7 +122,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
     };
 #include "renderablegrid_codegen.cpp"
 } // namespace
@@ -192,7 +192,6 @@ bool RenderableGrid::isReady() const {
 void RenderableGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
@@ -263,7 +262,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     );
 
     if (orthoRight == glm::vec3(0.0)) {
-        glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+        const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
             glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
@@ -337,8 +336,8 @@ void RenderableGrid::update(const UpdateData&) {
 
     // If the number of segments are uneven the center won't be completly centered
     const glm::uvec2 center = glm::uvec2(nSegments.x / 2.f, nSegments.y / 2.f);
-    for (unsigned int i = 0; i < nSegments.x; ++i) {
-        for (unsigned int j = 0; j < nSegments.y; ++j) {
+    for (unsigned int i = 0; i < nSegments.x; i++) {
+        for (unsigned int j = 0; j < nSegments.y; j++) {
             const double y0 = -halfSize.y + j * step.y;
             const double y1 = y0 + step.y;
 
@@ -348,8 +347,8 @@ void RenderableGrid::update(const UpdateData&) {
             // Line in y direction
             bool shouldHighlight = false;
             if (_highlightRate.value().x != 0) {
-                int dist = abs(static_cast<int>(i) - static_cast<int>(center.x));
-                int rest = dist % _highlightRate.value().x;
+                const int dist = abs(static_cast<int>(i) - static_cast<int>(center.x));
+                const int rest = dist % _highlightRate.value().x;
                 shouldHighlight = rest == 0;
             }
 
@@ -365,8 +364,8 @@ void RenderableGrid::update(const UpdateData&) {
             // Line in x direction
             shouldHighlight = false;
             if (_highlightRate.value().y != 0) {
-                int dist = abs(static_cast<int>(j) - static_cast<int>(center.y));
-                int rest = dist % _highlightRate.value().y;
+                const int dist = abs(static_cast<int>(j) - static_cast<int>(center.y));
+                const int rest = dist % _highlightRate.value().y;
                 shouldHighlight = abs(rest) == 0;
             }
 
@@ -382,15 +381,17 @@ void RenderableGrid::update(const UpdateData&) {
     }
 
     // last x row
-    for (unsigned int i = 0; i < nSegments.x; ++i) {
+    for (unsigned int i = 0; i < nSegments.x; i++) {
         const double x0 = -halfSize.x + i * step.x;
         const double x1 = x0 + step.x;
 
         bool shouldHighlight = false;
         if (_highlightRate.value().y != 0) {
-            int dist = abs(static_cast<int>(nSegments.y) - static_cast<int>(center.y));
-            int rest = dist % _highlightRate.value().y;
-            shouldHighlight = abs(rest) == 0;
+            const int dist = std::abs(
+                static_cast<int>(nSegments.y) - static_cast<int>(center.y)
+            );
+            const int rest = dist % _highlightRate.value().y;
+            shouldHighlight = std::abs(rest) == 0;
         }
 
         if (shouldHighlight) {
@@ -404,15 +405,17 @@ void RenderableGrid::update(const UpdateData&) {
     }
 
     // last y col
-    for (unsigned int j = 0; j < nSegments.y; ++j) {
+    for (unsigned int j = 0; j < nSegments.y; j++) {
         const double y0 = -halfSize.y + j * step.y;
         const double y1 = y0 + step.y;
 
         bool shouldHighlight = false;
         if (_highlightRate.value().x != 0) {
-            int dist = abs(static_cast<int>(nSegments.x) - static_cast<int>(center.x));
-            int rest = dist % _highlightRate.value().x;
-            shouldHighlight = abs(rest) == 0;
+            const int dist = std::abs(
+                static_cast<int>(nSegments.x) - static_cast<int>(center.x)
+            );
+            const int rest = dist % _highlightRate.value().x;
+            shouldHighlight = std::abs(rest) == 0;
         }
         if (shouldHighlight) {
             _highlightArray.push_back({ halfSize.x, y0, 0.0 });

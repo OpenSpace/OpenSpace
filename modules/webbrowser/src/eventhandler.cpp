@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,8 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "WebBrowser:EventHandler";
@@ -263,7 +263,7 @@ void EventHandler::initialize() {
                 );
                 _browserInstance->sendTouchEvent(event);
 #else // ^^^^ WIN32 // !WIN32 vvvv
-                glm::vec2 windowPos = input.currentWindowCoordinates();
+                const glm::vec2 windowPos = input.currentWindowCoordinates();
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = true;
@@ -311,7 +311,7 @@ void EventHandler::initialize() {
             _validTouchStates.erase(found);
 #ifndef WIN32
             if (_validTouchStates.empty()) {
-                glm::vec2 windowPos = input.currentWindowCoordinates();
+                const glm::vec2 windowPos = input.currentWindowCoordinates();
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = false;
@@ -365,7 +365,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
 
 bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
     auto now = std::chrono::high_resolution_clock::now();
-    std::chrono::milliseconds maxTimeDifference(doubleClickTime());
+    const std::chrono::milliseconds maxTimeDifference(doubleClickTime());
     auto requiredTime = button.lastClickTime + maxTimeDifference;
     if (requiredTime < now) {
         return false;
@@ -381,8 +381,8 @@ bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
 
 bool EventHandler::mousePositionCallback(double x, double y) {
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
-    _mousePosition.x = floor(static_cast<float>(x) * dpiScaling.x);
-    _mousePosition.y = floor(static_cast<float>(y) * dpiScaling.y);
+    _mousePosition.x = std::floor(static_cast<float>(x) * dpiScaling.x);
+    _mousePosition.y = std::floor(static_cast<float>(y) * dpiScaling.y);
     _mousePosition =
         global::windowDelegate->mousePositionViewportRelative(_mousePosition);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
@@ -468,7 +468,7 @@ cef_key_event_type_t EventHandler::keyEventType(KeyAction action) {
     return action == KeyAction::Release ? KEYEVENT_KEYUP : KEYEVENT_KEYDOWN;
 }
 
-CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) {
+CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) const {
     CefMouseEvent event;
     event.x = static_cast<int>(_mousePosition.x);
     event.y = static_cast<int>(_mousePosition.y);

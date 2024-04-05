@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -97,10 +97,11 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format(fmt::runtime(_formatString.value()), time)
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_formatString.value(), std::make_format_args(time))
         );
     }
-    catch (const fmt::format_error&) {
+    catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
     penPosition.y -= _font->height();
@@ -110,7 +111,10 @@ glm::vec2 DashboardItemDate::size() const {
     ZoneScoped;
 
     std::string_view time = global::timeManager->time().UTC();
-    return _font->boundingBox(fmt::format(fmt::runtime(_formatString.value()), time));
+    // @CPP26(abock): This can be replaced with std::runtime_format
+    return _font->boundingBox(
+        std::vformat(_formatString.value(), std::make_format_args(time))
+    );
 }
 
 } // namespace openspace

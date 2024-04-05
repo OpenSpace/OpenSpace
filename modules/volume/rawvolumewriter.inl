@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,8 @@
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/volumeutils.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/exception.h>
-#include <ghoul/fmt.h>
 #include <fstream>
 
 namespace openspace::volume {
@@ -100,7 +100,7 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     std::ofstream file(_path, std::ios::binary);
 
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Could not create file {}", _path));
+        throw ghoul::RuntimeError(std::format("Could not create file '{}'", _path));
     }
 
     file.write(buffer, length);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,7 +58,7 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid"
@@ -76,7 +76,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
     };
 #include "renderableboxgrid_codegen.cpp"
 } // namespace
@@ -124,7 +124,6 @@ bool RenderableBoxGrid::isReady() const {
 void RenderableBoxGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
@@ -211,7 +210,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
         );
 
         if (orthoRight == glm::vec3(0.0)) {
-            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+            const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
             right = glm::cross(viewDirection, otherVector);
             orthoRight = glm::normalize(
                 glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))

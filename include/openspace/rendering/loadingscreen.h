@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,6 +46,9 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
+class AssetManager;
+class Scene;
+
 class LoadingScreen {
 public:
     BooleanType(ShowMessage);
@@ -57,28 +60,10 @@ public:
         ShowLogMessages showLogMessages);
     ~LoadingScreen();
 
+    void abort();
+    void exec(AssetManager& manager, Scene& scene);
+
     void render();
-
-    void postMessage(std::string message);
-    void setCatastrophicError(CatastrophicError catastrophicError);
-
-    void finalize();
-
-    enum class Phase {
-        PreStart,
-        Construction,
-        Synchronization,
-        Initialization
-    };
-    void setPhase(Phase phase);
-
-
-    enum class ItemStatus {
-        Started,
-        Initializing,
-        Finished,
-        Failed
-    };
 
     struct ProgressInfo {
         float progress = 0.f;
@@ -87,10 +72,29 @@ public:
         int64_t totalSize = -1;
     };
 
+    enum class ItemStatus {
+        Started,
+        Initializing,
+        Finished,
+        Failed
+    };
+
     void updateItem(const std::string& itemIdentifier, const std::string& itemName,
         ItemStatus newStatus, ProgressInfo progressInfo);
 
 private:
+    enum class Phase {
+        PreStart,
+        Construction,
+        Synchronization,
+        Initialization
+    };
+
+    void postMessage(std::string message);
+    void setCatastrophicError(CatastrophicError catastrophicError);
+
+    void finalize();
+    void setPhase(Phase phase);
 
     void renderLogMessages() const;
 
@@ -126,6 +130,8 @@ private:
     };
     std::vector<Item> _items;
     std::mutex _itemsMutex;
+
+    bool _shouldAbortLoading = false;
 
     std::random_device _randomDevice;
     std::default_random_engine _randomEngine;

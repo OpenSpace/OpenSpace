@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,9 @@
 #include <modules/gaia/tasks/readfilejob.h>
 
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "ReadFileJob";
@@ -50,7 +50,7 @@ ReadFileJob::ReadFileJob(std::string filePath, std::vector<std::string> allColum
 
 void ReadFileJob::execute() {
     // Read columns from FITS file. If rows aren't specified then full table will be read.
-    std::shared_ptr<TableData<float>> table = _fitsFileReader->readTable<float>(
+    const std::shared_ptr<TableData<float>> table = _fitsFileReader->readTable<float>(
         _inFilePath,
         _allColumns,
         _firstRow,
@@ -59,14 +59,13 @@ void ReadFileJob::execute() {
 
     if (!table) {
         throw ghoul::RuntimeError(
-            fmt::format("Failed to open Fits file '{}'", _inFilePath
+            std::format("Failed to open Fits file '{}'", _inFilePath
         ));
     }
 
-    int nStars = table->readRows - _firstRow + 1;
+    const int nStars = table->readRows - _firstRow + 1;
 
-    int nNullArr = 0;
-    size_t nColumnsRead = _allColumns.size();
+    const size_t nColumnsRead = _allColumns.size();
     if (nColumnsRead != _nDefaultCols) {
         LINFO(
             "Additional columns will be read! Consider add column in code for "
@@ -101,7 +100,7 @@ void ReadFileJob::execute() {
 
 
     // Construct data array. OBS: ORDERING IS IMPORTANT! This is where slicing happens.
-    for (int i = 0; i < nStars; ++i) {
+    for (int i = 0; i < nStars; i++) {
         std::vector<float> values(_nValuesPerStar);
         size_t idx = 0;
 
@@ -117,7 +116,6 @@ void ReadFileJob::execute() {
 
         // Return early if star doesn't have a measured position.
         if (std::isnan(ra[i]) || std::isnan(dec[i])) {
-            nNullArr++;
             continue;
         }
 
@@ -141,7 +139,7 @@ void ReadFileJob::execute() {
         */
 
         // Convert ICRS Equatorial Ra and Dec to Galactic latitude and longitude.
-        glm::mat3 aPrimG = glm::mat3(
+        const glm::mat3 aPrimG = glm::mat3(
             // Col 0
             glm::vec3(-0.0548755604162154, 0.4941094278755837, -0.8676661490190047),
             // Col 1
@@ -149,12 +147,12 @@ void ReadFileJob::execute() {
             // Col 2
             glm::vec3(-0.4838350155487132, 0.7469822444972189, 0.4559837761750669)
         );
-        glm::vec3 rICRS = glm::vec3(
-            cos(glm::radians(ra[i])) * cos(glm::radians(dec[i])),
-            sin(glm::radians(ra[i])) * cos(glm::radians(dec[i])),
-            sin(glm::radians(dec[i]))
+        const glm::vec3 rICRS = glm::vec3(
+            std::cos(glm::radians(ra[i])) * std::cos(glm::radians(dec[i])),
+            std::sin(glm::radians(ra[i])) * std::cos(glm::radians(dec[i])),
+            std::sin(glm::radians(dec[i]))
         );
-        glm::vec3 rGal = aPrimG * rICRS;
+        const glm::vec3 rGal = aPrimG * rICRS;
         values[idx++] = radiusInKiloParsec * rGal.x; // Pos X
         values[idx++] = radiusInKiloParsec * rGal.y; // Pos Y
         values[idx++] = radiusInKiloParsec * rGal.z; // Pos Z
@@ -182,27 +180,27 @@ void ReadFileJob::execute() {
         }
 
         // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tanget Vector [l,b].
-        glm::vec3 uICRS = glm::vec3(
-            -sin(glm::radians(ra[i])) * pmra[i] -
-                cos(glm::radians(ra[i])) * sin(glm::radians(dec[i])) * pmdec[i],
-            cos(glm::radians(ra[i])) * pmra[i] -
-                sin(glm::radians(ra[i])) * sin(glm::radians(dec[i])) * pmdec[i],
-            cos(glm::radians(dec[i]))  * pmdec[i]
+        const glm::vec3 uICRS = glm::vec3(
+            -std::sin(glm::radians(ra[i])) * pmra[i] -
+                std::cos(glm::radians(ra[i])) * std::sin(glm::radians(dec[i])) * pmdec[i],
+            std::cos(glm::radians(ra[i])) * pmra[i] -
+                std::sin(glm::radians(ra[i])) * std::sin(glm::radians(dec[i])) * pmdec[i],
+            std::cos(glm::radians(dec[i]))  * pmdec[i]
         );
-        glm::vec3 pmVecGal = aPrimG * uICRS;
+        const glm::vec3 pmVecGal = aPrimG * uICRS;
 
         // Convert to Tangential vector [m/s] from Proper Motion vector [mas/yr]
-        float tanVelX = 1000.f * 4.74f * radiusInKiloParsec * pmVecGal.x;
-        float tanVelY = 1000.f * 4.74f * radiusInKiloParsec * pmVecGal.y;
-        float tanVelZ = 1000.f * 4.74f * radiusInKiloParsec * pmVecGal.z;
+        const float tanVelX = 1000.f * 4.74f * radiusInKiloParsec * pmVecGal.x;
+        const float tanVelY = 1000.f * 4.74f * radiusInKiloParsec * pmVecGal.y;
+        const float tanVelZ = 1000.f * 4.74f * radiusInKiloParsec * pmVecGal.z;
 
         // Calculate True Space Velocity [m/s] if we have the radial velocity
         if (!std::isnan(radial_vel[i])) {
             // Calculate Radial Velocity in the direction of the star.
             // radial_vel is given in [km/s] -> convert to [m/s].
-            float radVelX = 1000.f * radial_vel[i] * rGal.x;
-            float radVelY = 1000.f * radial_vel[i] * rGal.y;
-            float radVelZ = 1000.f * radial_vel[i] * rGal.z;
+            const float radVelX = 1000.f * radial_vel[i] * rGal.x;
+            const float radVelY = 1000.f * radial_vel[i] * rGal.y;
+            const float radVelZ = 1000.f * radial_vel[i] * rGal.z;
 
             // Use Pythagoras theorem for the final Space Velocity [m/s].
             values[idx++] = static_cast<float>(
@@ -260,12 +258,10 @@ void ReadFileJob::execute() {
 
         _octants[index].insert(_octants[index].end(), values.begin(), values.end());
     }
-
-    // LINFO(fmt::format("{} out of {} read stars were nullArrays", nNullArr, nStars));
 }
 
 std::vector<std::vector<float>> ReadFileJob::product() {
     return _octants;
 }
 
-} // namespace openspace::gaiamission
+} // namespace openspace::gaia

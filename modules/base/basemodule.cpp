@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,6 +43,10 @@
 #include <modules/base/rendering/grids/renderablegrid.h>
 #include <modules/base/rendering/grids/renderableradialgrid.h>
 #include <modules/base/rendering/grids/renderablesphericalgrid.h>
+#include <modules/base/rendering/pointcloud/renderableinterpolatedpoints.h>
+#include <modules/base/rendering/pointcloud/renderablepointcloud.h>
+#include <modules/base/rendering/pointcloud/renderablepolygoncloud.h>
+#include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderabledisc.h>
 #include <modules/base/rendering/renderablelabel.h>
@@ -144,6 +148,11 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePlaneTimeVaryingImage>(
         "RenderablePlaneTimeVaryingImage"
     );
+    fRenderable->registerClass<RenderableInterpolatedPoints>(
+        "RenderableInterpolatedPoints"
+    );
+    fRenderable->registerClass<RenderablePointCloud>("RenderablePointCloud");
+    fRenderable->registerClass<RenderablePolygonCloud>("RenderablePolygonCloud");
     fRenderable->registerClass<RenderablePrism>("RenderablePrism");
     fRenderable->registerClass<RenderableTimeVaryingSphere>(
         "RenderableTimeVaryingSphere"
@@ -222,6 +231,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableCartesianAxes::Documentation(),
         RenderableDisc::Documentation(),
         RenderableGrid::Documentation(),
+        RenderableInterpolatedPoints::Documentation(),
         RenderableLabel::Documentation(),
         RenderableModel::Documentation(),
         RenderableNodeArrow::Documentation(),
@@ -230,6 +240,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderablePlaneImageLocal::Documentation(),
         RenderablePlaneImageOnline::Documentation(),
         RenderablePlaneTimeVaryingImage::Documentation(),
+        RenderablePointCloud::Documentation(),
+        RenderablePolygonCloud::Documentation(),
         RenderablePrism::Documentation(),
         RenderableRadialGrid::Documentation(),
         RenderableSphere::Documentation(),
@@ -239,6 +251,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableTimeVaryingSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
+
+        SizeMappingComponent::Documentation(),
 
         ScreenSpaceDashboard::Documentation(),
         ScreenSpaceFramebuffer::Documentation(),

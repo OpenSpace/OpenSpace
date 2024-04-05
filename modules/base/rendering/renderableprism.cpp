@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -230,9 +230,9 @@ void RenderablePrism::updateVertexData() {
     std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(_nLines.value(), 1.f);
 
     // Put base vertices into array
-    for (int j = 0; j < _nShapeSegments; ++j) {
-        float ux = unitVertices[j].xyz[0];
-        float uy = unitVertices[j].xyz[1];
+    for (int j = 0; j < _nShapeSegments; j++) {
+        const float ux = unitVertices[j].xyz[0];
+        const float uy = unitVertices[j].xyz[1];
 
         _vertexArray.push_back(ux * _baseRadius); // x
         _vertexArray.push_back(uy * _baseRadius); // y
@@ -240,9 +240,9 @@ void RenderablePrism::updateVertexData() {
     }
 
     // Put top shape vertices into array
-    for (int j = 0; j < _nShapeSegments; ++j) {
-        float ux = unitVertices[j].xyz[0];
-        float uy = unitVertices[j].xyz[1];
+    for (int j = 0; j < _nShapeSegments; j++) {
+        const float ux = unitVertices[j].xyz[0];
+        const float uy = unitVertices[j].xyz[1];
 
         _vertexArray.push_back(ux * _radius); // x
         _vertexArray.push_back(uy * _radius); // y
@@ -263,9 +263,9 @@ void RenderablePrism::updateVertexData() {
         _vertexArray.push_back(_length);
     }
     else {
-        for (int j = 0; j < _nLines; ++j) {
-            float ux = unitVerticesLines[j].xyz[0];
-            float uy = unitVerticesLines[j].xyz[1];
+        for (int j = 0; j < _nLines; j++) {
+            const float ux = unitVerticesLines[j].xyz[0];
+            const float uy = unitVerticesLines[j].xyz[1];
 
             // Base
             _vertexArray.push_back(ux * _baseRadius); // x
@@ -284,7 +284,7 @@ void RenderablePrism::updateVertexData() {
         _nShapeSegments.value() <= std::numeric_limits<uint8_t>::max(),
         "Too many shape segments"
     );
-    for (uint8_t i = 0; i < _nShapeSegments; ++i) {
+    for (uint8_t i = 0; i < _nShapeSegments; i++) {
         _indexArray.push_back(i);
     }
 
@@ -292,12 +292,12 @@ void RenderablePrism::updateVertexData() {
     _indexArray.push_back(255);
 
     // Indices for Top shape
-    for (int i = _nShapeSegments; i < 2 * _nShapeSegments; ++i) {
+    for (int i = _nShapeSegments; i < 2 * _nShapeSegments; i++) {
         _indexArray.push_back(static_cast<uint8_t>(i));
     }
 
     // Indices for connecting lines
-    for (int i = 0, k = 0; i < _nLines; ++i, k += 2) {
+    for (int i = 0, k = 0; i < _nLines; i++, k += 2) {
         // Reset
         _indexArray.push_back(255);
 

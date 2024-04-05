@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,15 +74,15 @@ std::string to_string(const openspace::documentation::TestResult& value) {
         stream << "Specification Failure. ";
 
         for (const TestResult::Offense& offense : value.offenses) {
-            stream << fmt::format(" {}", ghoul::to_string(offense));
+            stream << std::format(" {}", ghoul::to_string(offense));
             if (!offense.explanation.empty()) {
-                stream << fmt::format(" ({})", offense.explanation);
+                stream << std::format(" ({})", offense.explanation);
             }
             stream << '\n';
         }
 
         for (const TestResult::Warning& warning : value.warnings) {
-            stream << fmt::format(" {}\n", ghoul::to_string(warning));
+            stream << std::format(" {}\n", ghoul::to_string(warning));
         }
 
         return stream.str();
@@ -95,7 +95,7 @@ std::string to_string(const openspace::documentation::TestResult::Offense& value
     stream << value.offender + ": " + ghoul::to_string(value.reason);
 
     if (!value.explanation.empty()) {
-        stream << fmt::format(" ({})", value.explanation);
+        stream << std::format(" ({})", value.explanation);
     }
 
     return stream.str();
@@ -159,16 +159,21 @@ void logError(const SpecificationError& error, std::string component) {
         LERRORC(error.component, error.message);
     }
     else {
-        LERRORC(fmt::format("{}: {}", component, error.component), error.message);
+        LERRORC(std::format("{}: {}", component, error.component), error.message);
     }
     for (const documentation::TestResult::Offense& o : error.result.offenses) {
-        LERRORC(
-            o.offender,
-            fmt::format("{}: {}", ghoul::to_string(o.reason), o.explanation)
-        );
+        if (o.explanation.empty()) {
+            LERRORC(ghoul::to_string(o.reason), o.offender);
+        }
+        else {
+            LERRORC(
+                ghoul::to_string(o.reason),
+                std::format("{}: {}", o.offender, o.explanation)
+            );
+        }
     }
     for (const documentation::TestResult::Warning& w : error.result.warnings) {
-        LWARNINGC(w.offender, ghoul::to_string(w.reason));
+        LWARNINGC(ghoul::to_string(w.reason), w.offender);
     }
 }
 
@@ -216,7 +221,7 @@ TestResult testSpecification(const Documentation& documentation,
 
     for (const auto& p : documentation.entries) {
         if (p.key == DocumentationEntry::Wildcard) {
-            for (std::string_view key : dictionary.keys()) {
+            for (const std::string_view key : dictionary.keys()) {
                 applyVerifier(*(p.verifier), std::string(key));
             }
         }
@@ -232,14 +237,14 @@ TestResult testSpecification(const Documentation& documentation,
 
     // Remove duplicate offenders that might occur if multiple rules apply to a single
     // key and more than one of these rules are broken
-    std::set<TestResult::Offense, OffenseCompare> uniqueOffenders(
+    const std::set<TestResult::Offense, OffenseCompare> uniqueOffenders(
         result.offenses.begin(), result.offenses.end()
     );
     result.offenses = std::vector<TestResult::Offense>(
         uniqueOffenders.begin(), uniqueOffenders.end()
     );
     // Remove duplicate warnings. This should normally not happen, but we want to be sure
-    std::set<TestResult::Warning, WarningCompare> uniqueWarnings(
+    const std::set<TestResult::Warning, WarningCompare> uniqueWarnings(
         result.warnings.begin(), result.warnings.end()
     );
     result.warnings = std::vector<TestResult::Warning>(
@@ -253,9 +258,9 @@ void testSpecificationAndThrow(const Documentation& documentation,
                                const ghoul::Dictionary& dictionary, std::string component)
 {
     // Perform testing against the documentation/specification
-    TestResult testResult = testSpecification(documentation, dictionary);
+    const TestResult testResult = testSpecification(documentation, dictionary);
     if (!testResult.success) {
-        throw SpecificationError(testResult, component);
+        throw SpecificationError(testResult, std::move(component));
     }
 }
 

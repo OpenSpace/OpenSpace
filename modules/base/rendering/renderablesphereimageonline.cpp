@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,6 +42,28 @@ namespace {
         // @VISIBILITY(2.25)
         openspace::properties::Property::Visibility::User
     };
+
+    std::future<openspace::DownloadManager::MemoryFile> downloadImageToMemory(
+                                                                   const std::string& url)
+    {
+        using namespace openspace;
+
+        return global::downloadManager->fetchFile(
+            url,
+            [url](const DownloadManager::MemoryFile&) {
+                LDEBUGC(
+                    "RenderableSphereImageOnline",
+                    std::format("Download to memory finished for image '{}'", url)
+                );
+            },
+            [url](const std::string& err) {
+                LDEBUGC(
+                    "RenderableSphereImageOnline",
+                    std::format("Download to memory failed for image '{}': {}", url, err)
+                );
+            }
+        );
+    }
 
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
@@ -93,12 +115,12 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
             LERRORC(
                 "RenderableSphereImageOnline",
-                fmt::format("Error loading image from URL '{}'", _textureUrl.value())
+                std::format("Error loading image from URL '{}'", _textureUrl.value())
             );
             return;
         }
@@ -139,26 +161,6 @@ void RenderableSphereImageOnline::bindTexture() {
     else {
         unbindTexture();
     }
-}
-
-std::future<DownloadManager::MemoryFile>
-RenderableSphereImageOnline::downloadImageToMemory(const std::string& url)
-{
-    return global::downloadManager->fetchFile(
-        url,
-        [url](const DownloadManager::MemoryFile&) {
-            LDEBUGC(
-                "RenderableSphereImageOnline",
-                fmt::format("Download to memory finished for image '{}'", url)
-            );
-        },
-        [url](const std::string& err) {
-            LDEBUGC(
-                "RenderableSphereImageOnline",
-                fmt::format("Download to memory failed for image '{}': {}", url, err)
-            );
-        }
-    );
 }
 
 } // namespace openspace

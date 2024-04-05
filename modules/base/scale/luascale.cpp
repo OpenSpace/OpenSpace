@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,7 +87,7 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            fmt::format(
+            std::format(
                 "Script '{}' does not have a function 'scale'", _luaScriptFile.value()
             )
         );
@@ -110,7 +110,7 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            fmt::format("Error executing 'scale': {}", lua_tostring(_state, -1))
+            std::format("Error executing 'scale': {}", lua_tostring(_state, -1))
         );
     }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,13 +42,13 @@ public:
 
     void initializeStateMachine(const ghoul::Dictionary& states,
         const ghoul::Dictionary& transitions,
-        const std::optional<std::string> startState = std::nullopt);
+        std::optional<std::string> startState = std::nullopt);
     void deinitializeStateMachine();
 
     bool hasStateMachine() const;
 
     // initializeStateMachine must have been called before
-    void setInitialState(const std::string initialState);
+    void setInitialState(const std::string& initialState);
     std::string currentState() const;
     std::vector<std::string> possibleTransitions() const;
     void transitionTo(const std::string& newState);
@@ -58,7 +58,7 @@ public:
      * Save the state machine to a file given by the name and optional directory.
      * If no directory is given, the TEMP folder is used.
      */
-    void saveToFile(const std::string& fileName,
+    void saveToFile(const std::string& filename,
         std::string directory = "${TEMPORARY}/") const;
 
     scripting::LuaLibrary luaLibrary() const override;

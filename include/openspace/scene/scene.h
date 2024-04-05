@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -214,24 +214,6 @@ public:
     void updateInterpolations();
 
     /**
-     * Adds the provided \p time as an interesting time to this scene. The same time can
-     * be added multiple times.
-     *
-     * \param time The time that should be added
-     *
-     * \pre \p time.time must not be empty
-     * \pre \p time.name must not be empty
-     */
-    void addInterestingTime(InterestingTime time);
-
-    /**
-     * Returns the list of all interesting times that are defined for this scene.
-     *
-     * \return The list of all interesting times that are defined for this scene
-     */
-    const std::vector<InterestingTime>& interestingTimes() const;
-
-    /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph.
      *
@@ -259,7 +241,7 @@ public:
      * \return Vector of Property objs containing property names that matched the regex
      */
     std::vector<properties::Property*> propertiesMatchingRegex(
-        std::string propertyString);
+        const std::string& propertyString);
 
     /**
      * Returns a list of all unique tags that are used in the currently loaded scene.
@@ -323,7 +305,6 @@ private:
      * Update dependencies.
      */
     void updateNodeRegistry();
-    std::chrono::steady_clock::time_point currentTimeForInterpolation();
     void sortTopologically();
 
     std::unique_ptr<Camera> _camera;
@@ -331,10 +312,9 @@ private:
     std::vector<SceneGraphNode*> _circularNodes;
     std::unordered_map<std::string, SceneGraphNode*> _nodesByIdentifier;
     bool _dirtyNodeRegistry = false;
-    SceneGraphNode _rootDummy;
+    SceneGraphNode _rootNode;
     std::unique_ptr<SceneInitializer> _initializer;
     std::string _profilePropertyName;
-    std::vector<InterestingTime> _interestingTimes;
     bool _valueIsTable = false;
 
     std::mutex _programUpdateLock;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -257,9 +257,56 @@ DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     _buffer.resize(128);
 }
 
-std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
-                                                                    Component& comp) const
-{
+void DashboardItemAngle::render(glm::vec2& penPosition) {
+    ZoneScoped;
+
+    std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);
+    std::pair<glm::dvec3, std::string> referenceInfo = positionAndLabel(_reference);
+    std::pair<glm::dvec3, std::string> destinationInfo = positionAndLabel(_destination);
+
+    const glm::dvec3 a = referenceInfo.first - sourceInfo.first;
+    const glm::dvec3 b = destinationInfo.first - sourceInfo.first;
+
+    std::fill(_buffer.begin(), _buffer.end(), char(0));
+    if (glm::length(a) == 0.0 || glm::length(b) == 0) {
+        char* end = std::format_to(
+            _buffer.data(),
+            "Could not compute angle at {} between {} and {}",
+            sourceInfo.second, destinationInfo.second, referenceInfo.second
+        );
+        const std::string_view text = std::string_view(
+            _buffer.data(),
+            end - _buffer.data()
+        );
+        RenderFont(*_font, penPosition, text);
+        penPosition.y -= _font->height();
+    }
+    else {
+        const double angle = glm::degrees(
+            glm::acos(glm::dot(a, b) / (glm::length(a) * glm::length(b)))
+        );
+
+        char* end = std::format_to(
+            _buffer.data(),
+            "Angle at {} between {} and {}: {} degrees",
+            sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
+        );
+        const std::string_view text = std::string_view(
+            _buffer.data(), end - _buffer.data()
+        );
+        RenderFont(*_font, penPosition, text);
+        penPosition.y -= _font->height();
+    }
+}
+
+glm::vec2 DashboardItemAngle::size() const {
+    ZoneScoped;
+
+    constexpr double Angle = 120;
+    return _font->boundingBox("Angle: " + std::to_string(Angle));
+}
+
+std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(Component& comp) {
     if (comp.type == Type::Node) {
         if (!comp.node) {
             comp.node = global::renderEngine->scene()->sceneGraphNode(comp.nodeName);
@@ -291,50 +338,6 @@ std::pair<glm::dvec3, std::string> DashboardItemAngle::positionAndLabel(
         default:
             return { glm::dvec3(0.0), "Unknown" };
     }
-}
-
-void DashboardItemAngle::render(glm::vec2& penPosition) {
-    ZoneScoped;
-
-    std::pair<glm::dvec3, std::string> sourceInfo = positionAndLabel(_source);
-    std::pair<glm::dvec3, std::string> referenceInfo = positionAndLabel(_reference);
-    std::pair<glm::dvec3, std::string> destinationInfo = positionAndLabel(_destination);
-
-    const glm::dvec3 a = referenceInfo.first - sourceInfo.first;
-    const glm::dvec3 b = destinationInfo.first - sourceInfo.first;
-
-    std::fill(_buffer.begin(), _buffer.end(), char(0));
-    if (glm::length(a) == 0.0 || glm::length(b) == 0) {
-        char* end = fmt::format_to(
-            _buffer.data(),
-            "Could not compute angle at {} between {} and {}",
-            sourceInfo.second, destinationInfo.second, referenceInfo.second
-        );
-        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-        RenderFont(*_font, penPosition, text);
-        penPosition.y -= _font->height();
-    }
-    else {
-        const double angle = glm::degrees(
-            glm::acos(glm::dot(a, b) / (glm::length(a) * glm::length(b)))
-        );
-
-        char* end = fmt::format_to(
-            _buffer.data(),
-            "Angle at {} between {} and {}: {} degrees",
-            sourceInfo.second, destinationInfo.second, referenceInfo.second, angle
-        );
-        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-        RenderFont(*_font, penPosition, text);
-        penPosition.y -= _font->height();
-    }
-}
-
-glm::vec2 DashboardItemAngle::size() const {
-    ZoneScoped;
-
-    constexpr double Angle = 120;
-    return _font->boundingBox("Angle: " + std::to_string(Angle));
 }
 
 } // namespace openspace

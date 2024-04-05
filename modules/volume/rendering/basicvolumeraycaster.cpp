@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,10 +50,10 @@ BasicVolumeRaycaster::BasicVolumeRaycaster(
                                     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
                             std::shared_ptr<openspace::TransferFunction> transferFunction,
                                              std::shared_ptr<VolumeClipPlanes> clipPlanes)
-    : _clipPlanes(clipPlanes)
-    , _volumeTexture(volumeTexture)
-    , _transferFunction(transferFunction)
-    , _boundingBox(glm::vec3(1.0))
+    : _clipPlanes(std::move(clipPlanes))
+    , _volumeTexture(std::move(volumeTexture))
+    , _transferFunction(std::move(transferFunction))
+    , _boundingBox(glm::vec3(1.f))
 {}
 
 BasicVolumeRaycaster::~BasicVolumeRaycaster() {}
@@ -79,7 +79,7 @@ void BasicVolumeRaycaster::renderEntryPoints(const RenderData& data,
 }
 
 glm::dmat4 BasicVolumeRaycaster::modelViewTransform(const RenderData& data) {
-    glm::dmat4 modelTransform =
+    const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
@@ -112,10 +112,10 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
         return;
     }
 
-    std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
+    const std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
     program.setUniform(stepSizeUniformName, _stepSize);
 
-    std::string id = std::to_string(data.id);
+    const std::string id = std::to_string(data.id);
 
     _transferFunction->update();
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
@@ -130,9 +130,9 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
 
     program.setUniform("gridType_" + id, static_cast<int>(_gridType));
 
-    std::vector<glm::vec3> clipNormals = _clipPlanes->normals();
-    std::vector<glm::vec2> clipOffsets = _clipPlanes->offsets();
-    int nClips = static_cast<int>(clipNormals.size());
+    const std::vector<glm::vec3> clipNormals = _clipPlanes->normals();
+    const std::vector<glm::vec2> clipOffsets = _clipPlanes->offsets();
+    const int nClips = static_cast<int>(clipNormals.size());
 
     program.setUniform("nClips_" + id, nClips);
     program.setUniform("clipNormals_" + id, clipNormals);
@@ -151,8 +151,8 @@ void BasicVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::Progra
 bool BasicVolumeRaycaster::isCameraInside(const RenderData& data,
                                           glm::vec3& localPosition)
 {
-    glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
-                         glm::vec4(0.f, 0.f, 0.f, 1.f);
+    const glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
+                               glm::vec4(0.f, 0.f, 0.f, 1.f);
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
 

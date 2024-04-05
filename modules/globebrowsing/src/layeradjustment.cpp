@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,13 +81,13 @@ LayerAdjustment::LayerAdjustment()
     , _chromaKeyColor(ChromaKeyColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _chromaKeyTolerance(ChromaKeyToleranceInfo, 0.f, 0.f, 1.f)
     , _typeOption(TypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _typeId(static_cast<layers::Adjustment::ID>(_typeOption.value()))
 {
     // Add options to option properties
     for (const layers::Adjustment& ai : layers::Adjustments) {
         _typeOption.addOption(static_cast<int>(ai.id), std::string(ai.identifier));
     }
     _typeOption.setValue(static_cast<int>(layers::Adjustment::ID::None));
-    _typeId = static_cast<layers::Adjustment::ID>(_typeOption.value());
 
     _typeOption.onChange([this]() {
         switch (type()) {

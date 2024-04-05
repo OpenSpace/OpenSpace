@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___FACTORYMANAGER___H__
 #define __OPENSPACE_CORE___FACTORYMANAGER___H__
 
-#include <openspace/json.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/templatefactory.h>
 #include <memory>
@@ -39,6 +38,11 @@ namespace openspace {
  */
 class FactoryManager {
 public:
+    struct FactoryInfo {
+        std::unique_ptr<ghoul::TemplateFactoryBase> factory;
+        std::string name;
+    };
+
     /**
      * This exception is thrown if the ghoul::TemplateFactory could not be found in the
      * #factory method.
@@ -97,7 +101,7 @@ public:
      *
      * \tparam Factory The type for which a factory should be created and added
      * \param name A user-readable name for the registered factory
-     *     *
+     *
      * \pre \p name must not be empty
      */
     template <typename T>
@@ -117,16 +121,12 @@ public:
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
 
-    nlohmann::json generateJson() const;
+    const std::vector<FactoryInfo>& factories() const;
 
 private:
     /// Singleton member for the Factory Manager
     static FactoryManager* _manager;
 
-    struct FactoryInfo {
-        std::unique_ptr<ghoul::TemplateFactoryBase> factory;
-        std::string name;
-    };
     std::vector<FactoryInfo> _factories;
 };
 

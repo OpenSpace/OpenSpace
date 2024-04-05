@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -173,20 +173,20 @@ glm::ivec3 RenderableSkyTarget::borderColor() const {
 }
 
 glm::dvec3 RenderableSkyTarget::rightVector() const {
-    double scaling =
-        (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
+    const double scaling =
+        (_verticalFov / 70.0) * static_cast<double>(glm::compMax(_size.value()));
     return scaling * _rightVector;
 }
 
 glm::dvec3 RenderableSkyTarget::upVector() const {
-    double scaling =
-        (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
+    const double scaling =
+        (_verticalFov / 70.0) * static_cast<double>(glm::compMax(_size.value()));
     return scaling * _upVector;
 }
 
 void RenderableSkyTarget::applyRoll() {
     Camera* camera = global::navigationHandler->camera();
-    glm::dvec3 normal = glm::normalize(camera->positionVec3() - _worldPosition);
+    const glm::dvec3 normal = glm::normalize(camera->positionVec3() - _worldPosition);
 
     _rightVector = glm::normalize(
         glm::cross(camera->lookUpVectorWorldSpace(), normal)
@@ -198,7 +198,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     ZoneScoped;
     const bool showRectangle = _verticalFov > _showRectangleThreshold;
 
-    glm::vec4 color = glm::vec4(glm::vec3(_borderColor) / 255.f, 1.0);
+    const glm::vec4 color = glm::vec4(glm::vec3(_borderColor) / 255.f, 1.0);
 
     _shader->activate();
     _shader->setUniform("opacity", opacity());
@@ -216,7 +216,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
             data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - _worldPosition);
+    const glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - _worldPosition);
     // There are two modes - 1) target rolls to have its up vector parallel to the
     // cameras up vector or 2) it is decoupled from the camera, in which case it needs to
     // be initialized once
@@ -253,7 +253,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("multiplyColor", _multiplyColor);
 
-    bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
+    const bool additiveBlending = _blendMode == static_cast<int>(BlendMode::Additive);
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);

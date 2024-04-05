@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
@@ -78,12 +78,12 @@ namespace {
             if (!isOptional) {
                 throw Profile::ParsingError(
                     Profile::ParsingError::Severity::Error,
-                    fmt::format("'{}.{}' field is missing", keyPrefix, key)
+                    std::format("'{}.{}' field is missing", keyPrefix, key)
                 );
             }
         }
         else {
-            const nlohmann::json value = j[key];
+            const nlohmann::json& value = j[key];
             if (!(value.*checkFunc)()) {
                 std::string type = [](auto c) {
                     if (c == &nlohmann::json::is_string) { return "a string"; }
@@ -98,7 +98,7 @@ namespace {
 
                 throw Profile::ParsingError(
                     Profile::ParsingError::Severity::Error,
-                    fmt::format("'{}.{}' must be {}", keyPrefix, key, type)
+                    std::format("'{}.{}' must be {}", keyPrefix, key, type)
                 );
             }
         }
@@ -111,7 +111,7 @@ namespace {
             if (allowedKeys.find(key) == allowedKeys.end()) {
                 LINFOC(
                     "Profile",
-                    fmt::format("Key '{}' not supported in '{}'", key, prefix)
+                    std::format("Key '{}' not supported in '{}'", key, prefix)
                 );
             }
         }
@@ -229,7 +229,7 @@ void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
 }
 
 void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
-    std::string value = j.get<std::string>();
+    const std::string value = j.get<std::string>();
     if (value == "setPropertyValue") {
         v = Profile::Property::SetType::SetPropertyValue;
     }
@@ -315,7 +315,7 @@ void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
 }
 
 void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
-    std::string value = j.get<std::string>();
+    const std::string value = j.get<std::string>();
     if (value == "absolute") {
         v = Profile::Time::Type::Absolute;
     }
@@ -381,14 +381,14 @@ void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
         j["aim"] = *v.aim;
     }
     j["frame"] = v.referenceFrame;
-    nlohmann::json p {
+    const nlohmann::json p {
         { "x", v.position.x },
         { "y", v.position.y },
         { "z", v.position.z }
     };
     j["position"] = p;
     if (v.up.has_value()) {
-        nlohmann::json u {
+        const nlohmann::json u {
             { "x", v.up->x },
             { "y", v.up->y },
             { "z", v.up->z }
@@ -575,16 +575,16 @@ void convertVersion10to11(nlohmann::json& profile) {
 
     std::vector<version10::Keybinding> kbs =
         profile.at("keybindings").get<std::vector<version10::Keybinding>>();
-    for (size_t i = 0; i < kbs.size(); ++i) {
+    for (size_t i = 0; i < kbs.size(); i++) {
         version10::Keybinding& kb = kbs[i];
-        std::string identifier = fmt::format("profile.keybind.{}", i);
+        const std::string identifier = std::format("profile.keybind.{}", i);
 
         Profile::Action action;
         action.identifier = identifier;
         action.documentation = std::move(kb.documentation);
         action.name = std::move(kb.name);
         action.guiPath = std::move(kb.guiPath);
-        action.isLocal = std::move(kb.isLocal);
+        action.isLocal = kb.isLocal;
         action.script = std::move(kb.script);
         actions.push_back(std::move(action));
 
@@ -635,7 +635,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     version = Profile::CurrentVersion;
 
     // Update properties
-    std::vector<properties::Property*> ps = changedProperties(rootOwner);
+    const std::vector<properties::Property*> ps = changedProperties(rootOwner);
 
     for (properties::Property* prop : ps) {
         Property p;
@@ -741,7 +741,24 @@ std::string Profile::serialize() const {
     return r.dump(2);
 }
 
-Profile::Profile(const std::string& content) {
+Profile::Profile(const std::filesystem::path& path) {
+    ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
+
+    std::ifstream inFile;
+    try {
+        inFile.open(path, std::ifstream::in);
+    }
+    catch (const std::ifstream::failure& e) {
+        throw ghoul::RuntimeError(std::format(
+            "Exception opening profile file for read '{}': {}", path, e.what()
+        ));
+    }
+
+    const std::string content = std::string(
+        std::istreambuf_iterator<char>(inFile),
+        std::istreambuf_iterator<char>()
+    );
+
     try {
         nlohmann::json profile = nlohmann::json::parse(content);
         profile.at("version").get_to(version);
@@ -813,7 +830,7 @@ Profile::Profile(const std::string& content) {
     }
     catch (const nlohmann::json::exception& e) {
         std::string err = e.what();
-        throw ParsingError(ParsingError::Severity::Error, err);
+        throw ParsingError(ParsingError::Severity::Error, std::move(err));
     }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,14 +40,14 @@ TEST_CASE("Settings Load: Empty", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_empty.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_empty.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -67,14 +67,14 @@ TEST_CASE("Settings Load: Really Empty", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_really-empty.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_really-empty.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -89,13 +89,13 @@ TEST_CASE("Settings Load: Really Empty", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Empty", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_empty.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_empty.json";
 
-    Settings srcSettings;
+    const Settings srcSettings;
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -107,14 +107,14 @@ TEST_CASE("Settings Load: Started Before", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_started-before.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_started-before.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     REQUIRE(settings.hasStartedBefore.has_value());
     CHECK(*settings.hasStartedBefore == false);
@@ -130,15 +130,15 @@ TEST_CASE("Settings Load: Started Before", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Started Before", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_started-before.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_started-before.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .hasStartedBefore = false
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -150,14 +150,14 @@ TEST_CASE("Settings Load: Configuration", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_config.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_config.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     REQUIRE(settings.configuration.has_value());
@@ -173,15 +173,15 @@ TEST_CASE("Settings Load: Configuration", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Configuration", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_config.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_config.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .configuration = "abc"
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -193,14 +193,14 @@ TEST_CASE("Settings Load: Configuration Remember", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_config_remember.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_config_remember.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -216,15 +216,15 @@ TEST_CASE("Settings Load: Configuration Remember", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Configuration Remember", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_config_remember.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_config_remember.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .rememberLastConfiguration = true
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -236,14 +236,14 @@ TEST_CASE("Settings Load: Profile", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_profile.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_profile.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -259,15 +259,15 @@ TEST_CASE("Settings Load: Profile", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Profile", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_profile.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_profile.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .profile = "def"
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -279,14 +279,14 @@ TEST_CASE("Settings Load: Profile Remember", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_profile_remember.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_profile_remember.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -302,15 +302,15 @@ TEST_CASE("Settings Load: Profile Remember", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Profile Remember", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_profile.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_profile.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .rememberLastProfile = false
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -322,14 +322,14 @@ TEST_CASE("Settings Load: Visibility/NoviceUser", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_visibility_novice.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_visibility_novice.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -345,15 +345,15 @@ TEST_CASE("Settings Load: Visibility/NoviceUser", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Visibility/NoviceUser", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_noviceuser.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_noviceuser.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .visibility = openspace::properties::Property::Visibility::NoviceUser
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -365,14 +365,14 @@ TEST_CASE("Settings Load: Visibility/User", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_visibility_user.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_visibility_user.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -388,15 +388,15 @@ TEST_CASE("Settings Load: Visibility/User", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Visibility/User", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_user.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_user.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .visibility = openspace::properties::Property::Visibility::User
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -408,14 +408,14 @@ TEST_CASE("Settings Load: Visibility/AdvancedUser", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_visibility_advanced.json";
+    const  std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_vis_advanced.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -431,15 +431,15 @@ TEST_CASE("Settings Load: Visibility/AdvancedUser", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Visibility/AdvancedUser", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_advanceduser.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_advanceduser.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .visibility = openspace::properties::Property::Visibility::AdvancedUser
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -451,14 +451,14 @@ TEST_CASE("Settings Load: Visibility/Developer", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_visibility_developer.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_vis_developer.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -474,15 +474,15 @@ TEST_CASE("Settings Load: Visibility/Developer", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Visibility/Developer", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_developer.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_developer.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .visibility = openspace::properties::Property::Visibility::Developer
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -494,14 +494,14 @@ TEST_CASE("Settings Load: Bypass Launcher", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_bypass.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_bypass.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -517,15 +517,231 @@ TEST_CASE("Settings Load: Bypass Launcher", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Bypass Launcher", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_bypass.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_bypass.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .bypassLauncher = false
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: LayerServer/All", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "All"
+}
+)";
+
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_layerserver_all.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    const Settings settings = loadSettings(file);
+
+    CHECK(!settings.hasStartedBefore.has_value());
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::All);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+}
+
+TEST_CASE("Settings Save: LayerServer/All", "[settings]") {
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_layerserver_all.json";
+
+    const Settings srcSettings = {
+        .layerServer = openspace::Configuration::LayerServer::All
+    };
+    saveSettings(srcSettings, file);
+
+    const Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: LayerServer/NewYork", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "NewYork"
+}
+)";
+
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_layerserver_nyc.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    const Settings settings = loadSettings(file);
+
+    CHECK(!settings.hasStartedBefore.has_value());
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::NewYork);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+}
+
+TEST_CASE("Settings Save: LayerServer/NewYork", "[settings]") {
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_layerserver_nyc.json";
+
+    const Settings srcSettings = {
+        .layerServer = openspace::Configuration::LayerServer::NewYork
+    };
+    saveSettings(srcSettings, file);
+
+    const Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: LayerServer/Sweden", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "Sweden"
+}
+)";
+
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file =
+        path / "test_settings_load_layerserver_sweden.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    const Settings settings = loadSettings(file);
+
+    CHECK(!settings.hasStartedBefore.has_value());
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::Sweden);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+}
+
+TEST_CASE("Settings Save: LayerServer/Sweden", "[settings]") {
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_layers_sweden.json";
+
+    const Settings srcSettings = {
+        .layerServer = openspace::Configuration::LayerServer::Sweden
+    };
+    saveSettings(srcSettings, file);
+
+    const Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: LayerServer/Utah", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "Utah"
+}
+)";
+
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_layerserver_utah.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    const Settings settings = loadSettings(file);
+
+    CHECK(!settings.hasStartedBefore.has_value());
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::Utah);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+}
+
+TEST_CASE("Settings Save: LayerServer/Utah", "[settings]") {
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_layerserver_utah.json";
+
+    const Settings srcSettings = {
+        .layerServer = openspace::Configuration::LayerServer::Utah
+    };
+    saveSettings(srcSettings, file);
+
+    const Settings cmpSettings = loadSettings(file);
+    CHECK(srcSettings == cmpSettings);
+}
+
+TEST_CASE("Settings Load: LayerServer/None", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "None"
+}
+)";
+
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_layerserver_none.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    const Settings settings = loadSettings(file);
+
+    CHECK(!settings.hasStartedBefore.has_value());
+    CHECK(!settings.configuration.has_value());
+    CHECK(!settings.rememberLastConfiguration.has_value());
+    CHECK(!settings.profile.has_value());
+    CHECK(!settings.rememberLastProfile.has_value());
+    CHECK(!settings.visibility.has_value());
+    CHECK(!settings.bypassLauncher.has_value());
+    REQUIRE(settings.layerServer.has_value());
+    CHECK(*settings.layerServer == Configuration::LayerServer::None);
+    CHECK(!settings.mrf.isEnabled.has_value());
+    CHECK(!settings.mrf.location.has_value());
+}
+
+TEST_CASE("Settings Save: LayerServer/None", "[settings]") {
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_layerserver_none.json";
+
+    const Settings srcSettings = {
+        .layerServer = openspace::Configuration::LayerServer::None
+    };
+    saveSettings(srcSettings, file);
+
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -754,14 +970,14 @@ TEST_CASE("Settings Load: MRF IsEnabled", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_mrf_isenabled.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_mrf_isenabled.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -777,17 +993,17 @@ TEST_CASE("Settings Load: MRF IsEnabled", "[settings]") {
 }
 
 TEST_CASE("Settings Save: MRF IsEnabled", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_mrf_isenabled.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_mrf_isenabled.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .mrf = Settings::MRF {
             .isEnabled = true
         }
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -801,14 +1017,14 @@ TEST_CASE("Settings Load: MRF Location", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_mrf_location.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_mrf_location.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     CHECK(!settings.hasStartedBefore.has_value());
     CHECK(!settings.configuration.has_value());
@@ -824,17 +1040,17 @@ TEST_CASE("Settings Load: MRF Location", "[settings]") {
 }
 
 TEST_CASE("Settings Save: MRF Location", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_mrf_location.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_mrf_location.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .mrf = Settings::MRF {
             .location = "ghi"
         }
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -857,14 +1073,14 @@ TEST_CASE("Settings Load: Full", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_full.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_full.json";
     {
         std::ofstream f(file);
         f << Source;
     }
 
-    Settings settings = loadSettings(file);
+    const Settings settings = loadSettings(file);
 
     REQUIRE(settings.hasStartedBefore.has_value());
     CHECK(*settings.hasStartedBefore == false);
@@ -889,10 +1105,10 @@ TEST_CASE("Settings Load: Full", "[settings]") {
 }
 
 TEST_CASE("Settings Save: Full", "[settings]") {
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_save_full.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_save_full.json";
 
-    Settings srcSettings = {
+    const Settings srcSettings = {
         .hasStartedBefore = false,
         .configuration = "abc",
         .rememberLastConfiguration = true,
@@ -908,7 +1124,7 @@ TEST_CASE("Settings Save: Full", "[settings]") {
     };
     saveSettings(srcSettings, file);
 
-    Settings cmpSettings = loadSettings(file);
+    const Settings cmpSettings = loadSettings(file);
     CHECK(srcSettings == cmpSettings);
 }
 
@@ -919,8 +1135,8 @@ TEST_CASE("Settings Load Fail: Illegal version", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_fail_illegal_version.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_illegal_ver.json";
     {
         std::ofstream f(file);
         f << Source;
@@ -937,8 +1153,8 @@ TEST_CASE("Settings Load Fail: Started before", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_fail_started-before.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_start-before.json";
     {
         std::ofstream f(file);
         f << Source;
@@ -955,8 +1171,8 @@ TEST_CASE("Settings Load Fail: Config", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_fail_config.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_config.json";
     {
         std::ofstream f(file);
         f << Source;
@@ -973,8 +1189,8 @@ TEST_CASE("Settings Load Fail: Profile", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_fail_profile.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_profile.json";
     {
         std::ofstream f(file);
         f << Source;
@@ -991,8 +1207,8 @@ TEST_CASE("Settings Load Fail: Visibility type", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_fail_visibility_type.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_vis_type.json";
     {
         std::ofstream f(file);
         f << Source;
@@ -1009,8 +1225,8 @@ TEST_CASE("Settings Load Fail: Visibility value", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_fail_visibility_value.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_vis_value.json";
     {
         std::ofstream f(file);
         f << Source;
@@ -1027,8 +1243,45 @@ TEST_CASE("Settings Load Fail: Bypass Launcher", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_fail_bypass.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_bypass.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: LayerServer type", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": 1
+}
+)";
+
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file =
+        path / "test_settings_load_fail_layerserver_type.json";
+    {
+        std::ofstream f(file);
+        f << Source;
+    }
+
+    CHECK_THROWS(loadSettings(file));
+}
+
+TEST_CASE("Settings Load Fail: LayerServer value", "[settings]") {
+    constexpr std::string_view Source = R"(
+{
+    "version": 1,
+    "layerserver": "abc"
+}
+)";
+
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_layer_value.json";
     {
         std::ofstream f(file);
         f << Source;
@@ -1081,8 +1334,8 @@ TEST_CASE("Settings Load Fail: MRF", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_fail_mrf.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_mrf.json";
     {
         std::ofstream f(file);
         f << Source;
@@ -1101,8 +1354,8 @@ TEST_CASE("Settings Load Fail: MRF/enabled", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_fail_mrf_enabled.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_mrf_enabled.json";
     {
         std::ofstream f(file);
         f << Source;
@@ -1121,8 +1374,8 @@ TEST_CASE("Settings Load Fail: MRF/location", "[settings]") {
 }
 )";
 
-    std::filesystem::path path = std::filesystem::temp_directory_path();
-    std::filesystem::path file = path / "test_settings_load_fail_mrf_location.json";
+    const std::filesystem::path path = std::filesystem::temp_directory_path();
+    const std::filesystem::path file = path / "test_settings_load_fail_mrf_location.json";
     {
         std::ofstream f(file);
         f << Source;

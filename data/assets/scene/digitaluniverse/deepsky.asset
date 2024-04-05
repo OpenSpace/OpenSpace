@@ -16,8 +16,9 @@ local speck = asset.resource({
 local DeepSkyObjects = {
   Identifier = "DeepSkyObjects",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "dso.speck",
     Labels = {
       File = speck .. "dso.label",
       Color = { 0.1, 0.4, 0.6 },
@@ -25,22 +26,20 @@ local DeepSkyObjects = {
       MinMaxSize = { 16, 20 },
       Unit = "pc"
     },
-    Color = { 1.0, 1.0, 0.0 },
     Opacity = 0.99,
-    ScaleFactor = 500.0,
-    File = speck .. "dso.speck",
-    Texture = textures .. "point3.png",
-    --ColorMap = speck .. "tully.cmap",
-    --ColorMap = speck .. "lss.cmap",
-    --ColorOption = { "proximity" },
-    --ColorOption = { "prox5Mpc" },
-    --ColorRange = { { 1.0, 30.0 } },
+    Coloring = {
+      FixedColor = { 1.0, 1.0, 0.0 }
+    },
+    Texture = {
+      File = textures .. "point3.png",
+    },
     Unit = "pc",
     --FadeInDistances = { 0.05, 1.0 }, -- Fade in value in the same unit as "Unit"
-    BillboardMinMaxSize = { 0.0, 8.22 }, -- in pixels
-    --CorrectionSizeEndDistance = 22.0,
-    --CorrectionSizeFactor = 10.45
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 21.7,
+      MaxSize = 0.32,
+      EnableMaxSizeControl = true
+    }
   },
   Transform = {
     Rotation = {
@@ -112,7 +111,7 @@ asset.export(DeepSkyObjectsImages)
 
 asset.meta = {
   Name = "Deep Sky Objects Images",
-  Version = "1.1",
+  Version = "2.0",
   Description = "Digital Universe asset for Deep Sky Objects and their Images",
   Author = "Nate Greenstein, Matt Everhart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

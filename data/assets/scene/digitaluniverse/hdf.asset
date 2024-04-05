@@ -23,19 +23,26 @@ local ColorMap = asset.resource({
 local Object = {
   Identifier = "HubbleDeepField",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 1.0,
     File = HUDFSpeck .. "hudf.speck",
-    Texture = circle .. "circle.png",
-    ColorMap = ColorMap .. "hudf.cmap",
-    ColorOption = { "redshift", "proximity" },
-    ColorRange = { { 0.0, 0.075 }, { 1.0, 25.0 } },
+    Texture = {
+      File = circle .. "circle.png",
+    },
+    Coloring = {
+      ColorMapping = {
+        File = ColorMap .. "hudf.cmap",
+        ParameterOptions = {
+          { Key = "proximity", Range = { 1.0, 25.0 } },
+          { Key = "redshift", Range = { 0.0, 0.075 } }
+        }
+      }
+    },
     Unit = "Mpc",
-    ScaleFactor = 505.0,
-    BillboardMaxSize = 4.7,
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 21.9
+    }
   },
   GUI = {
     Name = "Hubble Deep Field",
@@ -62,7 +69,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field",
-  Version = "1.2",
+  Version = "2.0",
   Description = "Hubble Ultra Deep Field galaxy survey",
   Author = "Frank Summers (STScI), Brian Abbott (AMNH)",
   URL = "http://www.haydenplanetarium.org/universe",

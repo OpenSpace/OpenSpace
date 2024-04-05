@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/util/httprequest.h>
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 #include <unordered_map>
 
@@ -101,7 +102,7 @@ void HttpSynchronization::start() {
     }
     _state = State::Syncing;
 
-    bool isSynced = isEachFileDownloaded();
+    const bool isSynced = isEachFileDownloaded();
     if (isSynced) {
         _state = State::Resolved;
         return;
@@ -111,7 +112,7 @@ void HttpSynchronization::start() {
         return;
     }
 
-    std::string query = fmt::format(
+    const std::string query = std::format(
         "?identifier={}&file_version={}&application_version={}",
         _identifier, _version, ApplicationVersion
     );
@@ -121,7 +122,7 @@ void HttpSynchronization::start() {
             for (const std::string& url : _syncRepositories) {
                 const SynchronizationState syncState = trySyncFromUrl(url + q);
 
-                // Could not get this sync repository list of files. 
+                // Could not get this sync repository list of files.
                 if (syncState == SynchronizationState::ListDownloadFail) {
                     continue;
                 }
@@ -131,7 +132,7 @@ void HttpSynchronization::start() {
                     createSyncFile(true);
                 }
                 else if (syncState == SynchronizationState::FileDownloadFail) {
-                    // If it was not successful we should add any files that were 
+                    // If it was not successful we should add any files that were
                     // potentially downloaded to avoid downloading from other repositories
                     _existingSyncedFiles.insert(
                         _existingSyncedFiles.end(),
@@ -143,7 +144,7 @@ void HttpSynchronization::start() {
                 }
                 break;
             }
-            
+
             if (!isResolved() && !_shouldCancel) {
                 _state = State::Rejected;
             }
@@ -158,7 +159,7 @@ void HttpSynchronization::cancel() {
 }
 
 std::string HttpSynchronization::generateUid() {
-    return fmt::format("{}/{}", _identifier, _version);
+    return std::format("{}/{}", _identifier, _version);
 }
 
 void HttpSynchronization::createSyncFile(bool isFullySynchronized) const {
@@ -168,7 +169,7 @@ void HttpSynchronization::createSyncFile(bool isFullySynchronized) const {
     dir.replace_extension("ossync");
     std::ofstream syncFile(dir, std::ofstream::out);
 
-    syncFile << fmt::format(
+    syncFile << std::format(
         "{}\n{}\n",
         OssyncVersionNumber,
         (isFullySynchronized ? SynchronizationToken : "Partial Synchronized")
@@ -212,7 +213,7 @@ bool HttpSynchronization::isEachFileDownloaded() {
     //Optionally list of already synched files
 
     if (ossyncVersion == OssyncVersionNumber) {
-        std::getline(file >> std::ws, line); // Read synchronization status
+        ghoul::getline(file >> std::ws, line); // Read synchronization status
         if (line == SynchronizationToken) {
             return true;
         }
@@ -227,7 +228,7 @@ bool HttpSynchronization::isEachFileDownloaded() {
         }
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "{}: Unknown ossync version number read."
             "Got {} while {} and below are valid.",
             _identifier,
@@ -240,8 +241,8 @@ bool HttpSynchronization::isEachFileDownloaded() {
 }
 
 HttpSynchronization::SynchronizationState
-HttpSynchronization::trySyncFromUrl(std::string listUrl) {
-    HttpMemoryDownload fileListDownload(std::move(listUrl));
+HttpSynchronization::trySyncFromUrl(std::string url) {
+    HttpMemoryDownload fileListDownload = HttpMemoryDownload(std::move(url));
     fileListDownload.onProgress([&c = _shouldCancel](int64_t, std::optional<int64_t>) {
         return !c;
     });
@@ -282,11 +283,11 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             continue;
         }
 
-        std::string filename = std::filesystem::path(line).filename().string();
-        std::filesystem::path destination = directory() / (filename + ".tmp");
+        const std::string filename = std::filesystem::path(line).filename().string();
+        const std::filesystem::path destination = directory() / (filename + ".tmp");
 
         if (sizeData.find(line) != sizeData.end()) {
-            LWARNING(fmt::format("{}: Duplicate entry for {}", _identifier, line));
+            LWARNING(std::format("{}: Duplicate entry for {}", _identifier, line));
             continue;
         }
 
@@ -320,7 +321,7 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
                 return !_shouldCancel;
             }
 
-            std::lock_guard guard(mutex);
+            const std::lock_guard guard(mutex);
 
             sizeData[line] = { downloadedBytes, totalBytes };
 
@@ -372,7 +373,7 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
         d->wait();
         if (!d->hasSucceeded()) {
-            LERROR(fmt::format("Error downloading file from URL {}", d->url()));
+            LERROR(std::format("Error downloading file from URL '{}'", d->url()));
             failed = true;
             continue;
         }
@@ -391,13 +392,13 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
         std::error_code ec;
         std::filesystem::rename(tempName, originalName, ec);
         if (ec) {
-            LERROR(fmt::format("Error renaming {} to {}", tempName, originalName));
+            LERROR(std::format("Error renaming '{}' to '{}'", tempName, originalName));
             failed = true;
         }
 
         if (_unzipFiles && originalName.extension() == ".zip") {
             std::string source = originalName.string();
-            std::string dest =
+            const std::string dest =
                 _unzipFilesDestination.has_value() ?
                 (originalName.parent_path() / *_unzipFilesDestination).string() :
                 originalName.replace_extension().string();;
@@ -407,15 +408,15 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
             zip_close(z);
 
             if (is64) {
-                LERROR(fmt::format(
-                    "Error while unzipping {}: Zip64 archives are not supported", source
+                LERROR(std::format(
+                    "Error while unzipping '{}': Zip64 archives are not supported", source
                 ));
                 continue;
             }
 
             int ret = zip_extract(source.c_str(), dest.c_str(), nullptr, nullptr);
             if (ret != 0) {
-                LERROR(fmt::format("Error {} while unzipping {}", ret, source));
+                LERROR(std::format("Error '{}' while unzipping '{}'", ret, source));
                 continue;
             }
 
@@ -424,7 +425,7 @@ HttpSynchronization::trySyncFromUrl(std::string listUrl) {
     }
     if (failed) {
         for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
-            // Store all files that were synced to the ossync 
+            // Store all files that were synced to the ossync
             if (d->hasSucceeded()) {
                 _newSyncedFiles.push_back(d->url());
             }

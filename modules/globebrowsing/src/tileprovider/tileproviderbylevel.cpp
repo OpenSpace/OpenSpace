@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    layers::Group::ID group = static_cast<layers::Group::ID>(p.layerGroupID);
+    const layers::Group::ID group = static_cast<layers::Group::ID>(p.layerGroupID);
 
     for (Parameters::Provider provider : p.levelTileProviders) {
         ghoul::Dictionary& tileProviderDict = provider.tileProvider;
@@ -65,15 +65,15 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         }
         layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
         if (tileProviderDict.hasValue<std::string>("Type")) {
-            std::string type = tileProviderDict.value<std::string>("Type");
+            const std::string type = tileProviderDict.value<std::string>("Type");
             typeID = ghoul::from_string<layers::Layer::ID>(type);
         }
 
         std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, tileProviderDict);
 
-        std::string provId = tileProviderDict.value<std::string>("Identifier");
+        const std::string provId = tileProviderDict.value<std::string>("Identifier");
         tp->setIdentifier(provId);
-        std::string providerName = tileProviderDict.value<std::string>("Name");
+        const std::string providerName = tileProviderDict.value<std::string>("Name");
         tp->setGuiName(providerName);
         addPropertySubOwner(tp.get());
 
@@ -130,12 +130,12 @@ TileProvider* TileProviderByLevel::levelProvider(int level) const {
     ZoneScoped;
 
     if (!_levelTileProviders.empty()) {
-        int clampedLevel = glm::clamp(
+        const int clampedLevel = glm::clamp(
             level,
             0,
             static_cast<int>(_providerIndices.size() - 1)
         );
-        int idx = _providerIndices[clampedLevel];
+        const int idx = _providerIndices[clampedLevel];
         return _levelTileProviders[idx].get();
     }
     else {

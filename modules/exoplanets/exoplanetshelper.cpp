@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,9 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
 #include <string_view>
@@ -48,11 +49,11 @@ bool isValidPosition(const glm::vec3& pos) {
 }
 
 bool hasSufficientData(const ExoplanetDataEntry& p) {
-    const glm::vec3 starPosition{ p.positionX , p.positionY, p.positionZ };
+    const glm::vec3 starPosition = glm::vec3(p.positionX, p.positionY, p.positionZ);
 
-    bool validStarPosition = isValidPosition(starPosition);
-    bool hasSemiMajorAxis = !std::isnan(p.a);
-    bool hasOrbitalPeriod = !std::isnan(p.per);
+    const bool validStarPosition = isValidPosition(starPosition);
+    const bool hasSemiMajorAxis = !std::isnan(p.a);
+    const bool hasOrbitalPeriod = !std::isnan(p.per);
 
     return validStarPosition && hasSemiMajorAxis && hasOrbitalPeriod;
 }
@@ -64,15 +65,15 @@ glm::vec3 computeStarColor(float bv) {
     std::ifstream colorMap(absPath(bvColormapPath), std::ios::in);
 
     if (!colorMap.good()) {
-        LERROR(fmt::format(
-            "Failed to open colormap data file: {}", absPath(bvColormapPath)
+        LERROR(std::format(
+            "Failed to open colormap data file '{}'", absPath(bvColormapPath)
         ));
         return glm::vec3(0.f);
     }
 
     // Interpret the colormap cmap file
     std::string line;
-    while (std::getline(colorMap, line)) {
+    while (ghoul::getline(colorMap, line)) {
         if (line.empty() || (line[0] == '#')) {
             continue;
         }
@@ -81,22 +82,20 @@ glm::vec3 computeStarColor(float bv) {
 
     // The first line is the width of the image, i.e number of values
     std::istringstream ss(line);
-    int nValues;
+    int nValues = 0;
     ss >> nValues;
 
     // Find the line matching the input B-V value (B-V is in [-0.4,2.0])
     const int t = static_cast<int>(round(((bv + 0.4) / (2.0 + 0.4)) * (nValues - 1)));
     std::string color;
     for (int i = 0; i < t + 1; i++) {
-        std::getline(colorMap, color);
+        ghoul::getline(colorMap, color);
     }
-    colorMap.close();
 
     std::istringstream colorStream(color);
-    float r, g, b;
-    colorStream >> r >> g >> b;
-
-    return glm::vec3(r, g, b);
+    glm::vec3 rgb;
+    colorStream >> rgb.r >> rgb.g >> rgb.b;
+    return rgb;
 }
 
 glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega) {
@@ -117,7 +116,7 @@ glm::dmat4 computeOrbitPlaneRotationMatrix(float i, float bigom, float omega) {
     return orbitPlaneRotation;
 }
 
-glm::dmat3 computeSystemRotation(glm::dvec3 starPosition) {
+glm::dmat3 computeSystemRotation(const glm::dvec3& starPosition) {
     const glm::dvec3 sunPosition = glm::dvec3(0.0, 0.0, 0.0);
     const glm::dvec3 starToSunVec = glm::normalize(sunPosition - starPosition);
     const glm::dvec3 galacticNorth = glm::dvec3(0.0, 0.0, 1.0);
@@ -135,7 +134,7 @@ glm::dmat3 computeSystemRotation(glm::dvec3 starPosition) {
         celestialNorth,
         starToSunVec
     ));
-    glm::dvec3 northProjected = glm::normalize(
+    const glm::dvec3 northProjected = glm::normalize(
         celestialNorth - (celestialAngle / glm::length(starToSunVec)) * starToSunVec
     );
 

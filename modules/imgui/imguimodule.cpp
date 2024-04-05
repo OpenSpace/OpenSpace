@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -136,7 +136,7 @@ ImGUIModule::ImGUIModule()
             return;
         }
 
-        WindowDelegate& delegate = *global::windowDelegate;
+        const WindowDelegate& delegate = *global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
         if (delegate.isMaster() && showGui) {
             const glm::ivec2 windowSize = delegate.currentSubwindowSize();
@@ -281,7 +281,7 @@ void ImGUIModule::internalDeinitialize() {
 
 void ImGUIModule::internalInitializeGL() {
     std::filesystem::path file = FileSys.cacheManager()->cachedFilename("imgui.ini", "");
-    LDEBUG(fmt::format("Using {} as ImGUI cache location", file));
+    LDEBUG(std::format("Using '{}' as ImGUI cache location", file));
 
     _iniFileBuffer.resize(file.string().size() + 1);
 
@@ -291,10 +291,10 @@ void ImGUIModule::internalInitializeGL() {
     strcpy(_iniFileBuffer.data(), file.c_str());
 #endif
 
-    int nWindows = global::windowDelegate->nWindows();
+    const int nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
-    for (int i = 0; i < nWindows; ++i) {
+    for (int i = 0; i < nWindows; i++) {
         _contexts[i] = ImGui::CreateContext();
         ImGui::SetCurrentContext(_contexts[i]);
 
@@ -393,9 +393,9 @@ void ImGUIModule::internalInitializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     {
-        unsigned char* texData;
+        unsigned char* texData = nullptr;
         glm::ivec2 texSize = glm::ivec2(0, 0);
-        for (int i = 0; i < nWindows; ++i) {
+        for (int i = 0; i < nWindows; i++) {
             ImGui::SetCurrentContext(_contexts[i]);
 
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
@@ -409,8 +409,8 @@ void ImGUIModule::internalInitializeGL() {
         _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         _fontTexture->uploadTexture();
     }
-    for (int i = 0; i < nWindows; ++i) {
-        uintptr_t texture = static_cast<GLuint>(*_fontTexture);
+    for (int i = 0; i < nWindows; i++) {
+        const uintptr_t texture = static_cast<GLuint>(*_fontTexture);
         ImGui::SetCurrentContext(_contexts[i]);
         ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(texture);
     }
@@ -425,9 +425,9 @@ void ImGUIModule::internalInitializeGL() {
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    GLuint positionAttrib = _program->attributeLocation("in_position");
-    GLuint uvAttrib = _program->attributeLocation("in_uv");
-    GLuint colorAttrib = _program->attributeLocation("in_color");
+    const GLuint positionAttrib = _program->attributeLocation("in_position");
+    const GLuint uvAttrib = _program->attributeLocation("in_uv");
+    const GLuint colorAttrib = _program->attributeLocation("in_color");
 
     glEnableVertexAttribArray(positionAttrib);
     glVertexAttribPointer(
@@ -549,10 +549,10 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 
     // Avoid rendering when minimized, scale coordinates for retina displays
     // (screen coordinates != framebuffer coordinates)
-    GLsizei fbWidth = static_cast<GLsizei>(
+    const GLsizei fbWidth = static_cast<GLsizei>(
         io.DisplaySize.x * io.DisplayFramebufferScale.x
     );
-    GLsizei fbHeight = static_cast<GLsizei>(
+    const GLsizei fbHeight = static_cast<GLsizei>(
         io.DisplaySize.y * io.DisplayFramebufferScale.y
     );
     if (fbWidth == 0 || fbHeight == 0) {
@@ -590,7 +590,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 
     glBindVertexArray(vao);
 
-    for (int i = 0; i < drawData->CmdListsCount; ++i) {
+    for (int i = 0; i < drawData->CmdListsCount; i++) {
         const ImDrawList* cmdList = drawData->CmdLists[i];
         const ImDrawIdx* indexBufferOffset = nullptr;
 
@@ -645,14 +645,14 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 }
 
 bool ImGUIModule::mouseButtonCallback(MouseButton, MouseAction) {
-    ImGuiIO& io = ImGui::GetIO();
-    bool consumeEvent = io.WantCaptureMouse;
+    const ImGuiIO& io = ImGui::GetIO();
+    const bool consumeEvent = io.WantCaptureMouse;
     return consumeEvent;
 }
 
 bool ImGUIModule::mouseWheelCallback(double position) {
     ImGuiIO& io = ImGui::GetIO();
-    bool consumeEvent = io.WantCaptureMouse;
+    const bool consumeEvent = io.WantCaptureMouse;
     if (consumeEvent) {
         io.MouseWheel = static_cast<float>(position);
     }
@@ -701,7 +701,7 @@ bool ImGUIModule::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
 
 bool ImGUIModule::charCallback(unsigned int character, KeyModifier) {
     ImGuiIO& io = ImGui::GetIO();
-    bool consumeEvent = io.WantCaptureKeyboard;
+    const bool consumeEvent = io.WantCaptureKeyboard;
     if (consumeEvent) {
         io.AddInputCharacter(static_cast<unsigned short>(character));
     }
@@ -740,7 +740,7 @@ bool ImGUIModule::touchUpdatedCallback(TouchInput input) {
     );
 
     if (it == _validTouchStates.cbegin()) {
-        glm::vec2 windowPos = input.currentWindowCoordinates();
+        const glm::vec2 windowPos = input.currentWindowCoordinates();
         io.MousePos = ImVec2(windowPos.x, windowPos.y);
         io.MouseClicked[0] = true;
         return true;
@@ -772,7 +772,7 @@ void ImGUIModule::touchExitCallback(TouchInput input) {
     ImGuiIO& io = ImGui::GetIO();
     _validTouchStates.erase(found);
     if (_validTouchStates.empty()) {
-        glm::vec2 windowPos = input.currentWindowCoordinates();
+        const glm::vec2 windowPos = input.currentWindowCoordinates();
         io.MousePos = ImVec2(windowPos.x, windowPos.y);
         io.MouseClicked[0] = false;
     }

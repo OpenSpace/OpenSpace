@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,8 +36,8 @@
 
 namespace {
     struct VBOData {
-        float position[3];
-        float color[4];
+        std::array<float, 3> position;
+        std::array<float, 4> color;
     };
 
     struct [[codegen::Dictionary(RenderableCrawlingLine)]] Parameters {
@@ -142,13 +142,12 @@ void RenderableCrawlingLine::render(const RenderData& data, RendererTasks&) {
     _program->activate();
     _frameCounter++;
 
-    glm::dmat4 modelViewProjectionTransform = calcModelViewProjectionTransform(data);
+    const glm::dmat4 modelViewProjection = calcModelViewProjectionTransform(data);
+    _program->setUniform("modelViewProjection", modelViewProjection);
 
-    _program->setUniform("modelViewProjection", modelViewProjectionTransform);
-
-    int frame = _frameCounter % 60;
-    float fadingFactor = static_cast<float>(sin((frame * glm::pi<float>()) / 60));
-    float alpha = 0.6f + fadingFactor*0.4f;
+    const int frame = _frameCounter % 60;
+    const float fadingFactor = std::sin(frame * glm::pi<float>() / 60.f);
+    const float alpha = 0.6f + fadingFactor * 0.4f;
 
     glLineWidth(2.f);
 
@@ -176,12 +175,12 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
     const glm::dvec3 boresight = res.boresightVector;
     const glm::vec4 target = glm::dmat4(tm) * glm::vec4(boresight, 12);
 
-    VBOData vboData[2] = {
-        {
+    std::array<VBOData, 2> vboData = {
+        VBOData {
             { 0.f, 0.f, 0.f },
             { _lineColorBegin.r, _lineColorBegin.g, _lineColorBegin.b, _lineColorBegin.a }
         },
-        {
+        VBOData {
             {
                 target.x * powf(10, target.w),
                 target.y * powf(10, target.w),
@@ -193,10 +192,10 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
 
 
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, 2 * sizeof(VBOData), vboData);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, 2 * sizeof(VBOData), vboData.data());
 
     if (ImageSequencer::ref().isReady()) {
-        float imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(
+        const float imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(
             data.time.j2000Seconds(),
             _instrumentName
         );

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -119,7 +119,7 @@ public:
 
     std::string key() const;
 
-    void setOffsets(const glm::vec3& offsets);
+    void setOffsets(glm::vec3 offsets);
 
     void initializeGL(ghoul::opengl::ProgramObject* pointsProgram,
         ghoul::opengl::ProgramObject* linesAndPolygonsProgram);

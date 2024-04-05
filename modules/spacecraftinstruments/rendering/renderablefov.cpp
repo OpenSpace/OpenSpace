@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -301,14 +301,14 @@ void RenderableFov::initializeGL() {
         res.shape == SpiceManager::FieldOfViewResult::Shape::Rectangle;
     if (!supportedShape) {
         throw ghoul::RuntimeError(
-            fmt::format("'{}' has unsupported shape", _instrument.name),
+            std::format("'{}' has unsupported shape", _instrument.name),
             "RenderableFov"
         );
     }
 
     if (_simplifyBounds) {
         const size_t sizeBefore = res.bounds.size();
-        for (size_t i = 1; i < res.bounds.size() - 1; ++i) {
+        for (size_t i = 1; i < res.bounds.size() - 1; i++) {
             const glm::dvec3& prev = res.bounds[i - 1];
             const glm::dvec3& curr = res.bounds[i];
             const glm::dvec3& next = res.bounds[i + 1];
@@ -329,7 +329,7 @@ void RenderableFov::initializeGL() {
 
         LINFOC(
             _instrument.name,
-            fmt::format("Simplified from {} to {}", sizeBefore, sizeAfter)
+            std::format("Simplified from {} to {}", sizeBefore, sizeAfter)
         );
     }
 
@@ -447,27 +447,33 @@ bool RenderableFov::isReady() const {
 glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double time,
                                                const std::string& target) const
 {
-    const glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
-        target,
-        _instrument.spacecraft,
-        _instrument.referenceFrame,
-        _instrument.aberrationCorrection,
-        time
-    );
-    const glm::dvec3 fov = SpiceManager::ref().frameTransformationMatrix(
-        _instrument.name,
-        _instrument.referenceFrame,
-        time
-    ) * vecFov;
-    const glm::dvec3 p = glm::proj(vecToTarget, fov);
-    return p  * 1000.0; // km -> m
+    if (target.empty()) {
+        constexpr glm::dvec3 Up = glm::dvec3(1.0, 0.0, 0.0);
+        return glm::normalize(glm::cross(Up, vecFov));
+    }
+    else {
+        const glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
+            target,
+            _instrument.spacecraft,
+            _instrument.referenceFrame,
+            _instrument.aberrationCorrection,
+            time
+        );
+        const glm::dvec3 fov = SpiceManager::ref().frameTransformationMatrix(
+            _instrument.name,
+            _instrument.referenceFrame,
+            time
+        ) * vecFov;
+        const glm::dvec3 p = glm::proj(vecToTarget, fov);
+        return p * 1000.0; // km -> m
+    }
 }
 
 void RenderableFov::computeIntercepts(double time, const std::string& target,
                                       bool isInFov)
 {
     auto makeBodyFixedReferenceFrame =
-        [&target](std::string ref) -> std::pair<std::string, bool>
+        [&target](const std::string& ref) -> std::pair<std::string, bool>
     {
         const bool convert = (ref.find("IAU_") == std::string::npos);
         if (convert) {
@@ -483,7 +489,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
     // First we fill the field-of-view bounds array by testing each bounds vector against
     // the object. We need to test it against the object (rather than using a fixed
     // distance) as the field of view rendering should stop at the surface
-    for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+    for (size_t i = 0; i < _instrument.bounds.size(); i++) {
         const glm::dvec3& bound = _instrument.bounds[i];
 
         RenderInformation::VBOData& first = _fieldOfViewBounds.data[2 * i];
@@ -509,7 +515,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
         else {
             // The target is in the field of view, but not the entire field of view has to
             // be filled by the target
-            std::pair<std::string, bool> ref = makeBodyFixedReferenceFrame(
+            const std::pair<std::string, bool> ref = makeBodyFixedReferenceFrame(
                 _instrument.referenceFrame
             );
 
@@ -576,7 +582,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
 
     // An early out for when the target is not in field of view
     if (!isInFov) {
-        for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+        for (size_t i = 0; i < _instrument.bounds.size(); i++) {
             // If none of the points are able to intersect with the target, we can just
             // copy the values from the field-of-view boundary. So we take each second
             // item (the first one is (0,0,0)) and replicate it 'InterpolationSteps' times
@@ -585,7 +591,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
     }
     else {
         // At least one point will intersect
-        for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+        for (size_t i = 0; i < _instrument.bounds.size(); i++) {
             // Wrap around the array index to 0
             const size_t j = (i == _instrument.bounds.size() - 1) ? 0 : i + 1;
 
@@ -657,7 +663,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
 
 #if 0 // DEBUG_THIS
     // At least one point will intersect
-    for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+    for (size_t i = 0; i < _instrument.bounds.size(); i++) {
         // Wrap around the array index to 0
         const size_t j = (i == _instrument.bounds.size() - 1) ? 0 : i + 1;
 
@@ -720,7 +726,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                     copyFieldOfViewValues(i, p2, indexForBounds(j));
 
                     // Are recompute the intersecting ones
-                    for (size_t k = 0; k <= (p2 - p1); ++k) {
+                    for (size_t k = 0; k <= (p2 - p1); k++) {
                         const double t = t1 + k * (t2 - t1);
                         const glm::dvec3 interpolated = glm::mix(iBound, jBound, t);
                         const glm::vec3 icpt = interceptVector(interpolated);
@@ -758,7 +764,7 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
     // Model transform and view transform needs to be in double precision
-    glm::mat4 modelViewProjectionTransform =
+    const glm::mat4 modelViewProjectionTransform =
         calcModelViewProjectionTransform(data);
 
     _program->setUniform(_uniformCache.modelViewProjection, modelViewProjectionTransform);
@@ -829,7 +835,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
 
     // First, for all potential targets, check whether they are in the field of view
     for (const std::string& pt : _instrument.potentialTargets) {
-        bool inFOV = SpiceManager::ref().isTargetInFieldOfView(
+        const bool inFOV = SpiceManager::ref().isTargetInFieldOfView(
             pt,
             _instrument.spacecraft,
             global::moduleEngine->module<SpacecraftInstrumentsModule>()->frameFromBody(
@@ -849,7 +855,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
 
     // If none of the targets is in field of view, either use the last target or if there
     // hasn't been one, find the closest target
-    if (_previousTarget.empty()) {
+    if (_previousTarget.empty() && !_instrument.potentialTargets.empty()) {
         // If we reached this, we haven't found a target in field of view and we don't
         // have a previously selected target, so the next best heuristic for a target is
         // the closest one
@@ -859,7 +865,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
             _instrument.potentialTargets.end(),
             distances.begin(),
             [&i = _instrument, &t = time] (const std::string& pt) {
-                double lt;
+                double lt = 0.0;
                 const glm::dvec3 p = SpiceManager::ref().targetPosition(
                     pt,
                     i.spacecraft,

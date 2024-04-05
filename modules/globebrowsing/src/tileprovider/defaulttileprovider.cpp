@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -130,7 +130,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     name = p.name.value_or("Name unspecified");
-    std::string _loggerCat = "DefaultTileProvider (" + name + ")";
+    const std::string _loggerCat = std::format("DefaultTileProvider ({})", name);
 
     // 1. Get required Keys
     _filePath = p.filePath;
@@ -139,10 +139,10 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
-    int pixelSize = p.tilePixelSize.value_or(0);
+    const int pixelSize = p.tilePixelSize.value_or(0);
 
     // Only preprocess height layers by default
-    _performPreProcessing = _layerGroupID == layers::Group::ID::HeightLayers;
+    _performPreProcessing = (_layerGroupID == layers::Group::ID::HeightLayers);
     _performPreProcessing = p.performPreProcessing.value_or(_performPreProcessing);
 
     // Get the name of the layergroup to which this layer belongs
@@ -162,10 +162,10 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     std::string identifier = p.identifier.value_or("unspecified");
     std::string enclosing = p.globeName.value_or("unspecified");
 
-    std::string path = fmt::format("{}/{}/{}/", enclosing, layerGroup, identifier);
+    std::string path = std::format("{}/{}/{}/", enclosing, layerGroup, identifier);
 
-    GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
-    bool enabled = module.isMRFCachingEnabled();
+    const GlobeBrowsingModule& mod = *global::moduleEngine->module<GlobeBrowsingModule>();
+    bool enabled = mod.isMRFCachingEnabled();
     Compression compression =
         _layerGroupID == layers::Group::ID::HeightLayers ?
         Compression::LERC :
@@ -182,16 +182,16 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     }
 
     _cacheProperties.enabled = enabled;
-    _cacheProperties.path = path;
+    _cacheProperties.path = std::move(path);
     _cacheProperties.quality = quality;
     _cacheProperties.blockSize = blockSize;
     _cacheProperties.compression = codegen::toString(compression);
 
-    TileTextureInitData initData(
+    TileTextureInitData initData = TileTextureInitData(
         tileTextureInitData(_layerGroupID, pixelSize)
     );
     _tilePixelSize = initData.dimensions.x;
-    initAsyncTileDataReader(initData, _cacheProperties);
+    initAsyncTileDataReader(std::move(initData), _cacheProperties);
 
     addProperty(_filePath);
     addProperty(_tilePixelSize);
@@ -206,8 +206,8 @@ void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData,
         name,
         std::make_unique<RawTileDataReader>(
             _filePath,
-            initData,
-            cacheProperties,
+            std::move(initData),
+            std::move(cacheProperties),
             RawTileDataReader::PerformPreprocessing(_performPreProcessing)
         )
     );

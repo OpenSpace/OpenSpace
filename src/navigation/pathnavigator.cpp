@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,6 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
-#include <openspace/navigation/pathnavigator.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -45,6 +44,7 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <vector>
@@ -208,6 +208,14 @@ bool PathNavigator::isPlayingPath() const {
     return hasCurrentPath() && _isPlaying;
 }
 
+bool PathNavigator::isPaused() const {
+    return hasCurrentPath() && !_isPlaying;
+}
+
+float PathNavigator::estimatedRemainingTimeInPath() const {
+    return hasCurrentPath() ? _currentPath->estimatedRemainingTime(_speedScale) : 0.f;
+}
+
 void PathNavigator::updateCamera(double deltaTime) {
     ghoul_assert(camera() != nullptr, "Camera must not be nullptr");
 
@@ -228,11 +236,19 @@ void PathNavigator::updateCamera(double deltaTime) {
     if (_setCameraToEndNextFrame) {
         LDEBUG("Skipped to end of camera path");
         _currentPath->quitPath();
-        camera()->setPose(_currentPath->endPoint().pose());
+
+        const interaction::Waypoint endPoint = _currentPath->endPoint();
+        camera()->setPose(endPoint.pose());
         global::navigationHandler->orbitalNavigator().setFocusNode(
-            _currentPath->endPoint().nodeIdentifier(),
+            endPoint.nodeIdentifier(),
             false
         );
+        if (endPoint.aimIdentifier().has_value()) {
+            global::navigationHandler->orbitalNavigator().setAimNode(
+                *endPoint.aimIdentifier()
+            );
+        }
+
         handlePathEnd();
         _setCameraToEndNextFrame = false;
         return;
@@ -251,26 +267,34 @@ void PathNavigator::updateCamera(double deltaTime) {
 
     // Set anchor node in orbitalNavigator, to render visible nodes and add activate
     // navigation when we reach the end.
-    std::string currentAnchor = anchor()->identifier();
+    const std::string currentAnchor = anchor()->identifier();
     if (currentAnchor != newAnchor) {
         global::navigationHandler->orbitalNavigator().setFocusNode(newAnchor, false);
     }
 
     if (!_includeRoll) {
-        removeRollRotation(newPose, deltaTime);
+        removeRollRotation(newPose);
     }
 
     camera()->setPose(newPose);
 
     if (_currentPath->hasReachedEnd()) {
         LINFO("Reached target");
+
+        // Also set the aim once the path is finished, if one should be set
+        if (_currentPath->endPoint().aimIdentifier().has_value()) {
+            global::navigationHandler->orbitalNavigator().setAimNode(
+                *_currentPath->endPoint().aimIdentifier()
+            );
+        }
+
         handlePathEnd();
         return;
     }
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
-    OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
+    const OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
         // Silently ignore any paths that are being created during a session recording
         // playback. The camera path should already have been recorded
@@ -290,7 +314,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
         // Do nothing
     }
     catch (const ghoul::RuntimeError& e) {
-        LERROR(fmt::format("Could not create path. Reason: {}", e.message));
+        LERROR(std::format("Could not create path. Reason: {}", e.message));
         return;
     }
 
@@ -310,7 +334,9 @@ void PathNavigator::startPath() {
         return;
     }
 
-    bool success = global::openSpaceEngine->setMode(OpenSpaceEngine::Mode::CameraPath);
+    const bool success = global::openSpaceEngine->setMode(
+        OpenSpaceEngine::Mode::CameraPath
+    );
     if (!success) {
         LERROR("Could not start camera path");
         return; // couldn't switch to camera path mode
@@ -403,15 +429,15 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
         // Use the biggest of the bounding sphere and interaction sphere,
         // so we don't accidentally choose a bounding sphere that is much smaller
         // than the interaction sphere of the node
-        double bs = n->boundingSphere();
-        double is = n->interactionSphere();
+        const double bs = n->boundingSphere();
+        const double is = n->interactionSphere();
         return std::max(is, bs);
     };
 
     double result = sphere(node);
 
     if (result < _minValidBoundingSphere) {
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
             "minimal value of {}. This might lead to unexpected results",
             node->identifier(), _minValidBoundingSphere.value()
@@ -473,7 +499,7 @@ void PathNavigator::findRelevantNodes() {
     }
 
     auto isRelevant = [&relevantTags](const SceneGraphNode* node) {
-        const std::vector<std::string> tags = node->tags();
+        const std::vector<std::string>& tags = node->tags();
         auto result = std::find_first_of(
             relevantTags.begin(),
             relevantTags.end(),
@@ -523,7 +549,7 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
         const glm::dvec3 posInModelCoords =
             glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
 
-        bool isClose = collision::isPointInsideSphere(
+        const bool isClose = collision::isPointInsideSphere(
             posInModelCoords,
             glm::dvec3(0.0, 0.0, 0.0),
             proximityRadius
@@ -537,7 +563,7 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
     return nullptr;
 }
 
-void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {
+void PathNavigator::removeRollRotation(CameraPose& pose) const {
     // The actual position for the camera does not really matter. Use the origin,
     // to avoid precision problems when we have large values for the position
     const glm::dvec3 cameraPos = glm::dvec3(0.0);
@@ -549,9 +575,9 @@ void PathNavigator::removeRollRotation(CameraPose& pose, double deltaTime) {
     // enough away from the camera
     constexpr double NotTooCloseDistance = 10000.0;
 
-    glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;
+    const glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;
 
-    glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
+    const glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
         cameraPos,
         lookAtPos,
         camera()->lookUpVectorWorldSpace()
@@ -575,6 +601,8 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
             codegen::lua::ZoomToFocus,
             codegen::lua::ZoomToDistance,
             codegen::lua::ZoomToDistanceRelative,
+            codegen::lua::JumpTo,
+            codegen::lua::JumpToNavigationState,
             codegen::lua::CreatePath
         }
     };

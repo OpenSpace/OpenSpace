@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,13 +32,15 @@
 SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     : QWidget(parent)
     , _orientationValue(std::move(orientation))
+    , _firstWindowGraphicsSelection(new QComboBox)
+    , _firstWindowSelectionLayout(new QHBoxLayout)
+    ,_showUiOnFirstWindow(new QCheckBox(
+        "Show user interface only on first window using graphics:"
+    ))
 {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     
-    _showUiOnFirstWindow = new QCheckBox(
-        "Show user interface only on first window using graphics:"
-    );
     _showUiOnFirstWindow->setChecked(false);
     _showUiOnFirstWindow->setEnabled(false);
     _showUiOnFirstWindow->setToolTip(
@@ -48,9 +50,6 @@ SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
         "not show the user interface"
     );
 
-    _firstWindowSelectionLayout = new QHBoxLayout;
-
-    _firstWindowGraphicsSelection = new QComboBox();
     _firstWindowGraphicsSelection->setToolTip(
         "Select the contents of the first window to match one of the other windows"
     );
@@ -127,7 +126,7 @@ void SettingsWidget::nWindowsDisplayedChanged(int newCount) {
     graphicsSelect = std::max(0, graphicsSelect);
 
     QList<QString> graphicsOptions = {"None (GUI only)"};
-    for (int i = CountOneWindow; i <= newCount; ++i) {
+    for (int i = CountOneWindow; i <= newCount; i++) {
         graphicsOptions.append("Window " + QString::number(i));
     }
     _firstWindowGraphicsSelection->clear();

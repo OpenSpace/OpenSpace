@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -104,15 +104,14 @@ public:
         OverrideFile overrideFile = OverrideFile::Yes,
         FailOnError failOnError = FailOnError::No, unsigned int timeout_secs = 0,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
-        DownloadProgressCallback progressCallback = DownloadProgressCallback()
-    );
+        DownloadProgressCallback progressCallback = DownloadProgressCallback()) const;
 
     std::future<MemoryFile> fetchFile(const std::string& url,
         SuccessCallback successCallback = SuccessCallback(),
         ErrorCallback errorCallback = ErrorCallback());
 
-    void getFileExtension(const std::string& url,
-        RequestFinishedCallback finishedCallback = RequestFinishedCallback());
+    void fileExtension(const std::string& url,
+        RequestFinishedCallback finishedCallback = RequestFinishedCallback()) const;
 
 private:
     bool _useMultithreadedDownload;

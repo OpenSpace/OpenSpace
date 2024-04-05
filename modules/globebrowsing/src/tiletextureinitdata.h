@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,8 +48,8 @@ public:
     TileTextureInitData(const TileTextureInitData& original) = default;
     TileTextureInitData(TileTextureInitData&& original) = default;
 
-    TileTextureInitData operator=(const TileTextureInitData& rhs);
-    TileTextureInitData operator=(TileTextureInitData&& rhs) noexcept;
+    TileTextureInitData& operator=(const TileTextureInitData& rhs);
+    TileTextureInitData& operator=(TileTextureInitData&& rhs) noexcept;
 
     ~TileTextureInitData() = default;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/json.h>
+#include <openspace/properties/propertyowner.h>
 #include <ghoul/misc/exception.h>
 
 namespace openspace::documentation {
@@ -86,9 +87,16 @@ public:
      */
     static DocumentationEngine& ref();
 
-    std::string generateJson() const;
+    void writeDocumentation() const;
 
-    nlohmann::json generateJsonJson() const;
+    nlohmann::json generateScriptEngineJson() const;
+    nlohmann::json generateFactoryManagerJson() const;
+    nlohmann::json generateKeybindingsJson() const;
+    nlohmann::json generatePropertyOwnerJson(properties::PropertyOwner* owner) const;
+    nlohmann::json generateLicenseGroupsJson() const;
+    nlohmann::json generateLicenseListJson() const;
+    nlohmann::json generateActionJson() const;
+    nlohmann::json generateEventJson() const;
 
 private:
     /// The list of all Documentation%s that are stored by the DocumentationEngine

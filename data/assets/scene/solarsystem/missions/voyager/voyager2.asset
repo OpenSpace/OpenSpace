@@ -1,5 +1,5 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -57,7 +57,7 @@ local Voyager2 = {
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = "VG2_SC_BUS",
-      DestinationFrame = "GALACTIC"
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -75,7 +75,7 @@ local Voyager2Main = {
     GeometryFile = models .. "voyager-main.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
+      sunTransforms.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",
@@ -99,7 +99,7 @@ local Voyager2Antenna = {
     GeometryFile = models .. "voyager-antenna.obj",
     ModelTransform = RotationMatrix,
     LightSources = {
-      sun.LightSource,
+      sunTransforms.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",

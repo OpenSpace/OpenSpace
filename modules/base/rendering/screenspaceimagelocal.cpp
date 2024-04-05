@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,8 +85,8 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
         if (!std::filesystem::is_regular_file(absPath(_texturePath))) {
             LWARNINGC(
                 "ScreenSpaceImageLocal",
-                fmt::format(
-                    "Image {} did not exist for {}", _texturePath.value(), _identifier
+                std::format(
+                    "Image '{}' did not exist for '{}'", _texturePath.value(), _identifier
                 )
             );
         }
@@ -103,7 +103,9 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
         else {
             LWARNINGC(
                 "ScreenSpaceImageLocal",
-                fmt::format("Image {} did not exist for {}", *p.texturePath, _identifier)
+                std::format(
+                    "Image '{}' did not exist for '{}'", *p.texturePath, _identifier
+                )
             );
         }
     }

@@ -9,15 +9,16 @@ local speck = asset.resource({
   Name = "Brown Dwarf Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_dwarfs_speck",
-  Version = 2
+  Version = 3
 })
 
 
 local Object = {
   Identifier = "Dwarfs",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "dwarfs.speck",
     Labels = {
       File = speck .. "dwarfs.label",
       Color = { 0.5, 0.1, 0.2 },
@@ -25,19 +26,25 @@ local Object = {
       MinMaxSize = { 10, 20 },
       Unit = "pc"
     },
-    Color = { 0.4, 0.0, 0.1 },
     Opacity = 1.0,
-    File = speck .. "dwarfs.speck",
-    Texture = textures .. "point3.png",
+    Texture = {
+      File = textures .. "point3.png",
+    },
     Unit = "pc",
-    ColorMap = speck .. "dwarfs.cmap",
-    ColorOption = { "typeindex" },
-    --ColorRange = { { 1.0, 4.0} },
-    ScaleFactor = 372.1,
-    --CorrectionSizeEndDistance = 16.1,
-    --CorrectionSizeFactor = 7.75,
-    BillboardMinMaxSize = { 0.0, 20.0 },
-    EnablePixelSizeControl = true
+    Coloring = {
+      FixedColor = { 0.4, 0.0, 0.1 },
+      ColorMapping = {
+        File = speck .. "dwarfs.cmap",
+        ParameterOptions = {
+          { Key = "typeindex", Range = { 1.0, 4.0 } }
+        }
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 16.2,
+      MaxSize = 0.7,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Brown Dwarfs",
@@ -77,7 +84,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Brown Dwarfs",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for Brown Dwarfs",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

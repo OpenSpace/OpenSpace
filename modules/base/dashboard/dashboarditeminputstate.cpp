@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -135,12 +135,12 @@ void DashboardItemInputState::render(glm::vec2& penPosition) {
     if (_showKeyboard) {
         if (global::navigationHandler->disabledKeybindings()) {
             if (_showWhenDisabled) {
-                text.push_back("Keyboard shortcuts disabled");
+                text.emplace_back("Keyboard shortcuts disabled");
             }
         }
         else {
             if (_showWhenEnabled) {
-                text.push_back("Keyboard shortcuts enabled");
+                text.emplace_back("Keyboard shortcuts enabled");
             }
         }
     }
@@ -148,12 +148,12 @@ void DashboardItemInputState::render(glm::vec2& penPosition) {
     if (_showMouse) {
         if (global::navigationHandler->disabledMouse()) {
             if (_showWhenDisabled) {
-                text.push_back("Mouse input disabled");
+                text.emplace_back("Mouse input disabled");
             }
         }
         else {
             if (_showWhenEnabled) {
-                text.push_back("Mouse input enabled");
+                text.emplace_back("Mouse input enabled");
             }
         }
     }
@@ -161,18 +161,18 @@ void DashboardItemInputState::render(glm::vec2& penPosition) {
     if (_showJoystick) {
         if (global::navigationHandler->disabledJoystick()) {
             if (_showWhenDisabled) {
-                text.push_back("Joystick input disabled");
+                text.emplace_back("Joystick input disabled");
             }
         }
         else {
             if (_showWhenEnabled) {
-                text.push_back("Joystick input enabled");
+                text.emplace_back("Joystick input enabled");
             }
         }
     }
 
     if (!text.empty()) {
-        std::string t = ghoul::join(std::move(text), "\n");
+        const std::string t = ghoul::join(std::move(text), "\n");
         RenderFont(*_font, penPosition, t);
         penPosition.y -= _font->height();
     }
@@ -185,12 +185,12 @@ glm::vec2 DashboardItemInputState::size() const {
     if (_showKeyboard) {
         if (global::navigationHandler->disabledKeybindings()) {
             if (_showWhenDisabled) {
-                text.push_back("Keyboard shortcuts disabled");
+                text.emplace_back("Keyboard shortcuts disabled");
             }
         }
         else {
             if (_showWhenEnabled) {
-                text.push_back("Keyboard shortcuts enabled");
+                text.emplace_back("Keyboard shortcuts enabled");
             }
         }
     }
@@ -198,12 +198,12 @@ glm::vec2 DashboardItemInputState::size() const {
     if (_showMouse) {
         if (global::navigationHandler->disabledMouse()) {
             if (_showWhenDisabled) {
-                text.push_back("Mouse input disabled");
+                text.emplace_back("Mouse input disabled");
             }
         }
         else {
             if (_showWhenEnabled) {
-                text.push_back("Mouse input disabled");
+                text.emplace_back("Mouse input disabled");
             }
         }
     }
@@ -211,18 +211,18 @@ glm::vec2 DashboardItemInputState::size() const {
     if (_showJoystick) {
         if (global::navigationHandler->disabledJoystick()) {
             if (_showWhenDisabled) {
-                text.push_back("Joystick input disabled");
+                text.emplace_back("Joystick input disabled");
             }
         }
         else {
             if (_showWhenEnabled) {
-                text.push_back("Joystick input disabled");
+                text.emplace_back("Joystick input disabled");
             }
         }
     }
 
     if (!text.empty()) {
-        std::string t = ghoul::join(std::move(text), "\n");
+        const std::string t = ghoul::join(std::move(text), "\n");
         return _font->boundingBox(t);
     }
     else {

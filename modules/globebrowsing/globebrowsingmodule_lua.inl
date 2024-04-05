@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -191,7 +191,7 @@ namespace {
 
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError(fmt::format("Unknown globe: {}", globeIdentifier));
+        throw ghoul::lua::LuaError(std::format("Unknown globe '{}'", globeIdentifier));
     }
 
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
@@ -201,7 +201,7 @@ namespace {
 
     layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layerGroup);
     if (group == layers::Group::ID::Unknown) {
-        throw ghoul::lua::LuaError(fmt::format("Unknown layer group: {}", layerGroup));
+        throw ghoul::lua::LuaError(std::format("Unknown layer group '{}'", layerGroup));
     }
 
     LayerGroup& lg = globe->layerManager().layerGroup(group);
@@ -225,7 +225,7 @@ namespace {
             }
         );
         if (it == layers.cend()) {
-            throw ghoul::lua::LuaError(fmt::format(
+            throw ghoul::lua::LuaError(std::format(
                 "Could not find source layer '{}'", std::get<std::string>(source)
             ));
         }
@@ -245,7 +245,7 @@ namespace {
             }
         );
         if (it == layers.cend()) {
-            throw ghoul::lua::LuaError(fmt::format(
+            throw ghoul::lua::LuaError(std::format(
                 "Could not find destination layer '{}'", std::get<std::string>(source)
             ));
         }
@@ -582,7 +582,7 @@ geoPositionForCameraDeprecated(bool useEyePosition = false)
 
     std::vector<ghoul::Dictionary> res;
     res.reserve(cap.size());
-    for (size_t i = 0; i < cap.size(); ++i) {
+    for (size_t i = 0; i < cap.size(); i++) {
         ghoul::Dictionary c;
         c.setValue("Name", cap[i].name);
         c.setValue("URL", cap[i].url);
@@ -668,8 +668,8 @@ geoPositionForCameraDeprecated(bool useEyePosition = false)
 
     std::filesystem::path path = absPath(filename);
     if (!std::filesystem::is_regular_file(path)) {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Could not find the provided file: '{}'", filename
+        throw ghoul::lua::LuaError(std::format(
+            "Could not find the provided file '{}'", filename
         ));
     }
 
@@ -677,8 +677,8 @@ geoPositionForCameraDeprecated(bool useEyePosition = false)
     extension = ghoul::toLowerCase(extension);
 
     if (extension != ".geojson" && extension != ".json") {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Unexpected file type: '{}'. Expected '.geojson' or '.json' file", filename
+        throw ghoul::lua::LuaError(std::format(
+            "Unexpected file type '{}'. Expected '.geojson' or '.json' file", filename
         ));
     }
 

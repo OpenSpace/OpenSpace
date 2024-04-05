@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -403,30 +403,32 @@ void RenderableLabel::render(const RenderData& data, RendererTasks&) {
     float fadeInVariable = 1.f;
 
     if (_enableFadingEffect) {
-        float distanceNodeToCamera = static_cast<float>(
+        const float distanceNodeToCamera = static_cast<float>(
             glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
         );
         fadeInVariable = computeFadeFactor(distanceNodeToCamera);
     }
 
-    glm::dmat4 modelMatrix(1.0);
+    const glm::dmat4 modelMatrix = glm::dmat4(1.0);
     const glm::dmat4 modelViewProjectionTransform =
         calcModelViewProjectionTransform(data, modelMatrix);
 
-    glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
-    glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+    const glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+    const glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
     glm::dvec3 orthoRight = glm::normalize(
         glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
     );
     if (orthoRight == glm::dvec3(0.0)) {
-        glm::dvec3 otherVector(
+        const glm::dvec3 otherVector = glm::dvec3(
             cameraUpDirectionWorld.y,
             cameraUpDirectionWorld.x,
             cameraUpDirectionWorld.z
         );
         orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
     }
-    glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+    const glm::dvec3 orthoUp = glm::normalize(
+        glm::cross(cameraViewDirectionWorld, orthoRight)
+    );
 
     renderLabels(data, modelViewProjectionTransform, orthoRight, orthoUp, fadeInVariable);
 
@@ -464,7 +466,7 @@ void RenderableLabel::renderLabels(const RenderData& data,
     labelInfo.enableFalseDepth = false;
 
     // We don't use spice rotation and scale
-    glm::vec3 transformedPos(
+    const glm::vec3 transformedPos = glm::vec3(
         _transformationMatrix * glm::dvec4(data.modelTransform.translation, 1.0)
     );
 
@@ -478,25 +480,25 @@ void RenderableLabel::renderLabels(const RenderData& data,
 }
 
 float RenderableLabel::computeFadeFactor(float distanceNodeToCamera) const {
-    float distanceUnit = unit(_fadeUnitOption);
+    const float distanceUnit = unit(_fadeUnitOption);
 
-    float x = distanceNodeToCamera;
-    float startX = _fadeDistances.value().x * distanceUnit;
-    float endX = _fadeDistances.value().y * distanceUnit;
+    const float x = distanceNodeToCamera;
+    const float startX = _fadeDistances.value().x * distanceUnit;
+    const float endX = _fadeDistances.value().y * distanceUnit;
 
     // The distances over which the fading should happen
-    float fadingStartDistance = _fadeWidths.value().x * distanceUnit;
-    float fadingEndDistance = _fadeWidths.value().y * distanceUnit;
+    const float fadingStartDistance = _fadeWidths.value().x * distanceUnit;
+    const float fadingEndDistance = _fadeWidths.value().y * distanceUnit;
 
     if (x <= startX) {
-        float f1 = 1.f - (startX - x) / fadingStartDistance;
+        const float f1 = 1.f - (startX - x) / fadingStartDistance;
         return std::clamp(f1, 0.f, 1.f);
     }
     else if (x > startX && x < endX) {
         return 1.f; // not faded
     }
     else { // x >= endX
-        float f2 = 1.f - (x - endX) / fadingEndDistance;
+        const float f2 = 1.f - (x - endX) / fadingEndDistance;
         return std::clamp(f2, 0.f, 1.f);
     }
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,14 +35,13 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-SettingsDialog::SettingsDialog(openspace::Settings settings,
-                               QWidget* parent)
+SettingsDialog::SettingsDialog(openspace::Settings settings, QWidget* parent)
     : QDialog(parent)
-    , _currentEdit(settings)
+    , _currentEdit(std::move(settings))
 {
     setWindowTitle("Settings");
     createWidgets();
-    loadFromSettings(settings);
+    loadFromSettings(_currentEdit);
 
     // Setting the startup values for the control will have caused the Save button to be
     // enabled, so we need to manually disable it again here
@@ -91,7 +90,7 @@ void SettingsDialog::createWidgets() {
             _profile,
             &QLineEdit::textChanged,
             [this]() {
-                std::string v = _profile->text().toStdString();
+                const std::string v = _profile->text().toStdString();
                 if (v.empty()) {
                     _currentEdit.profile = std::nullopt;
                 }
@@ -147,7 +146,7 @@ void SettingsDialog::createWidgets() {
             _configuration,
             &QLineEdit::textChanged,
             [this]() {
-                std::string v = _configuration->text().toStdString();
+                const std::string v = _configuration->text().toStdString();
                 if (v.empty()) {
                     _currentEdit.configuration = std::nullopt;
                 }
@@ -392,7 +391,7 @@ void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
 
     if (settings.visibility.has_value()) {
         using Visibility = openspace::properties::Property::Visibility;
-        Visibility vis = *settings.visibility;
+        const Visibility vis = *settings.visibility;
         switch (vis) {
             case Visibility::NoviceUser:
                 _propertyVisibility->setCurrentText("Novice User");
@@ -417,9 +416,9 @@ void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
     }
 
     if (settings.layerServer.has_value()) {
-        openspace::Configuration::LayerServer server = *settings.layerServer;
+        Configuration::LayerServer server = *settings.layerServer;
         _layerServer->setCurrentText(
-            QString::fromStdString(openspace::layerServerToString(server))
+            QString::fromStdString(openspace::layerServerToString(std::move(server)))
         );
     }
 

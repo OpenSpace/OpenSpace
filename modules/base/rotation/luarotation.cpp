@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -89,7 +89,7 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaRotation",
-            fmt::format(
+            std::format(
                 "Script '{}' does not have a function 'rotation'", _luaScriptFile.value()
             )
         );
@@ -108,20 +108,20 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
     // Execute the scaling function
-    int success = lua_pcall(_state, 2, 9, 0);
+    const int success = lua_pcall(_state, 2, 9, 0);
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            fmt::format("Error executing 'rotation': {}", lua_tostring(_state, -1))
+            std::format("Error executing 'rotation': {}", lua_tostring(_state, -1))
         );
     }
 
-    double values[9];
-    for (int i = 0; i < 9; ++i) {
+    std::array<double, 9> values;
+    for (int i = 0; i < 9; i++) {
         values[i] = luaL_checknumber(_state, -1 - i);
     }
 
-    return glm::make_mat3(values);
+    return glm::make_mat3(values.data());
 }
 
 } // namespace openspace

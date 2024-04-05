@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___SPICEMANAGER___H__
 #define __OPENSPACE_CORE___SPICEMANAGER___H__
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
@@ -231,6 +231,14 @@ public:
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
     void unloadKernel(KernelHandle kernelId);
+
+    /**
+     * Returns a list of all loaded kernels in the kernel pool that have been loaded
+     * through the SpiceManager. The kernels are reported in order of their loading.
+     *
+     * \return The list of all loaded kernels that have been loaded through this manager
+     */
+    std::vector<std::string> loadedKernels() const;
 
     /**
      * Unloads a SPICE kernel identified by the \p filePath which was used in the
@@ -516,7 +524,7 @@ public:
      *        specific spacecraft
      * \pre \p craft must not be empty
      */
-    double spacecraftClockToET(const std::string& craft, double craftTicks);
+    double spacecraftClockToET(const std::string& craft, double craftTicks) const;
 
     /**
      * Converts the \p timeString representing a date to a double precision value
@@ -570,7 +578,7 @@ public:
 
         timout_c(ephemerisTime, format, bufferSize, outBuf);
         if (failed_c()) {
-            throwSpiceError(fmt::format(
+            throwSpiceError(std::format(
                 "Error converting ephemeris time '{}' to date with format '{}'",
                     ephemerisTime, format
             ));
@@ -670,8 +678,8 @@ public:
      * Struct that is used as the return value from the #surfaceIntercept method.
      */
     struct SurfaceInterceptResult {
-        /// The closest surface intercept point on the target body in Cartesian Coordinates
-        /// relative to the reference frame
+        /// The closest surface intercept point on the target body in Cartesian
+        /// Coordinates relative to the reference frame
         glm::dvec3 surfaceIntercept = glm::dvec3(0.0);
 
         /// If the aberration correction is not AberrationCorrection::Type::None, this
@@ -1113,6 +1121,12 @@ private:
      * Loads pre defined leap seconds time kernel (naif00012.tls).
      */
     void loadLeapSecondsSpiceKernel();
+
+    /**
+     * Loads pre defined geophysical constants kernel (geophysical.ker)
+     */
+    void loadGeophysicalConstantsKernel();
+
 
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;

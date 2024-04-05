@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -266,7 +266,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     });
     addProperty(_doSimplification);
 
-    for (DistanceUnit u : DistanceUnits) {
+    for (const DistanceUnit u : DistanceUnits) {
         _requestedUnit.addOption(
             static_cast<int>(u),
             std::string(nameForDistanceUnit(u))
@@ -274,7 +274,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     }
     _requestedUnit = static_cast<int>(DistanceUnit::Meter);
     if (p.requestedUnit.has_value()) {
-        DistanceUnit unit = distanceUnitFromString(p.requestedUnit->c_str());
+        const DistanceUnit unit = distanceUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
@@ -323,9 +323,9 @@ std::pair<glm::dvec3, std::string> DashboardItemDistance::positionAndLabel(
             const glm::dvec3 thisPos = mainComp.node->worldPosition();
 
             const glm::dvec3 dir = glm::normalize(otherPos - thisPos);
-            glm::dvec3 dirLength = dir * glm::dvec3(mainComp.node->boundingSphere());
+            const glm::dvec3 dirLen = dir * glm::dvec3(mainComp.node->boundingSphere());
 
-            return { thisPos + dirLength, "surface of " + mainComp.node->guiName() };
+            return { thisPos + dirLen, "surface of " + mainComp.node->guiName() };
         }
         case Type::Focus: {
             const SceneGraphNode* anchor =
@@ -369,16 +369,22 @@ void DashboardItemDistance::render(glm::vec2& penPosition) {
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
     try {
-        char* end = fmt::format_to(
+        // @CPP26(abock): This can be replaced with std::runtime_format
+        char* end = std::vformat_to(
             _buffer.data(),
-            fmt::runtime(_formatString.value()),
-            sourceInfo.second, destinationInfo.second, dist.first, dist.second
+            _formatString.value(),
+            std::make_format_args(
+                sourceInfo.second,
+                destinationInfo.second,
+                dist.first,
+                dist.second
+            )
         );
 
-        std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-        RenderFont(*_font, penPosition, text);
+        const std::string_view t = std::string_view(_buffer.data(), end - _buffer.data());
+        RenderFont(*_font, penPosition, t);
     }
-    catch (const fmt::format_error&) {
+    catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
     penPosition.y -= _font->height();
@@ -393,13 +399,13 @@ glm::vec2 DashboardItemDistance::size() const {
         dist = simplifyDistance(d);
     }
     else {
-        DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
-        double convertedD = convertMeters(d, unit);
+        const DistanceUnit unit = static_cast<DistanceUnit>(_requestedUnit.value());
+        const double convertedD = convertMeters(d, unit);
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
     return _font->boundingBox(
-        fmt::format("Distance from focus: {} {}", dist.first, dist.second)
+        std::format("Distance from focus: {} {}", dist.first, dist.second)
     );
 }
 

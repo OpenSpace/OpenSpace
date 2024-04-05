@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -141,9 +141,10 @@ struct TileProvider : public properties::PropertyOwner {
 
     uint16_t uniqueIdentifier = 0;
     bool isInitialized = false;
+
 protected:
     ChunkTile traverseTree(TileIndex tileIndex, int parents, int maxParents,
-        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
+        const std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
         TileUvTransform& uvTransform);
 
 private:

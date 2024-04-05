@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -274,8 +274,8 @@ private:
      * from the global to the current total rotation so that
      * `cameraRotation = globalRotation * localRotation`.
      */
-    CameraRotationDecomposition decomposeCameraRotationSurface(const CameraPose pose,
-        const SceneGraphNode& reference);
+    CameraRotationDecomposition decomposeCameraRotationSurface(
+        const CameraPose& cameraPose, const SceneGraphNode& reference);
 
     /**
      * Decomposes the camera's rotation in to a global and a local rotation defined by
@@ -285,22 +285,23 @@ private:
      * The local rotation defines the differential from the global to the current total
      * rotation so that `cameraRotation = globalRotation * localRotation`.
      */
-    CameraRotationDecomposition decomposeCameraRotation(const CameraPose pose,
-        glm::dvec3 reference);
+    CameraRotationDecomposition decomposeCameraRotation(const CameraPose& cameraPose,
+        const glm::dvec3& reference);
 
     /**
      * Composes a pair of global and local rotations into a quaternion that can be used as
      * the world rotation for a camera.
      */
-    glm::dquat composeCameraRotation(const CameraRotationDecomposition& composition);
+    glm::dquat composeCameraRotation(
+        const CameraRotationDecomposition& decomposition) const;
 
     /**
      * Moves and rotates the camera around the anchor node in order to maintain the screen
      * space position of the aim node. Also interpolates to the aim node, when retargeting
      * the aim.
      */
-    CameraPose followAim(CameraPose pose, glm::dvec3 cameraToAnchor,
-        Displacement anchorToAim);
+    CameraPose followAim(CameraPose pose, const glm::dvec3& cameraToAnchor,
+        const Displacement& anchorToAim);
 
     /**
      * Perform a camera roll on the local camera rotation.
@@ -325,8 +326,8 @@ private:
     glm::dquat interpolateLocalRotation(double deltaTime,
         const glm::dquat& localCameraRotation);
 
-    Displacement interpolateRetargetAim(double deltaTime, CameraPose pose,
-        glm::dvec3 cameraToAnchor, Displacement anchorToAim);
+    Displacement interpolateRetargetAim(double deltaTime, const CameraPose& pose,
+        const glm::dvec3& prevCameraToAnchor, Displacement anchorToAim);
 
     double interpolateCameraToSurfaceDistance(double deltaTime, double currentDistance,
         double targetDistance);
@@ -354,12 +355,12 @@ private:
 
     /**
      * Adds rotation to the camera position so that it follows the rotation of the anchor
-     * node defined by the differential \p anchorNodeRotationDiff.
+     * node defined by the differential \p focusNodeRotationDiff.
      *
      * \return A position updated with the rotation defined by \p anchorNodeRotationDiff
      */
     glm::dvec3 followAnchorNodeRotation(const glm::dvec3& cameraPosition,
-        const glm::dvec3& objectPosition, const glm::dquat& anchorNodeRotationDiff) const;
+        const glm::dvec3& objectPosition, const glm::dquat& focusNodeRotationDiff) const;
 
     /**
      * Updates the global rotation so that it points towards the anchor node.
@@ -367,7 +368,7 @@ private:
      * \return A global rotation quaternion defining a rotation towards the anchor node
      */
     glm::dquat rotateGlobally(const glm::dquat& globalCameraRotation,
-        const glm::dquat& aimNodeRotationDiff,
+        const glm::dquat& focusNodeRotationDiff,
         const SurfacePositionHandle& positionHandle) const;
 
     /**
@@ -410,12 +411,6 @@ private:
     glm::dvec3 cameraToSurfaceVector(const glm::dvec3& cameraPos,
         const glm::dvec3& centerPos, const SurfacePositionHandle& posHandle);
 
-    /**
-     * Calculates a SurfacePositionHandle given a camera position in world space.
-     */
-    SurfacePositionHandle calculateSurfacePositionHandle(const SceneGraphNode& node,
-        const glm::dvec3& cameraPositionWorldSpace) const;
-
     void resetIdleBehavior();
 
     /**
@@ -451,7 +446,7 @@ private:
      * \param position The position of the camera. Will be changed by the function
      * \param globalRotation The camera's global rotation. Will be changed by the function
      */
-    void orbitAroundAxis(const glm::dvec3 axis, double angle, glm::dvec3& position,
+    void orbitAroundAxis(const glm::dvec3& axis, double angle, glm::dvec3& position,
         glm::dquat& globalRotation);
 
     double rotationSpeedScaleFromCameraHeight(const glm::dvec3& cameraPosition,

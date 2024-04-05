@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,7 +49,7 @@ public:
     static constexpr const char* Name = "WebBrowser";
 
     WebBrowserModule();
-    ~WebBrowserModule() override = default;
+    ~WebBrowserModule() override;
 
     void addBrowser(BrowserInstance*);
     void removeBrowser(BrowserInstance*);
@@ -63,14 +63,6 @@ protected:
     void internalDeinitialize() override;
 
 private:
-    /**
-     * Try to find the CEF Helper executable. It looks in the bin/openspace folder.
-     * Therefore, if you change that this might cause a crash here.
-     *
-     * \return the absolute path to the file
-     */
-    std::filesystem::path findHelperExecutable();
-
     properties::BoolProperty _updateBrowserBetweenRenderables;
     properties::FloatProperty _browserUpdateInterval;
 

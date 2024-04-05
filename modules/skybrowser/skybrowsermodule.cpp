@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -211,10 +211,10 @@ SkyBrowserModule::SkyBrowserModule()
         constexpr double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
 
         // Disable browser and targets when camera is outside of solar system
-        bool camWasInSolarSystem = _isCameraInSolarSystem;
-        glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+        const bool camWasInSolarSystem = _isCameraInSolarSystem;
+        const glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
         _isCameraInSolarSystem = glm::length(cameraPos) < SolarSystemRadius;
-        bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
+        const bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
 
         // Visualization mode changed. Start fading in/out
         if (vizModeChanged) {
@@ -350,7 +350,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
 
     // Show the circle
     if (useScript) {
-        const std::string script = fmt::format(
+        const std::string script = std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);",
             id
         );
@@ -374,7 +374,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
     pos *= skybrowser::CelestialSphereRadius * 1.1;
 
     // Note that the position can only be set through the script engine
-    const std::string script = fmt::format(
+    const std::string script = std::format(
         "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
         id, ghoul::to_string(pos)
     );
@@ -388,7 +388,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
 void SkyBrowserModule::disableHoverCircle(bool useScript) {
     if (_hoverCircle && _hoverCircle->renderable()) {
         if (useScript) {
-            const std::string script = fmt::format(
+            const std::string script = std::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
                 _hoverCircle->identifier()
             );
@@ -439,23 +439,23 @@ TargetBrowserPair* SkyBrowserModule::pair(std::string_view id) const {
     );
     TargetBrowserPair* found = it != _targetsBrowsers.end() ? it->get() : nullptr;
     if (found == nullptr) {
-        LINFO(fmt::format("Identifier '{}' not found", id));
+        LINFO(std::format("Identifier '{}' not found", id));
     }
     return found;
 }
 
-void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
+void SkyBrowserModule::startRotatingCamera(const glm::dvec3& endAnimation) {
     // Save coordinates to rotate to in galactic world coordinates
-    glm::dvec3 start = skybrowser::cameraDirectionGalactic();
-    double angle = skybrowser::angleBetweenVectors(start, endAnimation);
-    double time = angle / _cameraRotationSpeed;
+    const glm::dvec3 start = skybrowser::cameraDirectionGalactic();
+    const double angle = skybrowser::angleBetweenVectors(start, endAnimation);
+    const double time = angle / _cameraRotationSpeed;
     _cameraRotation = skybrowser::Animation(start, endAnimation, time);
     _cameraRotation.start();
 }
 
 void SkyBrowserModule::incrementallyRotateCamera() {
     if (_cameraRotation.isAnimating()) {
-        glm::dmat4 rotMat = _cameraRotation.rotationMatrix();
+        const glm::dmat4 rotMat = _cameraRotation.rotationMatrix();
         global::navigationHandler->camera()->rotate(glm::quat_cast(rotMat));
     }
 }

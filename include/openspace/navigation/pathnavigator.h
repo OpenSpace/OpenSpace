@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,6 +64,9 @@ public:
     bool hasCurrentPath() const;
     bool hasFinished() const;
     bool isPlayingPath() const;
+    bool isPaused() const;
+
+    float estimatedRemainingTimeInPath() const;
 
     void updateCamera(double deltaTime);
     void createPath(const ghoul::Dictionary& dictionary);
@@ -102,7 +105,7 @@ private:
      */
     void findRelevantNodes();
 
-    void removeRollRotation(CameraPose& pose, double deltaTime);
+    void removeRollRotation(CameraPose& pose) const;
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;

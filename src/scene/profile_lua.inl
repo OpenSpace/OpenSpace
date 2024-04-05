@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ namespace {
         std::tm* utcTime = std::gmtime(&t);
         ghoul_assert(utcTime, "Conversion to UTC failed");
 
-        std::string time = fmt::format(
+        std::string time = std::format(
             "{:04d}-{:02d}-{:02d}T{:02d}_{:02d}_{:02d}",
             utcTime->tm_year + 1900,
             utcTime->tm_mon + 1,
@@ -54,22 +54,25 @@ namespace {
         );
         std::filesystem::path path = global::configuration->profile;
         path.replace_extension();
-        std::string newFile = fmt::format("{}_{}", path.string(), time);
-        std::string sourcePath = fmt::format(
+        std::string newFile = std::format("{}_{}", path.string(), time);
+        std::string sourcePath = std::format(
             "{}/{}.profile",
             absPath("${USER_PROFILES}").string(), global::configuration->profile
         );
-        std::string destPath = fmt::format(
+        std::string destPath = std::format(
             "{}/{}.profile",
             absPath("${PROFILES}").string(), global::configuration->profile
         );
         if (!std::filesystem::is_regular_file(sourcePath)) {
-            sourcePath = fmt::format(
+            sourcePath = std::format(
                 "{}/{}.profile",
                 absPath("${USER_PROFILES}").string(), global::configuration->profile
             );
         }
-        LINFOC("Profile", fmt::format("Saving a copy of the old profile as {}", newFile));
+        LINFOC(
+            "Profile",
+            std::format("Saving a copy of the old profile as '{}'", newFile)
+        );
         std::filesystem::copy(sourcePath, destPath);
         saveFilePath = global::configuration->profile;
     }
@@ -95,7 +98,7 @@ namespace {
         );
     }
 
-    std::string absFilename = fmt::format(
+    std::string absFilename = std::format(
         "{}/{}.profile", absPath("${PROFILES}").string(), *saveFilePath
     );
     if (!std::filesystem::is_regular_file(absFilename)) {
@@ -104,7 +107,7 @@ namespace {
 
     if (std::filesystem::is_regular_file(absFilename) && !overwrite) {
         throw ghoul::lua::LuaError(
-            fmt::format(
+            std::format(
                 "Unable to save profile '{}'. File of same name already exists",
                 absFilename
             )
@@ -118,8 +121,8 @@ namespace {
     }
     catch (const std::ofstream::failure& e) {
         throw ghoul::lua::LuaError(
-            fmt::format(
-                "Exception opening profile file for write: {} ({})", absFilename, e.what()
+            std::format(
+                "Exception opening profile file for write '{}': {}", absFilename, e.what()
             )
         );
     }
@@ -129,7 +132,7 @@ namespace {
     }
     catch (const std::ofstream::failure& e) {
         throw ghoul::lua::LuaError(
-            fmt::format("Data write error to file: {} ({})", absFilename, e.what())
+            std::format("Data write error to file '{}': {}", absFilename, e.what())
         );
     }
 }

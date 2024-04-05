@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -369,7 +369,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             }
             else {
                 _tracingVariable = "b"; //  Magnetic field variable as default
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "No tracing variable, using default '{}'", _tracingVariable
                 ));
             }
@@ -388,9 +388,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     // the files with the same extension as fileTypeString
     std::filesystem::path sourcePath = p.sourceFolder;
     if (!std::filesystem::is_directory(sourcePath)) {
-        LERROR(fmt::format(
-            "FieldlinesSequence {} is not a valid directory",
-            sourcePath.string()
+        LERROR(std::format(
+            "FieldlinesSequence '{}' is not a valid directory", sourcePath
         ));
     }
 
@@ -421,8 +420,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     // Ensure that there are available and valid source files left
     if (_sourceFiles.empty()) {
-        LERROR(fmt::format(
-            "{} contains no {} files", sourcePath.string(), fileTypeString
+        LERROR(std::format(
+            "'{}' contains no {} files", sourcePath.string(), fileTypeString
         ));
     }
     _extraVars = p.extraVariables.value_or(_extraVars);
@@ -491,8 +490,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _outputFolderPath = p.outputFolder.value_or(_outputFolderPath);
     if (!_outputFolderPath.empty() && !std::filesystem::is_directory(_outputFolderPath)) {
         _outputFolderPath.clear();
-        LERROR(fmt::format(
-            "The specified output path: '{}', does not exist", _outputFolderPath
+        LERROR(std::format(
+            "The specified output path '{}' does not exist", _outputFolderPath
         ));
     }
 
@@ -618,7 +617,7 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM() {
             }
         }
         else {
-            LWARNING(fmt::format("Failed to load state from: {}", filePath));
+            LWARNING(std::format("Failed to load state from '{}'", filePath));
         }
     }
 }
@@ -674,7 +673,7 @@ void RenderableFieldlinesSequence::setupProperties() {
         // the given sequence have the same extra quantities
         const size_t nExtraQuantities = _states[0].nExtraQuantities();
         const std::vector<std::string>& extraNamesVec = _states[0].extraQuantityNames();
-        for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
+        for (int i = 0; i < static_cast<int>(nExtraQuantities); i++) {
             _colorQuantity.addOption(i, extraNamesVec[i]);
             _maskingQuantity.addOption(i, extraNamesVec[i]);
         }
@@ -852,8 +851,8 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
 
     if (!std::filesystem::is_directory(filePath)) {
-        LERROR(fmt::format(
-            "The specified seed point directory: '{}' does not exist", filePath
+        LERROR(std::format(
+            "The specified seed point directory '{}' does not exist", filePath
         ));
         return outMap;
     }
@@ -869,15 +868,15 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
 
         std::ifstream seedFile(seedFilePath);
         if (!seedFile.good()) {
-            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
+            LERROR(std::format("Could not open seed points file '{}'", seedFilePath));
             outMap.clear();
             return {};
         }
 
-        LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
+        LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
         std::string line;
         std::vector<glm::vec3> outVec;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             std::stringstream ss(line);
             glm::vec3 point;
             ss >> point.x;
@@ -887,7 +886,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
         }
 
         if (outVec.empty()) {
-            LERROR(fmt::format("Found no seed points in: {}", seedFilePath));
+            LERROR(std::format("Found no seed points in '{}'", seedFilePath));
             outMap.clear();
             return {};
         }
@@ -916,7 +915,7 @@ std::vector<std::string>
             std::istringstream ss(str.substr(2, str.size() - 4));
             std::string magVar;
             size_t counter = 0;
-            while (std::getline(ss, magVar, ',')) {
+            while (ghoul::getline(ss, magVar, ',')) {
                 magVar.erase(
                     std::remove_if(
                         magVar.begin(),

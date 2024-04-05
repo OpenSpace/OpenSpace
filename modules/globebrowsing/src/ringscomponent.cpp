@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -452,7 +452,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
 
             const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
 
-            glm::vec3 sunPositionObjectSpace = glm::normalize(
+            const glm::vec3 sunPositionObjectSpace = glm::normalize(
                 glm::vec3(inverseModelTransform * glm::vec4(_sunPosition, 0.f))
             );
 
@@ -665,7 +665,7 @@ void RingsComponent::loadTexture() {
         if (texture) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format("Loaded texture from {}", absPath(_texturePath))
+                std::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             _texture = std::move(texture);
 
@@ -688,8 +688,8 @@ void RingsComponent::loadTexture() {
         if (textureForwards) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format(
-                    "Loaded forwards scattering texture from {}",
+                std::format(
+                    "Loaded forwards scattering texture from '{}'",
                     absPath(_textureFwrdPath)
                 )
             );
@@ -715,8 +715,8 @@ void RingsComponent::loadTexture() {
         if (textureBackwards) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format(
-                    "Loaded backwards scattering texture from {}",
+                std::format(
+                    "Loaded backwards scattering texture from '{}'",
                     absPath(_textureBckwrdPath)
                 )
             );
@@ -742,7 +742,7 @@ void RingsComponent::loadTexture() {
         if (textureUnlit) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format("Loaded unlit texture from {}", absPath(_textureUnlitPath))
+                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
             );
             _textureUnlit = std::move(textureUnlit);
 
@@ -765,7 +765,7 @@ void RingsComponent::loadTexture() {
         if (textureColor) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format("Loaded color texture from {}", absPath(_textureColorPath))
+                std::format("Loaded color texture from '{}'", absPath(_textureColorPath))
             );
             _textureColor = std::move(textureColor);
 
@@ -788,7 +788,7 @@ void RingsComponent::loadTexture() {
         if (textureTransparency) {
             LDEBUGC(
                 "RingsComponent",
-                fmt::format("Loaded unlit texture from {}", absPath(_textureUnlitPath))
+                std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
             );
             _textureTransparency = std::move(textureTransparency);
 
@@ -817,18 +817,18 @@ void RingsComponent::createPlane() {
         GLfloat t;
     };
 
-    VertexData data[] = {
-        { -size, -size, 0.f, 0.f },
-        {  size,  size, 1.f, 1.f },
-        { -size,  size, 0.f, 1.f },
-        { -size, -size, 0.f, 0.f },
-        {  size, -size, 1.f, 0.f },
-        {  size,  size, 1.f, 1.f },
+    const std::array<VertexData, 6> vertices = {
+        VertexData{ -size, -size, 0.f, 0.f },
+        VertexData{  size,  size, 1.f, 1.f },
+        VertexData{ -size,  size, 0.f, 1.f },
+        VertexData{ -size, -size, 0.f, 0.f },
+        VertexData{  size, -size, 1.f, 0.f },
+        VertexData{  size,  size, 1.f, 1.f },
     };
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(
         0,

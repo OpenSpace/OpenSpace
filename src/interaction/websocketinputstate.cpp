@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ namespace openspace::interaction {
 float WebsocketInputStates::axis(int axis) const {
     ghoul_precondition(axis >= 0, "axis must be 0 or positive");
 
-    float res = std::accumulate(
+    const float res = std::accumulate(
         begin(),
         end(),
         0.f,
@@ -58,7 +58,7 @@ float WebsocketInputStates::axis(int axis) const {
 bool WebsocketInputStates::button(int button, WebsocketAction action) const {
     ghoul_precondition(button >= 0, "button must be 0 or positive");
 
-    bool res = std::any_of(
+    const bool res = std::any_of(
         begin(),
         end(),
         [button, action](const std::pair<const size_t, const WebsocketInputState *> state)

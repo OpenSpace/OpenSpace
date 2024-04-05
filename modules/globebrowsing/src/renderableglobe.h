@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,9 +37,10 @@
 #include <modules/globebrowsing/src/shadowcomponent.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstddef>
@@ -70,7 +71,7 @@ struct Chunk {
         WantSplit
     };
 
-    Chunk(const TileIndex& tileIndex);
+    Chunk(const TileIndex& ti);
 
     const TileIndex tileIndex;
     const GeodeticPatch surfacePatch;
@@ -287,6 +288,9 @@ private:
 
         std::array<GPULayerGroup, LayerManager::NumLayerGroups> gpuLayerGroups;
     } _localRenderer;
+
+    SceneGraphNode* _lightSourceNode = nullptr;
+    properties::StringProperty _lightSourceNodeName;
 
     bool _shadersNeedRecompilation = true;
     bool _lodScaleFactorDirty = true;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 
 #include <openspace/util/syncable.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/json.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
 #include <filesystem>
@@ -84,7 +83,8 @@ public:
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
 
-    bool runScript(const std::string& script, ScriptCallback callback = ScriptCallback());
+    bool runScript(const std::string& script,
+        const ScriptCallback& callback = ScriptCallback());
     bool runScriptFile(const std::filesystem::path& filename);
 
     virtual void preSync(bool isMaster) override;
@@ -93,11 +93,11 @@ public:
     virtual void postSync(bool isMaster) override;
 
     void queueScript(std::string script, ShouldBeSynchronized shouldBeSynchronized,
-        ShouldSendToRemote shouldSendToRemote, ScriptCallback cb = ScriptCallback());
+        ShouldSendToRemote shouldSendToRemote,
+        ScriptCallback callback = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
-
-    nlohmann::json generateJson() const;
+    const std::vector<LuaLibrary>& allLuaLibraries() const;
 
 private:
     BooleanType(Replace);

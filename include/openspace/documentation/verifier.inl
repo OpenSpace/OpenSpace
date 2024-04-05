@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,7 @@
 
 #include <ghoul/misc/dictionary.h>
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <iterator>
 #include <numeric>
@@ -378,13 +378,13 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             std::string list = std::accumulate(
                 values.begin() + 1,
                 values.end(),
-                fmt::format("{}", values.front()),
+                std::format("{}", values.front()),
                 [](std::string lhs, typename T::Type rhs) {
-                    return fmt::format("{}, {}", lhs, rhs);
+                    return std::format("{}, {}", lhs, rhs);
                 }
             );
-            o.explanation = fmt::format(
-                "{} not in list of accepted values '{}'",
+            o.explanation = std::format(
+                "'{}' not in list of accepted values '{}'",
                 key, list
             );
             r.offenses.push_back(o);

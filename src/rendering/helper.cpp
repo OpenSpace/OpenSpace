@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -221,11 +221,11 @@ void initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.square.vbo);
 
     struct VertexXYUVRGBA {
-        GLfloat xy[2];
-        GLfloat uv[2];
-        GLfloat rgba[4];
+        std::array<GLfloat, 2> xy;
+        std::array<GLfloat, 2> uv;
+        std::array<GLfloat, 4> rgba;
     };
-    VertexXYUVRGBA data[] = {
+    constexpr std::array<VertexXYUVRGBA, 6> Vtx = {
         // X     Y    U    V    R    G    B    A
         -1.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f,
         -1.f,  1.f, 0.f, 1.f, 1.f, 1.f, 1.f, 1.f,
@@ -235,16 +235,28 @@ void initialize() {
          1.f,  1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f,
          1.f, -1.f, 1.f, 0.f, 1.f, 1.f, 1.f, 1.f
     };
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(VertexXYUVRGBA), data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(VertexXYUVRGBA), Vtx.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA), nullptr);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA),
-        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, uv)));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexXYUVRGBA),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, uv))
+    );
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA),
-        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, rgba)));
+    glVertexAttribPointer(
+        2,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexXYUVRGBA),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, rgba))
+    );
     glBindVertexArray(0);
 
 
@@ -502,7 +514,7 @@ std::vector<VertexXYZ> convert(std::vector<Vertex> v) {
 }
 
 Vertex computeCircleVertex(int i, int nSegments, float radius,
-                           glm::vec4 color = glm::vec4(1.f))
+                           const glm::vec4& color = glm::vec4(1.f))
 {
     const float fsegments = static_cast<float>(nSegments);
 
@@ -520,11 +532,11 @@ Vertex computeCircleVertex(int i, int nSegments, float radius,
     return { x, y, z, u, v, color.r, color.g, color.b, color.a };
 }
 
-std::vector<Vertex> createRing(int nSegments, float radius, glm::vec4 colors) {
+std::vector<Vertex> createRing(int nSegments, float radius, const glm::vec4& colors) {
     const int nVertices = nSegments + 1;
     std::vector<Vertex> vertices(nVertices);
 
-    for (int i = 0; i <= nSegments; ++i) {
+    for (int i = 0; i <= nSegments; i++) {
         vertices[i] = computeCircleVertex(i, nSegments, radius, colors);
     }
     return vertices;
@@ -534,15 +546,15 @@ std::vector<VertexXYZ> createRingXYZ(int nSegments, float radius) {
     const int nVertices = nSegments + 1;
     std::vector<VertexXYZ> vertices(nVertices);
 
-    for (int i = 0; i <= nSegments; ++i) {
-        Vertex fullVertex = computeCircleVertex(i, nSegments, radius);
+    for (int i = 0; i <= nSegments; i++) {
+        const Vertex fullVertex = computeCircleVertex(i, nSegments, radius);
         vertices[i] = { fullVertex.xyz[0], fullVertex.xyz[1], fullVertex.xyz[2] };
     }
     return vertices;
 }
 
 VertexIndexListCombo<Vertex> createSphere(int nSegments, glm::vec3 radii,
-                                          glm::vec4 colors)
+                                          const glm::vec4& colors)
 {
     std::vector<Vertex> vertices;
     vertices.reserve(nSegments * nSegments);
@@ -558,9 +570,10 @@ VertexIndexListCombo<Vertex> createSphere(int nSegments, glm::vec3 radii,
             // 0 -> 2*PI
             const float phi = fj * glm::pi<float>() * 2.f / nSegments;
 
-            const float x = radii[0] * sin(theta) * cos(phi);
-            const float y = radii[1] * sin(theta) * sin(phi);
-            const float z = radii[2] * cos(theta); // Z points towards pole (theta = 0)
+            const float x = radii[0] * std::sin(theta) * std::cos(phi);
+            const float y = radii[1] * std::sin(theta) * std::sin(phi);
+            // Z points towards pole (theta = 0)
+            const float z = radii[2] * std::cos(theta);
 
             Vertex v;
             v.xyz[0] = x;
@@ -640,7 +653,7 @@ VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegmen
             );
         }
         else {
-            glm::vec3 p = glm::closestPointOnLine(
+            const glm::vec3 p = glm::closestPointOnLine(
                 glm::vec3(0.f),
                 glm::vec3(vBot.xyz[0], vBot.xyz[1], vBot.xyz[2]),
                 glm::vec3(vTop.xyz[0], vTop.xyz[1], vTop.xyz[2])
@@ -693,12 +706,15 @@ VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegmen
         return static_cast<GLushort>(1 + ringIndex * (nSegments + 1) + i);
     };
 
-    GLushort botCenterIndex = 0;
-    GLushort topCenterIndex = static_cast<GLushort>(vertices.size()) - 1;
+    const GLushort botCenterIndex = 0;
+    const GLushort topCenterIndex = static_cast<GLushort>(vertices.size()) - 1;
 
-    for (unsigned int i = 0; i < nSegments; ++i) {
-        bool isLast = (i == nSegments - 1);
-        GLushort v0, v1, v2, v3;
+    for (unsigned int i = 0; i < nSegments; i++) {
+        const bool isLast = (i == nSegments - 1);
+        GLushort v0 = 0;
+        GLushort v1 = 0;
+        GLushort v2 = 0;
+        GLushort v3 = 0;
 
         // Bottom triangle
         v0 = ringVerticeIndex(0, i);

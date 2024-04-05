@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@ namespace openspace {
 
 template <typename T>
 Keyframe<T>::Keyframe(size_t i, double t, T d)
-    : KeyframeBase{ i, t }
+    : KeyframeBase(i, t)
     , data(std::move(d))
 {}
 

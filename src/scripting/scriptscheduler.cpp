@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -120,7 +120,7 @@ void ScriptScheduler::loadScripts(std::vector<ScheduledScript> scheduledScripts)
     );
 
     for (ScheduledScript& script : scheduledScripts) {
-        _scripts.push_back(script);
+        _scripts.push_back(std::move(script));
     }
 
     // Re-sort so it is always in sorted order in regards to time
@@ -150,7 +150,7 @@ void ScriptScheduler::clearSchedule(std::optional<int> group) {
                 it = _scripts.erase(it);
             }
             else {
-                ++it;
+                it++;
             }
         }
 
@@ -176,7 +176,7 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
     if (newTime > _currentTime) {
         // Moving forward in time; we need to find the highest entry in the timings
         // vector that is still smaller than the newTime
-        size_t prevIndex = _currentIndex;
+        const size_t prevIndex = _currentIndex;
         const auto it = std::upper_bound(
             _scripts.begin() + prevIndex, // We only need to start at the previous time
             _scripts.end(),
@@ -196,12 +196,12 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
         // Construct result
         for (auto iter = _scripts.begin() + prevIndex;
             iter < (_scripts.begin() + _currentIndex);
-            ++iter)
+            iter++)
         {
             std::string script = iter->universalScript.empty() ?
                 iter->forwardScript :
                 iter->universalScript + "; " + iter->forwardScript;
-            result.push_back(script);
+            result.push_back(std::move(script));
         }
 
         return result;
@@ -234,7 +234,7 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
             std::string script = iter->universalScript.empty() ?
                 iter->backwardScript :
                 iter->universalScript + "; " + iter->backwardScript;
-            result.push_back(script);
+            result.push_back(std::move(script));
 
             if (iter == _scripts.begin()) {
                 break;
@@ -255,7 +255,7 @@ double ScriptScheduler::currentTime() const {
 
 void ScriptScheduler::setCurrentTime(double time) {
     // Ensure _currentIndex and _currentTime is accurate after time jump
-    std::vector<std::string> scheduledScripts = progressTo(time);
+    const std::vector<std::string> scheduledScripts = progressTo(time);
 
     if (_shouldRunAllTimeJump) {
         // Queue all scripts for the time jump

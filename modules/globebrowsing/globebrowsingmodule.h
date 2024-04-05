@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -93,7 +93,7 @@ public:
     void removeWMSServer(const std::string& name);
 
     bool isMRFCachingEnabled() const;
-    const std::string mrfCacheLocation() const;
+    std::string mrfCacheLocation() const;
 
     bool hasDefaultGeoPointTexture() const;
     std::string_view defaultGeoPointTexture() const;
@@ -103,7 +103,8 @@ protected:
 
 private:
     void goToChunk(const globebrowsing::RenderableGlobe& globe,
-        const globebrowsing::TileIndex& ti, glm::vec2 uv, bool doResetCameraDirection);
+        const globebrowsing::TileIndex& ti, const glm::vec2& uv,
+        bool doResetCameraDirection);
 
     void goToGeodetic2(const globebrowsing::RenderableGlobe& globe,
         globebrowsing::Geodetic2 geo2, bool doResetCameraDirection);

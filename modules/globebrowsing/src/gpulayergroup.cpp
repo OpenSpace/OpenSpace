@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,9 +43,9 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
     );
 
     const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
-    for (unsigned int i = 0; i < activeLayers.size(); ++i) {
+    for (unsigned int i = 0; i < activeLayers.size(); i++) {
         const GPULayer& gal = _gpuActiveLayers[i];
-        auto& galuc = gal.uniformCache;
+        const auto& galuc = gal.uniformCache;
         const Layer& al = *activeLayers[i];
 
         program.setUniform(galuc.opacity, al.opacity());
@@ -80,7 +80,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                     tileIndex,
                     layerGroup.pileSize()
                 );
-                for (size_t j = 0; j < _gpuActiveLayers[i].gpuChunkTiles.size(); ++j) {
+                for (size_t j = 0; j < _gpuActiveLayers[i].gpuChunkTiles.size(); j++) {
                     GPULayer::GPUChunkTile& t = _gpuActiveLayers[i].gpuChunkTiles[j];
                     ghoul_assert(ctp[j].has_value(), "Wrong ChunkTiles number in pile");
                     const ChunkTile& ct = *ctp[j];
@@ -112,11 +112,11 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
     const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
     _gpuActiveLayers.resize(activeLayers.size());
     const int pileSize = layerGroup.pileSize();
-    for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
+    for (size_t i = 0; i < _gpuActiveLayers.size(); i++) {
         GPULayer& gal = _gpuActiveLayers[i];
         auto& galuc = gal.uniformCache;
         const Layer& al = *activeLayers[i];
-        std::string name = fmt::format("{}[{}].", layerGroup.identifier(), i);
+        const std::string name = std::format("{}[{}].", layerGroup.identifier(), i);
 
         if (layerGroup.isHeightLayer()) {
             gal.isHeightLayer = true;
@@ -149,10 +149,10 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
             case layers::Layer::ID::TileProviderByIndex:
             case layers::Layer::ID::TileProviderByLevel: {
                 gal.gpuChunkTiles.resize(pileSize);
-                for (size_t j = 0; j < gal.gpuChunkTiles.size(); ++j) {
+                for (size_t j = 0; j < gal.gpuChunkTiles.size(); j++) {
                     GPULayer::GPUChunkTile& t = gal.gpuChunkTiles[j];
                     auto& tuc = t.uniformCache;
-                    std::string n = name + "pile.chunkTile" + std::to_string(j) + ".";
+                    const std::string n = std::format("{}pile.chunkTile{}.", name, j);
 
                     tuc.texture = p.uniformLocation(n + "textureSampler");
                     tuc.uvOffset = p.uniformLocation(n + "uvTransform.uvOffset");

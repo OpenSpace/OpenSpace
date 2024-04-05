@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,7 +54,7 @@ ConvertRecFileVersionTask::ConvertRecFileVersionTask(const ghoul::Dictionary& di
 
     ghoul_assert(std::filesystem::is_regular_file(_inFilePath), "The file must exist");
     if (!std::filesystem::is_regular_file(_inFilePath)) {
-        LERROR(fmt::format("Failed to load session recording file: {}", _inFilePath));
+        LERROR(std::format("Failed to load session recording file: {}", _inFilePath));
     }
     else {
         sessRec = new SessionRecording(false);
@@ -62,14 +62,12 @@ ConvertRecFileVersionTask::ConvertRecFileVersionTask(const ghoul::Dictionary& di
 }
 
 ConvertRecFileVersionTask::~ConvertRecFileVersionTask() {
-    if (sessRec != nullptr) {
-        delete sessRec;
-    }
+    delete sessRec;
 }
 
 std::string ConvertRecFileVersionTask::description() {
-    std::string description = fmt::format(
-        "Convert file format of session recording file {} to current version",
+    std::string description = std::format(
+        "Convert file format of session recording file '{}' to current version",
         _inFilePath
     );
     return description;
@@ -80,17 +78,17 @@ void ConvertRecFileVersionTask::perform(const Task::ProgressCallback&) {
 }
 
 void ConvertRecFileVersionTask::convert() {
-    bool hasBinaryFileExtension = sessRec->hasFileExtension(
+    const bool hasBinaryFileExtension = SessionRecording::hasFileExtension(
         _inFilename,
         SessionRecording::FileExtensionBinary
     );
-    bool hasAsciiFileExtension = sessRec->hasFileExtension(
+    const bool hasAsciiFileExtension = SessionRecording::hasFileExtension(
         _inFilename,
         SessionRecording::FileExtensionAscii
     );
     if (!hasBinaryFileExtension && !hasAsciiFileExtension) {
-        LERROR(fmt::format(
-            "Input filename does not have expected {} or {} extension",
+        LERROR(std::format(
+            "Input filename does not have expected '{}' or '{}' extension",
             SessionRecording::FileExtensionBinary, SessionRecording::FileExtensionAscii
         ));
         return;
@@ -115,4 +113,4 @@ documentation::Documentation ConvertRecFileVersionTask::documentation() {
     };
 }
 
-}
+} // namespace openspace::interaction

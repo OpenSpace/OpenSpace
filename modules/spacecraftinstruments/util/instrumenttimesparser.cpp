@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/fmt.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 
@@ -59,9 +60,13 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
 
     _target = p.target;
     for (const std::pair<const std::string, ghoul::Dictionary>& ps : p.instruments) {
-        ghoul::Dictionary files = ps.second.value<ghoul::Dictionary>(KeyInstrumentFiles);
-        _fileTranslation[ps.first] =
-            Decoder::createFromDictionary(ps.second, KeyInstrument);
+        const ghoul::Dictionary files = ps.second.value<ghoul::Dictionary>(
+            KeyInstrumentFiles
+        );
+        _fileTranslation[ps.first] = Decoder::createFromDictionary(
+            ps.second,
+            KeyInstrument
+        );
         for (size_t i = 0; i < files.size(); i++) {
             std::string filename = files.value<std::string>(std::to_string(i + 1));
             _instrumentFiles[ps.first].push_back(std::move(filename));
@@ -72,7 +77,7 @@ InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string seque
 bool InstrumentTimesParser::create() {
     std::filesystem::path sequenceDir = absPath(_fileName);
     if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(fmt::format("Could not load Label Directory {}", sequenceDir));
+        LERROR(std::format("Could not load label directory '{}'", sequenceDir));
         return false;
     }
 
@@ -80,11 +85,11 @@ bool InstrumentTimesParser::create() {
     using V = std::vector<std::string>;
     for (const std::pair<const K, V>& p : _instrumentFiles) {
         const std::string& instrumentID = p.first;
-        for (std::string filename : p.second) {
+        for (const std::string& filename : p.second) {
             std::filesystem::path filepath = sequenceDir / filename;
 
             if (!std::filesystem::is_regular_file(filepath)) {
-                LERROR(fmt::format("Unable to read file {}. Skipping file", filepath));
+                LERROR(std::format("Unable to read file '{}'. Skipping file", filepath));
                 continue;
             }
 
@@ -94,7 +99,7 @@ bool InstrumentTimesParser::create() {
             std::smatch matches;
             TimeRange instrumentActiveTimeRange;
             bool successfulRead = true;
-            while (std::getline(inFile, line)) {
+            while (ghoul::getline(inFile, line)) {
                 if (!std::regex_match(line, matches, _pattern)) {
                     continue;
                 }
@@ -110,8 +115,8 @@ bool InstrumentTimesParser::create() {
 
                 TimeRange tr;
                 try { // parse date strings
-                    std::string start = matches[1].str();
-                    std::string stop = matches[2].str();
+                    const std::string start = matches[1].str();
+                    const std::string stop = matches[2].str();
                     tr.start = SpiceManager::ref().ephemerisTimeFromDate(start);
                     tr.end = SpiceManager::ref().ephemerisTimeFromDate(stop);
                 }

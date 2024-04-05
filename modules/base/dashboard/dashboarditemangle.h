@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,7 +55,7 @@ private:
         SceneGraphNode* node;
     };
 
-    std::pair<glm::dvec3, std::string> positionAndLabel(Component& comp) const;
+    static std::pair<glm::dvec3, std::string> positionAndLabel(Component& comp);
 
     Component _source;
     Component _reference;

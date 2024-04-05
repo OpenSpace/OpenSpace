@@ -91,7 +91,7 @@ local JWSTTrailOrbit = {
       Type = "SpiceTranslation",
       Target = kernels.ID.JWST,
       Observer = transforms.ID.L2,
-      Frame = "GALACTIC"
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months

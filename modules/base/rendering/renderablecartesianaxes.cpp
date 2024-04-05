@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,6 +61,18 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    // The RenderableCartesianAxes can be used to render the local Cartesian coordinate
+    // system, or reference frame, of another scene graph node. The colors of the axes
+    // can be customized but are per default set to Red, Green and Blue, for the X-, Y-
+    // and Z-axis, respectively.
+    //
+    // To add the axes, create a scene graph node with the RenderableCartesianAxes
+    // renderable and add it as a child to the other scene graph node, i.e. specify the
+    // other node as the Parent of the node with this renderable. Also, the axes have to
+    // be scaled to match the parent object for the axes to be visible in the scene, for
+    // example using a StaticScale.
+    //
+    // See example asset (@TODO: link to asset file).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];
@@ -70,7 +82,6 @@ namespace {
 
         // [[codegen::verbatim(ZColorInfo.description)]]
         std::optional<glm::vec3> zColor [[codegen::color()]];
-
     };
 #include "renderablecartesianaxes_codegen.cpp"
 } // namespace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,14 +71,14 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
 
     layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
     if (p.defaultProvider.hasValue<std::string>("Type")) {
-        std::string type = p.defaultProvider.value<std::string>("Type");
+        const std::string type = p.defaultProvider.value<std::string>("Type");
         typeID = ghoul::from_string<layers::Layer::ID>(type);
     }
 
     _defaultTileProvider = createFromDictionary(typeID, p.defaultProvider);
 
     for (const Parameters::IndexProvider& ip : p.indexTileProviders) {
-        const TileIndex tileIndex(
+        const TileIndex tileIndex = TileIndex(
             ip.tileIndex.x,
             ip.tileIndex.y,
             static_cast<uint8_t>(ip.tileIndex.level)
@@ -86,7 +86,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
 
         layers::Layer::ID providerID = layers::Layer::ID::DefaultTileProvider;
         if (ip.tileProvider.hasValue<std::string>("Type")) {
-            std::string type = ip.tileProvider.value<std::string>("Type");
+            const std::string type = ip.tileProvider.value<std::string>("Type");
             providerID = ghoul::from_string<layers::Layer::ID>(type);
         }
 
@@ -94,8 +94,8 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             providerID,
             ip.tileProvider
         );
-        TileIndex::TileHashKey key = tileIndex.hashKey();
-        _providers.insert(std::make_pair(key, std::move(stp)));
+        const TileIndex::TileHashKey key = tileIndex.hashKey();
+        _providers.emplace(key, std::move(stp));
     }
 }
 

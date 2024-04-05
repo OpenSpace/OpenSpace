@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -105,12 +105,12 @@ void ScreenSpaceImageOnline::update() {
         }
 
         if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-            DownloadManager::MemoryFile imageFile = _imageFuture.get();
+            const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
             if (imageFile.corrupted) {
                 LERRORC(
                     "ScreenSpaceImageOnline",
-                    fmt::format("Error loading image from URL '{}'", _texturePath.value())
+                    std::format("Error loading image from URL '{}'", _texturePath.value())
                 );
                 return;
             }

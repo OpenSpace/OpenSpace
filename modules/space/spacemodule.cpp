@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,6 @@
 
 #include <modules/space/spacemodule.h>
 
-#include <modules/space/labelscomponent.h>
 #include <modules/space/rendering/renderableconstellationbounds.h>
 #include <modules/space/rendering/renderableconstellationlines.h>
 #include <modules/space/rendering/renderableeclipsecone.h>
@@ -46,6 +45,7 @@
 #include <openspace/util/coordinateconversion.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 
@@ -133,18 +133,20 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        LabelsComponent::Documentation(),
         GPTranslation::Documentation()
     };
 }
 
 scripting::LuaLibrary SpaceModule::luaLibrary() const {
     return {
-        "space",
-        {
+        .name = "space",
+        .functions = {
             codegen::lua::ConvertFromRaDec,
             codegen::lua::ConvertToRaDec,
             codegen::lua::ReadKeplerFile
+        },
+        .scripts = {
+            absPath("${MODULE_SPACE}/scripts/spice.lua")
         }
     };
 }

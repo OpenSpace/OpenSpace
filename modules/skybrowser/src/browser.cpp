@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -92,6 +92,11 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
     )
     , _url(UrlInfo)
     , _reload(ReloadInfo)
+    , _renderHandler(new RenderHandler)
+    , _keyboardHandler(new WebKeyboardHandler)
+    , _browserInstance(
+        std::make_unique<BrowserInstance>(_renderHandler.get(), _keyboardHandler.get())
+    )
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -104,8 +109,6 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
     _reload.onChange([this]() { _shouldReload = true; });
 
     // Create browser and render handler
-    _renderHandler = new RenderHandler();
-    _keyboardHandler = new WebKeyboardHandler();
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),
         _keyboardHandler.get()
@@ -139,7 +142,7 @@ void Browser::deinitializeGL() {
 
     _texture = nullptr;
 
-    LDEBUG(fmt::format("Deinitializing browser: {}", _url.value()));
+    LDEBUG(std::format("Deinitializing browser '{}'", _url.value()));
 
     _browserInstance->close(true);
 
@@ -189,10 +192,12 @@ void Browser::reload() {
 }
 
 void Browser::setRatio(float ratio) {
-    float relativeRatio = ratio / browserRatio();
-    float newX = static_cast<float>(_browserDimensions.value().x) * relativeRatio;
-    glm::ivec2 newDims = { static_cast<int>(floor(newX)), _browserDimensions.value().y };
-    _browserDimensions = newDims;
+    const float relativeRatio = ratio / browserRatio();
+    const float newX = static_cast<float>(_browserDimensions.value().x) * relativeRatio;
+    _browserDimensions = {
+        static_cast<int>(std::floor(newX)),
+        _browserDimensions.value().y
+    };
     _isDimensionsDirty = true;
 }
 
@@ -202,7 +207,7 @@ float Browser::browserRatio() const {
 }
 
 void Browser::updateBrowserDimensions() {
-    glm::ivec2 dim = _browserDimensions;
+    const glm::ivec2 dim = _browserDimensions;
     if (dim.x > 0 && dim.y > 0) {
         _texture->setDimensions(glm::uvec3(_browserDimensions.value(), 1));
         _browserInstance->reshape(dim);
@@ -212,11 +217,12 @@ void Browser::updateBrowserDimensions() {
 
 void Browser::executeJavascript(const std::string& script) const {
     // Make sure that the browser has a main frame
-    bool browserExists = _browserInstance && _browserInstance->getBrowser();
-    bool frameIsLoaded = browserExists && _browserInstance->getBrowser()->GetMainFrame();
+    const bool browserExists = _browserInstance && _browserInstance->getBrowser();
+    const bool frameIsLoaded =
+        browserExists && _browserInstance->getBrowser()->GetMainFrame();
 
     if (frameIsLoaded) {
-        CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
+        const CefRefPtr<CefFrame> frame = _browserInstance->getBrowser()->GetMainFrame();
         frame->ExecuteJavaScript(script, frame->GetURL(), 0);
     }
 }

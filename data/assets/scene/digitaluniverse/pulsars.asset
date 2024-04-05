@@ -16,7 +16,7 @@ local speck = asset.resource({
 local Object = {
   Identifier = "Pulsars",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePolygonCloud",
     Enabled = false,
     Labels = {
       File = speck .. "pulsar.label",
@@ -25,15 +25,18 @@ local Object = {
       MinMaxSize = { 4, 20 },
       Unit = "pc"
     },
-    Color = { 0.7, 0.0, 0.0 },
+    Coloring = {
+      FixedColor = { 0.7, 0.0, 0.0 }
+    },
     Opacity = 1.0,
     File = speck .. "pulsar.speck",
-    Texture = textures .. "point4.png",
     PolygonSides = 4,
     Unit = "pc",
-    ScaleFactor = 424.0,
-    BillboardMinMaxSize = { 0.0, 500.0 },
-    EnablePixelSizeControl = false
+    SizeSettings = {
+      ScaleExponent = 18.4,
+      MaxSize = 19.0,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Pulsars",
@@ -68,7 +71,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Pulsars",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for Pulsars",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,6 +42,26 @@ namespace {
         .loadedInstruction = std::nullopt,
         .notLoadedInstruction = std::nullopt
     };
+
+    QString createOneLineSummary(Profile::Module m) {
+        QString summary = QString::fromStdString(m.name);
+        const bool hasCommandForLoaded = !m.loadedInstruction->empty();
+        const bool hasCommandForNotLoaded = !m.notLoadedInstruction->empty();
+
+        if (hasCommandForLoaded && hasCommandForNotLoaded) {
+            summary += " (commands set for both loaded & not-loaded conditions)";
+        }
+        else if (hasCommandForLoaded) {
+            summary += " (command set only for loaded condition)";
+        }
+        else if (hasCommandForNotLoaded) {
+            summary += " (command set only for NOT loaded condition)";
+        }
+        else {
+            summary += " (no commands set)";
+        }
+        return summary;
+    }
 } // namespace
 
 ModulesDialog::ModulesDialog(QWidget* parent,
@@ -160,29 +180,9 @@ void ModulesDialog::createWidgets() {
     }
 }
 
-QString ModulesDialog::createOneLineSummary(Profile::Module m) {
-    QString summary = QString::fromStdString(m.name);
-    bool hasCommandForLoaded = !m.loadedInstruction->empty();
-    bool hasCommandForNotLoaded = !m.notLoadedInstruction->empty();
-
-    if (hasCommandForLoaded && hasCommandForNotLoaded) {
-        summary += " (commands set for both loaded & not-loaded conditions)";
-    }
-    else if (hasCommandForLoaded) {
-        summary += " (command set only for loaded condition)";
-    }
-    else if (hasCommandForNotLoaded) {
-        summary += " (command set only for NOT loaded condition)";
-    }
-    else {
-        summary += " (no commands set)";
-    }
-    return summary;
-}
-
 void ModulesDialog::listItemSelected() {
     QListWidgetItem* item = _list->currentItem();
-    int index = _list->row(item);
+    const int index = _list->row(item);
 
     if (!_moduleData.empty()) {
         const Profile::Module& m = _moduleData[index];
@@ -211,7 +211,7 @@ bool ModulesDialog::isLineEmpty(int index) const {
 }
 
 void ModulesDialog::listItemAdded() {
-    int currentListSize = _list->count();
+    const int currentListSize = _list->count();
 
     if ((currentListSize == 1) && (isLineEmpty(0))) {
         // Special case where list is "empty" but really has one line that is blank.
@@ -259,7 +259,7 @@ void ModulesDialog::listItemSave() {
     }
 
     QListWidgetItem* item = _list->currentItem();
-    int index = _list->row(item);
+    const int index = _list->row(item);
 
     if (!_moduleData.empty()) {
         _moduleData[index].name = _moduleEdit->text().toStdString();
@@ -290,7 +290,7 @@ void ModulesDialog::listItemRemove() {
             _list->item(0)->setText("");
         }
         else {
-            int index = _list->currentRow();
+            const int index = _list->currentRow();
             if (index >= 0 && index < _list->count()) {
                 delete _list->takeItem(index);
                 if (!_moduleData.empty()) {

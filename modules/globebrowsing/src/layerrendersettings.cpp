@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -81,27 +81,25 @@ LayerRenderSettings::LayerRenderSettings()
     });
 }
 
-void LayerRenderSettings::onChange(std::function<void()> callback) {
+void LayerRenderSettings::onChange(const std::function<void()>& callback) {
     gamma.onChange(callback);
     multiplier.onChange(callback);
     multiplier.onChange(callback);
     offset.onChange(callback);
 }
 
-float LayerRenderSettings::performLayerSettings(float v) const {
+float LayerRenderSettings::performLayerSettings(float value) const {
     return
-        ((glm::sign(v) * glm::pow(glm::abs(v), gamma) * multiplier) + offset);
+        ((glm::sign(value) * glm::pow(glm::abs(value), gamma) * multiplier) + offset);
 }
 
 glm::vec4 LayerRenderSettings::performLayerSettings(const glm::vec4& currentValue) const {
-    glm::vec4 newValue = glm::vec4(
+    return glm::vec4(
         performLayerSettings(currentValue.r),
         performLayerSettings(currentValue.g),
         performLayerSettings(currentValue.b),
         performLayerSettings(currentValue.a)
     );
-
-    return newValue;
 }
 
 } // namespace openspace::globebrowsing

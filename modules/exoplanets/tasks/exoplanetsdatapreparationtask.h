@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -77,10 +77,10 @@ public:
      *
      * /sa https://exoplanetarchive.ipac.caltech.edu/
      */
-    static PlanetData parseDataRow(std::string row,
+    static PlanetData parseDataRow(const std::string& row,
         const std::vector<std::string>& columnNames,
-        std::filesystem::path positionSourceFile,
-        std::filesystem::path bvFromTeffConversionFile);
+        const std::filesystem::path& positionSourceFile,
+        const std::filesystem::path& bvFromTeffConversionFile);
 
 private:
     std::filesystem::path _inputDataPath;

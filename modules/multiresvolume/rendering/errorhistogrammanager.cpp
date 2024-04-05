@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/util/progressbar.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 
 namespace openspace {
 
@@ -53,7 +53,7 @@ bool ErrorHistogramManager::buildHistograms(int numBins) {
     _histograms = std::vector<Histogram>(_numInnerNodes);
     LINFOC(
         "ErrorHistogramManager",
-        fmt::format("Build {} histograms with {} bins each", _numInnerNodes, numBins)
+        std::format("Build {} histograms with {} bins each", _numInnerNodes, numBins)
     );
 
     // All TSP Leaves
@@ -196,7 +196,7 @@ bool ErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) 
 
     _histograms = std::vector<Histogram>(_numInnerNodes);
 
-    for (int i = 0; i < static_cast<int>(_numInnerNodes); ++i) {
+    for (int i = 0; i < static_cast<int>(_numInnerNodes); i++) {
         int offset = i * _numBins;
         float* data = new float[_numBins];
         memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
@@ -224,7 +224,7 @@ bool ErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
     int nFloats = _numInnerNodes * _numBins;
     float* histogramData = new float[nFloats];
 
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
         memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
     }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/documentation/core_registration.h>
 
+#include <openspace/data/datamapping.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
@@ -38,7 +39,9 @@
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/path.h>
 #include <openspace/network/parallelpeer.h>
+#include <openspace/rendering/colormappingcomponent.h>
 #include <openspace/rendering/dashboard.h>
+#include <openspace/rendering/labelscomponent.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -54,6 +57,7 @@
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/systemcapabilitiesbinding.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/task.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
 
@@ -62,6 +66,8 @@ namespace openspace {
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(LogFactoryDocumentation());
 
+    engine.addDocumentation(ColorMappingComponent::Documentation());
+    engine.addDocumentation(LabelsComponent::Documentation());
     engine.addDocumentation(LightSource::Documentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
@@ -69,9 +75,12 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(Scale::Documentation());
     engine.addDocumentation(SceneGraphNode::Documentation());
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
+    engine.addDocumentation(Task::documentation());
     engine.addDocumentation(TimeRange::Documentation());
     engine.addDocumentation(Translation::Documentation());
     engine.addDocumentation(TimeFrame::Documentation());
+
+    engine.addDocumentation(dataloader::DataMapping::Documentation());
 
     engine.addDocumentation(interaction::NavigationState::Documentation());
     engine.addDocumentation(interaction::Path::Documentation());

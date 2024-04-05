@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -102,15 +102,15 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
         }
 
         // Shape the plane based on the aspect ration of the image
-        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
         if (_textureDimensions != textureDim) {
-            float aspectRatio = textureDim.x / textureDim.y;
-            float planeAspectRatio = _size.value().x / _size.value().y;
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
 
             if (std::abs(planeAspectRatio - aspectRatio) >
                 std::numeric_limits<float>::epsilon())
             {
-                glm::vec2 newSize =
+                const glm::vec2 newSize =
                     aspectRatio > 0.f ?
                     glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
                     glm::vec2(_size.value().x, _size.value().y * aspectRatio);
@@ -162,7 +162,7 @@ void RenderablePlaneImageLocal::loadTexture() {
     if (!_texturePath.value().empty()) {
         ghoul::opengl::Texture* t = _texture;
 
-        unsigned int hash = ghoul::hashCRC32File(_texturePath);
+        const unsigned int hash = ghoul::hashCRC32File(_texturePath);
 
         _texture = BaseModule::TextureManager.request(
             std::to_string(hash),
@@ -175,7 +175,7 @@ void RenderablePlaneImageLocal::loadTexture() {
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",
-                    fmt::format("Loaded texture from {}", absPath(path))
+                    std::format("Loaded texture from '{}'", absPath(path))
                 );
                 texture->uploadTexture();
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
@@ -195,15 +195,15 @@ void RenderablePlaneImageLocal::loadTexture() {
         }
 
         // Shape the plane based on the aspect ration of the image
-        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
         if (_textureDimensions != textureDim) {
-            float aspectRatio = textureDim.x / textureDim.y;
-            float planeAspectRatio = _size.value().x / _size.value().y;
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
 
             if (std::abs(planeAspectRatio - aspectRatio) >
                 std::numeric_limits<float>::epsilon())
             {
-                glm::vec2 newSize =
+                const glm::vec2 newSize =
                     aspectRatio > 0.f ?
                     glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
                     glm::vec2(_size.value().x, _size.value().y * aspectRatio);

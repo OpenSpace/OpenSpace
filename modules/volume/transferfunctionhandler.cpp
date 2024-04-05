@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -68,9 +68,9 @@ namespace {
 
 namespace openspace::volume {
 
-TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
+TransferFunctionHandler::TransferFunctionHandler(properties::StringProperty prop)
     : properties::PropertyOwner({ "TransferFunctionHandler", "Tranfer Function Handler" })
-    , _transferFunctionPath(prop)
+    , _transferFunctionPath(std::move(prop))
     , _dataUnit(DataUnitInfo)
     , _minValue(MinValueInfo)
     , _maxValue(MaxValueInfo)
@@ -143,7 +143,7 @@ void TransferFunctionHandler::setFilepath(std::string path) {
 }
 
 ghoul::opengl::Texture& TransferFunctionHandler::texture() {
-    return *_texture.get();
+    return *_texture;
 }
 
 void TransferFunctionHandler::uploadTexture() {

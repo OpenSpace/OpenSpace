@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -116,8 +116,10 @@ documentation::Documentation Renderable::Documentation() {
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
-                                                             ghoul::Dictionary dictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     if (!dictionary.hasKey(KeyType)) {
         throw ghoul::RuntimeError("Tried to create Renderable but no 'Type' was found");
     }
@@ -125,7 +127,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     // This should be done in the constructor instead with noexhaustive
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
-    std::string renderableType = dictionary.value<std::string>(KeyType);
+    const std::string renderableType = dictionary.value<std::string>(KeyType);
     ghoul::TemplateFactory<Renderable>* factory =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
@@ -142,7 +144,6 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings settings)
     : properties::PropertyOwner({ "Renderable" })
-    , Fadeable()
     , _enabled(EnabledInfo, true)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
@@ -340,29 +341,29 @@ bool Renderable::hasOverrideRenderBin() const noexcept {
 glm::dmat4 Renderable::calcModelTransform(const RenderData& data,
                                           const AlternativeTransform& altTransform) const
 {
-    glm::dvec3 translation =
+    const glm::dvec3 translation =
         altTransform.translation.value_or(data.modelTransform.translation);
-    glm::dmat3 rotation = altTransform.rotation.value_or(data.modelTransform.rotation);
-    glm::dvec3 scale = altTransform.scale.value_or(data.modelTransform.scale);
+    const glm::dmat3 rot = altTransform.rotation.value_or(data.modelTransform.rotation);
+    const glm::dvec3 scale = altTransform.scale.value_or(data.modelTransform.scale);
 
     return glm::translate(glm::dmat4(1.0), translation) *
-        glm::dmat4(rotation) *
+        glm::dmat4(rot) *
         glm::scale(glm::dmat4(1.0), scale);
 }
 
 glm::dmat4 Renderable::calcModelViewTransform(const RenderData& data,
-                                           std::optional<glm::dmat4> modelTransform) const
+                                    const std::optional<glm::dmat4>& modelTransform) const
 {
-    glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    const glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
     return data.camera.combinedViewMatrix() * modelMatrix;
 }
 
 glm::dmat4 Renderable::calcModelViewProjectionTransform(const RenderData& data,
-                                           std::optional<glm::dmat4> modelTransform) const
+                                    const std::optional<glm::dmat4>& modelTransform) const
 {
-    glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
-    glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
-    glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+    const glm::dmat4& modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    const glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
+    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
     return glm::dmat4(projectionMatrix * viewMatrix * modelMatrix);
 }
 
@@ -370,9 +371,9 @@ std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
                                                                    const RenderData& data,
                                       const AlternativeTransform& altModelTransform) const
 {
-    glm::dmat4 modelTransform = calcModelTransform(data, altModelTransform);
-    glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
-    glm::dmat4 modelViewProjectionTransform = calcModelViewProjectionTransform(
+    const glm::dmat4 modelTransform = calcModelTransform(data, altModelTransform);
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
+    const glm::dmat4 modelViewProjectionTransform = calcModelViewProjectionTransform(
         data,
         modelTransform
     );

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -154,8 +154,8 @@ Geodetic2 GeodeticPatch::clamp(const Geodetic2& p) const {
     //        --> Just clamping pointLat would be clamp(330, -10, 10) = 10 // WRONG!
     //    Instead, if we first normalize 330 deg around 0, we get -30 deg
     //        --> clamp(-30, -10, 10) = -10 // CORRECT!
-    double pointLat = normalizedAngleAround(p.lat, _center.lat);
-    double pointLon = normalizedAngleAround(p.lon, _center.lon);
+    const double pointLat = normalizedAngleAround(p.lat, _center.lat);
+    const double pointLon = normalizedAngleAround(p.lon, _center.lon);
 
     return {
         glm::clamp(pointLat, minLat(), maxLat()),
@@ -219,8 +219,8 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
 
     // Normalize point with respect to center. This is done because the point
     // will later be clamped. See LatLonPatch::clamp(const LatLon&) for explanation
-    double pointLat = normalizedAngleAround(p.lat, _center.lat);
-    double pointLon = normalizedAngleAround(p.lon, _center.lon);
+    const double pointLat = normalizedAngleAround(p.lat, _center.lat);
+    const double pointLon = normalizedAngleAround(p.lon, _center.lon);
 
     // Calculate the longitud difference between center and point. We normalize around
     // zero because we want the "shortest distance" difference, i.e the difference

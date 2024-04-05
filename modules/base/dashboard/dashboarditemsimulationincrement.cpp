@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -138,12 +138,12 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     });
     addProperty(_doSimplification);
 
-    for (TimeUnit u : TimeUnits) {
+    for (const TimeUnit u : TimeUnits) {
         _requestedUnit.addOption(static_cast<int>(u), std::string(nameForTimeUnit(u)));
     }
     _requestedUnit = static_cast<int>(TimeUnit::Second);
     if (p.requestedUnit.has_value()) {
-        TimeUnit unit = timeUnitFromString(p.requestedUnit->c_str());
+        const TimeUnit unit = timeUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
@@ -195,11 +195,14 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(
-                    fmt::runtime(_transitionFormat.value()),
-                    targetDeltaTime.first, targetDeltaTime.second,
-                    pauseText,
-                    currentDeltaTime.first, currentDeltaTime.second
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(
+                    _transitionFormat.value(),
+                    std::make_format_args(
+                        targetDeltaTime.first, targetDeltaTime.second,
+                        pauseText,
+                        currentDeltaTime.first, currentDeltaTime.second
+                    )
                 )
             );
         }
@@ -207,14 +210,19 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(
-                    fmt::runtime(_regularFormat.value()),
-                    targetDeltaTime.first, targetDeltaTime.second, pauseText
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(
+                    _regularFormat.value(),
+                    std::make_format_args(
+                        targetDeltaTime.first,
+                        targetDeltaTime.second,
+                        pauseText
+                    )
                 )
             );
         }
     }
-    catch (const fmt::format_error&) {
+    catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
     penPosition.y -= _font->height();
@@ -223,14 +231,14 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
 glm::vec2 DashboardItemSimulationIncrement::size() const {
     ZoneScoped;
 
-    double t = global::timeManager->targetDeltaTime();
+    const double t = global::timeManager->targetDeltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);
     }
     else {
-        TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        double convertedT = convertTime(t, TimeUnit::Second, unit);
+        const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
+        const double convertedT = convertTime(t, TimeUnit::Second, unit);
         deltaTime = std::pair(
             convertedT,
             std::string(nameForTimeUnit(unit, convertedT != 1.0))
@@ -238,7 +246,7 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
     }
 
     return _font->boundingBox(
-        fmt::format(
+        std::format(
             "Simulation increment: {:.1f} {:s} / second",
             deltaTime.first, deltaTime.second
         )

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -192,6 +192,13 @@ namespace {
 }
 
 /**
+ * Returns whether the simulation time is currently paused or is progressing.
+ */
+[[codegen::luawrap]] bool isPaused() {
+    return openspace::global::timeManager->isPaused();
+}
+
+/**
  * Sets the current simulation time to the specified value. If the parameter is a number,
  * the value is the number of seconds past the J2000 epoch. If it is a string, it has to
  * be a valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. Note: providing
@@ -329,7 +336,7 @@ namespace {
     }
     else {
         double v = std::get<double>(change);
-        c = fmt::format("{}s", v);
+        c = std::format("{}s", v);
     }
 
     std::string res = openspace::Time::advancedTime(std::move(b), std::move(c));

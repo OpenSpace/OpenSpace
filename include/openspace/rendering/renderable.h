@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,7 +71,7 @@ public:
     };
 
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
-        ghoul::Dictionary dictionary);
+        const ghoul::Dictionary& dictionary);
 
     Renderable(const ghoul::Dictionary& dictionary,
         RenderableSettings settings = RenderableSettings());
@@ -175,7 +175,7 @@ protected:
      * \return The resulting model view transformation matrix in double precision
      */
     glm::dmat4 calcModelViewTransform(const RenderData& data,
-        std::optional<glm::dmat4> modelTransform = std::nullopt) const;
+        const std::optional<glm::dmat4>& modelTransform = std::nullopt) const;
 
     /**
      * Calculates the model view projection transformation matrix with the given data and
@@ -189,7 +189,7 @@ protected:
      *         precision
      */
     glm::dmat4 calcModelViewProjectionTransform(const RenderData& data,
-        std::optional<glm::dmat4> modelTransform = std::nullopt) const;
+        const std::optional<glm::dmat4>& modelTransform = std::nullopt) const;
 
     /**
      * Calculates the model, model view, and the model view projection transformation

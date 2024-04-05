@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,7 @@
 
 #include "modules/spout/spoutwrapper.h"
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
@@ -135,7 +135,7 @@ const std::vector<std::string> &SpoutReceiver::spoutReceiverList() {
     const int nSenders = _spoutHandle->GetSenderCount();
     _receiverList.clear();
 
-    for (int i = 0; i < nSenders; ++i) {
+    for (int i = 0; i < nSenders; i++) {
         char Name[256];
         _spoutHandle->GetSenderName(i, Name, 256);
         _receiverList.push_back(Name);
@@ -213,7 +213,7 @@ bool SpoutReceiver::updateReceiverName(const std::string& name) {
     bool hasCreated = _spoutHandle->CreateReceiver(nameBuf, width, height);
     if (!hasCreated) {
         if (!_isErrorMessageDisplayed) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Could not create receiver for {} -> {}x{}", name, width, height
             ));
             _isErrorMessageDisplayed = true;
@@ -294,7 +294,7 @@ bool SpoutReceiver::updateTexture(unsigned int width, unsigned int height) {
         if (_spoutTexture) {
             _spoutTexture->uploadTexture();
             if (_onUpdateTextureCallback && !_onUpdateTextureCallback(width, height)) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Could not create callback texture for {} -> {}x{}",
                     _currentSpoutName, width, height
                 ));
@@ -304,7 +304,7 @@ bool SpoutReceiver::updateTexture(unsigned int width, unsigned int height) {
             _spoutHeight = height;
         }
         else {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Could not create texture for {} -> {}x{}",
                 _currentSpoutName, width, height
             ));
@@ -373,10 +373,10 @@ SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner
         _spoutSelection.addOption(0, "");
 
         int idx = 0;
-        for (int i = 0; i < static_cast<int>(receiverList.size()); ++i) {
+        for (int i = 0; i < static_cast<int>(receiverList.size()); i++) {
             _spoutSelection.addOption(i + 1, receiverList[i]);
 
-            LWARNING(fmt::format("List {}", receiverList[i]));
+            LWARNING(std::format("List {}", receiverList[i]));
 
             if (!_isSelectAny && _spoutName.value() == receiverList[i]) {
                 idx = i + 1;
@@ -424,7 +424,7 @@ bool SpoutSender::updateSenderStatus() {
     if (!_isSending) {
         if (_spoutWidth == 0 || _spoutHeight == 0) {
             if (!_isErrorMessageDisplayed) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Could not create sender for {}, dimensions invalid {}x{}",
                     _currentSpoutName, _spoutWidth, _spoutHeight
                 ));
@@ -435,7 +435,7 @@ bool SpoutSender::updateSenderStatus() {
 
         if (_currentSpoutName.empty()) {
             if (!_isErrorMessageDisplayed) {
-                LWARNING(fmt::format("Could not create sender, invalid name"));
+                LWARNING(std::format("Could not create sender, invalid name"));
                 _isErrorMessageDisplayed = true;
             }
             return false;
@@ -448,7 +448,7 @@ bool SpoutSender::updateSenderStatus() {
         bool hasCreated = _spoutHandle->CreateSender(name, _spoutWidth, _spoutHeight);
         if (!hasCreated) {
             if (!_isErrorMessageDisplayed) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Could not create sender for {} -> {}x{}",
                     _currentSpoutName, _spoutWidth, _spoutHeight
                 ));
@@ -588,7 +588,7 @@ SpoutSenderPropertyProxy::SpoutSenderPropertyProxy(properties::PropertyOwner& ow
         _spoutName = dictionary.value<std::string>(NameSenderInfo.identifier);
     }
     else {
-        LWARNING(fmt::format("Sender does not have a name"));
+        LWARNING(std::format("Sender does not have a name"));
     }
 
     _spoutName.onChange([this]() { _isSpoutDirty = true; });

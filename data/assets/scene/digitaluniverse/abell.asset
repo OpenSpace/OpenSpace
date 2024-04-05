@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Abell Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_abell_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -23,8 +23,9 @@ local TransformMatrix = {
 local Object = {
   Identifier = "Abell",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "abell.speck",
     Labels = {
       File = speck .. "abell.label",
       Opacity = 1.0,
@@ -34,16 +35,21 @@ local Object = {
       Unit = "Mpc",
       TransformationMatrix = TransformMatrix
     },
-    Color = { 1.0, 0.4, 0.2 },
     Opacity = 1.0,
-    --ColorMap = speck .. "abell.cmap",
-    File = speck .. "abell.speck",
-    Texture = textures .. "point3A.png",
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 },
+      --ColorMap = speck .. "abell.cmap", -- TODO: Decide whether to add
+    },
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
-    ScaleFactor = 520.0,
-    BillboardMinMaxSize = { 0.0, 7.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 22.6,
+      MaxSize = 0.27,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Abell Galaxy Clusters",
@@ -78,7 +84,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Abell Galaxy Clusters",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for The Abell catalog",
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

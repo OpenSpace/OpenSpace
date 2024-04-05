@@ -1,0 +1,57 @@
+local transforms = asset.require("../model")
+local kernels = asset.require("../kernels")
+
+
+
+local MGNS = {
+  Identifier = "BepiColomboMPO_MGNS",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MGNS,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_MGNS",
+      Method = "CIRCLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO MGNS",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+
+asset.onInitialize(function()
+  -- Circle shapes are currently not supported
+  -- openspace.addSceneGraphNode(MGNS)
+end)
+
+asset.onDeinitialize(function()
+  -- openspace.removeSceneGraphNode(MGNS)
+end)
+
+
+
+asset.meta = {
+  Name = "MGNS",
+  Version = "1.0",
+  Description = [[
+    The Mercury Gamma-ray and Neutron Spectrometer (MGNS) on board BepiColombo Mercury
+    Planet Orbiter is designed to observe and study the gamma-ray and neutron emissions of
+    Mercury. The MGNS is a multifunctional scientific instrument, comprising one gamma-ray
+    spectrometer and four neutron detectors. The sensor unit of the gamma-ray spectrometer
+    consists of one 3 by 3 inches high energy resolution inorganic scintillator crystal,
+    i.e. CeBr3, whereas the sensor unit of the neutron detectors consists of three 3He
+    gas-filled tubes and one stilbene organic scintillator crystal with plastic
+    scintillator as its anticoincidence shield.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

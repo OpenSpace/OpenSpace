@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 
 #include "profile/line.h"
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/boolean.h>
 #include <QComboBox>
@@ -47,18 +47,8 @@
 #include <QStyle>
 #include <sstream>
 
-using json = nlohmann::json;
-using namespace openspace;
-
-namespace {
-    BooleanType(IsDirty);
-    void styleLabel(QLabel* label, IsDirty isDirty) {
-        std::string newStyle = isDirty ? "error" : "normal";
-        label->setObjectName(QString::fromStdString(newStyle));
-        label->style()->unpolish(label);
-        label->style()->polish(label);
-    }
-} // namespace
+//using json = nlohmann::json;
+//using namespace openspace;
 
 namespace {
     constexpr std::string_view _loggerCat = "HorizonsDialog";
@@ -72,11 +62,18 @@ namespace {
     constexpr std::string_view Years = "calendar years";
     constexpr std::string_view Unitless = "equal intervals (unitless)";
 
+    BooleanType(IsDirty);
+    void styleLabel(QLabel* label, IsDirty isDirty) {
+        const std::string newStyle = isDirty ? "error" : "normal";
+        label->setObjectName(QString::fromStdString(newStyle));
+        label->style()->unpolish(label);
+        label->style()->polish(label);
+    }
+
     int findId(const std::string& match) {
         // Format: id, other information...
         std::stringstream str(match);
-        int id;
-
+        int id = 0;
         str >> id;
         return id;
     }
@@ -84,10 +81,12 @@ namespace {
 
 HorizonsDialog::HorizonsDialog(QWidget* parent)
     : QDialog(parent)
-{
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
-    _manager = new QNetworkAccessManager(this);
+    , _manager(new QNetworkAccessManager(this))
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
+{
 
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
     setWindowTitle("Horizons");
     createWidgets();
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
@@ -102,7 +101,7 @@ std::filesystem::path HorizonsDialog::file() const {
 }
 
 void HorizonsDialog::openSaveAs() {
-    QString filename = QFileDialog::getSaveFileName(
+    const QString filename = QFileDialog::getSaveFileName(
         this,
         "Choose a file path where the generated Horizons file will be saved",
         QString::fromStdString(absPath("${USER}").string()),
@@ -142,8 +141,8 @@ void HorizonsDialog::downloadProgress(int value, int total) {
 }
 
 void HorizonsDialog::importTimeRange() {
-    QString startStr = QString::fromStdString(_validTimeRange.first);
-    QString endStr = QString::fromStdString(_validTimeRange.second);
+    const QString startStr = QString::fromStdString(_validTimeRange.first);
+    const QString endStr = QString::fromStdString(_validTimeRange.second);
 
     QDateTime start = QDateTime::fromString(startStr, "yyyy-MMM-dd T hh:mm");
     QDateTime end = QDateTime::fromString(endStr, "yyyy-MMM-dd T hh:mm");
@@ -153,8 +152,8 @@ void HorizonsDialog::importTimeRange() {
         end = QDateTime::fromString(endStr, "yyyy-MMM-dd T hh:mm:ss");
 
         if (!start.isValid() || !end.isValid()) {
-            QDate startDate = QDate::fromString(startStr, "yyyy-MMM-dd");
-            QDate endDate = QDate::fromString(endStr, "yyyy-MMM-dd");
+            const QDate startDate = QDate::fromString(startStr, "yyyy-MMM-dd");
+            const QDate endDate = QDate::fromString(endStr, "yyyy-MMM-dd");
 
             if (startDate.isValid() && endDate.isValid()) {
                 _startEdit->setDate(startDate);
@@ -165,7 +164,7 @@ void HorizonsDialog::importTimeRange() {
             }
 
             _errorMsg->setText("Could not import time range");
-            std::string msg = fmt::format(
+            const std::string msg = std::format(
                 "Could not import time range '{}' to '{}'",
                 _validTimeRange.first, _validTimeRange.second
             );
@@ -183,7 +182,7 @@ void HorizonsDialog::importTimeRange() {
 void HorizonsDialog::approved() {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     _downloadLabel->show();
-    bool result = handleRequest();
+    const bool result = handleRequest();
     _downloadLabel->hide();
     if (result && std::filesystem::is_regular_file(_horizonsFile.file())) {
         accept();
@@ -216,7 +215,7 @@ void HorizonsDialog::createWidgets() {
 
         _typeCombo = new QComboBox;
         _typeCombo->setToolTip("Choose Horizons data type");
-        QStringList types = {
+        const QStringList types = {
            "Vector table",
            "Observer table"
         };
@@ -335,7 +334,7 @@ void HorizonsDialog::createWidgets() {
 
         _timeTypeCombo = new QComboBox;
         _timeTypeCombo->setToolTip("Choose unit of the step size");
-        QStringList timeTypes = {
+        const QStringList timeTypes = {
             Minutes.data(),
             Hours.data(),
             Days.data(),
@@ -437,9 +436,9 @@ bool HorizonsDialog::isValidInput() {
     }
     // Numerical
     bool couldConvert = false;
-    int32_t step = _stepEdit->text().toInt(&couldConvert);
+    const int32_t step = _stepEdit->text().toInt(&couldConvert);
     if (!couldConvert) {
-        _errorMsg->setText(QString::fromStdString(fmt::format(
+        _errorMsg->setText(QString::fromStdString(std::format(
             "Step size needs to be a number in range 1 to {}",
             std::numeric_limits<int32_t>::max()
         )));
@@ -459,7 +458,7 @@ bool HorizonsDialog::isValidInput() {
     // website as a uint32_t. If step size over 32 bit int is sent, this error message is
     // received: Cannot read numeric value -- re-enter
     if (step < 1) {
-        _errorMsg->setText(QString::fromStdString(fmt::format(
+        _errorMsg->setText(QString::fromStdString(std::format(
             "Step size is outside valid range 1 to '{}'",
             std::numeric_limits<int32_t>::max()
         )));
@@ -470,7 +469,7 @@ bool HorizonsDialog::isValidInput() {
 }
 
 // Send request synchronously, EventLoop waits until request has finished
-json HorizonsDialog::sendRequest(const std::string& url) {
+nlohmann::json HorizonsDialog::sendRequest(const std::string& url) {
     QNetworkRequest request;
     request.setHeader(QNetworkRequest::UserAgentHeader, "OpenSpace");
     request.setUrl(QUrl(QString::fromStdString(url)));
@@ -484,13 +483,13 @@ json HorizonsDialog::sendRequest(const std::string& url) {
     _downloadProgress->show();
 
     QEventLoop loop;
-    QMetaObject::Connection status = connect(
+    const QMetaObject::Connection status = connect(
         reply, &QNetworkReply::finished,
         &loop, &QEventLoop::quit
     );
     if (!status) {
         appendLog("Could not connect to Horizons API", HorizonsDialog::LogLevel::Error);
-        return json();
+        return nlohmann::json();
     }
 
     loop.exec(QEventLoop::ExcludeUserInputEvents);
@@ -498,19 +497,20 @@ json HorizonsDialog::sendRequest(const std::string& url) {
     return handleReply(reply);
 }
 
-json HorizonsDialog::handleReply(QNetworkReply* reply) {
+nlohmann::json HorizonsDialog::handleReply(QNetworkReply* reply) {
     _downloadProgress->hide();
     if (reply->error() != QNetworkReply::NoError) {
-        QVariant statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+        const QVariant statusCode =
+            reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
         if (!checkHttpStatus(statusCode)) {
-            std::string msg = fmt::format(
-                "Connection Error '{}' ", reply->errorString().toStdString()
+            const std::string msg = std::format(
+                "Connection Error '{}'", reply->errorString().toStdString()
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
         }
 
         reply->deleteLater();
-        return json();
+        return nlohmann::json();
     }
 
     QUrl redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
@@ -519,26 +519,26 @@ json HorizonsDialog::handleReply(QNetworkReply* reply) {
             redirect = reply->url().resolved(redirect);
         }
 
-        std::string msg = fmt::format(
+        const std::string msg = std::format(
             "Redirecting request to '{}'", redirect.toString().toStdString()
         );
         appendLog(msg, HorizonsDialog::LogLevel::Info);
         return sendRequest(redirect.toString().toStdString());
     }
 
-    QString answer = reply->readAll();
+    const QString answer = reply->readAll();
     reply->deleteLater();
 
     if (answer.isEmpty()) {
-        std::string msg = fmt::format(
+        const std::string msg = std::format(
             "Connection Error '{}'", reply->errorString().toStdString()
         );
         appendLog(msg, HorizonsDialog::LogLevel::Error);
-        return json();
+        return nlohmann::json();
     }
 
     // Convert the answer to a json object and return it
-    return json::parse(answer.toStdString());
+    return nlohmann::json::parse(answer.toStdString());
 }
 
 bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
@@ -547,7 +547,7 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
         statusCode.toInt() != static_cast<int>(HorizonsDialog::HTTPCodes::Ok))
     {
         std::string message;
-        HorizonsDialog::HTTPCodes code =
+        const HorizonsDialog::HTTPCodes code =
             static_cast<HorizonsDialog::HTTPCodes>(statusCode.toInt());
 
         switch (code) {
@@ -568,7 +568,7 @@ bool HorizonsDialog::checkHttpStatus(const QVariant& statusCode) {
                     "later time";
                 break;
             default:
-                message = fmt::format(
+                message = std::format(
                     "HTTP status code '{}' was returned",
                     statusCode.toString().toStdString()
                 );
@@ -618,7 +618,8 @@ std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
         "Trajectory name"
     );
 
-    QDateTime start, end;
+    QDateTime start;
+    QDateTime end;
     start = QDateTime::fromString(
         QString::fromStdString(timeRange.first),
         "yyyy-MMM-dd T hh:mm"
@@ -665,16 +666,16 @@ std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
                 }
                 else {
                     _errorMsg->setText("Could not parse time range");
-                    std::string msg = fmt::format(
-                        "Could not read time range '{}' to '{}'", timeRange.first,
-                        timeRange.second
+                    const std::string msg = std::format(
+                        "Could not read time range '{}' to '{}'",
+                        timeRange.first, timeRange.second
                     );
                     appendLog(msg, LogLevel::Error);
                 }
                 return std::pair<std::string, std::string>();
             }
             else {
-                std::string msg = fmt::format(
+                const std::string msg = std::format(
                     "Could not find all time range information. Latest Horizons "
                     "mesage: {}", _latestHorizonsError
                 );
@@ -686,6 +687,8 @@ std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
 }
 
 bool HorizonsDialog::handleRequest() {
+    using namespace openspace;
+
     if (!isValidInput()) {
         return false;
     }
@@ -707,14 +710,14 @@ bool HorizonsDialog::handleRequest() {
     _validTimeRange = std::pair<std::string, std::string>();
     _latestHorizonsError.clear();
 
-    std::string url = constructUrl();
+    const std::string url = constructUrl();
 
     _chooseObserverCombo->clear();
     _chooseObserverCombo->hide();
     _chooseTargetCombo->clear();
     _chooseTargetCombo->hide();
 
-    json answer = sendRequest(url);
+    nlohmann::json answer = sendRequest(url);
     if (answer.empty()) {
         _errorMsg->setText("Connection error");
         return false;
@@ -728,19 +731,18 @@ bool HorizonsDialog::handleRequest() {
     _horizonsFile = std::move(file);
     HorizonsResultCode result = isValidHorizonsFile(_horizonsFile.file());
 
-    bool isValid = handleResult(result);
-
+    const bool isValid = handleResult(result);
     if (!isValid && std::filesystem::is_regular_file(_horizonsFile.file())) {
-        std::string newName = _horizonsFile.file().filename().stem().string();
+        const std::string newName = _horizonsFile.file().filename().stem().string();
 
-        std::filesystem::path oldFile = _horizonsFile.file();
+        const std::filesystem::path& oldFile = _horizonsFile.file();
         std::filesystem::path newFile = oldFile;
         newFile.replace_filename(newName + "_error.txt");
 
         std::filesystem::rename(oldFile, newFile);
 
-        std::string msg = fmt::format(
-            "For more information, see the saved error file {}", newFile
+        const std::string msg = std::format(
+            "For more information, see the saved error file '{}'", newFile
         );
         appendLog(msg, LogLevel::Info);
     }
@@ -749,8 +751,10 @@ bool HorizonsDialog::handleRequest() {
 }
 
 std::string HorizonsDialog::constructUrl() {
+    using namespace openspace;
+
     // Construct url for request
-    HorizonsType type;
+    HorizonsType type = HorizonsType::Invalid;
     if (_typeCombo->currentIndex() == 0) {
         type = HorizonsType::Vector;
     }
@@ -765,7 +769,8 @@ std::string HorizonsDialog::constructUrl() {
 
     std::string command;
     if (_chooseTargetCombo->count() > 0 && _chooseTargetCombo->currentIndex() != 0) {
-        QVariant t = _chooseTargetCombo->itemData(_chooseTargetCombo->currentIndex());
+        const QVariant t =
+            _chooseTargetCombo->itemData(_chooseTargetCombo->currentIndex());
         command = t.toString().toStdString();
         _targetName = _chooseTargetCombo->currentText().toStdString();
         _targetEdit->setText(QString::fromStdString(command));
@@ -777,9 +782,9 @@ std::string HorizonsDialog::constructUrl() {
 
     std::string center;
     if (_chooseObserverCombo->count() > 0 && _chooseObserverCombo->currentIndex() != 0) {
-        QVariant observer =
+        const QVariant observer =
             _chooseObserverCombo->itemData(_chooseObserverCombo->currentIndex());
-        std::string id = observer.toString().toStdString();
+        const std::string id = observer.toString().toStdString();
         center = "@" + id;
         _observerName = _chooseObserverCombo->currentText().toStdString();
         _centerEdit->setText(QString::fromStdString(id));
@@ -789,13 +794,13 @@ std::string HorizonsDialog::constructUrl() {
         _observerName = center;
     }
 
-    _startTime = fmt::format(
+    _startTime = std::format(
         "{} {}",
         _startEdit->date().toString("yyyy-MM-dd").toStdString(),
         _startEdit->time().toString("hh:mm:ss").toStdString()
     );
 
-    _endTime = fmt::format(
+    _endTime = std::format(
         "{} {}",
         _endEdit->date().toString("yyyy-MM-dd").toStdString(),
         _endEdit->time().toString("hh:mm:ss").toStdString()
@@ -840,7 +845,9 @@ std::string HorizonsDialog::constructUrl() {
     );
 }
 
-openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
+openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
+    using namespace openspace;
+
     auto it = answer.find("error");
     if (it != answer.end()) {
         _latestHorizonsError = *it;
@@ -860,12 +867,14 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
     }
 
     // Create a text file and write reply to it
-    std::filesystem::path filePath =
+    const std::filesystem::path filePath =
         std::filesystem::absolute(_fileEdit->text().toStdString());
 
     auto result = answer.find("result");
     if (result == answer.end()) {
-        std::string msg = fmt::format("Malformed answer recieved '{}'", answer.dump());
+        const std::string msg = std::format(
+            "Malformed answer received '{}'", answer.dump()
+        );
         appendLog(msg, HorizonsDialog::LogLevel::Error);
         return openspace::HorizonsFile();
     }
@@ -878,7 +887,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
             QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel
         );
         msgBox.setDefaultButton(QMessageBox::Yes);
-        int ret = msgBox.exec();
+        const int ret = msgBox.exec();
         switch (ret) {
             case QMessageBox::Yes:
                 // If yes then continue as normal
@@ -900,13 +909,15 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(json& answer) {
 }
 
 bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
+    using namespace openspace;
+
     switch (result) {
         case HorizonsResultCode::Valid: {
             // If the request worked then delete the corresponding error file if it exist
-            std::filesystem::path validFile(_horizonsFile.file());
+            std::filesystem::path validFile =_horizonsFile.file();
 
-            std::string errorName = validFile.filename().stem().string();
-            std::filesystem::path errorFile = validFile.replace_filename(
+            const std::string errorName = validFile.filename().stem().string();
+            const std::filesystem::path errorFile = validFile.replace_filename(
                 errorName + "_error.txt"
             );
 
@@ -918,7 +929,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
         case HorizonsResultCode::Empty: {
             _errorMsg->setText("The horizons file is empty");
             if (!_latestHorizonsError.empty()) {
-                std::string msg = fmt::format(
+                const std::string msg = std::format(
                     "Latest Horizons error: {}", _latestHorizonsError
                 );
                 appendLog(msg, LogLevel::Error);
@@ -928,7 +939,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::ErrorSize: {
-            std::string msg = fmt::format(
+            const std::string msg = std::format(
                 "Time range '{}' to '{}' with step size '{} {}' is too big, try to "
                 "increase the step size and/or decrease the time range",
                 _startTime, _endTime, _stepEdit->text().toStdString(),
@@ -952,7 +963,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             std::filesystem::remove(_horizonsFile.file());
             break;
         case HorizonsResultCode::ErrorTimeRange: {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "Time range is outside the valid range for target '{}'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
@@ -962,15 +973,15 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             _validTimeRange = readTimeRange();
             if (_validTimeRange.first.empty() || _validTimeRange.second.empty()) {
                 if (!_latestHorizonsError.empty()) {
-                    msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
+                    msg = std::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
                 break;
             }
 
-            msg = fmt::format(
-                "Valid time range is '{}' to '{}'", _validTimeRange.first,
-                _validTimeRange.second
+            msg = std::format(
+                "Valid time range is '{}' to '{}'",
+                _validTimeRange.first, _validTimeRange.second
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
             _importTimeButton->show();
@@ -979,12 +990,12 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::ErrorNoObserver: {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "No match was found for observer '{}'", _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
 
-            msg = fmt::format(
+            msg = std::format(
                 "Try to use '@{}' as observer to search for possible matches",
                 _observerName
             );
@@ -995,7 +1006,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::ErrorObserverTargetSame: {
-            std::string msg = fmt::format(
+            const std::string msg = std::format(
                 "The observer '{}' and target '{}' are the same. Please use another "
                 "observer for the current target", _observerName, _targetName
             );
@@ -1007,7 +1018,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::ErrorNoData: {
-            std::string msg = fmt::format(
+            const std::string msg = std::format(
                 "There is not enough data to compute the state of target '{}' in "
                 "relation to the observer '{}' for the time range '{}' to '{}'. Try to "
                 "use another observer for the current target or another time range",
@@ -1019,20 +1030,20 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::MultipleObserverStations: {
-            std::string msg = fmt::format(
-                "Multiple matching observer stations were found for observer '{}'. ",
+            std::string msg = std::format(
+                "Multiple matching observer stations were found for observer '{}'",
                 _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
 
-            msg = fmt::format(
+            msg = std::format(
                 "Did not find what you were looking for? Use '@{}' as observer to search "
                 "for alternatives", _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
             styleLabel(_centerLabel, IsDirty::Yes);
 
-            std::vector<std::string> matchingstations =
+            const std::vector<std::string> matchingstations =
                 _horizonsFile.parseMatches(
                     "Observatory Name",
                     "Multiple matching stations found"
@@ -1043,7 +1054,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
-                    msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
+                    msg = std::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
                 break;
@@ -1062,13 +1073,13 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::MultipleObserver: {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "Multiple matches were found for observer '{}'", _observerName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
             styleLabel(_centerLabel, IsDirty::Yes);
 
-            std::vector<std::string> matchingObservers =
+            const std::vector<std::string> matchingObservers =
                 _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingObservers.empty()) {
                 appendLog(
@@ -1076,9 +1087,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
-                    msg = fmt::format(
-                        "Latest Horizons error: {}", _latestHorizonsError
-                    );
+                    msg = std::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
                 break;
@@ -1097,12 +1106,12 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::ErrorNoTarget: {
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "No match was found for target '{}'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Error);
 
-            msg = fmt::format(
+            msg = std::format(
                 "Try to use '{}*' as target to search for possible matches", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Info);
@@ -1123,13 +1132,13 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             // Format: ID#, Name, Designation, IAU/aliases/other
             // Line after data: Number of matches =  X. Use ID# to make unique selection.
 
-            std::string msg = fmt::format(
+            std::string msg = std::format(
                 "Multiple matches were found for target '{}'", _targetName
             );
             appendLog(msg, HorizonsDialog::LogLevel::Warning);
             styleLabel(_targetLabel, IsDirty::Yes);
 
-            std::vector<std::string> matchingTargets =
+            const std::vector<std::string> matchingTargets =
                 _horizonsFile.parseMatches("Name", "matches", ">MATCH NAME<");
             if (matchingTargets.empty()) {
                 appendLog(
@@ -1137,7 +1146,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                     HorizonsDialog::LogLevel::Error
                 );
                 if (!_latestHorizonsError.empty()) {
-                    msg = fmt::format("Latest Horizons error: {}", _latestHorizonsError);
+                    msg = std::format("Latest Horizons error: {}", _latestHorizonsError);
                     appendLog(msg, LogLevel::Error);
                 }
                 break;
@@ -1158,7 +1167,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
         case HorizonsResultCode::UnknownError: {
             appendLog("Unknown error", LogLevel::Error);
             if (!_latestHorizonsError.empty()) {
-                std::string msg = fmt::format(
+                const std::string msg = std::format(
                     "Latest Horizons error: {}", _latestHorizonsError
                 );
                 appendLog(msg, LogLevel::Error);
@@ -1168,7 +1177,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
         }
         default: {
             if (!_latestHorizonsError.empty()) {
-                std::string msg = fmt::format(
+                const std::string msg = std::format(
                     "Latest Horizons error: {}", _latestHorizonsError
                 );
                 appendLog(msg, LogLevel::Error);

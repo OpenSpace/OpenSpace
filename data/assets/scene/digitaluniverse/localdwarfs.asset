@@ -16,8 +16,10 @@ local speck = asset.resource({
 local Object = {
   Identifier = "LocalDwarfGalaxies",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePolygonCloud",
     Enabled = false,
+    Opacity = 0.3,
+    File = speck .. "localgroup.speck",
     Labels = {
       File = speck .. "localgroup.label",
       Color = { 0.3, 0.3, 1.0 },
@@ -25,17 +27,22 @@ local Object = {
       MinMaxSize = { 7, 20 },
       Unit = "Mpc"
     },
-    Color = { 0.5, 1.0, 0.2 },
-    ColorMap = speck .. "localgroup.cmap",
-    ColorOption = { "association" },
-    Opacity = 0.3,
-    File = speck .. "localgroup.speck",
-    Texture = textures .. "point4.png",
+    Coloring = {
+      FixedColor = { 0.0, 1.0, 0.0 },
+      ColorMapping = {
+        File = speck .. "localgroup.cmap",
+        ParameterOptions = {
+          { Key = "association" }
+        }
+      }
+    },
     PolygonSides = 12,
     Unit = "Mpc",
-    ScaleFactor = 465.0,
-    BillboardMinMaxSize = { 0.0, 20.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 20.2,
+      MaxSize = 0.7,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Local Group",
@@ -69,7 +76,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Local Group",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for the Local Goup",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

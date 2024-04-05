@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -92,14 +92,14 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     auto updateFormatString = [this]() {
         switch (_displayFormat.value()) {
             case static_cast<int>(DisplayFormat::DecimalDegrees):
-                _formatString = fmt::format(
+                _formatString = std::format(
                     "Position: {{:03.{0}f}}, {{:03.{0}f}}  "
                     "Altitude: {{:03.{0}f}} {{}}",
                     _significantDigits.value()
                 );
                 break;
             case static_cast<int>(DisplayFormat::DegreeMinuteSeconds):
-                _formatString = fmt::format(
+                _formatString = std::format(
                     "Position: {{}}d {{}}' {{:03.{0}f}}\" {{}}, "
                     "{{}}d {{}}' {{:03.{0}f}}\" {{}}  "
                     "Altitude: {{:03.{0}f}} {{}}",
@@ -145,10 +145,10 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
 
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
 
-    glm::dvec3 position = module->geoPosition();
+    const glm::dvec3 position = module->geoPosition();
     double lat = position.x;
     double lon = position.y;
-    double altitude = position.z;
+    const double altitude = position.z;
 
     std::pair<double, std::string_view> dist = simplifyDistance(altitude);
 
@@ -157,9 +157,11 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
     switch (_displayFormat.value()) {
         case static_cast<int>(DisplayFormat::DecimalDegrees):
         {
-            end = fmt::format_to(
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            end = std::vformat_to(
                 _buffer.data(),
-                fmt::runtime(_formatString), lat, lon, dist.first, dist.second
+                _formatString,
+                std::make_format_args(lat, lon, dist.first, dist.second)
             );
             break;
         }
@@ -184,20 +186,22 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
             const double lonSec = lonMinRemainder * 60.f;
 
 
-            end = fmt::format_to(
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            end = std::vformat_to(
                 _buffer.data(),
-                fmt::runtime(_formatString),
-                latDeg, latMin, latSec, isNorth ? "N" : "S",
-                lonDeg, lonMin, lonSec, isEast ? "E" : "W",
-                dist.first, dist.second
+                _formatString,
+                std::make_format_args(
+                    latDeg, latMin, latSec, isNorth ? "N" : "S",
+                    lonDeg, lonMin, lonSec, isEast ? "E" : "W",
+                    dist.first, dist.second
+                )
             );
 
             break;
         }
     }
 
-    std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-
+    const std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
     RenderFont(*_font, penPosition, text);
     penPosition.y -= _font->height();
 }
@@ -206,7 +210,7 @@ glm::vec2 DashboardItemGlobeLocation::size() const {
     ZoneScoped;
 
     return _font->boundingBox(
-        fmt::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)
+        std::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)
     );
 }
 

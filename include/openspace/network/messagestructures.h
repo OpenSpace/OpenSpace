@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 #define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <cstring>
 #include <fstream>
@@ -49,8 +50,8 @@ struct CameraKeyframe {
     CameraKeyframe(const std::vector<char>& buffer) {
         deserialize(buffer);
     }
-    CameraKeyframe(glm::dvec3&& pos, glm::dquat&& rot, std::string&& focusNode,
-        bool&& followNodeRot, float&& scale)
+    CameraKeyframe(glm::dvec3 pos, glm::dquat rot, std::string focusNode,
+                   bool followNodeRot, float scale)
         : _position(pos)
         , _rotation(rot)
         , _followNodeRotation(followNodeRot)
@@ -407,7 +408,7 @@ struct ScriptMessage {
         if (buffer.size() != (sizeof(uint32_t) + len)) {
             LERRORC(
                 "ParallelPeer",
-                fmt::format(
+                std::format(
                     "Received buffer with wrong size. Expected {} got {}",
                     len, buffer.size()
                 )
@@ -468,7 +469,7 @@ struct ScriptMessage {
         std::string tmpReadbackScript;
         _script.erase();
         for (int i = 0; i < numScriptLines; ++i) {
-            std::getline(iss, tmpReadbackScript);
+            ghoul::getline(iss, tmpReadbackScript);
             size_t start = tmpReadbackScript.find_first_not_of(" ");
             tmpReadbackScript = tmpReadbackScript.substr(start);
             _script.append(tmpReadbackScript);

@@ -9,28 +9,36 @@ local speck = asset.resource({
   Name = "2MASS Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_2mass_speck",
-  Version = 1
+  Version = 2
 })
 
 
 local Object = {
   Identifier = "2MASS",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
-    Color = { 1.0, 0.4, 0.2 },
     Opacity = 1.0,
     File = speck .. "2MASS.speck",
     Unit = "Mpc",
-    Texture = textures .. "point3A.png",
-    ColorMap = speck .. "lss.cmap",
-    ColorOption = { "redshift", "prox5Mpc" },
-    ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
-    CorrectionSizeEndDistance = 20.6,
-    CorrectionSizeFactor = 15.0,
-    ScaleFactor = 510.78,
-    BillboardMinMaxSize = { 0.0, 11.15 },
-    EnablePixelSizeControl = true
+    Texture = {
+      File = textures .. "point3A.png",
+    },
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 },
+      ColorMapping = {
+        File = speck .. "lss.cmap",
+        ParameterOptions = {
+          { Key = "prox5Mpc", Range = { 1.0, 50.0 } },
+          { Key = "redshift", Range = { 0.0, 0.075 } }
+        }
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 22.2,
+      MaxSize = 0.44,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "2MASS Galaxies",
@@ -60,7 +68,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "2MASS Galaxies",
-  Version = "1.1",
+  Version = "2.0",
   Description = "Digital Universe asset for the Two Micron All-Sky Survey (2MASS) survey",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

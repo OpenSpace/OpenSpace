@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -255,7 +255,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             // Convert the start and end time from string representations to J2000 seconds
             _start = SpiceManager::ref().ephemerisTimeFromDate(_startTime);
             _end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
-            double timespan = _end - _start;
+            const double timespan = _end - _start;
 
             _totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
 
@@ -282,8 +282,8 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
 
         // Calculate sweeping range for this iteration
-        unsigned int startIndex = _sweepIteration * _sweepChunkSize;
-        unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
+        const unsigned int startIndex = _sweepIteration * _sweepChunkSize;
+        const unsigned int nextIndex = (_sweepIteration + 1) * _sweepChunkSize;
         unsigned int stopIndex = std::min(nextIndex, _numberOfVertices);
 
         // If iterative calculations are disabled
@@ -292,7 +292,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
 
         // Calculate all vertex positions
-        for (unsigned int i = startIndex; i < stopIndex; ++i) {
+        for (unsigned int i = startIndex; i < stopIndex; i++) {
             const glm::dvec3 dp = _translation->position({
                 {},
                 Time(_start + i * _totalSampleInterval),

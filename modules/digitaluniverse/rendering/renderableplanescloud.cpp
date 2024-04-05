@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -156,7 +156,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
 
         // [[codegen::verbatim(TransformationMatrixInfo.description)]]
         std::optional<glm::dmat4x4> transformationMatrix;
@@ -322,7 +322,7 @@ void RenderablePlanesCloud::initialize() {
     ZoneScoped;
 
     if (_hasSpeckFile && std::filesystem::is_regular_file(_speckFile)) {
-        _dataset = speck::data::loadFileWithCache(_speckFile);
+        _dataset = dataloader::data::loadFileWithCache(_speckFile);
         if (_dataset.entries.empty()) {
             throw ghoul::RuntimeError("Error loading data");
         }
@@ -330,7 +330,6 @@ void RenderablePlanesCloud::initialize() {
 
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
@@ -470,7 +469,13 @@ void RenderablePlanesCloud::render(const RenderData& data, RendererTasks&) {
             glm::dvec3(invMVPParts * glm::dvec4(0.0, 1.0, 0.0, 0.0))
         );
 
-        _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp, fadeInVariable);
+        _labels->render(
+            data,
+            modelViewProjectionTransform,
+            orthoRight,
+            orthoUp,
+            fadeInVariable
+        );
     }
 }
 
@@ -488,7 +493,7 @@ void RenderablePlanesCloud::update(const UpdateData&) {
 }
 
 void RenderablePlanesCloud::loadTextures() {
-    for (const speck::Dataset::Texture& tex : _dataset.textures) {
+    for (const dataloader::Dataset::Texture& tex : _dataset.textures) {
         std::filesystem::path fullPath = absPath(_texturesPath.string() + '/' + tex.file);
         std::filesystem::path pngPath = fullPath;
         pngPath.replace_extension(".png");
@@ -502,7 +507,7 @@ void RenderablePlanesCloud::loadTextures() {
         }
         else {
             // We can't really recover from this as it would crash during rendering anyway
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Could not find image file '{}'", tex.file
             ));
         }
@@ -511,14 +516,14 @@ void RenderablePlanesCloud::loadTextures() {
             ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
         if (t) {
-            LINFOC("RenderablePlanesCloud", fmt::format("Loaded texture {}", path));
+            LINFOC("RenderablePlanesCloud", std::format("Loaded texture '{}'", path));
             t->uploadTexture();
             t->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             t->purgeFromRAM();
         }
         else {
             // Same here, we won't be able to recover from this nullptr
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Could not find image file '{}'", tex.file
             ));
         }
@@ -535,7 +540,7 @@ void RenderablePlanesCloud::createPlanes() {
         LDEBUG("Creating planes...");
         float maxSize = 0.f;
         double maxRadius = 0.0;
-        for (const speck::Dataset::Entry& e : _dataset.entries) {
+        for (const dataloader::Dataset::Entry& e : _dataset.entries) {
             const glm::vec4 transformedPos = glm::vec4(
                 _transformationMatrix * glm::dvec4(e.position, 1.0)
             );
@@ -582,7 +587,7 @@ void RenderablePlanesCloud::createPlanes() {
             glm::vec4 vertex2 = transformedPos - u + v;
             glm::vec4 vertex4 = transformedPos + u - v;
 
-            for (int i = 0; i < 3; ++i) {
+            for (int i = 0; i < 3; i++) {
                 maxSize = std::max(maxSize, vertex0[i]);
                 maxSize = std::max(maxSize, vertex1[i]);
                 maxSize = std::max(maxSize, vertex2[i]);
@@ -608,7 +613,7 @@ void RenderablePlanesCloud::createPlanes() {
             std::unordered_map<int, PlaneAggregate>::iterator found =
                 _planesMap.find(textureIndex);
             if (found != _planesMap.end()) {
-                for (int i = 0; i < PlanesVertexDataSize; ++i) {
+                for (int i = 0; i < PlanesVertexDataSize; i++) {
                     found->second.planesCoordinates.push_back(VertexData[i]);
                 }
                 found->second.numberOfPlanes++;
@@ -619,7 +624,7 @@ void RenderablePlanesCloud::createPlanes() {
                 glGenVertexArrays(1, &pA.vao);
                 glGenBuffers(1, &pA.vbo);
                 pA.numberOfPlanes = 1;
-                for (int i = 0; i < PlanesVertexDataSize; ++i) {
+                for (int i = 0; i < PlanesVertexDataSize; i++) {
                     pA.planesCoordinates.push_back(VertexData[i]);
                 }
                 _planesMap.insert(std::pair(textureIndex, pA));

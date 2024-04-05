@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -200,7 +200,7 @@ glm::dmat4 incrementalAnimationMatrix(const glm::dvec3& start, const glm::dvec3&
  * \param worldPosition The galactic position of the plane
  * \return Field of view
  */
-double sizeFromFov(double fov, glm::dvec3 worldPosition);
+double sizeFromFov(double fov, const glm::dvec3& worldPosition);
 
 template <typename T>
 class Animation {

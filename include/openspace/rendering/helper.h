@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -146,12 +146,12 @@ VertexXYZ convertToXYZ(const Vertex& v);
 std::vector<VertexXYZ> convert(std::vector<Vertex> v);
 
 std::vector<Vertex> createRing(int nSegments, float radius,
-    glm::vec4 colors = glm::vec4(1.f));
+    const glm::vec4& colors = glm::vec4(1.f));
 
 std::vector<VertexXYZ> createRingXYZ(int nSegments, float radius);
 
 VertexIndexListCombo<Vertex>
-createSphere(int nSegments, glm::vec3 radii, glm::vec4 colors = glm::vec4(1.f));
+createSphere(int nSegments, glm::vec3 radii, const glm::vec4& colors = glm::vec4(1.f));
 
 VertexIndexListCombo<VertexXYZNormal> createCylinder(unsigned int nSegments,
     float radius, float height);

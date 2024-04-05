@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,14 +59,15 @@ namespace {
 
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props)
     {
-        using Visibility = openspace::properties::Property::Visibility;
-        Visibility visibilityFilter = openspace::global::openSpaceEngine->visibility();
+        using namespace openspace;
+        using Visibility = properties::Property::Visibility;
+        const Visibility visibilityFilter = global::openSpaceEngine->visibility();
 
         return static_cast<int>(std::count_if(
             props.begin(),
             props.end(),
-            [visibilityFilter](openspace::properties::Property* p) {
-                using V = openspace::properties::Property::Visibility;
+            [visibilityFilter](properties::Property* p) {
+                using V = properties::Property::Visibility;
                 return static_cast<std::underlying_type_t<V>>(visibilityFilter) >=
                        static_cast<std::underlying_type_t<V>>(p->visibility());
             }
@@ -124,7 +125,7 @@ namespace {
             }
         );
 
-        TreeNode* n;
+        TreeNode* n = nullptr;
         if (it != node.children.end()) {
             // We have a child, so we use it
             n = it->get();
@@ -216,7 +217,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
     const std::vector<PropertyOwner*>& subOwners = owner->propertySubOwners();
     for (PropertyOwner* subOwner : subOwners) {
         const std::vector<Property*>& properties = subOwner->propertiesRecursive();
-        int count = nVisibleProperties(properties);
+        const int count = nVisibleProperties(properties);
         if (count == 0) {
             continue;
         }
@@ -280,7 +281,6 @@ void GuiPropertyComponent::render() {
     ImGui::SetNextWindowBgAlpha(0.75f);
     ImGui::Begin(guiName().c_str(), &v);
     _isEnabled = v;
-    bool showHiddenNode = openspace::global::openSpaceEngine->showHiddenSceneGraphNodes();
 
     _isCollapsed = ImGui::IsWindowCollapsed();
     using namespace properties;
@@ -313,25 +313,25 @@ void GuiPropertyComponent::render() {
             owners.begin(),
             owners.end(),
             [&ordering](PropertyOwner* lhs, PropertyOwner* rhs) {
-                std::string lhsGroup = dynamic_cast<SceneGraphNode*>(lhs)->guiPath();
-                std::string rhsGroup = dynamic_cast<SceneGraphNode*>(rhs)->guiPath();
+                const std::string lhsGrp = dynamic_cast<SceneGraphNode*>(lhs)->guiPath();
+                const std::string rhsGrp = dynamic_cast<SceneGraphNode*>(rhs)->guiPath();
 
-                if (lhsGroup.empty()) {
+                if (lhsGrp.empty()) {
                     return false;
                 }
-                if (rhsGroup.empty()) {
+                if (rhsGrp.empty()) {
                     return true;
                 }
 
                 if (ordering.empty()) {
-                    return lhsGroup < rhsGroup;
+                    return lhsGrp < rhsGrp;
                 }
 
-                std::vector<std::string> lhsToken = ghoul::tokenizeString(lhsGroup, '/');
+                std::vector<std::string> lhsToken = ghoul::tokenizeString(lhsGrp, '/');
                 // The first token is always empty
                 auto lhsIt = std::find(ordering.begin(), ordering.end(), lhsToken[1]);
 
-                std::vector<std::string> rhsToken = ghoul::tokenizeString(rhsGroup, '/');
+                std::vector<std::string> rhsToken = ghoul::tokenizeString(rhsGrp, '/');
                 // The first token is always empty
                 auto rhsIt = std::find(ordering.begin(), ordering.end(), rhsToken[1]);
 
@@ -342,7 +342,7 @@ void GuiPropertyComponent::render() {
                         return lhsIt < rhsIt;
                     }
                     else {
-                        return lhsGroup < rhsGroup;
+                        return lhsGrp < rhsGrp;
                     }
                 }
                 else if (lhsIt != ordering.end() && rhsIt == ordering.end()) {
@@ -353,7 +353,7 @@ void GuiPropertyComponent::render() {
                     return false;
                 }
                 else {
-                    return lhsGroup < rhsGroup;
+                    return lhsGrp < rhsGrp;
                 }
             }
         );
@@ -397,20 +397,6 @@ void GuiPropertyComponent::render() {
     };
 
     if (!_useTreeLayout || noGuiGroups) {
-        if (!showHiddenNode) {
-            // Remove all of the nodes that we want hidden first
-            owners.erase(
-                std::remove_if(
-                    owners.begin(),
-                    owners.end(),
-                    [](properties::PropertyOwner* p) {
-                        SceneGraphNode* s = dynamic_cast<SceneGraphNode*>(p);
-                        return s && s->hasGuiHintHidden();
-                    }
-                ),
-                owners.end()
-            );
-        }
         std::for_each(owners.begin(), owners.end(), renderProp);
     }
     else { // _useTreeLayout && gui groups exist
@@ -419,15 +405,13 @@ void GuiPropertyComponent::render() {
         for (properties::PropertyOwner* pOwner : owners) {
             // We checked above that pOwner is a SceneGraphNode
             SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
-            if (!showHiddenNode && nOwner->hasGuiHintHidden()) {
-                continue;
-            }
             const std::string gui = nOwner->guiPath();
             if (gui.empty()) {
                 // We know that we are done now since we stable_sort:ed them above
                 break;
             }
-            std::vector<std::string> paths = ghoul::tokenizeString(gui.substr(1), '/');
+            const std::vector<std::string> paths =
+                ghoul::tokenizeString(gui.substr(1), '/');
             addPathToTree(root, paths, nOwner);
         }
 
@@ -487,7 +471,7 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
     // Check if the visibility of the property is high enough to be displayed
     using V = properties::Property::Visibility;
     using Visibility = openspace::properties::Property::Visibility;
-    Visibility visibilityFilter = openspace::global::openSpaceEngine->visibility();
+    const Visibility visibilityFilter = openspace::global::openSpaceEngine->visibility();
     const auto v = static_cast<std::underlying_type_t<V>>(visibilityFilter);
     const auto propV = static_cast<std::underlying_type_t<V>>(prop->visibility());
     if (v >= propV) {

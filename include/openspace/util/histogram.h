@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,7 @@ public:
      * \param repeat How many times you want to insert it
      * \return Returns `true` if succesful insertion, otherwise return `false`
      */
-    bool add(float value, float repeat = 1.0f);
+    bool add(float value, float repeat = 1.f);
     bool add(const Histogram& histogram);
     bool addRectangle(float lowBin, float highBin, float value);
 
@@ -69,7 +69,7 @@ public:
     std::vector<char> getBinaryData() const;
 
     float highestBinValue(bool equalized, int overBins=0);
-    float binWidth();
+    float binWidth() const;
 
     void changeRange(float minValue, float maxValue);
 

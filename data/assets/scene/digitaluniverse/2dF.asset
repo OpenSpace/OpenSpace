@@ -9,26 +9,35 @@ local speck = asset.resource({
   Name = "2dF Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_2dF_speck",
-  Version = 2
+  Version = 3
 })
 
 
 local Object = {
   Identifier = "2dF",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 1.0,
     File = speck .. "2dF.speck",
     Unit = "Mpc",
-    Texture = textures .. "point3A.png",
-    ColorMap = speck .. "2dF.cmap",
-    ColorOption = { "redshift", "proximity" },
-    ColorRange = { { 0.0, 0.075 }, { 1.0, 25.0 } },
-    ScaleFactor = 520.0,
-    BillboardMinMaxSize = { 0.0, 4.7 },
-    EnablePixelSizeControl = true
+    Texture = {
+      File = textures .. "point3A.png",
+    },
+    Coloring = {
+      ColorMapping = {
+        File = speck .. "2dF.cmap",
+        ParameterOptions = {
+          { Key = "proximity", Range = { 1.0, 25.0 } },
+          { Key = "redshift", Range = { 0.0, 0.075 } }
+        }
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 22.6,
+      MaxSize = 0.2,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "2dF Galaxies",
@@ -64,7 +73,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "2dF Galaxies",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for the The Two-degree Field (2dF) Survey",
   Author = "Brian Abbott (AMNH), Eric Gawiser (Rutgers U)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

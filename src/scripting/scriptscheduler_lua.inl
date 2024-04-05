@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ namespace {
     );
 
     std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
-    for (size_t i = 1; i <= scriptsDict.size(); ++i) {
+    for (size_t i = 1; i <= scriptsDict.size(); i++) {
         ghoul::Dictionary d = scriptsDict.value<ghoul::Dictionary>(std::to_string(i));
 
         scripting::ScriptScheduler::ScheduledScript script =

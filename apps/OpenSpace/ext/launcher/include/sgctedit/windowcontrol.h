@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -199,7 +199,7 @@ private:
     void onSizeYChanged(int newValue);
     void onOffsetXChanged(int newValue);
     void onOffsetYChanged(int newValue);
-    void onProjectionChanged(int newSelection);
+    void onProjectionChanged(int newSelection) const;
     void onFullscreenClicked();
     void onAspectRatioLockClicked();
     void onFovLockClicked();

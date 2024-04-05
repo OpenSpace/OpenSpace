@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -228,7 +228,7 @@ namespace {
 
         SceneGraphNode* startNode = sceneGraphNode(nodeName);
         if (!startNode) {
-            LERROR(fmt::format("Could not find start node '{}'", nodeName));
+            LERROR(std::format("Could not find start node '{}'", nodeName));
             return;
         }
         const double boundingSphere = startNode->boundingSphere();
@@ -242,7 +242,7 @@ namespace {
         else {
             // Recompute distance (previous value was in meters)
             if (boundingSphere < std::numeric_limits<double>::epsilon()) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Start node '{}' has invalid bounding sphere", nodeName
                 ));
                 return;
@@ -383,20 +383,21 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     SceneGraphNode* endNode = sceneGraphNode(_end);
 
     if (!startNode) {
-        LERROR(fmt::format("Could not find start node '{}'", _start.value()));
+        LERROR(std::format("Could not find start node '{}'", _start.value()));
         return;
     }
 
     if (!endNode) {
-        LERROR(fmt::format("Could not find end node '{}'", _end.value()));
+        LERROR(std::format("Could not find end node '{}'", _end.value()));
         return;
     }
 
     const double boundingSphere = startNode->boundingSphere();
-    bool hasNoBoundingSphere = boundingSphere < std::numeric_limits<double>::epsilon();
+    const bool hasNoBoundingSphere =
+        boundingSphere < std::numeric_limits<double>::epsilon();
 
     if (hasNoBoundingSphere && (_useRelativeLength || _useRelativeOffset)) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Node '{}' has no valid bounding sphere. Can not use relative values",
             _end.value()
         ));
@@ -420,8 +421,8 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     );
 
     // Update the position based on the arrowDirection of the nodes
-    glm::dvec3 startNodePos = startNode->worldPosition();
-    glm::dvec3 endNodePos = endNode->worldPosition();
+    const glm::dvec3 startNodePos = startNode->worldPosition();
+    const glm::dvec3 endNodePos = endNode->worldPosition();
 
     glm::dvec3 arrowDirection = glm::normalize(endNodePos - startNodePos);
     glm::dvec3 startPos = glm::dvec3(startNodePos + offset * arrowDirection);
@@ -432,24 +433,26 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
         arrowDirection *= -1.0;
     }
 
-    double coneLength = _arrowHeadSize * length;
-    double cylinderLength = length - coneLength;
-    double arrowHeadWidth = _width * _arrowHeadWidthFactor;
+    const double coneLength = _arrowHeadSize * length;
+    const double cylinderLength = length - coneLength;
+    const double arrowHeadWidth = _width * _arrowHeadWidthFactor;
 
     // Create transformation matrices to reshape to size and position
     _cylinderTranslation = glm::translate(glm::dmat4(1.0), startPos);
-    glm::dvec3 cylinderScale = glm::dvec3(s * glm::dvec4(_width, _width, cylinderLength, 0.0));
+    const glm::dvec3 cylinderScale = glm::dvec3(
+        s * glm::dvec4(_width, _width, cylinderLength, 0.0)
+    );
     _cylinderScale = glm::scale(glm::dmat4(1.0), cylinderScale);
 
     // Adapt arrow head start to scaled size
-    glm::dvec3 arrowHeadStartPos = startPos + cylinderScale.z * arrowDirection;
+    const glm::dvec3 arrowHeadStartPos = startPos + cylinderScale.z * arrowDirection;
 
     _coneTranslation = glm::translate(glm::dmat4(1.0), arrowHeadStartPos);
-    glm::dvec3 coneScale = glm::dvec3(arrowHeadWidth, arrowHeadWidth, coneLength);
+    const glm::dvec3 coneScale = glm::dvec3(arrowHeadWidth, arrowHeadWidth, coneLength);
     _coneScale = s * glm::scale(glm::dmat4(1.0), coneScale);
 
     // Rotation to point at the end node
-    glm::quat rotQuat = glm::rotation(glm::dvec3(0.0, 0.0, 1.0), arrowDirection);
+    const glm::quat rotQuat = glm::rotation(glm::dvec3(0.0, 0.0, 1.0), arrowDirection);
     _pointDirectionRotation = glm::dmat4(glm::toMat4(rotQuat));
 }
 

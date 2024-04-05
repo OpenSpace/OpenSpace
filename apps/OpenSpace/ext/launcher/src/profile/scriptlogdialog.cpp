@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scene/profile.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QGridLayout>
 #include <QDialogButtonBox>
 #include <QFileDialog>
@@ -65,7 +65,7 @@ void ScriptlogDialog::createWidgets() {
 
     QGridLayout* layout = new QGridLayout(this);
     {
-        QLabel* heading = new QLabel(QString::fromStdString(fmt::format(
+        QLabel* heading = new QLabel(QString::fromStdString(std::format(
             "Choose commands from \"{}\"", _scriptLogFile
         )));
         heading->setObjectName("heading");
@@ -76,7 +76,7 @@ void ScriptlogDialog::createWidgets() {
         connect(
             open, &QPushButton::clicked,
             [this, heading]() {
-                QString file = QFileDialog::getOpenFileName(
+                const QString file = QFileDialog::getOpenFileName(
                     this,
                     "Select log file",
                     "",
@@ -84,7 +84,7 @@ void ScriptlogDialog::createWidgets() {
                 );
                 _scriptLogFile = file.toStdString();
         
-                heading->setText(QString::fromStdString(fmt::format(
+                heading->setText(QString::fromStdString(std::format(
                     "Choose commands from \"{}\"", _scriptLogFile
                 )));
                 loadScriptFile();
@@ -126,7 +126,7 @@ void ScriptlogDialog::createWidgets() {
 void ScriptlogDialog::loadScriptFile() {
     _scripts.clear();
 
-    std::string log = absPath(_scriptLogFile).string();
+    const std::string log = absPath(_scriptLogFile).string();
     QFile file(QString::fromStdString(log));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
@@ -143,7 +143,7 @@ void ScriptlogDialog::loadScriptFile() {
 }
 
 void ScriptlogDialog::updateScriptList() {
-    std::string filter = _filter->text().toStdString();
+    const std::string filter = _filter->text().toStdString();
     QListWidgetItem* curr = _scriptlogList->currentItem();
     std::string selection;
     if (curr) {
@@ -152,8 +152,8 @@ void ScriptlogDialog::updateScriptList() {
     int index = -1;
     _scriptlogList->clear();
     for (const std::string& script : _scripts) {
-        bool foundDynamic = script.find(filter) != std::string::npos;
-        bool foundStatic =
+        const bool foundDynamic = script.find(filter) != std::string::npos;
+        const bool foundStatic =
             _fixedFilter.empty() ? true : script.find(_fixedFilter) != std::string::npos;
         if (foundDynamic && foundStatic) {
             if (script == selection && index == -1) {

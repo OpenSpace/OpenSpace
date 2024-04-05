@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -77,7 +77,7 @@ RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary
         else {
             setIdentifier("RenderableSphereSpout" + std::to_string(iIdentifier));
         }
-        ++id;
+        id++;
     }
 
     if (_guiName.empty()) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
 #include <glm/gtx/quaternion.hpp>
@@ -741,7 +741,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
 
     if (pinchConsecCt > 0 && action != InteractionType::PINCH) {
         if (pinchConsecCt > 3) {
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "PINCH gesture ended with {} drag distance and {} counts",
                 pinchConsecZoomFactor, pinchConsecCt
             ));
@@ -1005,7 +1005,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
                 // Because of heightmaps we need to ensure we don't go through the surface
                 if (_zoomInLimit.value() < nodeRadius) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-                    LINFO(fmt::format(
+                    LINFO(std::format(
                         "Zoom In limit should be larger than anchor "
                         "center to surface, setting it to {}", zoomInBounds
                     ));
@@ -1021,7 +1021,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
             // Make sure zoom in limit is not larger than zoom out limit
             if (zoomInBounds > zoomOutBounds) {
-               LWARNING(fmt::format(
+               LWARNING(std::format(
                    "Zoom In Limit should be smaller than Zoom Out Limit",
                     zoomOutBounds
                ));
@@ -1069,7 +1069,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
             }
             else if (currentPosViolatingZoomOutLimit) {
 #ifdef TOUCH_DEBUG_PROPERTIES
-                LINFO(fmt::format(
+                LINFO(std::format(
                     "You are outside zoom out {} limit, only zoom in allowed",
                     zoomOutBounds
                 ));
@@ -1112,7 +1112,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         //Show velocity status every N frames
         if (++stepVelUpdate >= 60) {
             stepVelUpdate = 0;
-            LINFO(fmt::format(
+            LINFO(std::format(
                 "DistToFocusNode {} stepZoomVelUpdate {}",
                 length(centerToCamera), _vel.zoom
             ));

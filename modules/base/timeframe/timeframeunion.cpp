@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,18 +63,16 @@ bool TimeFrameUnion::isActive(const Time& time) const {
     return false;
 }
 
-TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary)
-    : TimeFrame()
-{
+TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
     // I don't know how we can actually help the reference attribute properly. Since the
     // Parameter list only contains the monostate, there is no need to actually create
     // the object here
     codegen::bake<Parameters>(dictionary);
 
-    ghoul::Dictionary frames =
+    const ghoul::Dictionary frames =
         dictionary.value<ghoul::Dictionary>(TimeFramesInfo.identifier);
 
-    for (std::string_view k : frames.keys()) {
+    for (const std::string_view k : frames.keys()) {
         const ghoul::Dictionary& subDictionary = frames.value<ghoul::Dictionary>(k);
         _timeFrames.push_back(TimeFrame::createFromDictionary(subDictionary));
         TimeFrame& subFrame = *_timeFrames.back();

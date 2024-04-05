@@ -94,7 +94,7 @@ function (handle_module_dependencies target_name module_name)
   # We always want to link against Ghoul and the core library
   target_link_libraries(${library_name} PRIVATE Ghoul openspace-core)
   target_precompile_headers(${library_name} PRIVATE
-    [["ghoul/fmt.h"]]
+    [["ghoul/format.h"]]
     [["ghoul/glm.h"]]
     [["ghoul/misc/assert.h"]]
     [["ghoul/misc/boolean.h"]]

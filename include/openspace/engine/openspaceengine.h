@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -96,12 +96,10 @@ public:
     void deinitializeGL();
     void preSynchronization();
     void postSynchronizationPreDraw();
-    void viewportChanged();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
         const glm::mat4& projectionMatrix);
     void drawOverlays();
     void postDraw();
-    void resetPropertyChangeFlags();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action,
         IsGuiWindow isGuiWindow);
     void charCallback(unsigned int codepoint, KeyModifier modifier,
@@ -118,7 +116,6 @@ public:
     void decode(std::vector<std::byte> data);
 
     properties::Property::Visibility visibility() const;
-    bool showHiddenSceneGraphNodes() const;
     void toggleShutdownMode();
 
     Mode currentMode() const;
@@ -135,7 +132,6 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
-    void writeDocumentation();
     void createUserDirectoriesIfNecessary();
 
     /**
@@ -149,17 +145,14 @@ private:
     void loadFonts();
 
     void runGlobalCustomizationScripts();
-    void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     properties::BoolProperty _printEvents;
     properties::OptionProperty _visibility;
-    properties::BoolProperty _showHiddenSceneGraphNodes;
     properties::FloatProperty _fadeOnEnableDuration;
     properties::BoolProperty _disableAllMouseInputs;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
-    bool _shouldAbortLoading = false;
     std::unique_ptr<LoadingScreen> _loadingScreen;
     std::unique_ptr<VersionChecker> _versionChecker;
 

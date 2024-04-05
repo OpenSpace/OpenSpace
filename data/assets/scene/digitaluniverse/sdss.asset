@@ -9,31 +9,39 @@ local speck = asset.resource({
   Name = "Sloan Digital Sky Survey Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_sloandss_speck",
-  Version = 2
+  Version = 3
 })
 
 
 local Object = {
   Identifier = "SloanDigitalSkySurvey",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = true,
-    Color = { 0.8, 0.8, 1.0 },
     Opacity = 0.8,
-    ScaleFactor = 520.0,
     File = speck .. "SDSSgals.speck",
-    ColorMap = speck .. "SDSSgals.cmap",
-    ColorOption = { "redshift", "proximity" },
-    ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
-    Texture = textures .. "point3A.png",
+    Coloring = {
+      FixedColor = { 0.8, 0.8, 1.0 },
+      ColorMapping = {
+        File = speck .. "SDSSgals.cmap",
+        ParameterOptions = {
+          { Key = "proximity", Range = { 1.0, 50.0 } },
+          { Key = "redshift", Range = { 0.0, 0.075 } }
+        }
+      }
+    },
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Unit = "Mpc",
-    FadeInDistances = { 220.0, 650.0 }, -- Fade in value in the same unit as "Unit"
-    BillboardMinMaxSize = { 0.0, 5.5 },
-    CorrectionSizeEndDistance = 20.65,
-    CorrectionSizeFactor = 10.41,
-    TextSize = 14.8,
-    TextMinMaxSize = { 10, 50 },
-    EnablePixelSizeControl = true
+    Fading = {
+      FadeInDistances = { 220.0, 650.0 } -- Fade in value in the same unit as "Unit"
+    },
+    SizeSettings = {
+      ScaleExponent = 22.6,
+      MaxSize = 0.15,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Sloan Digital Sky Survey",
@@ -71,7 +79,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Sloan Digital Sky Survey",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for The Sloan Digital Sky Survey (SDSS)",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

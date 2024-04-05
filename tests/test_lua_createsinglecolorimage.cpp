@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@
 TEST_CASE("CreateSingleColorImage: Create image and check return value",
           "[createsinglecolorimage]")
 {
-    std::filesystem::path path = createSingleColorImage(
+    const std::filesystem::path path = createSingleColorImage(
         "colorFile",
         glm::dvec3(1.0, 0.0, 0.0)
     );
@@ -65,7 +65,7 @@ TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
 TEST_CASE("CreateSingleColorImage: Check if file was created",
           "[createsinglecolorimage]")
 {
-    std::filesystem::path path = createSingleColorImage(
+    const std::filesystem::path path = createSingleColorImage(
         "colorFile2",
         glm::dvec3(0.0, 1.0, 0.0)
     );
@@ -73,19 +73,19 @@ TEST_CASE("CreateSingleColorImage: Check if file was created",
 }
 
 TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage]") {
-    std::filesystem::path path = createSingleColorImage(
+    const std::filesystem::path path = createSingleColorImage(
         "colorFile",
         glm::dvec3(1.0, 0.0, 0.0)
     );
 
     // Read the PPM file and check the image dimensions
     // (maybe too hard coded, but cannot load a texture here...)
-    std::ifstream ppmFile(path, std::ifstream::binary);
+    std::ifstream ppmFile = std::ifstream(path, std::ifstream::binary);
     REQUIRE(ppmFile.is_open());
 
     std::string version;
-    unsigned int width;
-    unsigned int height;
+    unsigned int width = 0;
+    unsigned int height = 0;
 
     ppmFile >> version >> width >> height;
 

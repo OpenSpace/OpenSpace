@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,9 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
@@ -85,7 +85,7 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
     if (std::holds_alternative<std::string>(p.horizonsTextFile)) {
         std::string file = std::get<std::string>(p.horizonsTextFile);
         if (!std::filesystem::is_regular_file(absPath(file))) {
-            LWARNING(fmt::format("The Horizons text file '{}' could not be found", file));
+            LWARNING(std::format("The Horizons text file '{}' could not be found", file));
             return;
         }
 
@@ -94,12 +94,12 @@ HorizonsTranslation::HorizonsTranslation(const ghoul::Dictionary& dictionary)
         _horizonsTextFiles = files;
     }
     else if (std::holds_alternative<std::vector<std::string>>(p.horizonsTextFile)) {
-        std::vector<std::string> files =
+        const std::vector<std::string> files =
             std::get<std::vector<std::string>>(p.horizonsTextFile);
 
         for (const std::string& file : files) {
             if (!std::filesystem::is_regular_file(absPath(file))) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "The Horizons text file '{}' could not be found", file
                 ));
                 return;
@@ -122,11 +122,11 @@ glm::dvec3 HorizonsTranslation::position(const UpdateData& data) const {
 
     if (lastBefore && firstAfter) {
         // We're inbetween first and last value.
-        double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;
-        double timeDiff = data.time.j2000Seconds() - lastBefore->timestamp;
-        double diff = (timelineDiff > DBL_EPSILON) ? timeDiff / timelineDiff : 0.0;
+        const double timelineDiff = firstAfter->timestamp - lastBefore->timestamp;
+        const double timeDiff = data.time.j2000Seconds() - lastBefore->timestamp;
+        const double diff = (timelineDiff > DBL_EPSILON) ? timeDiff / timelineDiff : 0.0;
 
-        glm::dvec3 dir = firstAfter->data - lastBefore->data;
+        const glm::dvec3 dir = firstAfter->data - lastBefore->data;
         interpolatedPos = lastBefore->data + dir * diff;
     }
     else if (lastBefore) {
@@ -145,14 +145,14 @@ void HorizonsTranslation::loadData() {
     for (const std::string& filePath : _horizonsTextFiles.value()) {
         std::filesystem::path file = absPath(filePath);
         if (!std::filesystem::is_regular_file(file)) {
-            LWARNING(fmt::format("The Horizons text file '{}' could not be found", file));
+            LWARNING(std::format("The Horizons text file '{}' could not be found", file));
             return;
         }
 
         std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
-        bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
+        const bool hasCachedFile = std::filesystem::is_regular_file(cachedFile);
         if (hasCachedFile) {
-            LINFO(fmt::format(
+            LINFO(std::format(
                 "Cached file '{}' used for Horizon file '{}'", cachedFile, file
             ));
 
@@ -166,13 +166,13 @@ void HorizonsTranslation::loadData() {
             }
         }
         else {
-            LINFO(fmt::format("Cache for Horizon file '{}' not found", file));
+            LINFO(std::format("Cache for Horizon file '{}' not found", file));
         }
-        LINFO(fmt::format("Loading Horizon file '{}'", file));
+        LINFO(std::format("Loading Horizon file '{}'", file));
 
         HorizonsFile horizonsFile(file);
         if (!readHorizonsTextFile(horizonsFile)) {
-            LERROR(fmt::format("Could not read data from Horizons file '{}'", file));
+            LERROR(std::format("Could not read data from Horizons file '{}'", file));
             return;
         }
 
@@ -210,7 +210,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     std::ifstream fileStream(file, std::ifstream::binary);
 
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file {} for loading cache file", file));
+        LERROR(std::format("Error opening file '{}' for loading cache file", file));
         return false;
     }
 
@@ -241,10 +241,10 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
     );
 
     // Extract the data from the cache Keyframe vector
-    for (int i = 0; i < nKeyframes; ++i) {
+    for (int i = 0; i < nKeyframes; i++) {
         // Add keyframe in timeline
         _timeline.addKeyframe(
-            std::move(cacheKeyframes[i].timestamp),
+            cacheKeyframes[i].timestamp,
             {
                 cacheKeyframes[i].position[0],
                 cacheKeyframes[i].position[1],
@@ -259,7 +259,7 @@ bool HorizonsTranslation::loadCachedFile(const std::filesystem::path& file) {
 void HorizonsTranslation::saveCachedFile(const std::filesystem::path& file) const {
     std::ofstream fileStream(file, std::ofstream::binary);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Error opening file {} for save cache file", file));
+        LERROR(std::format("Error opening file '{}' for save cache file", file));
         return;
     }
 

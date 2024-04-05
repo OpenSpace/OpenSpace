@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
@@ -168,8 +168,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
-        "Triggering this will remove this GeoJson component from its globe. Note that the "
-        "GUI may have to be reloaded for the change to be reflect in the user interface.",
+        "Triggering this will remove this GeoJson component from its globe. Note that "
+        "the GUI may have to be reloaded for the change to be reflect in the user "
+        "interface.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -249,7 +250,7 @@ documentation::Documentation GeoJsonComponent::Documentation() {
 
 GeoJsonComponent::SubFeatureProps::SubFeatureProps(
                                        properties::PropertyOwner::PropertyOwnerInfo info)
-    : properties::PropertyOwner(info)
+    : properties::PropertyOwner(std::move(info))
     , enabled(EnabledInfo, true)
     , centroidLatLong(
         CentroidCoordinateInfo,
@@ -313,8 +314,8 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
         glm::vec2(90.f, 180.f)
     )
     , _flyToFeature(FlyToFeatureInfo)
-    , _deleteThisComponent(DeleteInfo)
     , _deletePropertyOwner({ "Deletion", "Deletion" })
+    , _deleteThisComponent(DeleteInfo)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _featuresPropertyOwner({ "Features", "Features" })
 {
@@ -361,14 +362,14 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     addPropertySubOwner(_defaultProperties);
 
     _defaultProperties.pointTexture.onChange([this]() {
-        std::filesystem::path texturePath = _defaultProperties.pointTexture.value();
+        const std::filesystem::path texturePath = _defaultProperties.pointTexture.value();
         // Not ethat an empty texture is also valid => use default texture from module
         if (std::filesystem::is_regular_file(texturePath) || texturePath.empty()) {
             _textureIsDirty = true;
         }
         else {
-            LERROR(fmt::format(
-                "Provided texture file does not exist: '{}'",
+            LERROR(std::format(
+                "Provided texture file does not exist: {}",
                 _defaultProperties.pointTexture.value()
             ));
         }
@@ -423,7 +424,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     readFile();
 
     if (p.lightSources.has_value()) {
-        std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
+        const std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
 
         for (const ghoul::Dictionary& lsDictionary : lightsources) {
             std::unique_ptr<LightSource> lightSource =
@@ -496,7 +497,7 @@ void GeoJsonComponent::deinitializeGL() {
 }
 
 bool GeoJsonComponent::isReady() const {
-    bool isReady = std::all_of(
+    const bool isReady = std::all_of(
         std::begin(_geometryFeatures),
         std::end(_geometryFeatures),
         std::mem_fn(&GlobeGeometryFeature::isReady)
@@ -536,7 +537,7 @@ void GeoJsonComponent::render(const RenderData& data) {
 
     // Do two render passes, to properly render opacity of overlaying objects
     for (int renderPass = 0; renderPass < 2; ++renderPass) {
-        for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
+        for (size_t i = 0; i < _geometryFeatures.size(); i++) {
             if (_features[i]->enabled && _features[i]->isVisible()) {
                 _geometryFeatures[i].render(
                     data,
@@ -566,9 +567,9 @@ void GeoJsonComponent::update() {
         return;
     }
 
-    glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset);
+    const glm::vec3 offsets = glm::vec3(_latLongOffset.value(), _heightOffset);
 
-    for (size_t i = 0; i < _geometryFeatures.size(); ++i) {
+    for (size_t i = 0; i < _geometryFeatures.size(); i++) {
         if (!_features[i]->enabled) {
             continue;
         }
@@ -593,32 +594,30 @@ void GeoJsonComponent::readFile() {
     std::ifstream file(_geoJsonFile);
 
     if (!file.good()) {
-        LERROR(fmt::format("Failed to open GeoJSON file: {}", _geoJsonFile.value()));
+        LERROR(std::format("Failed to open GeoJSON file: {}", _geoJsonFile.value()));
         return;
     }
 
     _geometryFeatures.clear();
 
-    std::string content(
-        (std::istreambuf_iterator<char>(file)),
-        (std::istreambuf_iterator<char>())
+    const std::string content = std::string(
+        std::istreambuf_iterator<char>(file),
+        std::istreambuf_iterator<char>()
     );
 
     // Parse GeoJSON string into GeoJSON objects
-    using namespace geos::io;
-    GeoJSONReader reader;
-
     try {
-        GeoJSONFeatureCollection fc = reader.readFeatures(content);
+        const geos::io::GeoJSONReader reader;
+        const geos::io::GeoJSONFeatureCollection fc = reader.readFeatures(content);
 
         int count = 1;
-        for (const GeoJSONFeature& feature : fc.getFeatures()) {
+        for (const geos::io::GeoJSONFeature& feature : fc.getFeatures()) {
             parseSingleFeature(feature, count);
             count++;
         }
 
         if (_geometryFeatures.empty()) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "No GeoJson features could be successfully created for GeoJson layer "
                 "with identifier '{}'. Disabling layer.", identifier()
             ));
@@ -626,9 +625,9 @@ void GeoJsonComponent::readFile() {
         }
     }
     catch (const geos::util::GEOSException& e) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error creating GeoJson layer with identifier '{}'. Problem reading "
-            "GeoJson file '{}'. Error: '{}'", identifier(), _geoJsonFile.value(), e.what()
+            "GeoJson file '{}'. Error: {}", identifier(), _geoJsonFile.value(), e.what()
         ));
     }
 
@@ -647,7 +646,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
     std::vector<const geos::geom::Geometry*> geomsToAdd;
     if (!geom) {
         // Null geometry => no geometries to add
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Feature {} in GeoJson file '{}' is a null geometry and will not be loaded",
             indexInFile, _geoJsonFile.value()
         ));
@@ -658,9 +657,9 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         geomsToAdd = { geom };
     }
     else {
-        size_t nGeom = geom->getNumGeometries();
+        const size_t nGeom = geom->getNumGeometries();
         geomsToAdd.reserve(nGeom);
-        for (size_t i = 0; i < nGeom; ++i) {
+        for (size_t i = 0; i < nGeom; i++) {
             const geos::geom::Geometry* subGeometry = geom->getGeometryN(i);
             if (subGeometry) {
                 geomsToAdd.push_back(subGeometry);
@@ -684,12 +683,12 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             // If there is already an owner with that name as an identifier, make a
             // unique one
             if (_featuresPropertyOwner.hasPropertySubOwner(identifier)) {
-                identifier = fmt::format("Feature{}-", index, identifier);
+                identifier = std::format("Feature{}-", index, identifier);
             }
 
-            properties::PropertyOwner::PropertyOwnerInfo info = {
-                identifier,
-                name
+            const properties::PropertyOwner::PropertyOwnerInfo info = {
+                std::move(identifier),
+                std::move(name)
                 // @TODO: Use description from file, if any
             };
             _features.push_back(std::make_unique<SubFeatureProps>(info));
@@ -699,7 +698,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             _featuresPropertyOwner.addPropertySubOwner(_features.back().get());
         }
         catch (const ghoul::RuntimeError& error) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error creating GeoJson layer with identifier '{}'. Problem reading "
                 "feature {} in GeoJson file '{}'.",
                 identifier(), indexInFile, _geoJsonFile.value()
@@ -719,7 +718,7 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
     // but on Windows it returns
     // geos::geom::CoordinateXY
     auto centroidCoord = *centroid->getCoordinate();
-    glm::vec2 centroidLatLong = glm::vec2(centroidCoord.y, centroidCoord.x);
+    const glm::vec2 centroidLatLong = glm::vec2(centroidCoord.y, centroidCoord.x);
     feature.centroidLatLong = centroidLatLong;
 
     std::unique_ptr<geos::geom::Geometry> boundingbox = geometry->getEnvelope();
@@ -749,12 +748,12 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
     feature.boundingboxLatLong = boundingboxLatLong;
 
     // Compute the diagonal distance of the bounding box
-    Geodetic2 pos0 = {
+    const Geodetic2 pos0 = {
         glm::radians(boundingboxLatLong.x),
         glm::radians(boundingboxLatLong.y)
     };
 
-    Geodetic2 pos1 = {
+    const Geodetic2 pos1 = {
         glm::radians(boundingboxLatLong.z),
         glm::radians(boundingboxLatLong.w)
     };
@@ -799,12 +798,12 @@ void GeoJsonComponent::computeMainFeatureMetaPropeties() {
     _centerLatLong = 0.5f * (bboxLowerCorner + bboxUpperCorner);
 
     // Compute the diagonal distance (size) of the bounding box
-    Geodetic2 pos0 = {
+    const Geodetic2 pos0 = {
         glm::radians(bboxLowerCorner.x),
         glm::radians(bboxLowerCorner.y)
     };
 
-    Geodetic2 pos1 = {
+    const Geodetic2 pos1 = {
         glm::radians(bboxUpperCorner.x),
         glm::radians(bboxUpperCorner.y)
     };
@@ -836,8 +835,8 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
     float lon = centroidLon + _latLongOffset.value().y;
 
     global::scriptEngine->queueScript(
-        fmt::format(
-            "openspace.globebrowsing.flyToGeo(\"{}\", {}, {}, {})",
+        std::format(
+            "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
             _globeNode.owner()->identifier(), lat, lon, d
         ),
         scripting::ScriptEngine::ShouldBeSynchronized::Yes,
@@ -847,8 +846,8 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
 
 void GeoJsonComponent::triggerDeletion() const {
     global::scriptEngine->queueScript(
-        fmt::format(
-            "openspace.globebrowsing.deleteGeoJson(\"{}\", \"{}\")",
+        std::format(
+            "openspace.globebrowsing.deleteGeoJson([[{}]], [[{}]])",
             _globeNode.owner()->identifier(), _identifier
         ),
         scripting::ScriptEngine::ShouldBeSynchronized::Yes,

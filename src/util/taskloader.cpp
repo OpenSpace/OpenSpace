@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,9 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/task.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/dictionary.h>
@@ -42,23 +42,23 @@ namespace {
 namespace openspace {
 
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
-                                                 const ghoul::Dictionary& tasksDictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
     std::vector<std::unique_ptr<Task>> tasks;
 
-    for (std::string_view key : tasksDictionary.keys()) {
-        if (tasksDictionary.hasValue<std::string>(key)) {
-            std::string taskName = tasksDictionary.value<std::string>(key);
+    for (const std::string_view key : dictionary.keys()) {
+        if (dictionary.hasValue<std::string>(key)) {
+            const std::string taskName = dictionary.value<std::string>(key);
             const std::string path = taskName + ".task";
             std::vector<std::unique_ptr<Task>> subTasks = tasksFromFile(path);
             std::move(subTasks.begin(), subTasks.end(), std::back_inserter(tasks));
         }
-        else if (tasksDictionary.hasValue<ghoul::Dictionary>(key)) {
-            ghoul::Dictionary subTask = tasksDictionary.value<ghoul::Dictionary>(key);
+        else if (dictionary.hasValue<ghoul::Dictionary>(key)) {
+            const ghoul::Dictionary subTask = dictionary.value<ghoul::Dictionary>(key);
             const std::string& taskType = subTask.value<std::string>("Type");
             std::unique_ptr<Task> task = Task::createFromDictionary(subTask);
             if (!task) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Failed to create a Task object of type '{}'", taskType
                 ));
             }
@@ -71,7 +71,9 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromDictionary(
 std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& path) {
     std::filesystem::path absTasksFile = absPath(path);
     if (!std::filesystem::is_regular_file(absTasksFile)) {
-        LERROR(fmt::format("Could not load tasks file {}. File not found", absTasksFile));
+        LERROR(std::format(
+            "Could not load tasks file '{}'. File not found", absTasksFile
+        ));
         return std::vector<std::unique_ptr<Task>>();
     }
 
@@ -80,8 +82,8 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
         ghoul::lua::loadDictionaryFromFile(absTasksFile.string(), tasksDictionary);
     }
     catch (const ghoul::RuntimeError& e) {
-        LERROR(fmt::format(
-            "Could not load tasks file {}. Lua error: {}: {}",
+        LERROR(std::format(
+            "Could not load tasks file '{}'. Lua error: ({}) {}",
             absTasksFile, e.message, e.component
         ));
         return std::vector<std::unique_ptr<Task>>();
@@ -91,7 +93,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
         return tasksFromDictionary(tasksDictionary);
     }
     catch (const documentation::SpecificationError& e) {
-        LERROR(fmt::format("Could not load tasks file {}. {}", absTasksFile, e.what()));
+        LERROR(std::format("Could not load tasks file '{}': {}", absTasksFile, e.what()));
         logError(e);
 
         return std::vector<std::unique_ptr<Task>>();

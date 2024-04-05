@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,20 +78,20 @@ SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
     createWidgets(createMonitorInfoSet(), 1, true);
 }
 
-SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
+SgctEdit::SgctEdit(sgct::config::Cluster& cluster, std::string configName,
                    std::string& configBasePath, QWidget* parent)
     : QDialog(parent)
     , _cluster(cluster)
     , _userConfigPath(configBasePath)
-    , _configurationFilename(configName)
+    , _configurationFilename(std::move(configName))
     , _didImportValues(true)
 {
     setWindowTitle("Window Configuration Editor");
-    size_t nWindows = _cluster.nodes.front().windows.size();
+    const size_t nWindows = _cluster.nodes.front().windows.size();
     std::vector<QRect> monitorSizes = createMonitorInfoSet();
     createWidgets(monitorSizes, static_cast<unsigned int>(nWindows), false);
-    size_t existingWindowsControlSize = _displayWidget->windowControls().size();
-    for (size_t i = 0; i < nWindows; ++i) {
+    const size_t existingWindowsControlSize = _displayWidget->windowControls().size();
+    for (size_t i = 0; i < nWindows; i++) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         WindowControl* wCtrl = _displayWidget->windowControls()[i];
         if (i < existingWindowsControlSize && wCtrl) {
@@ -116,12 +116,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, const std::string& configName
                     posY -= monitorSizes[monitorNum].y();
                 }
             }
-            QRectF newDims(
-                posX,
-                posY,
-                w.size.x,
-                w.size.y
-            );
+            const QRectF newDims = QRectF(posX, posY, w.size.x, w.size.y);
             wCtrl->setDimensions(newDims);
             if (w.name.has_value()) {
                 wCtrl->setWindowName(w.name.value());
@@ -142,9 +137,9 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
     bool firstWindowGuiIsEnabled = (nWindows > 1);
     int graphicsSelectionForFirstWindow = 0;
     int nGuiRenderTagsFound = 0;
-    _settingsWidget->nWindowsDisplayedChanged(nWindows);
+    _settingsWidget->nWindowsDisplayedChanged(static_cast<int>(nWindows));
 
-    for (size_t i = 0; i < nWindows; ++i) {
+    for (size_t i = 0; i < nWindows; i++) {
         sgct::config::Window& w = _cluster.nodes.front().windows[i];
         //First window needs to have "GUI" tag if this mode is set
         if (i == 0) {
@@ -156,9 +151,8 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
                 nGuiRenderTagsFound++;
             }
             for (int winNum = 0; winNum <= 4; ++winNum) {
-                std::string tagToLookFor = "GUI_Render_Win" + std::to_string(winNum);
-                if (std::find(w.tags.begin(), w.tags.end(), tagToLookFor) != w.tags.end())
-                {
+                const std::string searchTag = "GUI_Render_Win" + std::to_string(winNum);
+                if (std::find(w.tags.begin(), w.tags.end(), searchTag) != w.tags.end()) {
                     graphicsSelectionForFirstWindow = winNum;
                     nGuiRenderTagsFound++;
                 }
@@ -185,7 +179,7 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
         // Call these again in order to ensure that GUI is configured correctly based on
         // the values read from the config file
         _settingsWidget->setEnableShowUiOnFirstWindowCheckbox(true);
-        _settingsWidget->nWindowsDisplayedChanged(nWindows);
+        _settingsWidget->nWindowsDisplayedChanged(static_cast<int>(nWindows));
     }
     _settingsWidget->setGraphicsSelectionForShowUiOnFirstWindow(
         graphicsSelectionForFirstWindow
@@ -195,8 +189,8 @@ void SgctEdit::setupStateOfUiOnFirstWindow(size_t nWindows) {
 void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
                                         WindowControl* wCtrl)
 {
-    std::visit(overloaded{
-        [&](sgct::config::CylindricalProjection p) {
+    std::visit(overloaded {
+        [&](const sgct::config::CylindricalProjection& p) {
             if (p.quality && p.heightOffset) {
                 wCtrl->setProjectionCylindrical(
                     *p.quality,
@@ -204,7 +198,7 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
                 );
             }
         },
-        [&](sgct::config::EquirectangularProjection p) {
+        [&](const sgct::config::EquirectangularProjection& p) {
             if (p.quality) {
                 wCtrl->setProjectionEquirectangular(
                     *p.quality,
@@ -212,7 +206,7 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
                 );
             }
         },
-        [&](sgct::config::FisheyeProjection p) {
+        [&](const sgct::config::FisheyeProjection& p) {
             if (p.quality) {
                 wCtrl->setProjectionFisheye(
                     *p.quality,
@@ -220,20 +214,20 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
                 );
             }
         },
-        [&](sgct::config::PlanarProjection p) {
+        [&](const sgct::config::PlanarProjection& p) {
             wCtrl->setProjectionPlanar(
                 (std::abs(p.fov.left) + std::abs(p.fov.right)),
                 (std::abs(p.fov.up) + std::abs(p.fov.down))
             );
         },
-        [&](sgct::config::SphericalMirrorProjection p) {
+        [&](const sgct::config::SphericalMirrorProjection& p) {
             if (p.quality) {
                 wCtrl->setProjectionSphericalMirror(
                     *p.quality
                 );
             }
         },
-        [&](sgct::config::SpoutOutputProjection p) {
+        [&](const sgct::config::SpoutOutputProjection& p) {
             if (p.quality) {
                 if (p.mapping ==
                     sgct::config::SpoutOutputProjection::Mapping::Equirectangular)
@@ -253,21 +247,21 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
                 }
             }
         },
-        [&](sgct::config::NoProjection) {},
-        [&](sgct::config::ProjectionPlane) {},
-        [&](sgct::config::SpoutFlatProjection) {}
+        [&](const sgct::config::NoProjection&) {},
+        [&](const sgct::config::ProjectionPlane&) {},
+        [&](const sgct::config::SpoutFlatProjection&) {}
     }, vPort.projection);
 }
 
 std::vector<QRect> SgctEdit::createMonitorInfoSet() {
-    QList<QScreen*> screens = qApp->screens();
-    int nScreensManaged = std::min(static_cast<int>(screens.length()), 4);
+    const QList<QScreen*> screens = qApp->screens();
+    const int nScreensManaged = std::min(static_cast<int>(screens.length()), 4);
     std::vector<QRect> monitorSizes;
     for (int s = 0; s < nScreensManaged; ++s) {
-        QSize size = screens[s]->size();
-        QRect geometry = screens[s]->availableGeometry();
-        int actualWidth = std::max(size.width(), geometry.width());
-        int actualHeight = std::max(size.height(), geometry.height());
+        const QSize size = screens[s]->size();
+        const QRect geometry = screens[s]->availableGeometry();
+        const int actualWidth = std::max(size.width(), geometry.width());
+        const int actualHeight = std::max(size.height(), geometry.height());
         monitorSizes.emplace_back(
             geometry.x(),
             geometry.y(),
@@ -318,7 +312,7 @@ void SgctEdit::createWidgets(const std::vector<QRect>& monitorSizes,
             monitorBox, &MonitorBox::nWindowsDisplayedChanged
         );
 
-        for (unsigned int i = 0; i < nWindows; ++i) {
+        for (unsigned int i = 0; i < nWindows; i++) {
             _displayWidget->addWindow();
         }
         
@@ -394,7 +388,7 @@ std::filesystem::path SgctEdit::saveFilename() const {
 void SgctEdit::save() {
     generateConfiguration();
     if (hasWindowIssues(_cluster)) {
-        int ret = QMessageBox::warning(
+        const int ret = QMessageBox::warning(
             this,
             "Window Sizes Incompatible",
             "Window sizes for multiple windows have to be strictly ordered, meaning that "
@@ -414,7 +408,7 @@ void SgctEdit::save() {
         accept();
     }
     else {
-        QString fileName = QFileDialog::getSaveFileName(
+        const QString fileName = QFileDialog::getSaveFileName(
             this,
             "Save Window Configuration File",
             QString::fromStdString(_userConfigPath),
@@ -435,7 +429,7 @@ void SgctEdit::save() {
 void SgctEdit::apply() {
     generateConfiguration();
     if (hasWindowIssues(_cluster)) {
-        int ret = QMessageBox::warning(
+        const int ret = QMessageBox::warning(
             this,
             "Window Sizes Incompatible",
             "Window sizes for multiple windows have to be strictly ordered, meaning that "
@@ -466,7 +460,7 @@ void SgctEdit::generateConfiguration() {
     _cluster.scene = sgct::config::Scene();
     _cluster.scene->orientation = _settingsWidget->orientation();
     if (_cluster.nodes.empty()) {
-        _cluster.nodes.push_back(sgct::config::Node());
+        _cluster.nodes.emplace_back();
     }
     sgct::config::Node& node = _cluster.nodes.back();
 
@@ -515,12 +509,10 @@ void SgctEdit::generateConfigResizeWindowsAccordingToSelected(sgct::config::Node
     std::vector<WindowControl*> windowControls = _displayWidget->activeWindowControls();
     for (size_t wIdx = 0; wIdx < windowControls.size(); ++wIdx) {
         if (node.windows.size() <= wIdx) {
-            node.windows.push_back(sgct::config::Window());
+            node.windows.emplace_back();
         }
         if (windowControls[wIdx]) {
-            windowControls[wIdx]->generateWindowInformation(
-                node.windows[wIdx]
-            );
+            windowControls[wIdx]->generateWindowInformation(node.windows[wIdx]);
         }
     }
     while (node.windows.size() > windowControls.size()) {
@@ -529,7 +521,7 @@ void SgctEdit::generateConfigResizeWindowsAccordingToSelected(sgct::config::Node
 }
 
 void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) {
-    for (size_t i = 0; i < node.windows.size(); ++i) {
+    for (size_t i = 0; i < node.windows.size(); i++) {
         // First apply default settings to each window...
         node.windows[i].id = static_cast<int>(i);
         node.windows[i].draw2D = true;
@@ -540,20 +532,21 @@ void SgctEdit::generateConfigIndividualWindowSettings(sgct::config::Node& node) 
         // depending on if this is the first window or not
         if (_settingsWidget->showUiOnFirstWindow()) {
             if (i == 0) {
-                node.windows[i].tags.push_back("GUI");
-                int selectedGraphics =
+                node.windows[i].tags.emplace_back("GUI");
+                const int selectedGraphics =
                     _settingsWidget->graphicsSelectionForShowUiOnFirstWindow();
 
                 if (selectedGraphics == 0) {
                     node.windows[i].viewports.back().isTracked = false;
-                    node.windows[i].tags.push_back("GUI_No_Render");
+                    node.windows[i].tags.emplace_back("GUI_No_Render");
                 }
                 else if (selectedGraphics > 0 &&
                          selectedGraphics <= static_cast<int>(node.windows.size()))
                 {
-                    node.windows[i].tags.push_back("GUI_Render_Win" +
-                        std::to_string(selectedGraphics));
-                    //Set first window viewport to mirror the selected window's viewport
+                    node.windows[i].tags.emplace_back(
+                        "GUI_Render_Win" + std::to_string(selectedGraphics)
+                    );
+                    // Set first window viewport to mirror the selected window's viewport
                     node.windows[i].viewports =
                         node.windows[(selectedGraphics - 1)].viewports;
                 }
@@ -577,7 +570,7 @@ void SgctEdit::deleteFromTags(sgct::config::Window& window) {
         "GUI_Render_Win3",
         "GUI_Render_Win4"
     };
-    for (std::string_view tag : Tags) {
+    for (const std::string_view tag : Tags) {
         window.tags.erase(
             std::remove(window.tags.begin(), window.tags.end(), tag),
             window.tags.end()
@@ -590,12 +583,12 @@ sgct::config::Cluster SgctEdit::cluster() const {
 }
 
 void SgctEdit::firstWindowGraphicsSelectionChanged(const QString&) {
-    if (!_settingsWidget)
+    if (!_settingsWidget) {
         return;
-
-    int newSetting = _settingsWidget->graphicsSelectionForShowUiOnFirstWindow();
+    }
 
     if (_settingsWidget->showUiOnFirstWindow()) {
+        const int newSetting = _settingsWidget->graphicsSelectionForShowUiOnFirstWindow();
         _displayWidget->activeWindowControls()[0]->setVisibilityOfProjectionGui(
             newSetting == 1
         );

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -227,7 +227,7 @@ void RenderableDebugPlane::createPlane() {
     // ============================
     const GLfloat size = _size;
 
-    const GLfloat vertexData[] = {
+    const std::array<GLfloat, 36> vertexData = {
         //  x      y    z    w    s    t
         -size, -size, 0.f, 0.f, 0.f, 0.f,
          size,  size, 0.f, 0.f, 1.f, 1.f,
@@ -239,7 +239,7 @@ void RenderableDebugPlane::createPlane() {
 
     glBindVertexArray(_quad); // bind array
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);

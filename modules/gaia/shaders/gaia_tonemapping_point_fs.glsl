@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -162,7 +162,7 @@ Fragment getFragment() {
     discard;
   }
 
-  color = vec4(intensity, 1.0f);
+  color = vec4(intensity, 1.0);
 
   // Use the following to check for any intensity at all.
   //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);

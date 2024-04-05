@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,9 +30,9 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
@@ -88,11 +88,11 @@ GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary
 }
 
 std::string GenerateRawVolumeTask::description() {
-    return fmt::format(
+    return std::format(
         "Generate a raw volume with dimenstions: ({}, {}, {}). For each cell, set the "
         "value by evaluating the lua function: `{}`, with three arguments (x, y, z) "
-        "ranging from ({}, {}, {}) to ({}, {}, {}). Write raw volume data into {} and "
-        "dictionary with metadata to {}",
+        "ranging from ({}, {}, {}) to ({}, {}, {}). Write raw volume data into '{}' and "
+        "dictionary with metadata to '{}'",
         _dimensions.x, _dimensions.y, _dimensions.z, _valueFunctionLua,
         _lowerDomainBound.x, _lowerDomainBound.y, _lowerDomainBound.z,
         _upperDomainBound.x, _upperDomainBound.y, _upperDomainBound.z,
@@ -133,8 +133,8 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::min();
 
-    rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
-        glm::vec3 coord = _lowerDomainBound +
+    rawVolume.forEachVoxel([&](const glm::uvec3& cell, float) {
+        const glm::vec3 coord = _lowerDomainBound +
             glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
 
 #if (defined(NDEBUG) || defined(DEBUG))
@@ -154,7 +154,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
             return;
         }
 
-        float value = static_cast<float>(luaL_checknumber(state, 1));
+        const float value = static_cast<float>(luaL_checknumber(state, 1));
         lua_pop(state, 1);
         rawVolume.set(cell, value);
 
@@ -189,14 +189,13 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     metadata.minValue = minVal;
     metadata.maxValue = maxVal;
 
-    ghoul::Dictionary outputDictionary = metadata.dictionary();
-    std::string metadataString = ghoul::formatLua(outputDictionary);
+    const ghoul::Dictionary outputDictionary = metadata.dictionary();
+    const std::string metadataString = ghoul::formatLua(outputDictionary);
 
-    std::fstream f(_dictionaryOutputPath, std::ios::out);
+    std::fstream f = std::fstream(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;
-    f.close();
 
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace::volume

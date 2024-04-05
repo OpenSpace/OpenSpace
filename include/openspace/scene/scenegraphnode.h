@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,7 +74,6 @@ public:
 
     BooleanType(UpdateScene);
 
-    static constexpr const char* RootNodeIdentifier = "Root";
     static constexpr std::string_view KeyIdentifier = "Identifier";
     static constexpr std::string_view KeyParentName = "Parent";
     static constexpr std::string_view KeyDependencies = "Dependencies";
@@ -141,13 +140,14 @@ public:
 
     bool supportsDirectInteraction() const;
 
-    SceneGraphNode* childNode(const std::string& identifier);
+    SceneGraphNode* childNode(const std::string& id);
 
     const Renderable* renderable() const;
     Renderable* renderable();
 
     std::string guiPath() const;
     bool hasGuiHintHidden() const;
+    void setGuiHintHidden(bool value);
 
     static documentation::Documentation Documentation();
 
@@ -156,7 +156,7 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
     void computeScreenSpaceData(RenderData& newData);
-    void renderDebugSphere(const Camera& camera, double size, glm::vec4 color);
+    void renderDebugSphere(const Camera& camera, double size, const glm::vec4& color);
 
     std::atomic<State> _state = State::Loaded;
     std::vector<ghoul::mm_unique_ptr<SceneGraphNode>> _children;

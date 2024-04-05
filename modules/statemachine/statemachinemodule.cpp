@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,24 +52,24 @@ StateMachineModule::StateMachineModule()
 
 void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
                                                 const ghoul::Dictionary& transitions,
-                                             const std::optional<std::string> startState)
+                                                std::optional<std::string> startState)
 {
     ghoul::Dictionary dictionary;
     dictionary.setValue("States", states);
     dictionary.setValue("Transitions", transitions);
 
     if (startState.has_value()) {
-        dictionary.setValue("StartState", *startState);
+        dictionary.setValue("StartState", std::move(*startState));
     }
 
     try {
         _machine = std::make_unique<StateMachine>(dictionary);
-        LINFO(fmt::format(
+        LINFO(std::format(
             "State machine was created with start state: {}", currentState()
         ));
     }
     catch (const documentation::SpecificationError& e) {
-        LERROR(fmt::format("Error loading state machine: {}", e.what()));
+        LERROR(std::format("Error loading state machine: {}", e.what()));
         logError(e);
     }
 }
@@ -83,7 +83,7 @@ bool StateMachineModule::hasStateMachine() const {
     return _machine != nullptr;
 }
 
-void StateMachineModule::setInitialState(const std::string initialState) {
+void StateMachineModule::setInitialState(const std::string& initialState) {
     if (!_machine) {
         LERROR("Attempting to use uninitialized state machine");
         return;

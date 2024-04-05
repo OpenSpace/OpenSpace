@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,15 +55,6 @@ namespace {
         msg.setValue("event", "load_image_collection"s);
         msg.setValue("url", url);
         msg.setValue("loadChildFolders", true);
-        return msg;
-    }
-
-    ghoul::Dictionary setForegroundMessage(const std::string& name) {
-        using namespace std::string_literals;
-
-        ghoul::Dictionary msg;
-        msg.setValue("event", "set_foreground_by_name"s);
-        msg.setValue("name", name);
         return msg;
     }
 
@@ -144,8 +135,8 @@ WwtCommunicator::WwtCommunicator(const ghoul::Dictionary& dictionary)
 
 void WwtCommunicator::update() {
     // Cap how messages are passed
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    std::chrono::system_clock::duration timeSinceLastUpdate = now - _lastUpdateTime;
+    const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+    const std::chrono::system_clock::duration timeSinceLastUpdate = now - _lastUpdateTime;
 
     if (timeSinceLastUpdate > TimeUpdateInterval) {
         if (_equatorialAimIsDirty) {
@@ -170,7 +161,7 @@ void WwtCommunicator::selectImage(const std::string& url) {
 
     if (it == _selectedImages.end()) {
         // Push newly selected image to front
-        _selectedImages.push_front(std::pair<std::string, double>(url, 1.0));
+        _selectedImages.emplace_front(url, 1.0);
 
         // If wwt has not loaded the collection yet, wait with passing the message
         if (_isImageCollectionLoaded) {
@@ -196,7 +187,7 @@ void WwtCommunicator::removeSelectedImage(const std::string& imageUrl) {
 
 void WwtCommunicator::sendMessageToWwt(const ghoul::Dictionary& msg) const {
     std::string m = ghoul::formatJson(msg);
-    executeJavascript(fmt::format("sendMessageToWWT({});", m));
+    executeJavascript(std::format("sendMessageToWWT({});", m));
 }
 
 std::vector<std::string> WwtCommunicator::selectedImages() const {
@@ -248,12 +239,12 @@ void WwtCommunicator::setBorderColor(glm::ivec3 color) {
 
 void WwtCommunicator::setBorderRadius(double radius) {
     _borderRadius = radius;
-    std::string scr = fmt::format("setBorderRadius({});", radius);
+    const std::string scr = std::format("setBorderRadius({});", radius);
     executeJavascript(scr);
 }
 
 void WwtCommunicator::updateBorderColor() const {
-    std::string script = fmt::format(
+    const std::string script = std::format(
         "setBackgroundColor('rgb({},{},{})');",
         _wwtBorderColor.x, _wwtBorderColor.y, _wwtBorderColor.z
     );
@@ -262,7 +253,11 @@ void WwtCommunicator::updateBorderColor() const {
 
 void WwtCommunicator::updateAim() const {
     // Message WorldWide Telescope current view
-    ghoul::Dictionary msg = moveCameraMessage(_equatorialAim, _verticalFov, _targetRoll);
+    const ghoul::Dictionary msg = moveCameraMessage(
+        _equatorialAim,
+        _verticalFov,
+        _targetRoll
+    );
     sendMessageToWwt(msg);
 }
 
@@ -296,7 +291,9 @@ glm::dvec2 WwtCommunicator::equatorialAim() const {
 void WwtCommunicator::setImageOrder(const std::string& imageUrl, int order) {
     // Find in selected images list
     auto current = findSelectedImage(imageUrl);
-    int currentIndex = static_cast<int>(std::distance(_selectedImages.begin(), current));
+    const int currentIndex = static_cast<int>(
+        std::distance(_selectedImages.begin(), current)
+    );
 
     std::deque<std::pair<std::string, double>> newDeque;
 
@@ -320,8 +317,8 @@ void WwtCommunicator::setImageOrder(const std::string& imageUrl, int order) {
     }
 
     _selectedImages = newDeque;
-    int reverseOrder = static_cast<int>(_selectedImages.size()) - order - 1;
-    ghoul::Dictionary message = setLayerOrderMessage(imageUrl, reverseOrder);
+    const int reverseOrder = static_cast<int>(_selectedImages.size()) - order - 1;
+    const ghoul::Dictionary message = setLayerOrderMessage(imageUrl, reverseOrder);
     sendMessageToWwt(message);
 }
 
@@ -335,12 +332,12 @@ void WwtCommunicator::setImageOpacity(const std::string& imageUrl, float opacity
     auto it = findSelectedImage(imageUrl);
     it->second = opacity;
 
-    ghoul::Dictionary msg = setImageOpacityMessage(imageUrl, opacity);
+    const ghoul::Dictionary msg = setImageOpacityMessage(imageUrl, opacity);
     sendMessageToWwt(msg);
 }
 
 void WwtCommunicator::hideChromeInterface() const {
-    std::string script = "sendMessageToWWT({event : \"modify_settings\", "
+    const std::string script = "sendMessageToWWT({event : \"modify_settings\", "
         "settings : [[\"hideAllChrome\", true]], target: \"app\"});";
     executeJavascript(script);
 }
@@ -351,7 +348,7 @@ void WwtCommunicator::setImageCollectionIsLoaded(bool isLoaded) {
 
 void WwtCommunicator::setIdInBrowser(const std::string& id) const {
     // Send ID to its browser
-    executeJavascript(fmt::format("setId('{}')", id));
+    executeJavascript(std::format("setId('{}')", id));
 }
 
 glm::ivec3 WwtCommunicator::borderColor() const {

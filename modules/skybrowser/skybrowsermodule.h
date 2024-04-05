@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,7 +60,9 @@ public:
 
     // Rotation, animation, placement
     void lookAtTarget(const std::string& id);
-    void startRotatingCamera(glm::dvec3 endAnimation); // Pass in galactic coordinate
+
+    // Pass in galactic coordinate
+    void startRotatingCamera(const glm::dvec3& endAnimation);
     double targetAnimationSpeed() const;
     double browserAnimationSpeed() const;
     double spaceCraftAnimationTime() const;
@@ -72,7 +74,7 @@ public:
     bool isSelectedPairUsingRae() const;
 
     // Managing the target browser pairs
-    void removeTargetBrowserPair(const std::string& browserId);
+    void removeTargetBrowserPair(const std::string& id);
     void addTargetBrowserPair(const std::string& targetId, const std::string& browserId);
 
     // Hover circle

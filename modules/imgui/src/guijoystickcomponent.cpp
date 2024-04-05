@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ void GuiJoystickComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
-    for (size_t i = 0; i < global::joystickInputStates->size(); ++i) {
+    for (size_t i = 0; i < global::joystickInputStates->size(); i++) {
         const JoystickInputState& state = global::joystickInputStates->at(i);
         if (!state.isConnected) {
             continue;
@@ -58,9 +58,9 @@ void GuiJoystickComponent::render() {
 
         ImGui::Text("%s [%i]", state.name.c_str(), static_cast<int>(i));
         ImGui::Text("%s", "Axes");
-        for (int j = 0; j < state.nAxes; ++j) {
+        for (int j = 0; j < state.nAxes; j++) {
             float f = state.axes[j];
-            std::string id = std::to_string(j) + "##" + state.name + "Axis";
+            const std::string id = std::to_string(j) + "##" + state.name + "Axis";
             ImGui::SliderFloat(
                 id.c_str(),
                 &f,
@@ -69,8 +69,8 @@ void GuiJoystickComponent::render() {
             );
         }
         ImGui::Text("%s", "Buttons");
-        for (int j = 0; j < state.nButtons; ++j) {
-            std::string id = std::to_string(j) + "##" + state.name + "Button";
+        for (int j = 0; j < state.nButtons; j++) {
+            const std::string id = std::to_string(j) + "##" + state.name + "Button";
             ImGui::RadioButton(
                 id.c_str(),
                 state.buttons[j] == JoystickAction::Press ||
@@ -86,9 +86,9 @@ void GuiJoystickComponent::render() {
 
     ImGui::Text("%s", "Summed contributions");
     ImGui::Text("%s", "Axes");
-    for (int i = 0; i < global::joystickInputStates->numAxes(); ++i) {
+    for (int i = 0; i < global::joystickInputStates->numAxes(); i++) {
         float f = global::joystickInputStates->axis("", i);
-        std::string id = std::to_string(i) + "##" + "TotalAxis";
+        const std::string id = std::to_string(i) + "##" + "TotalAxis";
         ImGui::SliderFloat(
             id.c_str(),
             &f,
@@ -97,8 +97,8 @@ void GuiJoystickComponent::render() {
         );
     }
     ImGui::Text("%s", "Buttons");
-    for (int i = 0; i < global::joystickInputStates->numButtons(); ++i) {
-        std::string id = std::to_string(i) + "##" + "TotalButton";
+    for (int i = 0; i < global::joystickInputStates->numButtons(); i++) {
+        const std::string id = std::to_string(i) + "##" + "TotalButton";
         ImGui::RadioButton(
             id.c_str(),
             global::joystickInputStates->button("", i, JoystickAction::Press) ||

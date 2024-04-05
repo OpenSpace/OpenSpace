@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -77,19 +77,18 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
         }
 
         // Shape the plane based on the aspect ration of the image
-        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
         if (_textureDimensions != textureDim) {
-            float aspectRatio = textureDim.x / textureDim.y;
-            float planeAspectRatio = _size.value().x / _size.value().y;
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
 
             if (std::abs(planeAspectRatio - aspectRatio) >
                 std::numeric_limits<float>::epsilon())
             {
-                glm::vec2 newSize =
+                _size =
                     aspectRatio > 0.f ?
                     glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
                     glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-                _size = newSize;
             }
 
             _textureDimensions = textureDim;
@@ -129,12 +128,12 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
             LERRORC(
                 "ScreenSpaceImageOnline",
-                fmt::format("Error loading image from URL '{}'", _texturePath.value())
+                std::format("Error loading image from URL '{}'", _texturePath.value())
             );
             return;
         }
@@ -165,19 +164,18 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
                 }
 
                 // Shape the plane based on the aspect ration of the image
-                glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+                const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
                 if (_textureDimensions != textureDim) {
-                    float aspectRatio = textureDim.x / textureDim.y;
-                    float planeAspectRatio = _size.value().x / _size.value().y;
+                    const float aspectRatio = textureDim.x / textureDim.y;
+                    const float planeAspectRatio = _size.value().x / _size.value().y;
 
                     if (std::abs(planeAspectRatio - aspectRatio) >
                         std::numeric_limits<float>::epsilon())
                     {
-                        glm::vec2 newSize =
+                        _size =
                             aspectRatio > 0.f ?
                             glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
                             glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-                        _size = newSize;
                     }
 
                     _textureDimensions = textureDim;

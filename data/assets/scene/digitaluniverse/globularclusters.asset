@@ -16,7 +16,7 @@ local speck = asset.resource({
 local Object = {
   Identifier = "GlobularClusters",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePolygonCloud",
     Enabled = false,
     Labels = {
       File = speck .. "gc.label",
@@ -25,15 +25,18 @@ local Object = {
       MinMaxSize = { 4, 20 },
       Unit = "pc"
     },
-    Color = { 0.8, 0.8, 0.0 },
+    Coloring = {
+      FixedColor = { 0.8, 0.8, 0.0 }
+    },
     Opacity = 0.4,
     File = speck .. "gc.speck",
-    Texture = textures .. "point4.png",
     PolygonSides = 5,
     Unit = "pc",
-    ScaleFactor = 431.0,
-    BillboardMinMaxSize = { 0.0, 500.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 18.9,
+      MaxSize = 13.0,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Globular Clusters",
@@ -69,7 +72,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Globular Clusters",
-  Version = "2.1",
+  Version = "3.0",
   Description = [[Census: 157 globular clusters. DU Version 2.6. Globular star clusters
     are gravitationally bound groups of 100,000 to 1 million stars. They are compact,
     spherical "balls" of stars with very high stellar densities in their centers (stars

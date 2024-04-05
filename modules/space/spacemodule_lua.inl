@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -93,7 +93,7 @@ std::vector<ghoul::Dictionary> readKeplerFile(std::filesystem::path p, std::stri
         f = openspace::kepler::Format::SBDB;
     }
     else {
-        throw ghoul::lua::LuaError(fmt::format("Unsupported format '{}'", type));
+        throw ghoul::lua::LuaError(std::format("Unsupported format '{}'", type));
     }
 
     std::vector<openspace::kepler::Parameters> params = openspace::kepler::readFile(p, f);

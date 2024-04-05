@@ -9,14 +9,14 @@ local speck = asset.resource({
   Name = "OB Associations Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_obassociations_speck",
-  Version = 3
+  Version = 4
 })
 
 
 local Object = {
   Identifier = "OBAssociations",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePolygonCloud",
     Enabled = false,
     Labels = {
       File = speck .. "ob.label",
@@ -25,19 +25,26 @@ local Object = {
       MinMaxSize = { 4, 25 },
       Unit = "pc"
     },
-    Color = { 1.0, 1.0, 1.0 },
-    ColorMap = speck .. "ob.cmap",
-    ColorOption = { "arm" },
-    SizeOption = { "diameter" },
-    ExactColorMap = true,
+    Coloring = {
+      ColorMapping = {
+        File = speck .. "ob.cmap",
+        ParameterOptions = {
+          { Key = "arm" }
+        }
+      }
+    },
     Opacity = 0.7,
     File = speck .. "ob.speck",
     Unit = "pc",
-    Texture = textures .. "point4.png",
     PolygonSides = 7,
-    ScaleFactor = 390.0,
-    BillboardMinMaxSize = { 0.0, 450.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      SizeMapping = {
+        ParameterOptions = { "diameter" }
+      },
+      ScaleExponent = 16.9,
+      MaxSize = 17,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "OB Associations",
@@ -71,7 +78,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "OB Associations",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for OB Associations",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

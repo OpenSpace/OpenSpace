@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -62,7 +62,7 @@ namespace {
     };
 
     [[ nodiscard ]] char* formatDt(std::vector<char>& buffer) {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "Avg. Frametime: {:.2f} ms\0",
             openspace::global::windowDelegate->averageDeltaTime() * 1000.0
@@ -73,7 +73,7 @@ namespace {
                                            double minFrametimeCache,
                                            double maxFrametimeCache)
     {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "Last frametimes between: {:.2f} and {:.2f} ms\n"
             "Overall between: {:.2f} and {:.2f} ms\0",
@@ -85,7 +85,7 @@ namespace {
     }
 
     [[ nodiscard ]] char* formatDtStandardDeviation(std::vector<char>& buffer) {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "Frametime standard deviation : {:.2f} ms\0",
             openspace::global::windowDelegate->deltaTimeStandardDeviation() * 1000.0
@@ -93,7 +93,7 @@ namespace {
     }
 
     [[ nodiscard ]] char* formatDtCoefficientOfVariation(std::vector<char>& buffer) {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "Frametime coefficient of variation : {:.2f} %\0",
             openspace::global::windowDelegate->deltaTimeStandardDeviation() /
@@ -102,7 +102,7 @@ namespace {
     }
 
     [[ nodiscard ]] char* formatFps(std::vector<char>& buffer) {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "FPS: {:3.2f}\0",
             1.0 / openspace::global::windowDelegate->deltaTime()
@@ -110,7 +110,7 @@ namespace {
     }
 
     [[ nodiscard ]] char* formatAverageFps(std::vector<char>& buffer) {
-        return fmt::format_to(
+        return std::format_to(
             buffer.data(),
             "Avg. FPS: {:3.2f}\0",
             1.0 / openspace::global::windowDelegate->averageDeltaTime()
@@ -223,7 +223,7 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
         global::windowDelegate->maxDeltaTime() * 1000.0
     );
 
-    FrametimeType frametimeType = FrametimeType(_frametimeType.value());
+    const FrametimeType frametimeType = FrametimeType(_frametimeType.value());
 
     std::fill(_buffer.begin(), _buffer.end(), char(0));
     char* end = format(
@@ -232,15 +232,16 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
         _minDeltaTimeCache,
         _maxDeltaTimeCache
     );
-    std::string_view output = std::string_view(_buffer.data(), end - _buffer.data());
+    const std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
 
-    int nLines = output.empty() ? 0 :
-        static_cast<int>((std::count(output.begin(), output.end(), '\n') + 1));
+    const int nLines = text.empty() ?
+        0 :
+        static_cast<int>((std::count(text.begin(), text.end(), '\n') + 1));
 
     ghoul::fontrendering::FontRenderer::defaultRenderer().render(
         *_font,
         penPosition,
-        output
+        text
     );
     penPosition.y -= _font->height() * static_cast<float>(nLines);
 }
@@ -250,13 +251,13 @@ glm::vec2 DashboardItemFramerate::size() const {
 
     const FrametimeType t = FrametimeType(_frametimeType.value());
     char* end = format(_buffer, t, _minDeltaTimeCache, _maxDeltaTimeCache);
-    std::string_view output = std::string_view(_buffer.data(), end - _buffer.data());
+    const std::string_view res = std::string_view(_buffer.data(), end - _buffer.data());
 
-    if (output.empty()) {
+    if (res.empty()) {
         return { 0.f, 0.f };
     }
 
-    return _font->boundingBox(output);
+    return _font->boundingBox(res);
 }
 
 } // namespace openspace

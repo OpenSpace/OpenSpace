@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <numeric>
 
@@ -151,7 +151,7 @@ void GuiGlobeBrowsingComponent::render() {
     bool isNodeChanged = ImGui::Combo("Globe", &iNode, nodeNames.c_str());
 
     ImGui::SameLine();
-    bool selectFocusNode = ImGui::Button("From Focus");
+    const bool selectFocusNode = ImGui::Button("From Focus");
     if (selectFocusNode) {
         const SceneGraphNode* const focus =
             global::navigationHandler->orbitalNavigator().anchorNode();
@@ -186,7 +186,7 @@ void GuiGlobeBrowsingComponent::render() {
     // Render the list of servers for the planet
     std::vector<UrlInfo> urlInfo = module->urlInfo(_currentNode);
 
-    std::string serverList = std::accumulate(
+    const std::string serverList = std::accumulate(
         urlInfo.cbegin(),
         urlInfo.cend(),
         std::string(),
@@ -226,21 +226,21 @@ void GuiGlobeBrowsingComponent::render() {
 
     if (ImGui::BeginPopup("globebrowsing_add_server")) {
         constexpr int InputBufferSize = 512;
-        static char NameInputBuffer[InputBufferSize];
-        ImGui::InputText("Server Name", NameInputBuffer, InputBufferSize);
+        static std::array<char, InputBufferSize> NameInputBuffer;
+        ImGui::InputText("Server Name", NameInputBuffer.data(), InputBufferSize);
 
-        static char UrlInputBuffer[InputBufferSize];
-        ImGui::InputText("Server URL", UrlInputBuffer, InputBufferSize);
+        static std::array<char, InputBufferSize> UrlInputBuffer;
+        ImGui::InputText("Server URL", UrlInputBuffer.data(), InputBufferSize);
 
         const bool addServer = ImGui::Button("Add Server");
         if (addServer && (!_currentNode.empty())) {
             module->loadWMSCapabilities(
-                std::string(NameInputBuffer),
+                std::string(NameInputBuffer.data()),
                 _currentNode,
-                std::string(UrlInputBuffer)
+                std::string(UrlInputBuffer.data())
             );
-            std::memset(NameInputBuffer, 0, InputBufferSize * sizeof(char));
-            std::memset(UrlInputBuffer, 0, InputBufferSize * sizeof(char));
+            std::memset(NameInputBuffer.data(), 0, InputBufferSize * sizeof(char));
+            std::memset(UrlInputBuffer.data(), 0, InputBufferSize * sizeof(char));
 
             urlInfo = module->urlInfo(_currentNode);
             _currentServer = urlInfo.back().name;
@@ -267,10 +267,10 @@ void GuiGlobeBrowsingComponent::render() {
 
     ImGui::Separator();
 
-    Capabilities cap = module->capabilities(_currentServer);
+    const Capabilities cap = module->capabilities(_currentServer);
 
     if (cap.empty()) {
-        LWARNINGC("GlobeBrowsing", fmt::format("Unknown server: '{}'", _currentServer));
+        LWARNINGC("GlobeBrowsing", std::format("Unknown server '{}'", _currentServer));
     }
 
     ImGui::Columns(6, nullptr, false);
@@ -327,7 +327,7 @@ void GuiGlobeBrowsingComponent::render() {
                 layerName.end()
             );
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.globebrowsing.addLayer(\
                         '{}', \
                         '{}', \

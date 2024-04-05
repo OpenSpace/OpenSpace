@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -96,12 +96,11 @@ private:
     void editRefusalDialog(const std::string& title, const std::string& msg,
         const std::string& detailedText);
 
-    void populateProfilesList(std::string preset);
-    void populateWindowConfigsList(std::string preset);
+    void populateProfilesList(const std::string& preset);
+    void populateWindowConfigsList(const std::string& preset);
     void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
         std::filesystem::path savePath, const std::string& saveWindowCfgPath);
     void onNewWindowConfigSelection(int newIndex);
-    bool versionCheck(sgct::config::GeneratorVersion& v) const;
 
     const std::string _assetPath;
     const std::string _userAssetPath;

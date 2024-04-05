@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,12 +29,12 @@
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -181,6 +181,15 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo LightSourceNodeInfo = {
+        "LightSourceNode",
+        "Name of the light source",
+        "This value is the name of a scene graph node that should be used as the source "
+        "of illumination for the globe. If this value is not specified, the solar "
+        "system's Sun is used instead",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EclipseInfo = {
         "Eclipse",
         "Eclipse",
@@ -311,6 +320,9 @@ namespace {
 
         std::optional<ghoul::Dictionary> shadows
             [[codegen::reference("globebrowsing_shadows_component")]];
+
+        // [[codegen::verbatim(LightSourceNodeInfo.description)]]
+        std::optional<std::string> lightSourceNode;
     };
 #include "renderableglobe_codegen.cpp"
 } // namespace
@@ -332,11 +344,11 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
         const Geodetic2 center = n->surfacePatch.center();
         int index = 0;
         if (center.lon < location.lon) {
-            ++index;
+            index++;
         }
         if (location.lat < center.lat) {
-            ++index;
-            ++index;
+            index++;
+            index++;
         }
         n = n->children[static_cast<Quad>(index)];
     }
@@ -385,7 +397,7 @@ BoundingHeights boundingHeightsForChunk(const Chunk& chunk, const LayerManager& 
     const size_t HeightChannel = 0;
     const LayerGroup& heightmaps = lm.layerGroup(layers::Group::ID::HeightLayers);
 
-    ChunkTileVector chunkTileSettingPairs = tilesAndSettingsUnsorted(
+    const ChunkTileVector chunkTileSettingPairs = tilesAndSettingsUnsorted(
         heightmaps,
         chunk.tileIndex
     );
@@ -443,7 +455,7 @@ bool colorAvailableForChunk(const Chunk& chunk, const LayerManager& lm) {
     const LayerGroup& colorLayers = lm.layerGroup(layers::Group::ID::ColorLayers);
     for (Layer* lyr : colorLayers.activeLayers()) {
         if (lyr->tileProvider()) {
-            ChunkTile t = lyr->tileProvider()->chunkTile(chunk.tileIndex);
+            const ChunkTile t = lyr->tileProvider()->chunkTile(chunk.tileIndex);
             if (t.tile.status == Tile::Status::Unavailable) {
                 return false;
             }
@@ -463,7 +475,7 @@ std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
     const double patchCenterRadius = ellipsoid.maximumRadius();
 
     const double maxCenterRadius = patchCenterRadius + heights.max;
-    Geodetic2 halfSize = chunk.surfacePatch.halfSize();
+    const Geodetic2 halfSize = chunk.surfacePatch.halfSize();
 
     // As the patch is curved, the maximum height offsets at the corners must be long
     // enough to cover large enough to cover a heights.max at the center of the
@@ -504,7 +516,7 @@ std::array<glm::dvec4, 8> boundingCornersForChunk(const Chunk& chunk,
     const Geodetic2 pGeodetic = ellipsoid.cartesianToGeodetic2(p);
     const double latDiff = latCloseToEquator - pGeodetic.lat;
 
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         const Quad q = static_cast<Quad>(i % 4);
         const double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
         Geodetic3 cornerGeodetic = { chunk.surfacePatch.corner(q), cornerHeight };
@@ -530,6 +542,24 @@ bool intersects(const AABB3& bb, const AABB3& o) {
     return (bb.min.x <= o.max.x) && (o.min.x <= bb.max.x)
         && (bb.min.y <= o.max.y) && (o.min.y <= bb.max.y)
         && (bb.min.z <= o.max.z) && (o.min.z <= bb.max.z);
+}
+
+/**
+ * Calculates the direction towards the local light source. If \p illumination is a
+ * `nullptr`, it is interpreted to be (0,0,0)
+ */
+glm::dvec3 directionToLightSource(const glm::dvec3& pos, SceneGraphNode* lightSource) {
+    // For the lighting we use the provided node, or the Sun
+    SceneGraphNode* node =
+        lightSource ? lightSource : sceneGraph()->sceneGraphNode("Sun");
+
+    if (lightSource) {
+        return lightSource->worldPosition() - pos;
+    }
+    else {
+        const glm::dvec3 dir = length(pos) > 0.0 ? glm::normalize(-pos) : glm::dvec3(0.0);
+        return dir;
+    }
 }
 
 } // namespace
@@ -574,6 +604,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
+    , _lightSourceNodeName(LightSourceNodeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -608,13 +639,33 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     // @TODO (abock, 2021-03-25) The layermanager should be changed to take a
     // std::map<std::string, ghoul::Dictionary> instead and then we don't need to get it
     // as a bare dictionary anymore and can use the value from the struct directly
-    ghoul::Dictionary layersDictionary = dictionary.value<ghoul::Dictionary>("Layers");
-    _layerManager.initialize(layersDictionary);
+    const ghoul::Dictionary layersDict = dictionary.value<ghoul::Dictionary>("Layers");
+    _layerManager.initialize(layersDict);
 
     addProperty(Fadeable::_opacity);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.renderAtDistance);
+
+    _lightSourceNodeName.onChange([this]() {
+        if (_lightSourceNodeName.value().empty()) {
+            _lightSourceNode = nullptr;
+            return;
+        }
+
+        SceneGraphNode* n = sceneGraphNode(_lightSourceNodeName);
+        if (!n) {
+            LERROR(std::format(
+                "Could not find node '{}' as illumination for '{}'",
+                _lightSourceNodeName.value(), identifier()
+            ));
+        }
+        else {
+            _lightSourceNode = n;
+        }
+    });
+    _lightSourceNodeName = p.lightSourceNode.value_or("");
+    addProperty(_lightSourceNodeName);
 
     if (p.shadowGroup.has_value()) {
         std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
@@ -641,7 +692,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_shadowMappingPropertyOwner);
 
     _generalProperties.targetLodScaleFactor.onChange([this]() {
-        float sf = _generalProperties.targetLodScaleFactor;
+        const float sf = _generalProperties.targetLodScaleFactor;
         _generalProperties.currentLodScaleFactor = sf;
         _lodScaleFactorDirty = true;
     });
@@ -785,7 +836,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
         try {
             if (_shadowComponent && _shadowComponent->isEnabled()) {
                 // Set matrices and other GL states
-                RenderData lightRenderData(_shadowComponent->begin(data));
+                const RenderData lightRenderData(_shadowComponent->begin(data));
 
                 glDisable(GL_BLEND);
 
@@ -829,7 +880,8 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& rendererTask
             }
         }
         catch (const ghoul::opengl::TextureUnit::TextureUnitError&) {
-            std::string layer = _lastChangedLayer ? _lastChangedLayer->guiName() : "";
+            const std::string& layer =
+                _lastChangedLayer ? _lastChangedLayer->guiName() : "";
 
             LWARNINGC(
                 guiName(),
@@ -866,7 +918,7 @@ void RenderableGlobe::renderSecondary(const RenderData& data, RendererTasks&) {
         _globeLabelsComponent.draw(data);
     }
     catch (const ghoul::opengl::TextureUnit::TextureUnitError& e) {
-        LERROR(fmt::format("Error on drawing globe labels: '{}'", e.message));
+        LERROR(std::format("Error on drawing globe labels '{}'", e.message));
     }
 
     if (_geoJsonManager.isReady()) {
@@ -917,10 +969,10 @@ void RenderableGlobe::update(const UpdateData& data) {
     setBoundingSphere(bs);
     setInteractionSphere(bs);
 
-    glm::dmat4 translation =
+    const glm::dmat4 translation =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation);
-    glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
-    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
+    const glm::dmat4 rotation = glm::dmat4(data.modelTransform.rotation);
+    const glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
 
     _cachedModelTransform = translation * rotation * scaling;
     _cachedInverseModelTransform = glm::inverse(_cachedModelTransform);
@@ -1063,7 +1115,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
 
-        for (size_t i = 0; i < layerGroups.size(); ++i) {
+        for (size_t i = 0; i < layerGroups.size(); i++) {
             _globalRenderer.gpuLayerGroups[i].bind(
                 *_globalRenderer.program,
                 *layerGroups[i]
@@ -1085,7 +1137,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
             _layerManager.layerGroups();
 
-        for (size_t i = 0; i < layerGroups.size(); ++i) {
+        for (size_t i = 0; i < layerGroups.size(); i++) {
             _localRenderer.gpuLayerGroups[i].bind(
                 *_localRenderer.program,
                 *layerGroups[i]
@@ -1165,9 +1217,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     if (nightLayersActive || waterLayersActive || _generalProperties.performShading) {
         const glm::dvec3 directionToSunWorldSpace =
-            length(data.modelTransform.translation) > 0.0 ?
-            glm::normalize(-data.modelTransform.translation) :
-            glm::dvec3(0.0);
+            directionToLightSource(data.modelTransform.translation, _lightSourceNode);
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
@@ -1193,9 +1243,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     if (nightLayersActive || waterLayersActive || _generalProperties.performShading) {
         const glm::dvec3 directionToSunWorldSpace =
-            length(data.modelTransform.translation) > 0.0 ?
-            glm::normalize(-data.modelTransform.translation) :
-            glm::dvec3(0.0);
+            directionToLightSource(data.modelTransform.translation, _lightSourceNode);
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
@@ -1233,17 +1281,17 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             if (isLeaf(*n) && n->isVisible) {
                 if (n->tileIndex.level < cutoff) {
                     global[iGlobal] = n;
-                    ++iGlobal;
+                    iGlobal++;
                 }
                 else {
                     local[iLocal] = n;
-                    ++iLocal;
+                    iLocal++;
                 }
             }
 
             // Add children to queue, if any
             if (!isLeaf(*n)) {
-                for (int i = 0; i < 4; ++i) {
+                for (int i = 0; i < 4; i++) {
                     traversalMemory.push_back(n->children[i]);
                 }
             }
@@ -1271,7 +1319,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
-    for (int i = 0; i < globalCount; ++i) {
+    for (int i = 0; i < globalCount; i++) {
         renderChunkGlobally(*_globalChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
     _globalRenderer.program->deactivate();
@@ -1279,7 +1327,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
-    for (int i = 0; i < localCount; ++i) {
+    for (int i = 0; i < localCount; i++) {
         renderChunkLocally(*_localChunkBuffer[i], data, shadowData, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
@@ -1327,7 +1375,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     std::array<LayerGroup*, LayerManager::NumLayerGroups> layerGroups =
         _layerManager.layerGroups();
-    for (size_t i = 0; i < layerGroups.size(); ++i) {
+    for (size_t i = 0; i < layerGroups.size(); i++) {
         _globalRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);
     }
 
@@ -1419,7 +1467,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     const std::array<LayerGroup*, LayerManager::NumLayerGroups>& layerGroups =
         _layerManager.layerGroups();
-    for (size_t i = 0; i < layerGroups.size(); ++i) {
+    for (size_t i = 0; i < layerGroups.size(); i++) {
         _localRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);
     }
 
@@ -1445,7 +1493,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     std::array<glm::dvec3, 4> cornersCameraSpace;
     std::array<glm::dvec3, 4> cornersModelSpace;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; i++) {
         const Quad q = static_cast<Quad>(i);
         const Geodetic2 corner = chunk.surfacePatch.corner(q);
         const glm::dvec3 cornerModelSpace = _ellipsoid.cartesianSurfacePosition(corner);
@@ -1554,7 +1602,7 @@ void RenderableGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
     std::vector<glm::vec4> clippingSpaceCorners(8);
     AABB3 screenSpaceBounds;
 
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         const glm::vec4& clippingSpaceCorner = mvp * modelSpaceCorners[i];
         clippingSpaceCorners[i] = clippingSpaceCorner;
 
@@ -1726,29 +1774,29 @@ void RenderableGlobe::recompileShaders() {
         // lastLayerIndex must be at least 0 for the shader to compile,
         // the layer type is inactivated by setting use to false
         shaderDictionary.setValue(
-            fmt::format("lastLayerIndex{}", layers::Groups[i].identifier),
+            std::format("lastLayerIndex{}", layers::Groups[i].identifier),
             glm::max(preprocessingData.layeredTextureInfo[i].lastLayerIdx, 0)
         );
         shaderDictionary.setValue(
-            fmt::format("use{}", layers::Groups[i].identifier),
+            std::format("use{}", layers::Groups[i].identifier),
             preprocessingData.layeredTextureInfo[i].lastLayerIdx >= 0
         );
         shaderDictionary.setValue(
-            fmt::format("blend{}", layers::Groups[i].identifier),
+            std::format("blend{}", layers::Groups[i].identifier),
             preprocessingData.layeredTextureInfo[i].layerBlendingEnabled
         );
 
         // This is to avoid errors from shader preprocessor
         shaderDictionary.setValue(
-            fmt::format("{}0LayerType", layers::Groups[i].identifier),
+            std::format("{}0LayerType", layers::Groups[i].identifier),
             0
         );
 
-        std::string groupName = std::string(layers::Groups[i].identifier);
+        const std::string groupName = std::string(layers::Groups[i].identifier);
 
         for (int j = 0;
              j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1;
-             ++j)
+             j++)
         {
             shaderDictionary.setValue(
                 groupName + std::to_string(j) + "LayerType",
@@ -1761,7 +1809,7 @@ void RenderableGlobe::recompileShaders() {
 
         for (int j = 0;
              j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1;
-             ++j)
+             j++)
         {
             shaderDictionary.setValue(
                 groupName + std::to_string(j) + "BlendMode",
@@ -1770,12 +1818,12 @@ void RenderableGlobe::recompileShaders() {
         }
 
         // This is to avoid errors from shader preprocessor
-        std::string keyLayerAdjustmentType = groupName + "0" + "LayerAdjustmentType";
-        shaderDictionary.setValue(keyLayerAdjustmentType, 0);
+        std::string layerAdjustmentType = groupName + "0" + "LayerAdjustmentType";
+        shaderDictionary.setValue(std::move(layerAdjustmentType), 0);
 
         for (int j = 0;
              j < preprocessingData.layeredTextureInfo[i].lastLayerIdx + 1;
-             ++j)
+             j++)
         {
             shaderDictionary.setValue(
                 groupName + std::to_string(j) + "LayerAdjustmentType",
@@ -1787,7 +1835,7 @@ void RenderableGlobe::recompileShaders() {
     }
 
     ghoul::Dictionary layerGroupNames;
-    for (size_t i = 0; i < layers::Groups.size(); ++i) {
+    for (size_t i = 0; i < layers::Groups.size(); i++) {
         layerGroupNames.setValue(
             std::to_string(i),
             std::string(layers::Groups[i].identifier)
@@ -1804,7 +1852,9 @@ void RenderableGlobe::recompileShaders() {
     shaderDictionary.setValue("nShadowSamples", _generalProperties.nShadowSamples - 1);
 
     // Exclise Shadow Samples
-    int nEclipseShadows = static_cast<int>(_ellipsoid.shadowConfigurationArray().size());
+    const int nEclipseShadows = static_cast<int>(
+        _ellipsoid.shadowConfigurationArray().size()
+    );
     shaderDictionary.setValue("nEclipseShadows", nEclipseShadows - 1);
     //
     // Create local shader
@@ -1865,11 +1915,11 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
 
     glm::dvec3 centerToEllipsoidSurface =
         _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
-    glm::dvec3 ellipsoidSurfaceToTarget = targetModelSpace - centerToEllipsoidSurface;
+    const glm::dvec3 ellipsoidSrfToTarget = targetModelSpace - centerToEllipsoidSurface;
     // ellipsoidSurfaceOutDirection will point towards the target, we want the outward
     // direction. Therefore it must be flipped in case the target is under the reference
     // ellipsoid so that it always points outwards
-    glm::dvec3 ellipsoidSurfaceOutDirection = glm::normalize(ellipsoidSurfaceToTarget);
+    glm::dvec3 ellipsoidSurfaceOutDirection = glm::normalize(ellipsoidSrfToTarget);
     if (glm::dot(ellipsoidSurfaceOutDirection, centerToEllipsoidSurface) < 0) {
         ellipsoidSurfaceOutDirection *= -1.0;
     }
@@ -1897,7 +1947,8 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
     ZoneScoped;
 
     return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (_debugProperties.performFrustumCulling && isCullableByFrustum(chunk, renderData, mvp));
+           (_debugProperties.performFrustumCulling &&
+               isCullableByFrustum(chunk, renderData, mvp));
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
@@ -1985,10 +2036,9 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
             return 0;
         }
 
-        glm::vec2 transformedUv = layer->tileUvToTextureSamplePosition(
+        const glm::vec2& transformedUv = layer->tileUvToTextureSamplePosition(
             uvTransform,
-            patchUV,
-            glm::uvec2(tileTexture->dimensions())
+            patchUV
         );
 
         // Sample and do linear interpolation
@@ -2085,10 +2135,10 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
     );
     // Shadow calculations..
     std::vector<ShadowRenderingStruct> shadowDataArray;
-    std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray =
+    const std::vector<Ellipsoid::ShadowConfiguration>& shadowConfArray =
         _ellipsoid.shadowConfigurationArray();
     shadowDataArray.reserve(shadowConfArray.size());
-    double lt;
+    double lt = 0.0;
     for (const auto& shadowConf : shadowConfArray) {
         // TO REMEMBER: all distances and lengths in world coordinates are in
         // meters!!! We need to move this to view space...
@@ -2196,17 +2246,17 @@ void RenderableGlobe::calculateEclipseShadows(ghoul::opengl::ProgramObject& prog
         constexpr std::string_view NameSource = "shadowDataArray[{}].sourceCasterVec";
         constexpr std::string_view NamePos = "shadowDataArray[{}].casterPositionVec";
 
-        programObject.setUniform(fmt::format(NameIsShadowing, counter), sd.isShadowing);
+        programObject.setUniform(std::format(NameIsShadowing, counter), sd.isShadowing);
 
         if (sd.isShadowing) {
-            programObject.setUniform(fmt::format(NameXp, counter), sd.xp);
-            programObject.setUniform(fmt::format(NameXu, counter), sd.xu);
-            programObject.setUniform(fmt::format(NameRc, counter), sd.rc);
+            programObject.setUniform(std::format(NameXp, counter), sd.xp);
+            programObject.setUniform(std::format(NameXu, counter), sd.xu);
+            programObject.setUniform(std::format(NameRc, counter), sd.rc);
             programObject.setUniform(
-                fmt::format(NameSource, counter), sd.sourceCasterVec
+                std::format(NameSource, counter), sd.sourceCasterVec
             );
             programObject.setUniform(
-                fmt::format(NamePos, counter), sd.casterPositionVec
+                std::format(NamePos, counter), sd.casterPositionVec
             );
         }
         counter++;
@@ -2363,10 +2413,12 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
     for (const layers::Group& gi : layers::Groups) {
         const std::vector<Layer*>& lyrs = _layerManager.layerGroup(gi.id).activeLayers();
         for (Layer* layer : lyrs) {
-            Tile::Status status = layer->tileStatus(chunk.tileIndex);
-            // Ensure that the current tile is OK and that the tileprovider for the current
-            // layer has enough data to support an additional level.
-            if (status == Tile::Status::OK && layer->tileProvider()->maxLevel() > currLevel + 1) {
+            const Tile::Status status = layer->tileStatus(chunk.tileIndex);
+            // Ensure that the current tile is OK and that the tileprovider for the
+            // current layer has enough data to support an additional level.
+            if (status == Tile::Status::OK &&
+                layer->tileProvider()->maxLevel() > currLevel + 1)
+            {
                 return UnknownDesiredLevel;
             }
         }
@@ -2389,7 +2441,7 @@ bool RenderableGlobe::isCullableByFrustum(const Chunk& chunk,
 
     // Create a bounding box that fits the patch corners
     AABB3 bounds; // in screen space
-    for (size_t i = 0; i < 8; ++i) {
+    for (size_t i = 0; i < 8; i++) {
         const glm::dvec4 cornerClippingSpace = mvp * corners[i];
         const glm::dvec3 ndc = glm::dvec3(
             (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace
@@ -2417,7 +2469,7 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
         _cachedInverseModelTransform * glm::dvec4(renderData.camera.positionVec3(), 1.0)
     );
 
-    const glm::dvec3 globeToCamera = cameraPos;
+    const glm::dvec3& globeToCamera = cameraPos;
 
     const Geodetic2 camPosOnGlobe = _ellipsoid.cartesianToGeodetic2(globeToCamera);
     const Geodetic2 closestPatchPoint = patch.closestPoint(camPosOnGlobe);
@@ -2433,7 +2485,7 @@ bool RenderableGlobe::isCullableByHorizon(const Chunk& chunk,
         _ellipsoid.cartesianSurfacePosition(chunk.surfacePatch.corner(SOUTH_EAST))
     };
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; i++) {
         const double distance = glm::length(cameraPos - corners[i]);
         if (distance < glm::length(cameraPos - objectPos)) {
             objectPos = corners[i];
@@ -2481,7 +2533,7 @@ void RenderableGlobe::splitChunkNode(Chunk& cn, int depth) {
         std::vector<void*> memory = _chunkPool.allocate(
             static_cast<int>(cn.children.size())
         );
-        for (size_t i = 0; i < cn.children.size(); ++i) {
+        for (size_t i = 0; i < cn.children.size(); i++) {
             cn.children[i] = new (memory[i]) Chunk(
                 cn.tileIndex.child(static_cast<Quad>(i))
             );
@@ -2555,7 +2607,7 @@ bool RenderableGlobe::updateChunkTree(Chunk& cn, const RenderData& data,
     else {
         ZoneScopedN("!leaf");
         char requestedMergeMask = 0;
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 4; i++) {
             if (updateChunkTree(*cn.children[i], data, mvp)) {
                 requestedMergeMask |= (1 << i);
             }

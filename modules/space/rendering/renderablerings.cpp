@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -246,7 +246,7 @@ void RenderableRings::loadTexture() {
         if (texture) {
             LDEBUGC(
                 "RenderableRings",
-                fmt::format("Loaded texture from {}", absPath(_texturePath))
+                std::format("Loaded texture from '{}'", absPath(_texturePath))
             );
             _texture = std::move(texture);
 
@@ -271,18 +271,18 @@ void RenderableRings::createPlane() {
         GLfloat t;
     };
 
-    VertexData data[] = {
-        { -size, -size, 0.f, 0.f },
-        {  size,  size, 1.f, 1.f },
-        { -size,  size, 0.f, 1.f },
-        { -size, -size, 0.f, 0.f },
-        {  size, -size, 1.f, 0.f },
-        {  size,  size, 1.f, 1.f },
+    const std::array<VertexData, 6> Data = {
+        VertexData{ -size, -size, 0.f, 0.f },
+        VertexData{  size,  size, 1.f, 1.f },
+        VertexData{ -size,  size, 0.f, 1.f },
+        VertexData{ -size, -size, 0.f, 0.f },
+        VertexData{  size, -size, 1.f, 0.f },
+        VertexData{  size,  size, 1.f, 1.f },
     };
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, Data.size(), Data.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(
         0,

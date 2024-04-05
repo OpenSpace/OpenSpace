@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,6 +48,18 @@ namespace {
         "",
         ""
     };
+
+    QString createOneLineSummary(const Profile::Property& p) {
+        QString summary = QString::fromStdString(p.name);
+        summary += " = ";
+        summary += QString::fromStdString(p.value);
+        summary += " (SetPropertyValue";
+        if (p.setType == Profile::Property::SetType::SetPropertyValueSingle) {
+            summary += "Single";
+        }
+        summary += ")";
+        return summary;
+    }
 } // namespace
 
 PropertiesDialog::PropertiesDialog(QWidget* parent,
@@ -70,8 +82,8 @@ void PropertiesDialog::createWidgets() {
             _list, &QListWidget::itemSelectionChanged,
             this, &PropertiesDialog::listItemSelected
         );
-        for (size_t i = 0; i < _propertyData.size(); ++i) {
-            _list->addItem(new QListWidgetItem(createOneLineSummary(_propertyData[i])));
+        for (const Profile::Property& property : _propertyData) {
+            _list->addItem(new QListWidgetItem(createOneLineSummary(property)));
         }
         layout->addWidget(_list);
     }
@@ -168,24 +180,12 @@ void PropertiesDialog::createWidgets() {
     }
 }
 
-QString PropertiesDialog::createOneLineSummary(Profile::Property p) {
-    QString summary = QString::fromStdString(p.name);
-    summary += " = ";
-    summary += QString::fromStdString(p.value);
-    summary += " (SetPropertyValue";
-    if (p.setType == Profile::Property::SetType::SetPropertyValueSingle) {
-        summary += "Single";
-    }
-    summary += ")";
-    return summary;
-}
-
 void PropertiesDialog::listItemSelected() {
     QListWidgetItem* item = _list->currentItem();
-    int index = _list->row(item);
+    const int index = _list->row(item);
 
     if (!_propertyData.empty()) {
-        Profile::Property& p = _propertyData[index];
+        const Profile::Property& p = _propertyData[index];
         if (p.setType == Profile::Property::SetType::SetPropertyValueSingle) {
             _commandCombo->setCurrentIndex(0);
         }
@@ -210,7 +210,7 @@ bool PropertiesDialog::isLineEmpty(int index) {
 }
 
 void PropertiesDialog::listItemAdded() {
-    int currentListSize = _list->count();
+    const int currentListSize = _list->count();
 
     if ((currentListSize == 1) && (isLineEmpty(0))) {
         // Special case where list is "empty" but really has one line that is blank.
@@ -242,7 +242,7 @@ void PropertiesDialog::listItemSave() {
     }
 
     QListWidgetItem* item = _list->currentItem();
-    int index = _list->row(item);
+    const int index = _list->row(item);
 
     if (!_propertyData.empty()) {
         if (_commandCombo->currentIndex() == 0) {
@@ -300,10 +300,10 @@ void PropertiesDialog::listItemRemove() {
             _list->item(0)->setText("");
         }
         else {
-            int index = _list->currentRow();
+            const int index = _list->currentRow();
             if (index >= 0 && index < _list->count()) {
                 delete _list->takeItem(index);
-                if (_propertyData.size() > 0) {
+                if (!_propertyData.empty()) {
                     _propertyData.erase(_propertyData.begin() + index);
                 }
             }
@@ -379,7 +379,7 @@ void PropertiesDialog::selectLineFromScriptLog() {
     ScriptlogDialog d(this, "openspace.setPropertyValue");
     connect(
         &d, &ScriptlogDialog::scriptsSelected,
-        [this](std::vector<std::string> scripts) {
+        [this](const std::vector<std::string>& scripts) {
             for (const std::string& script : scripts) {
                 listItemAdded();
 
@@ -392,13 +392,13 @@ void PropertiesDialog::selectLineFromScriptLog() {
                 // openspace.setPropertyValue('prop', value);
                 if (text.startsWith("openspace.setPropertyValueSingle")) {
                     _commandCombo->setCurrentIndex(0);
-                    std::string_view prefix = "openspace.setPropertyValueSingle";
+                    const std::string_view prefix = "openspace.setPropertyValueSingle";
                     text = text.mid(static_cast<int>(prefix.size()) + 1); // +1 for (
                 }
                 else {
                     // command == "openspace.setPropertyValue"
                     _commandCombo->setCurrentIndex(1);
-                    std::string_view prefix = "openspace.setPropertyValue";
+                    const std::string_view prefix = "openspace.setPropertyValue";
                     text = text.mid(static_cast<int>(prefix.size()) + 1); // +1 for (
                 }
 
@@ -411,11 +411,10 @@ void PropertiesDialog::selectLineFromScriptLog() {
                 }
 
                 // Remove the string markers around the property
-                QString property = textList[0].mid(1, textList[0].size() - 2);
+                const QString property = textList[0].mid(1, textList[0].size() - 2);
 
                 textList.removeFirst();
-                QString value = textList.join(",");
-
+                const QString value = textList.join(",");
 
                 _propertyEdit->setText(property.trimmed());
                 _valueEdit->setText(value.trimmed());

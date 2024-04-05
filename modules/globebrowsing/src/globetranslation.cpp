@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -222,6 +222,14 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         return _position;
     }
 
+    if (!_attachedNode) {
+        LERRORC(
+            "GlobeRotation",
+            std::format("Could not find attached node '{}'", _globe.value())
+        );
+        return _position;
+    }
+
     GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
 
     double lat = _latitude;
@@ -229,7 +237,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     double alt = _altitude;
 
     if (_useCamera) {
-        glm::dvec3 position = mod->geoPosition();
+        const glm::dvec3 position = mod->geoPosition();
         lat = position.x;
         lon = position.y;
         if (_useCameraAltitude) {
@@ -238,16 +246,16 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     }
 
     if (_useHeightmap) {
-
-        glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
+        const glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,
             lat,
             lon,
             0.0
         );
 
-        SurfacePositionHandle h =
-            _attachedNode->calculateSurfacePositionHandle(groundPos);
+        const SurfacePositionHandle h = _attachedNode->calculateSurfacePositionHandle(
+            groundPos
+        );
 
         _position = mod->cartesianCoordinatesFromGeo(
             *_attachedNode,

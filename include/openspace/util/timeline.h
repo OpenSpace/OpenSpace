@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,8 @@ namespace openspace {
  * Base class for keyframes.
  */
 struct KeyframeBase {
+    KeyframeBase(size_t id_, double timestamp_);
+
     size_t id;
     double timestamp;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 #include <QPainter>
 
 namespace {
-    constexpr float MarginFractionOfWidgetSize = 0.05f;
+    constexpr float MarginFractionWidgetSize = 0.05f;
     constexpr int WindowOpacity = 170;
 
     QRectF computeUnion(const std::vector<QRect>& monitorResolutions) {
@@ -48,15 +48,15 @@ MonitorBox::MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolu
 {
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     
-    QRectF monitorArrangement = computeUnion(monitorResolutions);
+    const QRectF monitorArrangement = computeUnion(monitorResolutions);
     
     const float aspectRatio = monitorArrangement.width() / monitorArrangement.height();
     if (aspectRatio > 1.0) {
-        float borderMargin = 2.f * MarginFractionOfWidgetSize * widgetDims.width();
+        const float borderMargin = 2.f * MarginFractionWidgetSize * widgetDims.width();
         widgetDims.setHeight(widgetDims.width() / aspectRatio + borderMargin);
     }
     else {
-        float borderMargin = 2.f * MarginFractionOfWidgetSize * widgetDims.height();
+        const float borderMargin = 2.f * MarginFractionWidgetSize * widgetDims.height();
         widgetDims.setWidth(widgetDims.height() * aspectRatio + borderMargin);
     }
     setFixedSize(widgetDims.width(), widgetDims.height());
@@ -68,7 +68,7 @@ MonitorBox::MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolu
         computeScaledResolutionLandscape(monitorArrangement, monitorResolutions) :
         computeScaledResolutionPortrait(monitorArrangement, monitorResolutions);
 
-    for (size_t i = 0; i < monitorResolutions.size(); ++i) {
+    for (size_t i = 0; i < monitorResolutions.size(); i++) {
         _monitorDimensionsScaled.emplace_back(
             offsets[i].width(),
             offsets[i].height(),
@@ -89,7 +89,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     //
     // Draw window out-of-bounds region(s) first
-    for (int i = 0; i < _nWindows; ++i) {
+    for (int i = 0; i < _nWindows; i++) {
         painter.setBrush(Qt::BDiagPattern);
         painter.setPen(QPen(_colorsForWindows[i], 0));
         painter.drawRect(_windowRendering[i]);
@@ -99,7 +99,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
     painter.setPen(QPen(Qt::black, 2));
     painter.setBrush(Qt::NoBrush);
 
-    for (size_t i = 0; i < _monitorDimensionsScaled.size(); ++i) {
+    for (size_t i = 0; i < _monitorDimensionsScaled.size(); i++) {
         const QColor Grey = QColor(0xDD, 0xDD, 0xDD);
 
         painter.drawRect(_monitorDimensionsScaled[i]);
@@ -107,7 +107,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
         if (_monitorDimensionsScaled.size() > 1 && i == 0) {
             // We only want to render the "Primary" if there are multiple windows
-            QPointF textPos = QPointF(
+            const QPointF textPos = QPointF(
                 _monitorDimensionsScaled[i].left() + 4.0,
                 _monitorDimensionsScaled[i].top() + 24.0
             );
@@ -120,7 +120,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     // Draw window number(s) first for darker contrast, then window(s) over both
     // out-of-bounds and monitors
-    for (int i = 0; i < _nWindows; ++i) {
+    for (int i = 0; i < _nWindows; i++) {
         QPointF p = QPointF(
             _windowRendering[i].left() + 5.0,
             _windowRendering[i].bottom() - 5.0
@@ -132,7 +132,7 @@ void MonitorBox::paintEvent(QPaintEvent*) {
 
     //
     // Paint window
-    for (int i = 0; i < _nWindows; ++i) {
+    for (int i = 0; i < _nWindows; i++) {
         painter.setPen(QPen(_colorsForWindows[i], 1));
         painter.drawRect(_windowRendering[i]);
         
@@ -159,16 +159,16 @@ std::vector<QSizeF> MonitorBox::computeScaledResolutionLandscape(QRectF arrangem
 {
     std::vector<QSizeF> offsets;
 
-    float marginWidget = size().width() * MarginFractionOfWidgetSize;
-    float virtualWidth = size().width() * (1.f - MarginFractionOfWidgetSize * 2.f);
+    const float margin = size().width() * MarginFractionWidgetSize;
+    const float virtualWidth = size().width() * (1.f - MarginFractionWidgetSize * 2.f);
     _monitorScaleFactor = virtualWidth / arrangement.width();
 
     const float aspectRatio = arrangement.width() / arrangement.height();
     const float newHeight = virtualWidth / aspectRatio;
 
     for (const QRect& res : resolutions) {
-        float x = marginWidget + (res.x() - arrangement.x()) * _monitorScaleFactor;
-        float y = marginWidget + (size().height() - newHeight - marginWidget) / 4.f +
+        const float x = margin + (res.x() - arrangement.x()) * _monitorScaleFactor;
+        const float y = margin + (size().height() - newHeight - margin) / 4.f +
             (res.y() - arrangement.y()) * _monitorScaleFactor;
         offsets.emplace_back(x, y);
     }
@@ -181,17 +181,17 @@ std::vector<QSizeF> MonitorBox::computeScaledResolutionPortrait(QRectF arrangeme
 {
     std::vector<QSizeF> offsets;
     
-    float marginWidget = size().height() * MarginFractionOfWidgetSize;
-    float virtualHeight = size().height() * (1.f - MarginFractionOfWidgetSize * 2.f);
+    const float marginWidget = size().height() * MarginFractionWidgetSize;
+    const float virtualHeight = size().height() * (1.f - MarginFractionWidgetSize * 2.f);
     _monitorScaleFactor = virtualHeight / arrangement.height();
     
     const float aspectRatio = arrangement.width() / arrangement.height();
     const float newWidth = virtualHeight * aspectRatio;
 
     for (const QRect& res : resolutions) {
-        float x = marginWidget + (size().width() - newWidth - marginWidget) / 4.f +
+        const float x = marginWidget + (size().width() - newWidth - marginWidget) / 4.f +
             (res.x() - arrangement.x()) * _monitorScaleFactor;
-        float y = marginWidget + (res.y() - arrangement.y()) * _monitorScaleFactor;
+        const float y = marginWidget + (res.y() - arrangement.y()) * _monitorScaleFactor;
         offsets.emplace_back(x, y);
     }
     

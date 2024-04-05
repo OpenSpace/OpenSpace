@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/configuration.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/util/factorymanager.h>
@@ -32,10 +34,9 @@
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
 #include <openspace/util/taskloader.h>
-
-#include <ghoul/fmt.h>
-#include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/ghoul.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 
@@ -44,21 +45,25 @@ int main(int, char**) {
 
     ghoul::initialize();
 
-    std::string configFile = configuration::findConfiguration();
-    global::configuration = configuration::loadConfigurationFromFile(configFile);
-    global::openSpaceEngine.initialize();
+    std::filesystem::path configFile = findConfiguration();
+    std::filesystem::path settings = findSettings();
+    *global::configuration = loadConfigurationFromFile(
+        configFile,
+        settings,
+        glm::ivec2(0, 0)
+    );
+    global::openSpaceEngine->initialize();
 
 
     TaskLoader taskLoader;
-    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(
-        absPath("${TASKS}/full_sync.task")
-    );
+    std::filesystem::path t = absPath("${TASKS}/full_sync.task");
+    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(t.string());
 
     for (size_t i = 0; i < tasks.size(); i++) {
         Task& task = *tasks[i].get();
         LINFOC(
             "Sync",
-            fmt::format(
+            std::format(
                 "Synchronizing scene {} out of {}: {}",
                 i + 1, tasks.size(), task.description()
             )

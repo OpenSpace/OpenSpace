@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -283,7 +283,7 @@ std::string ScreenSpaceRenderable::makeUniqueIdentifier(std::string name) {
         return taken;
     };
 
-    std::string baseName = name;
+    const std::string baseName = name;
     int i = 1;
     while (nameTaken(name)) {
         name = baseName + std::to_string(i);
@@ -424,7 +424,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         // when this triggerProperty was pressed in the gui, therefor it has already been
         // synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript(
-            script,
+            std::move(script),
             scripting::ScriptEngine::ShouldBeSynchronized::No,
             scripting::ScriptEngine::ShouldSendToRemote::No
         );
@@ -459,7 +459,7 @@ bool ScreenSpaceRenderable::deinitializeGL() {
 void ScreenSpaceRenderable::render(float blackoutFactor) {
     ZoneScoped;
 
-    glm::mat4 mat =
+    const glm::mat4 mat =
         globalRotationMatrix() *
         translationMatrix() *
         localRotationMatrix() *
@@ -533,7 +533,7 @@ void ScreenSpaceRenderable::createShaders() {
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
     // to scale the plane
-    float textureRatio =
+    const float textureRatio =
         static_cast<float>(_objectSize.y) / static_cast<float>(_objectSize.x);
 
     glm::mat4 scale = glm::scale(
@@ -549,7 +549,8 @@ glm::vec2 ScreenSpaceRenderable::screenSpacePosition() {
 }
 
 glm::vec2 ScreenSpaceRenderable::screenSpaceDimensions() {
-    float ratio = static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y);
+    const float ratio =
+        static_cast<float>(_objectSize.x) / static_cast<float>(_objectSize.y);
     return glm::vec2(2.f * _scale * ratio, 2.f * _scale);
 }
 
@@ -561,22 +562,22 @@ glm::vec2 ScreenSpaceRenderable::lowerLeftCornerScreenSpace() {
     return screenSpacePosition() - (screenSpaceDimensions() / 2.0f);
 }
 
-bool ScreenSpaceRenderable::isIntersecting(glm::vec2 coord) {
-    bool isUnderTopBorder = coord.x < upperRightCornerScreenSpace().x;
-    bool isLeftToRightBorder = coord.y < upperRightCornerScreenSpace().y;
-    bool isRightToLeftBorder = coord.x > lowerLeftCornerScreenSpace().x;
-    bool isOverBottomBorder = coord.y > lowerLeftCornerScreenSpace().y;
+bool ScreenSpaceRenderable::isIntersecting(const glm::vec2& coord) {
+    const bool isUnderTopBorder = coord.x < upperRightCornerScreenSpace().x;
+    const bool isLeftToRightBorder = coord.y < upperRightCornerScreenSpace().y;
+    const bool isRightToLeftBorder = coord.x > lowerLeftCornerScreenSpace().x;
+    const bool isOverBottomBorder = coord.y > lowerLeftCornerScreenSpace().y;
 
     return  isUnderTopBorder && isLeftToRightBorder &&
             isRightToLeftBorder && isOverBottomBorder;
 }
 
 void ScreenSpaceRenderable::translate(glm::vec2 translation, glm::vec2 position) {
-    glm::mat4 translationMatrix = glm::translate(
+    const glm::mat4 translationMatrix = glm::translate(
         glm::mat4(1.f),
-        glm::vec3(translation, 0.0f)
+        glm::vec3(translation, 0.f)
     );
-    glm::vec4 origin = glm::vec4(position, _cartesianPosition.value().z, 1.0f);
+    const glm::vec4 origin = glm::vec4(position, _cartesianPosition.value().z, 1.f);
     _cartesianPosition = translationMatrix * origin;
 }
 
@@ -597,7 +598,7 @@ glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
     // 1) The global rotation of the view applied in the render engine
     // 2) sgct's scene matrix (also called model matrix by sgct)
 
-    glm::mat4 inverseRotation = glm::inverse(
+    const glm::mat4 inverseRotation = glm::inverse(
         global::renderEngine->globalRotation() *
         global::windowDelegate->modelMatrix()
     );
@@ -609,7 +610,7 @@ glm::mat4 ScreenSpaceRenderable::globalRotationMatrix() {
 glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
     glm::mat4 rotation = glm::mat4(1.f);
     if (_faceCamera) {
-        glm::vec3 translation = _useRadiusAzimuthElevation ?
+        const glm::vec3 translation = _useRadiusAzimuthElevation ?
             sphericalToCartesian(raeToSpherical(_raePosition)) :
             _cartesianPosition;
 
@@ -620,9 +621,9 @@ glm::mat4 ScreenSpaceRenderable::localRotationMatrix() {
         ));
     }
 
-    float roll = _localRotation.value().x;
-    float pitch = _localRotation.value().y;
-    float yaw = _localRotation.value().z;
+    const float roll = _localRotation.value().x;
+    const float pitch = _localRotation.value().y;
+    const float yaw = _localRotation.value().z;
     return rotation * glm::mat4(glm::quat(glm::vec3(pitch, yaw, roll)));
 }
 
@@ -635,19 +636,19 @@ glm::vec3 ScreenSpaceRenderable::cartesianToRae(const glm::vec3& cartesian) cons
 }
 
 glm::mat4 ScreenSpaceRenderable::translationMatrix() {
-    glm::vec3 translation = _useRadiusAzimuthElevation ?
+    const glm::vec3 translation = _useRadiusAzimuthElevation ?
         sphericalToCartesian(raeToSpherical(_raePosition)) :
         _cartesianPosition;
 
     return glm::translate(glm::mat4(1.f), translation);
 }
 
-void ScreenSpaceRenderable::draw(glm::mat4 modelTransform, float blackoutFactor) {
+void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform, float blackoutFactor) {
     glDisable(GL_CULL_FACE);
 
     _shader->activate();
     // Calculate the border from pixels to UV coordinates
-    glm::vec2 borderUV = glm::vec2(
+    const glm::vec2 borderUV = glm::vec2(
         _borderWidth / static_cast<float>(_objectSize.x),
         _borderWidth / static_cast<float>(_objectSize.y)
     );
@@ -715,18 +716,18 @@ glm::vec3 ScreenSpaceRenderable::sphericalToCartesian(glm::vec3 spherical) const
 
 glm::vec3 ScreenSpaceRenderable::cartesianToSpherical(const glm::vec3& cartesian) const {
     // Rotate cartesian coordinates.
-    glm::vec3 rotated = glm::vec3(cartesian.x, cartesian.z, -cartesian.y);
+    const glm::vec3 rotated = glm::vec3(cartesian.x, cartesian.z, -cartesian.y);
 
-    const float r = sqrt(
-        pow(rotated.x, 2.f) + pow(rotated.y, 2.f) + pow(rotated.z, 2.f)
+    const float r = std::sqrt(
+        std::pow(rotated.x, 2.f) + std::pow(rotated.y, 2.f) + std::pow(rotated.z, 2.f)
     );
-    const float theta = acos(rotated.z / r);
-    const float phi = atan2(rotated.y, rotated.x);
+    const float theta = std::acos(rotated.z / r);
+    const float phi = std::atan2(rotated.y, rotated.x);
     return sanitizeSphericalCoordinates(glm::vec3(r, theta, phi));
 }
 
 // Radius, azimiuth, elevation to spherical coordinates.
-glm::vec3 ScreenSpaceRenderable::raeToSpherical(glm::vec3 rae) const {
+glm::vec3 ScreenSpaceRenderable::raeToSpherical(const glm::vec3& rae) const {
     //return rae;
     const float r = rae.x;
 
@@ -741,15 +742,15 @@ glm::vec3 ScreenSpaceRenderable::raeToSpherical(glm::vec3 rae) const {
 }
 
 // Spherical coordinates to radius, azimuth and elevation.
-glm::vec3 ScreenSpaceRenderable::sphericalToRae(glm::vec3 spherical) const {
+glm::vec3 ScreenSpaceRenderable::sphericalToRae(const glm::vec3& spherical) const {
     //return spherical;
     const float r = spherical.x;
 
     // Azimuth on screen is angle from negative y, as opposed to from x.
-    float azimuth = spherical.z + glm::half_pi<float>();
+    const float azimuth = spherical.z + glm::half_pi<float>();
 
     // Elevation is polar angle - pi/2
-    float elevation = wrap(
+    const float elevation = wrap(
         spherical.y - glm::half_pi<float>(),
         -glm::pi<float>(),
         glm::pi<float>()

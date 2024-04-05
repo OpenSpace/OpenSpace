@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,7 +73,7 @@ void renderTooltip(Property* prop, double delay) {
 
 void executeSetPropertyScript(const std::string& id, const std::string& value) {
     global::scriptEngine->queueScript(
-        fmt::format("openspace.setPropertyValueSingle('{}', {});", id, value),
+        std::format("openspace.setPropertyValueSingle('{}', {});", id, value),
         scripting::ScriptEngine::ShouldBeSynchronized::Yes,
         scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
@@ -175,11 +175,10 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
         bool selectionChanged = false;
         std::set<std::string> newSelected;
 
-        std::set<std::string> selected = p->value();
+        const std::set<std::string> selected = p->value();
         const std::vector<std::string>& options = p->options();
 
-        for (int i = 0; i < static_cast<int>(options.size()); ++i) {
-            const std::string key = options[i];
+        for (const std::string& key : options) {
             bool isSelected = p->isSelected(key);
 
             selectionChanged |= ImGui::Checkbox(key.c_str(), &isSelected);
@@ -195,7 +194,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
         if (selectionChanged) {
             std::string parameters = "{";
             for (const std::string& s : newSelected) {
-                parameters += fmt::format("'{}',", s);
+                parameters += std::format("'{}',", s);
             }
             if (!newSelected.empty()) {
                 parameters.pop_back();
@@ -218,14 +217,14 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 
     const std::string value = p->value();
 
-    static constexpr int bufferSize = 256;
-    static char buffer[bufferSize];
+    static constexpr int BufferSize = 256;
+    static std::array<char, BufferSize> buffer;
 #ifdef _MSC_VER
-    strcpy_s(buffer, value.length() + 1, value.c_str());
+    strcpy_s(buffer.data(), value.length() + 1, value.c_str());
 #else
-    strcpy(buffer, value.c_str());
+    strcpy(buffer.data(), value.c_str());
 #endif
-    bool hasNewValue = ImGui::InputText(name.c_str(), buffer, bufferSize);
+    const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
@@ -233,7 +232,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     if (hasNewValue) {
         executeSetPropertyScript(
             p->fullyQualifiedIdentifier(),
-            "[[" + std::string(buffer) + "]]"
+            "[[" + std::string(buffer.data()) + "]]"
         );
     }
 
@@ -249,19 +248,19 @@ void renderListProperty(const std::string& name, const std::string& fullIdentifi
     );
 
     // Remove brackets from the string value
-    std::string value = stringValue.substr(1, stringValue.size() - 2);
+    const std::string value = stringValue.substr(1, stringValue.size() - 2);
 
-    static const int bufferSize = 512;
-    static char buffer[bufferSize];
+    static constexpr int BufferSize = 512;
+    static std::array<char, BufferSize> buffer;
 #ifdef _MSC_VER
-    strcpy_s(buffer, value.length() + 1, value.c_str());
+    strcpy_s(buffer.data(), value.length() + 1, value.c_str());
 #else
-    strcpy(buffer, value.c_str());
+    strcpy(buffer.data(), value.c_str());
 #endif
 
-    bool hasNewValue = ImGui::InputText(name.c_str(), buffer, bufferSize);
+    const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (hasNewValue) {
-        std::vector<std::string> tokens = ghoul::tokenizeString(std::string(buffer), ',');
+        std::vector<std::string> tokens = ghoul::tokenizeString(buffer.data(), ',');
         std::string script = "{";
         for (std::string& token : tokens) {
             if (!token.empty()) {
@@ -271,7 +270,7 @@ void renderListProperty(const std::string& name, const std::string& fullIdentifi
         }
         script += '}';
 
-        executeSetPropertyScript(fullIdentifier, std::move(script));
+        executeSetPropertyScript(fullIdentifier, script);
     }
 }
 
@@ -283,7 +282,7 @@ void renderDoubleListProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    std::string value = p->stringValue();
+    const std::string value = p->stringValue();
     renderListProperty(name, p->fullyQualifiedIdentifier(), value);
 
     if (showTooltip) {
@@ -301,7 +300,7 @@ void renderIntListProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    std::string value = p->stringValue();
+    const std::string value = p->stringValue();
     renderListProperty(name, p->fullyQualifiedIdentifier(), value);
 
     if (showTooltip) {
@@ -319,7 +318,7 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
     const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    std::string value = p->stringValue();
+    const std::string value = p->stringValue();
     renderListProperty(name, p->fullyQualifiedIdentifier(), value);
 
     if (showTooltip) {
@@ -334,7 +333,7 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
 {
     ghoul_assert(prop, "prop must not be nullptr");
     DoubleProperty* p = static_cast<DoubleProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     float value = static_cast<float>(*p);
@@ -346,7 +345,7 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
     min = std::max(min, std::numeric_limits<float>::min() / 2.f);
     max = std::min(max, std::numeric_limits<float>::max() / 2.f);
 
-    bool changed = ImGui::SliderFloat(
+    const bool changed = ImGui::SliderFloat(
         name.c_str(),
         &value,
         min,
@@ -370,14 +369,14 @@ void renderIntProperty(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     IntProperty* p = static_cast<IntProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IntProperty::ValueType value = *p;
-    int min = p->minValue();
-    int max = p->maxValue();
+    const int min = p->minValue();
+    const int max = p->maxValue();
 
-    bool changed = ImGui::SliderInt(name.c_str(), &value, min, max);
+    const bool changed = ImGui::SliderInt(name.c_str(), &value, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
@@ -394,13 +393,13 @@ void renderIVec2Property(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     IVec2Property* p = static_cast<IVec2Property*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec2Property::ValueType value = *p;
-    int min = glm::compMin(p->minValue());
-    int max = glm::compMax(p->maxValue());
-    bool changed = ImGui::SliderInt2(name.c_str(), &value.x, min, max);
+    const int min = glm::compMin(p->minValue());
+    const int max = glm::compMax(p->maxValue());
+    const bool changed = ImGui::SliderInt2(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
@@ -417,14 +416,13 @@ void renderIVec3Property(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     IVec3Property* p = static_cast<IVec3Property*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec3Property::ValueType value = *p;
-    int min = glm::compMin(p->minValue());
-    int max = glm::compMax(p->maxValue());
-
-    bool changed = ImGui::SliderInt3(name.c_str(), &value.x, min, max);
+    const int min = glm::compMin(p->minValue());
+    const int max = glm::compMax(p->maxValue());
+    const bool changed = ImGui::SliderInt3(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
@@ -440,14 +438,13 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     IVec4Property* p = static_cast<IVec4Property*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IVec4Property::ValueType value = *p;
-    int min = glm::compMin(p->minValue());
-    int max = glm::compMax(p->maxValue());
-
-    bool changed = ImGui::SliderInt4(name.c_str(), &value.x, min, max);
+    const int min = glm::compMin(p->minValue());
+    const int max = glm::compMax(p->maxValue());
+    const bool changed = ImGui::SliderInt4(name.c_str(), &value.x, min, max);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
     }
@@ -463,13 +460,13 @@ void renderFloatProperty(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     FloatProperty* p = static_cast<FloatProperty*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     FloatProperty::ValueType value = *p;
-    float min = p->minValue();
-    float max = p->maxValue();
-    bool changed = ImGui::SliderFloat(
+    const float min = p->minValue();
+    const float max = p->maxValue();
+    const bool changed = ImGui::SliderFloat(
         name.c_str(),
         &value,
         min,
@@ -493,14 +490,13 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     Vec2Property* p = static_cast<Vec2Property*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec2Property::ValueType value = *p;
-    float min = glm::compMin(p->minValue());
-    float max = glm::compMax(p->maxValue());
-
-    bool changed = ImGui::SliderFloat2(
+    const float min = glm::compMin(p->minValue());
+    const float max = glm::compMax(p->maxValue());
+    const bool changed = ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
         min,
@@ -524,13 +520,12 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     Vec3Property* p = static_cast<Vec3Property*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec3Property::ValueType value = *p;
-    float min = glm::compMin(p->minValue());
-    float max = glm::compMax(p->maxValue());
-
+    const float min = glm::compMin(p->minValue());
+    const float max = glm::compMax(p->maxValue());
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
         changed = ImGui::ColorEdit3(name.c_str(), glm::value_ptr(value));
@@ -561,13 +556,12 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     Vec4Property* p = static_cast<Vec4Property*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     Vec4Property::ValueType value = *p;
-    float min = glm::compMin(p->minValue());
-    float max = glm::compMax(p->maxValue());
-
+    const float min = glm::compMin(p->minValue());
+    const float max = glm::compMax(p->maxValue());
     bool changed = false;
     if (prop->viewOption(Property::ViewOptions::Color)) {
         changed = ImGui::ColorEdit4(name.c_str(), glm::value_ptr(value));
@@ -598,13 +592,13 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     DVec2Property* p = static_cast<DVec2Property*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec2 value = glm::dvec2(*p);
-    float min = static_cast<float>(glm::compMin(p->minValue()));
-    float max = static_cast<float>(glm::compMax(p->maxValue()));
-    bool changed = ImGui::SliderFloat2(
+    const float min = static_cast<float>(glm::compMin(p->minValue()));
+    const float max = static_cast<float>(glm::compMax(p->maxValue()));
+    const bool changed = ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
         min,
@@ -628,14 +622,13 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     DVec3Property* p = static_cast<DVec3Property*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec3 value = glm::dvec3(*p);
-    float min = static_cast<float>(glm::compMin(p->minValue()));
-    float max = static_cast<float>(glm::compMax(p->maxValue()));
-
-    bool changed = ImGui::SliderFloat3(
+    const float min = static_cast<float>(glm::compMin(p->minValue()));
+    const float max = static_cast<float>(glm::compMax(p->maxValue()));
+    const bool changed = ImGui::SliderFloat3(
         name.c_str(),
         glm::value_ptr(value),
         min,
@@ -659,14 +652,13 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
 {
     ghoul_assert(prop, "prop must not be nullptr");
     DVec4Property* p = static_cast<DVec4Property*>(prop);
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     glm::vec4 value = glm::dvec4(*p);
-    float min = static_cast<float>(glm::compMin(p->minValue()));
-    float max = static_cast<float>(glm::compMax(p->maxValue()));
-
-    bool changed = ImGui::SliderFloat4(
+    const float min = static_cast<float>(glm::compMin(p->minValue()));
+    const float max = static_cast<float>(glm::compMax(p->maxValue()));
+    const bool changed = ImGui::SliderFloat4(
         name.c_str(),
         &value.x,
         min,
@@ -691,22 +683,22 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     DMat2Property* p = static_cast<DMat2Property*>(prop);
 
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
     ImGui::Text("%s", name.c_str());
 
     glm::mat2 value = glm::dmat2(*p);
-    glm::dvec2 minValues = glm::dvec2(
+    const glm::dvec2 minValues = glm::dvec2(
         glm::compMin(p->minValue()[0]),
         glm::compMin(p->minValue()[1])
     );
-    float min = static_cast<float>(glm::compMin(minValues));
+    const float min = static_cast<float>(glm::compMin(minValues));
 
-    glm::dvec2 maxValues = glm::dvec2(
+    const glm::dvec2 maxValues = glm::dvec2(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1])
     );
-    float max = static_cast<float>(glm::compMax(maxValues));
+    const float max = static_cast<float>(glm::compMax(maxValues));
 
     bool changed = false;
     changed |= ImGui::SliderFloat2(
@@ -743,24 +735,24 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     DMat3Property* p = static_cast<DMat3Property*>(prop);
 
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
     ImGui::Text("%s", name.c_str());
 
     glm::mat3 value = glm::dmat3(*p);
-    glm::dvec3 minValues = glm::dvec3(
+    const glm::dvec3 minValues = glm::dvec3(
         glm::compMin(p->minValue()[0]),
         glm::compMin(p->minValue()[1]),
         glm::compMin(p->minValue()[2])
     );
-    float min = static_cast<float>(glm::compMin(minValues));
+    const float min = static_cast<float>(glm::compMin(minValues));
 
-    glm::dvec3 maxValues = glm::dvec3(
+    const glm::dvec3 maxValues = glm::dvec3(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1]),
         glm::compMax(p->maxValue()[2])
     );
-    float max = static_cast<float>(glm::compMax(maxValues));
+    const float max = static_cast<float>(glm::compMax(maxValues));
 
     bool changed = false;
     changed |= ImGui::SliderFloat3(
@@ -805,26 +797,26 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
     ghoul_assert(prop, "prop must not be nullptr");
     DMat4Property* p = static_cast<DMat4Property*>(prop);
 
-    std::string name = p->guiName();
+    const std::string& name = p->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
     ImGui::Text("%s", name.c_str());
 
     glm::mat4 value = glm::dmat4(*p);
-    glm::dvec4 minValues = glm::dvec4(
+    const glm::dvec4 minValues = glm::dvec4(
         glm::compMin(p->minValue()[0]),
         glm::compMin(p->minValue()[1]),
         glm::compMin(p->minValue()[2]),
         glm::compMin(p->minValue()[3])
     );
-    float min = static_cast<float>(glm::compMin(minValues));
+    const float min = static_cast<float>(glm::compMin(minValues));
 
-    glm::dvec4 maxValues = glm::dvec4(
+    const glm::dvec4 maxValues = glm::dvec4(
         glm::compMax(p->maxValue()[0]),
         glm::compMax(p->maxValue()[1]),
         glm::compMax(p->maxValue()[2]),
         glm::compMax(p->maxValue()[3])
     );
-    float max = static_cast<float>(glm::compMax(maxValues));
+    const float max = static_cast<float>(glm::compMax(maxValues));
 
     bool changed = false;
     changed |= ImGui::SliderFloat4(
@@ -875,10 +867,10 @@ void renderTriggerProperty(Property* prop, const std::string& ownerName,
                            ShowToolTip showTooltip, double tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");
-    std::string name = prop->guiName();
+    const std::string& name = prop->guiName();
     ImGui::PushID((ownerName + '.' + name).c_str());
 
-    bool pressed = ImGui::Button(name.c_str());
+    const bool pressed = ImGui::Button(name.c_str());
     if (pressed) {
         executeSetPropertyScript(prop->fullyQualifiedIdentifier(), "nil");
     }

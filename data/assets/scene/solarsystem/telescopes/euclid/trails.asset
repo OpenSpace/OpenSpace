@@ -1,7 +1,8 @@
-local spice = asset.require("./spice")
+local kernels = asset.require("./kernels")
 local earth = asset.require("scene/solarsystem/planets/earth/transforms")
 local solarsystem = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
+local coreKernels = asset.require("spice/core")
 
 
 local StartTime = "2023 JUL 01 15:53:08.239"
@@ -14,8 +15,8 @@ local EuclidTrailSun = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Euclid,
-      Observer = "SSB"
+      Target = kernels.ID.Euclid,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = StartTime,
@@ -35,8 +36,8 @@ local EuclidTrailEarth = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Euclid,
-      Observer = "EARTH BARYCENTER"
+      Target = kernels.ID.Euclid,
+      Observer = coreKernels.ID.EarthBarycenter
     },
     Color = { 0.325, 0.65, 0.55 },
     StartTime = StartTime,
@@ -61,9 +62,9 @@ local EuclidTrailOrbit = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Euclid,
-      Observer = 392, -- L2
-      Frame = "GALACTIC"
+      Target = kernels.ID.Euclid,
+      Observer = l2.ID.L2,
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months
@@ -88,9 +89,9 @@ local EuclidTrailCoRevOrbit = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = spice.ID.Euclid,
-      Observer = 392, -- L2
-      Frame = "L2_COREV"
+      Target = kernels.ID.Euclid,
+      Observer = l2.ID.L2,
+      Frame = l2.Frame.L2Corevolving
     },
     Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months

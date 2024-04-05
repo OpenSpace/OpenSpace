@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -102,7 +102,7 @@ glm::dmat3 ConstantRotation::matrix(const UpdateData& data) const {
         _accumulatedRotation += glm::tau<double>();
     }
 
-    glm::dquat q = glm::angleAxis(_accumulatedRotation, _rotationAxis.value());
+    const glm::dquat q = glm::angleAxis(_accumulatedRotation, _rotationAxis.value());
     return glm::toMat3(q);
 }
 

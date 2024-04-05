@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,10 +58,10 @@ LayerGroup::LayerGroup(layers::Group group)
 
 void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
     for (size_t i = 1; i <= dict.size(); i++) {
-        ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(std::to_string(i));
+        const ghoul::Dictionary layer = dict.value<ghoul::Dictionary>(std::to_string(i));
 
         try {
-            addLayer(layerDict);
+            addLayer(layer);
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
@@ -101,7 +101,7 @@ void LayerGroup::update() {
 Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     ZoneScoped;
 
-    documentation::TestResult res = documentation::testSpecification(
+    const documentation::TestResult res = documentation::testSpecification(
         Layer::Documentation(),
         layerDict
     );
@@ -113,7 +113,7 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
         LERROR("'Identifier' must be specified for layer");
         return nullptr;
     }
-    std::string identifier = layerDict.value<std::string>("Identifier");
+    const std::string identifier = layerDict.value<std::string>("Identifier");
     if (hasPropertySubOwner(identifier)) {
         LINFO("Layer with identifier '" + identifier + "' already exists");
         _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
@@ -162,12 +162,11 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
 void LayerGroup::deleteLayer(const std::string& layerName) {
     for (std::vector<std::unique_ptr<Layer>>::iterator it = _layers.begin();
          it != _layers.end();
-         ++it)
+         it++)
     {
         if (it->get()->identifier() == layerName) {
             // we need to make a copy as the layername is only a reference
             // which will no longer be valid once it is deleted
-            std::string name = layerName;
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
             properties::PropertyOwner* layerGroup = it->get()->owner();
@@ -184,7 +183,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             if (_onChangeCallback) {
                 _onChangeCallback(nullptr);
             }
-            LINFO("Deleted layer " + name);
+            LINFO("Deleted layer " + layerName);
 
             if (_layers.empty()) {
                 _levelBlendingEnabled.setVisibility(
@@ -211,10 +210,10 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     _layers.insert(newPosLayers, std::move(v));
 
     auto oldPosOwner = _subOwners.begin() + oldPosition;
-    PropertyOwner* owner = std::move(*oldPosOwner);
+    PropertyOwner* owner = *oldPosOwner;
     _subOwners.erase(oldPosOwner);
     auto newPosOwner = _subOwners.begin() + newPosition;
-    _subOwners.insert(newPosOwner, std::move(owner));
+    _subOwners.insert(newPosOwner, owner);
 }
 
 std::vector<Layer*> LayerGroup::layers() const {

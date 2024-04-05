@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ struct NavigationState;
 class Waypoint {
 public:
     Waypoint() = default;
-    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, const std::string& ref);
+    Waypoint(const glm::dvec3& pos, const glm::dquat& rot, std::string ref);
     explicit Waypoint(const NavigationState& ns);
 
     CameraPose pose() const;
@@ -47,6 +47,7 @@ public:
     glm::dquat rotation() const;
     SceneGraphNode* node() const;
     std::string nodeIdentifier() const;
+    std::optional<std::string> aimIdentifier() const;
     double validBoundingSphere() const;
 
 private:
@@ -54,6 +55,11 @@ private:
     std::string _nodeIdentifier;
     // To be able to handle nodes with faulty bounding spheres
     double _validBoundingSphere = 0.0;
+
+    // Keep track of if there was an aim node, specified in for example the
+    // navigation state used to create this waypoint. It may be required in
+    // certain situations
+    std::optional<std::string> _aimNodeIdentifier;
 };
 
 /**
@@ -86,7 +92,7 @@ struct NodeCameraStateSpec {
  * \return The computed WayPoint
  */
 Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
-    std::optional<Waypoint> startPoint = std::nullopt, bool useLinear = false);
+    const std::optional<Waypoint>& startPoint = std::nullopt, bool useLinear = false);
 
 } // namespace openspace::interaction
 

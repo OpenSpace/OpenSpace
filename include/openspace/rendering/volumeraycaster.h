@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -136,15 +136,11 @@ public:
     float downscaleRender() const;
 
 private:
-    /**
-     * Maximum number of integration steps to be executed by the volume integrator.
-     */
+    /// Maximum number of integration steps to be executed by the volume integrator
     int _rayCastMaxSteps = 1000;
 
-    /**
-     * Enable and set the downscale rendering of the volume. Used to improve performance.
-     */
-    float _downscaleRenderConst = 1.0f;
+    /// Enable and set the downscale rendering of the volume. Used to improve performance
+    float _downscaleRenderConst = 1.f;
 };
 
 } // namespace openspace

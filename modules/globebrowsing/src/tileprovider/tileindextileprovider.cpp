@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,17 +59,17 @@ TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dictionary
 
 Tile TileIndexTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped;
-    std::string text = fmt::format(
+    const std::string text = std::format(
         "level: {}\nx: {}\ny: {}", tileIndex.level, tileIndex.x, tileIndex.y
     );
-    glm::vec2 position = glm::vec2(
+    const glm::vec2 position = glm::vec2(
         initData.dimensions.x / 4 -
         (initData.dimensions.x / 32) * log10(1 << tileIndex.level),
         initData.dimensions.y / 2 + fontSize
     );
 
     if (_uniqueBackgroundColors) {
-        TileIndex::TileHashKey key = tileIndex.hashKey();
+        const TileIndex::TileHashKey key = tileIndex.hashKey();
         size_t hash = std::hash<TileIndex::TileHashKey>{}(key);
 
         // This is pretty ugly, but it's just for debugging and it is reproducable... We
@@ -78,11 +78,11 @@ Tile TileIndexTileProvider::tile(const TileIndex& tileIndex) {
         // each tile. If we divide the resulting number by 255 we get a value [0, 1] that
         // we can use for the color channel
 
-        uint8_t red = reinterpret_cast<uint8_t*>(&hash)[0];
-        uint8_t green = reinterpret_cast<uint8_t*>(&hash)[1];
-        uint8_t blue = reinterpret_cast<uint8_t*>(&hash)[2];
+        const uint8_t red = reinterpret_cast<uint8_t*>(&hash)[0];
+        const uint8_t green = reinterpret_cast<uint8_t*>(&hash)[1];
+        const uint8_t blue = reinterpret_cast<uint8_t*>(&hash)[2];
 
-        glm::vec4 backgroundColor = glm::vec4(
+        const glm::vec4 backgroundColor = glm::vec4(
             static_cast<float>(red) / 255.f,
             static_cast<float>(green) / 255.f,
             static_cast<float>(blue) / 255.f,

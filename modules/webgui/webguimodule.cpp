@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,8 +30,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/json_helper.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
@@ -153,8 +153,8 @@ std::string  WebGuiModule::address() const {
 
 WebGuiModule::CallbackHandle WebGuiModule::addEndpointChangeCallback(EndpointCallback cb)
 {
-    CallbackHandle handle = _nextCallbackHandle++;
-    _endpointChangeCallbacks.push_back({ handle, std::move(cb) });
+    const CallbackHandle handle = _nextCallbackHandle++;
+    _endpointChangeCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 
@@ -259,7 +259,7 @@ void WebGuiModule::startProcess() {
     std::string formattedDirectories = "[";
 
     std::vector<std::string> directories = _directories;
-    for (size_t i = 0; i < directories.size(); ++i) {
+    for (size_t i = 0; i < directories.size(); i++) {
         std::string arg = directories[i];
         if (i % 2 == 1) {
             arg = absPath(arg).string();
@@ -273,10 +273,10 @@ void WebGuiModule::startProcess() {
 
     std::string defaultEndpoint;
     if (!_defaultEndpoint.value().empty()) {
-        defaultEndpoint = fmt::format("--redirect \"{}\"", _defaultEndpoint.value());
+        defaultEndpoint = std::format("--redirect \"{}\"", _defaultEndpoint.value());
     }
 
-    const std::string command = fmt::format(
+    const std::string command = std::format(
         "\"{}\" \"{}\" --directories \"{}\" {} --http-port \"{}\" --ws-address \"{}\" "
         "--ws-port {} --auto-close --local",
         node.string(), absPath(_entryPoint.value()).string(), formattedDirectories,
@@ -288,11 +288,11 @@ void WebGuiModule::startProcess() {
         absPath("${BIN}").string(),
         [](const char* data, size_t n) {
             const std::string str(data, n);
-            LDEBUG(fmt::format("Web GUI server output: {}", str));
+            LDEBUG(std::format("Web GUI server output: {}", str));
         },
         [](const char* data, size_t n) {
             const std::string str(data, n);
-            LERROR(fmt::format("Web GUI server error: {}", str));
+            LERROR(std::format("Web GUI server error: {}", str));
         }
     );
 }

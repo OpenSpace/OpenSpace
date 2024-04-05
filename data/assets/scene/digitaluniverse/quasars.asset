@@ -23,21 +23,34 @@ local colormaps = asset.resource({
 local Object = {
   Identifier = "Quasars",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = true,
-    Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.95,
     File = speck .. "quasars.speck",
-    Texture = textures .. "point3A.png",
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Unit = "Mpc",
-    ScaleFactor = 540.9,
-    FadeInDistances = { 1000.0, 10000.0 }, -- Fade in value in the same unit as "Unit"
-    BillboardMinMaxSize = { 0.0, 11.1 },
-    EnablePixelSizeControl = true,
-    ColorMap = colormaps .. "viridis.cmap",
-    ColorOption = { "redshift", "Tlookback", "distMpc" },
-    ColorRange = { { 0.102, 7.085 }, { 1.4, 13.0 }, { 440.5, 8852.099609 } },
-    UseColorMap = false
+    Fading = {
+      FadeInDistances = { 1000.0, 10000.0 } -- Fade in value in the same unit as "Unit"
+    },
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 },
+      ColorMapping = {
+        Enabled = false,
+        File = colormaps .. "viridis.cmap",
+        ParameterOptions = {
+          { Key = "distMpc", Range = { 440.5, 8852.099609 } },
+          { Key = "redshift", Range = { 0.102, 7.085 } },
+          { Key = "Tlookback", Range = { 1.4, 13.0 } }
+        }
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 23.5,
+      MaxSize = 0.3,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Quasars",
@@ -68,7 +81,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Quasars",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for Quasars",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

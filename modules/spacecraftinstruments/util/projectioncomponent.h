@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,13 +54,13 @@ public:
 
     bool isReady() const;
 
-    ghoul::opengl::Texture& depthTexture();
+    ghoul::opengl::Texture& depthTexture() const;
     void imageProjectBegin();
     void imageProjectEnd();
     void depthMapRenderBegin();
     void depthMapRenderEnd();
 
-    void update();
+    void update() const;
 
     bool auxiliaryRendertarget();
     bool depthRendertarget();
@@ -68,8 +68,8 @@ public:
     std::shared_ptr<ghoul::opengl::Texture> loadProjectionTexture(
         const std::string& texturePath, bool isPlaceholder = false);
 
-    glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim,
-        const glm::vec3 up, const glm::dmat3& instrumentMatrix, float fieldOfViewY,
+    glm::mat4 computeProjectorMatrix(const glm::vec3& loc, const glm::dvec3& aim,
+        const glm::vec3& up, const glm::dmat3& instrumentMatrix, float fieldOfViewY,
         float aspectRatio, float nearPlane, float farPlane, glm::vec3& boreSight);
 
     bool doesPerformProjection() const;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -331,7 +331,7 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
         "LimitZoom",
         "Limit Zoom",
         "Settings to limit the camera from going to close to or too far away from the "
@@ -411,6 +411,28 @@ namespace {
         "choice for globes, and the Y-axis is a good choice for models",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    /**
+     * Calculates a SurfacePositionHandle given a camera position in world space.
+     */
+    openspace::SurfacePositionHandle calculateSurfacePositionHandle(
+                                                    const openspace::SceneGraphNode& node,
+                                               const glm::dvec3& cameraPositionWorldSpace)
+    {
+        ghoul_assert(
+            glm::length(cameraPositionWorldSpace) > 0.0,
+            "Cannot have degenerate vector"
+        );
+
+        const glm::dmat4 inverseModelTransform = glm::inverse(node.modelTransform());
+        const glm::dvec3 cameraPositionModelSpace =
+            glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1.0));
+        const openspace::SurfacePositionHandle posHandle =
+            node.calculateSurfacePositionHandle(cameraPositionModelSpace);
+
+        return posHandle;
+    }
+
 } // namespace
 
 namespace openspace::interaction {
@@ -468,7 +490,7 @@ OrbitalNavigator::IdleBehavior::IdleBehavior()
 OrbitalNavigator::LimitZoom::LimitZoom()
     : properties::PropertyOwner(LimitZoomInfo)
     , enableZoomInLimit(EnabledMinimumAllowedDistanceInfo, true)
-    , minimumAllowedDistance(MinimumDistanceInfo, 10.0f, 0.0f, 10000.f)
+    , minimumAllowedDistance(MinimumDistanceInfo, 10.f, 0.f, 10000.f)
     , enableZoomOutLimit(EnabledMaximumDistanceInfo, false)
     , maximumAllowedDistance(
         MaximumDistanceInfo,
@@ -498,8 +520,8 @@ OrbitalNavigator::OrbitalNavigator()
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
-    , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.0f, 50.f)
-    , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.0f, 50.f)
+    , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.f, 50.f)
+    , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.f, 50.f)
     , _useAdaptiveStereoscopicDepth(UseAdaptiveStereoscopicDepthInfo, true)
     , _stereoscopicDepthOfFocusSurface(
         StereoscopicDepthOfFocusSurfaceInfo,
@@ -533,8 +555,8 @@ OrbitalNavigator::OrbitalNavigator()
             );
         }
         else {
-            LERROR(fmt::format(
-                "No scenegraph node with identifier {} exists", _anchor.value()
+            LERROR(std::format(
+                "No scenegraph node with identifier '{}' exists", _anchor.value()
             ));
         }
     });
@@ -549,8 +571,8 @@ OrbitalNavigator::OrbitalNavigator()
             setAimNode(node);
         }
         else {
-            LERROR(fmt::format(
-                "No scenegraph node with identifier {} exists", _aim.value()
+            LERROR(std::format(
+                "No scenegraph node with identifier '{}' exists", _aim.value()
             ));
         }
     });
@@ -734,7 +756,7 @@ glm::dvec3 OrbitalNavigator::anchorNodeToCameraVector() const {
 }
 
 glm::quat OrbitalNavigator::anchorNodeToCameraRotation() const {
-    glm::dmat4 invWorldRotation = glm::dmat4(
+    const glm::dmat4 invWorldRotation = glm::dmat4(
         glm::inverse(anchorNode()->worldRotationMatrix())
     );
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
@@ -777,7 +799,8 @@ void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputSt
     _websocketStates.updateStateFromInput(*global::websocketInputStates, deltaTime);
     _scriptStates.updateStateFromInput(deltaTime);
 
-    bool interactionHappened = _mouseStates.hasNonZeroVelocities() ||
+    const bool interactionHappened =
+        _mouseStates.hasNonZeroVelocities() ||
         _joystickStates.hasNonZeroVelocities() ||
         _websocketStates.hasNonZeroVelocities() ||
         _scriptStates.hasNonZeroVelocities();
@@ -789,7 +812,8 @@ void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputSt
         tickIdleBehaviorTimer(deltaTime);
     }
 
-    bool cameraLocationChanged = _mouseStates.hasNonZeroVelocities(true) ||
+    const bool cameraLocationChanged =
+        _mouseStates.hasNonZeroVelocities(true) ||
         _joystickStates.hasNonZeroVelocities(true) ||
         _websocketStates.hasNonZeroVelocities(true) ||
         _scriptStates.hasNonZeroVelocities(true);
@@ -869,7 +893,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     // Rotate with the object by finding a differential rotation from the previous
     // to the current rotation
-    glm::dquat anchorRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
+    const glm::dquat anchorRotation = glm::quat_cast(_anchorNode->worldRotationMatrix());
 
     glm::dquat anchorNodeRotationDiff = _previousAnchorNodeRotation.has_value() ?
         *_previousAnchorNodeRotation * glm::inverse(anchorRotation) :
@@ -893,7 +917,7 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
     camRot.localRotation = interpolateLocalRotation(deltaTime, camRot.localRotation);
     camRot.localRotation = rotateLocally(deltaTime, camRot.localRotation);
 
-    double horizontalTranslationSpeedScale =
+    const double horizontalTranslationSpeedScale =
         rotationSpeedScaleFromCameraHeight(pose.position, posHandle);
 
     // Rotation around target object's up vector based on user input
@@ -986,8 +1010,10 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
             return;
         }
 
-        SurfacePositionHandle posHandle =
-            calculateSurfacePositionHandle(*_anchorNode, cameraPos);
+        const SurfacePositionHandle posHandle = calculateSurfacePositionHandle(
+            *_anchorNode,
+            cameraPos
+        );
 
         double targetCameraToSurfaceDistance = glm::length(
             cameraToSurfaceVector(cameraPos, anchorPos, posHandle)
@@ -1046,7 +1072,7 @@ void OrbitalNavigator::tickIdleBehaviorTimer(double deltaTime) {
 }
 
 glm::dquat OrbitalNavigator::composeCameraRotation(
-                                        const CameraRotationDecomposition& decomposition)
+                                   const CameraRotationDecomposition& decomposition) const
 {
     return decomposition.globalRotation * decomposition.localRotation;
 }
@@ -1063,13 +1089,13 @@ glm::dvec3 OrbitalNavigator::cameraToSurfaceVector(const glm::dvec3& cameraPos,
                                                    const glm::dvec3& centerPos,
                                                    const SurfacePositionHandle& posHandle)
 {
-    glm::dmat4 modelTransform = _anchorNode->modelTransform();
-    glm::dvec3 posDiff = cameraPos - centerPos;
-    glm::dvec3 centerToActualSurfaceModelSpace =
+    const glm::dmat4 modelTransform = _anchorNode->modelTransform();
+    const glm::dvec3 posDiff = cameraPos - centerPos;
+    const glm::dvec3 centerToActualSurfaceModelSpace =
         posHandle.centerToReferenceSurface +
         posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
 
-    glm::dvec3 centerToActualSurface =
+    const glm::dvec3 centerToActualSurface =
         glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
 
     return centerToActualSurface - posDiff;
@@ -1247,16 +1273,16 @@ bool OrbitalNavigator::shouldFollowAnchorRotation(const glm::dvec3& cameraPositi
     const glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform *
         glm::dvec4(cameraPosition, 1.0));
 
-    const SurfacePositionHandle positionHandle =
-        _anchorNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
+    const glm::dvec3 centerToReference =
+        glm::normalize(cameraPositionModelSpace) * _anchorNode->boundingSphere();
 
     const double maximumDistanceForRotation = glm::length(
-        glm::dmat3(modelTransform) * positionHandle.centerToReferenceSurface
+        glm::dmat3(modelTransform) * centerToReference
     ) * _followAnchorNodeRotationDistance;
 
     const double distanceToCamera =
         glm::distance(cameraPosition, _anchorNode->worldPosition());
-    bool shouldFollow = distanceToCamera < maximumDistanceForRotation;
+    const bool shouldFollow = distanceToCamera < maximumDistanceForRotation;
     return shouldFollow;
 }
 
@@ -1296,7 +1322,7 @@ double OrbitalNavigator::maxAllowedDistance() const {
 }
 
 OrbitalNavigator::CameraRotationDecomposition
-    OrbitalNavigator::decomposeCameraRotationSurface(CameraPose cameraPose,
+    OrbitalNavigator::decomposeCameraRotationSurface(const CameraPose& cameraPose,
                                                      const SceneGraphNode& reference)
 {
     const glm::dvec3 cameraUp = cameraPose.rotation * Camera::UpDirectionCameraSpace;
@@ -1330,8 +1356,8 @@ OrbitalNavigator::CameraRotationDecomposition
 }
 
 OrbitalNavigator::CameraRotationDecomposition
-    OrbitalNavigator::decomposeCameraRotation(CameraPose cameraPose,
-                                              glm::dvec3 reference)
+OrbitalNavigator::decomposeCameraRotation(const CameraPose& cameraPose,
+                                          const glm::dvec3& reference)
 {
     const glm::dvec3 cameraUp = cameraPose.rotation * glm::dvec3(0.0, 1.0, 0.0);
     const glm::dvec3 cameraViewDirection = ghoul::viewDirection(cameraPose.rotation);
@@ -1349,8 +1375,8 @@ OrbitalNavigator::CameraRotationDecomposition
     return { localCameraRotation, globalCameraRotation };
 }
 
-CameraPose OrbitalNavigator::followAim(CameraPose pose, glm::dvec3 cameraToAnchor,
-                                       Displacement anchorToAim)
+CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& cameraToAnchor,
+                                       const Displacement& anchorToAim)
 {
     CameraRotationDecomposition anchorDecomp =
         decomposeCameraRotation(pose, pose.position + cameraToAnchor);
@@ -1368,7 +1394,7 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, glm::dvec3 cameraToAncho
         // 2. Adjustment of the camera to account for radial displacement of the aim
 
         // Step 1 (Rotation around anchor based on aim's projection)
-        glm::dvec3 newAnchorToProjectedAim =
+        const glm::dvec3 newAnchorToProjectedAim =
             glm::length(anchorToAim.first) * glm::normalize(anchorToAim.second);
         const double spinRotationAngle = glm::angle(
             glm::normalize(anchorToAim.first), glm::normalize(newAnchorToProjectedAim)
@@ -1432,11 +1458,11 @@ CameraPose OrbitalNavigator::followAim(CameraPose pose, glm::dvec3 cameraToAncho
         const double newCameraAimAngle =
             glm::pi<double>() - anchorAimAngle - newCameraAnchorAngle;
 
-        double distanceRotationAngle = correctionFactor *
+        const double distanceRotationAngle = correctionFactor *
                                        (newCameraAimAngle - prevCameraAimAngle);
 
         if (glm::abs(distanceRotationAngle) > AngleEpsilon) {
-            glm::dvec3 distanceRotationAxis = glm::normalize(
+            const glm::dvec3 distanceRotationAxis = glm::normalize(
                 glm::cross(intermediateCameraToAnchor, newAnchorToProjectedAim)
             );
             const glm::dquat orbitRotation =
@@ -1539,63 +1565,68 @@ glm::dquat OrbitalNavigator::interpolateLocalRotation(double deltaTime,
 }
 
 OrbitalNavigator::Displacement
-OrbitalNavigator::interpolateRetargetAim(double deltaTime, CameraPose pose,
-                                         glm::dvec3 prevCameraToAnchor,
+OrbitalNavigator::interpolateRetargetAim(double deltaTime, const CameraPose& pose,
+                                         const glm::dvec3& prevCameraToAnchor,
                                          Displacement anchorToAim)
 {
-    if (_retargetAimInterpolator.isInterpolating()) {
-        double t = _retargetAimInterpolator.value();
-        _retargetAimInterpolator.setDeltaTime(static_cast<float>(deltaTime));
-        _retargetAimInterpolator.step();
+    if (!_retargetAimInterpolator.isInterpolating()) {
+        return anchorToAim;
+    }
 
-        const glm::dvec3 prevCameraToAim = prevCameraToAnchor + anchorToAim.first;
-        const double aimDistance = glm::length(prevCameraToAim);
-        const glm::dquat prevRotation = pose.rotation;
+    const double t = _retargetAimInterpolator.value();
+    _retargetAimInterpolator.setDeltaTime(static_cast<float>(deltaTime));
+    _retargetAimInterpolator.step();
 
-        // Introduce a virtual aim - a position straight ahead of the camera,
-        // that should be rotated around the camera, until it reaches the aim node.
+    const glm::dvec3 prevCameraToAim = prevCameraToAnchor + anchorToAim.first;
+    const double aimDistance = glm::length(prevCameraToAim);
+    const glm::dquat prevRotation = pose.rotation;
 
-        const glm::dvec3 prevCameraToVirtualAim =
-            aimDistance * (prevRotation * Camera::ViewDirectionCameraSpace);
+    // Introduce a virtual aim - a position straight ahead of the camera,
+    // that should be rotated around the camera, until it reaches the aim node.
 
-        // Max angle: the maximum possible angle between anchor and aim, given that
-        // the camera orbits the anchor on a fixed distance.
-        const double maxAngle =
-            glm::atan(glm::length(anchorToAim.first), glm::length(prevCameraToAnchor));
+    const glm::dvec3 prevCameraToVirtualAim =
+        aimDistance * (prevRotation * Camera::ViewDirectionCameraSpace);
 
-        // Requested angle: The angle between the vector straight ahead from the
-        // camera and the vector from camera to anchor should remain constant, in
-        // order for the anchor not to move in screen space.
-        const double requestedAngle = glm::angle(
-            glm::normalize(prevCameraToVirtualAim),
-            glm::normalize(prevCameraToAnchor)
+    // Max angle: the maximum possible angle between anchor and aim, given that
+    // the camera orbits the anchor on a fixed distance.
+    const double maxAngle =
+        glm::atan(glm::length(anchorToAim.first), glm::length(prevCameraToAnchor));
+
+    // Requested angle: The angle between the vector straight ahead from the
+    // camera and the vector from camera to anchor should remain constant, in
+    // order for the anchor not to move in screen space.
+    const double requestedAngle = glm::angle(
+        glm::normalize(prevCameraToVirtualAim),
+        glm::normalize(prevCameraToAnchor)
+    );
+
+    if (requestedAngle <= maxAngle) {
+        const glm::dvec3 aimPos = pose.position + prevCameraToAnchor + anchorToAim.second;
+        const CameraRotationDecomposition aimDecomp = decomposeCameraRotation(
+            pose,
+            aimPos
         );
 
-        if (requestedAngle <= maxAngle) {
-            glm::dvec3 aimPos = pose.position + prevCameraToAnchor + anchorToAim.second;
-            CameraRotationDecomposition aimDecomp = decomposeCameraRotation(pose, aimPos);
+        const glm::dquat interpolatedRotation = glm::slerp(
+            prevRotation,
+            aimDecomp.globalRotation,
+            glm::min(t * _retargetAimInterpolator.deltaTimeScaled(), 1.0)
+        );
 
-            const glm::dquat interpolatedRotation = glm::slerp(
-                prevRotation,
-                aimDecomp.globalRotation,
-                glm::min(t * _retargetAimInterpolator.deltaTimeScaled(), 1.0)
-            );
+        const glm::dvec3 recomputedCameraToVirtualAim =
+            aimDistance * (interpolatedRotation * Camera::ViewDirectionCameraSpace);
 
-            const glm::dvec3 recomputedCameraToVirtualAim =
-                aimDistance * (interpolatedRotation * Camera::ViewDirectionCameraSpace);
-
-            return {
-                prevCameraToVirtualAim - prevCameraToAnchor,
-                recomputedCameraToVirtualAim - prevCameraToAnchor
-            };
-        }
-        else {
-            // Bail out.
-            // Cannot put aim node in center without moving anchor in screen space.
-            // Future work: Rotate as much as possible,
-            // or possibly use some other DOF to find solution, like moving the camera.
-            _retargetAimInterpolator.end();
-        }
+        return {
+            prevCameraToVirtualAim - prevCameraToAnchor,
+            recomputedCameraToVirtualAim - prevCameraToAnchor
+        };
+    }
+    else {
+        // Bail out.
+        // Cannot put aim node in center without moving anchor in screen space.
+        // Future work: Rotate as much as possible,
+        // or possibly use some other DOF to find solution, like moving the camera.
+        _retargetAimInterpolator.end();
     }
     return anchorToAim;
 }
@@ -1609,18 +1640,18 @@ double OrbitalNavigator::interpolateCameraToSurfaceDistance(double deltaTime,
         return targetDistance;
     }
 
-    double t = _cameraToSurfaceDistanceInterpolator.value();
+    const double t = _cameraToSurfaceDistanceInterpolator.value();
     _cameraToSurfaceDistanceInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _cameraToSurfaceDistanceInterpolator.step();
 
     // Interpolate distance logarithmically
-    double result = glm::exp(glm::mix(
+    const double result = glm::exp(glm::mix(
         glm::log(currentDistance),
         glm::log(targetDistance),
         glm::min(t * _cameraToSurfaceDistanceInterpolator.deltaTimeScaled(), 1.0))
     );
 
-    double ratio = currentDistance / targetDistance;
+    const double ratio = currentDistance / targetDistance;
     if (glm::abs(ratio - 1.0) < 0.000001) {
         _cameraToSurfaceDistanceInterpolator.end();
     }
@@ -1641,12 +1672,12 @@ void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
         }
     }(UpDirectionChoice(_upToUseForRotation.value()));
 
-    double combinedXInput = _mouseStates.globalRotationVelocity().x +
+    const double combinedXInput = _mouseStates.globalRotationVelocity().x +
         _joystickStates.globalRotationVelocity().x +
         _websocketStates.globalRotationVelocity().x +
         _scriptStates.globalRotationVelocity().x;
 
-    double angle = combinedXInput * deltaTime * speedScale;
+    const double angle = combinedXInput * deltaTime * speedScale;
     orbitAroundAxis(axis, angle, cameraPosition, globalCameraRotation);
 }
 
@@ -1658,9 +1689,9 @@ glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime, double spee
 {
     // If we are orbiting around an up vector, we only want to allow verical
     // movement and not use the x velocity
-    bool useX = !_shouldRotateAroundUp;
+    const bool useX = !_shouldRotateAroundUp;
 
-    double angleScale = deltaTime * speedScale;
+    const double angleScale = deltaTime * speedScale;
 
     // Get rotation in camera space
     const glm::dquat mouseRotationDiffCamSpace = glm::dquat(glm::dvec3(
@@ -1792,10 +1823,10 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
                                            const glm::dvec3& objectPosition,
                                         const SurfacePositionHandle& positionHandle) const
 {
-    double minHeight = _limitZoom.enableZoomInLimit ?
+    const double minHeight = _limitZoom.enableZoomInLimit ?
         static_cast<double>(_limitZoom.minimumAllowedDistance) : 0.0;
 
-    double maxHeight = _limitZoom.enableZoomOutLimit ?
+    const double maxHeight = _limitZoom.enableZoomOutLimit ?
         static_cast<double>(_limitZoom.maximumAllowedDistance) : -1.0;
 
     if (maxHeight > 0.0 && minHeight > maxHeight) {
@@ -1854,24 +1885,6 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
     );
 }
 
-SurfacePositionHandle OrbitalNavigator::calculateSurfacePositionHandle(
-                                                const SceneGraphNode& node,
-                                        const glm::dvec3& cameraPositionWorldSpace) const
-{
-    ghoul_assert(
-        glm::length(cameraPositionWorldSpace) > 0.0,
-        "Cannot have degenerate vector"
-    );
-
-    const glm::dmat4 inverseModelTransform = glm::inverse(node.modelTransform());
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPositionWorldSpace, 1.0));
-    const SurfacePositionHandle posHandle =
-        node.calculateSurfacePositionHandle(cameraPositionModelSpace);
-
-    return posHandle;
-}
-
 JoystickCameraStates& OrbitalNavigator::joystickStates() {
     return _joystickStates;
 }
@@ -1897,7 +1910,7 @@ const ScriptCameraStates& OrbitalNavigator::scriptStates() const {
 }
 
 void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     if (mode != OpenSpaceEngine::Mode::UserControl) {
         LERROR(
             "Could not start idle behavior. The camera is being controlled "
@@ -1910,7 +1923,7 @@ void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
         _idleBehavior.chosenBehavior = std::nullopt;
     }
     else {
-        IdleBehavior::Behavior behavior;
+        IdleBehavior::Behavior behavior = IdleBehavior::Behavior::Orbit;
         if (choice == IdleKeyOrbit) {
             behavior = IdleBehavior::Behavior::Orbit;
         }
@@ -1921,9 +1934,9 @@ void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
             behavior = IdleBehavior::Behavior::OrbitAroundUp;
         }
         else {
-            throw ghoul::RuntimeError(
-                fmt::format("No existing IdleBehavior with identifier '{}'", choice)
-            );
+            throw ghoul::RuntimeError(std::format(
+                "No existing IdleBehavior with identifier '{}'", choice
+            ));
         }
         _idleBehavior.chosenBehavior = behavior;
     }
@@ -1940,8 +1953,7 @@ void OrbitalNavigator::resetIdleBehavior() {
 }
 
 void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
-                                         glm::dquat& localRotation,
-                                         glm::dquat& globalRotation)
+                                         glm::dquat&, glm::dquat& globalRotation)
 {
     _idleBehaviorDampenInterpolator.setDeltaTime(static_cast<float>(deltaTime));
     _idleBehaviorDampenInterpolator.step();
@@ -1950,8 +1962,10 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
         return;
     }
 
-    SurfacePositionHandle posHandle =
-        calculateSurfacePositionHandle(*_anchorNode, position);
+    const SurfacePositionHandle posHandle = calculateSurfacePositionHandle(
+        *_anchorNode,
+        position
+    );
 
     // Same speed scale as horizontal translation
     double speedScale = rotationSpeedScaleFromCameraHeight(position, posHandle);
@@ -1964,10 +1978,10 @@ void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
     }
 
     // Interpolate so that the start and end are smooth
-    double s = _idleBehaviorDampenInterpolator.value();
+    const double s = _idleBehaviorDampenInterpolator.value();
     speedScale *= _invertIdleBehaviorInterpolation ? (1.0 - s) : s;
 
-    double angle = deltaTime * speedScale;
+    const double angle = deltaTime * speedScale;
 
     // Apply the chosen behavior
     const IdleBehavior::Behavior choice = _idleBehavior.chosenBehavior.value_or(
@@ -2021,7 +2035,7 @@ void OrbitalNavigator::orbitAnchor(double angle, glm::dvec3& position,
     position += rotationDiffVec3;
 }
 
-void OrbitalNavigator::orbitAroundAxis(const glm::dvec3 axis, double angle,
+void OrbitalNavigator::orbitAroundAxis(const glm::dvec3& axis, double angle,
                                        glm::dvec3& position, glm::dquat& globalRotation)
 {
     ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
@@ -2059,11 +2073,6 @@ double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
 {
     const glm::dmat4 modelTransform = _anchorNode->modelTransform();
     const glm::dvec3 anchorPos = _anchorNode->worldPosition();
-
-    const glm::dvec3 outDirection = glm::normalize(
-        glm::dmat3(modelTransform) *
-        positionHandle.referenceSurfaceOutDirection
-    );
 
     const glm::dvec3 posDiff = cameraPosition - anchorPos;
     const glm::dvec3 centerToActualSurfaceModelSpace =

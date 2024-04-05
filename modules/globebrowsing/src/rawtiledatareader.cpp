@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,9 @@
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
@@ -111,7 +111,7 @@ GDALDataType toGDALDataType(GLenum glType) {
         default:
             LERRORC(
                 "GDALRawTileDataReader",
-                fmt::format(
+                std::format(
                     "OpenGL data type unknown to GDAL: {}", static_cast<int>(glType)
                 )
             );
@@ -126,8 +126,8 @@ GDALDataType toGDALDataType(GLenum glType) {
  */
 int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
     GDALRasterBand* firstBand = dataset->GetRasterBand(1);
-    GDALRasterBand* maxOverview;
-    int numOverviews = firstBand->GetOverviewCount();
+    GDALRasterBand* maxOverview = nullptr;
+    const int numOverviews = firstBand->GetOverviewCount();
     if (numOverviews <= 0) { // No overviews. Use first band.
         maxOverview = firstBand;
     }
@@ -140,137 +140,11 @@ int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
     return static_cast<int>(intdiff);
 }
 
-/**
- * Aligns one the sides of the pixel regino to the specified position. This does
- * not change the number of pixels within the region.
- *
- * Example: Side = left and pos = 16:
- *                 start.x = 16 and keep the size the same
- */
-void alignPixelRegion(PixelRegion& pixelRegion, Side side, int pos) {
-    switch (side) {
-        case Side::Left:
-            pixelRegion.start.x = pos;
-            break;
-        case Side::Top:
-            pixelRegion.start.y = pos;
-            break;
-        case Side::Right:
-            pixelRegion.start.x = pos - pixelRegion.numPixels.x;
-            break;
-        case Side::Bottom:
-            pixelRegion.start.y = pos - pixelRegion.numPixels.y;
-            break;
-    }
-}
-
-PixelRegion globalCut(PixelRegion& pixelRegion, Side side, int p) {
-    const bool lineIntersect = [pr = pixelRegion, side, p]() {
-        switch (side) {
-            case Side::Left:
-            case Side::Right:
-                return pr.start.x <= p && p <= (pr.start.x + pr.numPixels.x);
-            case Side::Top:
-            case Side::Bottom:
-                return pr.start.y <= p && p <= (pr.start.y + pr.numPixels.y);
-            default:
-                throw ghoul::MissingCaseException();
-        }
-    }();
-
-    if (!lineIntersect) {
-        return PixelRegion();
-    }
-
-    auto setSide = [](PixelRegion& pr, Side s, int pos) {
-        switch (s) {
-            case Side::Left:
-                pr.numPixels.x += (pr.start.x - pos);
-                pr.start.x = pos;
-                break;
-            case Side::Top:
-                pr.numPixels.y += (pr.start.y - pos);
-                pr.start.y = pos;
-                break;
-            case Side::Right:
-                pr.numPixels.x = pos - pr.start.x;
-                break;
-            case Side::Bottom:
-                pr.numPixels.y = pos - pr.start.y;
-                break;
-        }
-    };
-
-    PixelRegion cutOff(pixelRegion);
-    int cutSize = 0;
-    switch (side) {
-        case Side::Left:
-            setSide(pixelRegion, Side::Left, p);
-            setSide(cutOff, Side::Right, p - cutSize);
-            break;
-        case Side::Top:
-            setSide(pixelRegion, Side::Top, p);
-            setSide(cutOff, Side::Bottom, p - cutSize);
-            break;
-        case Side::Right:
-            setSide(pixelRegion, Side::Right, p);
-            setSide(cutOff, Side::Left, p + cutSize);
-            break;
-        case Side::Bottom:
-            setSide(pixelRegion, Side::Bottom, p);
-            setSide(cutOff, Side::Top, p + cutSize);
-            break;
-    }
-    return cutOff;
-}
-
-int edge(const PixelRegion& pixelRegion, Side side) {
-    switch (side) {
-        case Side::Left:   return pixelRegion.start.x;
-        case Side::Top:    return pixelRegion.start.y;
-        case Side::Right:  return pixelRegion.start.x + pixelRegion.numPixels.x;
-        case Side::Bottom: return pixelRegion.start.y + pixelRegion.numPixels.y;
-        default:           throw ghoul::MissingCaseException();
-    }
-}
-
-PixelRegion localCut(PixelRegion& pr, Side side, int localPos) {
-    if (localPos < 1) {
-        return PixelRegion();
-    }
-    else {
-        const int edgeDirectionSign = (side < Side::Right) ? -1 : 1;
-        return globalCut(pr, side, edge(pr, side) - edgeDirectionSign * localPos);
-    }
-}
-
 bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
-    glm::ivec2 e = lhs.start + lhs.numPixels;
-    glm::ivec2 re = rhs.start + rhs.numPixels;
+    const glm::ivec2 e = lhs.start + lhs.numPixels;
+    const glm::ivec2 re = rhs.start + rhs.numPixels;
     return rhs.start.x <= lhs.start.x && e.x <= re.x &&
            rhs.start.y <= lhs.start.y && e.y <= re.y;
-}
-
-IODescription cutIODescription(IODescription& io, Side side, int pos) {
-    glm::dvec2 ratio = glm::dvec2(
-        io.write.region.numPixels.x / static_cast<double>(io.read.region.numPixels.x),
-        io.write.region.numPixels.y / static_cast<double>(io.read.region.numPixels.y)
-    );
-
-    IODescription whatCameOff = io;
-    whatCameOff.read.region = globalCut(io.read.region, side, pos);
-
-    glm::ivec2 cutSize = whatCameOff.read.region.numPixels;
-    glm::ivec2 localWriteCutSize = ratio * glm::dvec2(cutSize);
-
-    int localWriteCutPos =
-        (side == Side::Left || side == Side::Right) ?
-        localWriteCutSize.x :
-        localWriteCutSize.y;
-
-    whatCameOff.write.region = localCut(io.write.region, side, localWriteCutPos);
-
-    return whatCameOff;
 }
 
 /**
@@ -278,7 +152,7 @@ IODescription cutIODescription(IODescription& io, Side side, int pos) {
  * by GDAL.
  */
 std::array<double, 6> geoTransform(int rasterX, int rasterY) {
-    GeodeticPatch cov(
+    const GeodeticPatch cov(
         Geodetic2{ 0.0, 0.0 },
         Geodetic2{ glm::half_pi<double>(), glm::pi<double>() }
     );
@@ -382,7 +256,7 @@ RawTileDataReader::RawTileDataReader(std::string filePath,
 }
 
 RawTileDataReader::~RawTileDataReader() {
-    std::lock_guard lockGuard(_datasetLock);
+    const std::lock_guard lockGuard(_datasetLock);
     if (_dataset) {
         GDALClose(_dataset);
         _dataset = nullptr;
@@ -408,21 +282,21 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
 
     for (std::string_view fmt : Unsupported) {
         if (_datasetFilePath.ends_with(fmt)) {
-            LWARNING(fmt::format(
-                "Unsupported file format for MRF caching: {}, Dataset: {}",
+            LWARNING(std::format(
+                "Unsupported file format for MRF caching: '{}', Dataset: '{}'",
                 fmt, _datasetFilePath
             ));
             return std::nullopt;
         }
     }
 
-    GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
+    const GlobeBrowsingModule& mod = *global::moduleEngine->module<GlobeBrowsingModule>();
 
-    std::string datasetIdentifier =
+    const std::string datasetIdentifier =
         std::to_string(std::hash<std::string>{}(_datasetFilePath));
-    std::string path = fmt::format("{}/{}/{}/",
-        module.mrfCacheLocation(), _cacheProperties.path, datasetIdentifier);
-    std::string root = absPath(path).string();
+    const std::string path = std::format("{}/{}/{}/",
+        mod.mrfCacheLocation(), _cacheProperties.path, datasetIdentifier);
+    const std::string root = absPath(path).string();
     std::string mrf = root + datasetIdentifier + ".mrf";
 
     if (!std::filesystem::exists(mrf)) {
@@ -430,9 +304,9 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
         if (!std::filesystem::create_directories(root, ec)) {
             // Already existing directories causes a 'failure' but no error
             if (ec) {
-                LWARNING(fmt::format(
-                    "Failed to create directories for cache at: {}. "
-                    "Error Code: {}, message: {}",
+                LWARNING(std::format(
+                    "Failed to create directories for cache at: '{}'. "
+                    "Error Code: '{}', message: {}",
                     root, std::to_string(ec.value()), ec.message()
                 ));
                 return std::nullopt;
@@ -445,8 +319,8 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
                 GDALOpen(_datasetFilePath.c_str(), GA_ReadOnly)
             );
             if (!src) {
-                LWARNING(fmt::format(
-                    "Failed to load dataset: {}. GDAL Error: {}",
+                LWARNING(std::format(
+                    "Failed to load dataset '{}'. GDAL error: {}",
                     _datasetFilePath, CPLGetLastErrorMsg()
                 ));
                 return std::nullopt;
@@ -482,8 +356,8 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
                 driver->CreateCopy(mrf.c_str(), src, false, createOpts, nullptr, nullptr)
             );
             if (!dst) {
-                LWARNING(fmt::format(
-                    "Failed to create MRF Caching dataset dataset: {}. GDAL Error: {}",
+                LWARNING(std::format(
+                    "Failed to create MRF Caching dataset dataset '{}'. GDAL error: {}",
                     mrf, CPLGetLastErrorMsg()
                 ));
                 return std::nullopt;
@@ -523,8 +397,8 @@ void RawTileDataReader::initialize() {
         ZoneScopedN("GDALOpen");
         _dataset = static_cast<GDALDataset*>(GDALOpen(content.c_str(), GA_ReadOnly));
         if (!_dataset) {
-            throw ghoul::RuntimeError(fmt::format(
-                "Failed to load dataset: {}. GDAL Error: {}",
+            throw ghoul::RuntimeError(std::format(
+                "Failed to load dataset '{}'. GDAL error: {}",
                 _datasetFilePath, CPLGetLastErrorMsg()
             ));
         }
@@ -534,15 +408,15 @@ void RawTileDataReader::initialize() {
     _rasterCount = _dataset->GetRasterCount();
 
     // calculateTileDepthTransform
-    unsigned long long maximumValue = [](GLenum t) {
+    const unsigned long long maximumValue = [](GLenum t) {
         switch (t) {
             case GL_UNSIGNED_BYTE:  return 1ULL << 8ULL;
             case GL_UNSIGNED_SHORT: return 1ULL << 16ULL;
             case GL_SHORT:          return 1ULL << 15ULL;
             case GL_UNSIGNED_INT:   return 1ULL << 32ULL;
             case GL_INT:            return 1ULL << 31ULL;
-            case GL_HALF_FLOAT:     return 1ULL;
-            case GL_FLOAT:          return 1ULL;
+            case GL_HALF_FLOAT:
+            case GL_FLOAT:
             case GL_DOUBLE:         return 1ULL;
             default:                throw ghoul::MissingCaseException();
         }
@@ -560,12 +434,12 @@ void RawTileDataReader::initialize() {
     _noDataValue = static_cast<float>(_dataset->GetRasterBand(1)->GetNoDataValue());
     _dataType = toGDALDataType(_initData.glType);
 
-    CPLErr error = _dataset->GetGeoTransform(_padfTransform.data());
+    const CPLErr error = _dataset->GetGeoTransform(_padfTransform.data());
     if (error == CE_Failure) {
         _padfTransform = geoTransform(_rasterXSize, _rasterYSize);
     }
 
-    double tileLevelDifference = calculateTileLevelDifference(
+    const double tileLevelDifference = calculateTileLevelDifference(
         _dataset,
         _initData.dimensions.x
     );
@@ -579,7 +453,7 @@ void RawTileDataReader::initialize() {
 }
 
 void RawTileDataReader::reset() {
-    std::lock_guard lockGuard(_datasetLock);
+    const std::lock_guard lockGuard(_datasetLock);
     _maxChunkLevel = -1;
     if (_dataset) {
         GDALClose(_dataset);
@@ -643,7 +517,7 @@ RawTile::ReadError RawTileDataReader::rasterRead(int rasterBand,
 }
 
 RawTile RawTileDataReader::readTileData(TileIndex tileIndex) const {
-    size_t numBytes = _initData.totalNumBytes;
+    const size_t numBytes = _initData.totalNumBytes;
 
     RawTile rawTile;
     rawTile.imageData = std::unique_ptr<std::byte[]>(new std::byte[numBytes]);
@@ -672,7 +546,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                                       char* imageDataDest) const
 {
     // Only read the minimum number of rasters
-    int nRastersToRead = std::min(_rasterCount, static_cast<int>(_initData.nRasters));
+    const int nReadRasters = std::min(_rasterCount, static_cast<int>(_initData.nRasters));
 
     switch (_initData.ghoulTextureFormat) {
         case ghoul::opengl::Texture::Format::Red: {
@@ -684,7 +558,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
         case ghoul::opengl::Texture::Format::RG:
         case ghoul::opengl::Texture::Format::RGB:
         case ghoul::opengl::Texture::Format::RGBA: {
-            if (nRastersToRead == 1) { // Grayscale
+            if (nReadRasters == 1) { // Grayscale
                 for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
@@ -693,7 +567,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                     worstError = std::max(worstError, err);
                 }
             }
-            else if (nRastersToRead == 2) { // Grayscale + alpha
+            else if (nReadRasters == 2) { // Grayscale + alpha
                 for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
@@ -707,7 +581,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                 worstError = std::max(worstError, err);
             }
             else { // Three or more rasters
-                for (int i = 0; i < nRastersToRead; i++) {
+                for (int i = 0; i < nReadRasters; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
                     char* dest = imageDataDest + (i * _initData.bytesPerDatum);
@@ -719,7 +593,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
         }
         case ghoul::opengl::Texture::Format::BGR:
         case ghoul::opengl::Texture::Format::BGRA: {
-            if (nRastersToRead == 1) { // Grayscale
+            if (nReadRasters == 1) { // Grayscale
                 for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
@@ -728,7 +602,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                     worstError = std::max(worstError, err);
                 }
             }
-            else if (nRastersToRead == 2) { // Grayscale + alpha
+            else if (nReadRasters == 2) { // Grayscale + alpha
                 for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
@@ -742,7 +616,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                 worstError = std::max(worstError, err);
             }
             else { // Three or more rasters
-                for (int i = 0; i < 3 && i < nRastersToRead; i++) {
+                for (int i = 0; i < 3 && i < nReadRasters; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
                     char* dest = imageDataDest + (i * _initData.bytesPerDatum);
@@ -750,7 +624,7 @@ void RawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& wor
                     worstError = std::max(worstError, err);
                 }
             }
-            if (nRastersToRead > 3) { // Alpha channel exists
+            if (nReadRasters > 3) { // Alpha channel exists
                 // Last read is the alpha channel
                 char* dest = imageDataDest + (3 * _initData.bytesPerDatum);
                 const RawTile::ReadError err = rasterRead(4, io, dest);

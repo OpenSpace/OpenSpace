@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,7 +47,7 @@ struct Configuration {
 
     ghoul::Dictionary createDictionary();
 
-    std::string windowConfiguration = "${CONFIG}/single.xml";
+    std::string windowConfiguration = "${CONFIG}/single.json";
     std::string asset;
     std::string profile;
 
@@ -78,6 +78,7 @@ struct Configuration {
     Logging logging;
 
     std::string scriptLog;
+    int scriptLogRotation = 3;
 
     struct DocumentationInfo {
         std::string path;

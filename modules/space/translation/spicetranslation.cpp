@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,10 +88,6 @@ namespace {
 
         std::optional<std::string> fixedDate
             [[codegen::annotation("A date to lock the position to")]];
-
-        // A single kernel or list of kernels that this SpiceTranslation depends on. All
-        // provided kernels will be loaded before any other operation is performed
-        std::optional<std::variant<std::vector<std::string>, std::string>> kernels;
     };
 #include "spicetranslation_codegen.cpp"
 } // namespace
@@ -110,32 +106,6 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     , _cachedFrame("GALACTIC")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    auto loadKernel = [](const std::string& kernel) {
-        if (!std::filesystem::is_regular_file(kernel)) {
-            throw SpiceManager::SpiceException(fmt::format(
-                "Kernel '{}' does not exist", kernel
-            ));
-        }
-
-        try {
-            SpiceManager::ref().loadKernel(kernel);
-        }
-        catch (const SpiceManager::SpiceException& exception) {
-            LERRORC("SpiceEphemeris", exception.message);
-        }
-    };
-
-    if (p.kernels.has_value()) {
-        if (std::holds_alternative<std::string>(*p.kernels)) {
-            loadKernel(absPath(std::get<std::string>(*p.kernels)).string());
-        }
-        else {
-            for (const std::string& k : std::get<std::vector<std::string>>(*p.kernels)) {
-                loadKernel(absPath(k).string());
-            }
-        }
-    }
 
     _target.onChange([this]() {
         _cachedTarget = _target;

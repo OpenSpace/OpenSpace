@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -150,18 +150,18 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
 RenderableToyVolume::~RenderableToyVolume() {}
 
 void RenderableToyVolume::initializeGL() {
-    glm::vec4 color(glm::vec3(_color), opacity());
-    _raycaster = std::make_unique<ToyVolumeRaycaster>(color);
+    glm::vec4 color = glm::vec4(glm::vec3(_color), opacity());
+    _raycaster = std::make_unique<ToyVolumeRaycaster>(std::move(color));
     _raycaster->initialize();
 
-    global::raycasterManager->attachRaycaster(*_raycaster.get());
+    global::raycasterManager->attachRaycaster(*_raycaster);
 
-    std::function<void(bool)> onChange = [this](bool enabled) {
+    auto onChange = [this](bool enabled) {
         if (enabled) {
-            global::raycasterManager->attachRaycaster(*_raycaster.get());
+            global::raycasterManager->attachRaycaster(*_raycaster);
         }
         else {
-            global::raycasterManager->detachRaycaster(*_raycaster.get());
+            global::raycasterManager->detachRaycaster(*_raycaster);
         }
     };
 
@@ -179,7 +179,7 @@ void RenderableToyVolume::initializeGL() {
 
 void RenderableToyVolume::deinitializeGL() {
     if (_raycaster) {
-        global::raycasterManager->detachRaycaster(*_raycaster.get());
+        global::raycasterManager->detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
 }
@@ -196,7 +196,7 @@ void RenderableToyVolume::update(const UpdateData& data) {
             static_cast<glm::vec3>(_translation) *
                 std::pow(10.f, static_cast<float>(_scalingExponent))
         );
-        glm::vec3 eulerRotation = static_cast<glm::vec3>(_rotation);
+        const glm::vec3 eulerRotation = _rotation;
         transform = glm::rotate(transform, eulerRotation.x, glm::vec3(1.f, 0.f, 0.f));
         transform = glm::rotate(transform, eulerRotation.y, glm::vec3(0.f, 1.f, 0.f));
         transform = glm::rotate(transform, eulerRotation.z,  glm::vec3(0.f, 0.f, 1.f));
@@ -207,7 +207,7 @@ void RenderableToyVolume::update(const UpdateData& data) {
                 std::pow(10.f, static_cast<float>(_scalingExponent))
         );
 
-        glm::vec4 color(glm::vec3(_color), opacity());
+        const glm::vec4 color = glm::vec4(glm::vec3(_color), opacity());
 
         _raycaster->setColor(color);
         _raycaster->setStepSize(_stepSize);
@@ -220,7 +220,7 @@ void RenderableToyVolume::update(const UpdateData& data) {
 
 void RenderableToyVolume::render(const RenderData& data, RendererTasks& tasks) {
     RaycasterTask task { _raycaster.get(), data };
-    tasks.raycasterTasks.push_back(task);
+    tasks.raycasterTasks.push_back(std::move(task));
 }
 
 } // namespace openspace

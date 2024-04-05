@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,7 +69,7 @@ float opticalDepth(float r, float mu, float H) {
   float y_i = exp(-(r - Rg) / H);
 
   float accumulation = 0.0;
-  for (int i = 1; i <= TRANSMITTANCE_STEPS; ++i) {
+  for (int i = 1; i <= TRANSMITTANCE_STEPS; i++) {
     float x_i = float(i) * deltaStep;
     // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
     // In this case, a = r, b = x_i and cos(alpha) = cos(PI-zenithView) = mu

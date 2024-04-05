@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -82,7 +82,7 @@ public:
     glm::vec2 screenSpaceDimensions();
     glm::vec2 upperRightCornerScreenSpace();
     glm::vec2 lowerLeftCornerScreenSpace();
-    bool isIntersecting(glm::vec2 coord);
+    bool isIntersecting(const glm::vec2& coord);
     void translate(glm::vec2 translation, glm::vec2 position);
     void setCartesianPosition(const glm::vec3& position);
     void setRaeFromCartesianPosition(const glm::vec3& position);
@@ -102,13 +102,13 @@ protected:
     glm::vec3 raeToCartesian(const glm::vec3& rae) const;
     glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
-    void draw(glm::mat4 modelTransform, float blackoutFactor);
+    void draw(const glm::mat4& modelTransform, float blackoutFactor);
 
     virtual void bindTexture() = 0;
     virtual void unbindTexture();
 
-    glm::vec3 sphericalToRae(glm::vec3 spherical) const;
-    glm::vec3 raeToSpherical(glm::vec3 rae) const;
+    glm::vec3 sphericalToRae(const glm::vec3& spherical) const;
+    glm::vec3 raeToSpherical(const glm::vec3& rae) const;
     glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;

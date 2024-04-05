@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,8 +64,8 @@ KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& di
 }
 
 std::string KameleonDocumentationTask::description() {
-    return fmt::format(
-        "Extract metadata from cdf file {} and output html documentation to {}",
+    return std::format(
+        "Extract metadata from CDF file '{}' and output HTML documentation to '{}'",
         _inputPath, _outputPath
     );
 }
@@ -151,7 +151,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
 
     file << html.str();
 
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace::kameleonvolume

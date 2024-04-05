@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -329,15 +329,15 @@ std::vector<VBOLayout> calculateShadowPoints(const std::vector<glm::dvec3>& srcT
         // reference frame of the Moon
         const glm::dvec3 src =
             lightSourceToShadower * srcTerminator[i] + shadowerToLightSource;
-        const glm::dvec3 dst = dstTerminator[i];
+        const glm::dvec3& dst = dstTerminator[i];
         const glm::dvec3 dir = glm::normalize(dst - src);
 
         // The start point is the terminator point on the Moon
-        glm::vec3 p1 = dst;
+        const glm::vec3 p1 = dst;
         vertices.push_back({ p1.x, p1.y, p1.z });
 
         // The end point is calculated by forward propagating the incoming direction
-        glm::vec3 p2 = dst + dir * lengthScale;
+        const glm::vec3 p2 = dst + dir * lengthScale;
         vertices.push_back({ p2.x, p2.y, p2.z });
     }
     return vertices;
@@ -428,7 +428,7 @@ void RenderableEclipseCone::createCone(double et) {
 
 
     // 3. Get the necessary conversion distances and matrices
-    glm::dvec3 diff = SpiceManager::ref().targetPosition(
+    const glm::dvec3 diff = SpiceManager::ref().targetPosition(
         _shadowee,
         _shadower,
         "GALACTIC",
@@ -451,7 +451,7 @@ void RenderableEclipseCone::createCone(double et) {
         },
         et
     ) * 1000.0; // to meter
-    glm::dmat3 lightSourceToShadower = SpiceManager::ref().frameTransformationMatrix(
+    const glm::dmat3 lightToShadower = SpiceManager::ref().frameTransformationMatrix(
         _lightSourceFrame, _shadowerFrame, et
     );
 
@@ -463,7 +463,7 @@ void RenderableEclipseCone::createCone(double et) {
             resSrc.terminatorPoints,
             resDst.terminatorPoints,
             shadowerToLightSource,
-            lightSourceToShadower,
+            lightToShadower,
             distance * static_cast<double>(_shadowLength)
         );
 
@@ -488,7 +488,7 @@ void RenderableEclipseCone::createCone(double et) {
             resSrc.terminatorPoints,
             resDst.terminatorPoints,
             shadowerToLightSource,
-            lightSourceToShadower,
+            lightToShadower,
             distance * static_cast<double>(_shadowLength)
         );
 

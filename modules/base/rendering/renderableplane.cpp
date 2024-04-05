@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -156,7 +156,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         { static_cast<int>(BlendMode::Additive), "Additive"}
     });
     _blendMode.onChange([this]() {
-        BlendMode m = static_cast<BlendMode>(_blendMode.value());
+        const BlendMode m = static_cast<BlendMode>(_blendMode.value());
         switch (m) {
             case BlendMode::Normal:
                 setRenderBinFromOpacity();
@@ -244,17 +244,17 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform(_uniformCache.mirrorBackside, _mirrorBackside);
 
-    glm::dvec3 objectPositionWorld = glm::dvec3(
+    const glm::dvec3 objPosWorld = glm::dvec3(
         glm::translate(
             glm::dmat4(1.0),
             data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
-    glm::dvec3 newRight = glm::normalize(
+    const glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objPosWorld);
+    const glm::dvec3 newRight = glm::normalize(
         glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
     );
-    glm::dvec3 newUp = glm::cross(normal, newRight);
+    const glm::dvec3 newUp = glm::cross(normal, newRight);
 
     glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
     cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
@@ -283,7 +283,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform(_uniformCache.multiplyColor, _multiplyColor);
 
-    bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
+    const bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -322,7 +322,7 @@ void RenderablePlane::update(const UpdateData&) {
 void RenderablePlane::createPlane() {
     const GLfloat sizeX = _size.value().x;
     const GLfloat sizeY = _size.value().y;
-    const GLfloat vertexData[] = {
+    const std::array<GLfloat, 36> vertexData = {
         //   x       y    z    w    s    t
         -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
          sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
@@ -334,7 +334,7 @@ void RenderablePlane::createPlane() {
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,9 @@
 
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
 #include <filesystem>
@@ -117,9 +117,9 @@ bool KameleonWrapper::open(const std::string& filename) {
         _zCoordVar = v[2];
         _type = modelType();
 
-        LDEBUG(fmt::format("x: {}", _xCoordVar));
-        LDEBUG(fmt::format("y: {}", _yCoordVar));
-        LDEBUG(fmt::format("z: {}", _zCoordVar));
+        LDEBUG(std::format("x: {}", _xCoordVar));
+        LDEBUG(std::format("y: {}", _yCoordVar));
+        LDEBUG(std::format("z: {}", _zCoordVar));
 
         _min = glm::vec3(
             _model->getVariableAttribute(_xCoordVar, "actual_min").getAttributeFloat(),
@@ -172,7 +172,9 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format("Loading variable {} from CDF data with a uniform sampling", var));
+    LINFO(std::format(
+        "Loading variable '{}' from CDF data with a uniform sampling", var
+    ));
 
     const size_t size = outDimensions.x * outDimensions.y * outDimensions.z;
     float* data = new float[size];
@@ -181,10 +183,10 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
 
     const double varMin =
         _model->getVariableAttribute(var, "actual_min").getAttributeFloat();
-    LDEBUG(fmt::format("{} Min: {}", var, varMin));
+    LDEBUG(std::format("{} Min: {}", var, varMin));
     const double varMax =
         _model->getVariableAttribute(var, "actual_max").getAttributeFloat();
-    LDEBUG(fmt::format("{} Max: {}", var, varMax));
+    LDEBUG(std::format("{} Max: {}", var, varMax));
 
     // HISTOGRAM
     constexpr int NBins = 200;
@@ -290,7 +292,7 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     int stop = 0;
     constexpr float TruncationLimit = 0.9f;
     const int upperLimit = static_cast<int>(size * TruncationLimit);
-    for (int i = 0; i < NBins; ++i) {
+    for (int i = 0; i < NBins; i++) {
         sum += histogram[i];
         if (sum > upperLimit) {
             stop = i;
@@ -301,15 +303,15 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     const double dist = ((varMax - varMin) / NBins) * stop;
 
     const double varMaxNew = varMin + dist;
-    for(size_t i = 0; i < size; ++i) {
+    for(size_t i = 0; i < size; i++) {
         const double normalizedVal = (doubleData[i] - varMin) / (varMaxNew - varMin);
 
         data[i] = static_cast<float>(glm::clamp(normalizedVal, 0.0, 1.0));
         if (data[i] < 0.f) {
-            LERROR(fmt::format("Datapoint {} less than 0", i));
+            LERROR(std::format("Datapoint {} less than 0", i));
         }
         if (data[i] > 1.f) {
-            LERROR(fmt::format("Datapoint {} more than 1", i));
+            LERROR(std::format("Datapoint {} more than 1", i));
         }
     }
 
@@ -322,8 +324,8 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
                                            float slice) const
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO(fmt::format(
-        "Loading variable {} from CDF data with a uniform sampling",
+    LINFO(std::format(
+        "Loading variable '{}' from CDF data with a uniform sampling",
         var
     ));
 
@@ -350,8 +352,8 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
     const double yDim = hasYSlice ? 1.0 : outDimensions.y - 1;
     const double zDim = hasZSlice ? 1.0 : outDimensions.z - 1;
 
-    LDEBUG(fmt::format("{} min: {}", var, varMin));
-    LDEBUG(fmt::format("{} max: {}", var, varMax));
+    LDEBUG(std::format("{} min: {}", var, varMin));
+    LDEBUG(std::format("{} max: {}", var, varMax));
 
     //double maxValue = 0.0;
     //double minValue = std::numeric_limits<double>::max();
@@ -453,8 +455,8 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format(
-        "loading variables {} {} {} from CDF data with a uniform sampling",
+    LINFO(std::format(
+        "Loading variables {} {} {} from CDF data with a uniform sampling",
         xVar,
         yVar,
         zVar
@@ -528,7 +530,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::classifiedFieldLines(const std::str
                                                                      float stepSize) const
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Creating {} fieldlines from variables {} {} {}",
         seedPoints.size(), xVar, yVar, zVar
     ));
@@ -590,7 +592,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::fieldLines(const std::string& xVar,
 {
     ghoul_assert(_model && _interpolator, "Model and interpolator must exist");
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "Creating {} fieldlines from variables {} {} {}",
         seedPoints.size(), xVar, yVar, zVar
     ));
@@ -645,7 +647,7 @@ KameleonWrapper::Fieldlines KameleonWrapper::lorentzTrajectories(
                                                                const glm::vec4& /*color*/,
                                                                          float step) const
 {
-    LINFO(fmt::format("Creating {} Lorentz force trajectories", seedPoints.size()));
+    LINFO(std::format("Creating {} Lorentz force trajectories", seedPoints.size()));
 
     Fieldlines trajectories;
 
@@ -838,7 +840,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
 
         ++numSteps;
         if (numSteps > MaxSteps) {
-            LDEBUG(fmt::format("Max number of steps taken ({})", MaxSteps));
+            LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;
         }
     }
@@ -952,7 +954,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
 
         ++numSteps;
         if (numSteps > MaxSteps) {
-            LDEBUG(fmt::format("Max number of steps taken ({})", MaxSteps));
+            LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;
         }
     }
@@ -1072,7 +1074,7 @@ std::vector<std::string> KameleonWrapper::variables() const {
 
     int numVariables = _model->getNumberOfVariables();
 
-    for (int i = 0; i < numVariables; ++i) {
+    for (int i = 0; i < numVariables; i++) {
         variableNames.push_back(_model->getVariableName(i));;
     }
     return variableNames;

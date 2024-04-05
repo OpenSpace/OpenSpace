@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -105,7 +105,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
     namespace fs = std::filesystem;
-    fs::path sourceFolder = absPath(_textureSourcePath);
+    const fs::path sourceFolder = absPath(_textureSourcePath);
     if (!std::filesystem::is_directory(sourceFolder)) {
         throw ghoul::RuntimeError(
             "Source folder for RenderableTimeVaryingSphere is not a valid directory"
@@ -118,8 +118,8 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         if (!e.is_regular_file()) {
             continue;
         }
-        std::string filePath = e.path().string();
-        double time = extractTriggerTimeFromFileName(filePath);
+        const std::string filePath = e.path().string();
+        const double time = extractTriggerTimeFromFileName(filePath);
         std::unique_ptr<ghoul::opengl::Texture> t =
             ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
 
@@ -194,7 +194,7 @@ void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTim
     );
     if (iter != _files.end()) {
         if (iter != _files.begin()) {
-            ptrdiff_t idx = std::distance(_files.begin(), iter);
+            const ptrdiff_t idx = std::distance(_files.begin(), iter);
             _activeTriggerTimeIndex = static_cast<int>(idx - 1);
         }
         else {

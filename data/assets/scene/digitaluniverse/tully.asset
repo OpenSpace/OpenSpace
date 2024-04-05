@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Tully Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_tully_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -23,7 +23,7 @@ local TransformMatrix = {
 local TullyGalaxies = {
   Identifier = "TullyGalaxies",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = true,
     Labels = {
       File = speck .. "tully.label",
@@ -33,23 +33,30 @@ local TullyGalaxies = {
       Unit = "Mpc",
       TransformationMatrix = TransformMatrix
     },
-    Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
-    ScaleFactor = 504.0,
     File = speck .. "tully.speck",
-    Texture = textures .. "point3A.png",
-    --ColorMap = speck .. "tully.cmap",
-    ColorMap = speck .. "lss.cmap",
-    --ColorOption = { "proximity" },
-    ColorOption = { "prox5Mpc" },
-    ColorRange = { { 1.0, 30.0 } },
+    Texture = {
+      File = textures .. "point3A.png"
+    },
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 },
+      ColorMapping = {
+        File = speck .. "lss.cmap",
+        ParameterOptions = {
+          { Key = "prox5Mpc", Range = { 1.0, 30.0 } }
+        }
+      }
+    },
     Unit = "Mpc",
     TransformationMatrix = TransformMatrix,
-    FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"
-    BillboardMinMaxSize = { 0.0, 7.0 }, -- in pixels
-    --CorrectionSizeEndDistance = 22.0,
-    --CorrectionSizeFactor = 10.45
-    EnablePixelSizeControl = true
+    Fading = {
+      FadeInDistances = { 0.001, 1.0 } -- Fade in value in the same unit as "Unit"
+    },
+    SizeSettings = {
+      ScaleExponent = 21.9,
+      MaxSize = 0.3,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Tully Galaxies",
@@ -125,7 +132,7 @@ asset.export(TullyGalaxiesImages)
 
 asset.meta = {
   Name = "Tully Galaxies",
-  Version = "3.1",
+  Version = "4.0",
   Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
     images]],
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",

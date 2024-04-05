@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -280,16 +280,16 @@ TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
     };
 
     // First test if a new ScriptScheduler will return an empty list
-    for (double t : TestTimes) {
+    for (const double t : TestTimes) {
         ScriptScheduler scheduler;
-        std::vector<std::string> res = scheduler.progressTo(t);
+        const std::vector<std::string> res = scheduler.progressTo(t);
         CHECK(res.empty());
     }
 
     // Then test the same thing but keeping the same ScriptScheduler
     ScriptScheduler scheduler;
-    for (double t : TestTimes) {
-        std::vector<std::string> res = scheduler.progressTo(t);
+    for (const double t : TestTimes) {
+        const std::vector<std::string> res = scheduler.progressTo(t);
         CHECK(res.empty());
     }
 
@@ -398,7 +398,7 @@ TEST_CASE("ScriptScheduler: CurrentTime", "[scriptscheduler]") {
         -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()
     };
 
-    for (double t : TestValues) {
+    for (const double t : TestValues) {
         ScriptScheduler scheduler;
         scheduler.progressTo(t);
         CHECK(t == scheduler.currentTime());

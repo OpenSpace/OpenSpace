@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,12 +36,19 @@ namespace events { struct Event; }
 
 class EventEngine {
 public:
+    using ScriptCallback = std::function<void(ghoul::Dictionary)>;
+
     struct ActionInfo {
         events::Event::Type type;
         uint32_t id = std::numeric_limits<uint32_t>::max();
         bool isEnabled = true;
         std::string action;
         std::optional<ghoul::Dictionary> filter;
+    };
+
+    struct TopicInfo {
+        uint32_t id = std::numeric_limits<uint32_t>::max();
+        ScriptCallback callback;
     };
 
     /**
@@ -88,6 +95,16 @@ public:
         std::optional<ghoul::Dictionary> filter = std::nullopt);
 
     /**
+     * Registers a new topic for a specific event type.
+     *
+     * \param topicId The id of the topic that will be triggered
+     * \param type The type for which a new topic is registered
+     * \param callback The callback function that will be called on triggered event
+    */
+    void registerEventTopic(size_t topicId, events::Event::Type type,
+        ScriptCallback callback);
+
+    /**
      * Removing registration for a type/action combination.
      *
      * \param type The type of the action that should be unregistered
@@ -96,7 +113,7 @@ public:
      */
     void unregisterEventAction(events::Event::Type type,
         const std::string& identifier,
-        std::optional<ghoul::Dictionary> filter = std::nullopt);
+        const std::optional<ghoul::Dictionary>& filter = std::nullopt);
 
     /**
      * Removing registration for a specific event identified by the \p identifier.
@@ -106,11 +123,28 @@ public:
     void unregisterEventAction(uint32_t identifier);
 
     /**
+     * Removing registration for a topic/type combination, does nothing if topicId or type
+     * combination does not exist
+     *
+     * \param topicId The id of the topic that should be unregistered
+     * \param type The type of the topic that should be unregistered
+    */
+    void unregisterEventTopic(size_t topicId, events::Event::Type type);
+
+    /**
      * Returns the list of all registered actions, sorted by their identifiers.
      *
      * \return The list of all registered actions
      */
     std::vector<ActionInfo> registeredActions() const;
+
+    /**
+     * Returns the list of all registered actions, grouped by their event type.
+     *
+     * \return The unordered map of all registered actions
+     */
+    const std::unordered_map<events::Event::Type, std::vector<ActionInfo>>&
+        eventActions() const;
 
     /**
      * Enables the event identified by the \p identifier. If the event is already enabled,
@@ -134,6 +168,12 @@ public:
      */
     void triggerActions() const;
 
+    /**
+     * Triggers all topics that are registered for events that are in the current event
+     * queue.
+    */
+    void triggerTopics() const;
+
     static scripting::LuaLibrary luaLibrary();
 
 private:
@@ -148,6 +188,8 @@ private:
     /// to be able to return them to a caller and we want it in this unordered_map to make
     /// the lookup really fast. So having this extra wasted memory is probably worth it
     std::unordered_map<events::Event::Type, std::vector<ActionInfo>> _eventActions;
+
+    std::unordered_map<events::Event::Type, std::vector<TopicInfo>> _eventTopics;
 
     static uint32_t nextRegisteredEventId;
 

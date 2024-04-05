@@ -63,3 +63,12 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickAxis(name, controller.Push.UpDown, "Zoom")
   openspace.navigation.bindJoystickAxis(name, controller.Tilt.LeftRight, "LocalRoll")
 end)
+
+asset.meta = {
+  Name = "Joystick controller: SpaceMouse enterprise (wired)",
+  Version = "1.0",
+  Description = "Joystick controller configuration for SpaceMouse enterprise (wired)",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

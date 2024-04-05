@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -206,10 +206,10 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         { static_cast<int>(T::LightTimeStellar), "Light Time Stellar" },
 
     });
-    SpiceManager::AberrationCorrection aberration = SpiceManager::AberrationCorrection(
+    const SpiceManager::AberrationCorrection abbcorr = SpiceManager::AberrationCorrection(
         p.aberration
     );
-    _aberration = static_cast<int>(aberration.type);
+    _aberration = static_cast<int>(abbcorr.type);
 }
 
 void RenderableShadowCylinder::initializeGL() {
@@ -315,7 +315,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         [](const glm::dvec3& p) { return p * 1000.0; }
     );
 
-    double lt;
+    double lt = 0.0;
     glm::dvec3 vecLightSource = SpiceManager::ref().targetPosition(
         _body,
         _lightSource,

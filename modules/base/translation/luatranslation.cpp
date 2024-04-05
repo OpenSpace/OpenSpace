@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,9 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
@@ -91,7 +91,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            fmt::format(
+            std::format(
                 "Script '{}' does not have a function 'translation'",
                 _luaScriptFile.value()
             )
@@ -115,16 +115,15 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            fmt::format("Error executing 'translation': {}", lua_tostring(_state, -1))
+            std::format("Error executing 'translation': {}", lua_tostring(_state, -1))
         );
     }
 
-    double values[3];
-    for (int i = 1; i <= 3; ++i) {
+    glm::vec3 values;
+    for (int i = 1; i <= 3; i++) {
         values[i - 1] = ghoul::lua::value<double>(_state, i);
     }
-
-    return glm::make_vec3(values);
+    return values;
 }
 
 } // namespace openspace

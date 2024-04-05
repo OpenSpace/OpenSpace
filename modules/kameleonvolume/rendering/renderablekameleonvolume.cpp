@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -339,7 +339,7 @@ bool RenderableKameleonVolume::isCachingEnabled() const {
 
 void RenderableKameleonVolume::load() {
     if (!std::filesystem::is_regular_file(_sourcePath.value())) {
-        LERROR(fmt::format("File '{}' does not exist", _sourcePath.value()));
+        LERROR(std::format("File '{}' does not exist", _sourcePath.value()));
         return;
     }
     if (!isCachingEnabled()) {
@@ -361,7 +361,7 @@ void RenderableKameleonVolume::load() {
 
 std::string RenderableKameleonVolume::cacheSuffix() const {
     glm::uvec3 dims = _dimensions;
-    return fmt::format(".{}.{}x{}x{}", _variable.value(), dims[0], dims[1], dims[2]);
+    return std::format(".{}.{}x{}x{}", _variable.value(), dims[0], dims[1], dims[2]);
 }
 
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {
@@ -430,7 +430,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
     float min = _lowerValueBound;
     float diff = _upperValueBound - _lowerValueBound;
 
-    for (size_t i = 0; i < _normalizedVolume->nCells(); ++i) {
+    for (size_t i = 0; i < _normalizedVolume->nCells(); i++) {
         out[i] = glm::clamp((in[i] - min) / diff, 0.f, 1.f);
     }
 

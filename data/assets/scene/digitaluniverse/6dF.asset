@@ -9,26 +9,36 @@ local speck = asset.resource({
   Name = "6dF Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_6dF_speck",
-  Version = 2
+  Version = 3
 })
 
 
 local Object = {
   Identifier = "6dF",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
-    Color = { 1.0, 1.0, 0.0 },
     Opacity = 1.0,
     File = speck .. "6dF.speck",
     Unit = "Mpc",
-    Texture = textures .. "point3A.png",
-    ColorMap = speck .. "6dF.cmap",
-    ColorOption = { "redshift", "proximity" },
-    ColorRange = { { 0.0, 0.075 }, { 1.0, 10.0 } },
-    ScaleFactor = 534.0,
-    BillboardMinMaxSize = { 0.0, 9.0 },
-    EnablePixelSizeControl = true
+    Texture = {
+      File = textures .. "point3A.png",
+    },
+    Coloring = {
+      FixedColor = { 1.0, 1.0, 0.0 },
+      ColorMapping = {
+        File = speck .. "6dF.cmap",
+        ParameterOptions = {
+          { Key = "proximity", Range = { 1.0, 10.0 } },
+          { Key = "redshift", Range = { 0.0, 0.075 } }
+        }
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 22.5,
+      MaxSize = 0.2,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "6dF Galaxies",
@@ -62,7 +72,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "6dF Galaxies",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for The Six-degree Field (6dF) Galaxy Survey",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

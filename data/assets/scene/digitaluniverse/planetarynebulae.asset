@@ -16,7 +16,7 @@ local speck = asset.resource({
 local Object = {
   Identifier = "PlanetaryNebulae",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePolygonCloud",
     Enabled = false,
     Labels = {
       File = speck .. "pn.label",
@@ -25,15 +25,18 @@ local Object = {
       MinMaxSize = { 4, 25 },
       Unit = "pc"
     },
-    Color = { 0.4, 0.4, 0.9 },
+    Coloring = {
+      FixedColor = { 0.4, 0.4, 0.9 }
+    },
     Opacity = 0.65,
     File = speck .. "pn.speck",
-    Texture = textures .. "point4.png",
     PolygonSides = 3,
     Unit = "pc",
-    ScaleFactor = 425.0,
-    BillboardMinMaxSize = { 0.0, 500.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 18.46,
+      MaxSize = 19.0,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Planetary Nebulae",
@@ -64,7 +67,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Planetary Nebulae",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for Planetary Nebulae",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
