@@ -44,7 +44,7 @@ std::vector<std::string> DataProcessorJson::readMetadata(const std::string& data
         const json& j = json::parse(data);
         json variables = j["variables"];
 
-        for (json::iterator it = variables.begin(); it != variables.end(); ++it) {
+        for (json::iterator it = variables.begin(); it != variables.end(); it++) {
             std::string option = it.key();
             if (option == "ep") {
                 const json& row = it.value();
@@ -75,7 +75,7 @@ void DataProcessorJson::addDataValues(const std::string& data,
         std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
         const std::vector<std::string>& options = dataOptions.options();
 
-        for (int i = 0; i < numOptions; ++i) {
+        for (int i = 0; i < numOptions; i++) {
             const json& row = variables[options[i]];
 //            int rowsize = row.size();
 

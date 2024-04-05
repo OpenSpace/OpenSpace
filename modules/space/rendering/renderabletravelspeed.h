@@ -53,7 +53,6 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    double calculateLightTravelTime(glm::dvec3 startPosition, glm::dvec3 targetPosition);
     void calculateVerticesPositions();
     void calculateDirectionVector();
     void updateVertexData();

@@ -119,7 +119,7 @@ public:
 
     std::string key() const;
 
-    void setOffsets(const glm::vec3& offsets);
+    void setOffsets(glm::vec3 offsets);
 
     void initializeGL(ghoul::opengl::ProgramObject* pointsProgram,
         ghoul::opengl::ProgramObject* linesAndPolygonsProgram);

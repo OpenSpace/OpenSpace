@@ -39,8 +39,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/logging/logmanager.h>
 #include <chrono>
+#include <cmath>
 #include <fstream>
-#include <math.h>
 #include <random>
 #include <vector>
 
@@ -274,7 +274,10 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.modelView, calcModelViewTransform(data));
 
     // Because we want the property to work similar to the planet trails
-    const float fade = pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.f);
+    const float fade = std::pow(
+        _appearance.lineFade.maxValue() - _appearance.lineFade,
+        2.f
+    );
 
     _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
@@ -304,7 +307,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     _numObjects = parameters.size();
 
     if (_startRenderIdx >= _numObjects) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Start index {} out of range [0, {}]", _startRenderIdx.value(), _numObjects
         ));
     }
@@ -312,7 +315,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     long long endElement = _startRenderIdx + _sizeRender - 1;
     endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
     if (endElement < 0 || endElement >= _numObjects) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "End index {} out of range [0, {}]", endElement, _numObjects
         ));
     }
@@ -327,7 +330,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         if (_startRenderIdx >= parameters.size() ||
             (_startRenderIdx + _sizeRender) >= parameters.size())
         {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Tried to load {} objects but only {} are available",
                 _startRenderIdx + _sizeRender, parameters.size()
             ));
@@ -354,7 +357,7 @@ void RenderableOrbitalKepler::updateBuffers() {
     _segmentSize.clear();
     _startIndex.clear();
     _startIndex.push_back(0);
-    for (size_t i = 0; i < parameters.size(); ++i) {
+    for (size_t i = 0; i < parameters.size(); i++) {
         const double scale = static_cast<double>(_segmentQuality) * 10.0;
         const kepler::Parameters& p = parameters[i];
         _segmentSize.push_back(
@@ -366,8 +369,8 @@ void RenderableOrbitalKepler::updateBuffers() {
 
     size_t nVerticesTotal = 0;
 
-    int numOrbits = static_cast<int>(parameters.size());
-    for (int i = 0; i < numOrbits; ++i) {
+    const int numOrbits = static_cast<int>(parameters.size());
+    for (int i = 0; i < numOrbits; i++) {
         nVerticesTotal += _segmentSize[i];
     }
     _vertexBufferData.resize(nVerticesTotal);
@@ -388,11 +391,11 @@ void RenderableOrbitalKepler::updateBuffers() {
             orbit.epoch
         );
 
-        for (GLint j = 0 ; j < (_segmentSize[orbitIdx]); ++j) {
-            double timeOffset = orbit.period *
+        for (GLint j = 0 ; j < (_segmentSize[orbitIdx]); j++) {
+            const double timeOffset = orbit.period *
                 static_cast<double>(j) / static_cast<double>(_segmentSize[orbitIdx] - 1);
 
-            glm::dvec3 position = keplerTranslator.position({
+            const glm::dvec3 position = keplerTranslator.position({
                 {},
                 Time(timeOffset + orbit.epoch),
                 Time(0.0)
@@ -443,4 +446,4 @@ void RenderableOrbitalKepler::updateBuffers() {
     setBoundingSphere(maxSemiMajorAxis * 1000);
 }
 
-} // namespace opensapce
+} // namespace openspace

@@ -31,7 +31,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 
 using namespace openspace;
 
@@ -190,7 +190,7 @@ NSArray* focusIdentifiers;
 
         NSString* title = [button title];
 
-        std::string str = fmt::format(
+        std::string str = std::format(
             "openspace.setPropertyValueSingle('{}', '{}');\
              openspace.setPropertyValueSingle('{}', '');\
              openspace.setPropertyValueSingle('{}', '');",

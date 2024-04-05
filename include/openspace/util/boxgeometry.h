@@ -37,7 +37,7 @@ public:
     ~BoxGeometry();
 
     bool initialize();
-    void render();
+    void render() const;
 
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;

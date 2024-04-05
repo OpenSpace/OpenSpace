@@ -240,9 +240,9 @@ ColorMappingComponent::ColorMappingComponent()
     addProperty(setRangeFromData);
 
     colorMapFile.onChange([this]() {
-        bool fileExists = std::filesystem::exists(colorMapFile.value());
+        const bool fileExists = std::filesystem::exists(colorMapFile.value());
         if (!fileExists) {
-            LERROR(fmt::format("Could not find cmap file: '{}'", colorMapFile.value()));
+            LERROR(std::format("Could not find cmap file: {}", colorMapFile.value()));
         }
         _colorMapFileIsDirty = true;
     });
@@ -280,7 +280,7 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
         std::vector<Parameters::ColorMapParameter> opts = *p.parameterOptions;
 
         _colorRangeData.reserve(opts.size());
-        for (size_t i = 0; i < opts.size(); ++i) {
+        for (size_t i = 0; i < opts.size(); i++) {
             dataColumn.addOption(static_cast<int>(i), opts[i].key);
             // Add the provided range or an empty range. We will fill it later on,
             // when the dataset is loaded, if it is empty
@@ -321,6 +321,8 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
     if (p.file.has_value()) {
         colorMapFile = absPath(*p.file).string();
     }
+
+    invert = p.invert.value_or(invert);
 }
 
 ghoul::opengl::Texture* ColorMappingComponent::texture() const {
@@ -328,6 +330,8 @@ ghoul::opengl::Texture* ColorMappingComponent::texture() const {
 }
 
 void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
+    ZoneScoped;
+
     _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
 
     initializeParameterData(dataset);
@@ -354,9 +358,9 @@ void ColorMappingComponent::initializeTexture() {
         return;
     }
 
-    unsigned int width = static_cast<unsigned int>(_colorMap.entries.size());
-    unsigned int height = 1;
-    unsigned int size = width * height;
+    const unsigned int width = static_cast<unsigned int>(_colorMap.entries.size());
+    const unsigned int height = 1;
+    const unsigned int size = width * height;
     std::vector<GLubyte> img;
     img.reserve(size * 4);
 
@@ -399,14 +403,14 @@ void ColorMappingComponent::update(const dataloader::Dataset& dataset) {
 }
 
 glm::vec4 ColorMappingComponent::colorFromColorMap(float valueToColorFrom) const {
-    glm::vec2 currentColorRange = valueRange;
-    float cmax = currentColorRange.y;
-    float cmin = currentColorRange.x;
+    const glm::vec2 currentColorRange = valueRange;
+    const float cmax = currentColorRange.y;
+    const float cmin = currentColorRange.x;
 
-    float nColors = static_cast<float>(_colorMap.entries.size());
+    const float nColors = static_cast<float>(_colorMap.entries.size());
 
-    bool isOutsideMin = valueToColorFrom < cmin;
-    bool isOutsideMax = valueToColorFrom > cmax;
+    const bool isOutsideMin = valueToColorFrom < cmin;
+    const bool isOutsideMax = valueToColorFrom > cmax;
 
     if (hideOutsideRange && (isOutsideMin || isOutsideMax)) {
         return glm::vec4(0.f);
@@ -417,7 +421,7 @@ glm::vec4 ColorMappingComponent::colorFromColorMap(float valueToColorFrom) const
     }
 
     // Find color value using Nearest neighbor (same as texture)
-    float normalization = (cmax != cmin) ? (nColors) / (cmax - cmin) : 0;
+    const float normalization = (cmax != cmin) ? (nColors) / (cmax - cmin) : 0;
     int colorIndex = static_cast<int>((valueToColorFrom - cmin) * normalization);
 
     // Clamp color index to valid range
@@ -434,8 +438,8 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
 
     // Initialize empty ranges based on values in the dataset
     for (const properties::OptionProperty::Option& option : dataColumn.options()) {
-        int optionIndex = option.value;
-        int colorParameterIndex = dataset.index(option.description);
+        const int optionIndex = option.value;
+        const int colorParameterIndex = dataset.index(option.description);
 
         glm::vec2& range = _colorRangeData[optionIndex];
         if (glm::length(range) < glm::epsilon<float>()) {
@@ -464,7 +468,7 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
     }
     else {
         // Otherwise, check if the selected columns exist
-        for (size_t i = 0; i < dataColumn.options().size(); ++i) {
+        for (size_t i = 0; i < dataColumn.options().size(); i++) {
             std::string o = dataColumn.options()[i].description;
 
             bool found = false;
@@ -476,7 +480,7 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
             }
 
             if (!found) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Dataset does not contain specified parameter '{}'", o
                 ));
             }
@@ -489,7 +493,7 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
 
     if (_providedParameter.has_value()) {
         if (indexOfProvidedOption == -1) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error when reading Parameter. Could not find provided parameter '{}' in "
                 "list of parameter options", *_providedParameter
             ));

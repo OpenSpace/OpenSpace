@@ -28,7 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
 #include <geos/io/GeoJSON.h>
-#include <scn/scn.h>
+#include <scn/scan.h>
 #include <algorithm>
 #include <cstdio>
 
@@ -71,7 +71,7 @@ namespace geojson::propertykeys {
 namespace {
     using PropertyInfo = openspace::properties::Property::PropertyInfo;
 
-    template <std::size_t SIZE>
+    template <size_t SIZE>
     bool keyMatches(const std::string_view key,
                     const std::array<std::string_view, SIZE>& keyAlternativesArray,
                     std::optional<const PropertyInfo> propInfo = std::nullopt)
@@ -100,10 +100,10 @@ namespace {
     }
 
     std::optional<glm::vec3> hexToRgb(std::string_view hexColor) {
-        glm::ivec3 rgb;
-        auto ret = scn::scan(hexColor, "#{:2x}{:2x}{:2x}", rgb.r, rgb.g, rgb.b);
+        auto ret = scn::scan<int, int, int>(hexColor, "#{:2x}{:2x}{:2x}");
         if (ret) {
-            return (1.f / 255.f) * glm::vec3(rgb);
+            auto [x, y, z] = ret->values();
+            return (1.f / 255.f) * glm::vec3(x, y, z);
         }
         else {
             return std::nullopt;
@@ -120,7 +120,7 @@ namespace {
                 // Should add some more information on which file the reading failed for
                 LERRORC(
                     "GeoJson",
-                    fmt::format(
+                    std::format(
                         "Failed reading color property. Expected 3 values, got {}",
                         val.size()
                     )
@@ -135,12 +135,12 @@ namespace {
             );
         }
         else if (value.isString()) {
-            const std::string hex = value.getString();
+            const std::string& hex = value.getString();
             std::optional<glm::vec3> c = hexToRgb(hex);
             if (!c) {
                 LERRORC(
                     "GeoJson",
-                    fmt::format(
+                    std::format(
                         "Failed reading color property. Did not find a hex color, got {}",
                         hex
                     )
@@ -460,10 +460,10 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     // Distances are computed based on a certain lat/long angle size
     constexpr float DefaultAngle = glm::radians(1.f);
     constexpr float MaxAngle = glm::radians(45.f);
-    float defaultDistance = static_cast<float>(
+    const float defaultDistance = static_cast<float>(
         globe.ellipsoid().longitudalDistance(0.f, 0.f, DefaultAngle)
     );
-    float maxDistance = static_cast<float>(
+    const float maxDistance = static_cast<float>(
         globe.ellipsoid().longitudalDistance(0.f, 0.f, MaxAngle)
     );
     tessellation.distance = defaultDistance;
@@ -532,7 +532,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
                 result.pointTextureAnchor = GeoJsonProperties::PointTextureAnchor::Center;
             }
             else {
-                LERRORC("GeoJson", fmt::format(
+                LERRORC("GeoJson", std::format(
                     "Point texture anchor mode '{}' not supported", mode
                 ));
             }
@@ -554,7 +554,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             //    result.altitudeMode = GeoJsonProperties::AltitudeMode::ClampToGround;
             //}
             else {
-                LERRORC("GeoJson", fmt::format(
+                LERRORC("GeoJson", std::format(
                     "Altitude mode '{}' not supported", mode
                 ));
             }
@@ -587,7 +587,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
         }
         catch (const geos::io::GeoJSONValue::GeoJSONTypeError&) {
             // @TODO: Should add some more information on which file the reading failed
-            LERRORC("GeoJson", fmt::format(
+            LERRORC("GeoJson", std::format(
                 "Error reading GeoJson property '{}'. Value has wrong type", key
             ));
         }

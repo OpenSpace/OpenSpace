@@ -31,7 +31,7 @@
 namespace openspace::properties {
 
 StringProperty::StringProperty(Property::PropertyInfo info, std::string value)
-    : TemplateProperty<std::string>(info, value)
+    : TemplateProperty<std::string>(std::move(info), std::move(value))
 {}
 
 std::string_view StringProperty::className() const {

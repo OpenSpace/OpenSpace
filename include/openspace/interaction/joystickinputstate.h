@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 #define __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
-#include <ghoul/fmt.h>
 #include <array>
 #include <memory>
 #include <string>
@@ -150,7 +150,7 @@ constexpr openspace::interaction::JoystickAction from_string(std::string_view st
     if (string == "Repeat")  { return openspace::interaction::JoystickAction::Repeat; }
     if (string == "Release") { return openspace::interaction::JoystickAction::Release; }
 
-    throw RuntimeError(fmt::format("Unknown action '{}'", string));
+    throw RuntimeError(std::format("Unknown action '{}'", string));
 }
 
 } // namespace ghoul

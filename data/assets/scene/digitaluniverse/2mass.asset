@@ -21,7 +21,9 @@ local Object = {
     Opacity = 1.0,
     File = speck .. "2MASS.speck",
     Unit = "Mpc",
-    Texture = textures .. "point3A.png",
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Coloring = {
       FixedColor = { 1.0, 0.4, 0.2 },
       ColorMapping = {

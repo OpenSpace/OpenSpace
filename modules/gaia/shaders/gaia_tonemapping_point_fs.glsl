@@ -162,7 +162,7 @@ Fragment getFragment() {
     discard;
   }
 
-  color = vec4(intensity, 1.0f);
+  color = vec4(intensity, 1.0);
 
   // Use the following to check for any intensity at all.
   //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);

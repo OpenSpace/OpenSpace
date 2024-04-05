@@ -48,8 +48,8 @@ public:
     TileTextureInitData(const TileTextureInitData& original) = default;
     TileTextureInitData(TileTextureInitData&& original) = default;
 
-    TileTextureInitData operator=(const TileTextureInitData& rhs);
-    TileTextureInitData operator=(TileTextureInitData&& rhs) noexcept;
+    TileTextureInitData& operator=(const TileTextureInitData& rhs);
+    TileTextureInitData& operator=(TileTextureInitData&& rhs) noexcept;
 
     ~TileTextureInitData() = default;
 

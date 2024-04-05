@@ -27,10 +27,10 @@
 #include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <memory>
-#include <iostream>
+#include <fstream>
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 
@@ -133,7 +133,7 @@ extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
 
     if (!std::filesystem::is_directory(filePath)) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "The specified seed point directory: '{}' does not exist", filePath
         ));
         return outMap;
@@ -150,12 +150,12 @@ extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
 
         std::ifstream seedFile(seedFilePath);
         if (!seedFile.good()) {
-            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
+            LERROR(std::format("Could not open seed points file '{}'", seedFilePath));
             outMap.clear();
             return {};
         }
 
-        LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
+        LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
         std::string line;
         std::vector<glm::vec3> outVec;
         int linenumber = 0;
@@ -168,7 +168,7 @@ extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
                 std::stringstream ss(line);
                 glm::vec3 point;
                 if (!(ss >> point.x) || !(ss >> point.y) || !(ss >> point.z)) {
-                    LERROR(fmt::format(
+                    LERROR(std::format(
                         "Could not read line '{}' in file '{}'. ",
                         "Line is not formatted with 3 values representing a point",
                         linenumber, seedFilePath
@@ -182,7 +182,7 @@ extractSeedPointsFromFiles(std::filesystem::path filePath, size_t nth)
         }
 
         if (outVec.empty()) {
-            LERROR(fmt::format("Found no seed points in: {}", seedFilePath));
+            LERROR(std::format("Found no seed points in: {}", seedFilePath));
             outMap.clear();
             return {};
         }
@@ -325,40 +325,22 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
                         std::vector<std::string>& extraMagVars,
                         FieldlinesState& state)
 {
-    int nGlobalAttributes = kameleon->getNumberOfGlobalAttributes();
     int nVariableAttributes = kameleon->getNumberOfVariableAttributes();
-    int nTotalAttributes = kameleon->getNumberOfVariables();
-// Total?
-    std::vector<std::string> attributeNames;
-    for (int i = 0; i < nTotalAttributes; ++i) {
-        std::string varname = kameleon->getVariableName(i);
-        std::string varunit = kameleon->getNativeUnit(varname);
-        std::string varVizUnit = kameleon->getVisUnit(varname);
-
-        LWARNING(fmt::format("Total? Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'. ", i, varname, varunit, varVizUnit));
-        attributeNames.push_back(varname);
-    }
-// Variable?
     std::vector<std::string> variablesAttributeNames;
     for (int i = 0; i < nVariableAttributes; ++i) {
         std::string varname = kameleon->getVariableAttributeName(i);
         std::string varunit = kameleon->getNativeUnit(varname);
         std::string varVizUnit = kameleon->getVisUnit(varname);
-
-        LWARNING(fmt::format("Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'. ", i, varname, varunit, varVizUnit));
+        LINFO(std::format(
+            "Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'. ",
+            i,
+            varname,
+            varunit,
+            varVizUnit
+        ));
         variablesAttributeNames.push_back(varname);
     }
 
-// Global?
-    std::vector<std::string> gloablAttributeNames;
-    for (int i = 0; i < nGlobalAttributes; ++i) {
-        std::string varname = kameleon->getGlobalAttributeName(i);
-        std::string varunit = kameleon->getNativeUnit(varname);
-        std::string varVizUnit = kameleon->getVisUnit(varname);
-
-        LWARNING(fmt::format("Global Variable '{}' is : '{}'. Variable Unit: '{}'. Viz unit: '{}'. ", i, varname, varunit, varVizUnit));
-        gloablAttributeNames.push_back(varname);
-    }
     prepareStateAndKameleonForExtras(kameleon, extraScalarVars, extraMagVars, state);
 
     const size_t nXtraScalars = extraScalarVars.size();
@@ -387,7 +369,7 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
             state.appendToExtra(i, val);
         }
         // Calculate and store the magnitudes!
-        for (size_t i = 0; i < nXtraMagnitudes; ++i) {
+        for (size_t i = 0; i < nXtraMagnitudes; i++) {
             const size_t idx = i*3;
 
             const float x = interpolator->interpolate(extraMagVars[idx]  , p.x, p.y, p.z);
@@ -436,7 +418,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
 
     // Load the existing SCALAR variables into kameleon.
     // Remove non-existing variables from vector
-    for (int i = 0; i < static_cast<int>(extraScalarVars.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(extraScalarVars.size()); i++) {
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&
@@ -455,7 +437,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
             str = TAsPOverRho;
         }
         if (!success) {
-            LWARNING(fmt::format("Failed to load extra variable: '{}'. Ignoring", str));
+            LWARNING(std::format("Failed to load extra variable '{}'. Ignoring", str));
             extraScalarVars.erase(extraScalarVars.begin() + i);
             --i;
         }
@@ -493,9 +475,9 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
                 name = JParallelB;
             }
             if (!success) {
-                LWARNING(fmt::format(
-                    "Failed to load at least one of the magnitude variables: {}, {}, {}. "
-                    "Removing ability to store corresponding magnitude",
+                LWARNING(std::format(
+                    "Failed to load at least one of the magnitude variables: '{}', '{}', "
+                    "'{}'. Removing ability to store corresponding magnitude",
                     s1, s2, s3
                 ));
                 extraMagVars.erase(
@@ -512,7 +494,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
     else {
         // WRONG NUMBER OF MAGNITUDE VARIABLES.. REMOVE ALL!
         extraMagVars.clear();
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Wrong number of variables provided for storing magnitudes. Expects multiple "
             "of 3 but {} are provided",
             extraMagVars.size()

@@ -60,8 +60,8 @@ bool MissionManager::hasCurrentMission() const {
 
 std::string MissionManager::loadMission(Mission mission) {
     // Changing the values might invalidate the _currentMission iterator
-    std::string currentMission = hasCurrentMission() ? _currentMission->first : "";
-    std::string missionName = mission.name();
+    const std::string currentMission = hasCurrentMission() ? _currentMission->first : "";
+    const std::string missionName = mission.name();
     _missionMap.insert({ missionName, std::move(mission) });
     if (_missionMap.size() == 1) {
         setCurrentMission(missionName);

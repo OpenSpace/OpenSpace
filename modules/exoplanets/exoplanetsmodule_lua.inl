@@ -24,6 +24,7 @@
 
 #include <openspace/scene/scene.h>
 #include <ghoul/misc/csvreader.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <map>
 #include <string>
@@ -53,14 +54,14 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
     const std::string binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
-        LERROR(fmt::format("Failed to open exoplanets data file: '{}'", binPath));
+        LERROR(std::format("Failed to open exoplanets data file '{}'", binPath));
         return ExoplanetSystem();
     }
 
     const std::string lutPath = module->lookUpTablePath();
     std::ifstream lut(absPath(lutPath));
     if (!lut.good()) {
-        LERROR(fmt::format("Failed to open exoplanets look-up table: '{}'", lutPath));
+        LERROR(std::format("Failed to open exoplanets look-up table '{}'", lutPath));
         return ExoplanetSystem();
     }
 
@@ -71,17 +72,17 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
     // 3. read sizeof(exoplanet) bytes into an exoplanet object.
     ExoplanetDataEntry p;
     std::string line;
-    while (std::getline(lut, line)) {
+    while (ghoul::getline(lut, line)) {
         std::istringstream ss(line);
         std::string name;
-        std::getline(ss, name, ',');
+        ghoul::getline(ss, name, ',');
 
         if (name.substr(0, name.length() - 2) != starName) {
             continue;
         }
 
         std::string location_s;
-        std::getline(ss, location_s);
+        ghoul::getline(ss, location_s);
         long location = std::stol(location_s.c_str());
 
         data.seekg(location);
@@ -90,7 +91,7 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
         sanitizeNameString(name);
 
         if (!hasSufficientData(p)) {
-            LWARNING(fmt::format("Insufficient data for exoplanet: '{}'", name));
+            LWARNING(std::format("Insufficient data for exoplanet '{}'", name));
             continue;
         }
 
@@ -115,11 +116,11 @@ void createExoplanetSystem(const std::string& starName,
     std::string sanitizedStarName = starName;
     sanitizeNameString(sanitizedStarName);
 
-    const std::string guiPath = fmt::format("{}{}", ExoplanetsGuiPath, sanitizedStarName);
+    const std::string guiPath = std::format("{}{}", ExoplanetsGuiPath, sanitizedStarName);
 
     SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
     if (existingStarNode) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Adding of exoplanet system '{}' failed. The system has already been added",
             starName
         ));
@@ -128,8 +129,8 @@ void createExoplanetSystem(const std::string& starName,
 
     const glm::vec3 starPosInParsec = system.starData.position;
     if (!isValidPosition(starPosInParsec)) {
-        LERROR(fmt::format(
-            "Insufficient data available for exoplanet system: '{}'. Could not determine "
+        LERROR(std::format(
+            "Insufficient data available for exoplanet system '{}'. Could not determine "
             "star position", starName
         ));
         return;
@@ -560,14 +561,14 @@ std::vector<std::string> hostStarsWithSufficientData() {
     const std::string lutPath = module->lookUpTablePath();
     std::ifstream lookupTableFile(absPath(lutPath));
     if (!lookupTableFile.good()) {
-        LERROR(fmt::format("Failed to open lookup table file '{}'", lutPath));
+        LERROR(std::format("Failed to open lookup table file '{}'", lutPath));
         return {};
     }
 
     const std::string binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
-        LERROR(fmt::format("Failed to open data file '{}'", binPath));
+        LERROR(std::format("Failed to open data file '{}'", binPath));
         return {};
     }
 
@@ -576,7 +577,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     // Read number of lines
     int nExoplanets = 0;
-    while (std::getline(lookupTableFile, line)) {
+    while (ghoul::getline(lookupTableFile, line)) {
         ++nExoplanets;
     }
     lookupTableFile.clear();
@@ -584,17 +585,17 @@ std::vector<std::string> hostStarsWithSufficientData() {
     names.reserve(nExoplanets);
 
     ExoplanetDataEntry p;
-    while (std::getline(lookupTableFile, line)) {
+    while (ghoul::getline(lookupTableFile, line)) {
         std::stringstream ss(line);
         std::string name;
-        std::getline(ss, name, ',');
+        ghoul::getline(ss, name, ',');
         // Remove the last two characters, that specify the planet
         name = name.substr(0, name.size() - 2);
 
         // Don't want to list systems where there is not enough data to visualize.
         // So, test if there is before adding the name to the list.
         std::string location_s;
-        std::getline(ss, location_s);
+        ghoul::getline(ss, location_s);
         long location = std::stol(location_s.c_str());
 
         data.seekg(location);
@@ -634,7 +635,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
             findExoplanetSystemInData(starName);
 
         if (systemData.planetsData.empty()) {
-            LERROR(fmt::format("Exoplanet system '{}' could not be found", starName));
+            LERROR(std::format("Exoplanet system '{}' could not be found", starName));
             return;
         }
 
@@ -685,13 +686,13 @@ listOfExoplanetsDeprecated()
     std::vector<std::string> names = hostStarsWithSufficientData();
 
     std::string output;
-    for (auto it = names.begin(); it != names.end(); ++it) {
-        output += *it + ", ";
+    for (const std::string& name : names) {
+        output += name + ", ";
     }
     output.pop_back();
     output.pop_back();
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "There is data available for the following {} exoplanet systems: {}",
         names.size(), output
     ));
@@ -707,7 +708,8 @@ listOfExoplanetsDeprecated()
  *
  * We recommend downloading the file from the Exoplanet Archive's Composite data table,
  * where multiple sources are combined into one row per planet.
- * https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
+ * https://exoplanetarchive.ipac.caltech.edu
+ * /cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
  *
  * Please remember to include all columns in the file download, as missing data columns
  * may lead to an incomplete visualization.
@@ -723,7 +725,7 @@ listOfExoplanetsDeprecated()
 
     std::ifstream inputDataFile(csvFile);
     if (!inputDataFile.good()) {
-        LERROR(fmt::format("Failed to open input file {}", csvFile));
+        LERROR(std::format("Failed to open input file '{}'", csvFile));
         return;
     }
 
@@ -737,7 +739,7 @@ listOfExoplanetsDeprecated()
 
     // Parse the file line by line to compose system information
     std::string row;
-    while (std::getline(inputDataFile, row)) {
+    while (ghoul::getline(inputDataFile, row)) {
         PlanetData planetData = ExoplanetsDataPreparationTask::parseDataRow(
             row,
             columnNames,
@@ -745,11 +747,11 @@ listOfExoplanetsDeprecated()
             module->teffToBvConversionFilePath()
         );
 
-        LINFO(fmt::format("Reading data for planet: '{}' ", planetData.name));
+        LINFO(std::format("Reading data for planet '{}'", planetData.name));
 
         if (!hasSufficientData(planetData.dataEntry)) {
-            LWARNING(fmt::format(
-                "Insufficient data for exoplanet: '{}'", planetData.name
+            LWARNING(std::format(
+                "Insufficient data for exoplanet '{}'", planetData.name
             ));
             continue;
         }
@@ -784,8 +786,8 @@ listOfExoplanetsDeprecated()
         createExoplanetSystem(hostName, data);
     }
 
-    LINFO(fmt::format(
-        "Read data for {} exoplanet systems from CSV file: '{}'. Please wait until "
+    LINFO(std::format(
+        "Read data for {} exoplanet systems from CSV file: {}. Please wait until "
         "they are all finished initializing. You may have to reload the user interface.",
         hostNameToSystemDataMap.size(), csvFile
     ));

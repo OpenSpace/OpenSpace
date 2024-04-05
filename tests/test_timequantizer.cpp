@@ -35,7 +35,7 @@ using namespace openspace;
 
 namespace {
     int loadLSKKernel() {
-        int kernelID = openspace::SpiceManager::ref().loadKernel(
+        const int kernelID = openspace::SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
         );
         CHECK(kernelID == 1);
@@ -50,8 +50,9 @@ namespace {
         CHECK(t.ISO8601() == expected);
     }
 
-    void singleResolutionTest(globebrowsing::TimeQuantizer& tq, std::string resolution,
-                              std::string expectedType, bool expectFailure)
+    void singleResolutionTest(globebrowsing::TimeQuantizer& tq,
+                              const std::string& resolution,
+                              const std::string& expectedType, bool expectFailure)
     {
         std::string res;
         try {
@@ -69,8 +70,9 @@ namespace {
         }
     }
 
-    void singleStartTimeTest(globebrowsing::TimeQuantizer& tq, std::string startTime,
-                             std::string expectedErrSubstring, bool expectFailure)
+    void singleStartTimeTest(globebrowsing::TimeQuantizer& tq,
+                             const std::string& startTime,
+                             const std::string& expectedErrSubstring, bool expectFailure)
     {
         std::string res;
         try {
@@ -88,12 +90,12 @@ namespace {
         }
     }
 
-    void singleStartTimeTest(std::string startTime, std::string expectedErrSubstring,
-                             bool expectFailure)
+    void singleStartTimeTest(const std::string& startTime,
+                             const std::string& expectedErrSubstring, bool expectFailure)
     {
         std::string res;
         try {
-            globebrowsing::TimeQuantizer tq(startTime, startTime, "1d");
+            const globebrowsing::TimeQuantizer tq(startTime, startTime, "1d");
         }
         catch (const ghoul::RuntimeError & e) {
             res = e.message;

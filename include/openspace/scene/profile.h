@@ -46,7 +46,7 @@ public:
     struct ParsingError : public ghoul::RuntimeError {
         enum class Severity { Info, Warning, Error };
 
-        explicit ParsingError(Severity severity, std::string msg);
+        explicit ParsingError(Severity severity_, std::string msg);
 
         Severity severity;
     };
@@ -137,7 +137,7 @@ public:
     using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
 
     Profile() = default;
-    explicit Profile(const std::string& content);
+    explicit Profile(const std::filesystem::path& path);
     std::string serialize() const;
 
     /**

@@ -1,0 +1,21 @@
+-- Lets first download a file that we can use for our examples. If you have files
+-- locally, you can skip this part.
+-- The song in the example comes from https://incompetech.com/ which is a fantastic
+-- webpage for very high quality royalty-free music
+openspace.downloadFile(
+  "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Arcadia.mp3",
+  openspace.absPath("${TEMPORARY}/Arcadia.mp3"),
+  true
+)
+
+local soundName = "Example_Sound_1"
+
+asset.onInitialize(function()
+  -- Start playing the song immediately
+  openspace.audio.playAudio(openspace.absPath("${TEMPORARY}/Arcadia.mp3"), soundName)
+end)
+
+asset.onDeinitialize(function()
+  -- When we remove this asset, we want to audio to stop playing no matter what
+  openspace.audio.stopAudio(soundName)
+end)

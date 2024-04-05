@@ -1,0 +1,153 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+local models = asset.resource({
+  Name = "Tiangong Models",
+  Type = "HttpSynchronization",
+  Identifier = "tiangong_model",
+  Version = 1
+})
+
+local omm = asset.resource({
+  Name = "Satellite OMM Data (Tiangong)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_omm_data_tiangong",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=48274&FORMAT=kvn",
+  Filename = "Tiangong.txt",
+  SecondsUntilResync = 24 * 60 * 60
+})
+
+
+local TiangongPosition = {
+  Identifier = "TiangongPosition",
+  Parent = transforms.EarthInertial.Identifier,
+  BoundingSphere = 54.5, -- half the width
+  Transform = {
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "Tiangong.txt",
+      Format = "OMM"
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
+    }
+  },
+  Tag = { "earth_satellite" },
+  GUI = {
+    Name = "Tiangong Position",
+    Path = "/Solar System/Planets/Earth/Satellites/Tiangong",
+    Hidden = true
+  }
+}
+
+local TiangongModel = {
+  Identifier = "Tiangong",
+  Parent = TiangongPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Tiangong",
+      XAxis = { 0.01, -0.09, 1.0 },
+      XAxisOrthogonal = true,
+      YAxis = transforms.EarthInertial.Identifier
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = asset.resource(models .. "tiangong.glb"),
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true
+  },
+  Tag = { "earth_satellite" },
+  GUI = {
+    Name = "Tiangong",
+    Path = "/Solar System/Planets/Earth/Satellites/Tiangong"
+  }
+}
+
+local TiangongTrail = {
+  Identifier = "Tiangong_trail",
+  Parent = transforms.EarthInertial.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "Tiangong.txt",
+      Format = "OMM"
+    },
+    RenderBinMode = "PostDeferredTransparent",
+    Color = { 0.9, 0.28, 0.33 },
+    Fade = 1.5,
+    Resolution = 320
+  },
+  Tag = { "earth_satellite" },
+  GUI = {
+    Name = "Tiangong Trail",
+    Path = "/Solar System/Planets/Earth/Satellites/Tiangong"
+  }
+}
+
+-- @TODO (emmbr, 2021-05-27) add to scene when label rendering issues have been fixed
+local TiangongLabel = {
+  Identifier = "TiangongLabel",
+  Parent = TiangongPosition.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Tiangong",
+    FontSize = 70.0,
+    Size = 3.4,
+    MinMaxSize = { 1, 100 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeDistances = { 0.15, 15.0 },
+    FadeWidths = { 1.0, 25.0 }
+  },
+  Tag = { "solarsystem_labels" },
+  GUI = {
+    Name = "Tiangong Label",
+    Path = "/Solar System/Planets/Earth/Satellites"
+  }
+}
+
+
+asset.onInitialize(function()
+  local i = openspace.space.readKeplerFile(omm .. "Tiangong.txt", "OMM")
+  TiangongTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
+
+  openspace.addSceneGraphNode(TiangongPosition)
+  openspace.addSceneGraphNode(TiangongModel)
+  openspace.addSceneGraphNode(TiangongTrail)
+
+  openspace.setPropertyValueSingle("Scene.Tiangong.Rotation.yAxisInvertObject", true)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TiangongTrail)
+  openspace.removeSceneGraphNode(TiangongModel)
+  openspace.removeSceneGraphNode(TiangongPosition)
+end)
+
+asset.export(TiangongTrail)
+asset.export(TiangongModel)
+asset.export(TiangongPosition)
+
+
+
+asset.meta = {
+  Name = "Tiangong",
+  Version = "2.0",
+  Description = [[Model and Trail for Tiangong. Model from Turbosquid, trail from
+    Celestrak.]],
+  Author = "OpenSpace Team",
+  URL = "https://celestrak.com/"
+}

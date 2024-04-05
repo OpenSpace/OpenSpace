@@ -47,88 +47,110 @@ namespace {
         "ColorMethod",
         "Color Method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
-        "examples, temperature or particle density"
+        "examples, temperature or particle density",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
         "Quantity to Color By",
-        "Quantity used to color lines if the 'By Quantity' color method is selected"
+        "Quantity used to color lines if the 'By Quantity' color method is selected",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
         "ColorQuantityMinMax",
         "ColorTable Min Value",
-        "Value to map to the lowest and highest end of the color table"
+        "Value to map to the lowest and highest end of the color table",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to Color Table",
-        "Color Table/Transfer Function to use for 'By Quantity' coloring"
+        "Color Table/Transfer Function to use for 'By Quantity' coloring",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "Color",
         "Uniform Line Color",
-        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'"
+        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
         "Additive Blending",
-        "Activate/deactivate additive blending"
+        "Activate/deactivate additive blending",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
         "Domain Limits Enabled",
-        "Enable/Disable domain limits"
+        "Enable/Disable domain limits",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo DomainXInfo = {
         "LimitsX",
         "X-limits",
-        "Valid range along the X-axis. [Min, Max]"
+        "Valid range along the X-axis. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainYInfo = {
         "LimitsY",
         "Y-limits",
-        "Valid range along the Y-axis. [Min, Max]"
+        "Valid range along the Y-axis. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
         "LimitsZ",
         "Z-limits",
-        "Valid range along the Z-axis. [Min, Max]"
+        "Valid range along the Z-axis. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainRInfo = {
         "LimitsR",
         "Radial limits",
-        "Valid radial range. [Min, Max]"
+        "Valid radial range. [Min, Max]",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
         "Flow Enabled",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
-        "illustrate magnetic flow"
+        "illustrate magnetic flow",
+        // @VISIBILITY(1.33)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow Color",
-        "Color of particles flow direction indication"
+        "Color of particles flow direction indication",
+        // @VISIBILITY(1.67)
+        openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
         "Reversed",
         "Reversed Flow",
-        "Toggle to make the flow move in the opposite direction"
+        "Toggle to make the flow move in the opposite direction",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
         "Particle Size",
-        "Size of the particles"
+        "Size of the particles",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
         "Particle Spacing",
-        "Spacing inbetween particles"
+        "Spacing inbetween particles",
+        // @VISIBILITY(2.33)
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "Speed",
         "Speed",
-        "Speed of the flow"
+        "Speed of the flow",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",
@@ -136,25 +158,33 @@ namespace {
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
-        "topologies like solar wind & closed lines"
+        "topologies like solar wind & closed lines",
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
         "Lower Limit",
-        "Lower and upper limit of the valid masking range"
+        "Lower and upper limit of the valid masking range",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
         "Quantity used for Masking",
-        "Quantity used for masking"
+        "Quantity used for masking",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the fieldlines"
+        "This value specifies the line width of the fieldlines",
+        openspace::properties::Property::Visibility::NoviceUser
     };
-
-
+    constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
+        "TimeJumpToStart",
+        "Jump to Start Of Sequence",
+        "Performs a time jump to the start of the sequence",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
     struct [[codegen::Dictionary(RenderableFieldlinesSequence)]] Parameters {
         enum class [[codegen::map(openspace::RenderableFieldlinesSequence::ColorMethod)]] ColorMethod {
             Uniform = 0,
@@ -331,6 +361,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
+    , _jumpToStartBtn(TimeJumpButtonInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -427,13 +458,28 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         computeSequenceEndTime();
     }
     // Color group
+    _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile;
     if (p.colorTablePaths.has_value()) {
         for (auto path : *p.colorTablePaths) {
-            _colorTablePaths.push_back(path);
+            if (std::filesystem::exists(path)) {
+                _colorTablePaths.emplace_back(path);
+            }
+            else {
+                _colorTablePaths.emplace_back(
+                    FieldlinesSequenceModule::DefaultTransferFunctionFile
+                );
+                LERROR(std::format(
+                    "Color table path {} is not a valid file.",
+                    "Used a default transferfunction instead.",
+                    path
+                ));
+            }
         }
     }
-    else {
-        _colorTablePath = FieldlinesSequenceModule::DefaultTransferFunctionFile;
+    if (!p.colorTablePaths.has_value() || _colorTablePaths.empty()) {
+        _colorTablePaths.emplace_back(
+            FieldlinesSequenceModule::DefaultTransferFunctionFile
+        );
     }
     _colorUniform = p.color.value_or(_colorUniform);
     _colorMethod.addOption(static_cast<int>(ColorMethod::Uniform), "Uniform");
@@ -581,7 +627,9 @@ void RenderableFieldlinesSequence::initializeGL() {
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
-
+    if (_firstLoad && _atLeastOneFileLoaded){
+        firstUpdate();
+    }
     setupProperties();
     definePropertyCallbackFunctions();
 
@@ -597,6 +645,7 @@ void RenderableFieldlinesSequence::initializeGL() {
 void RenderableFieldlinesSequence::setupProperties() {
     addProperty(_colorABlendEnabled);
     addProperty(_lineWidth);
+    addProperty(_jumpToStartBtn);
 
     // Add Property Groups
     addPropertySubOwner(_colorGroup);
@@ -665,6 +714,11 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         }
     });
 
+    // This is to save the changes done in the gui for when you switch between options
+    _selectedColorRange.onChange([this]() {
+        _colorTableRanges[_colorQuantity] = _selectedColorRange;
+    });
+
     _maskingQuantity.onChange([this]() {
         _shouldUpdateMaskingBuffer = true;
         _havePrintedQuantityRange = false;
@@ -679,6 +733,12 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         else
         {
             LWARNING("Invalid path to transferfunction, please enter new path.");
+        }
+    });
+
+    _jumpToStartBtn.onChange([this]() {
+        if (_atLeastOneFileLoaded) {
+            global::timeManager->setTimeNextFrame(Time(_files[0].timestamp));
         }
     });
 }
@@ -930,10 +990,10 @@ void RenderableFieldlinesSequence::firstUpdate() {
             std::string min = std::to_string(minNr);
             float maxNr = *std::max_element(q.begin(), q.end());
             std::string max = std::to_string(maxNr);
-            LWARNING(fmt::format("min :{}", min));
-            LWARNING(fmt::format("max :{}", max));
+            LWARNING(std::format("min :{}", min));
+            LWARNING(std::format("max :{}", max));
             std::string name = extraNamesVec[i];
-            LWARNING(fmt::format("name:{}", name));
+            LWARNING(std::format("name:{}", name));
         }
         _havePrintedQuantityRange = true;
     }

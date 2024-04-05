@@ -64,7 +64,7 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    const static openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the constellations"
@@ -140,7 +140,7 @@ std::string RenderableConstellationsBase::constellationFullName(
         return _namesTranslation.at(identifier);
     }
 
-    throw ghoul::RuntimeError(fmt::format(
+    throw ghoul::RuntimeError(std::format(
         "Identifier '{}' could not be found in list of constellations", identifier
     ));
 }
@@ -161,7 +161,7 @@ void RenderableConstellationsBase::loadConstellationFile() {
 
     std::string line;
     while (file.good()) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
         if (line.empty()) {
             continue;
         }
@@ -171,7 +171,7 @@ void RenderableConstellationsBase::loadConstellationFile() {
         s >> abbreviation;
 
         std::string fullName;
-        std::getline(s, fullName);
+        ghoul::getline(s, fullName);
         ghoul::trimWhitespace(fullName);
         _namesTranslation[abbreviation] = fullName;
     }
@@ -198,7 +198,7 @@ void RenderableConstellationsBase::initialize() {
         if (!entry.identifier.empty()) {
             std::string fullName = constellationFullName(entry.identifier);
             if (!fullName.empty()) {
-                entry.text = fullName;
+                entry.text = std::move(fullName);
             }
         }
     }
@@ -228,7 +228,7 @@ void RenderableConstellationsBase::render(const RenderData& data, RendererTasks&
     );
 
     if (orthoRight == glm::vec3(0.f)) {
-        glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
+        const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
             glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
