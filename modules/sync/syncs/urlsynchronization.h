@@ -122,6 +122,8 @@ private:
 
     /// Determines how long the file is valid before it should be downloaded again
     double _secondsUntilResync = MaxDateAsJ2000;
+
+    std::mutex _mutex;
 };
 
 } // namespace openspace
