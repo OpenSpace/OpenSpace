@@ -330,7 +330,7 @@ namespace {
     // fading, sprite texture, color mapping and whether the colors of overlapping points
     // should be blended additively or not.
     //
-    // The point size depends on a few different things:
+    // The points are rendered as planes whose size depends on a few different things:
     //
     // - At the core, scaling is done based on an exponential value, the 'ScaleExponent'.
     //   A relatively small change to this value will lead to a large change in size.
@@ -343,6 +343,9 @@ namespace {
     //
     // - There is also an option to limit the size of the points based on a given max
     //   size value.
+    //
+    // - And an option to scale the points based on a data value (see 'SizeMapping' in
+    //   'SizeSettings')
     //
     // - To easily change the visual size of the points, the multiplicative 'ScaleFactor'
     //   may be used. A value of 2 makes the points twice as large, visually, compared
