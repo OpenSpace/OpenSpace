@@ -42,7 +42,7 @@ TEST_CASE("CreateSingleColorImage: Create image and check return value",
         glm::dvec3(1.0, 0.0, 0.0)
     );
 
-    CHECK_THAT(path, Catch::Matchers::ContainsSubstring("colorFile.ppm"));
+    CHECK_THAT(path.string(), Catch::Matchers::ContainsSubstring("colorFile.ppm"));
 }
 
 TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
