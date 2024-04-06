@@ -282,7 +282,7 @@ void mainInitFunc(GLFWwindow*) {
     // We save the startup value of the screenshots just in case we want to add a date
     // to them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
-    sgct::Settings::instance().setCapturePath(screenshotPath.string());
+    sgct::Settings::instance().setCapturePath(screenshotPath);
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", std::move(screenshotPath));
 
     LDEBUG("Initializing OpenSpace Engine started");
@@ -296,7 +296,8 @@ void mainInitFunc(GLFWwindow*) {
         int x = 0;
         int y = 0;
         int n = 0;
-        unsigned char* data = stbi_load(path.string().c_str(), &x, &y, &n, 0);
+        const std::string p = path.string();
+        unsigned char* data = stbi_load(p.c_str(), &x, &y, &n, 0);
 
         GLFWimage icon;
         icon.pixels = data;
@@ -1236,7 +1237,7 @@ int main(int argc, char* argv[]) {
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = loadConfigurationFromFile(
-            configurationFilePath.string(),
+            configurationFilePath,
             findSettings(),
             size
         );
@@ -1332,7 +1333,7 @@ int main(int argc, char* argv[]) {
                 nullptr,
                 "OpenSpace",
                 QString::fromStdString(std::format(
-                    "The OpenSpace folder is started must not contain any of \"'\", "
+                    "The OpenSpace folder is started from must not contain any of \"'\", "
                     "\"\"\", [, or ]. Path is: {}. Unexpected errors will occur when "
                     "proceeding to run the software", pwd
                 ))
@@ -1389,7 +1390,7 @@ int main(int argc, char* argv[]) {
 #endif // WIN32
 
         *global::configuration = loadConfigurationFromFile(
-            configurationFilePath.string(),
+            configurationFilePath,
             findSettings(),
             size
         );

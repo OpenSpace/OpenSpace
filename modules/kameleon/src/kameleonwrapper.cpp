@@ -90,7 +90,7 @@ std::array<std::string, 3> gridVariables(ccmc::Model* model) {
     return { x, y, z };
 }
 
-KameleonWrapper::KameleonWrapper(const std::string& filename) {
+KameleonWrapper::KameleonWrapper(const std::filesystem::path& filename) {
     open(filename);
 }
 
@@ -98,7 +98,7 @@ KameleonWrapper::~KameleonWrapper() {
     close();
 }
 
-bool KameleonWrapper::open(const std::string& filename) {
+bool KameleonWrapper::open(const std::filesystem::path& filename) {
     close();
 
     if (!std::filesystem::is_regular_file(filename)) {
@@ -106,7 +106,7 @@ bool KameleonWrapper::open(const std::string& filename) {
     }
 
     _kameleon = new ccmc::Kameleon;
-    long status = _kameleon->open(filename);
+    long status = _kameleon->open(filename.string());
     if (status == ccmc::FileReader::OK) {
         _model = _kameleon->model;
         _interpolator = _model->createNewInterpolator();

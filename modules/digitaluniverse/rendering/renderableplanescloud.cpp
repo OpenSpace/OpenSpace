@@ -494,7 +494,7 @@ void RenderablePlanesCloud::update(const UpdateData&) {
 
 void RenderablePlanesCloud::loadTextures() {
     for (const dataloader::Dataset::Texture& tex : _dataset.textures) {
-        std::filesystem::path fullPath = absPath(_texturesPath.string() + '/' + tex.file);
+        std::filesystem::path fullPath = absPath(_texturesPath / tex.file);
         std::filesystem::path pngPath = fullPath;
         pngPath.replace_extension(".png");
 
@@ -513,7 +513,7 @@ void RenderablePlanesCloud::loadTextures() {
         }
 
         std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
+            ghoul::io::TextureReader::ref().loadTexture(path, 2);
 
         if (t) {
             LINFOC("RenderablePlanesCloud", std::format("Loaded texture '{}'", path));

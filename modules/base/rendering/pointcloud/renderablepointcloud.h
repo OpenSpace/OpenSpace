@@ -42,6 +42,7 @@
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <filesystem>
 #include <functional>
 
 namespace ghoul::opengl {
@@ -223,7 +224,7 @@ protected:
         outlineWeight, aspectRatioScale
     ) _uniformCache;
 
-    std::string _dataFile;
+    std::filesystem::path _dataFile;
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 

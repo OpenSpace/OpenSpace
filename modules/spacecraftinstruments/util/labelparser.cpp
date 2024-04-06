@@ -43,7 +43,8 @@ namespace {
 
 namespace openspace {
 
-LabelParser::LabelParser(std::string fileName, const ghoul::Dictionary& dictionary)
+LabelParser::LabelParser(std::filesystem::path fileName,
+                         const ghoul::Dictionary& dictionary)
     : _fileName(std::move(fileName))
 {
     using ghoul::Dictionary;
@@ -151,19 +152,13 @@ bool LabelParser::create() {
             continue;
         }
 
-        std::string path = e.path().string();
-
-        const size_t position = path.find_last_of('.') + 1;
-        if (position == 0 || position == std::string::npos) {
-            continue;
-        }
-
-        const std::filesystem::path extension = std::filesystem::path(path).extension();
+        const std::filesystem::path path = e.path();
+        const std::filesystem::path extension = path.extension();
         if (extension != ".lbl" && extension != ".LBL") {
             continue;
         }
 
-        std::ifstream file(path);
+        std::ifstream file = std::ifstream(path);
 
         if (!file.good()) {
             LERROR(std::format("Failed to open label file '{}'", path));
@@ -264,10 +259,9 @@ bool LabelParser::create() {
 
                 count = 0;
 
-                using namespace std::literals;
-                const std::string p = path.substr(0, path.size() - ("lbl"s).size());
                 for (const std::string& ext : extensions) {
-                    const std::string imagePath = p + ext;
+                    std::filesystem::path imagePath = path;
+                    imagePath.replace_extension(ext);
                     if (std::filesystem::is_regular_file(imagePath)) {
                         std::vector<std::string> spiceInstrument;
                         spiceInstrument.push_back(_instrumentID);

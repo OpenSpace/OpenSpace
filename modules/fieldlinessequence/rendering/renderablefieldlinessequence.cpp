@@ -232,7 +232,7 @@ namespace {
 
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters
-        std::optional<std::vector<std::string>> colorTablePaths;
+        std::optional<std::vector<std::filesystem::path>> colorTablePaths;
 
         // [[codegen::verbatim(ColorMethodInfo.description)]]
         std::optional<std::string> colorMethod;
@@ -420,9 +420,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     // Ensure that there are available and valid source files left
     if (_sourceFiles.empty()) {
-        LERROR(std::format(
-            "'{}' contains no {} files", sourcePath.string(), fileTypeString
-        ));
+        LERROR(std::format("'{}' contains no {} files", sourcePath, fileTypeString));
     }
     _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
@@ -438,7 +436,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
     if (p.colorTablePaths.has_value()) {
-        _colorTablePaths = p.colorTablePaths.value();
+        _colorTablePaths = *p.colorTablePaths;
     }
     else {
         // Set a default color table, just in case the (optional) user defined paths are
@@ -499,9 +497,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 }
 
 void RenderableFieldlinesSequence::initialize() {
-    _transferFunction = std::make_unique<TransferFunction>(
-        absPath(_colorTablePaths[0]).string()
-    );
+    _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
@@ -680,7 +676,7 @@ void RenderableFieldlinesSequence::setupProperties() {
         // Each quantity should have its own color table and color table range
         // no more, no less
         _colorTablePaths.resize(nExtraQuantities, _colorTablePaths.back());
-        _colorTablePath = _colorTablePaths[0];
+        _colorTablePath = _colorTablePaths[0].string();
         _colorTableRanges.resize(nExtraQuantities, _colorTableRanges.back());
         _maskingRanges.resize(nExtraQuantities, _maskingRanges.back());
     }
@@ -704,11 +700,11 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         _colorQuantity.onChange([this]() {
             _shouldUpdateColorBuffer = true;
             _colorQuantityMinMax = _colorTableRanges[_colorQuantity];
-            _colorTablePath = _colorTablePaths[_colorQuantity];
+            _colorTablePath = _colorTablePaths[_colorQuantity].string();
         });
 
         _colorTablePath.onChange([this]() {
-            _transferFunction->setPath(_colorTablePath);
+            _transferFunction->setPath(_colorTablePath.value());
         });
 
         _colorQuantityMinMax.onChange([this]() {

@@ -37,21 +37,22 @@ public:
     virtual void clearGroup() override;
 
     std::set<std::string> fieldlineValue() const;
-    void setFieldlineInfo(std::string fieldlineIndexFile, std::string kameleonPath);
+    void setFieldlineInfo(std::filesystem::path fieldlineIndexFile,
+        std::filesystem::path kameleonPath);
     void changeCdf(std::string path);
 
 protected:
     void registerProperties();
 
-    void readFieldlinePaths(const std::string& indexFile);
+    void readFieldlinePaths(const std::filesystem::path& indexFile);
     void updateFieldlineSeeds();
     void clearFieldlines();
 
     properties::FloatProperty _resolution;
     properties::SelectionProperty _fieldlines;
 
-    std::string _fieldlineIndexFile;
-    std::string _kameleonPath;
+    std::filesystem::path _fieldlineIndexFile;
+    std::filesystem::path _kameleonPath;
     std::map<int, std::tuple<std::string, std::string, bool>> _fieldlineState;
 };
 

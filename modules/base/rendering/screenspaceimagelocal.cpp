@@ -120,10 +120,7 @@ bool ScreenSpaceImageLocal::deinitializeGL() {
 void ScreenSpaceImageLocal::update() {
     if (_textureIsDirty && !_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_texturePath).string(),
-                2
-            );
+            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath), 2);
 
         if (texture) {
             // Images don't need to start on 4-byte boundaries, for example if the

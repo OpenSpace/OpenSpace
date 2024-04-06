@@ -597,7 +597,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     if (p.file.has_value()) {
         _hasDataFile = true;
-        _dataFile = absPath(*p.file).string();
+        _dataFile = absPath(*p.file);
     }
 
     if (p.dataMapping.has_value()) {
@@ -637,7 +637,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         if (t.folder.has_value()) {
             _textureMode = TextureInputMode::Multi;
             _hasSpriteTexture = true;
-            _texturesDirectory = absPath(*t.folder).string();
+            _texturesDirectory = absPath(*t.folder);
 
             if (t.file.has_value()) {
                 LWARNING(std::format(
@@ -653,11 +653,14 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             _textureMode = TextureInputMode::Single;
             _hasSpriteTexture = true;
             _texture.spriteTexturePath = absPath(*t.file).string();
-            _texture.spriteTexturePath.onChange([this]() { _spriteTextureIsDirty = true; });
+            _texture.spriteTexturePath.onChange(
+                [this]() { _spriteTextureIsDirty = true; }
+            );
         }
 
         _texture.enabled = t.enabled.value_or(_texture.enabled);
-        _texture.allowCompression = t.allowCompression.value_or(_texture.allowCompression);
+        _texture.allowCompression =
+            t.allowCompression.value_or(_texture.allowCompression);
         _texture.useAlphaChannel = t.useAlphaChannel.value_or(_texture.useAlphaChannel);
     }
 
@@ -912,7 +915,7 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
     }
 
     std::unique_ptr<ghoul::opengl::Texture> t =
-        ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
+        ghoul::io::TextureReader::ref().loadTexture(path, 2);
 
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 

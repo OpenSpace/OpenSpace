@@ -29,6 +29,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <array>
+#include <filesystem>
 #include <map>
 #include <mutex>
 #include <queue>
@@ -150,7 +151,7 @@ public:
      * \return the total number of (distinct) stars read
      */
     int readFromFile(std::ifstream& inFileStream, bool readData,
-        const std::string& folderPath = std::string());
+        const std::filesystem::path& folderPath = std::filesystem::path());
 
     /**
      * Write specified part of Octree to multiple files, including all data.
@@ -159,7 +160,8 @@ public:
      * \param branchIndex Defines which branch to write. Clears specified branch after
      *        writing is done. Calls `writeNodeToMultipleFiles()` for the specified branch
      */
-    void writeToMultipleFiles(const std::string& outFolderPath, size_t branchIndex);
+    void writeToMultipleFiles(const std::filesystem::path& outFolderPath,
+        size_t branchIndex);
 
     /**
      * Getters.
@@ -410,7 +412,7 @@ private:
     long long _cpuRamBudget = 0;
     long long _maxCpuRamBudget = 0;
     unsigned long long _parentNodeOfCamera = 8;
-    std::string _streamFolderPath;
+    std::filesystem::path _streamFolderPath;
     size_t _traversedBranchesInRenderCall = 0;
 
 }; // class OctreeManager

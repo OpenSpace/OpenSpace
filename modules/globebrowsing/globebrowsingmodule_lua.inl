@@ -701,7 +701,7 @@ geoPositionForCameraDeprecated(bool useEyePosition = false)
 
     std::string identifier = makeIdentifier(name.value_or(path.stem().string()));
     d.setValue("Identifier", identifier);
-    d.setValue("File", path.string());
+    d.setValue("File", path);
     if (name.has_value()) {
         d.setValue("Name", *name);
     }

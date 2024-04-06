@@ -68,10 +68,10 @@ public:
         ghoul::opengl::ProgramObject& program) override;
     bool isCameraInside(const RenderData& data, glm::vec3& localPosition) override;
 
-    std::string boundsVertexShaderPath() const override;
-    std::string boundsFragmentShaderPath() const override;
-    std::string raycasterPath() const override;
-    std::string helperPath() const override;
+    std::filesystem::path boundsVertexShaderPath() const override;
+    std::filesystem::path boundsFragmentShaderPath() const override;
+    std::filesystem::path raycasterPath() const override;
+    std::filesystem::path helperPath() const override;
 
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);

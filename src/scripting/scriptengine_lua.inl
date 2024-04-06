@@ -109,23 +109,24 @@ namespace {
     return e;
 }
 
-std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorted,
+std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
+                                              bool recursive, bool sorted,
                                  std::function<bool(const std::filesystem::path&)> filter)
 {
     namespace fs = std::filesystem;
-    std::vector<std::string> result;
+    std::vector<std::filesystem::path> result;
     if (fs::is_directory(path)) {
         if (recursive) {
             for (fs::directory_entry e : fs::recursive_directory_iterator(path)) {
                 if (filter(e)) {
-                    result.push_back(e.path().string());
+                    result.push_back(e.path());
                 }
             }
         }
         else {
             for (fs::directory_entry e : fs::directory_iterator(path)) {
                 if (filter(e)) {
-                    result.push_back(e.path().string());
+                    result.push_back(e.path());
                 }
             }
         }
@@ -143,9 +144,10 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
  * default value for this parameter is "false". The third argument determines whether the
  * table that is returned is sorted. The default value for this parameter is "false".
  */
-[[codegen::luawrap]] std::vector<std::string> walkDirectory(std::string path,
-                                                            bool recursive = false,
-                                                            bool sorted = false)
+[[codegen::luawrap]] std::vector<std::filesystem::path> walkDirectory(
+                                                               std::filesystem::path path,
+                                                                   bool recursive = false,
+                                                                      bool sorted = false)
 {
     namespace fs = std::filesystem;
     return walkCommon(
@@ -163,9 +165,10 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
  * default value for this parameter is "false". The third argument determines whether the
  * table that is returned is sorted. The default value for this parameter is "false".
  */
-[[codegen::luawrap]] std::vector<std::string> walkDirectoryFiles(std::string path,
-                                                                 bool recursive = false,
-                                                                 bool sorted = false)
+[[codegen::luawrap]] std::vector<std::filesystem::path> walkDirectoryFiles(
+                                                               std::filesystem::path path,
+                                                                   bool recursive = false,
+                                                                      bool sorted = false)
 {
     namespace fs = std::filesystem;
     return walkCommon(
@@ -183,9 +186,10 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
  * default value for this parameter is "false". The third argument determines whether the
  * table that is returned is sorted. The default value for this parameter is "false".
  */
-[[codegen::luawrap]] std::vector<std::string> walkDirectoryFolders(std::string path,
+[[codegen::luawrap]] std::vector<std::filesystem::path> walkDirectoryFolders(
+                                                               std::filesystem::path path,
                                                                    bool recursive = false,
-                                                                   bool sorted = false)
+                                                                      bool sorted = false)
 {
     namespace fs = std::filesystem;
     return walkCommon(
