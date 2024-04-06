@@ -994,34 +994,6 @@ void setSgctDelegateFunctions() {
     };
 }
 
-void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
-                                 std::string& sgctFunctionName)
-{
-    for (int i = 1; i < argc; i++) {
-        const std::string arg = argv[i];
-        if (arg == "-c" || arg == "--config") {
-            std::string p = ((i + 1) < argc) ? argv[i + 1] : "";
-            p.erase(std::remove_if(p.begin(), p.end(), ::isspace), p.end());
-
-            const std::string sgctAssignment = "SGCTConfig=";
-            const size_t findSgct = p.find(sgctAssignment);
-            const size_t findBracket = p.find('}');
-            if (findSgct != std::string::npos) {
-                if (findBracket != std::string::npos) {
-                    sgctFunctionName = arg.substr(
-                        findSgct + sgctAssignment.length(),
-                        findBracket - findSgct
-                    );
-                }
-                hasSGCT = true;
-            }
-            if (p.find("Profile=") != std::string::npos) {
-                hasProfile = true;
-            }
-        }
-    }
-}
-
 std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,
                                         bool haveCliSGCTConfig)
 {

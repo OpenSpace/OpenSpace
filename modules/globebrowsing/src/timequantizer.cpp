@@ -333,9 +333,9 @@ void DateTime::setSecond(int s) {
 
 TimeQuantizer::TimeQuantizer(std::string start, std::string end,
                              const std::string& resolution)
-    : _start(start)
+    : _resolution(parseTimeResolutionStr(resolution))
+    , _start(start)
     , _timerange(std::move(start), std::move(end))
-    , _resolution(parseTimeResolutionStr(resolution))
 {
     verifyStartTimeRestrictions();
 }

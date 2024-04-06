@@ -548,13 +548,13 @@ RenderablePointCloud::Texture::Texture()
 
 RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Fading", "Fading", "" })
-    , enabled(EnableDistanceFadeInfo, false)
     , fadeInDistances(
         FadeInDistancesInfo,
         glm::vec2(0.f),
         glm::vec2(0.f),
         glm::vec2(100.f)
     )
+    , enabled(EnableDistanceFadeInfo, false)
     , invert(InvertFadeInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -581,13 +581,13 @@ RenderablePointCloud::Fading::Fading(const ghoul::Dictionary& dictionary)
 
 RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _drawElements(DrawElementsInfo, true)
+    , _sizeSettings(dictionary)
+    , _colorSettings(dictionary)
+    , _fading(dictionary)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
+    , _drawElements(DrawElementsInfo, true)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _nDataPoints(NumShownDataPointsInfo, 0)
-    , _fading(dictionary)
-    , _colorSettings(dictionary)
-    , _sizeSettings(dictionary)
 {
     ZoneScoped;
 
@@ -1015,7 +1015,7 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
 }
 
 void RenderablePointCloud::generateArrayTextures() {
-    using Entry = std::pair<TextureFormat, std::vector<size_t>>;
+    using Entry = std::pair<const TextureFormat, std::vector<size_t>>;
     unsigned int arrayIndex = 0;
     for (const Entry& e : _textureMapByFormat) {
         glm::uvec2 res = e.first.resolution;
@@ -1571,8 +1571,8 @@ gl::GLenum RenderablePointCloud::internalGlFormat(bool useAlpha) const {
 }
 
 ghoul::opengl::Texture::Format RenderablePointCloud::glFormat(bool useAlpha) const {
-    using Texture = ghoul::opengl::Texture;
-    return useAlpha ? Texture::Format::RGBA : Texture::Format::RGB;
+    using Tex = ghoul::opengl::Texture;
+    return useAlpha ? Tex::Format::RGBA : Tex::Format::RGB;
 }
 
 bool operator==(const TextureFormat& l, const TextureFormat& r) {

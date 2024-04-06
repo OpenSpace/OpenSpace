@@ -553,13 +553,7 @@ glm::dvec3 directionToLightSource(const glm::dvec3& pos, SceneGraphNode* lightSo
     SceneGraphNode* node =
         lightSource ? lightSource : sceneGraph()->sceneGraphNode("Sun");
 
-    if (lightSource) {
-        return lightSource->worldPosition() - pos;
-    }
-    else {
-        const glm::dvec3 dir = length(pos) > 0.0 ? glm::normalize(-pos) : glm::dvec3(0.0);
-        return dir;
-    }
+    return glm::normalize(node->worldPosition() - pos);
 }
 
 } // namespace
