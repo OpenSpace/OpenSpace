@@ -101,7 +101,7 @@ void FileSystemAccess::parseChildFile(std::string filename, bool& hasDirHeaderBe
 
     if (!hasDirHeaderBeenAdded) {
         for (const std::string& d : dirNames) {
-            if (d.length() > 0) {
+            if (!d.empty()) {
                 output.push_back(cbox + d);
             }
         }

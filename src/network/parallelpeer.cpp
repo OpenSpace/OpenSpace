@@ -367,7 +367,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
 
             for (const datamessagestructures::TimeKeyframe& kfMessage : keyframesMessage)
             {
-                TimeKeyframeData timeKeyframeData;
+                TimeManager::TimeKeyframeData timeKeyframeData;
                 timeKeyframeData.delta = kfMessage._dt;
                 timeKeyframeData.pause = kfMessage._paused;
                 timeKeyframeData.time = Time(kfMessage._time);
@@ -732,8 +732,9 @@ void ParallelPeer::sendCameraKeyframe() {
 
 void ParallelPeer::sendTimeTimeline() {
     // Create a keyframe with current position and orientation of camera
-    const Timeline<TimeKeyframeData>& timeline = global::timeManager->timeline();
-    std::deque<Keyframe<TimeKeyframeData>> keyframes = timeline.keyframes();
+    const Timeline<TimeManager::TimeKeyframeData>& timeline =
+        global::timeManager->timeline();
+    std::deque<Keyframe<TimeManager::TimeKeyframeData>> keyframes = timeline.keyframes();
 
     datamessagestructures::TimeTimeline timelineMessage;
     timelineMessage._clear = true;
@@ -741,7 +742,7 @@ void ParallelPeer::sendTimeTimeline() {
 
     // Case 1: Copy all keyframes from the native timeline
     for (size_t i = 0; i < timeline.nKeyframes(); i++) {
-        const Keyframe<TimeKeyframeData>& kf = keyframes.at(i);
+        const Keyframe<TimeManager::TimeKeyframeData>& kf = keyframes.at(i);
 
         datamessagestructures::TimeKeyframe kfMessage;
         kfMessage._time = kf.data.time.j2000Seconds();

@@ -992,20 +992,20 @@ std::filesystem::path AssetManager::generateAssetPath(
     // 2) Relative to the global asset root (*)
 
     const PathType pathType = classifyPath(assetPath);
-    std::string prefix;
+    std::filesystem::path prefix;
     if (pathType == PathType::RelativeToAsset) {
-        prefix = baseDirectory.string() + '/';
+        prefix = baseDirectory / "";
     }
     else if (pathType == PathType::RelativeToAssetRoot) {
-        prefix = _assetRootDirectory.string() + '/';
+        prefix = _assetRootDirectory / "";
     }
     // We treat the Absolute and the Tokenized paths the same here since they will
     // behave the same when passed into the `absPath` function
 
     // Construct the full path including the .asset extension
-    std::string fullAssetPath = prefix + assetPath;
-    if (std::filesystem::path(assetPath).extension() != ".asset") {
-        fullAssetPath += ".asset";
+    std::filesystem::path fullAssetPath = std::format("{}{}", prefix, assetPath);
+    if (fullAssetPath.extension() != ".asset") {
+        fullAssetPath.replace_extension(".asset");
     }
 
     // We don't check whether the file exists here as the error will be more

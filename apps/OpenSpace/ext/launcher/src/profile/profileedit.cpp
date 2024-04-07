@@ -96,10 +96,10 @@ namespace {
 } // namespace
 
 ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
-                         std::string assetBasePath,
-                         std::string userAssetBasePath,
-                         std::string builtInProfileBasePath,
-                         std::string profileBasePath,
+                         std::filesystem::path assetBasePath,
+                         std::filesystem::path userAssetBasePath,
+                         std::filesystem::path builtInProfileBasePath,
+                         std::filesystem::path profileBasePath,
                          QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
@@ -392,8 +392,10 @@ void ProfileEdit::duplicateProfile() {
     while (true) {
         version++;
 
-        const std::string candidate = profile + Separator + std::to_string(version);
-        const std::string candidatePath = _profileBasePath + candidate + ".profile";
+        const std::string candidate = std::format("{}{}{}", profile, Separator, version);
+        const std::string candidatePath = std::format(
+            "{}{}.profile", _profileBasePath, candidate
+        );
 
         if (!std::filesystem::exists(candidatePath)) {
             _profileEdit->setText(QString::fromStdString(candidate));

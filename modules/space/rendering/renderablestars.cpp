@@ -602,7 +602,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
 
     auto markTextureAsDirty = [this]() {_pointSpreadFunctionTextureIsDirty = true; };
-    _halo.texturePath = absPath(p.halo.texture.string()).string();
+    _halo.texturePath = absPath(p.halo.texture).string();
     _halo.texturePath.onChange(markTextureAsDirty);
     _halo.file = std::make_unique<ghoul::filesystem::File>(_halo.texturePath.value());
     _halo.file->setCallback(markTextureAsDirty);
@@ -614,7 +614,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_halo.container);
 
     if (p.glare.has_value()) {
-        _glare.texturePath = absPath(p.glare->texture.string()).string();
+        _glare.texturePath = absPath(p.glare->texture).string();
         _glare.file =
             std::make_unique<ghoul::filesystem::File>(_glare.texturePath.value());
         _glare.file->setCallback(markTextureAsDirty);
@@ -732,10 +732,7 @@ void RenderableStars::loadPSFTexture() {
             return;
         }
 
-        component.texture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(path).string(),
-            2
-        );
+        component.texture = ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
 
         if (!component.texture) {
             return;
@@ -1028,7 +1025,7 @@ void RenderableStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                _colorTexturePath,
+                absPath(_colorTexturePath),
                 1
             );
             if (_colorTexture) {
@@ -1049,7 +1046,7 @@ void RenderableStars::update(const UpdateData&) {
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
             _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-                _otherDataColorMapPath,
+                absPath(_otherDataColorMapPath),
                 1
             );
             if (_otherDataColorMapTexture) {

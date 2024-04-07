@@ -715,11 +715,11 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
 
     // If there is an initial config helper file, load it into the state
     if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
-        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper).string());
+        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
     }
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(result.state, configurationFile.string());
+    ghoul::lua::runScriptFile(result.state, configurationFile);
 
     parseLuaState(result);
 

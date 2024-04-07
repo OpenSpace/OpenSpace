@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__
 
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
@@ -43,7 +44,7 @@ namespace openspace::kameleonvolume {
 
 class KameleonVolumeReader {
 public:
-    KameleonVolumeReader(std::string path);
+    KameleonVolumeReader(std::filesystem::path path);
     ~KameleonVolumeReader();
 
     std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
@@ -75,7 +76,7 @@ private:
     static void addAttributeToDictionary(ghoul::Dictionary& dictionary,
         const std::string& key, ccmc::Attribute& attr);
 
-    std::string _path;
+    std::filesystem::path _path;
     std::unique_ptr<ccmc::Kameleon> _kameleon;
     std::unique_ptr<ccmc::Interpolator> _interpolator;
 };

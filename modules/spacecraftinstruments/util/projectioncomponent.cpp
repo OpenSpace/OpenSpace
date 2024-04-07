@@ -96,7 +96,9 @@ namespace {
         // This value specifies one or more directories from which images are being used
         // for image projections. If the sequence type is set to 'playbook', this value is
         // ignored
-        std::optional<std::variant<std::string, std::vector<std::string>>> sequence;
+        std::optional<
+           std::variant<std::filesystem::path, std::vector<std::filesystem::path>>
+        > sequence [[codegen::directory()]];
 
         struct Instrument {
             // The instrument that is used to perform the projections
@@ -123,7 +125,7 @@ namespace {
         // uses both methods
         std::optional<Type> sequenceType;
 
-        std::optional<std::string> eventFile;
+        std::optional<std::filesystem::path> eventFile;
 
         // The observer that is doing the projection. This has to be a valid SPICE name
         // or SPICE integer
@@ -208,29 +210,27 @@ void ProjectionComponent::initialize(const std::string& identifier,
     _shadowing.isEnabled = p.shadowMap.value_or(_shadowing.isEnabled);
     _projectionTextureAspectRatio = p.aspectRatio.value_or(_projectionTextureAspectRatio);
 
-
     if (!p.sequence.has_value()) {
         // we are done here, the rest only applies if we do have a sequence
         return;
     }
 
-    std::variant<std::string, std::vector<std::string>> sequence = *p.sequence;
+    //std::variant<std::filesystem::path, std::vector<std::filesystem::path>> s = *p.sequence;
 
-    std::vector<std::string> sequenceSources;
-    if (std::holds_alternative<std::string>(sequence)) {
-        sequenceSources.push_back(absPath(std::get<std::string>(sequence)).string());
+    std::vector<std::filesystem::path> sequenceSources;
+    if (std::holds_alternative<std::filesystem::path>(*p.sequence)) {
+        sequenceSources.push_back(absPath(std::get<std::filesystem::path>(*p.sequence)));
     }
     else {
         ghoul_assert(
-            std::holds_alternative<std::vector<std::string>>(sequence),
+            std::holds_alternative<std::vector<std::filesystem::path>>(*p.sequence),
             "Something is wrong with the generated documentation"
         );
-        sequenceSources = std::get<std::vector<std::string>>(sequence);
-        for (std::string& s : sequenceSources) {
-            s = absPath(s).string();
+        sequenceSources = std::get<std::vector<std::filesystem::path>>(*p.sequence);
+        for (std::filesystem::path& s : sequenceSources) {
+            s = absPath(s);
         }
     }
-
 
     if (!p.sequenceType.has_value()) {
         throw ghoul::RuntimeError("Missing SequenceType");
@@ -246,7 +246,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
     }
 
     std::vector<std::unique_ptr<SequenceParser>> parsers;
-    for (std::string& source : sequenceSources) {
+    for (std::filesystem::path& source : sequenceSources) {
         switch (*p.sequenceType) {
             case Parameters::Type::Playbook:
                 parsers.push_back(
@@ -274,7 +274,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
                     parsers.push_back(
                         std::make_unique<HongKangParser>(
                             identifier,
-                            absPath(*p.eventFile).string(),
+                            *p.eventFile,
                             _projectorID,
                             translations,
                             _potentialTargets
@@ -312,7 +312,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
                 parsers.push_back(
                     std::make_unique<InstrumentTimesParser>(
                         identifier,
-                        absPath(*p.timesSequence).string(),
+                        *p.timesSequence,
                         timesTranslationDictionary
                     )
                 );
@@ -360,7 +360,7 @@ bool ProjectionComponent::initializeGL() {
     using ghoul::opengl::Texture;
 
     std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-        absPath(placeholderFile).string(),
+        absPath(placeholderFile),
         2
     );
     if (texture) {
@@ -877,7 +877,7 @@ void ProjectionComponent::generateMipMap() {
 }
 
 std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
-                                                           const std::string& texturePath,
+                                                 const std::filesystem::path& texturePath,
                                                            bool isPlaceholder)
 {
     using ghoul::opengl::Texture;
@@ -887,7 +887,7 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
     }
 
     std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
-        absPath(texturePath).string(),
+        absPath(texturePath),
         2
     );
     if (texture) {

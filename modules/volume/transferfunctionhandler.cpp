@@ -78,7 +78,7 @@ TransferFunctionHandler::TransferFunctionHandler(properties::StringProperty prop
     , _transferFunctionProperty(TransferFunctionInfo)
 {
     _transferFunction = std::make_shared<openspace::TransferFunction>(
-        _transferFunctionPath
+        _transferFunctionPath.value()
     );
 }
 

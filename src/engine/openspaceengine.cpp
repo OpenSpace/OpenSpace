@@ -267,9 +267,9 @@ void OpenSpaceEngine::initialize() {
     _printEvents = global::configuration->isPrintingEvents;
     _visibility = static_cast<int>(global::configuration->propertyVisibility);
 
-    std::string cacheFolder = absPath("${CACHE}").string();
+    std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {
-        cacheFolder = cacheFolder + "-" + global::configuration->profile;
+        cacheFolder = std::format("{}-{}", cacheFolder, global::configuration->profile);
 
         LINFO(std::format("Old cache: {}", absPath("${CACHE}")));
         LINFO(std::format("New cache: {}", cacheFolder));
@@ -346,8 +346,8 @@ void OpenSpaceEngine::initialize() {
             // Move all of the existing logs one position up
 
             const std::filesystem::path file = absPath(global::configuration->scriptLog);
-            const std::string fname = file.stem().string();
-            const std::string ext = file.extension().string();
+            const std::filesystem::path fname = file.stem();
+            const std::filesystem::path ext = file.extension();
 
             std::filesystem::path newCandidate = file;
             newCandidate.replace_filename(std::format("{}-{}{}", fname, rot, ext));
@@ -911,7 +911,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
         if (std::filesystem::is_regular_file(s)) {
             try {
                 LINFO(std::format("Running global customization script: {}", s));
-                ghoul::lua::runScriptFile(state, s.string());
+                ghoul::lua::runScriptFile(state, s);
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
@@ -1374,7 +1374,8 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     const ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
     const std::filesystem::path path = absPath("${SCRIPTS}/drag_drop_handler.lua");
-    int status = luaL_loadfile(s, path.string().c_str());
+    const std::string p = path.string();
+    int status = luaL_loadfile(s, p.c_str());
     if (status != LUA_OK) {
         const std::string error = lua_tostring(s, -1);
         LERROR(error);
@@ -1384,7 +1385,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     ghoul::lua::push(s, file);
     lua_setglobal(s, "filename");
 
-    std::string basename = file.filename().string();
+    std::filesystem::path basename = file.filename();
     ghoul::lua::push(s, std::move(basename));
     lua_setglobal(s, "basename");
 

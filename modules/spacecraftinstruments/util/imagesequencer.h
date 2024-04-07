@@ -181,7 +181,7 @@ private:
     std::vector<double> _captureProgression;
 
     // default capture image
-    std::string _defaultCaptureImage;
+    std::filesystem::path _defaultCaptureImage;
 
     std::map<std::string, Image> _latestImages;
 

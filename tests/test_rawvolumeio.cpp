@@ -46,11 +46,11 @@ TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
     const std::filesystem::path volumePath = absPath("${TESTDIR}/tinyvolume.rawvolume");
 
     // Write the 1x1x1 volume to disk
-    RawVolumeWriter<float> writer(volumePath.string());
+    RawVolumeWriter<float> writer(volumePath);
     writer.write(vol);
 
     // Read the 1x1x1 volume and make sure the value is the same.
-    RawVolumeReader<float> reader(volumePath.string(), dims);
+    RawVolumeReader<float> reader(volumePath, dims);
     std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
     CHECK(storedVolume->get({ 0, 0, 0 }) == value);
 }
@@ -72,11 +72,11 @@ TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
     const std::filesystem::path volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
 
     // Write the 2x4x8 volume to disk
-    RawVolumeWriter<float> writer(volumePath.string());
+    RawVolumeWriter<float> writer(volumePath);
     writer.write(vol);
 
     // Read the 2x4x8 volume and make sure the value is the same.
-    RawVolumeReader<float> reader(volumePath.string(), dims);
+    RawVolumeReader<float> reader(volumePath, dims);
     const std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
     vol.forEachVoxel([&value](const glm::uvec3& x, float v) {
         CHECK(v == value(x));

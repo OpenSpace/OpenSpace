@@ -90,6 +90,15 @@ namespace {
         "than using the mouse interaction",
         openspace::properties::Property::Visibility::Developer
     };
+
+    constexpr openspace::properties::Property::PropertyInfo JumpToFadeDurationInfo = {
+        "JumpToFadeDuration",
+        "JumpTo Fade Duration",
+        "The number of seconds the fading of the rendering should take per default when "
+        "navigating through a 'jump' transition. This is when the rendering is first "
+        "faded to black, then the camera is moved, and then the rendering fades in again",
+        openspace::properties::Property::Visibility::User
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -100,6 +109,7 @@ NavigationHandler::NavigationHandler()
     , _disableMouseInputs(DisableMouseInputInfo, false)
     , _disableJoystickInputs(DisableJoystickInputInfo, false)
     , _useKeyFrameInteraction(FrameInfo, false)
+    , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.f, 10.f)
 {
     addPropertySubOwner(_orbitalNavigator);
     addPropertySubOwner(_pathNavigator);
@@ -108,6 +118,7 @@ NavigationHandler::NavigationHandler()
     addProperty(_disableMouseInputs);
     addProperty(_disableJoystickInputs);
     addProperty(_useKeyFrameInteraction);
+    addProperty(_jumpToFadeDuration);
 }
 
 NavigationHandler::~NavigationHandler() {}
@@ -170,12 +181,40 @@ bool NavigationHandler::isKeyFrameInteractionEnabled() const {
     return _useKeyFrameInteraction;
 }
 
+float NavigationHandler::jumpToFadeDuration() const {
+    return _jumpToFadeDuration;
+}
+
 float NavigationHandler::interpolationTime() const {
     return _orbitalNavigator.retargetInterpolationTime();
 }
 
 void NavigationHandler::setInterpolationTime(float durationInSeconds) {
     _orbitalNavigator.setRetargetInterpolationTime(durationInSeconds);
+}
+
+void NavigationHandler::triggerFadeToTransition(const std::string& transitionScript,
+                                                std::optional<float> fadeDuration)
+{
+    const float duration = fadeDuration.value_or(_jumpToFadeDuration);
+
+    const std::string onArrivalScript = std::format(
+        "{} "
+        "openspace.setPropertyValueSingle("
+        "'RenderEngine.BlackoutFactor', 1, {}, 'QuadraticEaseIn'"
+        ")", transitionScript, duration
+    );
+    const std::string script = std::format(
+        "openspace.setPropertyValueSingle("
+        "'RenderEngine.BlackoutFactor', 0, {}, 'QuadraticEaseOut', [[{}]]"
+        ")", duration, onArrivalScript
+    );
+    // No syncing, as this was called from a script that should have been synced already
+    global::scriptEngine->queueScript(
+        std::move(script),
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
+    );
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {
@@ -590,7 +629,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
     }
 
     if (!std::filesystem::is_regular_file(absolutePath)) {
-        throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
+        throw ghoul::FileNotFoundError(absolutePath, "NavigationState");
     }
 
     std::ifstream f = std::ifstream(absolutePath);

@@ -612,8 +612,10 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
     }
 }
 
-TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntries)
+TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntries,
+                             std::optional<int> nEntries)
     : documentations(std::move(documentationEntries))
+    , count(nEntries)
 {}
 
 TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
@@ -625,13 +627,24 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
         TestResult res = testSpecification(doc, d);
 
         // Add the 'key' as a prefix to make the new offender a fully qualified identifer
-        for (TestResult::Offense& s : res.offenses) {
-            s.offender = std::format("{}.{}", key, s.offender);
+        for (TestResult::Offense& o : res.offenses) {
+            o.offender = std::format("{}.{}", key, o.offender);
         }
 
         // Add the 'key' as a prefix to make the new warning a fully qualified identifer
         for (TestResult::Warning& w : res.warnings) {
             w.offender = std::format("{}.{}", key, w.offender);
+        }
+
+        if (count.has_value()) {
+            if (d.size() != *count) {
+                res.success = false;
+                res.offenses.emplace_back(
+                    "Count",
+                    TestResult::Offense::Reason::Verification,
+                    std::format("Expected {} entries, but only got {}", *count, d.size())
+                );
+            }
         }
 
         return res;

@@ -36,7 +36,7 @@ using namespace openspace;
 namespace {
     int loadLSKKernel() {
         const int kernelID = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
         );
         CHECK(kernelID == 1);
         return kernelID;

@@ -950,18 +950,18 @@ void FramebufferRenderer::updateRaycastData() {
 
         RaycastData data = { .id = nextId++, .namespaceName = "Helper" };
 
-        const std::string& vsPath = raycaster->boundsVertexShaderPath();
-        std::string fsPath = raycaster->boundsFragmentShaderPath();
+        const std::filesystem::path& vsPath = raycaster->boundsVertexShaderPath();
+        std::filesystem::path fsPath = raycaster->boundsFragmentShaderPath();
 
         ghoul::Dictionary dict;
         dict.setValue("rendererData", _rendererData);
-        dict.setValue("fragmentPath", std::move(fsPath));
+        dict.setValue("fragmentPath", fsPath);
         dict.setValue("id", data.id);
 
-        std::string helperPath = raycaster->helperPath();
+        std::filesystem::path helperPath = raycaster->helperPath();
         ghoul::Dictionary helpersDict;
         if (!helperPath.empty()) {
-            helpersDict.setValue("0", std::move(helperPath));
+            helpersDict.setValue("0", helperPath);
         }
         dict.setValue("helperPaths", std::move(helpersDict));
         dict.setValue("raycastPath", raycaster->raycasterPath());
@@ -1029,7 +1029,7 @@ void FramebufferRenderer::updateDeferredcastData() {
         const std::filesystem::path helperPath = caster->helperPath();
         ghoul::Dictionary helpersDict;
         if (!helperPath.empty()) {
-            helpersDict.setValue("0", helperPath.string());
+            helpersDict.setValue("0", helperPath);
         }
         dict.setValue("helperPaths", helpersDict);
 

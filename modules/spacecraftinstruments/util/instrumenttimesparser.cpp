@@ -50,7 +50,8 @@ namespace {
 
 namespace openspace {
 
-InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string sequenceSource,
+InstrumentTimesParser::InstrumentTimesParser(std::string name,
+                                             std::filesystem::path sequenceSource,
                                              ghoul::Dictionary& inputDict)
     : _pattern("\"(.{23})\" \"(.{23})\"")
     , _name(std::move(name))

@@ -112,14 +112,14 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     switch (p.type) {
         case Parameters::Type::Html:
         {
-            const std::vector<std::string> cssFiles = {
-                absPath(BootstrapPath).string(),
-                absPath(CssPath).string()
+            const std::vector<std::filesystem::path> cssFiles = {
+                absPath(BootstrapPath),
+                absPath(CssPath)
             };
-            const std::vector<std::string> jsFiles = { absPath(JsPath).string() };
+            const std::vector<std::filesystem::path> jsFiles = { absPath(JsPath) };
 
             return std::make_unique<ghoul::logging::HTMLLog>(
-                filename.string(),
+                filename,
                 nLogRotation,
                 ghoul::logging::Log::TimeStamping(timeStamp),
                 ghoul::logging::Log::DateStamping(dateStamp),
@@ -132,7 +132,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
         }
         case Parameters::Type::Text:
             return std::make_unique<ghoul::logging::TextLog>(
-                filename.string(),
+                filename,
                 nLogRotation,
                 ghoul::logging::TextLog::Append(append),
                 ghoul::logging::Log::TimeStamping(timeStamp),
