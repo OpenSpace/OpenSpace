@@ -185,8 +185,10 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
         return false;
     }
     else if (!std::filesystem::exists(absFilename.parent_path())) {
-        LERROR(std::format("The recording filename path '{}' is not a valid location "
-            "in the filesytem", absFilename.parent_path().string()));
+        LERROR(std::format(
+            "The recording filename path '{}' is not a valid location in the filesytem",
+            absFilename.parent_path().string()
+        ));
         return false;
     }
 
