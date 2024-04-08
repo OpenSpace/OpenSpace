@@ -84,10 +84,11 @@ local TullyGalaxies = {
 local TullyGalaxiesImages = {
   Identifier = "TullyGalaxiesImages",
   Renderable = {
-    Type = "RenderablePointCloud",
+    Type = "RenderableInterpolatedPoints",
     Opacity = 0.99,
     File = speck .. "tully.speck",
     SkipFirstDataPoint = true,
+    NumberOfObjects = 10,
     Texture = {
       Folder = textures
     },

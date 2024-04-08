@@ -97,6 +97,8 @@ protected:
     virtual void preUpdate();
 
     glm::dvec3 transformedPosition(const dataloader::Dataset::Entry& e) const;
+    std::pair<glm::vec3, glm::vec3> transformedOrientationVectors(
+        const dataloader::Dataset::Entry& e) const;
 
     virtual int nAttributesPerPoint() const;
 

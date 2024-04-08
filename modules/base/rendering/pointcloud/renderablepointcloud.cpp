@@ -1363,6 +1363,35 @@ glm::dvec3 RenderablePointCloud::transformedPosition(
     return glm::dvec3(_transformationMatrix * position);
 }
 
+std::pair<glm::vec3, glm::vec3>
+RenderablePointCloud::transformedOrientationVectors(
+                                                const dataloader::Dataset::Entry& e) const
+{
+    int orientationDataIndex = _dataset.orientationDataIndex;
+
+    glm::vec3 u = glm::vec3(
+        _transformationMatrix *
+        glm::dvec4(
+            e.data[orientationDataIndex + 0],
+            e.data[orientationDataIndex + 1],
+            e.data[orientationDataIndex + 2],
+            1.f
+        )
+    );
+
+    glm::vec3 v = glm::vec3(
+        _transformationMatrix *
+        glm::dvec4(
+            e.data[orientationDataIndex + 3],
+            e.data[orientationDataIndex + 4],
+            e.data[orientationDataIndex + 5],
+            1.f
+        )
+    );
+
+    return { u, v };
+}
+
 int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 3; // position
     n += hasColorData() ? 1 : 0;
@@ -1563,27 +1592,7 @@ void RenderablePointCloud::addOrientationDataForPoint(unsigned int index,
                                                       std::vector<float>& result) const
 {
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
-    int orientationDataIndex = _dataset.orientationDataIndex;
-
-    glm::vec4 u = glm::vec4(
-        _transformationMatrix *
-        glm::dvec4(
-            e.data[orientationDataIndex + 0],
-            e.data[orientationDataIndex + 1],
-            e.data[orientationDataIndex + 2],
-            1.f
-        )
-    );
-
-    glm::vec4 v = glm::vec4(
-        _transformationMatrix *
-        glm::dvec4(
-            e.data[orientationDataIndex + 3],
-            e.data[orientationDataIndex + 4],
-            e.data[orientationDataIndex + 5],
-            1.f
-        )
-    );
+    auto [ u, v ] = transformedOrientationVectors(e);
 
     // The orientation is given as six values in sucession: two vectors (u, v) that
     // specify the plane orientation
@@ -1594,8 +1603,6 @@ void RenderablePointCloud::addOrientationDataForPoint(unsigned int index,
     result.push_back(v.x);
     result.push_back(v.y);
     result.push_back(v.z);
-
-    // @TODO: when it works, make this safer (maybe store the rotation per point rather than assume there are six values)
 }
 
 std::vector<float> RenderablePointCloud::createDataSlice() {

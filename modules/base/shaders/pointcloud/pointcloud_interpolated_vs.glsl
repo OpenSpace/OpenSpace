@@ -40,12 +40,20 @@ in float in_scalingParameter1;
 
 in float in_textureLayer;
 
+in vec3 in_orientationU0;
+in vec3 in_orientationV0;
+in vec3 in_orientationU1;
+in vec3 in_orientationV1;
+
 uniform bool useSpline;
 uniform float interpolationValue;
 
 flat out float textureLayer;
 flat out float colorParameter;
 flat out float scalingParameter;
+
+flat out vec3 orientationU;
+flat out vec3 orientationV;
 
 float interpolateDataValue(float v0, float v1, float t) {
   const float Epsilon = 1E-7;
@@ -89,6 +97,12 @@ void main() {
       in_position_after
     );
   }
+
+  // @TODO (emmbr, 2024-04-08): This interpolation should be improved, preferably using
+  // quaternions instead of U and V vectors, to avoid potential problem during
+  // interpolation. But for now, just make it work
+  orientationU = mix(in_orientationU0, in_orientationV0, t);
+  orientationV = mix(in_orientationU1, in_orientationV1, t);
 
   textureLayer = in_textureLayer;
 

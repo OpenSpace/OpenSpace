@@ -365,6 +365,10 @@ int RenderableInterpolatedPoints::nAttributesPerPoint() const {
         // Use two more positions (xyz)
         n += 2 * 3;
     }
+    if (useOrientationData()) {
+        // Use two more orientation vectors (xyz)
+        n += 2 * 3;
+    }
     // And potentially some more color and size data
     n += hasColorData() ? 1 : 0;
     n += hasSizeData() ? 1 : 0;
@@ -427,7 +431,7 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
 }
 
 void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int index,
-                                                         std::vector<float>& result) const
+                                                        std::vector<float>& result) const
 {
     using namespace dataloader;
     auto [firstIndex, secondIndex] = interpolationIndices(index);
@@ -448,6 +452,34 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
         result.push_back(e0.data[sizeParamIndex]);
         result.push_back(e1.data[sizeParamIndex]);
     }
+}
+
+void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index,
+                                                        std::vector<float>& result) const
+{
+    using namespace dataloader;
+    auto [firstIndex, secondIndex] = interpolationIndices(index);
+    const Dataset::Entry& e0 = _dataset.entries[firstIndex];
+    const Dataset::Entry& e1 = _dataset.entries[secondIndex];
+
+    auto [u0, v0] = transformedOrientationVectors(e0);
+    auto [u1, v1] = transformedOrientationVectors(e1);
+
+    result.push_back(u0.x);
+    result.push_back(u0.y);
+    result.push_back(u0.z);
+
+    result.push_back(v0.x);
+    result.push_back(v0.y);
+    result.push_back(v0.z);
+
+    result.push_back(u1.x);
+    result.push_back(u1.y);
+    result.push_back(u1.z);
+
+    result.push_back(v1.x);
+    result.push_back(v1.y);
+    result.push_back(v1.z);
 }
 
 void RenderableInterpolatedPoints::initializeBufferData() {
@@ -489,8 +521,10 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     }
 
     if (useOrientationData()) {
-        offset = bufferVertexAttribute("in_orientationU", 3, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_orientationV", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientationU0", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientationV0", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientationU1", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientationV1", 3, attibutesPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {
