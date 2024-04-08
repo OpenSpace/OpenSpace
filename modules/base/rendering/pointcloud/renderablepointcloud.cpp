@@ -220,7 +220,7 @@ namespace {
         "direction of the camera (useful for planar displays), and \"Camera Position "
         "Normal\" rotates the points towards the position of the "
         "camera (useful for spherical displays, like dome theatres). In both these cases "
-        "the points will bebillboarded towards the camera. In contrast, \"Fixed "
+        "the points will be billboarded towards the camera. In contrast, \"Fixed "
         "Rotation\" does not rotate the points at all based on the camera and should be "
         "used when the dataset contains orientation information for the points.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -627,7 +627,7 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _fading(dictionary)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _drawElements(DrawElementsInfo, true)
-    , _useRotation(UseOrientationDataInfo, true) // @TODO: should be false per default?
+    , _useRotation(UseOrientationDataInfo, false)
     , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _nDataPoints(NumShownDataPointsInfo, 0)
     , _hasOrientationData(HasOrientationDataInfo, false)
