@@ -369,8 +369,8 @@ int RenderableInterpolatedPoints::nAttributesPerPoint() const {
         n += 2 * 3;
     }
     if (useOrientationData()) {
-        // Use two more orientation vectors (xyz)
-        n += 2 * 3;
+        // Use one more orientation quaternion (wxyz)
+        n += 4;
     }
     // And potentially some more color and size data
     n += hasColorData() ? 1 : 0;
@@ -465,24 +465,18 @@ void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index
     const Dataset::Entry& e0 = _dataset.entries[firstIndex];
     const Dataset::Entry& e1 = _dataset.entries[secondIndex];
 
-    auto [u0, v0] = transformedOrientationVectors(e0);
-    auto [u1, v1] = transformedOrientationVectors(e1);
+    glm::quat q0 = orientationQuaternion(e0);
+    glm::quat q1 = orientationQuaternion(e1);
 
-    result.push_back(u0.x);
-    result.push_back(u0.y);
-    result.push_back(u0.z);
+    result.push_back(q0.x);
+    result.push_back(q0.y);
+    result.push_back(q0.z);
+    result.push_back(q0.w);
 
-    result.push_back(v0.x);
-    result.push_back(v0.y);
-    result.push_back(v0.z);
-
-    result.push_back(u1.x);
-    result.push_back(u1.y);
-    result.push_back(u1.z);
-
-    result.push_back(v1.x);
-    result.push_back(v1.y);
-    result.push_back(v1.z);
+    result.push_back(q1.x);
+    result.push_back(q1.y);
+    result.push_back(q1.z);
+    result.push_back(q1.w);
 }
 
 void RenderableInterpolatedPoints::initializeBufferData() {
@@ -524,10 +518,8 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     }
 
     if (useOrientationData()) {
-        offset = bufferVertexAttribute("in_orientationU0", 3, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_orientationV0", 3, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_orientationU1", 3, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_orientationV1", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientation0", 4, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientation1", 4, attibutesPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {

@@ -1368,8 +1368,7 @@ glm::dvec3 RenderablePointCloud::transformedPosition(
     return glm::dvec3(_transformationMatrix * position);
 }
 
-std::pair<glm::vec3, glm::vec3>
-RenderablePointCloud::transformedOrientationVectors(
+glm::quat RenderablePointCloud::orientationQuaternion(
                                                 const dataloader::Dataset::Entry& e) const
 {
     int orientationDataIndex = _dataset.orientationDataIndex;
@@ -1394,7 +1393,20 @@ RenderablePointCloud::transformedOrientationVectors(
         )
     ));
 
-    return { u, v };
+    // Get the quaternion that represents the rotation from XY plane to the plane that is
+    // spanned by the UV vectors.
+
+    // First rotate to align the z-axis with plane normal
+    glm::vec3 planeNormal = glm::normalize(glm::cross(u, v));
+    glm::quat q = glm::normalize(glm::rotation(glm::vec3(0.f, 0.f, 1.f), planeNormal));
+
+    // Add rotation around plane normal (rotate new x-axis to u)
+    glm::vec3 rotatedRight = glm::normalize(
+        glm::vec3(glm::mat4_cast(q) * glm::vec4(1.f, 0.f, 0.f, 1.f))
+    );
+    q = glm::normalize(glm::rotation(rotatedRight, u)) * q;
+
+    return q;
 }
 
 int RenderablePointCloud::nAttributesPerPoint() const {
@@ -1596,20 +1608,7 @@ void RenderablePointCloud::addOrientationDataForPoint(unsigned int index,
                                                       std::vector<float>& result) const
 {
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
-    auto [ u, v ] = transformedOrientationVectors(e);
-
-    // Get the quaternion that representa the rotation from XY plane to the plane that is
-    // spanned by the UV vectors.
-
-    // First rotate to align the z-axis with plane normal
-    glm::vec3 planeNormal = glm::normalize(glm::cross(u, v));
-    glm::quat q = glm::normalize(glm::rotation(glm::vec3(0.f, 0.f, 1.f), planeNormal));
-
-    // Add rotation around plane normal (rotate new x-axis to u)
-    glm::vec3 rotatedRight = glm::normalize(
-        glm::vec3(glm::mat4_cast(q) * glm::vec4(1.f, 0.f, 0.f, 1.f))
-    );
-    q = glm::normalize(glm::rotation(rotatedRight, u)) * q;
+    glm::quat q = orientationQuaternion(e);
 
     result.push_back(q.x);
     result.push_back(q.y);
