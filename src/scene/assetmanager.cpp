@@ -904,10 +904,17 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     }
 
     if (!std::filesystem::is_regular_file(path)) {
-        throw ghoul::RuntimeError(std::format(
-            "Could not find asset file '{}' requested by '{}'",
-            path, retriever
-        ));
+        if (retriever.empty()) {
+            throw ghoul::RuntimeError(std::format(
+                "Could not find asset file '{}' requested by profile", path
+            ));
+        }
+        else {
+            throw ghoul::RuntimeError(std::format(
+                "Could not find asset file '{}' requested by '{}'",
+                path, retriever
+            ));
+        }
     }
     auto asset = std::make_unique<Asset>(*this, path, explicitEnable);
     Asset* res = asset.get();
