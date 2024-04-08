@@ -168,7 +168,7 @@ documentation::Documentation RenderableInterpolatedPoints::Documentation() {
 RenderableInterpolatedPoints::Interpolation::Interpolation()
     : properties::PropertyOwner({ "Interpolation", "Interpolation", "" })
     , value(InterpolationValueInfo, 0.f, 0.f, 1.f)
-    , nSteps(StepsInfo)
+    , nSteps(StepsInfo, 1)
     , goToNextStep(JumpToNextInfo)
     , goToPrevStep(JumpToPrevInfo)
     , interpolateToNextStep(InterpolateToNextInfo)
@@ -268,23 +268,6 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
         );
     }
 
-    unsigned int nObjects = static_cast<unsigned int>(p.numberOfObjects);
-
-    // At this point, the dataset has been loaded and the number of points computed. We
-    // need to recompute them and compute how many steps the number of points
-    // corresponded to
-
-    if (_nDataPoints % nObjects != 0) {
-        LERROR(std::format(
-            "Mismatch between provided number of data entries and the specified number "
-            "of points. Expected the number of entries in the data file '{}' to be "
-            "evenly divisible by the number of points", _dataFile
-        ));
-    }
-
-    _interpolation.nSteps = _nDataPoints / nObjects;
-    _interpolation.value.setMaxValue(static_cast<float>(_interpolation.nSteps - 1));
-
     _interpolation.value.onChange([this]() {
         bool passedAKnot =
             glm::ceil(_interpolation.value) != glm::ceil(_prevInterpolationValue);
@@ -300,10 +283,7 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
         _shouldReinitializeBufferdata = true;
     });
 
-    // This property is mostly for show in the UI, but also used to tell how many points
-    // should be rendered. So make sure it is updated once we know the number of
-    // interpolation steps
-    _nDataPoints = nObjects;
+    _nObjectsInDataset = static_cast<unsigned int>(p.numberOfObjects);
 
     if (_skipFirstDataPoint) {
         LWARNING(
@@ -312,6 +292,29 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
         );
         _skipFirstDataPoint = false;
     }
+}
+
+void RenderableInterpolatedPoints::initialize() {
+    RenderablePointCloud::initialize();
+
+    // At this point, the dataset has been loaded and we know how many data points it
+    // contains => we can compute the number of interpolation steps
+    if (_nDataPoints % _nObjectsInDataset != 0) {
+        LERROR(std::format(
+            "Mismatch between provided number of data entries and the specified number "
+            "of points. Expected the number of entries in the data file '{}' to be "
+            "evenly divisible by the number of objects", _dataFile
+        ));
+    }
+
+    if (_nObjectsInDataset > 0) {
+        _interpolation.nSteps = _nDataPoints / _nObjectsInDataset;
+    }
+    _interpolation.value.setMaxValue(static_cast<float>(_interpolation.nSteps - 1));
+
+    // This is the property that is shown in the user interface, so update it so the user
+    // can get an idea of how many points will be rendered
+    _nDataPoints = _nObjectsInDataset;
 }
 
 void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {

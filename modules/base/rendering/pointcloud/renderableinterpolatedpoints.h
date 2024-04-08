@@ -50,6 +50,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+    void initialize() override;
     void initializeShadersAndGlExtras() override;
     void deinitializeShaders() override;
     void setExtraUniforms() override;
@@ -109,6 +110,8 @@ private:
 
     float _prevInterpolationValue = 0.f;
     bool _shouldReinitializeBufferdata = false;
+
+    unsigned int _nObjectsInDataset = 0;
 };
 
 } // namespace openspace
