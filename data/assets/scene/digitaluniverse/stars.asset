@@ -34,14 +34,15 @@ local Stars = {
     File = speck .. "stars.speck",
     Halo = {
       Texture = textures .. "halo.png",
-      Multiplier = 0.875
+      Multiplier = 0.55,
+      Size = 0.95
     },
     Glare = {
       Texture = textures .. "glare.png",
       Multiplier = 5.0,
-      Scale = 0.7
+      Scale = 0.4
     },
-    MagnitudeExponent = 6.2,
+    MagnitudeExponent = 6.25,
     ColorMap = colormaps .. "colorbv.cmap",
     OtherDataColorMap = colormaps .. "viridis.cmap",
     SizeComposition = "Distance Modulus",
@@ -107,11 +108,11 @@ local SunStar = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Stars)
-  -- openspace.addSceneGraphNode(SunStar)
+  openspace.addSceneGraphNode(SunStar)
 end)
 
 asset.onDeinitialize(function()
-  -- openspace.removeSceneGraphNode(SunStar)
+  openspace.removeSceneGraphNode(SunStar)
   openspace.removeSceneGraphNode(Stars)
 end)
 

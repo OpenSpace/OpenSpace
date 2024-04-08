@@ -849,6 +849,7 @@ void RenderableStars::update(const UpdateData&) {
         std::vector<float> slice = createDataSlice(ColorOption(value));
 
         glBindVertexArray(_vao);
+        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
             slice.size() * sizeof(GLfloat),
@@ -872,7 +873,7 @@ void RenderableStars::update(const UpdateData&) {
             GL_FLOAT,
             GL_FALSE,
             stride,
-            nullptr // = offsetof(ColorVBOLayout, position)
+            nullptr
         );
 
         glEnableVertexAttribArray(bvLumAbsMagAttrib);
@@ -946,6 +947,7 @@ void RenderableStars::update(const UpdateData&) {
                     stride,
                     reinterpret_cast<void*>(offsetof(OtherDataLayout, value))
                 );
+                break;
         }
 
         glBindVertexArray(0);
