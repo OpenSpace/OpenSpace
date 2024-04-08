@@ -65,7 +65,7 @@ namespace {
         );
     }
 
-    struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
+    struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
     };

@@ -47,7 +47,7 @@ namespace openspace {
 documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
     using namespace documentation;
     return {
-        "ScreenSpace Framebuffer",
+        "ScreenSpaceFramebuffer",
         "base_screenspace_framebuffer",
         {}
     };

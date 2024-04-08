@@ -43,7 +43,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
+    struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 

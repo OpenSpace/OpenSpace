@@ -86,7 +86,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(RenderableLightTravel)]] Parameters {
+    struct [[codegen::Dictionary(RenderableTravelSpeed)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
         std::string target;
 
