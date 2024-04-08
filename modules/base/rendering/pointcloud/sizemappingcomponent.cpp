@@ -58,6 +58,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo IsRadiusInfo = {
+        "IsRadius",
+        "Size is Radius",
+        "If true, the size value in the data is interpreted as the radius of the points. "
+        "Otherwise, it is interpreted as the diameter.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(SizeMappingComponent)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -97,6 +105,9 @@ namespace {
         // kilometers then specify either <code>ScaleFactor = 'Kilometer'</code> or
         // <code>ScaleFactor = 1000.0</code>.
         std::optional<std::variant<ScaleUnit, double>> scaleFactor;
+
+        // [[codegen::verbatim(IsRadiusInfo.description)]]
+        std::optional<bool> isRadius;
     };
 #include "sizemappingcomponent_codegen.cpp"
 }  // namespace
@@ -115,10 +126,12 @@ SizeMappingComponent::SizeMappingComponent()
         properties::OptionProperty::DisplayType::Dropdown
     )
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
+    , isRadius(IsRadiusInfo, false)
 {
     addProperty(enabled);
     addProperty(parameterOption);
     addProperty(scaleFactor);
+    addProperty(isRadius);
 }
 
 SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
@@ -163,6 +176,8 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
             scaleFactor = std::get<double>(*p.scaleFactor);
         }
     }
+
+    isRadius = p.isRadius.value_or(isRadius);
 }
 
 } // namespace openspace

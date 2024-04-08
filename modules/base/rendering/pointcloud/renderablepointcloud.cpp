@@ -718,10 +718,11 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
-    if (p.sizeSettings.has_value() && p.sizeSettings->sizeMapping.has_value()) {
+    if (_sizeSettings.sizeMapping != nullptr) {
         _sizeSettings.sizeMapping->parameterOption.onChange(
             [this]() { _dataIsDirty = true; }
         );
+        _sizeSettings.sizeMapping->isRadius.onChange([this]() { _dataIsDirty = true; });
         _hasDatavarSize = true;
     }
 
@@ -1601,7 +1602,10 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
-        result.push_back(e.data[sizeParamIndex]);
+
+        // Convert to diameter if data is given as radius
+        float multiplier = _sizeSettings.sizeMapping->isRadius ? 2.f : 1.f;
+        result.push_back(multiplier * e.data[sizeParamIndex]);
     }
 }
 

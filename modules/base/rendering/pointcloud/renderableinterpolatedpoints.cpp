@@ -452,8 +452,11 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
-        result.push_back(e0.data[sizeParamIndex]);
-        result.push_back(e1.data[sizeParamIndex]);
+
+        // Convert to diameter if data is given as radius
+        float multiplier = _sizeSettings.sizeMapping->isRadius ? 2.f : 1.f;
+        result.push_back(multiplier * e0.data[sizeParamIndex]);
+        result.push_back(multiplier * e1.data[sizeParamIndex]);
     }
 }
 

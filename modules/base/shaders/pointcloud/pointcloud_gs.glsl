@@ -129,8 +129,6 @@ void main() {
     // Else use default
   }
 
-  // @TODO: this 0.5 should be removed if we want the scale to be based on radius rather
-  // than diameter
   scaledRight *= scaleMultiply * 0.5;
   scaledUp *= scaleMultiply * 0.5;
 
