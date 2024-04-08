@@ -44,6 +44,8 @@
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/vector_angle.hpp>
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -1372,7 +1374,7 @@ RenderablePointCloud::transformedOrientationVectors(
 {
     int orientationDataIndex = _dataset.orientationDataIndex;
 
-    glm::vec3 u = glm::vec3(
+    glm::vec3 u = glm::normalize(glm::vec3(
         _transformationMatrix *
         glm::dvec4(
             e.data[orientationDataIndex + 0],
@@ -1380,9 +1382,9 @@ RenderablePointCloud::transformedOrientationVectors(
             e.data[orientationDataIndex + 2],
             1.f
         )
-    );
+    ));
 
-    glm::vec3 v = glm::vec3(
+    glm::vec3 v = glm::normalize(glm::vec3(
         _transformationMatrix *
         glm::dvec4(
             e.data[orientationDataIndex + 3],
@@ -1390,7 +1392,7 @@ RenderablePointCloud::transformedOrientationVectors(
             e.data[orientationDataIndex + 5],
             1.f
         )
-    );
+    ));
 
     return { u, v };
 }
@@ -1399,7 +1401,7 @@ int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 3; // position
     n += hasColorData() ? 1 : 0;
     n += hasSizeData() ? 1 : 0;
-    n += useOrientationData() ? 6 : 0;
+    n += useOrientationData() ? 4 : 0;
     n += _hasSpriteTexture ? 1 : 0; // texture id
     return n;
 }
@@ -1461,8 +1463,7 @@ void RenderablePointCloud::updateBufferData() {
     }
 
     if (useOrientationData()) {
-        offset = bufferVertexAttribute("in_orientationU", 3, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_orientationV", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientation", 4, attibutesPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {
@@ -1597,15 +1598,23 @@ void RenderablePointCloud::addOrientationDataForPoint(unsigned int index,
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
     auto [ u, v ] = transformedOrientationVectors(e);
 
-    // The orientation is given as six values in sucession: two vectors (u, v) that
-    // specify the plane orientation
-    result.push_back(u.x);
-    result.push_back(u.y);
-    result.push_back(u.z);
+    // Get the quaternion that representa the rotation from XY plane to the plane that is
+    // spanned by the UV vectors.
 
-    result.push_back(v.x);
-    result.push_back(v.y);
-    result.push_back(v.z);
+    // First rotate to align the z-axis with plane normal
+    glm::vec3 planeNormal = glm::normalize(glm::cross(u, v));
+    glm::quat q = glm::normalize(glm::rotation(glm::vec3(0.f, 0.f, 1.f), planeNormal));
+
+    // Add rotation around plane normal (rotate new x-axis to u)
+    glm::vec3 rotatedRight = glm::normalize(
+        glm::vec3(glm::mat4_cast(q) * glm::vec4(1.f, 0.f, 0.f, 1.f))
+    );
+    q = glm::normalize(glm::rotation(rotatedRight, u)) * q;
+
+    result.push_back(q.x);
+    result.push_back(q.y);
+    result.push_back(q.z);
+    result.push_back(q.w);
 }
 
 std::vector<float> RenderablePointCloud::createDataSlice() {
