@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Deep Sky Objects Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_deepsky_speck",
-  Version = 1
+  Version = 2
 })
 
 

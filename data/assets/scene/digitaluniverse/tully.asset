@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Tully Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_tully_speck",
-  Version = 3
+  Version = 4
 })
 
 
