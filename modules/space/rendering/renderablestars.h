@@ -119,7 +119,7 @@ private:
 
     struct {
         properties::PropertyOwner container;
-        properties::OptionProperty sizeComposition;
+        properties::OptionProperty method;
         properties::FloatProperty lumCent;
         properties::FloatProperty radiusCent;
     } _parameters;
@@ -150,6 +150,7 @@ private:
     float _staticFilterReplacementValue = 0.f;
 
     GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

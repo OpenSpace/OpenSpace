@@ -259,21 +259,21 @@ namespace {
         "Scale",
         "Scale",
         "A uniform scale factor that determines how much of the total size of the star "
-        "this component is using. If it is 0, it will be hidden, if it is 1, it will "
+        "this component is using. If it is 0, it will be hidden. If it is 1, it will "
         "take the entire size.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo ParametersOwnerInfo = {
-        "ParametersOwner",
-        "Parameters Options",
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo SizeCompositionInfo = {
+        "SizeComposition",
+        "Size Composition",
         ""
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeCompositionOptionInfo = {
-        "SizeComposition",
-        "Size Composition Option",
-        "Base multiplyer for the final stars' sizes",
+    constexpr openspace::properties::Property::PropertyInfo SizeCompositionMethodInfo = {
+        "Method",
+        "Method",
+        "Method to determine the size for the stars",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -370,7 +370,7 @@ namespace {
             AppMagnitude [[codegen::key("App Magnitude")]]
         };
 
-        // [[codegen::verbatim(SizeCompositionOptionInfo.description)]]
+        // [[codegen::verbatim(SizeCompositionMethodInfo.description)]]
         std::optional<SizeComposition> sizeComposition;
 
         struct DataMapping {
@@ -449,9 +449,9 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
     , _parameters{
-        properties::PropertyOwner(ParametersOwnerInfo),
+        properties::PropertyOwner(SizeCompositionInfo),
         properties::OptionProperty(
-            SizeCompositionOptionInfo,
+            SizeCompositionMethodInfo,
             properties::OptionProperty::DisplayType::Dropdown
         ),
         properties::FloatProperty(LumPercentInfo, 0.5f, 0.f, 3.f),
@@ -470,6 +470,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     addProperty(Fadeable::_opacity);
 
+
     _speckFile = p.speckFile.string();
     _speckFile.onChange([this]() { _speckFileIsDirty = true; });
     addProperty(_speckFile);
@@ -485,7 +486,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         else {
             LWARNING(std::format("File not found: {}", _colorTexturePath.value()));
         }
-        });
+    });
     addProperty(_colorTexturePath);
 
 
@@ -574,6 +575,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
 
     auto markTextureAsDirty = [this]() {_pointSpreadFunctionTextureIsDirty = true; };
+
     _halo.texturePath = absPath(p.halo.texture).string();
     _halo.texturePath.onChange(markTextureAsDirty);
     _halo.file = std::make_unique<ghoul::filesystem::File>(_halo.texturePath.value());
@@ -604,22 +606,22 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     addProperty(_magnitudeExponent);
 
 
-    _parameters.sizeComposition.addOptions({
+    _parameters.method.addOptions({
         { DistanceModulus, "Distance Modulus" },
         { AppBrightness, "Apparent Brightness" },
         { LumSize, "Luminosity and Size" },
         { AbsMagnitude, "Absolute Magnitude" },
         { AppMagnitude, "Apparent Magnitude" }
     });
-    _parameters.sizeComposition =
+    _parameters.method =
         p.sizeComposition.has_value() ?
         static_cast<int>(codegen::map<SizeComposition>(*p.sizeComposition)) :
         SizeComposition::DistanceModulus;
-    _parameters.container.addProperty(_parameters.sizeComposition);
-
+    _parameters.container.addProperty(_parameters.method);
     _parameters.container.addProperty(_parameters.lumCent);
     _parameters.container.addProperty(_parameters.radiusCent);
     addPropertySubOwner(_parameters.container);
+
 
     if (p.fadeInDistances.has_value()) {
         _fadeInDistances = *p.fadeInDistances;
@@ -648,14 +650,11 @@ void RenderableStars::initializeGL() {
     );
 
     glGenVertexArrays(1, &_vao);
-    GLuint vbo = 0;
-    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &_vbo);
 
     glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBindVertexArray(0);
-
-    glDeleteBuffers(1, &vbo);
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
@@ -682,6 +681,9 @@ void RenderableStars::initializeGL() {
 void RenderableStars::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
+
+    glDeleteBuffers(1, &_vbo);
+    _vbo = 0;
 
     _colorTexture = nullptr;
 
@@ -754,10 +756,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.colorOption, _colorOption);
     _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
 
-    _program->setUniform(
-        _uniformCache.sizeComposition,
-        _parameters.sizeComposition.value()
-    );
+    _program->setUniform(_uniformCache.sizeComposition, _parameters.method.value());
     _program->setUniform(_uniformCache.lumCent, _parameters.lumCent);
     _program->setUniform(_uniformCache.radiusCent, _parameters.radiusCent);
 
@@ -769,12 +768,12 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     }
 
     if (_enableFadeInDistance) {
-        const float distCam = static_cast<float>(glm::length(data.camera.positionVec3()));
+        const double distCam = glm::length(data.camera.positionVec3());
         const glm::vec2 fadeRange = _fadeInDistances;
         const double a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
         const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        const double funcValue = a * distCam + b;
-        const float fadeInValue = static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
+        const float funcValue = static_cast<float>(a * distCam + b);
+        const float fadeInValue = std::min(funcValue, 1.f);
 
         _program->setUniform(_uniformCache.alphaValue, opacity() * fadeInValue);
     }
@@ -797,9 +796,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.glareMultiplier, _glare.multiplier);
         _program->setUniform(_uniformCache.glareScale, _glare.scale);
     }
-
     _program->setUniform(_uniformCache.hasGlare, _glare.texture != nullptr);
-
 
     ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {
