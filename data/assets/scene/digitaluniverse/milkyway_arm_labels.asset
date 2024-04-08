@@ -62,7 +62,6 @@ end)
 asset.export(Object)
 
 
-
 asset.meta = {
   Name = "Milky Way Arms Labels",
   Version = "1.2",

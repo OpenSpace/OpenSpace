@@ -65,7 +65,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "MilkyWay Galaxy",
-  Version = "2.1",
+  Version = "2.2",
   Description = [[Digital Universe asset containt 2D image of the MilkyWay. For
     extragalactic viewing]],
   Author = "Brian Abbott, Carter Emmart (AMNH)",

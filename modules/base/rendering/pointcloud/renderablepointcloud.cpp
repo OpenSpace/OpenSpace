@@ -249,7 +249,8 @@ namespace {
         "value should be. If not included, it is computed based on the maximum "
         "positional component of the data points. This is useful for showing the "
         "dataset at all, but you will likely want to change it to something that looks "
-        "good.",
+        "good. Note that a scale exponent of 0 leads to the points having a diameter of "
+        "1 meter, i.e. no exponential scaling.",
         openspace::properties::Property::Visibility::User
     };
 
