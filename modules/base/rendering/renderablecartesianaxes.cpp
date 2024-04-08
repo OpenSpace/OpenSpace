@@ -71,8 +71,6 @@ namespace {
     // other node as the Parent of the node with this renderable. Also, the axes have to
     // be scaled to match the parent object for the axes to be visible in the scene, for
     // example using a StaticScale.
-    //
-    // See example asset (@TODO: link to asset file).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];
