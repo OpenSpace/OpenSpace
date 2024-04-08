@@ -89,7 +89,6 @@ private:
         properties::StringProperty bvColor;
         properties::StringProperty luminance;
         properties::StringProperty absoluteMagnitude;
-        properties::StringProperty apparentMagnitude;
         properties::StringProperty vx;
         properties::StringProperty vy;
         properties::StringProperty vz;
@@ -108,7 +107,7 @@ private:
         properties::PropertyOwner container;
 
         properties::StringProperty texturePath;
-        properties::FloatProperty opacity;
+        properties::FloatProperty multiplier;
         properties::FloatProperty scale;
 
         std::unique_ptr<ghoul::opengl::Texture> texture;
@@ -123,7 +122,6 @@ private:
         properties::OptionProperty sizeComposition;
         properties::FloatProperty lumCent;
         properties::FloatProperty radiusCent;
-        properties::FloatProperty brightnessCent;
     } _parameters;
 
     properties::FloatProperty _magnitudeExponent;
@@ -133,10 +131,9 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
         modelMatrix, cameraViewProjectionMatrix, cameraUp, eyePosition, colorOption,
-        magnitudeExponent, sizeComposition, lumCent, radiusCent, brightnessCent,
-        colorTexture, alphaValue, otherDataTexture, otherDataRange, filterOutOfRange,
-        fixedColor, haloTexture, haloOpacity, haloScale, hasGlare, glareTexture,
-        glareOpacity, glareScale
+        magnitudeExponent, sizeComposition, lumCent, radiusCent, colorTexture, alphaValue,
+        otherDataTexture, otherDataRange, filterOutOfRange, fixedColor, haloTexture,
+        haloMultiplier, haloScale, hasGlare, glareTexture, glareMultiplier, glareScale
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;

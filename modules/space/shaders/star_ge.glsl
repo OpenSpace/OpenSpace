@@ -27,7 +27,7 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
-in vec4 vs_bvLumAbsMagAppMag[];
+in vec3 vs_bvLumAbsMag[];
 in vec3 vs_velocity[];
 in float vs_speed[];
 
@@ -45,7 +45,6 @@ uniform dvec3 cameraUp;
 uniform int sizeComposition;
 uniform float lumCent;
 uniform float radiusCent;
-uniform float brightnessCent;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
@@ -53,12 +52,11 @@ const double PARSEC = 3.08567756E16;
 
 // FRAGILE
 // All of these values have to be synchronized with the values in the optionproperty
-const int SizeCompositionOptionAppBrightness = 0;
-const int SizeCompositionOptionLumSize = 1;
-const int SizeCompositionOptionLumSizeAppBrightness = 2;
+const int SizeCompositionOptionLumSizeDistanceModulus = 0;
+const int SizeCompositionOptionAppBrightness = 1;
+const int SizeCompositionOptionLumSize = 2;
 const int SizeCompositionOptionLumSizeAbsMagnitude = 3;
 const int SizeCompositionOptionLumSizeAppMagnitude = 4;
-const int SizeCompositionOptionLumSizeDistanceModulus = 5;
 
 const float SunTemperature = 5800.0;
 const float SunAbsMagnitude = 4.83;
@@ -87,21 +85,6 @@ double scaleForLuminositySize(float bv, float luminance, float absMagnitude) {
   return (lumCent * adjustedLuminance + (radiusCent * starRadius)) * pow(10.0, magnitudeExponent);
 }
 
-double scaleForLuminositySizeAppBrightness(dvec3 dpos, float bv, float luminance, float absMagnitude) {
-  double luminosity = double(1.0 - luminance);
-  double distanceToStarInParsecs = trunc(length(dpos - eyePosition) / PARSEC);
-  double apparentBrightness = luminosity / distanceToStarInParsecs;
-  float L_over_Lsun = pow(2.51, SunAbsMagnitude - absMagnitude);
-  float temperature = bvToKelvin(bv);
-  float relativeTemperature = SunTemperature / temperature;
-  double starRadius = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
-
-  double scaledLuminance = lumCent * (luminance + 5E9);
-  double scaledStarRadius = radiusCent * starRadius;
-  double scaledBrightness = brightnessCent * apparentBrightness * 5E15;
-  return (scaledLuminance + scaledStarRadius + scaledBrightness) * pow(10.0, magnitudeExponent);
-}
-
 double scaleForAbsoluteMagnitude(float absMagnitude) {
   return (-absMagnitude + 35) * pow(10.0, magnitudeExponent + 8.5);
 }
@@ -124,45 +107,38 @@ void main() {
   vs_position = pos; // in object space
   dvec4 dpos  = modelMatrix * dvec4(pos, 1.0);
 
-  ge_bv = vs_bvLumAbsMagAppMag[0].x;
+  ge_bv = vs_bvLumAbsMag[0].x;
   ge_velocity = vs_velocity[0];
   ge_speed = vs_speed[0];
 
   double scaleMultiply = 1.0;
 
-  if (sizeComposition == SizeCompositionOptionAppBrightness) {
-    float luminance = vs_bvLumAbsMagAppMag[0].y;
+  if (sizeComposition == SizeCompositionOptionLumSizeDistanceModulus) {
+    float absMagnitude = vs_bvLumAbsMag[0].z;
+
+    scaleMultiply = scaleForDistanceModulus(absMagnitude);
+  }
+  else if (sizeComposition == SizeCompositionOptionAppBrightness) {
+    float luminance = vs_bvLumAbsMag[0].y;
 
     scaleMultiply = scaleForApparentBrightness(dpos.xyz, luminance);
   }
   else if (sizeComposition == SizeCompositionOptionLumSize) {
-    float bv = vs_bvLumAbsMagAppMag[0].x;
-    float luminance = vs_bvLumAbsMagAppMag[0].y;
-    float absMagnitude = vs_bvLumAbsMagAppMag[0].z;
+    float bv = vs_bvLumAbsMag[0].x;
+    float luminance = vs_bvLumAbsMag[0].y;
+    float absMagnitude = vs_bvLumAbsMag[0].z;
 
     scaleMultiply = scaleForLuminositySize(bv, luminance, absMagnitude);
   }
-  else if (sizeComposition == SizeCompositionOptionLumSizeAppBrightness) {
-    float bv = vs_bvLumAbsMagAppMag[0].x;
-    float luminance = vs_bvLumAbsMagAppMag[0].y;
-    float absMagnitude = vs_bvLumAbsMagAppMag[0].z;
-
-    scaleMultiply = scaleForLuminositySizeAppBrightness(dpos.xyz, bv, luminance, absMagnitude);
-  }
   else if (sizeComposition == SizeCompositionOptionLumSizeAbsMagnitude) {
-    float absMagnitude = vs_bvLumAbsMagAppMag[0].z;
+    float absMagnitude = vs_bvLumAbsMag[0].z;
 
     scaleMultiply = scaleForAbsoluteMagnitude(absMagnitude);
   }
   else if (sizeComposition == SizeCompositionOptionLumSizeAppMagnitude) {
-    float absMagnitude = vs_bvLumAbsMagAppMag[0].z;
+    float absMagnitude = vs_bvLumAbsMag[0].z;
 
     scaleMultiply = scaleForApparentMagnitude(dpos.xyz, absMagnitude);
-  }
-  else if (sizeComposition == SizeCompositionOptionLumSizeDistanceModulus) {
-    float absMagnitude = vs_bvLumAbsMagAppMag[0].z;
-
-    scaleMultiply = scaleForDistanceModulus(absMagnitude);
   }
 
   dvec3 normal = eyePosition - dpos.xyz;

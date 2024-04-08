@@ -40,12 +40,12 @@ uniform sampler1D otherDataTexture;
 uniform vec2 otherDataRange;
 uniform bool filterOutOfRange;
 
-uniform float haloOpacity;
+uniform float haloMultiplier;
 uniform float haloScale;
 
 uniform bool hasGlare;
 uniform sampler2D glareTexture;
-uniform float glareOpacity;
+uniform float glareMultiplier;
 uniform float glareScale;
 
 // keep in sync with renderablestars.h:ColorOption enum
@@ -105,11 +105,11 @@ Fragment getFragment() {
 
   vec2 scaledCoordsHalo = shiftedCoords / haloScale;
   vec2 unshiftedCoordsHalo = (scaledCoordsHalo + 1.0) / 2.0;
-  float textureColor = texture(haloTexture, unshiftedCoordsHalo).a * haloOpacity;
+  float textureColor = texture(haloTexture, unshiftedCoordsHalo).a * haloMultiplier;
   if (hasGlare) {
     vec2 scaledCoordsGlare = shiftedCoords / glareScale;
     vec2 unshiftedCoordsGlare = (scaledCoordsGlare + 1.0) / 2.0;
-    float glare = texture(glareTexture, unshiftedCoordsGlare).a * glareOpacity;
+    float glare = texture(glareTexture, unshiftedCoordsGlare).a * glareMultiplier;
     textureColor += glare;
   }
 

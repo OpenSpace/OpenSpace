@@ -50,21 +50,20 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableStars";
 
-    constexpr std::array<const char*, 23> UniformNames = {
+    constexpr std::array<const char*, 22> UniformNames = {
         "modelMatrix", "cameraViewProjectionMatrix", "cameraUp", "eyePosition",
         "colorOption", "magnitudeExponent", "sizeComposition", "lumCent", "radiusCent",
-        "brightnessCent", "colorTexture", "alphaValue", "otherDataTexture",
-        "otherDataRange", "filterOutOfRange", "fixedColor", "haloTexture", "haloOpacity",
-        "haloScale", "hasGlare", "glareTexture", "glareOpacity",  "glareScale"
+        "colorTexture", "alphaValue", "otherDataTexture", "otherDataRange",
+        "filterOutOfRange", "fixedColor", "haloTexture", "haloMultiplier", "haloScale",
+        "hasGlare", "glareTexture", "glareMultiplier", "glareScale"
     };
 
     enum SizeComposition {
-        AppBrightness = 0,
+        DistanceModulus = 0,
+        AppBrightness,
         LumSize,
-        LumSizeAppBrightness,
         AbsMagnitude,
-        AppMagnitude,
-        DistanceModulus
+        AppMagnitude
     };
 
     constexpr double PARSEC = 0.308567756E17;
@@ -74,7 +73,6 @@ namespace {
         float value;
         float luminance;
         float absoluteMagnitude;
-        float apparentMagnitude;
     };
 
     struct VelocityVBOLayout {
@@ -82,7 +80,6 @@ namespace {
         float value;
         float luminance;
         float absoluteMagnitude;
-        float apparentMagnitude;
 
         float vx; // v_x
         float vy; // v_y
@@ -94,7 +91,6 @@ namespace {
         float value;
         float luminance;
         float absoluteMagnitude;
-        float apparentMagnitude;
 
         float speed;
     };
@@ -104,7 +100,6 @@ namespace {
         float value;
         float luminance;
         float absoluteMagnitude;
-        float apparentMagnitude;
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
@@ -142,14 +137,6 @@ namespace {
         "MappingAbsMagnitude",
         "Mapping (absolute magnitude)",
         "The name of the variable in the speck file that is used as the absolute "
-        "magnitude variable",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MappingAppMagnitudeInfo = {
-        "MappingAppMagnitude",
-        "Mapping (apparent magnitude)",
-        "The name of the variable in the speck file that is used as the apparent "
         "magnitude variable",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -249,10 +236,12 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PartialOpacityInfo = {
-        "PartialOpacity",
-        "Partial Opacity",
-        "Controls the individual opacity for this texture component",
+    constexpr openspace::properties::Property::PropertyInfo MultiplierInfo = {
+        "Multiplier",
+        "Multiplier",
+        "An individual multiplication factor for this texture component. Using the "
+        "multipliers for both components, it is possible to fine tune the look of the "
+        "stars or disable the contributions altogether by setting it to 0",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -299,13 +288,6 @@ namespace {
         "RadiusPercent",
         "Radius Contribution",
         "Radius Contribution",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo BrightnessPercentInfo = {
-        "BrightnessPercent",
-        "App Brightness Contribution",
-        "App Brightness Contribution",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -364,8 +346,8 @@ namespace {
             // [[codegen::verbatim(TextureInfo.description)]]
             std::filesystem::path texture;
 
-            // [[codegen::verbatim(PartialOpacityInfo.description)]]
-            std::optional<float> partialOpacity;
+            // [[codegen::verbatim(MultiplierInfo.description)]]
+            std::optional<float> multiplier;
 
             // [[codegen::verbatim(ScaleInfo.description)]]
             std::optional<float> scale;
@@ -381,12 +363,11 @@ namespace {
         std::optional<float> magnitudeExponent;
 
         enum class [[codegen::map(SizeComposition)]] SizeComposition {
+            DistanceModulus [[codegen::key("Distance Modulus")]],
             AppBrightness [[codegen::key("App Brightness")]],
             LumSize [[codegen::key("Lum and Size")]],
-            LumSizeAppBrightness [[codegen::key("Lum, Size and App Brightness")]],
             AbsMagnitude [[codegen::key("Abs Magnitude")]],
-            AppMagnitude [[codegen::key("App Magnitude")]],
-            DistanceModulus [[codegen::key("Distance Modulus")]]
+            AppMagnitude [[codegen::key("App Magnitude")]]
         };
 
         // [[codegen::verbatim(SizeCompositionOptionInfo.description)]]
@@ -399,8 +380,6 @@ namespace {
             std::optional<std::string> luminance;
             // [[codegen::verbatim(MappingAbsMagnitudeInfo.description)]]
             std::optional<std::string> absoluteMagnitude;
-            // [[codegen::verbatim(MappingAppMagnitudeInfo.description)]]
-            std::optional<std::string> apparentMagnitude;
             // [[codegen::verbatim(MappingVxInfo.description)]]
             std::optional<std::string> vx;
             // [[codegen::verbatim(MappingVyInfo.description)]]
@@ -438,7 +417,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         properties::StringProperty(MappingBvInfo),
         properties::StringProperty(MappingLuminanceInfo),
         properties::StringProperty(MappingAbsMagnitudeInfo),
-        properties::StringProperty(MappingAppMagnitudeInfo),
         properties::StringProperty(MappingVxInfo),
         properties::StringProperty(MappingVyInfo),
         properties::StringProperty(MappingVzInfo),
@@ -461,13 +439,13 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _halo{
         properties::PropertyOwner(HaloOwnerInfo),
         properties::StringProperty(TextureInfo),
-        properties::FloatProperty(PartialOpacityInfo, 1.f, 0.f, 5.f),
+        properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 5.f),
         properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
     , _glare{
         properties::PropertyOwner(GlareOwnerInfo),
         properties::StringProperty(TextureInfo),
-        properties::FloatProperty(PartialOpacityInfo, 1.f, 0.f, 5.f),
+        properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 5.f),
         properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
     , _parameters{
@@ -477,8 +455,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
             properties::OptionProperty::DisplayType::Dropdown
         ),
         properties::FloatProperty(LumPercentInfo, 0.5f, 0.f, 3.f),
-        properties::FloatProperty(RadiusPercentInfo, 0.5f, 0.f, 3.f),
-        properties::FloatProperty(BrightnessPercentInfo, 0.5f, 0.f, 3.f)
+        properties::FloatProperty(RadiusPercentInfo, 0.5f, 0.f, 3.f)
     }
     , _magnitudeExponent(MagnitudeExponentInfo, 6.2f, 5.f, 8.f)
     , _fadeInDistances(
@@ -524,11 +501,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         p.dataMapping.absoluteMagnitude.value_or(_dataMapping.absoluteMagnitude);
     _dataMapping.absoluteMagnitude.onChange([this]() { _dataIsDirty = true; });
     _dataMapping.container.addProperty(_dataMapping.absoluteMagnitude);
-
-    _dataMapping.apparentMagnitude =
-        p.dataMapping.apparentMagnitude.value_or(_dataMapping.apparentMagnitude);
-    _dataMapping.apparentMagnitude.onChange([this]() { _dataIsDirty = true; });
-    _dataMapping.container.addProperty(_dataMapping.apparentMagnitude);
 
     _dataMapping.vx = p.dataMapping.vx.value_or(_dataMapping.vx);
     _dataMapping.vx.onChange([this]() { _dataIsDirty = true; });
@@ -607,8 +579,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _halo.file = std::make_unique<ghoul::filesystem::File>(_halo.texturePath.value());
     _halo.file->setCallback(markTextureAsDirty);
     _halo.container.addProperty(_halo.texturePath);
-    _halo.opacity = p.halo.partialOpacity.value_or(_halo.opacity);
-    _halo.container.addProperty(_halo.opacity);
+    _halo.multiplier = p.halo.multiplier.value_or(_halo.multiplier);
+    _halo.container.addProperty(_halo.multiplier);
     _halo.scale = p.halo.scale.value_or(_halo.scale);
     _halo.container.addProperty(_halo.scale);
     addPropertySubOwner(_halo.container);
@@ -618,12 +590,12 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         _glare.file =
             std::make_unique<ghoul::filesystem::File>(_glare.texturePath.value());
         _glare.file->setCallback(markTextureAsDirty);
-        _glare.opacity = p.glare->partialOpacity.value_or(_glare.opacity);
+        _glare.multiplier = p.glare->multiplier.value_or(_glare.multiplier);
         _glare.scale = p.glare->scale.value_or(_glare.scale);
     }
     _glare.texturePath.onChange(markTextureAsDirty);
     _glare.container.addProperty(_glare.texturePath);
-    _glare.container.addProperty(_glare.opacity);
+    _glare.container.addProperty(_glare.multiplier);
     _glare.container.addProperty(_glare.scale);
     addPropertySubOwner(_glare.container);
 
@@ -633,12 +605,11 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
 
     _parameters.sizeComposition.addOptions({
-        { AppBrightness, "Use Star's Apparent Brightness" },
-        { LumSize, "Use Star's Luminosity and Size" },
-        { LumSizeAppBrightness, "Luminosity, Size, App Brightness" },
+        { DistanceModulus, "Distance Modulus" },
+        { AppBrightness, "Apparent Brightness" },
+        { LumSize, "Luminosity and Size" },
         { AbsMagnitude, "Absolute Magnitude" },
-        { AppMagnitude, "Apparent Magnitude" },
-        { DistanceModulus, "Distance Modulus" }
+        { AppMagnitude, "Apparent Magnitude" }
     });
     _parameters.sizeComposition =
         p.sizeComposition.has_value() ?
@@ -648,7 +619,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     _parameters.container.addProperty(_parameters.lumCent);
     _parameters.container.addProperty(_parameters.radiusCent);
-    _parameters.container.addProperty(_parameters.brightnessCent);
     addPropertySubOwner(_parameters.container);
 
     if (p.fadeInDistances.has_value()) {
@@ -683,9 +653,9 @@ void RenderableStars::initializeGL() {
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindVertexArray(0);
 
     glDeleteBuffers(1, &vbo);
-    glBindVertexArray(0);
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
@@ -790,7 +760,6 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     );
     _program->setUniform(_uniformCache.lumCent, _parameters.lumCent);
     _program->setUniform(_uniformCache.radiusCent, _parameters.radiusCent);
-    _program->setUniform(_uniformCache.brightnessCent, _parameters.brightnessCent);
 
     if (_colorOption == ColorOption::FixedColor) {
         if (_uniformCache.fixedColor == -1) {
@@ -817,7 +786,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     haloUnit.activate();
     _halo.texture->bind();
     _program->setUniform(_uniformCache.haloTexture, haloUnit);
-    _program->setUniform(_uniformCache.haloOpacity, _halo.opacity);
+    _program->setUniform(_uniformCache.haloMultiplier, _halo.multiplier);
     _program->setUniform(_uniformCache.haloScale, _halo.scale);
 
     ghoul::opengl::TextureUnit glareUnit;
@@ -825,7 +794,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glareUnit.activate();
         _glare.texture->bind();
         _program->setUniform(_uniformCache.glareTexture, glareUnit);
-        _program->setUniform(_uniformCache.glareOpacity, _glare.opacity);
+        _program->setUniform(_uniformCache.glareMultiplier, _glare.multiplier);
         _program->setUniform(_uniformCache.glareScale, _glare.scale);
     }
 
@@ -891,10 +860,8 @@ void RenderableStars::update(const UpdateData&) {
         );
 
         const GLint positionAttrib = _program->attributeLocation("in_position");
-        // bvLumAbsMagAppMag = bv color, luminosity, abs magnitude and app magnitude
-        const GLint bvLumAbsMagAppMagAttrib = _program->attributeLocation(
-            "in_bvLumAbsMagAppMag"
-        );
+        // in_bvLumAbsMag = bv color, luminosity, abs magnitude
+        const GLint bvLumAbsMagAttrib = _program->attributeLocation("in_bvLumAbsMag");
 
         const size_t nStars = _dataset.entries.size();
         const size_t nValues = slice.size() / nStars;
@@ -902,22 +869,23 @@ void RenderableStars::update(const UpdateData&) {
         const GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
 
         glEnableVertexAttribArray(positionAttrib);
-        glEnableVertexAttribArray(bvLumAbsMagAppMagAttrib);
+        glVertexAttribPointer(
+            positionAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            nullptr // = offsetof(ColorVBOLayout, position)
+        );
+
+        glEnableVertexAttribArray(bvLumAbsMagAttrib);
         const int colorOption = _colorOption;
         switch (colorOption) {
             case ColorOption::Color:
             case ColorOption::FixedColor:
                 glVertexAttribPointer(
-                    positionAttrib,
+                    bvLumAbsMagAttrib,
                     3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    nullptr // = offsetof(ColorVBOLayout, position)
-                );
-                glVertexAttribPointer(
-                    bvLumAbsMagAppMagAttrib,
-                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
@@ -928,16 +896,8 @@ void RenderableStars::update(const UpdateData&) {
             case ColorOption::Velocity:
             {
                 glVertexAttribPointer(
-                    positionAttrib,
+                    bvLumAbsMagAttrib,
                     3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    nullptr // = offsetof(VelocityVBOLayout, position)
-                );
-                glVertexAttribPointer(
-                    bvLumAbsMagAppMagAttrib,
-                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
@@ -960,16 +920,8 @@ void RenderableStars::update(const UpdateData&) {
             case ColorOption::Speed:
             {
                 glVertexAttribPointer(
-                    positionAttrib,
+                    bvLumAbsMagAttrib,
                     3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    nullptr // = offsetof(SpeedVBOLayout, position)
-                );
-                glVertexAttribPointer(
-                    bvLumAbsMagAppMagAttrib,
-                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
@@ -989,27 +941,16 @@ void RenderableStars::update(const UpdateData&) {
                 break;
             }
             case ColorOption::OtherData:
-            {
                 glVertexAttribPointer(
-                    positionAttrib,
+                    bvLumAbsMagAttrib,
                     3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    nullptr // = offsetof(OtherDataLayout, position)
-                );
-                glVertexAttribPointer(
-                    bvLumAbsMagAppMagAttrib,
-                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
                     reinterpret_cast<void*>(offsetof(OtherDataLayout, value))
                 );
-            }
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
         _dataIsDirty = false;
@@ -1094,7 +1035,6 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
     const int bvIdx = std::max(_dataset.index(_dataMapping.bvColor), 0);
     const int lumIdx = std::max(_dataset.index(_dataMapping.luminance), 0);
     const int absMagIdx = std::max(_dataset.index(_dataMapping.absoluteMagnitude), 0);
-    const int appMagIdx = std::max(_dataset.index(_dataMapping.apparentMagnitude), 0);
     const int vxIdx = std::max(_dataset.index(_dataMapping.vx), 0);
     const int vyIdx = std::max(_dataset.index(_dataMapping.vy), 0);
     const int vzIdx = std::max(_dataset.index(_dataMapping.vz), 0);
@@ -1108,10 +1048,11 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
     double maxRadius = 0.0;
 
     std::vector<float> result;
-    // 7 for the default Color option of 3 positions + bv + lum + abs + app magnitude
-    result.reserve(_dataset.entries.size() * 7);
+    // 6 for the default Color option of 3 positions + bv + lum + abs
+    result.reserve(_dataset.entries.size() * 6);
     for (const dataloader::Dataset::Entry& e : _dataset.entries) {
         glm::dvec3 position = glm::dvec3(e.position) * distanceconstants::Parsec;
+        glm::vec3 pos = position;
         maxRadius = std::max(maxRadius, glm::length(position));
 
         switch (option) {
@@ -1123,16 +1064,10 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
                 } layout;
 
-                layout.value.position = { {
-                    static_cast<float>(position[0]),
-                    static_cast<float>(position[1]),
-                    static_cast<float>(position[2])
-                }};
-
+                layout.value.position = { pos.x, pos.y, pos.z };
                 layout.value.value = e.data[bvIdx];
                 layout.value.luminance = e.data[lumIdx];
                 layout.value.absoluteMagnitude = e.data[absMagIdx];
-                layout.value.apparentMagnitude = e.data[appMagIdx];
 
                 result.insert(result.end(), layout.data.begin(), layout.data.end());
                 break;
@@ -1144,16 +1079,10 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(VelocityVBOLayout) / sizeof(float)> data;
                 } layout;
 
-                layout.value.position = {{
-                    static_cast<float>(position[0]),
-                    static_cast<float>(position[1]),
-                    static_cast<float>(position[2])
-                }};
-
+                layout.value.position = { pos.x, pos.y, pos.z };
                 layout.value.value = e.data[bvIdx];
                 layout.value.luminance = e.data[lumIdx];
                 layout.value.absoluteMagnitude = e.data[absMagIdx];
-                layout.value.apparentMagnitude = e.data[appMagIdx];
 
                 layout.value.vx = e.data[vxIdx];
                 layout.value.vy = e.data[vyIdx];
@@ -1169,16 +1098,10 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(SpeedVBOLayout) / sizeof(float)> data;
                 } layout;
 
-                layout.value.position = {{
-                    static_cast<float>(position[0]),
-                    static_cast<float>(position[1]),
-                    static_cast<float>(position[2])
-                }};
-
+                layout.value.position = { pos.x, pos.y, pos.z };
                 layout.value.value = e.data[bvIdx];
                 layout.value.luminance = e.data[lumIdx];
                 layout.value.absoluteMagnitude = e.data[absMagIdx];
-                layout.value.apparentMagnitude = e.data[appMagIdx];
                 layout.value.speed = e.data[speedIdx];
 
                 result.insert(result.end(), layout.data.begin(), layout.data.end());
@@ -1191,11 +1114,7 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(OtherDataLayout)> data;
                 } layout = {};
 
-                layout.value.position = {{
-                    static_cast<float>(position[0]),
-                    static_cast<float>(position[1]),
-                    static_cast<float>(position[2])
-                }};
+                layout.value.position = { pos.x, pos.y, pos.z };
 
                 const int index = _otherDataOption.value();
                 // plus 3 because of the position
@@ -1215,7 +1134,6 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
 
                 layout.value.luminance = e.data[lumIdx];
                 layout.value.absoluteMagnitude = e.data[absMagIdx];
-                layout.value.apparentMagnitude = e.data[appMagIdx];
 
                 result.insert(result.end(), layout.data.begin(), layout.data.end());
                 break;
