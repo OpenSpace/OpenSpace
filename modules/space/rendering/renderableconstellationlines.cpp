@@ -113,7 +113,7 @@ RenderableConstellationLines::RenderableConstellationLines(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     // Avoid reading files here, instead do it in multithreaded initialize()
-    _speckFile = absPath(p.file.string()).string();
+    _speckFile = absPath(p.file).string();
     _speckFile.onChange([this]() { loadData(); });
     addProperty(_speckFile);
 

@@ -37,6 +37,7 @@
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <filesystem>
 #include <unordered_map>
 
 namespace ghoul::filesystem { class File; }
@@ -124,8 +125,8 @@ private:
         color) _uniformCache;
     std::shared_ptr<ghoul::fontrendering::Font> _font = nullptr;
 
-    std::string _speckFile;
-    std::string _labelFile;
+    std::filesystem::path _speckFile;
+    std::filesystem::path _labelFile;
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 

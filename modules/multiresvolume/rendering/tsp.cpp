@@ -40,7 +40,7 @@ namespace {
 
 namespace openspace {
 
-TSP::TSP(const std::string& filename)
+TSP::TSP(const std::filesystem::path& filename)
     : _filename(filename)
 {
     _file.open(_filename, std::ios::in | std::ios::binary);

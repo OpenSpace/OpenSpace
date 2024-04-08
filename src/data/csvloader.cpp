@@ -74,11 +74,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 
     LDEBUG("Parsing CSV file");
 
-    std::vector<std::vector<std::string>> rows = ghoul::loadCSVFile(
-        filePath.string(),
-        true
-    );
-
+    std::vector<std::vector<std::string>> rows = ghoul::loadCSVFile(filePath, true);
     if (rows.size() < 2) {
         LWARNING(std::format(
             "Error loading data file '{}'. No data items read", filePath

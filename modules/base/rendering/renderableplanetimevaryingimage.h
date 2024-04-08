@@ -27,6 +27,8 @@
 
 #include <modules/base/rendering/renderableplane.h>
 
+#include <filesystem>
+
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class Texture; }
 
@@ -62,7 +64,7 @@ private:
 
     // If there's just one state it should never disappear
     double _sequenceEndTime = std::numeric_limits<double>::max();
-    std::vector<std::string> _sourceFiles;
+    std::vector<std::filesystem::path> _sourceFiles;
     std::vector<double> _startTimes;
     int _activeTriggerTimeIndex = 0;
     properties::StringProperty _sourceFolder;

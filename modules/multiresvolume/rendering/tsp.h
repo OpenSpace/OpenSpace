@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
 #include <fstream>
 #include <list>
 #include <string>
@@ -55,7 +56,7 @@ public:
         NUM_DATA
     };
 
-    TSP(const std::string& filename);
+    TSP(const std::filesystem::path& filename);
     ~TSP();
 
     // load performs readHeader, readCache, writeCache and construct
@@ -113,7 +114,7 @@ private:
      */
     std::list<unsigned int> childBricks(unsigned int brickIndex);
 
-    std::string _filename;
+    std::filesystem::path _filename;
     std::ifstream _file;
     std::streampos _dataOffset;
 

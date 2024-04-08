@@ -194,7 +194,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _sourceDirectory = absPath(p.sourceDirectory).string();
     _transferFunctionPath = absPath(p.transferFunction).string();
     _transferFunction = std::make_shared<openspace::TransferFunction>(
-        _transferFunctionPath,
+        _transferFunctionPath.value(),
         [](const openspace::TransferFunction&) {}
     );
 
@@ -239,7 +239,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     namespace fs = std::filesystem;
     for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
         if (e.is_regular_file() && e.path().extension() == ".dictionary") {
-            loadTimestepMetadata(e.path().string());
+            loadTimestepMetadata(e.path());
         }
     }
 
@@ -328,13 +328,14 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
     _transferFunctionPath.onChange([this] {
         _transferFunction = std::make_shared<openspace::TransferFunction>(
-            _transferFunctionPath
+            _transferFunctionPath.value()
         );
         _raycaster->setTransferFunction(_transferFunction);
     });
 }
 
-void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
+void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::path& path)
+{
     RawVolumeMetadata metadata;
 
     try {
@@ -351,7 +352,7 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 
     Timestep t;
     t.metadata = metadata;
-    t.baseName = std::filesystem::path(path).stem().string();
+    t.baseName = path.stem();
     t.inRam = false;
     t.onGpu = false;
 

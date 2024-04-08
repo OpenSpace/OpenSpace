@@ -604,7 +604,7 @@ void OctreeManager::writeNodeToFile(std::ofstream& outFileStream, const OctreeNo
 }
 
 int OctreeManager::readFromFile(std::ifstream& inFileStream, bool readData,
-                                const std::string& folderPath)
+                                const std::filesystem::path& folderPath)
 {
     int nStarsRead = 0;
     const int oldMaxdist = static_cast<int>(MAX_DIST);
@@ -699,11 +699,11 @@ int OctreeManager::readNodeFromFile(std::ifstream& inFileStream, OctreeNode& nod
     return numStars;
 }
 
-void OctreeManager::writeToMultipleFiles(const std::string& outFolderPath,
+void OctreeManager::writeToMultipleFiles(const std::filesystem::path& outFolderPath,
                                          size_t branchIndex)
 {
     // Write entire branch to disc, with one file per node
-    const std::string outFilePrefix = outFolderPath + std::to_string(branchIndex);
+    const std::string outFilePrefix = std::format("{}{}", outFolderPath, branchIndex);
     // More threads doesn't make it much faster, disk speed still the limiter
     writeNodeToMultipleFiles(outFilePrefix, *_root->children[branchIndex], false);
 
@@ -797,7 +797,9 @@ void OctreeManager::fetchNodeDataFromFile(OctreeNode& node) {
     std::string posId = std::to_string(node.octreePositionIndex);
     posId.erase(posId.begin());
 
-    const std::string inFilePath = _streamFolderPath + posId + BINARY_SUFFIX;
+    const std::string inFilePath = std::format(
+        "{}{}{}", _streamFolderPath, posId, BINARY_SUFFIX
+    );
     std::ifstream inFileStream(inFilePath, std::ifstream::binary);
     // LINFO("Fetch node data file: " + inFilePath);
 

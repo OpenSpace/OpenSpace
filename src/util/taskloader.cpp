@@ -79,7 +79,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
 
     ghoul::Dictionary tasksDictionary;
     try {
-        ghoul::lua::loadDictionaryFromFile(absTasksFile.string(), tasksDictionary);
+        ghoul::lua::loadDictionaryFromFile(absTasksFile, tasksDictionary);
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(std::format(

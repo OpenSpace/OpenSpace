@@ -88,7 +88,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableRings)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::string texture;
+        std::filesystem::path texture;
 
         // [[codegen::verbatim(SizeInfo.description)]]
         float size;
@@ -128,7 +128,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _size.onChange([this]() { _planeIsDirty = true; });
     addProperty(_size);
 
-    _texturePath = absPath(p.texture).string();
+    _texturePath = p.texture.string();
     _textureFile = std::make_unique<File>(_texturePath.value());
 
     _offset = p.offset.value_or(_offset);
@@ -239,7 +239,7 @@ void RenderableRings::loadTexture() {
         using namespace ghoul::io;
         using namespace ghoul::opengl;
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath).string(),
+            absPath(_texturePath),
             1
         );
 

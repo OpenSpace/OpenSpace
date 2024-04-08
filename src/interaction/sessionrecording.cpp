@@ -157,11 +157,6 @@ void SessionRecording::removeTrailingPathSlashes(std::string& filename) const {
 }
 
 bool SessionRecording::handleRecordingFile(std::string filenameIn) {
-    if (isPath(filenameIn)) {
-        LERROR("Recording filename must not contain path (/) elements");
-        return false;
-    }
-
     if (_recordingDataMode == DataMode::Binary) {
         if (hasFileExtension(filenameIn, FileExtensionAscii)) {
             LERROR("Specified filename for binary recording has ascii file extension");
@@ -181,7 +176,21 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
         }
     }
 
-    std::filesystem::path absFilename = absPath("${RECORDINGS}/" + filenameIn);
+    std::filesystem::path absFilename = filenameIn;
+    if (absFilename.parent_path().empty() || absFilename.parent_path() == absFilename) {
+        absFilename = absPath("${RECORDINGS}/" + filenameIn);
+    }
+    else if (absFilename.parent_path().is_relative()) {
+        LERROR("If path is provided with the filename, then it must be an absolute path");
+        return false;
+    }
+    else if (!std::filesystem::exists(absFilename.parent_path())) {
+        LERROR(std::format(
+            "The recording filename path '{}' is not a valid location in the filesytem",
+            absFilename.parent_path().string()
+        ));
+        return false;
+    }
 
     if (std::filesystem::is_regular_file(absFilename)) {
         LERROR(std::format(

@@ -279,19 +279,19 @@ void WebGuiModule::startProcess() {
     const std::string command = std::format(
         "\"{}\" \"{}\" --directories \"{}\" {} --http-port \"{}\" --ws-address \"{}\" "
         "--ws-port {} --auto-close --local",
-        node.string(), absPath(_entryPoint.value()).string(), formattedDirectories,
+        node.string(), absPath(_entryPoint.value()), formattedDirectories,
         defaultEndpoint, _port.value(), _address.value(), webSocketPort
     );
 
     _process = std::make_unique<ghoul::Process>(
         command,
-        absPath("${BIN}").string(),
+        absPath("${BIN}"),
         [](const char* data, size_t n) {
-            const std::string str(data, n);
+            const std::string str = std::string(data, n);
             LDEBUG(std::format("Web GUI server output: {}", str));
         },
         [](const char* data, size_t n) {
-            const std::string str(data, n);
+            const std::string str = std::string(data, n);
             LERROR(std::format("Web GUI server error: {}", str));
         }
     );

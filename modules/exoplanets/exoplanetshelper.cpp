@@ -60,7 +60,7 @@ bool hasSufficientData(const ExoplanetDataEntry& p) {
 
 glm::vec3 computeStarColor(float bv) {
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
-    const std::string bvColormapPath = module->bvColormapPath();
+    const std::filesystem::path bvColormapPath = module->bvColormapPath();
 
     std::ifstream colorMap(absPath(bvColormapPath), std::ios::in);
 

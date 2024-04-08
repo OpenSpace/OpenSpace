@@ -302,15 +302,15 @@ RenderableGalaxy::RenderableGalaxy(const ghoul::Dictionary& dictionary)
 
     _rotation = p.rotation.value_or(_rotation);
 
-    _volumeFilename = p.volume.filename.string();
+    _volumeFilename = p.volume.filename;
     _volumeDimensions = p.volume.dimensions;
     _volumeSize = p.volume.size;
     _numberOfRayCastingSteps = p.volume.steps.value_or(_numberOfRayCastingSteps);
     _downScaleVolumeRendering = p.volume.downscale.value_or(_downScaleVolumeRendering);
 
-    _pointsFilename = p.points.filename.string();
+    _pointsFilename = p.points.filename;
     _enabledPointsRatio = p.points.enabledPointsRatio.value_or(_enabledPointsRatio);
-    _pointSpreadFunctionTexturePath = p.points.texture.string();
+    _pointSpreadFunctionTexturePath = p.points.texture;
     _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
         _pointSpreadFunctionTexturePath
     );
@@ -455,7 +455,7 @@ void RenderableGalaxy::initializeGL() {
 
     if (!_pointSpreadFunctionTexturePath.empty()) {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath).string(),
+            absPath(_pointSpreadFunctionTexturePath),
             2
         );
 
