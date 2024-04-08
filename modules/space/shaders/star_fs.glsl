@@ -33,7 +33,7 @@ flat in float gs_screenSpaceDepth;
 
 uniform sampler1D colorTexture;
 uniform sampler2D haloTexture;
-uniform float alphaValue;
+uniform float opacity;
 uniform vec3 fixedColor;
 uniform int colorOption;
 uniform sampler1D otherDataTexture;
@@ -41,11 +41,13 @@ uniform vec2 otherDataRange;
 uniform bool filterOutOfRange;
 
 uniform float haloMultiplier;
+uniform float haloGamma;
 uniform float haloScale;
 
 uniform bool hasGlare;
 uniform sampler2D glareTexture;
 uniform float glareMultiplier;
+uniform float glareGamma;
 uniform float glareScale;
 
 // keep in sync with renderablestars.h:ColorOption enum
@@ -105,15 +107,17 @@ Fragment getFragment() {
 
   vec2 scaledCoordsHalo = shiftedCoords / haloScale;
   vec2 unshiftedCoordsHalo = (scaledCoordsHalo + 1.0) / 2.0;
-  float textureColor = texture(haloTexture, unshiftedCoordsHalo).a * haloMultiplier;
+  float haloValue = texture(haloTexture, unshiftedCoordsHalo).a;
+  float alpha = pow(haloValue, haloGamma) * haloMultiplier;
   if (hasGlare) {
     vec2 scaledCoordsGlare = shiftedCoords / glareScale;
     vec2 unshiftedCoordsGlare = (scaledCoordsGlare + 1.0) / 2.0;
-    float glare = texture(glareTexture, unshiftedCoordsGlare).a * glareMultiplier;
-    textureColor += glare;
+    float glareValue = texture(glareTexture, unshiftedCoordsGlare).a;
+    float glare = pow(glareValue, glareGamma) * glareMultiplier;
+    alpha += glare;
   }
 
-  vec4 fullColor = vec4(color.rgb, textureColor * alphaValue);
+  vec4 fullColor = vec4(color.rgb, alpha * opacity);
 
   if (fullColor.a < 0.001) {
     discard;

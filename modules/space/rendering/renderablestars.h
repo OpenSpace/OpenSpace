@@ -108,6 +108,7 @@ private:
 
         properties::StringProperty texturePath;
         properties::FloatProperty multiplier;
+        properties::FloatProperty gamma;
         properties::FloatProperty scale;
 
         std::unique_ptr<ghoul::opengl::Texture> texture;
@@ -131,9 +132,10 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
         modelMatrix, cameraViewProjectionMatrix, cameraUp, eyePosition, colorOption,
-        magnitudeExponent, sizeComposition, lumCent, radiusCent, colorTexture, alphaValue,
+        magnitudeExponent, sizeComposition, lumCent, radiusCent, colorTexture, opacity,
         otherDataTexture, otherDataRange, filterOutOfRange, fixedColor, haloTexture,
-        haloMultiplier, haloScale, hasGlare, glareTexture, glareMultiplier, glareScale
+        haloMultiplier, haloGamma, haloScale, hasGlare, glareTexture, glareMultiplier,
+        glareGamma, glareScale
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;

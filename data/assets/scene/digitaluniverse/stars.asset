@@ -78,12 +78,20 @@ local SunStar = {
     Type = "RenderableStars",
     File = sunspeck .. "sunstar.speck",
     Halo = {
-      Texture = textures .. "halo.png"
+      Texture = textures .. "halo.png",
+      Multiplier = 0.55,
+      Gamma = 1.1,
+      Size = 0.95
     },
+    Glare = {
+      Texture = textures .. "glare.png",
+      Multiplier = 1.0,
+      Scale = 0.1
+    },
+    MagnitudeExponent = 6.25,
     ColorMap = colormaps .. "colorbv.cmap",
-    MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
-    FadeInDistances = { 0.0001, 0.1 },
+    FadeInDistances = { 0.0075, 0.1 },
     RenderableType = "PostDeferredTransparent",
     DataMapping = {
       Bv = "colorb_v",

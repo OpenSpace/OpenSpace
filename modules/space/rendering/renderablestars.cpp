@@ -50,12 +50,13 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableStars";
 
-    constexpr std::array<const char*, 22> UniformNames = {
+    constexpr std::array<const char*, 24> UniformNames = {
         "modelMatrix", "cameraViewProjectionMatrix", "cameraUp", "eyePosition",
         "colorOption", "magnitudeExponent", "sizeComposition", "lumCent", "radiusCent",
-        "colorTexture", "alphaValue", "otherDataTexture", "otherDataRange",
-        "filterOutOfRange", "fixedColor", "haloTexture", "haloMultiplier", "haloScale",
-        "hasGlare", "glareTexture", "glareMultiplier", "glareScale"
+        "colorTexture", "opacity", "otherDataTexture", "otherDataRange",
+        "filterOutOfRange", "fixedColor", "haloTexture", "haloMultiplier", "haloGamma",
+        "haloScale", "hasGlare", "glareTexture", "glareMultiplier", "glareGamma",
+        "glareScale"
     };
 
     enum SizeComposition {
@@ -240,9 +241,18 @@ namespace {
         "Multiplier",
         "Multiplier",
         "An individual multiplication factor for this texture component. Using the "
-        "multipliers for both components, it is possible to fine tune the look of the "
-        "stars or disable the contributions altogether by setting it to 0",
+        "multiplier and gamma values for both components, it is possible to fine tune "
+        "the look of the stars or disable the contributions altogether by setting it to "
+        "0",
         openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
+        "Gamma",
+        "Gamma",
+        "An individual gamma exponent for this texture component. Using the multiplier "
+        "and gamma values for both components, it is possible to finetune the look of "
+        "the stars."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
@@ -349,6 +359,9 @@ namespace {
             // [[codegen::verbatim(MultiplierInfo.description)]]
             std::optional<float> multiplier;
 
+            // [[codegen::verbatim(GammaInfo.description)]]
+            std::optional<float> gamma;
+
             // [[codegen::verbatim(ScaleInfo.description)]]
             std::optional<float> scale;
         };
@@ -440,12 +453,14 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         properties::PropertyOwner(HaloOwnerInfo),
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 5.f),
+        properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
         properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
     , _glare{
         properties::PropertyOwner(GlareOwnerInfo),
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 5.f),
+        properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
         properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
     , _parameters{
@@ -583,6 +598,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     _halo.container.addProperty(_halo.texturePath);
     _halo.multiplier = p.halo.multiplier.value_or(_halo.multiplier);
     _halo.container.addProperty(_halo.multiplier);
+    _halo.gamma = p.halo.gamma.value_or(_halo.gamma);
+    _halo.container.addProperty(_halo.gamma);
     _halo.scale = p.halo.scale.value_or(_halo.scale);
     _halo.container.addProperty(_halo.scale);
     addPropertySubOwner(_halo.container);
@@ -593,11 +610,13 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
             std::make_unique<ghoul::filesystem::File>(_glare.texturePath.value());
         _glare.file->setCallback(markTextureAsDirty);
         _glare.multiplier = p.glare->multiplier.value_or(_glare.multiplier);
+        _glare.gamma = p.glare->gamma.value_or(_glare.gamma);
         _glare.scale = p.glare->scale.value_or(_glare.scale);
     }
     _glare.texturePath.onChange(markTextureAsDirty);
     _glare.container.addProperty(_glare.texturePath);
     _glare.container.addProperty(_glare.multiplier);
+    _glare.container.addProperty(_glare.gamma);
     _glare.container.addProperty(_glare.scale);
     addPropertySubOwner(_glare.container);
 
@@ -775,10 +794,10 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         const float funcValue = static_cast<float>(a * distCam + b);
         const float fadeInValue = std::min(funcValue, 1.f);
 
-        _program->setUniform(_uniformCache.alphaValue, opacity() * fadeInValue);
+        _program->setUniform(_uniformCache.opacity, opacity() * fadeInValue);
     }
     else {
-        _program->setUniform(_uniformCache.alphaValue, opacity());
+        _program->setUniform(_uniformCache.opacity, opacity());
     }
 
     ghoul::opengl::TextureUnit haloUnit;
@@ -786,6 +805,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     _halo.texture->bind();
     _program->setUniform(_uniformCache.haloTexture, haloUnit);
     _program->setUniform(_uniformCache.haloMultiplier, _halo.multiplier);
+    _program->setUniform(_uniformCache.haloGamma, _halo.gamma);
     _program->setUniform(_uniformCache.haloScale, _halo.scale);
 
     ghoul::opengl::TextureUnit glareUnit;
@@ -794,6 +814,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _glare.texture->bind();
         _program->setUniform(_uniformCache.glareTexture, glareUnit);
         _program->setUniform(_uniformCache.glareMultiplier, _glare.multiplier);
+        _program->setUniform(_uniformCache.glareGamma, _glare.gamma);
         _program->setUniform(_uniformCache.glareScale, _glare.scale);
     }
     _program->setUniform(_uniformCache.hasGlare, _glare.texture != nullptr);
