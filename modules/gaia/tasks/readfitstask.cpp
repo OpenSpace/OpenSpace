@@ -132,7 +132,7 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
 
     FitsFileReader fileReader(false);
     std::vector<float> fullData = fileReader.readFitsFile(
-        _inFileOrFolderPath.string(),
+        _inFileOrFolderPath,
         nValuesPerStar,
         _firstRow,
         _lastRow,
@@ -255,7 +255,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
         // Add reading of file to jobmanager, which will distribute it to our threadpool.
         auto readFileJob = std::make_shared<gaia::ReadFileJob>(
-            fileToRead.string(),
+            fileToRead,
             _allColumnNames,
             _firstRow,
             _lastRow,

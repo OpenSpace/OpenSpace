@@ -112,7 +112,7 @@ void RenderableSphereImageLocal::loadTexture() {
     }
 
     std::unique_ptr<ghoul::opengl::Texture> texture =
-        ghoul::io::TextureReader::ref().loadTexture(_texturePath, 2);
+        ghoul::io::TextureReader::ref().loadTexture(_texturePath.value(), 2);
 
     if (!texture) {
         LWARNINGC(

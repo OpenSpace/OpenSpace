@@ -132,7 +132,7 @@ namespace {
     {
         using namespace openspace;
         // Download file from url
-        const std::filesystem::path file = directory.string() + fileName + ".aspx";
+        const std::filesystem::path file = std::format("{}{}.aspx", directory, fileName);
         const bool success = downloadFile(url, file);
         if (!success) {
             LINFO(std::format(
@@ -143,7 +143,8 @@ namespace {
 
         // Parse file to XML
         auto document = std::make_unique<tinyxml2::XMLDocument>();
-        document->LoadFile(file.string().c_str());
+        const std::string f = file.string();
+        document->LoadFile(f.c_str());
 
         // Search XML file for folders with urls
         const tinyxml2::XMLElement* root = document->RootElement();
@@ -253,6 +254,8 @@ namespace openspace {
 void WwtDataHandler::loadImages(const std::string& root,
                                 const std::filesystem::path& directory)
 {
+    ZoneScoped;
+
     // Steps to download new images
     // 1. Create the target directory if it doesn't already exist
     // 2. If the 'root' has an associated hash file, download and compare it with the

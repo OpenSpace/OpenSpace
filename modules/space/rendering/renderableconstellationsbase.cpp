@@ -106,7 +106,7 @@ RenderableConstellationsBase::RenderableConstellationsBase(
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     if (p.namesFile.has_value()) {
-        _namesFilename = absPath(p.namesFile.value().string()).string();
+        _namesFilename = absPath(*p.namesFile).string();
     }
     _namesFilename.onChange([this]() { loadConstellationFile(); });
     addProperty(_namesFilename);
@@ -161,7 +161,7 @@ void RenderableConstellationsBase::loadConstellationFile() {
 
     std::string line;
     while (file.good()) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
         if (line.empty()) {
             continue;
         }
@@ -171,7 +171,7 @@ void RenderableConstellationsBase::loadConstellationFile() {
         s >> abbreviation;
 
         std::string fullName;
-        std::getline(s, fullName);
+        ghoul::getline(s, fullName);
         ghoul::trimWhitespace(fullName);
         _namesTranslation[abbreviation] = fullName;
     }

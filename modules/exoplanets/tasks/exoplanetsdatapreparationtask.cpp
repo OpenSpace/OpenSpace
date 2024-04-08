@@ -33,6 +33,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
 #include <charconv>
 #include <filesystem>
 #include <fstream>
@@ -146,7 +147,7 @@ void ExoplanetsDataPreparationTask::perform(
     // Read total number of items
     int total = 0;
     std::string row;
-    while (std::getline(inputDataFile, row)) {
+    while (ghoul::getline(inputDataFile, row)) {
         ++total;
     }
     inputDataFile.clear();
@@ -159,7 +160,7 @@ void ExoplanetsDataPreparationTask::perform(
     LINFO(std::format("Loading {} exoplanets", total));
 
     int exoplanetCount = 0;
-    while (std::getline(inputDataFile, row)) {
+    while (ghoul::getline(inputDataFile, row)) {
         ++exoplanetCount;
         progressCallback(static_cast<float>(exoplanetCount) / static_cast<float>(total));
 
@@ -190,7 +191,7 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
     std::string line;
 
     // Read past any comments and empty lines
-    while (std::getline(file, line)) {
+    while (ghoul::getline(file, line)) {
         const bool shouldSkip = line.empty() || line[0] == '#';
         if (!shouldSkip) {
             break;
@@ -201,7 +202,7 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
     std::vector<std::string> columnNames;
     std::stringstream sStream(line);
     std::string colName;
-    while (std::getline(sStream, colName, ',')) {
+    while (ghoul::getline(sStream, colName, ',')) {
         columnNames.push_back(colName);
     }
 
@@ -270,7 +271,7 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
     std::string name;
 
     std::string data;
-    while (std::getline(lineStream, data, ',')) {
+    while (ghoul::getline(lineStream, data, ',')) {
         const std::string& column = columnNames[columnIndex];
         columnIndex++;
 
@@ -457,7 +458,7 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
     }
 
     std::string line;
-    while (std::getline(exoplanetsFile, line)) {
+    while (ghoul::getline(exoplanetsFile, line)) {
         const bool shouldSkipLine = (
             line.empty() || line[0] == '#' || line.substr(0, 7) == "datavar" ||
             line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture"
@@ -470,18 +471,18 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
         std::string data;
         std::string name;
         std::istringstream linestream(line);
-        std::getline(linestream, data, '#');
-        std::getline(linestream, name);
+        ghoul::getline(linestream, data, '#');
+        ghoul::getline(linestream, name);
         name.erase(0, 1);
 
         std::string coord;
         if (name == starName) {
             std::stringstream dataStream(data);
-            std::getline(dataStream, coord, ' ');
+            ghoul::getline(dataStream, coord, ' ');
             position[0] = std::stof(coord, nullptr);
-            std::getline(dataStream, coord, ' ');
+            ghoul::getline(dataStream, coord, ' ');
             position[1] = std::stof(coord, nullptr);
-            std::getline(dataStream, coord, ' ');
+            ghoul::getline(dataStream, coord, ' ');
             position[2] = std::stof(coord, nullptr);
             break;
         }
@@ -511,12 +512,12 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
     float teffLower = 0.f;
     float teffUpper = 0.f;
     std::string row;
-    while (std::getline(teffToBvFile, row)) {
+    while (ghoul::getline(teffToBvFile, row)) {
         std::istringstream lineStream(row);
         std::string teffString;
-        std::getline(lineStream, teffString, ',');
+        ghoul::getline(lineStream, teffString, ',');
         std::string bvString;
-        std::getline(lineStream, bvString);
+        ghoul::getline(lineStream, bvString);
 
         const float teffCurrent = std::stof(teffString, nullptr);
         const float bvCurrent = std::stof(bvString, nullptr);

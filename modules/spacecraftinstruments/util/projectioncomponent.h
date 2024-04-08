@@ -66,7 +66,7 @@ public:
     bool depthRendertarget();
 
     std::shared_ptr<ghoul::opengl::Texture> loadProjectionTexture(
-        const std::string& texturePath, bool isPlaceholder = false);
+        const std::filesystem::path& texturePath, bool isPlaceholder = false);
 
     glm::mat4 computeProjectorMatrix(const glm::vec3& loc, const glm::dvec3& aim,
         const glm::vec3& up, const glm::dmat3& instrumentMatrix, float fieldOfViewY,

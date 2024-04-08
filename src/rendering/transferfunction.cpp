@@ -28,6 +28,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/texture.h>
 #include <iterator>
 #include <filesystem>
@@ -41,7 +42,7 @@ namespace {
 
 namespace openspace {
 
-TransferFunction::TransferFunction(const std::string& filepath,
+TransferFunction::TransferFunction(const std::filesystem::path& filepath,
                                    TfChangedCallback tfChangedCallback)
     : _filepath(filepath)
 {
@@ -51,7 +52,7 @@ TransferFunction::TransferFunction(const std::string& filepath,
 
 TransferFunction::~TransferFunction() {}
 
-void TransferFunction::setPath(const std::string& filepath) {
+void TransferFunction::setPath(const std::filesystem::path& filepath) {
     if (_file) {
         _file = nullptr;
     }
@@ -94,11 +95,10 @@ void TransferFunction::setCallback(TfChangedCallback callback) {
 }
 
 void TransferFunction::setTextureFromTxt() {
-    std::ifstream in;
-    in.open(_filepath);
+    std::ifstream in = std::ifstream(_filepath);
 
     if (!in.is_open()) {
-        throw ghoul::FileNotFoundError(_filepath.string());
+        throw ghoul::FileNotFoundError(_filepath);
     }
 
     int width = 512;
@@ -109,7 +109,7 @@ void TransferFunction::setTextureFromTxt() {
 
     std::string line;
 
-    while (std::getline(in, line)) {
+    while (ghoul::getline(in, line)) {
         std::istringstream iss(line);
         std::string key;
         iss >> key;
@@ -208,7 +208,7 @@ void TransferFunction::setTextureFromTxt() {
 }
 
 void TransferFunction::setTextureFromImage() {
-    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath.string(), 1);
+    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath, 1);
     _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
 }
 

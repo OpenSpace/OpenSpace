@@ -36,9 +36,9 @@
 namespace {
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
-    double extractTriggerTimeFromFileName(const std::string& filePath) {
+    double extractTriggerTimeFromFileName(const std::filesystem::path& filePath) {
         // Extract the filename from the path (without extension)
-        std::string timeString = std::filesystem::path(filePath).stem().string();
+        std::string timeString = filePath.stem().string();
 
         // Ensure the separators are correct
         timeString.replace(4, 1, "-");
@@ -118,7 +118,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         if (!e.is_regular_file()) {
             continue;
         }
-        const std::string filePath = e.path().string();
+        std::filesystem::path filePath = e.path();
         const double time = extractTriggerTimeFromFileName(filePath);
         std::unique_ptr<ghoul::opengl::Texture> t =
             ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
@@ -128,7 +128,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         t->purgeFromRAM();
 
-        _files.push_back({ filePath, time, std::move(t) });
+        _files.push_back({ std::move(filePath), time, std::move(t) });
     }
 
     std::sort(

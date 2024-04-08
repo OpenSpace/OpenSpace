@@ -29,6 +29,7 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/thread.h>
 #include <curl/curl.h>
 #include <chrono>
@@ -111,7 +112,7 @@ namespace {
 
 namespace openspace {
 
-DownloadManager::FileFuture::FileFuture(std::string file)
+DownloadManager::FileFuture::FileFuture(std::filesystem::path file)
     : filePath(std::move(file))
 {}
 
@@ -134,18 +135,20 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
         return nullptr;
     }
 
-    auto future = std::make_shared<FileFuture>(file.filename().string());
+    auto future = std::make_shared<FileFuture>(file.filename());
     errno = 0;
 #ifdef WIN32
     FILE* fp;
-    errno_t error = fopen_s(&fp, file.string().c_str(), "wb");
+    const std::string f = file.string();
+    errno_t error = fopen_s(&fp, f.c_str(), "wb");
     if (error != 0) {
         LERROR(std::format(
             "Could not open/create file: {}. Errno: {}", file, errno
         ));
     }
 #else
-    FILE* fp = fopen(file.string().c_str(), "wb"); // write binary
+    const std::string f = file.string();
+    FILE* fp = fopen(f.c_str(), "wb"); // write binary
 #endif // WIN32
     if (!fp) {
         LERROR(std::format(
@@ -261,8 +264,8 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             if (res == CURLE_OK) {
                 std::string extension = std::string(ct);
                 std::stringstream ss(extension);
-                getline(ss, extension ,'/');
-                getline(ss, extension);
+                ghoul::getline(ss, extension ,'/');
+                ghoul::getline(ss, extension);
                 file.format = extension;
             }
             else {

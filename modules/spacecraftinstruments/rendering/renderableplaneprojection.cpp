@@ -77,7 +77,7 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     _defaultTarget = p.defaultTarget.value_or(_defaultTarget);
 
     if (p.texture.has_value()) {
-        _texturePath = absPath(*p.texture).string();
+        _texturePath = absPath(*p.texture);
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     }
 }
@@ -185,7 +185,7 @@ void RenderablePlaneProjection::loadTexture() {
     }
 
     std::unique_ptr<ghoul::opengl::Texture> texture =
-        ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath).string(), 2);
+        ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath), 2);
     if (!texture) {
         return;
     }

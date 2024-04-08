@@ -32,6 +32,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <filesystem>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -84,10 +85,10 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
 
-    std::string _volumeFilename;
+    std::filesystem::path _volumeFilename;
     glm::ivec3 _volumeDimensions = glm::ivec3(0);
-    std::string _pointsFilename;
-    std::string _pointSpreadFunctionTexturePath;
+    std::filesystem::path _pointsFilename;
+    std::filesystem::path _pointSpreadFunctionTexturePath;
     std::filesystem::path _raycastingShader;
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;

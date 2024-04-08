@@ -701,7 +701,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     _renderingMethodOption = codegen::map<RenderMethod>(p.renderMethod);
 
-    _pointSpreadFunctionTexturePath = absPath(p.texture.string()).string();
+    _pointSpreadFunctionTexturePath = absPath(p.texture).string();
     _pointSpreadFunctionFile = std::make_unique<File>(
         _pointSpreadFunctionTexturePath.value()
     );
@@ -900,7 +900,7 @@ void RenderableStars::loadPSFTexture() {
         std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
     {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath).string(),
+            absPath(_pointSpreadFunctionTexturePath),
             2
         );
 
@@ -1304,7 +1304,7 @@ void RenderableStars::update(const UpdateData&) {
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath).string(),
+                absPath(_colorTexturePath),
                 1
             );
             if (_colorTexture) {
@@ -1329,7 +1329,7 @@ void RenderableStars::update(const UpdateData&) {
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
             _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_otherDataColorMapPath).string(),
+                absPath(_otherDataColorMapPath),
                 1
             );
             if (_otherDataColorMapTexture) {

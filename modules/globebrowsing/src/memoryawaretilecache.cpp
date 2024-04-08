@@ -221,6 +221,8 @@ void MemoryAwareTileCache::TextureContainer::reset() {
         ghoul::opengl::Texture::FilterMode::AnisotropicMipMap;
 
     for (size_t i = 0; i < _numTextures; i++) {
+        ZoneScopedN("Texture");
+
         using namespace ghoul::opengl;
 
         std::unique_ptr<Texture> tex = std::make_unique<Texture>(
@@ -235,8 +237,8 @@ void MemoryAwareTileCache::TextureContainer::reset() {
         );
 
         tex->setDataOwnership(Texture::TakeOwnership::Yes);
-        tex->uploadTexture();
         tex->setFilter(mode);
+        tex->uploadTexture();
 
         _textures.push_back(std::move(tex));
     }

@@ -155,7 +155,7 @@ namespace {
         std::optional<bool> enabled;
 
         // [[codegen::verbatim(FileInfo.description)]]
-        std::optional<std::string> file;
+        std::optional<std::filesystem::path> file;
 
         struct ColorMapParameter {
             // The key for the data variable to use for color
@@ -319,7 +319,7 @@ ColorMappingComponent::ColorMappingComponent(const ghoul::Dictionary& dictionary
     }
 
     if (p.file.has_value()) {
-        colorMapFile = absPath(*p.file).string();
+        colorMapFile = p.file->string();
     }
 
     invert = p.invert.value_or(invert);
@@ -330,6 +330,8 @@ ghoul::opengl::Texture* ColorMappingComponent::texture() const {
 }
 
 void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
+    ZoneScoped;
+
     _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
 
     initializeParameterData(dataset);

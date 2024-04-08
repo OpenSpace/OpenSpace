@@ -28,6 +28,7 @@
 #include <openspace/util/concurrentjobmanager.h>
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
+#include <filesystem>
 
 namespace openspace::gaia {
 
@@ -49,8 +50,8 @@ struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
      * \param nValuesPerStar Defines how many values that will be stored per star
      * \param fitsReader The reader that should be used in this job
      */
-    ReadFileJob(std::string filePath, std::vector<std::string> allColumns, int firstRow,
-        int lastRow, size_t nDefaultCols, int nValuesPerStar,
+    ReadFileJob(std::filesystem::path filePath, std::vector<std::string> allColumns,
+        int firstRow, int lastRow, size_t nDefaultCols, int nValuesPerStar,
         std::shared_ptr<FitsFileReader> fitsReader);
 
     ~ReadFileJob() override = default;
@@ -60,7 +61,7 @@ struct ReadFileJob : public Job<std::vector<std::vector<float>>> {
     std::vector<std::vector<float>> product() override;
 
 private:
-    std::string _inFilePath;
+    std::filesystem::path _inFilePath;
     int _firstRow;
     int _lastRow;
     size_t _nDefaultCols;

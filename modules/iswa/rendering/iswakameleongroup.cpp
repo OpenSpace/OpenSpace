@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 
 namespace {
@@ -72,8 +73,8 @@ std::set<std::string> IswaKameleonGroup::fieldlineValue() const {
     return _fieldlines;
 }
 
-void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile,
-                                         std::string kameleonPath)
+void IswaKameleonGroup::setFieldlineInfo(std::filesystem::path fieldlineIndexFile,
+                                         std::filesystem::path kameleonPath)
 {
     if (fieldlineIndexFile != _fieldlineIndexFile) {
         _fieldlineIndexFile = std::move(fieldlineIndexFile);
@@ -98,7 +99,7 @@ void IswaKameleonGroup::registerProperties() {
     _fieldlines.onChange([this]() { updateFieldlineSeeds(); });
 }
 
-void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
+void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFile) {
     LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
 
     // Read the index file from disk
@@ -109,7 +110,7 @@ void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
     else {
         std::string line;
         std::string fileContent;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             fileContent += line;
         }
 

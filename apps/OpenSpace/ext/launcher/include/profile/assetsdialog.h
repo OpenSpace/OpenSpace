@@ -74,7 +74,8 @@ public:
      *        living
      */
     AssetsDialog(QWidget* parent, openspace::Profile* profile,
-        const std::string& assetBasePath, const std::string& userAssetBasePath);
+        const std::filesystem::path& assetBasePath,
+        const std::filesystem::path& userAssetBasePath);
 
 private slots:
     void searchTextChanged(const QString& text);

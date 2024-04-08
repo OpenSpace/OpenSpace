@@ -61,7 +61,7 @@ public:
 
 private:
     struct Timestep {
-        std::string baseName;
+        std::filesystem::path baseName;
         bool inRam;
         bool onGpu;
         RawVolumeMetadata metadata;
@@ -75,7 +75,7 @@ private:
     Timestep* timestepFromIndex(int target);
     void jumpToTimestep(int target);
 
-    void loadTimestepMetadata(const std::string& path);
+    void loadTimestepMetadata(const std::filesystem::path& path);
 
     properties::OptionProperty _gridType;
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;

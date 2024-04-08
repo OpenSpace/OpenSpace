@@ -54,7 +54,7 @@ public:
      * \param userConfigPath A string containing the file path of the user config
      *        directory where all window configs are stored
      */
-    SgctEdit(QWidget* parent, std::string userConfigPath);
+    SgctEdit(QWidget* parent, std::filesystem::path userConfigPath);
 
     /**
      * Constructor for SgctEdit class, the underlying class for the full window
@@ -67,7 +67,7 @@ public:
      * \param parent Pointer to parent Qt widget
      */
     SgctEdit(sgct::config::Cluster& cluster, std::string configName,
-        std::string& configBasePath, QWidget* parent);
+        std::filesystem::path& configBasePath, QWidget* parent);
 
     /**
      * Returns the saved filename.
@@ -124,7 +124,7 @@ private:
     DisplayWindowUnion* _displayWidget = nullptr;
     SettingsWidget* _settingsWidget = nullptr;
     sgct::config::Cluster _cluster;
-    const std::string _userConfigPath;
+    const std::filesystem::path _userConfigPath;
     const std::array<QColor, 4> _colorsForWindows = {
         QColor(0x2B, 0x9E, 0xC3),
         QColor(0xFC, 0xAB, 0x10),

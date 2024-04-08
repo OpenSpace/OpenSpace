@@ -29,6 +29,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -173,20 +174,20 @@ void MultiresVolumeRaycaster::postRaycast(const RaycastData&,
     _tfUnit = nullptr;
 }
 
-std::string MultiresVolumeRaycaster::boundsVertexShaderPath() const {
-    return std::string(GlslBoundsVsPath);
+std::filesystem::path MultiresVolumeRaycaster::boundsVertexShaderPath() const {
+    return absPath(GlslBoundsVsPath);
 }
 
-std::string MultiresVolumeRaycaster::boundsFragmentShaderPath() const {
-    return std::string(GlslBoundsFsPath);
+std::filesystem::path MultiresVolumeRaycaster::boundsFragmentShaderPath() const {
+    return absPath(GlslBoundsFsPath);
 }
 
-std::string MultiresVolumeRaycaster::raycasterPath() const {
-    return std::string(GlslRaycastPath);
+std::filesystem::path MultiresVolumeRaycaster::raycasterPath() const {
+    return absPath(GlslRaycastPath);
 }
 
-std::string MultiresVolumeRaycaster::helperPath() const {
-    return std::string(GlslHelperPath); // no helper file
+std::filesystem::path MultiresVolumeRaycaster::helperPath() const {
+    return absPath(GlslHelperPath); // no helper file
 }
 
 void MultiresVolumeRaycaster::setModelTransform(glm::mat4 transform) {

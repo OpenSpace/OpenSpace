@@ -59,7 +59,7 @@ namespace {
 
 namespace openspace {
 
-HongKangParser::HongKangParser(std::string name, std::string fileName,
+HongKangParser::HongKangParser(std::string name, std::filesystem::path fileName,
                                std::string spacecraft,
                                const ghoul::Dictionary& translationDictionary,
                                std::vector<std::string> potentialTargets)
@@ -140,12 +140,7 @@ bool HongKangParser::create() {
             "HongKangParser"
         );
     }
-    const size_t position = _fileName.find_last_of('.') + 1;
-    if (position == 0 || position == std::string::npos) {
-        return true;
-    }
-
-    if (std::filesystem::path(_fileName).extension() != ".txt") {
+    if (_fileName.extension() != ".txt") {
         return true;
     }
 
@@ -164,7 +159,7 @@ bool HongKangParser::create() {
 
     std::string line;
     while (!file.eof()) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
         const std::string event = line.substr(0, line.find_first_of(' '));
 
@@ -192,7 +187,7 @@ bool HongKangParser::create() {
                 // fill image
                 Image image = {
                     .timeRange = TimeRange(time, time + Exposure),
-                    .path = _defaultCaptureImage.string(),
+                    .path = _defaultCaptureImage,
                     .activeInstruments = std::move(cameraSpiceID),
                     .target = cameraTarget,
                     .isPlaceholder = true,
@@ -242,7 +237,7 @@ bool HongKangParser::create() {
                         // store individual image
                         Image image = {
                             .timeRange = std::move(scanRange),
-                            .path = _defaultCaptureImage.string(),
+                            .path = _defaultCaptureImage,
                             .activeInstruments = it->second->translations(),
                             .target = cameraTarget,
                             .isPlaceholder = true,

@@ -33,6 +33,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
 
@@ -372,7 +373,7 @@ void RenderableFieldlines::loadSeedPointsFromFile() {
         ));
     else {
         std::string line;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             std::stringstream s(line);
 
             glm::vec3 point;
@@ -436,8 +437,9 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         LERROR(std::format("'{}' does not name a file", KeyVectorField));
         return {};
     }
-    std::string fileName = _vectorFieldInfo.value<std::string>(KeyVectorFieldFile);
-    fileName = absPath(fileName).string();
+    std::filesystem::path fileName = absPath(
+        _vectorFieldInfo.value<std::string>(KeyVectorFieldFile)
+    );
 
     //KameleonWrapper::Model modelType;
     if (model != VectorFieldKameleonModelBATSRUS) {
@@ -472,7 +474,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         std::string yVariable = _vectorFieldInfo.value<std::string>(v2);
         std::string zVariable = _vectorFieldInfo.value<std::string>(v3);
 
-        KameleonWrapper kw(fileName);
+        KameleonWrapper kw = KameleonWrapper(fileName);
         return kw.classifiedFieldLines(
             xVariable,
             yVariable,
@@ -483,7 +485,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     }
 
     if (lorentzForce) {
-        KameleonWrapper kw(fileName);
+        KameleonWrapper kw = KameleonWrapper(fileName);
         return kw.lorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
     }
 

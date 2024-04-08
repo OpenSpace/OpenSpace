@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
 #include <memory>
 
 namespace ghoul::filesystem { class File; }
@@ -63,7 +64,7 @@ private:
     void updatePlane(const Image& img, double currentTime);
     void setTarget(std::string body);
 
-    std::string _texturePath;
+    std::filesystem::path _texturePath;
 
     bool _planeIsDirty = false;
 

@@ -904,10 +904,17 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     }
 
     if (!std::filesystem::is_regular_file(path)) {
-        throw ghoul::RuntimeError(std::format(
-            "Could not find asset file '{}' requested by '{}'",
-            path, retriever
-        ));
+        if (retriever.empty()) {
+            throw ghoul::RuntimeError(std::format(
+                "Could not find asset file '{}' requested by profile", path
+            ));
+        }
+        else {
+            throw ghoul::RuntimeError(std::format(
+                "Could not find asset file '{}' requested by '{}'",
+                path, retriever
+            ));
+        }
     }
     auto asset = std::make_unique<Asset>(*this, path, explicitEnable);
     Asset* res = asset.get();
@@ -918,6 +925,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
 
 void AssetManager::callOnInitialize(Asset* asset) const {
     ZoneScoped;
+    ZoneText(asset->path().string().c_str(), asset->path().string().length());
     ghoul_precondition(asset, "Asset must not be nullptr");
 
     auto it = _onInitializeFunctionRefs.find(asset);
@@ -991,20 +999,20 @@ std::filesystem::path AssetManager::generateAssetPath(
     // 2) Relative to the global asset root (*)
 
     const PathType pathType = classifyPath(assetPath);
-    std::string prefix;
+    std::filesystem::path prefix;
     if (pathType == PathType::RelativeToAsset) {
-        prefix = baseDirectory.string() + '/';
+        prefix = baseDirectory / "";
     }
     else if (pathType == PathType::RelativeToAssetRoot) {
-        prefix = _assetRootDirectory.string() + '/';
+        prefix = _assetRootDirectory / "";
     }
     // We treat the Absolute and the Tokenized paths the same here since they will
     // behave the same when passed into the `absPath` function
 
     // Construct the full path including the .asset extension
-    std::string fullAssetPath = prefix + assetPath;
-    if (std::filesystem::path(assetPath).extension() != ".asset") {
-        fullAssetPath += ".asset";
+    std::filesystem::path fullAssetPath = std::format("{}{}", prefix, assetPath);
+    if (fullAssetPath.extension() != ".asset") {
+        fullAssetPath.replace_extension(".asset");
     }
 
     // We don't check whether the file exists here as the error will be more

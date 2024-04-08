@@ -35,6 +35,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -202,7 +203,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
     addProperty(Fadeable::_opacity);
 
-    _speckFile = absPath(p.file).string();
+    _speckFile = absPath(p.file);
     _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
@@ -229,7 +230,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_lineWidth);
 
     if (p.labelFile.has_value()) {
-        _labelFile = absPath(*p.labelFile).string();
+        _labelFile = absPath(*p.labelFile);
         _hasLabel = true;
 
         _drawLabels = p.drawLabels.value_or(_drawLabels);
@@ -455,8 +456,7 @@ bool RenderableDUMeshes::loadData() {
         }
     }
 
-    const std::string labelFile = _labelFile;
-    if (!labelFile.empty()) {
+    if (!_labelFile.empty()) {
         _labelset = dataloader::label::loadFileWithCache(_labelFile);
     }
 
@@ -480,7 +480,7 @@ bool RenderableDUMeshes::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
         if (file.eof()) {
             break;
@@ -545,13 +545,13 @@ bool RenderableDUMeshes::readSpeckFile() {
                 str >> dummy;
             } while (dummy != "{");
 
-            std::getline(file, line);
+            ghoul::getline(file, line);
             std::stringstream dim(line);
             dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data:
             for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
-                std::getline(file, line);
+                ghoul::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;
                 }
@@ -603,7 +603,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 //}
             }
 
-            std::getline(file, line);
+            ghoul::getline(file, line);
             if (line.substr(0, 1) == "}") {
                 _renderingMeshesMap.insert({ meshIndex++, mesh });
             }

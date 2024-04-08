@@ -63,7 +63,7 @@ local EuclidTrailOrbit = {
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.Euclid,
-      Observer = l2.ID.L2,
+      Observer = transforms.ID.L2,
       Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.863, 0.0, 0.902 },
@@ -90,8 +90,8 @@ local EuclidTrailCoRevOrbit = {
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.Euclid,
-      Observer = l2.ID.L2,
-      Frame = l2.Frame.L2Corevolving
+      Observer = transforms.ID.L2,
+      Frame = transforms.Frame.L2Corevolving
     },
     Color = { 0.863, 0.0, 0.902 },
     Period = 182.621099, -- About 6 months

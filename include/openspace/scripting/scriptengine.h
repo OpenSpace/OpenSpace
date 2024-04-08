@@ -127,7 +127,7 @@ private:
     // Logging variables
     bool _logFileExists = false;
     bool _logScripts = true;
-    std::string _logFilename;
+    std::filesystem::path _logFilename;
 };
 
 } // namespace openspace::scripting

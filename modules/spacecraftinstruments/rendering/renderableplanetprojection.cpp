@@ -653,7 +653,7 @@ void RenderablePlanetProjection::loadColorTexture() {
     _baseTexture = nullptr;
     if (selectedPath != NoImageText) {
         _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(selectedPath).string(),
+            absPath(selectedPath),
             2
         );
         if (_baseTexture) {
@@ -676,7 +676,7 @@ void RenderablePlanetProjection::loadHeightTexture() {
     _heightMapTexture = nullptr;
     if (selectedPath != NoImageText) {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(selectedPath).string(),
+            absPath(selectedPath),
             2
         );
         if (_heightMapTexture) {

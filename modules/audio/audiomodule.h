@@ -305,7 +305,7 @@ private:
      */
     std::unique_ptr<SoLoud::Wav> loadSound(const std::filesystem::path& path);
 
-    std::unique_ptr<SoLoud::Soloud> _engine = nullptr;
+    std::unique_ptr<SoLoud::Soloud> _engine;
 
     std::map<std::string, Info> _sounds;
 };

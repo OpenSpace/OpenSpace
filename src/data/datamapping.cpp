@@ -151,6 +151,8 @@ documentation::Documentation DataMapping::Documentation() {
 }
 
 DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionary) {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     DataMapping result;

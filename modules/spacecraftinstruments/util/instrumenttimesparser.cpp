@@ -31,6 +31,7 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 
@@ -49,7 +50,8 @@ namespace {
 
 namespace openspace {
 
-InstrumentTimesParser::InstrumentTimesParser(std::string name, std::string sequenceSource,
+InstrumentTimesParser::InstrumentTimesParser(std::string name,
+                                             std::filesystem::path sequenceSource,
                                              ghoul::Dictionary& inputDict)
     : _pattern("\"(.{23})\" \"(.{23})\"")
     , _name(std::move(name))
@@ -98,7 +100,7 @@ bool InstrumentTimesParser::create() {
             std::smatch matches;
             TimeRange instrumentActiveTimeRange;
             bool successfulRead = true;
-            while (std::getline(inFile, line)) {
+            while (ghoul::getline(inFile, line)) {
                 if (!std::regex_match(line, matches, _pattern)) {
                     continue;
                 }

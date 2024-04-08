@@ -44,6 +44,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/constexpr.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 
@@ -273,13 +274,13 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
     ss << SpiceManager::ref().dateFromEphemerisTime(timestamp);;
     std::string token;
 
-    std::getline(ss, token, ' ');
+    ghoul::getline(ss, token, ' ');
     url += token + "-";
-    std::getline(ss, token, ' ');
+    ghoul::getline(ss, token, ' ');
     url = std::format("{}{}-", url, monthNumber(token));
-    std::getline(ss, token, 'T');
+    ghoul::getline(ss, token, 'T');
     url += token + "%20";
-    std::getline(ss, token, '.');
+    ghoul::getline(ss, token, '.');
     url += token;
 
     return url;
@@ -412,7 +413,7 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
 
     std::filesystem::path ext = std::filesystem::path(absPath(info.path)).extension();
     if (ext == ".cdf") {
-        KameleonWrapper kw = KameleonWrapper(absPath(info.path).string());
+        KameleonWrapper kw = KameleonWrapper(absPath(info.path));
 
         std::string parent = kw.parent();
         std::string frame = kw.frame();
@@ -627,7 +628,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
     }
 }
 
-void IswaManager::createFieldline(std::string name, std::string cdfPath,
+void IswaManager::createFieldline(std::string name, std::filesystem::path cdfPath,
                                   std::string seedPath)
 {
     std::filesystem::path ext = absPath(cdfPath).extension();
@@ -639,7 +640,7 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
                 "Type = 'RenderableFieldlines',"
                 "VectorField = {"
                     "Type = 'VolumeKameleon',"
-                    "File = '" + cdfPath + "',"
+                    "File = '" + cdfPath.string() + "',"
                     "Model = 'BATSRUS',"
                     "Variables = {'bx', 'by', 'bz'}"
                 "},"
@@ -663,7 +664,7 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
         }
     }
     else {
-        LWARNING(cdfPath + " is not a cdf file or can't be found");
+        LWARNING(std::format("{} is not a CDF file or cannot be found", cdfPath));
     }
 }
 

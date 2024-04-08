@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <filesystem>
 
 namespace openspace {
 
@@ -43,15 +44,15 @@ public:
     ~ExoplanetsModule() override = default;
 
     bool hasDataFiles() const;
-    std::string exoplanetsDataPath() const;
-    std::string lookUpTablePath() const;
-    std::string teffToBvConversionFilePath() const;
-    std::string bvColormapPath() const;
-    std::string starTexturePath() const;
-    std::string starGlareTexturePath() const;
-    std::string noDataTexturePath() const;
-    std::string orbitDiscTexturePath() const;
-    std::string habitableZoneTexturePath() const;
+    std::filesystem::path exoplanetsDataPath() const;
+    std::filesystem::path lookUpTablePath() const;
+    std::filesystem::path teffToBvConversionFilePath() const;
+    std::filesystem::path bvColormapPath() const;
+    std::filesystem::path starTexturePath() const;
+    std::filesystem::path starGlareTexturePath() const;
+    std::filesystem::path noDataTexturePath() const;
+    std::filesystem::path orbitDiscTexturePath() const;
+    std::filesystem::path habitableZoneTexturePath() const;
     glm::vec3 comparisonCircleColor() const;
     bool showComparisonCircle() const;
     bool showOrbitUncertainty() const;
