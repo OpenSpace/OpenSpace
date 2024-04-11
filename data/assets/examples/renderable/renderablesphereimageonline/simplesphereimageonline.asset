@@ -1,0 +1,28 @@
+local Radius = 696340000 * 20 -- The radius of the Sun in meters, times 20
+
+local SimpleSphereOnlineImage = {
+  Identifier = "SimpleSphereOnlineImage",
+  Renderable = {
+    Type = "RenderableSphereImageOnline",
+    URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg",
+
+    -- Parameters from the parent class `RenderableSphere`
+    Size = Radius,
+    Segments = 16
+  },
+  GUI = {
+    Name = "Simple Sphere Online Image",
+    Path = "/Examples",
+    Description = "Simple sphere with an online image of an owl"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SimpleSphereOnlineImage)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SimpleSphereOnlineImage)
+end)
+
+asset.export(SimpleSphereOnlineImage)

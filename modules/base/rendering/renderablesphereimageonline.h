@@ -56,7 +56,7 @@ private:
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-    bool _textureIsDirty = false;
+    bool _textureIsDirty = true;
 };
 
 } // namespace openspace
