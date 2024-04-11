@@ -50,7 +50,6 @@ local Object = {
 }
 
 
-
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Object)
 end)
@@ -60,6 +59,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Object)
+
 
 
 asset.meta = {
