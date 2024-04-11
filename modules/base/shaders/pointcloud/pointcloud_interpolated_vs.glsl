@@ -79,7 +79,7 @@ vec3 interpolateCatmullRom(float t, vec3 p0, vec3 p1, vec3 p2, vec3 p3) {
 }
 
 // Quaternion math from: https://gist.github.com/mattatz/40a91588d5fb38240403f198a938a593
-vec4 quaternionSlerp(in vec4 a, in vec4 b, float t) {
+vec4 quaternionSlerp(vec4 a, vec4 b, float t) {
     // if either input is zero, return the other.
     if (length(a) == 0.0) {
         if (length(b) == 0.0) {

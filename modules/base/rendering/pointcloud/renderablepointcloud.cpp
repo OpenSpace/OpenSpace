@@ -155,8 +155,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "OrientationRenderOption",
         "Orientation Render Option",
-        "Option that controls how the points are oriented in relation to the camera. "
-        "wether the point  should face the camera or not. Used for "
+        "Option that controls how the points are oriented in relation to the camera "
+        "whether the point should face the camera or not. Used for "
         "non-linear display environments such as fisheye.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -206,7 +206,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseOrientationDataInfo = {
         "UseOrientationData",
         "Use Orientation Data",
-        "Include the orietation data in the datraset when rendering the poitns, if there "
+        "Include the orietation data in the dataset when rendering the points, if there "
         "is any. To see the rotation, you also need to set the \"Orientation Render "
         "Option\" to \"Fixed Rotation\"",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -219,7 +219,7 @@ namespace {
         "Direction\" rotates the points so that the plane is orthogonal to the viewing "
         "direction of the camera (useful for planar displays), and \"Camera Position "
         "Normal\" rotates the points towards the position of the "
-        "camera (useful for spherical displays, like dome theatres). In both these cases "
+        "camera (useful for spherical displays, like dome theaters). In both these cases "
         "the points will be billboarded towards the camera. In contrast, \"Fixed "
         "Rotation\" does not rotate the points at all based on the camera and should be "
         "used when the dataset contains orientation information for the points.",
@@ -1373,9 +1373,9 @@ glm::dvec3 RenderablePointCloud::transformedPosition(
 glm::quat RenderablePointCloud::orientationQuaternion(
                                                 const dataloader::Dataset::Entry& e) const
 {
-    int orientationDataIndex = _dataset.orientationDataIndex;
+    const int orientationDataIndex = _dataset.orientationDataIndex;
 
-    glm::vec3 u = glm::normalize(glm::vec3(
+    const glm::vec3 u = glm::normalize(glm::vec3(
         _transformationMatrix *
         glm::dvec4(
             e.data[orientationDataIndex + 0],
@@ -1385,7 +1385,7 @@ glm::quat RenderablePointCloud::orientationQuaternion(
         )
     ));
 
-    glm::vec3 v = glm::normalize(glm::vec3(
+    const glm::vec3 v = glm::normalize(glm::vec3(
         _transformationMatrix *
         glm::dvec4(
             e.data[orientationDataIndex + 3],
@@ -1399,11 +1399,11 @@ glm::quat RenderablePointCloud::orientationQuaternion(
     // spanned by the UV vectors.
 
     // First rotate to align the z-axis with plane normal
-    glm::vec3 planeNormal = glm::normalize(glm::cross(u, v));
+    const glm::vec3 planeNormal = glm::normalize(glm::cross(u, v));
     glm::quat q = glm::normalize(glm::rotation(glm::vec3(0.f, 0.f, 1.f), planeNormal));
 
     // Add rotation around plane normal (rotate new x-axis to u)
-    glm::vec3 rotatedRight = glm::normalize(
+    const glm::vec3 rotatedRight = glm::normalize(
         glm::vec3(glm::mat4_cast(q) * glm::vec4(1.f, 0.f, 0.f, 1.f))
     );
     q = glm::normalize(glm::rotation(rotatedRight, u)) * q;
@@ -1552,12 +1552,12 @@ int RenderablePointCloud::currentSizeParameterIndex() const {
 }
 
 bool RenderablePointCloud::hasColorData() const {
-    int colorParamIndex = currentColorParameterIndex();
+    const int colorParamIndex = currentColorParameterIndex();
     return _hasColorMapFile && colorParamIndex >= 0;
 }
 
 bool RenderablePointCloud::hasSizeData() const {
-    int sizeParamIndex = currentSizeParameterIndex();
+    const int sizeParamIndex = currentSizeParameterIndex();
     return _hasDatavarSize && sizeParamIndex >= 0;
 }
 
@@ -1593,12 +1593,12 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
 
     if (hasColorData()) {
-        int colorParamIndex = currentColorParameterIndex();
+        const int colorParamIndex = currentColorParameterIndex();
         result.push_back(e.data[colorParamIndex]);
     }
 
     if (hasSizeData()) {
-        int sizeParamIndex = currentSizeParameterIndex();
+        const int sizeParamIndex = currentSizeParameterIndex();
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
