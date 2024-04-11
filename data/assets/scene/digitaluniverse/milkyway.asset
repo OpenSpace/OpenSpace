@@ -51,6 +51,7 @@ local Object = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Object)
 end)

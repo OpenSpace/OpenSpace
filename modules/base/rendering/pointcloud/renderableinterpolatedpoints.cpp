@@ -321,7 +321,7 @@ void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {
     _program = BaseModule::ProgramObjectManager.request(
         "RenderablePointCloud_Interpolated",
         []() {
-            std::filesystem::path path = absPath("${MODULE_BASE}/shaders/pointcloud/");
+            std::filesystem::path path = absPath("${MODULE_BASE}/shaders/pointcloud");
             return global::renderEngine->buildRenderProgram(
                 "RenderablePointCloud_Interpolated",
                 path / "pointcloud_interpolated_vs.glsl",
@@ -442,13 +442,13 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
     const Dataset::Entry& e1 = _dataset.entries[secondIndex];
 
     if (hasColorData()) {
-        int colorParamIndex = currentColorParameterIndex();
+        const int colorParamIndex = currentColorParameterIndex();
         result.push_back(e0.data[colorParamIndex]);
         result.push_back(e1.data[colorParamIndex]);
     }
 
     if (hasSizeData()) {
-        int sizeParamIndex = currentSizeParameterIndex();
+        const int sizeParamIndex = currentSizeParameterIndex();
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
