@@ -60,12 +60,21 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This Scale type provides the ability to scale an object dynamically as time in the
+    // simulation passes. The provided `ReferenceDate`, specifies when the total scale
+    // should be equal to 0 and the scales grows by `Speed` meters for every second in the
+    // simulation. If `ClampToPositive` is specified as `true`, then the scale will only
+    // stay positive. If it is `false` and the simulation time is _before_ the
+    // `ReferenceDate`, the scale value will be negative.
+    //
+    // A commmon use-case for the Scale type would be to represent the Radiosphere, which
+    // grows at the speed of light.
     struct [[codegen::Dictionary(TimeDependentScale)]] Parameters {
         // [[codegen::verbatim(ReferenceDateInfo.description)]]
-        std::string referenceDate;
+        std::string referenceDate [[codegen::datetime()]];
 
         // [[codegen::verbatim(SpeedInfo.description)]]
-        std::optional<double> speed;
+        std::optional<double> speed [[codegen::greaterequal(0.0)]];
 
         // [[codegen::verbatim(ClampToPositiveInfo.description)]]
         std::optional<bool> clampToPositive;
@@ -93,8 +102,7 @@ TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
     _speed = p.speed.value_or(_speed);
     addProperty(_speed);
 
-    // @TODO (abock, 2021-01-09) The clamp to positive value from the dictionary was never
-    // actually read. I think this should probably be done here?
+    _clampToPositive = p.clampToPositive.value_or(_clampToPositive);
     addProperty(_clampToPositive);
 }
 
