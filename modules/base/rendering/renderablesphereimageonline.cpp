@@ -65,6 +65,9 @@ namespace {
         );
     }
 
+    // A RenderableSphereImageOnline can be used to show an image from an online source
+    // (as a URL) on a sphere in the OpenSpace scene. For more informaiton about a general
+    // RenderableSphere see [RenderableSphere](#base_renderable_sphere).
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
