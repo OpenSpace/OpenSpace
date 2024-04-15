@@ -174,10 +174,6 @@ namespace {
         // Sets the blend mode of this layer to determine how it interacts with other
         // layers on top of this
         std::optional<BlendMode> blendMode;
-
-        // If the primary layer creation fails, this layer is used as a fallback
-        std::optional<ghoul::Dictionary>
-            fallback [[codegen::reference("globebrowsing_layer")]];
     };
 #include "layer_codegen.cpp"
 } // namespace

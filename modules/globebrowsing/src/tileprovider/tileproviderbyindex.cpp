@@ -27,33 +27,44 @@
 #include <openspace/documentation/documentation.h>
 
 namespace {
+    // This TileProvider provides the ability to override the contents for tiles at
+    // specific indices. A default tile provider `T` has to be specified that is used by
+    // default for the entrie globe and if a tile provider `P` is specified for a specific
+    // tile with index `I`, then `T` is used for all indices that are not `I` and `P` is
+    // used for the index `I`.
+    //
+    // This tile provider can be used to, for example, show an inset image that is merged
+    // with a larger globe-spanning image.
     struct [[codegen::Dictionary(TileProviderByIndex)]] Parameters {
-        ghoul::Dictionary defaultProvider;
+        ghoul::Dictionary defaultTileProvider
+            [[codegen::reference("globebrowsing_layer")]];
 
         struct IndexProvider {
             struct Index {
                 // The x coordinate for this index. This specifies the horizontal
-                // direction (longitude) component
+                // direction (longitude) component. Acceptable values for this coordinate
+                // have to be smaller than $2 * 2^{level}$
                 int x [[codegen::greaterequal(0)]];
 
                 // The y coordinate for this index. This specifies the vertical direction
-                // (latitude) component
+                // (latitude) component. Acceptable values for this coordinate have to be
+                // smaller than $2^{level}$
                 int y [[codegen::greaterequal(0)]];
 
                 // The z-level which corresponds to the depth of the tile pyramid, which
-                // directly impacts the applied resolution of the tileprovider shown here
-                int level [[codegen::inrange(0, 255)]];
+                // directly impacts the applied resolution of the tileprovider shown here.
+                int level [[codegen::inrange(0, 23)]];
             };
             // The index for which the provided tile provider is used
-            Index tileIndex;
+            Index index;
 
-            // The dictionary that described the tileprovider to be used by the provided
-            // index
-            ghoul::Dictionary tileProvider;
+            // The dictionary that describes the TileProvider to be used by the provided
+            // `index`.
+            ghoul::Dictionary tileProvider [[codegen::reference("globebrowsing_layer")]];
         };
 
-        // The list of all tileprovides and the indices at which they are used
-        std::vector<IndexProvider> indexTileProviders;
+        // The list of all TileProviders and the indices at which they are used
+        std::vector<IndexProvider> tileProviders;
     };
 #include "tileproviderbyindex_codegen.cpp"
 } // namespace
@@ -70,18 +81,18 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
-    if (p.defaultProvider.hasValue<std::string>("Type")) {
-        const std::string type = p.defaultProvider.value<std::string>("Type");
+    if (p.defaultTileProvider.hasValue<std::string>("Type")) {
+        const std::string type = p.defaultTileProvider.value<std::string>("Type");
         typeID = ghoul::from_string<layers::Layer::ID>(type);
     }
 
-    _defaultTileProvider = createFromDictionary(typeID, p.defaultProvider);
+    _defaultTileProvider = createFromDictionary(typeID, p.defaultTileProvider);
 
-    for (const Parameters::IndexProvider& ip : p.indexTileProviders) {
+    for (const Parameters::IndexProvider& ip : p.tileProviders) {
         const TileIndex tileIndex = TileIndex(
-            ip.tileIndex.x,
-            ip.tileIndex.y,
-            static_cast<uint8_t>(ip.tileIndex.level)
+            ip.index.x,
+            ip.index.y,
+            static_cast<uint8_t>(ip.index.level)
         );
 
         layers::Layer::ID providerID = layers::Layer::ID::DefaultTileProvider;
