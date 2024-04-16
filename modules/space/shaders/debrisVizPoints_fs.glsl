@@ -28,8 +28,10 @@ in float projectionViewDepth;
 in vec4 viewSpace;
 in vec2 texCoord;
 flat in int skip;
-//flat in float alpha;
 
+uniform bool enableOutline;
+uniform vec3 outlineColor;
+uniform float outlineWeight;
 uniform vec3 color;
 uniform float opacity;
 
@@ -48,8 +50,8 @@ Fragment getFragment() {
 
   // Creates outline for circle
   vec3 _color = color;
-  if (length(st) > 0.8 && length(st) < 1.0) {
-    _color *= 0.f;
+  if (enableOutline && (length(st) > (1.0 - outlineWeight) && length(st) < 1.0)) {
+    _color = outlineColor;
   }
 
   frag.color = vec4(_color, opacity);

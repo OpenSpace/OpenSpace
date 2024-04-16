@@ -132,6 +132,30 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
+        "EnableOutline",
+        "Enable Point Outline",
+        "This setting determines if each point should have an outline or not. An outline "
+        "is only applied when rendering as colored points (not when using textures).",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
+        "OutlineColor",
+        "Outline Color",
+        "This value defines the color of the outline. Darker colors will be "
+        "less visible if Additive Blending is enabled.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
+        "OutlineWeight",
+        "Outline Weight",
+        "This setting determines the thickness of the outline. A value of 0 will "
+        "not show any outline, while a value of 1 will cover the whole point.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
@@ -208,6 +232,15 @@ namespace {
 
         // [[codegen::verbatim(MaxSizeInfo.description)]]
         std::optional<float> maxSize;
+
+        // [[codegen::verbatim(EnableOutlineInfo.description)]]
+        std::optional<bool> enableOutline;
+
+        // [[codegen::verbatim(OutlineColorInfo.description)]]
+        std::optional<glm::vec3> outlineColor;
+
+        // [[codegen::verbatim(OutlineColorInfo.description)]]
+        std::optional<float> outlineWeight;
     };
 #include "renderableorbitalkepler_codegen.cpp"
 } // namespace
@@ -234,6 +267,9 @@ RenderableOrbitalKepler::Appearance::Appearance()
     , trailFade(TrailFadeInfo, 20.f, 0.f, 30.f)
     , enableMaxSize(EnableMaxSizeInfo, false)
     , maxSize(MaxSizeInfo, 1.f, 0.f, 45.f)
+    , enableOutline(EnableOutlineInfo, true)
+    , outlineColor(OutlineColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , outlineWeight(OutlineWeightInfo, 0.2f, 0.f, 1.f)
 {
     renderingModes.addOptions({
         { RenderingModeTrail, "Trails" },
@@ -248,6 +284,9 @@ RenderableOrbitalKepler::Appearance::Appearance()
     addProperty(pointSizeExponent);
     addProperty(enableMaxSize);
     addProperty(maxSize);
+    addProperty(enableOutline);
+    addProperty(outlineColor);
+    addProperty(outlineWeight);
 }
 
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
@@ -272,6 +311,9 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _appearance.pointSizeExponent = p.pointSizeExponent.value_or(_appearance.pointSizeExponent);
     _appearance.enableMaxSize = p.enableMaxSize.value_or(_appearance.enableMaxSize);
     _appearance.maxSize = p.maxSize.value_or(_appearance.maxSize);
+    _appearance.enableOutline = p.enableOutline.value_or(_appearance.enableOutline);
+    _appearance.outlineColor = p.outlineColor.value_or(_appearance.outlineColor);
+    _appearance.outlineWeight = p.outlineWeight.value_or(_appearance.outlineWeight);
 
     if (p.renderingMode.has_value()) {
         switch (*p.renderingMode) {
@@ -371,6 +413,9 @@ void RenderableOrbitalKepler::initializeGL() {
     _uniformPointCache.pointSizeExponent = _pointProgram->uniformLocation("pointSizeExponent");
     _uniformPointCache.enableMaxSize = _pointProgram->uniformLocation("enableMaxSize");
     _uniformPointCache.maxSize = _pointProgram->uniformLocation("maxSize");
+    _uniformPointCache.enableOutline = _pointProgram->uniformLocation("enableOutline");
+    _uniformPointCache.outlineColor = _pointProgram->uniformLocation("outlineColor");
+    _uniformPointCache.outlineWeight = _pointProgram->uniformLocation("outlineWeight");
     _uniformPointCache.opacity = _pointProgram->uniformLocation("opacity");
 
     updateBuffers();
@@ -431,6 +476,9 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         _pointProgram->setUniform(_uniformPointCache.pointSizeExponent, _appearance.pointSizeExponent);
         _pointProgram->setUniform(_uniformPointCache.enableMaxSize, _appearance.enableMaxSize);
         _pointProgram->setUniform(_uniformPointCache.maxSize, _appearance.maxSize);
+        _pointProgram->setUniform(_uniformPointCache.enableOutline, _appearance.enableOutline);
+        _pointProgram->setUniform(_uniformPointCache.outlineColor, _appearance.outlineColor);
+        _pointProgram->setUniform(_uniformPointCache.outlineWeight, _appearance.outlineWeight);
         _pointProgram->setUniform(_uniformPointCache.opacity, opacity());
         
         glBindVertexArray(_vertexArray);

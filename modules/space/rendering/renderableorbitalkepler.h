@@ -67,10 +67,15 @@ private:
         /// The option enables or disables Max Angular Size limit
         properties::FloatProperty maxSize;
         /// Max angular size between vector cameraToPoint and edge of the point
-        properties::OptionProperty renderingModes; //temp: line, point->line (maybe: point->point)
-
+        properties::OptionProperty renderingModes;
         /// Specifies a multiplicative factor that fades out the trail line
         properties::FloatProperty trailFade;
+        /// Specifies if the point outline should be enabled
+        properties::BoolProperty enableOutline;
+        /// Specifies the color of the point outline
+        properties::Vec3Property outlineColor;
+        /// Specifies how much if the point should be covered by the outline
+        properties::FloatProperty outlineWeight;
     };
 
     void updateBuffers();
@@ -113,7 +118,8 @@ private:
     // Point cache
     UniformCache(modelTransform, viewTransform, projectionTransform,
         cameraPositionWorld, cameraUpWorld,  inGameTime, color,
-        pointSizeExponent, enableMaxSize, maxSize, opacity)
+        pointSizeExponent, enableMaxSize, maxSize, enableOutline,
+        outlineColor, outlineWeight, opacity)
         _uniformPointCache;
 };
 

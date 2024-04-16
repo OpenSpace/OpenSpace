@@ -44,14 +44,12 @@ uniform dvec3 cameraUpWorld;
 uniform float pointSizeExponent;
 uniform bool enableMaxSize;
 uniform float maxSize;
-//uniform float opacity;
 
 layout(triangle_strip, max_vertices = 4) out;
 out float projectionViewDepth;
 out vec4 viewSpace;
 out vec2 texCoord;
 flat out int skip;
-//flat out float alpha;
 
 dvec4 dz_normalization(dvec4 dv_in) {
   dvec4 dv_out = dv_in;
@@ -94,22 +92,14 @@ void main () {
     double opp = length(right);
     double adj = length(cameraPositionWorld.xyz - vertPosWorldSpace.xyz);
     float angle = atan(float(opp/adj));
-
     float maxAngle = radians(maxSize * 0.5f);
 
-    //float breakDegree = 0.03f; // Should be controllable & May not be wanted
-    //float breakAngle = radians(breakDegree * 0.5);
-
-    //alpha = opacity;
+    // Controls the point size
     if (enableMaxSize && (angle > maxAngle) && (adj > 0.0)) {
       double correction = (adj * tan(maxAngle)) / opp;
       right *= correction;
       up *= correction;
     }
-    //else if (angle < breakAngle)  {
-    //  alpha *= angle / breakAngle;
-    //  alpha = 1.0;
-    //}
 
     // Calculate and set corners of the quad
     dvec4 p0World = vertPosWorldSpace + (dvec4(up-right, 0.0));
