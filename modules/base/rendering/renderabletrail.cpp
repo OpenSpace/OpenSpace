@@ -40,16 +40,18 @@
 
 namespace {
 #ifdef __APPLE__
-    constexpr std::array<const char*, 15> UniformNames = {
+    constexpr std::array<const char*, 16> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
-        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase", "useSplitRenderMode", "numberOfUniqueVertices", "floatingOffset"
+        "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
+        "stride", "pointSize", "renderPhase", "useSplitRenderMode","floatingOffset",
+        "numberOfUniqueVertices"
     };
 #else
-    constexpr std::array<const char*, 17> UniformNames = {
+    constexpr std::array<const char*, 18> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
-        "lineFade", "vertexSortingMethod", "idOffset", "nVertices", "stride", "pointSize",
-        "renderPhase", "viewport", "lineWidth", "useSplitRenderMode", "numberOfUniqueVertices", "floatingOffset"
+        "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
+        "stride", "pointSize", "renderPhase", "viewport", "lineWidth", "floatingOffset",
+        "useSplitRenderMode", "numberOfUniqueVertices"
     };
 #endif
 
@@ -86,35 +88,26 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    enum FadingMode {
-        LineFade = 0,
-        LineFadeEndPointAmount,
-        LineFadeBreakPointAmount
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LineFadeInfo = {
-        "LineFade",
-        "Point + Point",
-        "The fading factor that is applied to the trail if the 'EnableFade' value is "
-        "'true'. If it is 'false', this setting has no effect. --- IN PROGRESS ---",
+    constexpr openspace::properties::Property::PropertyInfo LineLengthInfo = {
+        "LineLength",
+        "Line Length",
+        "The amount of the orbit that should have a trail. A value of 0 will "
+        "result in no trail and a value of 1 will result in a trail that is "
+        "the entire orbit. The setting only applies if the 'EnableFade' value "
+        "is 'true'. If it is 'false', this setting has no effect.",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineFadeEndPointAmountInfo= {
-        "LineFadeEndPointAmount",
-        "Endpoint + Amount",
-        "The fading factor that is applied to the trail if the 'EnableFade' value is "
-        "'true'. If it is 'false', this setting has no effect. --- IN PROGRESS ---",
-        // @VISIBILITY(2.5)
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo LineFadeBreakPointAmountInfo = {
-        "LineFadeBreakPointAmount",
-        "Breakpoint + Amount",
-        "The fading factor that is applied to the trail if the 'EnableFade' value is "
-        "'true'. If it is 'false', this setting has no effect. --- IN PROGRESS ---",
+    constexpr openspace::properties::Property::PropertyInfo LineFadeAmountInfo = {
+        "LineFadeAmount",
+        "Line Fade Amount",
+        "The amount of the trail that should be faded. If the value is 0 the "
+        "trail will have no fading. A value of 0.5 will have a solid trail until "
+        "50% of the trail and then the fading will begin. A value of 1 will "
+        "result in a trail that starts fading immediately. The setting only "
+        "applies if the 'EnableFade' value is 'true'. If it is 'false', this "
+        "setting has no effect.",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
@@ -146,23 +139,13 @@ namespace {
         "Determines how the trail should be rendered to the screen. If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
         "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts",
+        // @VISIBILITY(?)
         openspace::properties::Property::Visibility::AdvancedUser
     };
-
-    // TEMP GOES HERE =======================
-
-    constexpr openspace::properties::Property::PropertyInfo FadeModeInfo = {
-        "FadeMode",
-        "Fade Mode",
-        "Selects fading mode for trails",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    //=======================================
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
-        // This object is used to compute locations along the path. Any Translation object
-        // can be used here
+        // This object is used to compute locations along the path. Any Translation 
+        // object can be used here
         ghoul::Dictionary translation
             [[codegen::reference("core_transform_translation")]];
 
@@ -172,8 +155,11 @@ namespace {
         // [[codegen::verbatim(EnableFadeInfo.description)]]
         std::optional<bool> enableFade;
 
-        // [[codegen::verbatim(LineFadeInfo.description)]]
-        std::optional<glm::vec2> lineFade;
+        // [[codegen::verbatim(LineLengthInfo.description)]]
+        std::optional<float> lineLength;
+
+        // [[codegen::verbatim(LineFadeAmountInfo.description)]]
+        std::optional<float> lineFadeAmount;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
@@ -189,17 +175,6 @@ namespace {
         };
         // [[codegen::verbatim(RenderingModeInfo.description)]]
         std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
-
-        // TEMP GOES HERE ===================
-        enum class FadeMode {
-            PointPoint [[codegen::key("Point+Point")]],
-            StartPointDuration [[codegen::key("StartPoint+Range")]],
-            DurationEndPoint [[codegen::key("EndPoint+Range")]],
-            StartPointDurationTime [[codegen::key("StartPoint+RangeTime")]]
-        };
-        //std::optional<FadeMode> fadeMode [[codegen::key("FadeMode")]];
-
-        // ==================================
     };
 #include "renderabletrail_codegen.cpp"
 } // namespace
@@ -218,19 +193,14 @@ RenderableTrail::Appearance::Appearance()
     })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
-    , lineFade(LineFadeInfo, glm::vec2(0.f, 1.f), glm::vec2(0.0f), glm::vec2(1.f))
+    , lineLength(LineLengthInfo, 1.f, 0.f, 1.f)
+    , lineFadeAmount(LineFadeAmountInfo, 1.f, 0.f, 1.f)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
           RenderingModeInfo,
           properties::OptionProperty::DisplayType::Dropdown
     )
-    , fadingModes(
-        FadeModeInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , lineFadeEndPointAmount(LineFadeEndPointAmountInfo, glm::vec2(1.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
-    , lineFadeBreakPointAmount(LineFadeBreakPointAmountInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1.f))
 {
     renderingModes.addOptions({
         { RenderingModeLines, "Lines" },
@@ -238,27 +208,14 @@ RenderableTrail::Appearance::Appearance()
         { RenderingModeLinesPoints, "Lines+Points" }
     });
 
-    // TEMP GOES HERE =================
-    fadingModes.addOptions({
-        { LineFade, "Point + Point" },
-        { LineFadeEndPointAmount, "Endpoint + Amount" },
-        { LineFadeBreakPointAmount, "Breakpoint + Amount" },
-    });
-    //=================================
-
     lineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(lineColor);
     addProperty(lineWidth);
     addProperty(pointSize);
     addProperty(renderingModes);
     addProperty(useLineFade);
-
-    // TEMP
-    addProperty(fadingModes);
-    lineFade.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-    addProperty(lineFade);
-    addProperty(lineFadeEndPointAmount);
-    addProperty(lineFadeBreakPointAmount);
+    addProperty(lineLength);
+    addProperty(lineFadeAmount);
 }
 
 RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
@@ -276,7 +233,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
 
     _appearance.lineColor = p.color;
     _appearance.useLineFade = p.enableFade.value_or(_appearance.useLineFade);
-    _appearance.lineFade = p.lineFade.value_or(_appearance.lineFade);
+    _appearance.lineLength = p.lineLength.value_or(_appearance.lineLength);
     _appearance.lineWidth = p.lineWidth.value_or(_appearance.lineWidth);
     _appearance.pointSize = p.pointSize.value_or(_appearance.pointSize);
 
@@ -468,32 +425,12 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
     _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
     if (_appearance.useLineFade) {
-        int selection = _appearance.fadingModes;
-        // Check which rendering method should be used
-        if (selection == LineFade) {
-            // use point+point
-            _programObject->setUniform(_uniformCache.lineFade, _appearance.lineFade);
-        }
-        else if (selection == LineFadeEndPointAmount) {
-            // use endpoint+amount
-            float startPoint = 1.f - _appearance.lineFadeEndPointAmount.value()[0];
-            float remainingRange = 1.0f - startPoint;
-            float delta = remainingRange * _appearance.lineFadeEndPointAmount.value()[1];
-            float endPoint = std::min(startPoint + delta, 1.f);
-            _programObject->setUniform(_uniformCache.lineFade, glm::vec2(startPoint, endPoint));
-        }
-        else if (selection == LineFadeBreakPointAmount) {
-            // use breakpoint+amount
-            float endPoint = 1.f - _appearance.lineFadeBreakPointAmount.value()[0];
-            float remainingRange = endPoint;
-            float delta = remainingRange * (_appearance.lineFadeBreakPointAmount.value())[1];
-            float startPoint = std::max(endPoint - delta, 0.f);
-            _programObject->setUniform(_uniformCache.lineFade, glm::vec2(startPoint, endPoint));
-        }
-        else {
-            // do nothing
-            _programObject->setUniform(_uniformCache.lineFade, glm::vec2(0, 0));
-        }
+        float startPoint = 1.f - _appearance.lineLength.value();
+        float remainingRange = 1.0f - startPoint;
+        float delta = remainingRange * _appearance.lineFadeAmount.value();
+        float endPoint = std::min(startPoint + delta, 1.f);
+        _programObject->setUniform(_uniformCache.lineLength, startPoint);
+        _programObject->setUniform(_uniformCache.lineFadeAmount, endPoint);
     }
 
     /*glm::ivec2 resolution = global::renderEngine.renderingResolution();

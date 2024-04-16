@@ -88,16 +88,10 @@ public:
         properties::IntProperty pointSize;
         /// The option determining which rendering method to use
         properties::OptionProperty renderingModes;
-
-        /// TEMP
-        /// Specifies a multiplicative factor that fades out the line
-        properties::Vec2Property lineFade;
-        /// Specifies a multiplicative factor that fades out the line
-        properties::Vec2Property lineFadeEndPointAmount;
-        /// Specifies a multiplicative factor that fades out the line
-        properties::Vec2Property lineFadeBreakPointAmount;
-        // Option to select fademode
-        properties::OptionProperty fadingModes;
+        /// Specifies how much of the orbit should have a trail
+        properties::FloatProperty lineLength;
+        /// Specifies how much of the trail should be faded
+        properties::FloatProperty lineFadeAmount;
     };
 
     virtual ~RenderableTrail() override = default;
@@ -189,9 +183,6 @@ protected:
     /// Number of unique vertices used when rendering segmented trails
     int _numberOfUniqueVertices = 0;
 
-    // TEMP
-    double _orbitPeriod = 0.0;
-
 private:
     void internalRender(bool renderLines, bool renderPoints,
         const RenderData& data,
@@ -205,12 +196,13 @@ private:
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 #ifdef __APPLE__
     UniformCache(opacity, modelView, projection, color, useLineFade,
-                 lineFade, vertexSorting, idOffset, nVertices, stride,
-                 pointSize, renderPhase) _uniformCache;
+                 lineLength, lineFadeAmount, vertexSorting, idOffset, nVertices,
+                 stride, pointSize, renderPhase) _uniformCache;
 #else
-    UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase, viewport,
-        lineWidth, useSplitRenderMode, numberOfUniqueVertices, floatingOffset) _uniformCache;
+    UniformCache(opacity, modelView, projection, color, useLineFade, lineLength,
+        lineFadeAmount, vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase, 
+        viewport, lineWidth, useSplitRenderMode, numberOfUniqueVertices, floatingOffset)
+            _uniformCache;
 #endif
 };
 
