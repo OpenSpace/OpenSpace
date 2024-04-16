@@ -40,7 +40,7 @@ namespace {
     // amount that does not change over time. It is possible to change the fixed scale
     // after starting the application, but it otherwise remains unchanged. The scaling is
     // a simple multiplication so that a `Scale` value of 10 means that the object will be
-    // 10 times larger than it should be.
+    // 10 times larger than its original size.
     struct [[codegen::Dictionary(StaticScale)]] Parameters {
         // [[codegen::verbatim(ScaleInfo.description)]]
         double scale;
