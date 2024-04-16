@@ -1563,7 +1563,7 @@ bool RenderablePointCloud::hasSizeData() const {
 
 bool RenderablePointCloud::hasMultiTextureData() const {
     // What datavar is the texture, if any
-    int textureIdIndex = _dataset.textureDataIndex;
+    const int textureIdIndex = _dataset.textureDataIndex;
     return _hasSpriteTexture && textureIdIndex >= 0;
 }
 
