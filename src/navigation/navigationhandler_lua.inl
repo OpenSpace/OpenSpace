@@ -56,7 +56,8 @@ namespace {
  * \param frame the identifier of an optional scene graph node to use as reference frame
  *              for the navigation state
  *
- * \return a Lua table representing the current navigation state of the camera
+ * \return a Lua table representing the current [ navigation state](#core_navigation_state)
+ *         of the camera
  */
 [[codegen::luawrap]] ghoul::Dictionary getNavigationState(
                                                          std::optional<std::string> frame)
