@@ -70,7 +70,9 @@ namespace {
 
         // This variable determines the validity period of a file(s) in seconds before it
         // needs to be re-downloaded. The default value keeps the file permanently cached,
-        // while a value of 0 forces the file to be downloaded on every startup.
+        // while a value of 0 forces the file to be downloaded on every startup. If the
+        // symbolic value `math.huge` is used, a file is never redownloaded after the
+        // first time.
         std::optional<double> secondsUntilResync [[codegen::greaterequal(0.0)]];
     };
 #include "urlsynchronization_codegen.cpp"
