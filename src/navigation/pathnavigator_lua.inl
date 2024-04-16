@@ -286,7 +286,7 @@ namespace {
 
 /**
  * Fly linearly to a specific distance in relation to the focus node, given as a relative
- * value based on the size of the objects rather than in meters.
+ * value based on the size of the object rather than in meters.
  *
  * \param distance The distance to fly to, given as a multiple of the bounding sphere of
  *                 the current focus node bounding sphere. A value of 1 will result in a

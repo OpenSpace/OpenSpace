@@ -26,10 +26,10 @@ namespace {
 
 /**
  * Set the camera position by loading a navigation state from file. The file should be in
- * json format, such as the output files of saveNavigationState.
+ * json format, such as the output files of `saveNavigationState`.
  *
  * \param filePath the path to the file, including the file name (and extension, if it is
- *                 anything alse than `.navstate`)
+ *                 anything other than `.navstate`)
  * \param useTimeStamp if true, and the provided navigation state includes a timestamp,
  *                     the time will be set as well.
  */
@@ -49,14 +49,14 @@ namespace {
 /**
  * Return the current navigation state as a Lua table.
  *
- * By default, the reference frame will picked based on whether the orbital navigator is
+ * By default, the reference frame will be picked based on whether the orbital navigator is
  * currently following the anchor node rotation. If it is, the anchor will be chosen as
  * reference frame. If not, the reference frame will be set to the scene graph root.
  *
  * \param frame the identifier of an optional scene graph node to use as reference frame
  *              for the navigation state
  *
- * \return a Lua table representing the current [ navigation state](#core_navigation_state)
+ * \return a Lua table representing the current [navigation state](#core_navigation_state)
  *         of the camera
  */
 [[codegen::luawrap]] ghoul::Dictionary getNavigationState(
@@ -106,14 +106,14 @@ namespace {
 /**
  * Save the current navigation state to a file with the path given by the first argument.
  *
- * By default, the reference frame will picked based on whether the orbital navigator is
- * currently following the anchor node rotation. If it is, the anchor will be chosen as
+ * By default, the reference frame will be picked based on whether the orbital navigator
+ * is currently following the anchor node rotation. If it is, the anchor will be chosen as
  * reference frame. If not, the reference frame will be set to the scene graph root.
  *
- * \param path the file path for to where to save the navigation state, including the file
- *             name. If no extnesion is added, the file is saved as a .navstate file.
+ * \param path the file path for where to save the navigation state, including the file
+ *             name. If no extension is added, the file is saved as a `.navstate` file.
  * \param frame the identifier of the scene graph node which coordinate system should be
- *              used as a reference frame for the navigation state
+ *              used as a reference frame for the navigation state.
  */
 [[codegen::luawrap]] void saveNavigationState(std::string path, std::string frame = "") {
     if (path.empty()) {
@@ -137,8 +137,9 @@ namespace {
 }
 
 /**
- * Picks the next node from the interesting nodes out of the profile and selects that. If
- * the current anchor is not an interesting node, the first will be selected
+ * Picks the next node from the interesting nodes out of the profile and selects that.
+ * If the current anchor is not an interesting node, the first node in the list will be
+ * selected.
  */
 [[codegen::luawrap]] void targetNextInterestingAnchor() {
     using namespace openspace;
@@ -169,8 +170,9 @@ namespace {
 }
 
 /**
- * Picks the next node from the interesting nodes out of the profile and selects that. If
- * the current anchor is not an interesting node, the first will be selected
+ * Picks the previous node from the interesting nodes out of the profile and selects that.
+ * If the current anchor is not an interesting node, the first node in the list will be
+ * selected.
  */
 [[codegen::luawrap]] void targetPreviousInterestingAnchor() {
     using namespace openspace;
@@ -204,25 +206,18 @@ namespace {
 
 // @TODO: consider adding enum types for axis type and joysticktype
 /**
- * Bind an axis of a joystick to be used as a certain type.
- *
- * There are also some extra settings that control the behavior:
- * - If `isInverted` is `true`, the axis value is inverted.
- * - `joystickType` decides if the joystick behaves more like a joystick
- * or a trigger, where the first is the default.
- * - If `isSticky` is `true, the value is calculated relative to the previous value.
- * - If`'shouldFlip` is true, then the camera movement for the axis is reversed.
- * - Finally, if `sensitivity` is given then that value will affect the sensitivity of
- * the axis together with the global sensitivity.
+ * Bind an axis of a joystick to be used as a certain type, and optionally define
+ * detailed settings for the axis.
  *
  * \param joystickName the name for the joystick or game controller that should be bound
  * \param axis the axis of the joystick that should be bound
  * \param axisType the type of movement that the axis should be mapped to
- * \param shouldInvert if the joystick movement should be inverted or not
- * \param joystickType what type of joystick or axis this is. Either
- *                     `\"JoystickLike\"` or `\"TriggerLike\"`
- * \param isSticky if true, the value is calculated relative to the previous value,
- *                 if false the the value is used as is
+ * \param shouldInvert decides if the joystick axis movement should be inverted or not
+ * \param joystickType what type of joystick or axis this is. Decides if the joystick
+ *                     behaves more like a joystick or a trigger. Either `"JoystickLike"`
+ *                     or `"TriggerLike"`, where `"JoystickLike"` is default
+ * \param isSticky if true, the value is calculated relative to the previous value.
+ *                 If false, the value is used as is
  * \param shouldFlip reverses the movement of the camera that the joystick produces
  * \param sensitivity sensitivity for this axis, in addition to the global sensitivity
  */
@@ -263,8 +258,8 @@ namespace {
  * \param min the minimum value that this axis can set for the property
  * \param max the maximum value that this axis can set for the property
  * \param shouldInvert if the joystick movement should be inverted or not
- * \param isRemote if true, the property change will also be executed on connected nodes
- *                 if false, the property change will only affect the master node
+ * \param isRemote if true, the property change will also be executed on connected nodes.
+ *                 If false, the property change will only affect the master node
  */
 [[codegen::luawrap]] void bindJoystickAxisProperty(std::string joystickName, int axis,
                                                    std::string propertyUri,
@@ -325,7 +320,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
     std::optional<float> maxValue;
 
     // If a property is bound to this axis, this says whether the property changes should
-    // be forwarded to other connected nodes or session (similarly to \"isLocal\" for
+    // be forwarded to other connected nodes or sessions (similarly to \"isLocal\" for
     // actions)
     std::optional<bool> isRemote;
 };
@@ -341,7 +336,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  *                     which to find the information
  * \param axis the joystick axis for which to find the information
  *
- * \return Information about the joystick axis
+ * \return an object with information about the joystick axis
  */
 [[codegen::luawrap]] ghoul::Dictionary joystickAxis(std::string joystickName, int axis) {
     using namespace openspace;
@@ -404,7 +399,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
     return deadzone;
 }
 
-/***
+/**
  * Bind a Lua script to one of the buttons for a joystick.
  *
  * \param joystickName the name for the joystick or game controller
@@ -414,8 +409,8 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \param action the action for when the script should be executed. This defaults to
  *               `"Press"`, which means that the script is run when the user presses the
  *               button. Alternatives are `"Idle"` (if the button is unpressed and has
- *               been unpressed since last frame), `"Repeat"` (if the button has been
- *               pressed since longer than last frame), and `"Release"` (f the button was
+ *               been unpressed since the last frame), `"Repeat"` (if the button has been
+ *               pressed since longer than the last frame), and `"Release"` (if the button was
  *               released since the last frame)
  * \param isRemote a value saying whether the command is going to be executable
  *                 locally or remotely, where the latter is the default
@@ -571,7 +566,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 }
 
 /**
- * Return the complete list of connected joysticks
+ * Return the complete list of connected joysticks.
  *
  * \return a list of joystick names
  */
@@ -581,7 +576,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 }
 
 /**
- * Return the distance to the current focus node
+ * Return the distance to the current focus node.
  *
  * \return the distance, in meters
  */
@@ -595,7 +590,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 }
 
 /**
- * Return the distance to the current focus node's bounding sphere
+ * Return the distance to the current focus node's bounding sphere.
  *
  * \return the distance, in meters
  */
@@ -611,7 +606,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 }
 
 /**
- * Return the distance to the current focus node's interaction sphere
+ * Return the distance to the current focus node's interaction sphere.
  *
  * \return the distance, in meters
  */
