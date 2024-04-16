@@ -11,9 +11,9 @@ openspace.time.setDeltaTime(-openspace.time.deltaTime())
 
 local SiderealDayIncrease = {
   Identifier = "os.time.siderealDayIncrease",
-  Name = "Advance sidereal day",
+  Name = "Advance 1 sidereal day",
   Command = [[
-openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(),86164.0905));
+openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(), 86164.0905));
   ]],
   Documentation = [[Advances time by a sidereal day (Instant)]],
   GuiPath = "/Time",
@@ -22,14 +22,15 @@ openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(),
 
 local SiderealDayDecrease = {
   Identifier = "os.time.siderealDayDecrease",
-  Name = "Decrement sidereal day",
+  Name = "Decrement 1 sidereal day",
   Command = [[
-openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(),-86164.0905));
+openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(), -86164.0905));
   ]],
   Documentation = [[Decrements time by a sidereal day (Instant)]],
   GuiPath = "/Time",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.action.registerAction(ReverseRate)
@@ -38,9 +39,9 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(ReverseRate)
-  openspace.action.removeAction(SiderealDayIncrease)
   openspace.action.removeAction(SiderealDayDecrease)
+  openspace.action.removeAction(SiderealDayIncrease)
+  openspace.action.removeAction(ReverseRate)
 end)
 
 asset.export("ReverseRate", ReverseRate.Identifier)
