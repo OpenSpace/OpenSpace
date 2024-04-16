@@ -1,11 +1,7 @@
-local constellations_helper = asset.require("util/constellations_helper")
-
-
-
 local speck = asset.resource({
   Name = "Big Dipper Constellation Files",
   Type = "HttpSynchronization",
-  Identifier = "bigdipper_constellation_data",
+  Identifier = "digitaluniverse_constellations_bigdipper",
   Version = 1
 })
 
@@ -34,9 +30,11 @@ local BigDipper = {
   GUI = {
     Name = "Big Dipper",
     Path = "/Milky Way/Constellations",
-    Description = [[Just the Big Dipper]]
+    Description = [[This item only draws the big dipper, and not the rest of the
+      lines of the Ursa Major constellation.]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(BigDipper)
@@ -48,9 +46,11 @@ end)
 
 asset.export(BigDipper)
 
+
+
 asset.meta = {
   Name = "Big Dipper",
-  Version = "1.1",
+  Version = "1.0",
   Description = "Constellation lines for the Big Dipper",
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",
