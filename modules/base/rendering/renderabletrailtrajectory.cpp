@@ -164,7 +164,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     , _maxVertex(glm::vec3(-std::numeric_limits<float>::max()))
     , _minVertex(glm::vec3(std::numeric_limits<float>::max()))
     , _sweepChunkSize(SweepChunkSizeInfo, 200, 50, 5000)
-    , _enableSweepChunking(EnableSweepChunkingInfo, true)
+    , _enableSweepChunking(EnableSweepChunkingInfo, false)
     , _numberOfReplacementPoints(AccurateTrailPositionsInfo, 100, 0, 1000)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
