@@ -219,7 +219,7 @@ namespace {
  * \param axisType the type of movement that the axis should be mapped to
  * \param shouldInvert if the joystick movement should be inverted or not
  * \param joystickType what type of joystick or axis this is. Either
- *                     `"JoystickLike"` or `"TriggerLike"`
+ *                     `\"JoystickLike\"` or `\"TriggerLike\"`
  * \param isSticky if true, the value is calculated relative to the previous value,
  *                 if false the the value is used as is
  * \param shouldFlip reverses the movement of the camera that the joystick produces
@@ -284,44 +284,87 @@ namespace {
     );
 }
 
-// @TODO: document return value in some nice way. Should this be a concrete Type in the
-// documentation?
+// @TODO: Should this be a concrete Type in the documentation? Could also be used in bind
+// joystick functions above//
+struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
+    // The current type of axis binding
+    std::string type;
+
+    // Whether the values are inverted
+    bool invert;
+
+    // The type of joystick that this axis represents on the controller - either
+    // `\"JoystickLike\"` or `\"TriggerLike\"`. A joystick is `\"TriggerLike\"` if it
+    // can only be pressed or pushed in one direction. A `\"JoystickLike\"` axis can
+    // be pushed in two directions; for example, left and right, or up and down.
+    std::string joystickType;
+
+    // Whether or not this axis is “sticky”. An axis is “sticky” if, when you let go of
+    // it, the values it represents in the software do not go back to the default.
+    bool isSticky;
+
+    // Whether the camera movement for the axis is reversed. In the case of a
+    // `\"JoystickLike\"` axis, this is the same as inverting the axis. However, in the
+    // case of a `\"TriggerLike\" axis, this can reverse the camera movement for the
+    // trigger.
+    bool flip;
+
+    // Sensitivity value for this axis
+    double sensitivity;
+
+    // The identifier (URI) of the property that is bound to this axes, if one is
+    std::optional<std::string> propertyUri;
+
+    // If a property is bound to this axis, this is the min value that can be set using
+    // the joystick input
+    std::optional<float> minValue;
+
+    // If a property is bound to this axis, this is the max value that can be set using
+    // the joystick input
+    std::optional<float> maxValue;
+
+    // If a property is bound to this axis, this says whether the property changes should
+    // be forwarded to other connected nodes or session (similarly to \"isLocal\" for
+    // actions)
+    std::optional<bool> isRemote;
+};
+
+// @TODO: How to create a reference to the above object as the return type?
+// Should we really create documentation for the JoyStickCameraStates::AxisInfomation
+// struct instead?
+
 /**
- * Finds the input joystick with the given 'name' and returns the joystick axis
- * information for the passed axis. The information that is returned is the current axis
- * binding as a string, whether the values are inverted as bool, the joystick type as a
- * string, whether the axis is sticky as bool, the sensitivity as number, the property uri
- * bound to the axis as string (empty is type is not Property), the min and max values for
- * the property as numbers and whether the property change will be executed remotly as
- * bool.
+ * Return all the information bound to a certain joystick axis.
  *
  * \param joystickName the name for the joystick or game controller with the axis for
  *                     which to find the information
  * \param axis the joystick axis for which to find the information
+ *
+ * \return Information about the joystick axis
  */
-[[codegen::luawrap]]
-std::tuple<
-    std::string, bool, std::string, bool, bool, double, std::string, float, float, bool
->
-joystickAxis(std::string joystickName, int axis)
-{
+[[codegen::luawrap]] ghoul::Dictionary joystickAxis(std::string joystickName, int axis) {
     using namespace openspace;
 
     interaction::JoystickCameraStates::AxisInformation info =
         global::navigationHandler->joystickAxisMapping(joystickName, axis);
 
-    return {
-        ghoul::to_string(info.type),
-        info.invert,
-        ghoul::to_string(info.joystickType),
-        info.isSticky,
-        info.flip,
-        info.sensitivity,
-        info.propertyUri,
-        info.minValue,
-        info.maxValue,
-        info.isRemote
-    };
+    ghoul::Dictionary dict;
+    dict.setValue("Type", ghoul::to_string(info.type));
+    dict.setValue("Inverted", static_cast<bool>(info.invert));
+    dict.setValue("JoystickType", ghoul::to_string(info.joystickType));
+    dict.setValue("Sticky", info.isSticky);
+    dict.setValue("Flip", static_cast<bool>(info.flip));
+    dict.setValue("Sensitivity", info.sensitivity);
+
+    bool isPropertyBound = !info.propertyUri.empty();
+    if (isPropertyBound) {
+        dict.setValue("PropertyUri", info.propertyUri);
+        dict.setValue("MinValue", static_cast<double>(info.minValue));
+        dict.setValue("MaxValue", static_cast<double>(info.maxValue));
+        dict.setValue("IsRemote", info.isRemote);
+    }
+
+    return dict;
 }
 
 /**
