@@ -40,12 +40,12 @@ namespace {
     // amount that does not change over time. It is possible to change the fixed scale
     // after starting the application, but it otherwise remains unchanged. The scaling is
     // a simple multiplication so that a `Scale` value of 10 means that the object will be
-    // 10 times larger than it should be. In comparison to the StaticScale type, this type
-    // has the ability to scale an object by different amounts for each direction.
+    // 10 times larger than its original size. In comparison to the StaticScale type, this
+    // type has the ability to scale an object by different amounts for each direction.
     //
-    // This type can be used to adjust the aspect ratio of certain Renderable types, for
-    // example to make a RenderableSphericalGrid that is not a perfect spherical grid, but
-    // a tri-axial ellipsoid instead.
+    // This type can be used to adjust the aspect ratio of Renderable types, for example
+    // to make a RenderableSphericalGrid that is not a perfect spherical grid, but a
+    // tri-axial ellipsoid instead.
     struct [[codegen::Dictionary(NonUniformStaticScale)]] Parameters {
         // [[codegen::verbatim(ScaleInfo.description)]]
         glm::dvec3 scale;
