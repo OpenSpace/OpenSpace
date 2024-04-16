@@ -22,6 +22,9 @@ local Node = {
       }
     }
   },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
   GUI = {
     Name = "TimeFrameUnion Example (Simple)",
     Path = "/Examples"
