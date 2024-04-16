@@ -149,16 +149,7 @@ namespace {
         "The labels for the points. If no label file is provided, the labels will be "
         "created to match the points in the data file. For a CSV file, you should then "
         "specify which column is the 'Name' column in the data mapping. For SPECK files "
-        "the labels are created from the comment at the end of each line"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "OrientationRenderOption",
-        "Orientation Render Option",
-        "Option that controls how the points are oriented in relation to the camera "
-        "whether the point should face the camera or not. Used for "
-        "non-linear display environments such as fisheye.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "the labels are created from the comment at the end of each line."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -208,7 +199,7 @@ namespace {
         "Use Orientation Data",
         "Include the orietation data in the dataset when rendering the points, if there "
         "is any. To see the rotation, you also need to set the \"Orientation Render "
-        "Option\" to \"Fixed Rotation\"",
+        "Option\" to \"Fixed Rotation\".",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -218,11 +209,11 @@ namespace {
         "Controls how the planes for the points will be oriented. \"Camera View "
         "Direction\" rotates the points so that the plane is orthogonal to the viewing "
         "direction of the camera (useful for planar displays), and \"Camera Position "
-        "Normal\" rotates the points towards the position of the "
-        "camera (useful for spherical displays, like dome theaters). In both these cases "
-        "the points will be billboarded towards the camera. In contrast, \"Fixed "
-        "Rotation\" does not rotate the points at all based on the camera and should be "
-        "used when the dataset contains orientation information for the points.",
+        "Normal\" rotates the points towards the position of the camera (useful for "
+        "spherical displays, like dome theaters). In both these cases the points will "
+        "be billboarded towards the camera. In contrast, \"Fixed Rotation\" does not "
+        "rotate the points at all based on the camera and should be used when the "
+        "dataset contains orientation information for the points.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -629,7 +620,10 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _drawElements(DrawElementsInfo, true)
     , _useRotation(UseOrientationDataInfo, false)
-    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _renderOption(
+        OrientationRenderOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _nDataPoints(NumShownDataPointsInfo, 0)
     , _hasOrientationData(HasOrientationDataInfo, false)
 {
