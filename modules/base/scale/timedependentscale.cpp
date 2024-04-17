@@ -54,20 +54,20 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ClampToPositiveInfo = {
         "ClampToPositive",
         "Clamp to Positive",
-        "If this value is true, the velocity computation will never result in any "
-        "negative values. This is useful for instantaneous events that only propagate "
-        "forwards. The default value is 'true'",
+        "If this value is true, the velocity computation will clamped to a positive "
+        "value if the current simulation time is before the `ReferenceDate`. This is "
+        "useful for instantaneous events that only propagate forwards in time. The "
+        "default value is 'true'",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     // This Scale type provides the ability to scale an object dynamically as time in the
     // simulation passes. The provided `ReferenceDate`, specifies when the total scale
     // should be equal to 0 and the scales grows by `Speed` meters for every second in the
-    // simulation. If `ClampToPositive` is specified as `true`, then the scale will only
-    // stay positive. If it is `false` and the simulation time is _before_ the
-    // `ReferenceDate`, the scale value will be negative.
+    // simulation. If `ClampToPositive` is specified as `true`, then the resulting scale
+    // will always be positive or 0 if the simulation time is before the `ReferenceDate`.
     //
-    // A commmon use-case for the Scale type would be to represent the Radiosphere, which
+    // A common use-case for the Scale type would be to represent the Radiosphere, which
     // grows at the speed of light.
     struct [[codegen::Dictionary(TimeDependentScale)]] Parameters {
         // [[codegen::verbatim(ReferenceDateInfo.description)]]
