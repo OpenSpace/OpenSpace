@@ -586,7 +586,7 @@ void PlanetaryTrailTileProvider::update() {
             }
 
             const size_t num_points = points.size();
-            if (num_points < _features.size() - 1) {
+            if (num_points < _features.size()) {
                 const Feature& prev = _features[num_points - 1];
                 const Feature& next = _features[num_points];
                 const double fact = (now - prev._time) / (next._time - prev._time);
