@@ -9,7 +9,7 @@ local RenderableSphereSpout = {
     Enabled = true,
     Opacity = 1,
     Segments = 32,
-    Texture = asset.resource("data/test.jpg"),
+    Texture = openspace.absPath("${DATA}/test.jpg"),
   },
   GUI = {
     Path = "/Examples/RenderableSphereSpout"
