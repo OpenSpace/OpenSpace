@@ -54,7 +54,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ClampToPositiveInfo = {
         "ClampToPositive",
         "Clamp to Positive",
-        "If this value is true, the velocity computation will clamped to a positive "
+        "If this value is true, the velocity computation will be clamped to a positive "
         "value if the current simulation time is before the `ReferenceDate`. This is "
         "useful for instantaneous events that only propagate forwards in time. The "
         "default value is 'true'",
@@ -67,7 +67,7 @@ namespace {
     // simulation. If `ClampToPositive` is specified as `true`, then the resulting scale
     // will always be positive or 0 if the simulation time is before the `ReferenceDate`.
     //
-    // A common use-case for the Scale type would be to represent the Radiosphere, which
+    // A common use-case for this Scale type would be to represent the Radiosphere, which
     // grows at the speed of light.
     struct [[codegen::Dictionary(TimeDependentScale)]] Parameters {
         // [[codegen::verbatim(ReferenceDateInfo.description)]]
