@@ -182,7 +182,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
         _transferFunctionPath = dictionary.value<std::string>(KeyTransferFunction);
         _transferFunction = std::make_shared<openspace::TransferFunction>(
-            _transferFunctionPath, [](const openspace::TransferFunction&) {}
+            _transferFunctionPath.value()
         );
     }
 

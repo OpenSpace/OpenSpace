@@ -40,12 +40,17 @@ in float in_scalingParameter1;
 
 in float in_textureLayer;
 
+in vec4 in_orientation0; // quaternion
+in vec4 in_orientation1; // quaternion
+
 uniform bool useSpline;
 uniform float interpolationValue;
 
 flat out float textureLayer;
 flat out float colorParameter;
 flat out float scalingParameter;
+
+flat out vec4 orientation; // quaternion
 
 float interpolateDataValue(float v0, float v1, float t) {
   const float Epsilon = 1E-7;
@@ -73,6 +78,53 @@ vec3 interpolateCatmullRom(float t, vec3 p0, vec3 p1, vec3 p2, vec3 p3) {
     );
 }
 
+// Quaternion math from: https://gist.github.com/mattatz/40a91588d5fb38240403f198a938a593
+vec4 quaternionSlerp(vec4 a, vec4 b, float t) {
+    // if either input is zero, return the other.
+    if (length(a) == 0.0) {
+        if (length(b) == 0.0) {
+            return vec4(0.0, 0.0, 0.0, 1.0);
+        }
+        return b;
+    }
+    else if (length(b) == 0.0) {
+        return a;
+    }
+
+    float cosHalfAngle = a.w * b.w + dot(a.xyz, b.xyz);
+
+    if (cosHalfAngle >= 1.0 || cosHalfAngle <= -1.0) {
+        return a;
+    }
+    else if (cosHalfAngle < 0.0) {
+        b.xyz = -b.xyz;
+        b.w = -b.w;
+        cosHalfAngle = -cosHalfAngle;
+    }
+
+    float blendA;
+    float blendB;
+    if (cosHalfAngle < 0.99) {
+        // Do proper slerp for big angles
+        float halfAngle = acos(cosHalfAngle);
+        float sinHalfAngle = sin(halfAngle);
+        float oneOverSinHalfAngle = 1.0 / sinHalfAngle;
+        blendA = sin(halfAngle * (1.0 - t)) * oneOverSinHalfAngle;
+        blendB = sin(halfAngle * t) * oneOverSinHalfAngle;
+    }
+    else {
+        // Do lerp if angle is really small
+        blendA = 1.0 - t;
+        blendB = t;
+    }
+
+    vec4 result = vec4(blendA * a.xyz + blendB * b.xyz, blendA * a.w + blendB * b.w);
+    if (length(result) > 0.0) {
+        return normalize(result);
+    }
+    return vec4(0.0, 0.0, 0.0, 1.0);
+}
+
 void main() {
   float t = interpolationValue;
 
@@ -89,6 +141,8 @@ void main() {
       in_position_after
     );
   }
+
+  orientation = quaternionSlerp(in_orientation0, in_orientation1, t);
 
   textureLayer = in_textureLayer;
 

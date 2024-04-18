@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
-local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunTransform = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 
 
@@ -33,7 +34,7 @@ local Gaia = {
     Type = "RenderableModel",
     GeometryFile = model .. "gaia.obj",
     LightSources = {
-      sun.LightSource,
+      sunTransform.LightSource,
       {
         Identifier = "Camera",
         Type = "CameraLightSource",

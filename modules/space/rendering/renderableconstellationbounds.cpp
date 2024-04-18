@@ -85,7 +85,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     // Avoid reading files here, instead do it in multithreaded initialize()
-    _vertexFilename = absPath(p.file.string()).string();
+    _vertexFilename = absPath(p.file).string();
     _vertexFilename.onChange([this](){ loadData(); });
     addProperty(_vertexFilename);
 

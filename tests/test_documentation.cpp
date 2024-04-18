@@ -553,13 +553,13 @@ TEST_CASE("Documentation: FileVerifier", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("File", absPath("${TESTDIR}/verifier/dummyfile.txt").string());
+    positive.setValue("File", absPath("${TESTDIR}/verifier/dummyfile.txt"));
     const TestResult positiveRes = testSpecification(doc, positive);
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative404;
-    negative404.setValue("File", absPath("${TESTDIR}/verifier/404.txt").string());
+    negative404.setValue("File", absPath("${TESTDIR}/verifier/404.txt"));
     TestResult negativeRes = testSpecification(doc, negative404);
     CHECK(!negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);
@@ -594,13 +594,13 @@ TEST_CASE("Documentation: DirectoryVerifier", "[documentation]") {
     };
 
     ghoul::Dictionary positive;
-    positive.setValue("Dir", absPath("${TESTDIR}/verifier").string());
+    positive.setValue("Dir", absPath("${TESTDIR}/verifier"));
     const TestResult positiveRes = testSpecification(doc, positive);
     CHECK(positiveRes.success);
     CHECK(positiveRes.offenses.empty());
 
     ghoul::Dictionary negative404;
-    negative404.setValue("Dir", absPath("${TESTDIR}/verifier404").string());
+    negative404.setValue("Dir", absPath("${TESTDIR}/verifier404"));
     TestResult negativeRes = testSpecification(doc, negative404);
     CHECK(!negativeRes.success);
     REQUIRE(negativeRes.offenses.size() == 1);

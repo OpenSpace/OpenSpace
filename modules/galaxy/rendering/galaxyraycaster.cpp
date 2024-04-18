@@ -26,8 +26,9 @@
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
@@ -142,19 +143,19 @@ bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPos
         localPosition.z > 0 && localPosition.z < 1);
 }
 
-std::string GalaxyRaycaster::boundsVertexShaderPath() const {
-    return std::string(GlslBoundsVsPath);
+std::filesystem::path GalaxyRaycaster::boundsVertexShaderPath() const {
+    return absPath(GlslBoundsVsPath);
 }
 
-std::string GalaxyRaycaster::boundsFragmentShaderPath() const {
-    return std::string(GlslBoundsFsPath);
+std::filesystem::path GalaxyRaycaster::boundsFragmentShaderPath() const {
+    return absPath(GlslBoundsFsPath);
 }
 
-std::string GalaxyRaycaster::raycasterPath() const {
-    return _raycastingShader.string();
+std::filesystem::path GalaxyRaycaster::raycasterPath() const {
+    return _raycastingShader;
 }
 
-std::string GalaxyRaycaster::helperPath() const {
+std::filesystem::path GalaxyRaycaster::helperPath() const {
     return ""; // no helper file
 }
 

@@ -70,7 +70,7 @@ namespace {
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 } // namespace
 
-SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
+SgctEdit::SgctEdit(QWidget* parent, std::filesystem::path userConfigPath)
     : QDialog(parent)
     , _userConfigPath(std::move(userConfigPath))
 {
@@ -79,7 +79,7 @@ SgctEdit::SgctEdit(QWidget* parent, std::string userConfigPath)
 }
 
 SgctEdit::SgctEdit(sgct::config::Cluster& cluster, std::string configName,
-                   std::string& configBasePath, QWidget* parent)
+                   std::filesystem::path& configBasePath, QWidget* parent)
     : QDialog(parent)
     , _cluster(cluster)
     , _userConfigPath(configBasePath)
@@ -411,7 +411,7 @@ void SgctEdit::save() {
         const QString fileName = QFileDialog::getSaveFileName(
             this,
             "Save Window Configuration File",
-            QString::fromStdString(_userConfigPath),
+            QString::fromStdString(_userConfigPath.string()),
             "Window Configuration (*.json)",
             nullptr
 #ifdef __linux__
@@ -444,7 +444,7 @@ void SgctEdit::apply() {
         }
     }
 
-    std::string userCfgTempDir = _userConfigPath;
+    std::string userCfgTempDir = _userConfigPath.string();
     if (userCfgTempDir.back() != '/') {
         userCfgTempDir += '/';
     }

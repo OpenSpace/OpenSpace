@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___VOLUMERAYCASTER___H__
 
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -84,7 +85,7 @@ public:
      * The shader preprocessor will have access to:
      *   - A `#{namespace}` variable (unique per helper file)
      */
-    virtual std::string boundsVertexShaderPath() const = 0;
+    virtual std::filesystem::path boundsVertexShaderPath() const = 0;
 
     /**
      * Return a path to a file with the functions, uniforms and fragment shader in
@@ -95,7 +96,7 @@ public:
      * The shader preprocessor will have access to:
      *   - A `#{namespace}` variable (unique per helper file)
      */
-    virtual std::string boundsFragmentShaderPath() const = 0;
+    virtual std::filesystem::path boundsFragmentShaderPath() const = 0;
 
     /**
      * Return a path to a file with all the uniforms, functions, etc. Required to perform
@@ -114,7 +115,7 @@ public:
      *   - An #{id} variable (unique per volume)
      *   - A #{namespace} variable (unique per helper file)
      */
-    virtual std::string raycasterPath() const = 0;
+    virtual std::filesystem::path raycasterPath() const = 0;
 
     /**
      * Return a path to a glsl file with helper functions required for the transformation
@@ -125,7 +126,7 @@ public:
      * The shader preprocessor will have access to the #{namespace} variable (unique per
      * helper file) which should be a prefix to all symbols defined by the helper
      */
-    virtual std::string helperPath() const = 0;
+    virtual std::filesystem::path helperPath() const = 0;
 
     void setMaxSteps(int nsteps);
 

@@ -561,7 +561,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         std::thread t(
             &OctreeManager::writeToMultipleFiles,
             _indexOctreeManager,
-            _outFileOrFolderPath.string(),
+            _outFileOrFolderPath,
             idx
         );
         writeThreads[idx] = std::move(t);
@@ -591,10 +591,8 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     //    " - 5000kPc is " + std::to_string(starsOutside5000));
 
     // Write index file of Octree structure.
-    std::filesystem::path indexFileOutPath = std::format(
-        "{}/index.bin", _outFileOrFolderPath.string()
-    );
-    std::ofstream outFileStream(indexFileOutPath, std::ofstream::binary);
+    std::filesystem::path indexFileOutPath = _outFileOrFolderPath / "index.bin";
+    std::ofstream outFileStream = std::ofstream(indexFileOutPath, std::ofstream::binary);
     if (outFileStream.good()) {
         LINFO("Writing index file");
         _indexOctreeManager->writeToFile(outFileStream, false);

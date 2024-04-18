@@ -36,6 +36,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <atomic>
+#include <filesystem>
 
 namespace openspace {
 
@@ -129,7 +130,7 @@ private:
     // Transfer function used to color lines when _colorMethod is set to by_flux_value
     std::unique_ptr<TransferFunction> _transferFunction;
 
-    std::vector<std::string> _binarySourceFiles;
+    std::vector<std::filesystem::path> _binarySourceFiles;
     // Contains the _triggerTimes for all streams in the sequence
     std::vector<double> _startTimes;
     // Contains vertexPositions

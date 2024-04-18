@@ -16,11 +16,12 @@ local OrionClusterStars = {
   Renderable = {
     Type = "RenderableStars",
     File = sync .. "oricluster.speck",
-    Texture = sync .. "halo.png",
+    Halo = {
+      Texture = sync .. "halo.png"
+    },
     ColorMap = sync .. "colorbv.cmap",
     MagnitudeExponent = 5.02,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based",
     DataMapping = {
       Bv = "colorb_v",
       Luminance = "lum",

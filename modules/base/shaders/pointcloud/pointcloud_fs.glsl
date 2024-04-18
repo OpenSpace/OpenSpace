@@ -103,9 +103,6 @@ Fragment getFragment() {
   }
 
   fullColor.a *= opacity * fadeInValue;
-  if (fullColor.a < 0.01) {
-    discard;
-  }
 
   Fragment frag;
   frag.color = fullColor;

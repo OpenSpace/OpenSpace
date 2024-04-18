@@ -44,7 +44,7 @@ public:
         // Since the FileFuture object will be used from multiple threads, we have to be
         // careful about the access pattern, that is, no values should be read and written
         // by both the DownloadManager and the outside threads.
-        FileFuture(std::string file);
+        FileFuture(std::filesystem::path file);
 
         // Values that are written by the DownloadManager to be consumed by others
         long long currentSize = -1;
@@ -53,7 +53,7 @@ public:
         float secondsRemaining = -1.f;
         bool isFinished = false;
         bool isAborted = false;
-        std::string filePath;
+        std::filesystem::path filePath;
         std::string errorMessage;
         std::string format;
         // Values set by others to be consumed by the DownloadManager

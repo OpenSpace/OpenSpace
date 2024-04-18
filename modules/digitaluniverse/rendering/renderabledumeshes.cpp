@@ -203,7 +203,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
     addProperty(Fadeable::_opacity);
 
-    _speckFile = absPath(p.file).string();
+    _speckFile = absPath(p.file);
     _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
@@ -230,7 +230,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_lineWidth);
 
     if (p.labelFile.has_value()) {
-        _labelFile = absPath(*p.labelFile).string();
+        _labelFile = absPath(*p.labelFile);
         _hasLabel = true;
 
         _drawLabels = p.drawLabels.value_or(_drawLabels);
@@ -456,8 +456,7 @@ bool RenderableDUMeshes::loadData() {
         }
     }
 
-    const std::string labelFile = _labelFile;
-    if (!labelFile.empty()) {
+    if (!_labelFile.empty()) {
         _labelset = dataloader::label::loadFileWithCache(_labelFile);
     }
 

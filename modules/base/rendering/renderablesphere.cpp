@@ -350,6 +350,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     // Reset
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
+    global::renderEngine->openglStateCache().resetPolygonAndClippingState();
     unbindTexture();
 
     if (orientation == Orientation::Inside) {

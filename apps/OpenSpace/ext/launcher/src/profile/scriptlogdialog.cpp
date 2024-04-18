@@ -126,8 +126,8 @@ void ScriptlogDialog::createWidgets() {
 void ScriptlogDialog::loadScriptFile() {
     _scripts.clear();
 
-    const std::string log = absPath(_scriptLogFile).string();
-    QFile file(QString::fromStdString(log));
+    const std::filesystem::path log = absPath(_scriptLogFile);
+    QFile file = QFile(QString::fromStdString(log.string()));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
         while (!in.atEnd()) {

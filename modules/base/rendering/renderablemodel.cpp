@@ -355,7 +355,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    _file = absPath(p.geometryFile.string());
+    _file = absPath(p.geometryFile);
     if (!std::filesystem::exists(_file)) {
         throw ghoul::RuntimeError(std::format("Cannot find model file '{}'", _file));
     }

@@ -608,12 +608,10 @@ void DocumentationEngine::writeDocumentation() const {
     ZoneScoped;
 
     // Write documentation to json files if config file supplies path for doc files
-    std::string path = global::configuration->documentation.path;
-    if (path.empty()) {
+    if (global::configuration->documentation.path.empty()) {
         // if path was empty, that means that no documentation is requested
         return;
     }
-    path = absPath(path).string() + '/';
 
     // Start the async requests as soon as possible so they are finished when we need them
     std::future<nlohmann::json> settings = std::async(

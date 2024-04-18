@@ -53,8 +53,9 @@ public:
      * \param parent Pointer to parent Qt widget
      */
     ProfileEdit(openspace::Profile& profile, const std::string& profileName,
-        std::string assetBasePath, std::string userAssetBasePath,
-        std::string builtInProfileBasePath, std::string profileBasePath, QWidget* parent);
+        std::filesystem::path assetBasePath, std::filesystem::path userAssetBasePath,
+        std::filesystem::path builtInProfileBasePath,
+        std::filesystem::path profileBasePath, QWidget* parent);
 
     /**
      * Gets the status of the save when the window is closed; was the file saved?
@@ -98,10 +99,10 @@ private:
     void initSummaryTextForEachCategory();
 
     openspace::Profile& _profile;
-    const std::string _assetBasePath;
-    const std::string _userAssetBasePath;
-    const std::string _profileBasePath;
-    const std::string _builtInProfilesPath;
+    const std::filesystem::path _assetBasePath;
+    const std::filesystem::path _userAssetBasePath;
+    const std::filesystem::path _profileBasePath;
+    const std::filesystem::path _builtInProfilesPath;
     bool _saveSelected = false;
 
     QLineEdit* _profileEdit = nullptr;

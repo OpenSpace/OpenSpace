@@ -32,11 +32,11 @@
 SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     : QWidget(parent)
     , _orientationValue(std::move(orientation))
-    , _firstWindowGraphicsSelection(new QComboBox)
-    , _firstWindowSelectionLayout(new QHBoxLayout)
-    ,_showUiOnFirstWindow(new QCheckBox(
+    , _showUiOnFirstWindow(new QCheckBox(
         "Show user interface only on first window using graphics:"
     ))
+    , _firstWindowGraphicsSelection(new QComboBox)
+    , _firstWindowSelectionLayout(new QHBoxLayout)
 {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);

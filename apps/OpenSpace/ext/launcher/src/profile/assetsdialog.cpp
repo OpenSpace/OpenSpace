@@ -125,13 +125,13 @@ namespace {
 } // namespace
 
 AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
-                           const std::string& assetBasePath,
-                           const std::string& userAssetBasePath)
+                           const std::filesystem::path& assetBasePath,
+                           const std::filesystem::path& userAssetBasePath)
     : QDialog(parent)
     , _profile(profile)
 {
     setWindowTitle("Assets");
-    _assetTreeModel.importModelData(assetBasePath, userAssetBasePath);
+    _assetTreeModel.importModelData(assetBasePath.string(), userAssetBasePath.string());
 
     QBoxLayout* layout = new QVBoxLayout(this);
     {

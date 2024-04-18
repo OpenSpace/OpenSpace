@@ -134,7 +134,7 @@ void KameleonPlane::initializeGL() {
     initializeTime();
     createGeometry();
 
-    readFieldlinePaths(absPath(_fieldlineIndexFile).string());
+    readFieldlinePaths(absPath(_fieldlineIndexFile));
 
     if (_group) {
         _dataProcessor = _group->dataProcessor();
@@ -317,7 +317,7 @@ void KameleonPlane::updateFieldlineSeeds() {
     }
 }
 
-void KameleonPlane::readFieldlinePaths(const std::string& indexFile) {
+void KameleonPlane::readFieldlinePaths(const std::filesystem::path& indexFile) {
     LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
     if (_group) {
         dynamic_cast<IswaKameleonGroup*>(_group)->setFieldlineInfo(

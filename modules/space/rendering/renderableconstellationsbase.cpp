@@ -106,7 +106,7 @@ RenderableConstellationsBase::RenderableConstellationsBase(
 
     // Avoid reading files here, instead do it in multithreaded initialize()
     if (p.namesFile.has_value()) {
-        _namesFilename = absPath(p.namesFile.value().string()).string();
+        _namesFilename = absPath(*p.namesFile).string();
     }
     _namesFilename.onChange([this]() { loadConstellationFile(); });
     addProperty(_namesFilename);
