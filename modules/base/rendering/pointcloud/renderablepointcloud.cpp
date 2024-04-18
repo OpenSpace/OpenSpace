@@ -327,8 +327,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OutlineStyleInfo = {
         "OutlineStyle",
         "Outline Style",
-        "This setting decides the shape of points that have an outline (Round, Square, "
-        "or lust a line at the bottom).",
+        "This setting decides the shape of points that have an outline (round, square, "
+        "or lust a line at the bottom). Note that anything but \"Round\" will lead to "
+        "the point being drawed as squares.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

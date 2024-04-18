@@ -94,7 +94,7 @@ Fragment getFragment() {
   vec2 centeredTexCoords = (texCoord - vec2(0.5)) * 2.0;
   float lengthFromCenter = length(centeredTexCoords);
 
-  bool shouldBeRound = !hasSpriteTexture ||
+  bool shouldBeRound = (!hasSpriteTexture && !enableOutline) ||
     (enableOutline && outlineStyle == OutlineStyleRound);
 
   if (shouldBeRound && (lengthFromCenter > 1.0)) {
