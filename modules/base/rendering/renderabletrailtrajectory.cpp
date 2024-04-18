@@ -207,7 +207,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _secondaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 
     // Activate special render mode for renderableTrailTrajectory 
-    _splitTrailRenderMode = true;
+    _useSplitRenderMode = true;
 }
 
 void RenderableTrailTrajectory::initializeGL() {

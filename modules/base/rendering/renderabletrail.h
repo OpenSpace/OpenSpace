@@ -179,7 +179,7 @@ protected:
     RenderInformation _secondaryRenderInformation;
 
     /// Flag used to determine if we use a split trail or not during rendering
-    bool _splitTrailRenderMode = false;
+    bool _useSplitRenderMode = false;
     /// Number of unique vertices used when rendering segmented trails
     int _numberOfUniqueVertices = 0;
 

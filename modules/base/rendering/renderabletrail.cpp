@@ -480,7 +480,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     //    return;
     //}
     
-    if (_splitTrailRenderMode) {
+    if (_useSplitRenderMode) {
         // Splits the trail up into three parts for more accurate rendering
         // of renderableTrailTrajectory trails
 
@@ -492,7 +492,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _primaryRenderInformation,
             _primaryRenderInformation.count,
             _primaryRenderInformation.first,
-            _splitTrailRenderMode,
+            _useSplitRenderMode,
             _numberOfUniqueVertices
         );
         
@@ -505,7 +505,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _floatingRenderInformation,
             _floatingRenderInformation.count,
             _floatingRenderInformation.first,
-            _splitTrailRenderMode,
+            _useSplitRenderMode,
             _numberOfUniqueVertices,
             floatingOffset
         );
@@ -519,7 +519,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _secondaryRenderInformation,
             _secondaryRenderInformation.count,
             _secondaryRenderInformation.first,
-            _splitTrailRenderMode,
+            _useSplitRenderMode,
             _numberOfUniqueVertices,
             offset
         );
