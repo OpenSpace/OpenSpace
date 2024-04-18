@@ -98,6 +98,7 @@ protected:
     virtual void preUpdate();
 
     glm::dvec3 transformedPosition(const dataloader::Dataset::Entry& e) const;
+    glm::quat orientationQuaternion(const dataloader::Dataset::Entry& e) const;
 
     virtual int nAttributesPerPoint() const;
 
@@ -118,9 +119,16 @@ protected:
     /// Find the index of the currently chosen size parameter in the dataset
     int currentSizeParameterIndex() const;
 
+    bool hasColorData() const;
+    bool hasSizeData() const;
+    bool hasMultiTextureData() const;
+    bool useOrientationData() const;
+
     virtual void addPositionDataForPoint(unsigned int index, std::vector<float>& result,
         double& maxRadius) const;
     virtual void addColorAndSizeDataForPoint(unsigned int index,
+        std::vector<float>& result) const;
+    virtual void addOrientationDataForPoint(unsigned int index,
         std::vector<float>& result) const;
 
     std::vector<float> createDataSlice();
@@ -146,7 +154,7 @@ protected:
 
     float computeDistanceFadeValue(const RenderData& data) const;
 
-    void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
+    void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     gl::GLenum internalGlFormat(bool useAlpha) const;
@@ -194,11 +202,13 @@ protected:
     Fading _fading;
 
     properties::BoolProperty _useAdditiveBlending;
+    properties::BoolProperty _useRotation;
 
     properties::BoolProperty _drawElements;
     properties::OptionProperty _renderOption;
 
     properties::UIntProperty _nDataPoints;
+    properties::BoolProperty _hasOrientationData;
 
     struct Texture : properties::PropertyOwner {
         Texture();
@@ -221,7 +231,7 @@ protected:
         cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
         enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
         useBelowRangeColor, hasDvarScaling, dvarScaleFactor, enableOutline, outlineColor,
-        outlineWeight, aspectRatioScale
+        outlineWeight, aspectRatioScale, useOrientationData
     ) _uniformCache;
 
     std::filesystem::path _dataFile;

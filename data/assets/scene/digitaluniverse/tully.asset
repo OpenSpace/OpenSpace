@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Tully Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_tully_speck",
-  Version = 3
+  Version = 4
 })
 
 
@@ -84,20 +84,30 @@ local TullyGalaxies = {
 local TullyGalaxiesImages = {
   Identifier = "TullyGalaxiesImages",
   Renderable = {
-    Type = "RenderablePlanesCloud",
-    Enabled = true,
-    Color = { 1.0, 1.0, 1.0 },
+    Type = "RenderablePointCloud",
     Opacity = 0.99,
-    ScaleFactor = 1.0,
     File = speck .. "tully.speck",
-    TexturePath = textures,
-    Luminosity = "diamkpc",
-    ScaleLuminosity = 0.001,
+    SkipFirstDataPoint = true,
+    Texture = {
+      Folder = textures
+    },
     TransformationMatrix = TransformMatrix,
+    -- Use fixed orientation, and rotate planes based on orientation information in
+    -- the dataset
+    OrientationRenderOption = "Fixed Rotation",
+    UseOrientationData = true,
     Unit = "Mpc",
-    -- Fade in value in the same unit as "Unit"
-    FadeInDistances = {0.0005, 0.003},
-    PlaneMinSize = 1.0
+    Fading = {
+      FadeInDistances = { 0.0005, 0.003 } -- Fade in value in the same unit as "Unit"
+    },
+    SizeSettings = {
+      SizeMapping = {
+        ParameterOptions = { "diamkpc" },
+        ScaleFactor = "Kiloparsec"
+      },
+      -- No exponential scaling, just use size mapping to set the correct size
+      ScaleExponent = 0.0
+    }
   },
   GUI = {
     Name = "Tully Galaxies Images",
@@ -133,7 +143,7 @@ asset.export(TullyGalaxiesImages)
 
 asset.meta = {
   Name = "Tully Galaxies",
-  Version = "4.0",
+  Version = "5.0",
   Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
     images]],
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
