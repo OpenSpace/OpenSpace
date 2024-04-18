@@ -60,7 +60,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Globular Clusters",
-  Version = "4.07",
+  Version = "3.1",
   Description = [[Globular star clusters are dense balls of 100,000 to 1 million stars that orbit the Milky Way outside the Galaxy’s disk.]],
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

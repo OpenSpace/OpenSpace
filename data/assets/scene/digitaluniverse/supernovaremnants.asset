@@ -59,7 +59,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Supernova Remnants",
-  Version = "4.08",
+  Version = "3.1",
   Description = "A supernova remnant is the ejected gas that results from a supernova. It glows for a cosmically short period (hence we don't see many in our galaxy) of time before mixing with the interstellar medium.",
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

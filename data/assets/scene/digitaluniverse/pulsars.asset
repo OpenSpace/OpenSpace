@@ -60,7 +60,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Pulsars",
-  Version = "7.07",
+  Version = "3.1",
   Description = "A pulsar is a spinning neutron star, an ultra-dense stellar remnant resulting from a supernova-driven collapse of the stellar core.",
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

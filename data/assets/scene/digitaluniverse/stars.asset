@@ -110,7 +110,7 @@ asset.export(SunStar)
 
 asset.meta = {
   Name = "Stars",
-  Version = "8.10",
+  Version = "3.0",
   Description = "The nearby stars that surround the Sun and make up our night sky. The base catalog is Hipparcos, with Gaia DR3 data applied for distance and velocity when available.",
   Author = "Brian Abbott, Zack Reeves, Andrew Ayala, Jackie Faherty (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

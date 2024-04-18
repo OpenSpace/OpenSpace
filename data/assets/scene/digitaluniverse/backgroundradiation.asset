@@ -62,7 +62,7 @@ local WMAP = {
   GUI = {
     Name = "2003 WMAP CMB",
     Path = "/Universe/Cosmic Microwave Background",
-    Description = [[WMAP, the Wilkinson Microwave Anisotropy Probe, released this all-sky image of the cosmic microwave background light in 2003. The blue colors are slightly cooler than average and red is slightly warmer, with fluctuations of about a 100,000th of a degree above or below the average. The reslution on this image is 0.5 degrees.]]
+    Description = [[WMAP, the Wilkinson Microwave Anisotropy Probe, released this all-sky image of the cosmic microwave background light in 2003. The blue colors are slightly cooler than average and red is slightly warmer, with fluctuations of about a 100,000th of a degree above or below the average. The resolution on this image is 0.5 degrees.]]
   }
 }
 

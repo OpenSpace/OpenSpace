@@ -72,7 +72,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Quasars",
-  Version = "4.03",
+  Version = "4.0",
   Description = "Quasars are the most distant objects we see. They are extremely active galaxies that contain supermassive black holes which are gobbling up material at a furious rate.",
   Author = "Brian Abbott, Sohum Udani (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

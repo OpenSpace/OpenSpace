@@ -197,7 +197,7 @@ asset.export(PM_J13420Orbit)
 
 asset.meta = {
   Name = "Star Orbits",
-  Version = "1.06",
+  Version = "1.2",
   Description = [[Projected star orbits for select stars over the next 1 billion years.]],
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

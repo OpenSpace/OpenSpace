@@ -60,7 +60,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "HII Regions",
-  Version = "5.07",
+  Version = "2.1",
   Description = "H II (H-two) regions are glowing clouds of hydrogen where the light from young stars are exciting and illuminating the gas that enshrouds them. They trace new star formation in the galaxy.",
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

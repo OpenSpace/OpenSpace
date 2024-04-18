@@ -44,7 +44,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Alternative Labels for the Stars",
-  Version = "1.08",
+  Version = "2.1",
   Description = "Alternate star labels for the stars. Priority goes to Bayer IDs (Greek designations, like Alpha Orionis), then to Flamsteed numbers (like 1 Orionis).",
   Author = "Zack Reeves, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

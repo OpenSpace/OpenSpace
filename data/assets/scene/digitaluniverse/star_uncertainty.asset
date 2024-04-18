@@ -1,7 +1,3 @@
---local constellations_helper = asset.require("util/constellations_helper")
-
-
-
 local speck = asset.resource({
   Name = "Star Uncertainty Files",
   Type = "HttpSynchronization",
@@ -40,7 +36,6 @@ local StarUncertainty = {
 }
 
 
-
 asset.onInitialize(function()
   openspace.addSceneGraphNode(StarUncertainty)
 end)
@@ -55,7 +50,7 @@ asset.export(StarUncertainty)
 
 asset.meta = {
   Name = "Star Distance Uncertainty",
-  Version = "6.05",
+  Version = "1.0",
   Description = "The uncertainty of a star's position is derived from the uncertainty in its parallax measurement. This results in a range in distance where the star could exist. Green lines are stars with Gaia geometric parallax measurements (the most accurate), yellow lines are stars with Gaia photogeomentric parallaxes, and orange lines indicate stars with Hipparcos geometric parallaxes. The label includes the length of the uncertainty in light years.",
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

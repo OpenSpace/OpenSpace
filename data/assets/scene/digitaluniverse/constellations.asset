@@ -156,7 +156,7 @@ asset.export("ShowZodiacs", ShowZodiacs.Identifier)
 
 asset.meta = {
   Name = "Constellation Lines",
-  Version = "3.05",
+  Version = "1.4",
   Description = "Lines connecting the stars that make up the constellation figures.",
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

@@ -60,7 +60,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Planetary Nebulae",
-  Version = "3.09",
+  Version = "3.1",
   Description = "A planetary nebula appears when an average-sized star begins to die. An expanding shell of gas is illuminated by the stellar remnant, creating a glowing gas cloud.",
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

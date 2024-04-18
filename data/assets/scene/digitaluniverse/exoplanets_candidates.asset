@@ -61,7 +61,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Exoplanetary Candidates",
-  Version = "12.09",
+  Version = "4.0",
   Description = "Stars that are strong candidates for hosting a system of planets. Further observations are needed to confirm a planet's existence.",
   Author = "Brian Abbott, Zack Reeves, Emily Rice, and Jason No (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
