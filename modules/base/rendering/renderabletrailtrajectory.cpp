@@ -95,16 +95,17 @@ namespace {
         "The number of vertices that will be calculated each frame whenever the trail "
         "needs to be recalculated. "
         "A greater value will result in more calculations per frame.",
-        // @VISIBILITY(?)
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableSweepChunkingInfo = {
-    "EnableSweepChunking",
-    "Use Sweep Chunking",
-    "Enable or Disable the use of iterative calculations (chunking) during "
-    "full sweep vertex calculations",
-        // @VISIBILITY(?)
+        "EnableSweepChunking",
+        "Use Sweep Chunking",
+        "Enable or Disable the use of iterative calculations (chunking) during full "
+        "sweep vertex calculations. When enabled, small part of the trail will be "
+        "calculated each frame instead of calculating the entire trail in one go. "
+        "The size of each 'chunk' can be altered by changing the sweep chunk size "
+        "property.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -113,7 +114,6 @@ namespace {
         "Number of Accurate Trail Points",
         "The number of vertices, each side of the object, that will be recalculated "
         "for greater accuracy. This also ensures that the object connects with the trail.",
-        // @VISIBILITY(?)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -207,7 +207,6 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _secondaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 
     // Activate special render mode for renderableTrailTrajectory 
-    // (in class renderabletrail.cpp)
     _splitTrailRenderMode = true;
 }
 
@@ -297,7 +296,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 {},
                 Time(_start + i * _totalSampleInterval),
                 Time(0.0)
-                });
+            });
             const glm::vec3 p(dp.x, dp.y, dp.z);
             _vertexArray[i] = { p.x, p.y, p.z };
             _timeVector[i] = Time(_start + i * _totalSampleInterval).j2000Seconds();
@@ -354,7 +353,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
     }
 
     // This has to be done every update step;
-    const double  j2k = data.time.j2000Seconds();
+    const double j2k = data.time.j2000Seconds();
 
     if (j2k >= _start && j2k < _end) {
         _replacementPoints.clear();
@@ -410,18 +409,18 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         const glm::dvec3 p = _translation->position(data);
 
         // Calculates all replacement points before the object
-        glm::dvec3 v = glm::dvec3(p.x, p.y, p.z);
+        glm::dvec3 v = p;
         for (int i = 0; i < prePaddingDelta; ++i) {
             const int floatPointIndex =
                 _primaryRenderInformation.count - prePaddingDelta + i;
 
-            glm::dvec3 fp(
+            glm::dvec3 fp = glm::dvec3(
                 _vertexArray[floatPointIndex].x,
                 _vertexArray[floatPointIndex].y,
                 _vertexArray[floatPointIndex].z
             );
 
-            glm::dvec3 dp(
+            glm::dvec3 dp = glm::dvec3(
                 _dVertexArray[floatPointIndex].x,
                 _dVertexArray[floatPointIndex].y,
                 _dVertexArray[floatPointIndex].z
@@ -445,7 +444,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 static_cast<float>(newPoint.x),
                 static_cast<float>(newPoint.y),
                 static_cast<float>(newPoint.z)
-                });
+            });
         }
 
         // Mid-point (model-space position for the object)
@@ -458,13 +457,13 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         for (int i = 0; i < postPaddingDelta; ++i) {
             const int floatPointIndex = _secondaryRenderInformation.first + i;
 
-            glm::dvec3 fp(
+            glm::dvec3 fp = glm::dvec3(
                 _vertexArray[floatPointIndex].x,
                 _vertexArray[floatPointIndex].y,
                 _vertexArray[floatPointIndex].z
             );
 
-            glm::dvec3 dp(
+            glm::dvec3 dp = glm::dvec3(
                 _dVertexArray[floatPointIndex].x,
                 _dVertexArray[floatPointIndex].y,
                 _dVertexArray[floatPointIndex].z
@@ -484,7 +483,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 static_cast<float>(newPoint.x),
                 static_cast<float>(newPoint.y),
                 static_cast<float>(newPoint.z)
-                });
+            });
         }
 
         // Set variables for floating segments
