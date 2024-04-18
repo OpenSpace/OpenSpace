@@ -1,31 +1,24 @@
 local textures = asset.resource({
   Name = "Brown Dwarf Textures",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_dwarfs_textures",
+  Identifier = "digitaluniverse_brown_dwarfs_textures",
   Version = 1
 })
 
 local speck = asset.resource({
   Name = "Brown Dwarf Speck Files",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_dwarfs_speck",
+  Identifier = "digitaluniverse_brown_dwarfs_speck",
   Version = 4
 })
 
 
 local Object = {
-  Identifier = "Dwarfs",
+  Identifier = "BrownDwarfs",
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
-    File = speck .. "dwarfs.speck",
-    -- Labels = {
-    --   File = speck .. "dwarfs.label",
-    --   Color = { 0.5, 0.1, 0.2 },
-    --   Size = 14.6,
-    --   MinMaxSize = { 10, 20 },
-    --   Unit = "pc"
-    -- },
+    File = speck .. "bd.speck",
     Opacity = 1.0,
     Texture = {
       File = textures .. "point3.png",
@@ -34,20 +27,20 @@ local Object = {
     Coloring = {
       FixedColor = { 0.4, 0.0, 0.1 },
       ColorMapping = {
-        File = speck .. "dwarfs.cmap",
+        File = speck .. "bd.cmap",
         ParameterOptions = {
           { Key = "typeindex", Range = { 1.0, 4.0 } }
         }
       }
     },
     SizeSettings = {
-      ScaleExponent = 16.2,
+      ScaleExponent = 15.8,
       MaxSize = 0.7,
       EnableMaxSizeControl = true
     }
   },
   GUI = {
-    Name = "Dwarfs",
+    Name = "Brown Dwarfs",
     Path = "/Milky Way",
     Description = [[A catalog of substellar objects, not large enough to be fully fledged stars, but larger than planets. Some are brown dwarfs, others are not massive enough for that moniker. Includes L, T, and Y dwarfs.]]
   }
@@ -68,9 +61,9 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Brown Dwarfs",
-  Version = "3.0",
-  Description = "Digital Universe asset for Brown Dwarfs",
-  Author = "Brian Abbott (AMNH)",
+  Version = "7.05",
+  Description = "A catalog of substellar objects, not large enough to be fully fledged stars, but larger than planets. Some are brown dwarfs, others are not massive enough for that moniker. Includes L, T, and Y dwarfs.",
+  Author = "Brian Abbott, Zack Reeves, Jackie Faherty (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

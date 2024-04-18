@@ -1,0 +1,64 @@
+-- local speck = asset.resource({
+--   Name = "Multiwavelength Milky Way Data Files",
+--   Type = "HttpSynchronization",
+--   Identifier = "digitaluniverse_multiwavelength_milkyway_data",
+--   Version = 1
+-- })
+
+local textures = asset.resource({
+  Name = "Multiwavelength Milky Way Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_multiwavelength_milkyway_textures",
+  Version = 1
+})
+
+
+local HAlpha = {
+  Identifier = "HAlpha",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.pi }
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphereImageLocal",
+    Enabled = false,
+    Size = 9.2E21,
+    Segments = 40,
+    Opacity = 0.4,
+    Texture = textures .. "mwHalpha-f.png",
+    Orientation = "Inside",
+    MirrorTexture = true,
+    FadeOutThreshold = 0.025,
+    Background = true
+  },
+  GUI = {
+    Name = "H Alpha",
+    Path = "/Milky Way/All Sky Images",
+    Description = [[An image of the sky in hydrogen-alpha light, a narrow part of the visible, red spectrum. This image shows excited regions of gas, including star-forming regions and nebulae.]]
+  }
+}
+
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(HAlpha)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HAlpha)
+end)
+
+
+asset.export(HAlpha)
+
+
+
+asset.meta = {
+  Name = "The Multiwavelength Milky Way All-Sky Images",
+  Version = "3.02",
+  Description = [[Various all-sky images taken by telescopes across the spectrum of light.]],
+  Author = "Brian Abbott (AMNH), OpenSpace Team",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}
