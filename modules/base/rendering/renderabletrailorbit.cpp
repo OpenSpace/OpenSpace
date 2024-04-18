@@ -417,8 +417,8 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     else {
         // See how many new points needs to be generated. Delta is negative, so we need
         // to invert the ratio
-        const uint64_t nNewPoints =
-            -(static_cast<uint64_t>(floor(delta / secondsPerPoint)));
+        const int nNewPoints =
+            -(static_cast<int>(floor(delta / secondsPerPoint)));
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
