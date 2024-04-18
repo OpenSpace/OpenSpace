@@ -34,15 +34,15 @@ local Stars = {
     File = speck .. "stars.speck",
     Halo = {
       Texture = textures .. "halo.png",
-      Multiplier = 0.55,
-      Size = 0.95
+      Multiplier = 0.65
     },
     Glare = {
       Texture = textures .. "glare.png",
-      Multiplier = 5.0,
-      Scale = 0.4
+      Multiplier = 15.0,
+      Gamma = 1.66,
+      Scale = 0.18
     },
-    MagnitudeExponent = 6.25,
+    MagnitudeExponent = 6.325,
     ColorMap = colormaps .. "colorbv.cmap",
     OtherDataColorMap = colormaps .. "viridis.cmap",
     SizeComposition = "Distance Modulus",
