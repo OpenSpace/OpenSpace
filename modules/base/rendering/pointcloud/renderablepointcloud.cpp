@@ -58,7 +58,7 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 35> UniformNames = {
+    constexpr std::array<const char*, 36> UniformNames = {
         "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
         "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
         "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
@@ -66,13 +66,19 @@ namespace {
         "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
         "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
         "hasDvarScaling", "dvarScaleFactor", "enableOutline", "outlineColor",
-        "outlineWeight", "aspectRatioScale", "useOrientationData"
+        "outlineWeight", "outlineStyle", "aspectRatioScale", "useOrientationData"
     };
 
     enum RenderOption {
         ViewDirection = 0,
         PositionNormal,
         FixedRotation
+    };
+
+    enum OutlineStyle {
+        Round = 0,
+        Square,
+        Bottom
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureEnabledInfo = {
@@ -318,6 +324,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OutlineStyleInfo = {
+        "OutlineStyle",
+        "Outline Style",
+        "This setting decides the shape of points that have an outline (Round, Square, "
+        "or lust a line at the bottom).",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     // A RenderablePointCloud can be used to render point-based datasets in 3D space,
     // optionally including color mapping, a sprite texture and labels. There are several
     // properties that affect the visuals of the points, such as settings for scaling,
@@ -462,6 +476,14 @@ namespace {
 
             // [[codegen::verbatim(OutlineColorInfo.description)]]
             std::optional<float> outlineWeight;
+
+            enum class [[codegen::map(OutlineStyle)]] OutlineStyle {
+                Round [[codegen::key("Round")]],
+                Square [[codegen::key("Square")]],
+                Bottom [[codegen::key("Bottom")]]
+            };
+            // [[codegen::verbatim(OutlineStyleInfo.description)]]
+            std::optional<OutlineStyle> outlineStyle;
         };
         // Settings related to the coloring of the points, such as a fixed color,
         // color map, etc.
@@ -532,25 +554,10 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     , enableOutline(EnableOutlineInfo, false)
     , outlineColor(OutlineColorInfo, glm::vec3(0.23f), glm::vec3(0.f), glm::vec3(1.f))
     , outlineWeight(OutlineWeightInfo, 0.2f, 0.f, 1.f)
+    , outlineStyle(OutlineStyleInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const bool hasColoring = p.coloring.has_value();
-    if (hasColoring) {
-        const Parameters::ColorSettings settings = *p.coloring;
-        pointColor = settings.fixedColor.value_or(pointColor);
-
-        if (settings.colorMapping.has_value()) {
-            colorMapping = std::make_unique<ColorMappingComponent>(
-                *settings.colorMapping
-           );
-           addPropertySubOwner(colorMapping.get());
-        }
-
-        enableOutline = p.coloring->enableOutline.value_or(enableOutline);
-        outlineColor = p.coloring->outlineColor.value_or(outlineColor);
-        outlineWeight = p.coloring->outlineWeight.value_or(outlineWeight);
-    }
     pointColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(pointColor);
 
@@ -560,6 +567,33 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     addProperty(outlineColor);
 
     addProperty(outlineWeight);
+
+    outlineStyle.addOption(OutlineStyle::Round, "Round");
+    outlineStyle.addOption(OutlineStyle::Square, "Square");
+    outlineStyle.addOption(OutlineStyle::Bottom, "Bottom");
+    outlineStyle = OutlineStyle::Round;
+    addProperty(outlineStyle);
+
+    const bool hasColoring = p.coloring.has_value();
+    if (hasColoring) {
+        const Parameters::ColorSettings settings = *p.coloring;
+        pointColor = settings.fixedColor.value_or(pointColor);
+
+        if (settings.colorMapping.has_value()) {
+            colorMapping = std::make_unique<ColorMappingComponent>(
+                *settings.colorMapping
+            );
+            addPropertySubOwner(colorMapping.get());
+        }
+
+        enableOutline = p.coloring->enableOutline.value_or(enableOutline);
+        outlineColor = p.coloring->outlineColor.value_or(outlineColor);
+        outlineWeight = p.coloring->outlineWeight.value_or(outlineWeight);
+
+        if (p.coloring->outlineStyle.has_value()) {
+            outlineStyle = codegen::map<OutlineStyle>(*p.coloring->outlineStyle);
+        }
+    }
 }
 
 RenderablePointCloud::Texture::Texture()
@@ -1211,6 +1245,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     _program->setUniform(_uniformCache.enableOutline, _colorSettings.enableOutline);
     _program->setUniform(_uniformCache.outlineColor, _colorSettings.outlineColor);
     _program->setUniform(_uniformCache.outlineWeight, _colorSettings.outlineWeight);
+    _program->setUniform(_uniformCache.outlineStyle, _colorSettings.outlineStyle);
 
     bool useColorMap = hasColorData() && _colorSettings.colorMapping->enabled &&
         _colorSettings.colorMapping->texture();
