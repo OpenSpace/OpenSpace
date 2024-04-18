@@ -44,7 +44,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Star Labels",
-  Version = "8.10",
+  Version = "3.1",
   Description = "Common name labels for nearby stars in the Milky Way. See 'Stars' for more information.",
   Author = "Brian Abbott, Zack Reeves, Andrew Ayala, Jackie Faherty (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

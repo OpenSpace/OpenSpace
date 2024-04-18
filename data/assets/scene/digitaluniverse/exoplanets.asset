@@ -59,7 +59,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Exoplanets",
-  Version = "21.13",
+  Version = "2.1",
   Description = "Stars with known planetary systems.",
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

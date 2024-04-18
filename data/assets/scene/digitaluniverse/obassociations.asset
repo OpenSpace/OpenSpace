@@ -68,7 +68,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "OB Associations",
-  Version = "3.06",
+  Version = "3.1",
   Description = "Stellar associations are loose agglomerations of stars that form from the same gas cloud. OB associations typically have on the order of dozens of O and B stars in them (hotter, massive, younger stars) in addition to cooler stars. Over time the stars dispurse and the association is less concentrated.",
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

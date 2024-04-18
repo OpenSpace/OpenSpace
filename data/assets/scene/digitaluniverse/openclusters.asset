@@ -60,7 +60,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Open Star Clusters",
-  Version = "8.09",
+  Version = "3.1",
   Description = "Open star clusters in the Milky Way galaxy.",
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

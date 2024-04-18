@@ -64,7 +64,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Sloan Galaxies",
-  Version = "12.08",
+  Version = "4.0",
   Description = "Galaxies from the Sloan Digital Sky Survey.",
   Author = "Brian Abbott, Zack Reeves (AMNH), Eric Gawiser (Rutgers)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

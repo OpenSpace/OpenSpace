@@ -61,7 +61,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Brown Dwarfs",
-  Version = "7.05",
+  Version = "4.0",
   Description = "A catalog of substellar objects, not large enough to be fully fledged stars, but larger than planets. Some are brown dwarfs, others are not massive enough for that moniker. Includes L, T, and Y dwarfs.",
   Author = "Brian Abbott, Zack Reeves, Jackie Faherty (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
