@@ -31,8 +31,7 @@ local showCyclesAction = {
   Name = "Enable/Show epicycles",
   Documentation = [[Enables and shows in all epicycle trails]],
   Command = [[openspace.setPropertyValue("*TrailEarth.Renderable.Enabled", true);
-  openspace.setPropertyValue("*TrailEarth.Renderable.Fade", 1, 2);
-  ]],
+  openspace.setPropertyValue("*TrailEarth.Renderable.Fade", 1, 2);]],
   GuiPath = "/Trails/Epicycle",
   IsLocal = false
 }
