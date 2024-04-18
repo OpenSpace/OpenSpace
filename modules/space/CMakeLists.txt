@@ -73,6 +73,7 @@ set(SHADER_FILES
   shaders/constellationlines_fs.glsl
   shaders/constellationlines_vs.glsl
   shaders/debrisVizPoints_fs.glsl
+  shaders/debrisVizPoints_gs.glsl
   shaders/debrisVizPoints_vs.glsl
   shaders/debrisVizTrails_fs.glsl
   shaders/debrisVizTrails_vs.glsl
