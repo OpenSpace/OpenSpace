@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,12 +21,6 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
-/*
-  NOTE: 
-    - Do we need to care about View Direction vs Normal?
-    - Change some things from Double to Float to save performance?
-*/
 
 #version __CONTEXT__
 
@@ -57,7 +51,7 @@ dvec4 dz_normalization(dvec4 dv_in) {
   return dv_out;
 }
 
-void main () {
+void main() {
   skip = 0;
   
   double cFrac = currentRevolutionFraction[0];
@@ -85,14 +79,14 @@ void main () {
     dvec3 up = normalize(cross(normal, right));
 
     // Calculate size of points
-    double initialSize = pow(10, pointSizeExponent);
+    double initialSize = pow(10.0, pointSizeExponent);
     right *= initialSize;
     up *= initialSize;
 
     double opp = length(right);
     double adj = length(cameraPositionWorld.xyz - vertPosWorldSpace.xyz);
     float angle = atan(float(opp/adj));
-    float maxAngle = radians(maxSize * 0.5f);
+    float maxAngle = radians(maxSize * 0.5);
 
     // Controls the point size
     if (enableMaxSize && (angle > maxAngle) && (adj > 0.0)) {
@@ -118,31 +112,32 @@ void main () {
     //left-top
     vec4 p0Screen = vec4(dz_normalization(ViewProjectionTransform * p0World));
     gl_Position = p0Screen;
-    texCoord = vec2(0,0);
+    texCoord = vec2(0.0, 0.0);
     EmitVertex();
 
     //left-bot
     vec4 p1Screen = vec4(dz_normalization(ViewProjectionTransform * p1World));
     gl_Position = p1Screen;
-    texCoord = vec2(1,0);
+    texCoord = vec2(1.0, 0.0);
     EmitVertex();
 
     //right-top
     vec4 p2Screen = vec4(dz_normalization(ViewProjectionTransform * p2World));
     gl_Position = p2Screen;
-    texCoord = vec2(0,1);
+    texCoord = vec2(0.0, 1.0);
     EmitVertex();
 
     //right-bot
     vec4 p3Screen = vec4(dz_normalization(ViewProjectionTransform * p3World));
     gl_Position = p3Screen;
-    texCoord = vec2(1,1);
+    texCoord = vec2(1.0, 1.0);
     EmitVertex();
     
     // Primitive
     EndPrimitive();
 
-  } else {
+  } 
+  else {
     skip = 1;
     EmitVertex();
     EndPrimitive();

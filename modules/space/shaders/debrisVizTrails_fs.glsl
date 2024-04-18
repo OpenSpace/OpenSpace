@@ -71,7 +71,6 @@ Fragment getFragment() {
   if (fade < 0.15) {
     frag.blend = BLEND_MODE_ADDITIVE;
   }
-  
   frag.color = vec4(color, fade * opacity);
   frag.depth = viewSpaceDepth;
   frag.gPosition = viewSpacePosition;
