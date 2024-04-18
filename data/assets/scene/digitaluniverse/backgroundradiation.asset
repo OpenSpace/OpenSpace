@@ -89,7 +89,7 @@ local Planck = {
   GUI = {
     Name = "2013 Planck CMB",
     Path = "/Universe/Cosmic Microwave Background",
-    Description = [[The Planck mission's image (2013) of the cosmic microwave background light release in 2013 is the most detailed view of the CMB we have to date. The orange areas represent the slightly hotter areas, and the blue areas show the areas that are slightly cooler. Reolution on this image is 0.16 degrees.]]
+    Description = [[The Planck mission's image (2013) of the cosmic microwave background light release in 2013 is the most detailed view of the CMB we have to date. The orange areas represent the slightly hotter areas, and the blue areas show the areas that are slightly cooler. The resolution on this image is 0.16 degrees.]]
   }
 }
 
