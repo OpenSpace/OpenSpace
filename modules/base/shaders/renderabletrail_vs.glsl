@@ -62,7 +62,7 @@ void main() {
   if ((vertexSortingMethod != VERTEX_SORTING_NOSORTING) && useLineFade) {
     float id = 0;
 
-    if(useSplitRenderMode) {
+    if (useSplitRenderMode) {
         // Calculates id for when using split render mode (renderableTrailTrajectory)
         id = float(floatingOffset + modId) / float(max(1, numberOfUniqueVertices - 1));
     }
@@ -73,7 +73,7 @@ void main() {
           modId += nVertices;
         }
         
-        // Convert the index to a [0,1] ranger
+        // Convert the index to a [0,1] range
         id = float(modId) / float(nVertices);
     }
 
@@ -90,7 +90,7 @@ void main() {
     }
     else if (id > b0 && id < b1) {
         float delta = b1 - b0;
-        fadeValue = (id-b0) / delta;
+        fadeValue = (id - b0) / delta;
     }
     else {
         fadeValue = 1.0;
