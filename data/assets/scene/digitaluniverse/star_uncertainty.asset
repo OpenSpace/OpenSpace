@@ -1,0 +1,63 @@
+--local constellations_helper = asset.require("util/constellations_helper")
+
+
+
+local speck = asset.resource({
+  Name = "Star Uncertainty Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_star_uncertainty_data",
+  Version = 2
+})
+
+
+local StarUncertainty = {
+  Identifier = "StarUncertainty",
+  Renderable = {
+    Type = "RenderableConstellationLines",
+    Enabled = false,
+    Labels = {
+      File = speck .. "star_uncertainty.label",
+      Opacity = 0.75,
+      Color = { 0.6, 0.6, 1.0 },
+      Size = 14.1,
+      MinMaxSize = { 8, 170 },
+      Unit = "pc"
+    },
+    Opacity = 0.8,
+    LineWidth = 5.0,
+    File = speck .. "star_uncertainty.speck",
+    NamesFile = speck .. "star_uncertainty.dat",
+    Colors = { { 1.0, 1.0, 0.0 }, { 0.475, 0.941, 0.404 }, { 0.957, 0.51, 0.10 } },
+    Unit = "pc",
+    DimInAtmosphere = true
+  },
+  Tag = { "daytime_hidden" },
+  GUI = {
+    Name = "Star Distance Uncertainty",
+    Path = "/Milky Way/Stars",
+    Description = [[The uncertainty of a star's position is derived from the uncertainty in its parallax measurement. This results in a range in distance where the star could exist. Green lines are stars with Gaia geometric parallax measurements (the most accurate), yellow lines are stars with Gaia photogeomentric parallaxes, and orange lines indicate stars with Hipparcos geometric parallaxes. The label includes the length of the uncertainty in light years.]]
+  }
+}
+
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(StarUncertainty)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StarUncertainty)
+end)
+
+asset.export(StarUncertainty)
+
+
+
+asset.meta = {
+  Name = "Star Distance Uncertainty",
+  Version = "6.05",
+  Description = "The uncertainty of a star's position is derived from the uncertainty in its parallax measurement. This results in a range in distance where the star could exist. Green lines are stars with Gaia geometric parallax measurements (the most accurate), yellow lines are stars with Gaia photogeomentric parallaxes, and orange lines indicate stars with Hipparcos geometric parallaxes. The label includes the length of the uncertainty in light years.",
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

@@ -1,0 +1,63 @@
+local textures = asset.resource({
+  Name = "White Dwarf Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_dwarfs_textures",
+  Version = 1
+})
+
+local speck = asset.resource({
+  Name = "White Dwarf Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_white_dwarfs_speck",
+  Version = 1
+})
+
+
+local Object = {
+  Identifier = "WhiteDwarfs",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    File = speck .. "wd.speck",
+    Opacity = 1.0,
+    Texture = {
+      File = textures .. "point3.png",
+    },
+    Unit = "pc",
+    Coloring = {
+      FixedColor = { 1.0, 1.0, 1.0 },
+    },
+    SizeSettings = {
+      ScaleExponent = 15.5,
+      MaxSize = 0.7,
+      EnableMaxSizeControl = true
+    }
+  },
+  GUI = {
+    Name = "White Dwarfs",
+    Path = "/Milky Way",
+    Description = [[White dwarfs in the nearby Milky Way.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "White Dwarfs",
+  Version = "1.01",
+  Description = "White dwarfs in the nearby Milky Way.",
+  Author = "Zack Reeves, Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

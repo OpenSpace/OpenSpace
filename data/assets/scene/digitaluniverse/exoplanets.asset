@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Exoplanets Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_speck",
-  Version = 3
+  Version = 4
 })
 
 
@@ -22,7 +22,7 @@ local Object = {
     Labels = {
       File = speck .. "expl.label",
       Color = { 0.3, 0.3, 0.8 },
-      Size = 14.8,
+      Size = 13.75,
       MinMaxSize = { 10, 100 },
       Unit = "pc"
     },
@@ -32,21 +32,15 @@ local Object = {
     },
     Unit = "pc",
     SizeSettings = {
-      ScaleExponent = 16.9,
-      MaxSize = 2.8,
+      ScaleExponent = 16.4,
+      MaxSize = 3.5,
       EnableMaxSizeControl = true
     }
   },
   GUI = {
     Name = "Exoplanets",
     Path = "/Milky Way/Exoplanets",
-    Description = [[Census: 5,361 planets in 3,982 systems. DU Version 20.12. <br>
-      Extrasolar planets, or exoplanets, are a relatively new phenomenon in
-      astronomy. While many astronomers believed in their existence, no
-      observational evidence was available until 1995. Since that time, scientists
-      have discovered thousands of systems consisting of one or more planets around
-      a host star.(Description from URL) <br><br> Data Reference: NASA Exoplanet
-      Archive (CalTech/NASA)]]
+    Description = [[Stars with known planetary systems.]]
   }
 }
 
@@ -65,9 +59,9 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Exoplanets",
-  Version = "2.0",
-  Description = "Digital Universe asset for Exoplanets",
-  Author = "Brian Abbott (AMNH)",
+  Version = "21.13",
+  Description = "Stars with known planetary systems.",
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

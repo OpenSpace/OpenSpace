@@ -4,10 +4,10 @@ local earth_transforms = asset.require("scene/solarsystem/planets/earth/transfor
 
 
 local speck = asset.resource({
-  Name = "Grids Speck Files",
+  Name = "Star Orbits Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_starorbits_speck",
-  Version = 1
+  Version = 2
 })
 
 
@@ -28,7 +28,7 @@ local SunOrbit = {
   GUI = {
     Name = "Sun Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of the Sun around the Milky Way"
+    Description = "Orbit of the Sun around the Milky Way"
   }
 }
 
@@ -50,7 +50,7 @@ local BarnardsOrbit = {
   GUI = {
     Name = "Barnards Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of Barnard's Star around the Milky Way"
+    Description = "Orbit of Barnard's Star around the Milky Way"
   }
 }
 
@@ -72,7 +72,7 @@ local KapteynsOrbit = {
   GUI = {
     Name = "Kapteyns Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of Kapteyn's Star around the Milky Way"
+    Description = "Orbit of Kapteyn's Star around the Milky Way"
   }
 }
 
@@ -94,7 +94,7 @@ local Lacaille9352Orbit = {
   GUI = {
     Name = "Lacaille 9352 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of Lacaille9352 around the Milky Way"
+    Description = "Orbit of Lacaille9352 around the Milky Way"
   }
 }
 
@@ -116,7 +116,7 @@ local LSR1826Orbit = {
   GUI = {
     Name = "LSR1826+3014 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of LSR1826+3014 around the Milky Way"
+    Description = "Orbit of LSR1826+3014 around the Milky Way"
   }
 }
 
@@ -138,7 +138,7 @@ local LSRJ0822Orbit = {
   GUI = {
     Name = "LSRJ0822+1700 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of LSRJ0822+1700 around the Milky Way"
+    Description = "Orbit of LSRJ0822+1700 around the Milky Way"
   }
 }
 
@@ -160,7 +160,7 @@ local PM_J13420Orbit = {
   GUI = {
     Name = "PM_J13420-3415 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of PM_J13420-3415 around the Milky Way"
+    Description = "Orbit of PM_J13420-3415 around the Milky Way"
   }
 }
 
@@ -197,12 +197,9 @@ asset.export(PM_J13420Orbit)
 
 asset.meta = {
   Name = "Star Orbits",
-  Version = "1.1",
-  Description = [[Select Star Orbital paths that delineate their trajectory around the
-    Milky Way over 1 billion years into the future. Included: Sun, Barnards, Kapteyns,
-    Lacaille 9352, LSR1826+3014, LSRJ0822+1700, PM_J13420-3415. <br><br> Data
-    Reference: Sebastien Lepine (AMNH)]],
-  Author = "Brian Abbott (AMNH)",
+  Version = "1.06",
+  Description = [[Projected star orbits for select stars over the next 1 billion years.]],
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }
