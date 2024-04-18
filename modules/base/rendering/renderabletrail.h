@@ -195,14 +195,15 @@ private:
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 #ifdef __APPLE__
-    UniformCache(opacity, modelView, projection, color, useLineFade,
-                 lineLength, lineFadeAmount, vertexSorting, idOffset, nVertices,
-                 stride, pointSize, renderPhase) _uniformCache;
+    UniformCache(opacity, modelView, projection, color, useLineFade, lineLength,
+        lineFadeAmount, vertexSorting, idOffset, nVertices, stride, pointSize,
+        renderPhase, useSplitRenderMode, floatingOffset, numberOfUniqueVertices
+    ) _uniformCache; 
 #else
     UniformCache(opacity, modelView, projection, color, useLineFade, lineLength,
         lineFadeAmount, vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase, 
-        viewport, lineWidth, useSplitRenderMode, numberOfUniqueVertices, floatingOffset)
-            _uniformCache;
+        viewport, lineWidth, floatingOffset, useSplitRenderMode, numberOfUniqueVertices
+    ) _uniformCache;
 #endif
 };
 

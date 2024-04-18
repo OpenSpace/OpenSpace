@@ -495,8 +495,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _splitTrailRenderMode,
             _numberOfUniqueVertices
         );
-
-        int floatingOffset = _primaryRenderInformation.count - 1;
+        
+        int floatingOffset = std::max(0, _primaryRenderInformation.count - 1);
         internalRender(
             renderLines,
             renderPoints,
@@ -523,6 +523,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _numberOfUniqueVertices,
             offset
         );
+        
     }
     else {
         // Render the primary batch of vertices
