@@ -103,16 +103,16 @@ namespace {
         "This value controls the maximum allowed size for the points, when the max size "
         "control feature is enabled. This limits the visual size of the points based on "
         "the distance to the camera. The larger the value, the larger the points are "
-        "allowed to be. In the background, the computations are made by limiting the "
-        "size of the angle between the CameraToPointMid and CameraToPointEdge vectors.",
+        "allowed to be. In the background, the computations are made to limit the size "
+        "of the angle between the CameraToPointMid and CameraToPointEdge vectors.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering Mode",
-        "Determines how the trail should be rendered to the screen. If 'Trail' is "
-        "selected, only the line part is visible, if 'Point' is selected, only the "
+        "Determines how the trail should be rendered. If 'Trail' is selected, "
+        "only the line part is visible, if 'Point' is selected, only the "
         "current satellite/debris point is visible.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -258,7 +258,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
         "Appearance of RenderableOrbitalKepler"
     })
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
-    , trailWidth(TrailWidthInfo, 10.f, 1.f, 20.f)
+    , trailWidth(TrailWidthInfo, 2.f, 1.f, 20.f)
     , pointSizeExponent(PointSizeExponentInfo, 1.0f, 0.f, 25.f)
     , renderingModes(
         RenderingModeInfo,
@@ -307,7 +307,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 
     _appearance.color = p.color;
     _appearance.trailFade = p.trailFade.value_or(_appearance.trailFade);
-    _appearance.trailWidth = p.trailWidth.value_or(2.f);
+    _appearance.trailWidth = p.trailWidth.value_or(_appearance.trailWidth);
     _appearance.pointSizeExponent = p.pointSizeExponent.value_or(_appearance.pointSizeExponent);
     _appearance.enableMaxSize = p.enableMaxSize.value_or(_appearance.enableMaxSize);
     _appearance.maxSize = p.maxSize.value_or(_appearance.maxSize);
@@ -317,12 +317,12 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 
     if (p.renderingMode.has_value()) {
         switch (*p.renderingMode) {
-        case Parameters::RenderingMode::Trail:
-            _appearance.renderingModes = RenderingModeTrail;
-            break;
-        case Parameters::RenderingMode::Point:
-            _appearance.renderingModes = RenderingModePoint;
-            break;
+            case Parameters::RenderingMode::Trail:
+                _appearance.renderingModes = RenderingModeTrail;
+                break;
+            case Parameters::RenderingMode::Point:
+                _appearance.renderingModes = RenderingModePoint;
+                break;
         }
     }
     else {
@@ -462,7 +462,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     GLint* _si = _startIndex.data();
     GLint* _ss = _segmentSize.data();
 
-    int selection = _appearance.renderingModes;
+    const int selection = _appearance.renderingModes;
     if (selection == RenderingModePoint) {
         _pointProgram->activate();
 
