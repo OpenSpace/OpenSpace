@@ -56,6 +56,7 @@ uniform float outlineWeight;
 
 uniform float fadeInValue;
 
+uniform bool useCmapOutline;
 uniform int outlineStyle;
 
 const int OutlineStyleRound = 0;
@@ -102,10 +103,15 @@ Fragment getFragment() {
   }
 
   vec4 fullColor = vec4(color, 1.0);
+  vec4 cmapColor = vec4(1.0);
   if (useColorMap) {
-    fullColor = sampleColorMap(gs_colorParameter);
+    cmapColor = sampleColorMap(gs_colorParameter);
+    if (!useCmapOutline) {
+      fullColor = cmapColor;
+    }
   }
 
+  vec4 textureColor = vec4(1.0);
   if (hasSpriteTexture) {
     fullColor *= texture(spriteTexture, vec3(texCoord, layer));
   }
@@ -126,7 +132,11 @@ Fragment getFragment() {
     }
 
     if (pixelIsOutline) {
-      fullColor.rgb = outlineColor;
+      vec4 theOutlineColor = vec4(outlineColor, 1.0);
+      if (useColorMap && useCmapOutline) {
+        theOutlineColor = cmapColor;
+      }
+      fullColor = theOutlineColor;
     }
   }
 
