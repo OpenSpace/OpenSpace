@@ -21,7 +21,8 @@ local DebrisFengyun = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.784, 1.0, 0.737 },
-    Fade = 1.5,
+    TrailFade = 1.5,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },

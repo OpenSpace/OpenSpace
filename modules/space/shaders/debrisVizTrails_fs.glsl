@@ -31,10 +31,18 @@ in float offsetPeriods;
 
 uniform vec3 color;
 uniform float opacity = 1.0;
-uniform float lineFade;
+uniform float trailFade;
 
+/// Different modes - sync with renderableorbitalkepler.cpp
+// RenderingModeLines = 0
+// RenderingModePoint = 1
 
 Fragment getFragment() {
+  Fragment frag;
+
+  float invert = 1.0;
+  float fade = 1.0;
+
   // float offsetPeriods = offset / period;
   // This is now done in the fragment shader instead to make smooth movement between
   // vertices. We want vertexDistance to be double up to this point, I think, (hence the
@@ -46,26 +54,23 @@ Fragment getFragment() {
   // float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
   // float nrOfSegments_f = float(numberOfSegments);
   // float vertexDistance = periodFraction - (vertexID_perOrbit/nrOfSegments_f);
-
   if (vertexDistance < 0.0) {
     vertexDistance += 1.0;
   }
 
-  float invert = pow((1.0 - vertexDistance), lineFade);
-  float fade = clamp(invert, 0.0, 1.0);
+  invert = pow((1.0 - vertexDistance), trailFade);  
+  fade = clamp(invert, 0.0, 1.0);
 
   // Currently even fully transparent lines can occlude other lines, thus we discard these
   // fragments since debris and satellites are rendered so close to each other
   if (fade < 0.05) {
     discard;
   }
-
-  Fragment frag;
+  
+  // Use additive blending for some values to make the discarding less abrupt
   if (fade < 0.15) {
-    // Use additive blending for some values to make the discarding less abrupt
     frag.blend = BLEND_MODE_ADDITIVE;
   }
-
   frag.color = vec4(color, fade * opacity);
   frag.depth = viewSpaceDepth;
   frag.gPosition = viewSpacePosition;

@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 2,
     Color = { 0.5, 0.8, 1.0 },
-    TrailFade = 25
+    TrailFade = 25,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Atira Asteroids",

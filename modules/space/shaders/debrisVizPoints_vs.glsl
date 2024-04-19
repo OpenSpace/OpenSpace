@@ -22,42 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#version __CONTEXT__
 
-in float vs_positionDepth;
-in vec4 vs_gPosition;
-in float fade;
+layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
+layout (location = 1) in vec2 orbitData; // 1: epoch, 2: period
 
-uniform vec3 color;
-uniform int renderPhase;
-uniform float opacity = 1.0;
+uniform double inGameTime;
+uniform dmat4 modelTransform;
 
-// Fragile! Keep in sync with RenderableTrail::render::RenderPhase
-#define RenderPhaseLines 0
-#define RenderPhasePoints 1
+flat out double currentRevolutionFraction;
+flat out double vertexRevolutionFraction;
 
-#define Delta 0.25
+void main() {
+  float epoch = orbitData.x;
+  float period = orbitData.y;
+  double numOfRevolutions = (inGameTime - epoch) / period;
 
-
-Fragment getFragment() {
-  Fragment frag;
-  frag.color = vec4(color * fade, fade * opacity);
-  frag.depth = vs_positionDepth;
-  frag.blend = BLEND_MODE_ADDITIVE;
-
-  if (renderPhase == RenderPhasePoints) {
-    // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
-    // smoothstep to gradually decrease the alpha on the edges of the point
-    vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-    //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
-    float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
-    frag.color.a *= circleClipping;
+  vertexRevolutionFraction = vertexData.w / period;
+  currentRevolutionFraction = numOfRevolutions - double(int(numOfRevolutions));
+  if (currentRevolutionFraction < 0.0) {
+    currentRevolutionFraction += 1.0;
   }
 
-  frag.gPosition = vs_gPosition;
-
-  // There is no normal here
-  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
-  return frag;
+  gl_Position = vec4(vertexData.xyz, 1.0);
 }

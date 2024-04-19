@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 9,
     Color = { 0.66, 0.66, 0.66 },
-    TrailFade = 18
+    TrailFade = 18,
+    PointSizeExponent = 10.6
   },
   GUI = {
     Name = "Halley-type Comets",

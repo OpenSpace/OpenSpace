@@ -21,7 +21,8 @@ local StarlinkSatellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.65, 0.55, 0.55 },
-    Fade = 1.5,
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },

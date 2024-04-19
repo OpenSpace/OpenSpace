@@ -21,7 +21,8 @@ local SpaceStations = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.9, 0.1, 0.0 },
-    Fade = 1.5,
+    TrailFade = 20,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },

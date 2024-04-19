@@ -40,7 +40,7 @@ uniform double inGameTime;
 
 
 void main() {
-  // The way the position and line fade is calculated is:
+  // The way the position and trail fade is calculated is:
   // By using inGameTime, epoch and period of this orbit, we get how many revolutions it
   // has done since epoch. The fract of that, is how far into a revolution it has traveled
   // since epoch. Similarly we do the same but for this vertex, but calculating

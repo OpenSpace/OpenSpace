@@ -72,8 +72,11 @@ set(SHADER_FILES
   shaders/constellationbounds_vs.glsl
   shaders/constellationlines_fs.glsl
   shaders/constellationlines_vs.glsl
-  shaders/debrisViz_fs.glsl
-  shaders/debrisViz_vs.glsl
+  shaders/debrisVizPoints_fs.glsl
+  shaders/debrisVizPoints_gs.glsl
+  shaders/debrisVizPoints_vs.glsl
+  shaders/debrisVizTrails_fs.glsl
+  shaders/debrisVizTrails_vs.glsl
   shaders/fluxnodes_fs.glsl
   shaders/fluxnodes_vs.glsl
   shaders/habitablezone_vs.glsl

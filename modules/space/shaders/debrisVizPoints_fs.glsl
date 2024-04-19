@@ -24,40 +24,40 @@
 
 #include "fragment.glsl"
 
-in float vs_positionDepth;
-in vec4 vs_gPosition;
-in float fade;
+in float projectionViewDepth;
+in vec4 viewSpace;
+in vec2 texCoord;
+flat in int skip;
 
+uniform bool enableOutline;
+uniform vec3 outlineColor;
+uniform float outlineWeight;
 uniform vec3 color;
-uniform int renderPhase;
-uniform float opacity = 1.0;
-
-// Fragile! Keep in sync with RenderableTrail::render::RenderPhase
-#define RenderPhaseLines 0
-#define RenderPhasePoints 1
-
-#define Delta 0.25
-
+uniform float opacity;
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vec4(color * fade, fade * opacity);
-  frag.depth = vs_positionDepth;
-  frag.blend = BLEND_MODE_ADDITIVE;
-
-  if (renderPhase == RenderPhasePoints) {
-    // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
-    // smoothstep to gradually decrease the alpha on the edges of the point
-    vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-    //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
-    float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
-    frag.color.a *= circleClipping;
+  
+  if (skip == 1) {
+    discard;
   }
 
-  frag.gPosition = vs_gPosition;
+  // Only draw circle instead of entire quad
+  vec2 st = (texCoord - vec2(0.5)) * 2.0;
+  if (length(st) > 1.0) {
+    discard;
+  }
 
-  // There is no normal here
-  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+  // Creates outline for circle
+  vec3 _color = color;
+  if (enableOutline && (length(st) > (1.0 - outlineWeight) && length(st) < 1.0)) {
+    _color = outlineColor;
+  }
+
+  frag.color = vec4(_color, opacity);
+  frag.depth = projectionViewDepth;
+  frag.gPosition = viewSpace;
+  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
   return frag;
 }

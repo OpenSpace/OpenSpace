@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 1,
     Color = { 0.4, 0.4, 1.0 },
-    TrailFade = 2
+    TrailFade = 2,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Outer Main Asteroid Belt",
