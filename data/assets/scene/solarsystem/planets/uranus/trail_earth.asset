@@ -14,9 +14,9 @@ local UranusTrailEarth = {
       Target = coreKernels.ID.Uranus,
       Observer = coreKernels.ID.Earth
     },
-    Color = { 1.0, 0.5, 0.2 },
-    Period = 224.695,
-    Resolution = 1000
+    Color = { 0.6, 0.95, 1.0 },
+    Period = 30588.74,
+    Resolution = 3000
   },
   Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
   GUI = {

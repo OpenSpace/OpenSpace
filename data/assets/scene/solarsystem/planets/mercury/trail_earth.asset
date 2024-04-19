@@ -15,8 +15,8 @@ local MercuryTrailEarth = {
       Target = coreKernels.ID.Mercury,
       Observer = coreKernels.ID.Earth
     },
-    Color = { 1.0, 0.5, 0.2 },
-    Period = 224.695,
+    Color = { 0.6, 0.5, 0.5 },
+    Period = 380.0,
     Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
