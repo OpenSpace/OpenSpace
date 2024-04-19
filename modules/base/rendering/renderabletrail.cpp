@@ -102,12 +102,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineFadeAmountInfo = {
         "LineFadeAmount",
         "Line Fade Amount",
-        "The amount of the trail that should be faded. If the value is 0 the "
-        "trail will have no fading. A value of 0.5 will have a solid trail until "
-        "50% of the trail and then the fading will begin. A value of 1 will "
-        "result in a trail that starts fading immediately. The setting only "
-        "applies if the 'EnableFade' value is 'true'. If it is 'false', this "
-        "setting has no effect.",
+        "The amount of the trail that should be faded. If the value is 0 then the "
+        "trail will have no fading applied. A value of 0.6 will result in a trail "
+        "where 60% of the extent of the trail will have fading applied to it. In other"
+        "words, the 40% closest to the head of the trail will be solid and the rest "
+        "will fade until completely transparent at the end of the trail. A value of 1 "
+        "will result in a trail that starts fading immediately, becoming fully "
+        "transparent by the end of the trail. This setting only applies if the "
+        "'EnableFade' value is 'true'. If it is 'false', this setting has no effect.",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
