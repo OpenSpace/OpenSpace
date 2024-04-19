@@ -998,10 +998,18 @@ void OpenSpaceEngine::preSynchronization() {
             global::timeManager->time().j2000Seconds()
         );
         for (const std::string& script : schedScripts) {
+            if (script.empty()) {
+                continue;
+            }
+
             global::scriptEngine->queueScript(
                 script,
                 scripting::ScriptEngine::ShouldBeSynchronized::Yes,
                 scripting::ScriptEngine::ShouldSendToRemote::Yes
+            );
+
+            global::eventEngine->publishEvent<events::EventScheduledScriptExecuted>(
+                script
             );
         }
 
