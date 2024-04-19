@@ -32,9 +32,9 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vector/vec4property.h>
-#include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -118,9 +118,6 @@ protected:
 
     /// The layout of the VBOs (use float if sending as positions to shader)
     template <typename T>
-    /**
-     * The layout of the VBOs (use float if sending as positions to shader).
-     */
     struct TrailVBOLayout {
         T x, y, z;
     };
@@ -188,7 +185,8 @@ private:
         const RenderData& data,
         const glm::dmat4& modelTransform,
         RenderInformation& info, int nVertices, int ringOffset,
-        bool useSplitRenderMode = false, int numberOfUniqueVertices = 0, int floatingOffset = 0);
+        bool useSplitRenderMode = false, int numberOfUniqueVertices = 0,
+        int floatingOffset = 0);
 
    Appearance _appearance;
 

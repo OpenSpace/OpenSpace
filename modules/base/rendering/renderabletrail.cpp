@@ -43,7 +43,7 @@ namespace {
     constexpr std::array<const char*, 16> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
-        "stride", "pointSize", "renderPhase", "useSplitRenderMode","floatingOffset",
+        "stride", "pointSize", "renderPhase", "useSplitRenderMode", "floatingOffset",
         "numberOfUniqueVertices"
     };
 #else
@@ -91,10 +91,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineLengthInfo = {
         "LineLength",
         "Line Length",
-        "The amount of the orbit that should have a trail. A value of 0 will "
-        "result in no trail and a value of 1 will result in a trail that is "
-        "the entire orbit. The setting only applies if the 'EnableFade' value "
-        "is 'true'. If it is 'false', this setting has no effect.",
+        "The extent of the rendered trail. A value of 0 will result in no trail and a "
+        "value of 1 will result in a trail that covers the entire extent. The setting "
+        "only applies if 'EnableFade' is 'true'. If it is 'false', this setting has "
+        "no effect.",
         // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
@@ -139,7 +139,6 @@ namespace {
         "Determines how the trail should be rendered. If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
         "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts",
-        // @VISIBILITY(?)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -307,7 +306,8 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
                                      const RenderData& data,
                                      const glm::dmat4& modelTransform,
                                      RenderInformation& info, int nVertices, int ringOffset,
-                                     bool useSplitRenderMode, int numberOfUniqueVertices, int floatingOffset)
+                                     bool useSplitRenderMode, int numberOfUniqueVertices,
+                                     int floatingOffset)
 {
     ZoneScoped;
 
@@ -425,10 +425,10 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
     _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);
     if (_appearance.useLineFade) {
-        float startPoint = 1.f - _appearance.lineLength.value();
-        float remainingRange = 1.0f - startPoint;
-        float delta = remainingRange * _appearance.lineFadeAmount.value();
-        float endPoint = std::min(startPoint + delta, 1.f);
+        const float startPoint = 1.f - _appearance.lineLength;
+        const float remainingRange = 1.f - startPoint;
+        const float delta = remainingRange * _appearance.lineFadeAmount;
+        const float endPoint = std::min(startPoint + delta, 1.f);
         _programObject->setUniform(_uniformCache.lineLength, startPoint);
         _programObject->setUniform(_uniformCache.lineFadeAmount, endPoint);
     }
@@ -496,7 +496,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _numberOfUniqueVertices
         );
         
-        int floatingOffset = std::max(0, _primaryRenderInformation.count - 1);
+        const int floatingOffset = std::max(0, _primaryRenderInformation.count - 1);
         internalRender(
             renderLines,
             renderPoints,
@@ -510,7 +510,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             floatingOffset
         );
 
-        int offset = (_floatingRenderInformation.count > 0) ? 1 : 0;
+        const int offset = (_floatingRenderInformation.count > 0) ? 1 : 0;
         internalRender(
             renderLines,
             renderPoints,
@@ -537,8 +537,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             primaryOffset
         );
 
-        // The secondary batch is optional, so we need to check whether we have any data here
-        if (_floatingRenderInformation._vaoID != 0 && _floatingRenderInformation.count != 0) {
+        // The secondary batch is optional. We need to check whether we have any data
+        if (_floatingRenderInformation._vaoID != 0 &&
+            _floatingRenderInformation.count != 0) {
             internalRender(
                 renderLines,
                 renderPoints,
