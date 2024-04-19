@@ -161,20 +161,20 @@ bool BasicVolumeRaycaster::isCameraInside(const RenderData& data,
             localPosition.z > 0 && localPosition.z < 1);
 }
 
-std::string BasicVolumeRaycaster::boundsVertexShaderPath() const {
-    return absPath(GlslBoundsVs).string();
+std::filesystem::path BasicVolumeRaycaster::boundsVertexShaderPath() const {
+    return absPath(GlslBoundsVs);
 }
 
-std::string BasicVolumeRaycaster::boundsFragmentShaderPath() const {
-    return absPath(GlslBoundsFs).string();
+std::filesystem::path BasicVolumeRaycaster::boundsFragmentShaderPath() const {
+    return absPath(GlslBoundsFs);
 }
 
-std::string BasicVolumeRaycaster::raycasterPath() const {
-    return absPath(GlslRaycast).string();
+std::filesystem::path BasicVolumeRaycaster::raycasterPath() const {
+    return absPath(GlslRaycast);
 }
 
-std::string BasicVolumeRaycaster::helperPath() const {
-    return absPath(GlslHelper).string();
+std::filesystem::path BasicVolumeRaycaster::helperPath() const {
+    return absPath(GlslHelper);
 }
 
 void BasicVolumeRaycaster::setTransferFunction(

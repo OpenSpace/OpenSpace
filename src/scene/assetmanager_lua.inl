@@ -73,13 +73,13 @@ namespace {
  * Returns the paths to all loaded assets, loaded directly or indirectly, as a table
  * containing the paths to all loaded assets.
  */
-[[codegen::luawrap]] std::vector<std::string> allAssets() {
+[[codegen::luawrap]] std::vector<std::filesystem::path> allAssets() {
     using namespace openspace;
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
-    std::vector<std::string> res;
+    std::vector<std::filesystem::path> res;
     res.reserve(as.size());
     for (const Asset* a : as) {
-        res.push_back(a->path().string());
+        res.push_back(a->path());
     }
     return res;
 }
@@ -88,13 +88,13 @@ namespace {
  * Returns the paths to all loaded root assets, which are assets that are loaded directly
  * either through a profile or by calling the `openspace.asset.add` method.
  */
-[[codegen::luawrap]] std::vector<std::string> rootAssets() {
+[[codegen::luawrap]] std::vector<std::filesystem::path> rootAssets() {
     using namespace openspace;
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().rootAssets();
-    std::vector<std::string> res;
+    std::vector<std::filesystem::path> res;
     res.reserve(as.size());
     for (const Asset* a : as) {
-        res.push_back(a->path().string());
+        res.push_back(a->path());
     }
     return res;
 }

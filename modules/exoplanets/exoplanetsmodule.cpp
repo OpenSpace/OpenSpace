@@ -264,52 +264,52 @@ bool ExoplanetsModule::hasDataFiles() const {
     return !_exoplanetsDataFolder.value().empty();
 }
 
-std::string ExoplanetsModule::exoplanetsDataPath() const {
+std::filesystem::path ExoplanetsModule::exoplanetsDataPath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
     return absPath(
         std::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
-    ).string();
+    );
 }
 
-std::string ExoplanetsModule::lookUpTablePath() const {
+std::filesystem::path ExoplanetsModule::lookUpTablePath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
     return absPath(
         std::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
-    ).string();
+    );
 }
 
-std::string ExoplanetsModule::teffToBvConversionFilePath() const {
+std::filesystem::path ExoplanetsModule::teffToBvConversionFilePath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
     return absPath(std::format(
         "{}/{}", _exoplanetsDataFolder.value(), TeffToBvConversionFileName
-    )).string();
+    ));
 }
 
-std::string ExoplanetsModule::bvColormapPath() const {
-    return _bvColorMapPath;
+std::filesystem::path ExoplanetsModule::bvColormapPath() const {
+    return _bvColorMapPath.value();
 }
 
-std::string ExoplanetsModule::starTexturePath() const {
-    return _starTexturePath;
+std::filesystem::path ExoplanetsModule::starTexturePath() const {
+    return _starTexturePath.value();
 }
 
-std::string ExoplanetsModule::starGlareTexturePath() const {
-    return _starGlareTexturePath;
+std::filesystem::path ExoplanetsModule::starGlareTexturePath() const {
+    return _starGlareTexturePath.value();
 }
 
-std::string ExoplanetsModule::noDataTexturePath() const {
-    return _noDataTexturePath;
+std::filesystem::path ExoplanetsModule::noDataTexturePath() const {
+    return _noDataTexturePath.value();
 }
 
-std::string ExoplanetsModule::orbitDiscTexturePath() const {
-    return _orbitDiscTexturePath;
+std::filesystem::path ExoplanetsModule::orbitDiscTexturePath() const {
+    return _orbitDiscTexturePath.value();
 }
 
-std::string ExoplanetsModule::habitableZoneTexturePath() const {
-    return _habitableZoneTexturePath;
+std::filesystem::path ExoplanetsModule::habitableZoneTexturePath() const {
+    return _habitableZoneTexturePath.value();
 }
 
 glm::vec3 ExoplanetsModule::comparisonCircleColor() const {
@@ -342,31 +342,31 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     _enabled = p.enabled.value_or(_enabled);
 
     if (p.dataFolder.has_value()) {
-        _exoplanetsDataFolder = p.dataFolder.value().string();
+        _exoplanetsDataFolder = p.dataFolder->string();
     }
 
     if (p.bvColormap.has_value()) {
-        _bvColorMapPath = p.bvColormap.value().string();
+        _bvColorMapPath = p.bvColormap->string();
     }
 
     if (p.starTexture.has_value()) {
-        _starTexturePath = p.starTexture.value().string();
+        _starTexturePath = p.starTexture->string();
     }
 
     if (p.starGlareTexture.has_value()) {
-        _starGlareTexturePath = p.starGlareTexture.value().string();
+        _starGlareTexturePath = p.starGlareTexture->string();
     }
 
     if (p.noDataTexture.has_value()) {
-        _noDataTexturePath = p.noDataTexture.value().string();
+        _noDataTexturePath = p.noDataTexture->string();
     }
 
     if (p.orbitDiscTexture.has_value()) {
-        _orbitDiscTexturePath = p.orbitDiscTexture.value().string();
+        _orbitDiscTexturePath = p.orbitDiscTexture->string();
     }
 
     if (p.habitableZoneTexture.has_value()) {
-        _habitableZoneTexturePath = p.habitableZoneTexture.value().string();
+        _habitableZoneTexturePath = p.habitableZoneTexture->string();
     }
 
     _comparisonCircleColor = p.comparisonCircleColor.value_or(_comparisonCircleColor);

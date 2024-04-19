@@ -35,9 +35,10 @@ namespace {
 
 namespace openspace::gaia {
 
-ReadFileJob::ReadFileJob(std::string filePath, std::vector<std::string> allColumns,
-                         int firstRow, int lastRow, size_t nDefaultCols,
-                         int nValuesPerStar, std::shared_ptr<FitsFileReader> fitsReader)
+ReadFileJob::ReadFileJob(std::filesystem::path filePath,
+                         std::vector<std::string> allColumns, int firstRow, int lastRow,
+                         size_t nDefaultCols, int nValuesPerStar,
+                         std::shared_ptr<FitsFileReader> fitsReader)
     : _inFilePath(std::move(filePath))
     , _firstRow(firstRow)
     , _lastRow(lastRow)

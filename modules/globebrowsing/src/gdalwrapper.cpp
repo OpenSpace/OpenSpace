@@ -97,9 +97,9 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     , _gdalMaximumCacheSize(
         GdalMaximumCacheInfo,
         static_cast<int>(maximumCacheSize / (1024ULL * 1024ULL)), // Default
-        0,                                          // Minimum: No caching
+        0, // Minimum: No caching
         static_cast<int>(maximumMaximumCacheSize / (1024ULL * 1024ULL)), // Maximum
-        1                                           // Step: One MB
+        1 // Step: One MB
     )
 {
     ZoneScoped;
@@ -108,11 +108,10 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     addProperty(_gdalMaximumCacheSize);
 
     GDALAllRegister();
-    CPLSetConfigOption(
-        "GDAL_DATA",
-        absPath("${MODULE_GLOBEBROWSING}/gdal_data").string().c_str()
-    );
-    CPLSetConfigOption("CPL_TMPDIR", absPath("${BASE}").string().c_str());
+    const std::string data = absPath("${MODULE_GLOBEBROWSING}/gdal_data").string();
+    CPLSetConfigOption("GDAL_DATA", data.c_str());
+    const std::string base = absPath("${BASE}").string();
+    CPLSetConfigOption("CPL_TMPDIR", base.c_str());
     CPLSetConfigOption("GDAL_HTTP_UNSAFESSL", "YES");
 
     CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "3"); // 3 seconds
@@ -121,7 +120,7 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     setGdalProxyConfiguration();
     CPLSetErrorHandler(gdalErrorHandler);
 
-    _gdalMaximumCacheSize.onChange([&] {
+    _gdalMaximumCacheSize.onChange([this] {
         // MB to Bytes
         GDALSetCacheMax64(
             static_cast<int64_t>(_gdalMaximumCacheSize) * 1024ULL * 1024ULL

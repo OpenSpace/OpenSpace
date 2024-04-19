@@ -1,0 +1,58 @@
+local speck = asset.resource({
+  Name = "Big Dipper Constellation Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_constellations_bigdipper",
+  Version = 1
+})
+
+
+local BigDipper = {
+  Identifier = "BigDipperConstellation",
+  Renderable = {
+    Type = "RenderableConstellationLines",
+    Enabled = false,
+    Labels = {
+      File = speck .. "bigdipper.label",
+      Opacity = 0.3,
+      Color = { 0.8, 0.8, 0.8 },
+      Size = 14.5,
+      MinMaxSize = { 8, 170 },
+      Unit = "pc"
+    },
+    Opacity = 0.3,
+    File = speck .. "bigdipper.speck",
+    NamesFile = speck .. "bigdipper.dat",
+    Colors = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
+    Unit = "pc",
+    DimInAtmosphere = true
+  },
+  Tag = { "daytime_hidden" },
+  GUI = {
+    Name = "Big Dipper",
+    Path = "/Milky Way/Constellations",
+    Description = [[This item only draws the big dipper, and not the rest of the
+      lines of the Ursa Major constellation.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(BigDipper)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(BigDipper)
+end)
+
+asset.export(BigDipper)
+
+
+
+asset.meta = {
+  Name = "Big Dipper",
+  Version = "1.0",
+  Description = "Constellation lines for the Big Dipper",
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

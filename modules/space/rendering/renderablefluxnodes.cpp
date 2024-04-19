@@ -342,7 +342,7 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _colorTablePath = p.colorTablePath;
-    _transferFunction = std::make_unique<TransferFunction>(_colorTablePath);
+    _transferFunction = std::make_unique<TransferFunction>(_colorTablePath.value());
     _colorTableRange = p.colorTableRange.value_or(_colorTableRange);
 
     _binarySourceFolderPath = p.sourceFolder;
@@ -353,7 +353,7 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
             fs::directory_iterator(_binarySourceFolderPath))
         {
             if (e.is_regular_file()) {
-                _binarySourceFiles.push_back(e.path().string());
+                _binarySourceFiles.push_back(e.path());
             }
         }
         std::sort(_binarySourceFiles.begin(), _binarySourceFiles.end());
@@ -431,7 +431,7 @@ void RenderableFluxNodes::definePropertyCallbackFunctions() {
         loadNodeData(_goesEnergyBins.option().value);
     });
     _colorTablePath.onChange([this]() {
-        _transferFunction->setPath(_colorTablePath);
+        _transferFunction->setPath(_colorTablePath.value());
     });
 }
 
@@ -448,13 +448,19 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
             break;
     }
 
-    const std::string file = _binarySourceFolderPath.string() + "\\positions" + energybin;
-    const std::string file2 = _binarySourceFolderPath.string() + "\\fluxes" + energybin;
-    const std::string file3 = _binarySourceFolderPath.string() + "\\radiuses" + energybin;
+    const std::string file = std::format(
+        "{}/positions{}", _binarySourceFolderPath, energybin
+    );
+    const std::string file2 = std::format(
+        "{}/fluxes/{}", _binarySourceFolderPath, energybin
+    );
+    const std::string file3 = std::format(
+        "{}/radiuses{}", _binarySourceFolderPath, energybin
+    );
 
-    std::ifstream fileStream(file, std::ifstream::binary);
-    std::ifstream fileStream2(file2, std::ifstream::binary);
-    std::ifstream fileStream3(file3, std::ifstream::binary);
+    std::ifstream fileStream = std::ifstream(file, std::ifstream::binary);
+    std::ifstream fileStream2 = std::ifstream(file2, std::ifstream::binary);
+    std::ifstream fileStream3 = std::ifstream(file3, std::ifstream::binary);
 
     if (!fileStream.good()) {
         LERROR(std::format("Could not read file '{}'", file));
@@ -580,24 +586,18 @@ bool RenderableFluxNodes::isReady() const {
 }
 
 void RenderableFluxNodes::populateStartTimes() {
-    std::string timeFile;
-    for (const std::string& filePath : _binarySourceFiles) {
-        if (filePath.substr(filePath.find_last_of('.') + 1) == "csv") {
-            timeFile = filePath;
-            break;
-        }
-        else if (filePath.substr(filePath.find_last_of('.') + 1) == "dat") {
-            timeFile = filePath;
-            break;
-        }
-        else if (filePath.substr(filePath.find_last_of('.') + 1) == "txt") {
-            timeFile = filePath;
-            break;
-        }
-        //if no file extention but word "time" in file name
-        else if (filePath.find("time") != std::string::npos &&
-                 filePath.find('.') == std::string::npos)
+    std::filesystem::path timeFile;
+    for (const std::filesystem::path& filePath : _binarySourceFiles) {
+        if (filePath.extension() == ".csv" || filePath.extension() == ".dat" ||
+            filePath.extension() == ".txt")
         {
+            timeFile = filePath;
+            break;
+        }
+
+        const std::string f = filePath.string();
+        // if no file extention but word "time" in file name
+        if (f.find("time") != std::string::npos && f.find('.') == std::string::npos) {
             timeFile = filePath;
             break;
         }
@@ -611,7 +611,7 @@ void RenderableFluxNodes::populateStartTimes() {
     }
 
     // time filestream
-    std::ifstream tfs(timeFile);
+    std::ifstream tfs = std::ifstream(timeFile);
     if (!tfs.is_open()) {
         throw ghoul::RuntimeError("Could not open file");
     }

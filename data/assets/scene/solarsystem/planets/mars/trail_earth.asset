@@ -14,8 +14,8 @@ local MarsTrailEarth = {
       Target = coreKernels.ID.Mars,
       Observer = coreKernels.ID.Earth
     },
-    Color = { 1.0, 0.5, 0.2 },
-    Period = 224.695,
+    Color = { 0.814, 0.305, 0.220 },
+    Period = 5990.0,
     Resolution = 1000
   },
   Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },

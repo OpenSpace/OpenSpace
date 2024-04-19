@@ -285,7 +285,7 @@ void RingsComponent::initialize() {
     addProperty(_size);
 
     if (p.texture.has_value()) {
-        _texturePath = absPath(p.texture->string()).string();
+        _texturePath = absPath(*p.texture).string();
         _textureFile = std::make_unique<File>(_texturePath.value());
         _texturePath.onChange([this]() { loadTexture(); });
         addProperty(_texturePath);
@@ -293,7 +293,7 @@ void RingsComponent::initialize() {
     }
 
     if (p.textureFwrd.has_value()) {
-        _textureFwrdPath = absPath(p.textureFwrd->string()).string();
+        _textureFwrdPath = absPath(*p.textureFwrd).string();
         _textureFileForwards = std::make_unique<File>(_textureFwrdPath.value());
         _textureFwrdPath.onChange([this]() { loadTexture(); });
         addProperty(_textureFwrdPath);
@@ -301,7 +301,7 @@ void RingsComponent::initialize() {
     }
 
     if (p.textureBckwrd.has_value()) {
-        _textureBckwrdPath = absPath(p.textureBckwrd->string()).string();
+        _textureBckwrdPath = absPath(*p.textureBckwrd).string();
         _textureFileBackwards = std::make_unique<File>(_textureBckwrdPath.value());
         _textureBckwrdPath.onChange([this]() { loadTexture(); });
         addProperty(_textureBckwrdPath);
@@ -309,7 +309,7 @@ void RingsComponent::initialize() {
     }
 
     if (p.textureUnlit.has_value()) {
-        _textureUnlitPath = absPath(p.textureUnlit->string()).string();
+        _textureUnlitPath = absPath(*p.textureUnlit).string();
         _textureFileUnlit = std::make_unique<File>(_textureUnlitPath.value());
         _textureUnlitPath.onChange([this]() { loadTexture(); });
         addProperty(_textureUnlitPath);
@@ -317,7 +317,7 @@ void RingsComponent::initialize() {
     }
 
     if (p.textureColor.has_value()) {
-        _textureColorPath = absPath(p.textureColor->string()).string();
+        _textureColorPath = absPath(*p.textureColor).string();
         _textureFileColor = std::make_unique<File>(_textureColorPath.value());
         _textureColorPath.onChange([this]() { loadTexture(); });
         addProperty(_textureColorPath);
@@ -325,7 +325,7 @@ void RingsComponent::initialize() {
     }
 
     if (p.textureTransparency.has_value()) {
-        _textureTransparencyPath = absPath(p.textureTransparency->string()).string();
+        _textureTransparencyPath = absPath(*p.textureTransparency).string();
         _textureFileTransparency = std::make_unique<File>(
             _textureTransparencyPath.value()
         );
@@ -658,15 +658,12 @@ void RingsComponent::loadTexture() {
 
     if (!_texturePath.value().empty()) {
         std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath).string(),
+            absPath(_texturePath),
             1
         );
 
         if (texture) {
-            LDEBUGC(
-                "RingsComponent",
-                std::format("Loaded texture from '{}'", absPath(_texturePath))
-            );
+            LDEBUG(std::format("Loaded texture from '{}'", absPath(_texturePath)));
             _texture = std::move(texture);
 
             _texture->uploadTexture();
@@ -681,13 +678,12 @@ void RingsComponent::loadTexture() {
 
     if (!_textureFwrdPath.value().empty()) {
         std::unique_ptr<Texture> textureForwards = TextureReader::ref().loadTexture(
-            absPath(_textureFwrdPath).string(),
+            absPath(_textureFwrdPath),
             1
         );
 
         if (textureForwards) {
-            LDEBUGC(
-                "RingsComponent",
+            LDEBUG(
                 std::format(
                     "Loaded forwards scattering texture from '{}'",
                     absPath(_textureFwrdPath)
@@ -708,13 +704,12 @@ void RingsComponent::loadTexture() {
 
     if (!_textureBckwrdPath.value().empty()) {
         std::unique_ptr<Texture> textureBackwards = TextureReader::ref().loadTexture(
-            absPath(_textureBckwrdPath).string(),
+            absPath(_textureBckwrdPath),
             1
         );
 
         if (textureBackwards) {
-            LDEBUGC(
-                "RingsComponent",
+            LDEBUG(
                 std::format(
                     "Loaded backwards scattering texture from '{}'",
                     absPath(_textureBckwrdPath)
@@ -735,13 +730,12 @@ void RingsComponent::loadTexture() {
 
     if (!_textureUnlitPath.value().empty()) {
         std::unique_ptr<Texture> textureUnlit = TextureReader::ref().loadTexture(
-            absPath(_textureUnlitPath).string(),
+            absPath(_textureUnlitPath),
             1
         );
 
         if (textureUnlit) {
-            LDEBUGC(
-                "RingsComponent",
+            LDEBUG(
                 std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
             );
             _textureUnlit = std::move(textureUnlit);
@@ -758,13 +752,12 @@ void RingsComponent::loadTexture() {
 
     if (!_textureColorPath.value().empty()) {
         std::unique_ptr<Texture> textureColor = TextureReader::ref().loadTexture(
-            absPath(_textureColorPath).string(),
+            absPath(_textureColorPath),
             1
         );
 
         if (textureColor) {
-            LDEBUGC(
-                "RingsComponent",
+            LDEBUG(
                 std::format("Loaded color texture from '{}'", absPath(_textureColorPath))
             );
             _textureColor = std::move(textureColor);
@@ -781,13 +774,12 @@ void RingsComponent::loadTexture() {
 
     if (!_textureTransparencyPath.value().empty()) {
         std::unique_ptr<Texture> textureTransparency = TextureReader::ref().loadTexture(
-            absPath(_textureTransparencyPath).string(),
+            absPath(_textureTransparencyPath),
             1
         );
 
         if (textureTransparency) {
-            LDEBUGC(
-                "RingsComponent",
+            LDEBUG(
                 std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath))
             );
             _textureTransparency = std::move(textureTransparency);

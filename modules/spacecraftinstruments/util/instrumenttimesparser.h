@@ -27,13 +27,14 @@
 
 #include <modules/spacecraftinstruments/util/sequenceparser.h>
 
+#include <filesystem>
 #include <regex>
 
 namespace openspace {
 
 class InstrumentTimesParser : public SequenceParser {
 public:
-    InstrumentTimesParser(std::string name, std::string sequenceSource,
+    InstrumentTimesParser(std::string name, std::filesystem::path sequenceSource,
         ghoul::Dictionary& inputDict);
 
     bool create() override;
@@ -44,7 +45,7 @@ private:
     std::map<std::string, std::vector<std::string>> _instrumentFiles;
 
     std::string _name;
-    std::string _fileName;
+    std::filesystem::path _fileName;
     std::string _spacecraft;
     std::vector<std::string> _specsOfInterest;
 

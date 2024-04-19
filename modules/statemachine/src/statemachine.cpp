@@ -197,10 +197,13 @@ std::vector<std::string> StateMachine::possibleTransitions() const {
     return res;
 }
 
-void StateMachine::saveToDotFile(const std::string& filename) const {
-    const std::string outputFile = filename + ".dot";
+void StateMachine::saveToDotFile(const std::filesystem::path& filename) const {
+    std::filesystem::path outputFile = filename;
+    if (!outputFile.has_extension()) {
+        outputFile.replace_extension(".dot");
+    }
 
-    std::ofstream file(outputFile);
+    std::ofstream file = std::ofstream(outputFile);
     if (!file.good()) {
         LERROR(std::format(
             "Error opening file '{}' for saving state machine dot file", outputFile

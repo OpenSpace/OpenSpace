@@ -25,11 +25,12 @@ local Object = {
   Renderable = {
     Type = "RenderableStars",
     File = speck .. "denver_stars.speck",
-    Texture = textures .. "halo.png",
+    Halo = {
+      Texture = textures .. "halo.png"
+    },
     ColorMap = colorLUT .. "denver_colorbv.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based", -- or PSF
     DataMapping = {
       Bv = "colorb_v",
       Luminance = "lum",

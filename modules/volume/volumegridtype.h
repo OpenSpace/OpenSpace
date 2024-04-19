@@ -36,7 +36,7 @@ enum class VolumeGridType : int {
 };
 
 struct InvalidGridTypeError : public ghoul::RuntimeError {
-    explicit InvalidGridTypeError(std::string gridType);
+    explicit InvalidGridTypeError(std::string gridType_);
 
     std::string gridType;
 };

@@ -324,7 +324,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
     library.documentations.clear();
     for (const std::filesystem::path& script : library.scripts) {
         // First we run the script to set its values in the current state
-        ghoul::lua::runScriptFile(state, script.string());
+        ghoul::lua::runScriptFile(state, script);
 
 
         // Then, we extract the documentation information from the file
@@ -430,20 +430,17 @@ void ScriptEngine::writeLog(const std::string& script) {
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
         if (!global::configuration->scriptLog.empty()) {
-            _logFilename = absPath(global::configuration->scriptLog).string();
+            _logFilename = absPath(global::configuration->scriptLog);
             _logFileExists = true;
 
-            LDEBUG(std::format(
-                "Using script log file {}", std::filesystem::path(_logFilename)
-            ));
+            LDEBUG(std::format("Using script log file '{}'", _logFilename));
 
             // Test file and clear previous input
             std::ofstream file(_logFilename, std::ofstream::out | std::ofstream::trunc);
 
             if (!file.good()) {
                 LERROR(std::format(
-                    "Could not open file {} for logging scripts",
-                    std::filesystem::path(_logFilename)
+                    "Could not open file '{}' for logging scripts", _logFilename
                 ));
 
                 return;

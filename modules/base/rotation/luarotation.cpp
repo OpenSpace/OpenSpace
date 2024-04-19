@@ -111,7 +111,7 @@ glm::dmat3 LuaRotation::matrix(const UpdateData& data) const {
     const int success = lua_pcall(_state, 2, 9, 0);
     if (success != 0) {
         LERRORC(
-            "LuaScale",
+            "LuaRotation",
             std::format("Error executing 'rotation': {}", lua_tostring(_state, -1))
         );
     }

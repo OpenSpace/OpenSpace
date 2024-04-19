@@ -27,6 +27,8 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <filesystem>
+
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
@@ -54,7 +56,7 @@ protected:
 
 private:
     struct FileData {
-        std::string path;
+        std::filesystem::path path;
         double time;
         std::unique_ptr<ghoul::opengl::Texture> texture;
     };

@@ -211,6 +211,11 @@ void log(int i, const EventCameraMovedPosition& e) {
     LINFO(std::format("[{}] EventCameraMovedPosition", i));
 }
 
+void log(int i, const EventScheduledScriptExecuted& e) {
+    ghoul_assert(e.type == EventScheduledScriptExecuted::Type, "Wrong type");
+    LINFO(std::format("[{}] ScheduledScriptExecuted: Script '{}'", i, e.script));
+}
+
 void log(int i, const CustomEvent& e) {
     ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
     LINFO(std::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
@@ -241,6 +246,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::CameraPathStarted: return "CameraPathStarted";
         case Event::Type::CameraPathFinished: return "CameraPathFinished";
         case Event::Type::CameraMovedPosition: return "CameraMovedPosition";
+        case Event::Type::ScheduledScriptExecuted: return "ScheduledScriptExecuted";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -313,6 +319,9 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "CameraMovedPosition") {
         return Event::Type::CameraMovedPosition;
+    }
+    else if (str == "ScheduledScriptExecuted") {
+        return Event::Type::ScheduledScriptExecuted;
     }
     else if (str == "Custom") {
         return Event::Type::Custom;
@@ -508,6 +517,12 @@ ghoul::Dictionary toParameter(const Event& e) {
                 std::string(static_cast<const EventCameraPathFinished&>(e).destination)
             );
             break;
+        case Event::Type::ScheduledScriptExecuted:
+            d.setValue(
+                "Script",
+                std::string(static_cast<const EventScheduledScriptExecuted&>(e).script)
+            );
+            break;
         case Event::Type::Custom:
             d.setValue(
                 "Subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
@@ -591,6 +606,9 @@ void logAllEvents(const Event* e) {
                 break;
             case Event::Type::CameraMovedPosition:
                 log(i, *static_cast<const EventCameraMovedPosition*>(e));
+                break;
+            case Event::Type::ScheduledScriptExecuted:
+                log(i, *static_cast<const EventScheduledScriptExecuted*>(e));
                 break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
@@ -736,6 +754,11 @@ EventCameraPathFinished::EventCameraPathFinished(const SceneGraphNode* origin_,
 
 EventCameraMovedPosition::EventCameraMovedPosition()
     : Event(Type)
+{}
+
+EventScheduledScriptExecuted::EventScheduledScriptExecuted(std::string_view script_)
+    : Event(Type)
+    , script(temporaryString(script_))
 {}
 
 CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)

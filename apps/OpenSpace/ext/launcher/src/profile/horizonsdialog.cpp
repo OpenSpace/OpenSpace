@@ -733,11 +733,11 @@ bool HorizonsDialog::handleRequest() {
 
     const bool isValid = handleResult(result);
     if (!isValid && std::filesystem::is_regular_file(_horizonsFile.file())) {
-        const std::string newName = _horizonsFile.file().filename().stem().string();
+        const std::filesystem::path newName = _horizonsFile.file().filename().stem();
 
         const std::filesystem::path& oldFile = _horizonsFile.file();
         std::filesystem::path newFile = oldFile;
-        newFile.replace_filename(newName + "_error.txt");
+        newFile.replace_filename(std::format("{}_error.txt", newName));
 
         std::filesystem::rename(oldFile, newFile);
 
@@ -916,9 +916,9 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             // If the request worked then delete the corresponding error file if it exist
             std::filesystem::path validFile =_horizonsFile.file();
 
-            const std::string errorName = validFile.filename().stem().string();
+            const std::filesystem::path errorName = validFile.filename().stem();
             const std::filesystem::path errorFile = validFile.replace_filename(
-                errorName + "_error.txt"
+                std::format("{}_error.txt", errorName)
             );
 
             if (std::filesystem::is_regular_file(errorFile)) {

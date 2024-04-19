@@ -37,8 +37,8 @@ constexpr std::string_view _loggerCat = "ExoplanetsModule";
 constexpr std::string_view ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
 // Lua cannot handle backslashes, so replace these with forward slashes
-std::string formatPathToLua(const std::string& path) {
-    std::string resPath = path;
+std::string formatPathToLua(const std::filesystem::path& path) {
+    std::string resPath = path.string();
     std::replace(resPath.begin(), resPath.end(), '\\', '/');
     return resPath;
 }
@@ -51,14 +51,14 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
 
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
-    const std::string binPath = module->exoplanetsDataPath();
+    const std::filesystem::path binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
         LERROR(std::format("Failed to open exoplanets data file '{}'", binPath));
         return ExoplanetSystem();
     }
 
-    const std::string lutPath = module->lookUpTablePath();
+    const std::filesystem::path lutPath = module->lookUpTablePath();
     std::ifstream lut(absPath(lutPath));
     if (!lut.good()) {
         LERROR(std::format("Failed to open exoplanets look-up table '{}'", lutPath));
@@ -154,7 +154,7 @@ void createExoplanetSystem(const std::string& starName,
 
     if (!std::isnan(bv)) {
         starColor = computeStarColor(bv);
-        const std::string starTexture = module->starTexturePath();
+        const std::filesystem::path starTexture = module->starTexturePath();
         colorLayers =
             "{"
                 "Identifier = 'StarColor',"
@@ -171,7 +171,7 @@ void createExoplanetSystem(const std::string& starName,
             "}";
     }
     else {
-        const std::string noDataTexture = module->noDataTexturePath();
+        const std::filesystem::path noDataTexture = module->noDataTexturePath();
         colorLayers =
             "{"
                 "Identifier = 'NoDataStarTexture',"
@@ -355,7 +355,7 @@ void createExoplanetSystem(const std::string& starName,
             const float lowerOffset = static_cast<float>(planet.aLower / planet.a);
             const float upperOffset = static_cast<float>(planet.aUpper / planet.a);
 
-            const std::string discTexture = module->orbitDiscTexturePath();
+            const std::filesystem::path discTexture = module->orbitDiscTexturePath();
 
             bool isDiscEnabled = module->showOrbitUncertainty();
 
@@ -462,7 +462,7 @@ void createExoplanetSystem(const std::string& starName,
             "the greenhouse effect would not be able to maintain surface temperature "
             "above freezing anywhere on the planet";
 
-        const std::string hzTexture = module->habitableZoneTexturePath();
+        const std::filesystem::path hzTexture = module->habitableZoneTexturePath();
         bool isHzEnabled = module->showHabitableZone();
         bool useOptimistic = module->useOptimisticZone();
         float opacity = module->habitableZoneOpacity();
@@ -514,7 +514,7 @@ void createExoplanetSystem(const std::string& starName,
                 size *= std::pow(system.starData.teff / sunTeff, 2.0);
             }
 
-            const std::string glareTexture = module->starGlareTexturePath();
+            const std::filesystem::path glareTexture = module->starGlareTexturePath();
 
             const std::string starGlare = "{"
                 "Identifier = '" + starIdentifier + "_Glare',"
@@ -559,14 +559,14 @@ std::vector<std::string> hostStarsWithSufficientData() {
         return {};
     }
 
-    const std::string lutPath = module->lookUpTablePath();
+    const std::filesystem::path lutPath = module->lookUpTablePath();
     std::ifstream lookupTableFile(absPath(lutPath));
     if (!lookupTableFile.good()) {
         LERROR(std::format("Failed to open lookup table file '{}'", lutPath));
         return {};
     }
 
-    const std::string binPath = module->exoplanetsDataPath();
+    const std::filesystem::path binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
         LERROR(std::format("Failed to open data file '{}'", binPath));
@@ -734,7 +734,8 @@ listOfExoplanetsDeprecated()
         ExoplanetsDataPreparationTask::readFirstDataRow(inputDataFile);
 
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
-    const std::string teffBvConversionPath = module->teffToBvConversionFilePath();
+    const std::filesystem::path
+        teffBvConversionPath = module->teffToBvConversionFilePath();
 
     std::map<std::string, ExoplanetSystem> hostNameToSystemDataMap;
 

@@ -296,8 +296,8 @@ std::optional<std::string> RawTileDataReader::mrfCache() {
         std::to_string(std::hash<std::string>{}(_datasetFilePath));
     const std::string path = std::format("{}/{}/{}/",
         mod.mrfCacheLocation(), _cacheProperties.path, datasetIdentifier);
-    const std::string root = absPath(path).string();
-    std::string mrf = root + datasetIdentifier + ".mrf";
+    const std::filesystem::path root = absPath(path);
+    const std::string mrf = std::format("{}{}.mrf", root, datasetIdentifier);
 
     if (!std::filesystem::exists(mrf)) {
         std::error_code ec;

@@ -118,9 +118,9 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const std::filesystem::path file = absPath(p.geometryFile.string());
+    const std::filesystem::path file = absPath(p.geometryFile);
     _geometry = ghoul::io::ModelReader::ref().loadModel(
-        file.string(),
+        file,
         ghoul::io::ModelReader::ForceRenderInvisible::No,
         ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
     );

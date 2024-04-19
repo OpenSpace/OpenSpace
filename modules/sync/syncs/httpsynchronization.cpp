@@ -401,7 +401,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             const std::string dest =
                 _unzipFilesDestination.has_value() ?
                 (originalName.parent_path() / *_unzipFilesDestination).string() :
-                originalName.replace_extension().string();;
+                originalName.replace_extension().string();
 
             struct zip_t* z = zip_open(source.c_str(), 0, 'r');
             const bool is64 = zip_is64(z);

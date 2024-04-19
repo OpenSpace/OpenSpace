@@ -40,13 +40,13 @@ class TransferFunction {
 public:
     using TfChangedCallback = std::function<void (const TransferFunction&)>;
 
-    TransferFunction(const std::string& filepath,
+    TransferFunction(const std::filesystem::path& filepath,
         TfChangedCallback tfChangedCallback = TfChangedCallback());
     ~TransferFunction();
 
     TransferFunction(TransferFunction&& rhs) = default;
 
-    void setPath(const std::string& filepath);
+    void setPath(const std::filesystem::path& filepath);
     ghoul::opengl::Texture& texture();
     void bind();
     void update();

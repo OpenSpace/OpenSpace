@@ -629,7 +629,7 @@ void NavigationHandler::loadNavigationState(const std::string& filepath,
     }
 
     if (!std::filesystem::is_regular_file(absolutePath)) {
-        throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
+        throw ghoul::FileNotFoundError(absolutePath, "NavigationState");
     }
 
     std::ifstream f = std::ifstream(absolutePath);

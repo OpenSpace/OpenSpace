@@ -279,24 +279,24 @@ namespace {
 
 /**
  * Go to geographic coordinates of a globe. The first (optional) argument is the
- * identifier of a scene graph node that has a RenderableGlobe attached. If no globe is
- * passed in, the current anchor will be used. The second argument is latitude and the
- * third is longitude (degrees). North and East are expressed as positive angles, while
- * South and West are negative. The optional fourh argument is the altitude in meters. If
- * no altitude is provided, the altitude will be kept as the current distance to the
- * surface of the specified globe.
+ * identifier of a scene graph node that has a RenderableGlobe attached. If the name of
+ * the globe is empty, the current anchor will be used. The second argument is latitude
+ * and the third is longitude (degrees). North and East are expressed as positive angles,
+ * while South and West are negative. The optional fourth argument is the altitude in
+ * meters. If no altitude is provided, the altitude will be kept as the current distance
+ * to the surface of the specified globe.
  */
-[[codegen::luawrap]] void goToGeo(std::optional<std::string> globe, double latitude,
-                                  double longitude, std::optional<double> altitude)
+[[codegen::luawrap]] void goToGeo(std::string globe, double latitude, double longitude,
+                                  std::optional<double> altitude)
 {
     using namespace openspace;
     using namespace globebrowsing;
 
     const SceneGraphNode* n;
-    if (globe.has_value()) {
-        n = sceneGraphNode(*globe);
+    if (!globe.empty()) {
+        n = sceneGraphNode(globe);
         if (!n) {
-            throw ghoul::lua::LuaError("Unknown globe name: " + *globe);
+            throw ghoul::lua::LuaError("Unknown globe name: " + globe);
         }
     }
     else {
@@ -334,13 +334,13 @@ namespace {
 /**
  * Fly the camera to geographic coordinates of a globe, using the path navigation system.
  * The first (optional) argument is the identifier of a scene graph node with a
- * RenderableGlobe. If no globe is passed in, the current anchor will be used. The second
- * and third argument is latitude and longitude (degrees). The fourth argument is the
- * altitude, in meters. The last two optional arguments are: a bool specifying whether the
- * up vector at the target position should be set to the globe's North vector, and a
+ * RenderableGlobe. If the globe name is empty, the current anchor will be used. The
+ * second and third argument is latitude and longitude (degrees). The fourth argument is
+ * the altitude, in meters. The last two optional arguments are: a bool specifying whether
+ * the up vector at the target position should be set to the globe's North vector, and a
  * duration for the motion, in seconds. Either of the two can be left out.
  */
-[[codegen::luawrap]] void flyToGeo(std::optional<std::string> globe, double latitude,
+[[codegen::luawrap]] void flyToGeo(std::string globe, double latitude,
                                    double longitude, double altitude,
                                    std::optional<double> duration,
                                    std::optional<bool> shouldUseUpVector)
@@ -349,10 +349,10 @@ namespace {
     using namespace globebrowsing;
 
     const SceneGraphNode* n;
-    if (globe.has_value()) {
-        n = sceneGraphNode(*globe);
+    if (!globe.empty()) {
+        n = sceneGraphNode(globe);
         if (!n) {
-            throw ghoul::lua::LuaError("Unknown globe name: " + *globe);
+            throw ghoul::lua::LuaError("Unknown globe name: " + globe);
         }
     }
     else {
@@ -701,7 +701,7 @@ geoPositionForCameraDeprecated(bool useEyePosition = false)
 
     std::string identifier = makeIdentifier(name.value_or(path.stem().string()));
     d.setValue("Identifier", identifier);
-    d.setValue("File", path.string());
+    d.setValue("File", path);
     if (name.has_value()) {
         d.setValue("Name", *name);
     }

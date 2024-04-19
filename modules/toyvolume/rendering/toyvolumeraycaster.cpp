@@ -125,19 +125,19 @@ bool ToyVolumeRaycaster::isCameraInside(const RenderData& data, glm::vec3& local
             localPosition.z > 0.f && localPosition.z < 1.f);
 }
 
-std::string ToyVolumeRaycaster::boundsVertexShaderPath() const {
-    return absPath(GlslBoundsVsPath).string();
+std::filesystem::path ToyVolumeRaycaster::boundsVertexShaderPath() const {
+    return absPath(GlslBoundsVsPath);
 }
 
-std::string ToyVolumeRaycaster::boundsFragmentShaderPath() const {
-    return absPath(GlslBoundsFsPath).string();
+std::filesystem::path ToyVolumeRaycaster::boundsFragmentShaderPath() const {
+    return absPath(GlslBoundsFsPath);
 }
 
-std::string ToyVolumeRaycaster::raycasterPath() const {
-    return absPath(GlslRaycastPath).string();
+std::filesystem::path ToyVolumeRaycaster::raycasterPath() const {
+    return absPath(GlslRaycastPath);
 }
 
-std::string ToyVolumeRaycaster::helperPath() const {
+std::filesystem::path ToyVolumeRaycaster::helperPath() const {
     return ""; // no helper file
 }
 
