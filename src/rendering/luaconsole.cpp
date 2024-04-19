@@ -251,6 +251,10 @@ void LuaConsole::initialize() {
 void LuaConsole::deinitialize() {
     ZoneScoped;
 
+    if (!FileSys.cacheManager()) {
+        return;
+    }
+
     const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
         ""
