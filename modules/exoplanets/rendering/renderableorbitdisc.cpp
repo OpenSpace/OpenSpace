@@ -95,7 +95,7 @@ namespace {
         float size;
 
         // [[codegen::verbatim(EccentricityInfo.description)]]
-        float eccentricity;
+        float eccentricity [[codegen::inrange(0.0, 0.99)]];
 
         // [[codegen::verbatim(OffsetInfo.description)]]
         std::optional<glm::vec2> offset;
@@ -116,8 +116,8 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
     , _size(SizeInfo, 1.f, 0.f, 3.0e12f)
-    , _eccentricity(EccentricityInfo, 0.f, 0.f, 1.f)
-    , _offset(OffsetInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(1.f))
+    , _eccentricity(EccentricityInfo, 0.f, 0.f, 0.99f)
+    , _offset(OffsetInfo, glm::vec2(0.5f), glm::vec2(0.f), glm::vec2(1.f))
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

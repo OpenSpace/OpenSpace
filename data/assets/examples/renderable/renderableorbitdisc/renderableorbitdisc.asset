@@ -1,0 +1,22 @@
+local OrbitDisc = {
+    Identifier = "RenderableOrbitDisc_Example",
+    Renderable = {
+      Type = "RenderableOrbitDisc",
+      Eccentricity = 0.2,
+      Size = 10000,
+      Offset = { 0.1, 0.7 },
+      Texture = asset.resource("texture.png"),
+    },
+    GUI = {
+      Name = "Example Renderable Orbit Disc",
+      Path = "/Example"
+    }
+  }
+
+  asset.onInitialize(function()
+    openspace.addSceneGraphNode(OrbitDisc)
+  end)
+
+  asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(OrbitDisc)
+  end)
