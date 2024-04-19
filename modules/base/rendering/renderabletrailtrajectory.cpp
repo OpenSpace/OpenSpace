@@ -95,7 +95,7 @@ namespace {
         "The number of vertices that will be calculated each frame whenever the trail "
         "needs to be recalculated. "
         "A greater value will result in more calculations per frame.",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableSweepChunkingInfo = {
@@ -106,7 +106,7 @@ namespace {
         "calculated each frame instead of calculating the entire trail in one go. "
         "The size of each 'chunk' can be altered by changing the sweep chunk size "
         "property.",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AccurateTrailPositionsInfo = {
