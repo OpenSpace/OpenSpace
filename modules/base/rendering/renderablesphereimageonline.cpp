@@ -75,7 +75,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphereImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphere_image_online");
+    return codegen::doc<Parameters>(
+        "base_renderable_sphere_image_online",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableSphereImageOnline::RenderableSphereImageOnline(

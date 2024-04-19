@@ -85,8 +85,7 @@ std::vector<documentation::Documentation> VideoModule::documentations() const {
         RenderableVideoPlane::Documentation(),
         RenderableVideoSphere::Documentation(),
         ScreenSpaceVideo::Documentation(),
-        globebrowsing::VideoTileProvider::Documentation(),
-        VideoPlayer::Documentation()
+        globebrowsing::VideoTileProvider::Documentation()
     };
 }
 

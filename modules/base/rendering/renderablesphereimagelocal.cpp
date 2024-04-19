@@ -58,7 +58,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphereImageLocal::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphere_image_local");
+    return codegen::doc<Parameters>(
+        "base_renderable_sphere_image_local",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableSphereImageLocal::RenderableSphereImageLocal(
