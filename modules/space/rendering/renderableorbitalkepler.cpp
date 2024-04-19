@@ -49,7 +49,8 @@ namespace {
     // The possible values for the _renderingModes property
     enum RenderingMode {
         RenderingModeTrail = 0,
-        RenderingModePoint
+        RenderingModePoint,
+        RenderingModePointTrail
     };
 
     constexpr openspace::properties::Property::PropertyInfo PathInfo = {
@@ -210,7 +211,8 @@ namespace {
 
         enum class RenderingMode {
             Trail,
-            Point
+            Point,
+            PointsTrails
         };
         // [[codegen::verbatim(RenderingModeInfo.description)]]
         std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
@@ -273,7 +275,8 @@ RenderableOrbitalKepler::Appearance::Appearance()
 {
     renderingModes.addOptions({
         { RenderingModeTrail, "Trails" },
-        { RenderingModePoint, "Points" }
+        { RenderingModePoint, "Points" },
+        { RenderingModePointTrail , "Points+Trails" }
     });
 
     color.setViewOption(properties::Property::ViewOptions::Color);
@@ -308,12 +311,13 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _appearance.color = p.color;
     _appearance.trailFade = p.trailFade.value_or(_appearance.trailFade);
     _appearance.trailWidth = p.trailWidth.value_or(_appearance.trailWidth);
-    _appearance.pointSizeExponent = p.pointSizeExponent.value_or(_appearance.pointSizeExponent);
     _appearance.enableMaxSize = p.enableMaxSize.value_or(_appearance.enableMaxSize);
     _appearance.maxSize = p.maxSize.value_or(_appearance.maxSize);
     _appearance.enableOutline = p.enableOutline.value_or(_appearance.enableOutline);
     _appearance.outlineColor = p.outlineColor.value_or(_appearance.outlineColor);
     _appearance.outlineWeight = p.outlineWeight.value_or(_appearance.outlineWeight);
+    _appearance.pointSizeExponent =
+        p.pointSizeExponent.value_or(_appearance.pointSizeExponent);
 
     if (p.renderingMode.has_value()) {
         switch (*p.renderingMode) {
@@ -322,6 +326,9 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
                 break;
             case Parameters::RenderingMode::Point:
                 _appearance.renderingModes = RenderingModePoint;
+                break;
+            case Parameters::RenderingMode::PointsTrails:
+                _appearance.renderingModes = RenderingModePointTrail;
                 break;
         }
     }
@@ -395,8 +402,10 @@ void RenderableOrbitalKepler::initializeGL() {
     );
 
     // Init cache for line rendering
-    _uniformTrailCache.modelView = _trailProgram->uniformLocation("modelViewTransform");
-    _uniformTrailCache.projection = _trailProgram->uniformLocation("projectionTransform");
+    _uniformTrailCache.modelView =
+        _trailProgram->uniformLocation("modelViewTransform");
+    _uniformTrailCache.projection =
+        _trailProgram->uniformLocation("projectionTransform");
     _uniformTrailCache.trailFade = _trailProgram->uniformLocation("trailFade");
     _uniformTrailCache.inGameTime = _trailProgram->uniformLocation("inGameTime");
     _uniformTrailCache.color = _trailProgram->uniformLocation("color");
@@ -405,18 +414,21 @@ void RenderableOrbitalKepler::initializeGL() {
     // Init cache for point rendering
     _uniformPointCache.modelTransform = _pointProgram->uniformLocation("modelTransform");
     _uniformPointCache.viewTransform = _pointProgram->uniformLocation("viewTransform");
-    _uniformPointCache.projectionTransform = _pointProgram->uniformLocation("projectionTransform");
-    _uniformPointCache.cameraPositionWorld = _pointProgram->uniformLocation("cameraPositionWorld");
     _uniformPointCache.cameraUpWorld = _pointProgram->uniformLocation("cameraUpWorld");
     _uniformPointCache.inGameTime = _pointProgram->uniformLocation("inGameTime");
     _uniformPointCache.color = _pointProgram->uniformLocation("color");
-    _uniformPointCache.pointSizeExponent = _pointProgram->uniformLocation("pointSizeExponent");
     _uniformPointCache.enableMaxSize = _pointProgram->uniformLocation("enableMaxSize");
     _uniformPointCache.maxSize = _pointProgram->uniformLocation("maxSize");
     _uniformPointCache.enableOutline = _pointProgram->uniformLocation("enableOutline");
     _uniformPointCache.outlineColor = _pointProgram->uniformLocation("outlineColor");
     _uniformPointCache.outlineWeight = _pointProgram->uniformLocation("outlineWeight");
     _uniformPointCache.opacity = _pointProgram->uniformLocation("opacity");
+    _uniformPointCache.projectionTransform =
+        _pointProgram->uniformLocation("projectionTransform");
+    _uniformPointCache.cameraPositionWorld =
+        _pointProgram->uniformLocation("cameraPositionWorld");
+    _uniformPointCache.pointSizeExponent =
+        _pointProgram->uniformLocation("pointSizeExponent");
 
     updateBuffers();
 }
@@ -463,47 +475,81 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
     GLint* _ss = _segmentSize.data();
 
     const int selection = _appearance.renderingModes;
-    if (selection == RenderingModePoint) {
-        _pointProgram->activate();
+    const bool renderPoints = (
+        selection == RenderingModePoint ||
+        selection == RenderingModePointTrail
+    );
+    const bool renderTrails = (
+        selection == RenderingModeTrail ||
+        selection == RenderingModePointTrail
+    );
 
-        _pointProgram->setUniform(_uniformPointCache.modelTransform, calcModelTransform(data));
-        _pointProgram->setUniform(_uniformPointCache.viewTransform, data.camera.combinedViewMatrix());
-        _pointProgram->setUniform(_uniformPointCache.projectionTransform, data.camera.projectionMatrix());
-        _pointProgram->setUniform(_uniformPointCache.cameraPositionWorld, data.camera.positionVec3());
-        _pointProgram->setUniform(_uniformPointCache.cameraUpWorld, data.camera.lookUpVectorWorldSpace());
-        _pointProgram->setUniform(_uniformPointCache.inGameTime, data.time.j2000Seconds());
+    if (renderPoints) {
+        _pointProgram->activate();
+        _pointProgram->setUniform(_uniformPointCache.modelTransform,
+            calcModelTransform(data));
+        _pointProgram->setUniform(_uniformPointCache.viewTransform,
+            data.camera.combinedViewMatrix());
+        _pointProgram->setUniform(_uniformPointCache.projectionTransform,
+            data.camera.projectionMatrix());
+        _pointProgram->setUniform(_uniformPointCache.cameraPositionWorld,
+            data.camera.positionVec3());
+        _pointProgram->setUniform(_uniformPointCache.cameraUpWorld,
+            data.camera.lookUpVectorWorldSpace());
+        _pointProgram->setUniform(_uniformPointCache.inGameTime,
+            data.time.j2000Seconds());
+        _pointProgram->setUniform(_uniformPointCache.pointSizeExponent,
+            _appearance.pointSizeExponent);
+        _pointProgram->setUniform(_uniformPointCache.enableMaxSize,
+            _appearance.enableMaxSize);
+        _pointProgram->setUniform(_uniformPointCache.enableOutline,
+            _appearance.enableOutline);
+        _pointProgram->setUniform(_uniformPointCache.outlineColor,
+            _appearance.outlineColor);
+        _pointProgram->setUniform(_uniformPointCache.outlineWeight,
+            _appearance.outlineWeight);
         _pointProgram->setUniform(_uniformPointCache.color, _appearance.color);
-        _pointProgram->setUniform(_uniformPointCache.pointSizeExponent, _appearance.pointSizeExponent);
-        _pointProgram->setUniform(_uniformPointCache.enableMaxSize, _appearance.enableMaxSize);
         _pointProgram->setUniform(_uniformPointCache.maxSize, _appearance.maxSize);
-        _pointProgram->setUniform(_uniformPointCache.enableOutline, _appearance.enableOutline);
-        _pointProgram->setUniform(_uniformPointCache.outlineColor, _appearance.outlineColor);
-        _pointProgram->setUniform(_uniformPointCache.outlineWeight, _appearance.outlineWeight);
         _pointProgram->setUniform(_uniformPointCache.opacity, opacity());
-        
+
         glBindVertexArray(_vertexArray);
-        glMultiDrawArrays(GL_LINE_STRIP, _si, _ss, static_cast<GLsizei>(_startIndex.size()));
+        glMultiDrawArrays(
+            GL_LINE_STRIP,
+            _si,
+            _ss,
+            static_cast<GLsizei>(_startIndex.size())
+        );
         glBindVertexArray(0);
 
         _pointProgram->deactivate();
     }
-    else { // selection == RenderingModeTrail 
-        _trailProgram->activate();
 
+    if (renderTrails) {
+        _trailProgram->activate();
         _trailProgram->setUniform(_uniformTrailCache.opacity, opacity());
-        _trailProgram->setUniform(_uniformTrailCache.inGameTime, data.time.j2000Seconds());
-        _trailProgram->setUniform(_uniformTrailCache.modelView, calcModelViewTransform(data));
-        _trailProgram->setUniform(_uniformTrailCache.projection, data.camera.projectionMatrix());
         _trailProgram->setUniform(_uniformTrailCache.color, _appearance.color);
+        _trailProgram->setUniform(_uniformTrailCache.inGameTime,
+            data.time.j2000Seconds());
+        _trailProgram->setUniform(_uniformTrailCache.modelView,
+            calcModelViewTransform(data));
+        _trailProgram->setUniform(_uniformTrailCache.projection,
+            data.camera.projectionMatrix());
 
         // Because we want the property to work similar to the planet trails
-        const float fade = pow(_appearance.trailFade.maxValue() - _appearance.trailFade, 2.f);
+        const float fade = pow(
+            _appearance.trailFade.maxValue() - _appearance.trailFade, 2.f
+        );
         _trailProgram->setUniform(_uniformTrailCache.trailFade, fade);
 
         glLineWidth(_appearance.trailWidth);
 
         glBindVertexArray(_vertexArray);
-        glMultiDrawArrays(GL_LINE_STRIP, _si, _ss, static_cast<GLsizei>(_startIndex.size()));
+        glMultiDrawArrays(
+            GL_LINE_STRIP,
+            _si,
+            _ss,
+            static_cast<GLsizei>(_startIndex.size())
+        );
         glBindVertexArray(0);
 
         _trailProgram->deactivate();

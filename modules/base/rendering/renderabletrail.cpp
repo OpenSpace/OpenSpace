@@ -307,9 +307,9 @@ bool RenderableTrail::isReady() const {
 void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
                                      const RenderData& data,
                                      const glm::dmat4& modelTransform,
-                                     RenderInformation& info, int nVertices, int ringOffset,
-                                     bool useSplitRenderMode, int numberOfUniqueVertices,
-                                     int floatingOffset)
+                                     RenderInformation& info, int nVertices,
+                                     int ringOffset, bool useSplitRenderMode,
+                                     int numberOfUniqueVertices, int floatingOffset)
 {
     ZoneScoped;
 
@@ -340,9 +340,10 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     _programObject->setUniform(_uniformCache.idOffset, ringOffset);
 
     _programObject->setUniform(_uniformCache.nVertices, nVertices);
-    _programObject->setUniform(_uniformCache.useSplitRenderMode, useSplitRenderMode);
-    _programObject->setUniform(_uniformCache.numberOfUniqueVertices, numberOfUniqueVertices);
     _programObject->setUniform(_uniformCache.floatingOffset, floatingOffset);
+    _programObject->setUniform(_uniformCache.useSplitRenderMode, useSplitRenderMode);
+    _programObject->setUniform(_uniformCache.numberOfUniqueVertices,
+        numberOfUniqueVertices);
 
 #if !defined(__APPLE__)
     std::array<GLint, 4> viewport;
