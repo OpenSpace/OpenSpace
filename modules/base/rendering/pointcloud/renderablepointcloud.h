@@ -190,6 +190,8 @@ protected:
         properties::BoolProperty enableOutline;
         properties::Vec3Property outlineColor;
         properties::FloatProperty outlineWeight;
+        properties::OptionProperty outlineStyle;
+        properties::BoolProperty applyCmapToOutline;
     };
     ColorSettings _colorSettings;
 
@@ -231,7 +233,7 @@ protected:
         cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
         enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
         useBelowRangeColor, hasDvarScaling, dvarScaleFactor, enableOutline, outlineColor,
-        outlineWeight, aspectRatioScale, useOrientationData
+        outlineWeight, outlineStyle, useCmapOutline, aspectRatioScale, useOrientationData
     ) _uniformCache;
 
     std::filesystem::path _dataFile;

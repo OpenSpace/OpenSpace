@@ -56,6 +56,13 @@ uniform float outlineWeight;
 
 uniform float fadeInValue;
 
+uniform bool useCmapOutline;
+uniform int outlineStyle;
+
+const int OutlineStyleRound = 0;
+const int OutlineStyleSquare = 1;
+const int OutlineStyleBottom = 2;
+
 vec4 sampleColorMap(float dataValue) {
     if (useNanColor && isnan(dataValue)) {
         return nanColor;
@@ -85,21 +92,52 @@ Fragment getFragment() {
   }
 
   // Moving the origin to the center and calculating the length
-  float lengthFromCenter = length((texCoord - vec2(0.5)) * 2.0);
-  if (!hasSpriteTexture && (lengthFromCenter > 1.0)) {
+  vec2 centeredTexCoords = (texCoord - vec2(0.5)) * 2.0;
+  float lengthFromCenter = length(centeredTexCoords);
+
+  bool shouldBeRound = (!hasSpriteTexture && !enableOutline) ||
+    (enableOutline && outlineStyle == OutlineStyleRound);
+
+  if (shouldBeRound && (lengthFromCenter > 1.0)) {
     discard;
   }
 
   vec4 fullColor = vec4(color, 1.0);
+  vec4 cmapColor = vec4(1.0);
   if (useColorMap) {
-    fullColor = sampleColorMap(gs_colorParameter);
+    cmapColor = sampleColorMap(gs_colorParameter);
+    if (!useCmapOutline) {
+      fullColor = cmapColor;
+    }
   }
 
+  vec4 textureColor = vec4(1.0);
   if (hasSpriteTexture) {
     fullColor *= texture(spriteTexture, vec3(texCoord, layer));
   }
-  else if (enableOutline && (lengthFromCenter > (1.0 - outlineWeight))) {
-    fullColor.rgb = outlineColor;
+
+  // Border
+  if (enableOutline) {
+    bool pixelIsOutline = false;
+    if (outlineStyle == OutlineStyleRound) {
+      pixelIsOutline = lengthFromCenter > (1.0 - outlineWeight);
+    }
+    else if (outlineStyle == OutlineStyleSquare) {
+      bool isOutsideY = abs(centeredTexCoords.y) > (1.0 - outlineWeight);
+      bool isOutsideX = abs(centeredTexCoords.x) > (1.0 - outlineWeight);
+      pixelIsOutline = isOutsideY || isOutsideX;
+    }
+    else if (outlineStyle == OutlineStyleBottom) {
+      pixelIsOutline = texCoord.y < 0.5 * outlineWeight;
+    }
+
+    if (pixelIsOutline) {
+      vec4 theOutlineColor = vec4(outlineColor, 1.0);
+      if (useColorMap && useCmapOutline) {
+        theOutlineColor = cmapColor;
+      }
+      fullColor = theOutlineColor;
+    }
   }
 
   fullColor.a *= opacity * fadeInValue;
