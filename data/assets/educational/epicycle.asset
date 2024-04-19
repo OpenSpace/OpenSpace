@@ -6,6 +6,7 @@ asset.require("scene/solarsystem/planets/saturn/trail_earth")
 asset.require("scene/solarsystem/planets/uranus/trail_earth")
 asset.require("scene/solarsystem/planets/neptune/trail_earth")
 
+
 local fullCycleAction = {
   Identifier = "os.epicycle.setfull",
   Name = "Set full epicycles",
