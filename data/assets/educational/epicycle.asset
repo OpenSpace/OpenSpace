@@ -8,27 +8,27 @@ asset.require("scene/solarsystem/planets/neptune/trail_earth")
 
 
 local fullCycleAction = {
-  Identifier = "os.epicycle.setfull",
+  Identifier = "os.epicycle.SetFull",
   Name = "Set full epicycles",
   Documentation = [[Sets EnableFade to false for all epicycle trails so that 
-  they show the entire period]],
-  Command = [[openspace.setPropertyValue("*TrailEarth.Renderable.Appearance.EnableFade", false);]],
+    they show the entire period]],
+  Command = [[openspace.setPropertyValue("*TrailEarth.Renderable.Appearance.EnableFade", false)]],
   GuiPath = "/Trails/Epicycle",
   IsLocal = false
 }
 
 local fadedCycleAction = {
-  Identifier = "os.epicycle.setfaded",
+  Identifier = "os.epicycle.SetFaded",
   Name = "Set faded epicycles",
   Documentation = [[Sets EnableFade to true for all epicycle trails so that 
-  they match the default planet trails]],
-  Command = [[openspace.setPropertyValue("*TrailEarth.Renderable.Appearance.EnableFade", true);]],
+    they match the default planet trails]],
+  Command = [[openspace.setPropertyValue("*TrailEarth.Renderable.Appearance.EnableFade", true)]],
   GuiPath = "/Trails/Epicycle",
   IsLocal = false
 }
 
 local showCyclesAction = {
-  Identifier = "os.epicycle.showtrails",
+  Identifier = "os.epicycle.ShowTrails",
   Name = "Enable/Show epicycles",
   Documentation = [[Enables and shows in all epicycle trails]],
   Command = [[openspace.setPropertyValue("*TrailEarth.Renderable.Enabled", true);
@@ -38,10 +38,10 @@ local showCyclesAction = {
 }
 
 local fadeoutCyclesAction = {
-  Identifier = "os.epicycle.hidetrails",
+  Identifier = "os.epicycle.HideTrails",
   Name = "Hide epicycles",
   Documentation = [[Hides all epicycle trails]],
-  Command = [[openspace.setPropertyValue("*TrailEarth.Renderable.Fade", 0, 2);]],
+  Command = [[openspace.setPropertyValue("*TrailEarth.Renderable.Fade", 0, 2)]],
   GuiPath = "/Trails/Epicycle",
   IsLocal = false
 }
@@ -67,7 +67,7 @@ asset.meta = {
   Name = "Epicycle",
   Version = "1.0",
   Description = [[This asset includes the trails of the planets from earth.
-  In addition, it provides some actions for manipulating them.]],
+    In addition, it provides some actions for manipulating them.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"
