@@ -337,8 +337,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ApplyColorMapToOutlineInfo = {
         "ApplyColorMapToOutline",
         "Apply Color Map to Outline",
-        "If true and outline is enabled, the color map will be applied to the outline "
-        "rather than the point body. Only works if color mapping is enabled.",
+        "If true and the outline is enabled, the color map will be applied to the "
+        "outline rather than the point body. Only works if color mapping is enabled.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -488,9 +488,9 @@ namespace {
             std::optional<float> outlineWeight;
 
             enum class [[codegen::map(OutlineStyle)]] OutlineStyle {
-                Round [[codegen::key("Round")]],
-                Square [[codegen::key("Square")]],
-                Bottom [[codegen::key("Bottom")]]
+                Round,
+                Square,
+                Bottom
             };
             // [[codegen::verbatim(OutlineStyleInfo.description)]]
             std::optional<OutlineStyle> outlineStyle;
@@ -598,8 +598,8 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
         if (settings.colorMapping.has_value()) {
             colorMapping = std::make_unique<ColorMappingComponent>(
                 *settings.colorMapping
-            );
-            addPropertySubOwner(colorMapping.get());
+           );
+           addPropertySubOwner(colorMapping.get());
         }
 
         enableOutline = p.coloring->enableOutline.value_or(enableOutline);
