@@ -1,0 +1,30 @@
+-- This asset creates a SceneGraphNode that only displays coordinate axes. The 
+-- parent is set to Earth which means the center of the axes will be at the center of Earth.
+
+local Node = {
+  Identifier = "Renderable_Cartesian_Axes_Example",
+  Parent = "Earth",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 30000000
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },    
+  GUI = {
+    Name = "Cartesian Axes",
+    Path = "/Examples"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
