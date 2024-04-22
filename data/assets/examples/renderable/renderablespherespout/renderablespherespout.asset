@@ -1,13 +1,9 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local RenderableSphereSpout = {
-  Identifier = "RenderableSphereSpout",
+  Identifier = "RenderableSphereSpout_Example",
   Renderable = {
     Type = "RenderableSphereSpout",
     Size = 333,
-    DimInAtmosphere = true,
-    Enabled = true,
-    Opacity = 1,
     Segments = 32,
     Texture = openspace.absPath("${DATA}/test.jpg"),
   },
@@ -17,14 +13,10 @@ local RenderableSphereSpout = {
 }
 
 asset.onInitialize(function()
-
   openspace.addSceneGraphNode(RenderableSphereSpout)
-
 end)
 
 
 asset.onDeinitialize(function()
-
   openspace.removeSceneGraphNode(RenderableSphereSpout)
-
 end)
