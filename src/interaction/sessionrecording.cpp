@@ -2618,7 +2618,7 @@ void SessionRecording::binary2ascii(const std::string& filename) {
             LERROR("Unknown data mode for infile.");
         }
         else if (mode == DataMode::Ascii) {
-            LWARNING(fmt::format("{} is already in ascii format...", filename));
+            LWARNING(std::format("{} is already in ascii format...", filename));
             return;
         }
 
@@ -2626,7 +2626,7 @@ void SessionRecording::binary2ascii(const std::string& filename) {
         path = absPath("${RECORDINGS}/" + out).string();
         std::ofstream outfile(path);
         if (!outfile.is_open() || !outfile.good()) {
-            LERROR(fmt::format("Failed to open {} for writing.", path));
+            LERROR(std::format("Failed to open {} for writing.", path));
         }
 
         outfile << FileHeaderTitle << FileHeaderVersion << DataFormatAsciiTag << "\n";
@@ -2701,12 +2701,12 @@ void SessionRecording::binary2ascii(const std::string& filename) {
                 }
             }
             else {
-                LERROR(fmt::format("Unknown frame type {}", frame));
+                LERROR(std::format("Unknown frame type {}", frame));
                 ok = false;
             }
         }
 
-        LINFO(fmt::format("{} converted to ascii format and saved to {}", filename, out));
+        LINFO(std::format("{} converted to ascii format and saved to {}", filename, out));
     }
     catch (std::exception& ex) {
         LERROR(ex.what());
