@@ -1,3 +1,4 @@
+-- Minimal
 -- This asset creates a SceneGraphNode that only displays coordinate axes. The coordinate
 -- axis normally have a length of 1 meter and are scaled in this example by a factor of
 -- 149597870700, which means they will be 149597870700 m (1 AU) long, thus reaching the
@@ -15,8 +16,8 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "StaticScale",
-    Path = "/Examples"
+    Name = "Minimal",
+    Path = "/Examples/StaticScale"
   }
 }
 
