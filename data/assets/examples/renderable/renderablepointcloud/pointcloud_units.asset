@@ -1,0 +1,24 @@
+-- This example creates a point cloud where the positions are interpreted to be in
+-- another unit than meters.
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_Units",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Unit = "Km"
+  },
+  GUI = {
+    Name = "Point Cloud (Units)",
+    Path = "/Examples",
+    Description = [[Example of a point cloud with positions specified in kilometers]]
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
