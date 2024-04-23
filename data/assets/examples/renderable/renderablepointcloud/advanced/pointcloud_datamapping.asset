@@ -1,4 +1,4 @@
--- Example of a point cloud with a custom data mapping. The X, Y and Z position are
+-- Example of a point cloud with a custom data mapping. The X, Y, and Z position are
 -- mapped to other columns in the dataset. The data mapping also includes some settings
 -- for missing data values and columns to exclude when loading the dataset
 

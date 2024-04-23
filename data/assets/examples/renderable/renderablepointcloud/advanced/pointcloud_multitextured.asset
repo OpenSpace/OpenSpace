@@ -1,6 +1,6 @@
 -- Example of point clouds where multiple textures are used for the points,
 -- based on information in the dataset. The dataset may be either CSV or Speck format.
-
+--
 -- Load data from a CSV file. This requires additional information to be provided through
 -- the DataMapping:
 -- 1) Which column in the dataset that corresponds to the texture, and
@@ -32,7 +32,7 @@ local Node = {
 
 
 -- Interpolated
--- Multi-texturing works also for interpolated point clouds. Here we let the same
+-- Multi-texturing works also for interpolated point clouds. Here, we let the same
 -- dataset as used above be interpreted as representing only two points, with a different
 -- texture. Note that the textures will be set based on the first two data items and will
 -- not be changed during interpolation
@@ -79,7 +79,6 @@ local Node_Speck = {
     Path = "/Examples"
   }
 }
-
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)

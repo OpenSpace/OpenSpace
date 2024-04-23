@@ -1,5 +1,5 @@
 -- Example of interpolating points with a color map. The data value used for the coloring
--- will also be inteprolated, leading to the points changing color throughout the
+-- will also be interpolated, leading to the points changing color throughout the
 -- interpolation.
 --
 -- Note that the color map is loaded from another asset. This is a utility asset that
@@ -19,6 +19,7 @@ local Node = {
     NumberOfObjects = 10,
     Coloring = {
       ColorMapping = {
+        -- For this example, we are using one of the example colormaps "Viridis"
         File = colormaps.Uniform.Viridis
       }
     },

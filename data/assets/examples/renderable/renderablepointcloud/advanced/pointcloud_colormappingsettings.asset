@@ -1,5 +1,5 @@
 -- This example shows almost all the available settings for the color mapping used
--- for point clouds. This includes things like handling missing data values, using
+-- for point clouds. This includes handling missing data values, using
 -- separate colors for values outside the data range used for the color mapping, as well
 -- as setting the default parameter and range.
 

@@ -1,6 +1,6 @@
 -- This example creates a point cloud where the color is set from a color map and the
 -- options for parameters to color by are pre-set, as well as some range. It also includes
--- settings to rendermissing data values in gray.
+-- settings to render missing data values in gray.
 --
 -- Note that the color map is loaded from another asset. This is a utility asset that
 -- includes some common color maps for general usage.
@@ -17,7 +17,7 @@ local Node = {
         File = colormaps.Uniform.Viridis,
         -- Specify which parameters we want to show up in the user interface, as
         -- well as what range we want the color mapping to be done based on. If not
-        -- included, all the columns in the data file would be exposed as optoins
+        -- included, all the columns in the data file would be exposed as options
         ParameterOptions = {
           { Key = "number_withNan" }, -- no range => compute min and max
           { Key = "normaldist_withMissing", Range = { -0.5, 0.5 } }

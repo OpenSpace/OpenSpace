@@ -11,7 +11,7 @@ local Node = {
       FixedColor = { 0.0, 0.0, 0.8 }
     },
     SizeSettings = {
-      -- Here we set the exponent for the scale explicitly, to a value that
+      -- We set the exponent for the scale explicitly, to a value that
       -- gives the points a suitable size based on their world-space coordinates
       ScaleExponent = 6.5
     }
