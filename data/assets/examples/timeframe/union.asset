@@ -4,7 +4,7 @@
 -- January 1st, 2000 and March 1st, 2002.
 
 local Node = {
-  Identifier = "TimeFrameUnion_Example_Simple",
+  Identifier = "TimeFrameUnion_Example",
   TimeFrame = {
     Type = "TimeFrameUnion",
     TimeFrames = {
@@ -26,7 +26,7 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "TimeFrameUnion Example (Simple)",
+    Name = "TimeFrameUnion",
     Path = "/Examples"
   }
 }
