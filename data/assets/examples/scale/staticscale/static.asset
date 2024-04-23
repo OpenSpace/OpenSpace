@@ -4,7 +4,7 @@
 -- same distance as Earth's orbit around the Sun.
 
 local Node = {
-  Identifier = "StaticScale_Example_Simple",
+  Identifier = "StaticScale_Example",
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -15,7 +15,7 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "StaticScale Example (Simple)",
+    Name = "StaticScale",
     Path = "/Examples"
   }
 }
