@@ -2489,15 +2489,17 @@ int RenderableGlobe::desiredLevelByAvailableTileData(const Chunk& chunk) const {
     const int currLevel = chunk.tileIndex.level;
 
     for (const layers::Group& gi : layers::Groups) {
-        const std::vector<Layer*>& lyrs = _layerManager.layerGroup(gi.id).activeLayers();
-        for (Layer* layer : lyrs) {
-            const Tile::Status status = layer->tileStatus(chunk.tileIndex);
-            // Ensure that the current tile is OK and that the tileprovider for the
-            // current layer has enough data to support an additional level.
-            if (status == Tile::Status::OK &&
-                layer->tileProvider()->maxLevel() > currLevel + 1)
-            {
-                return UnknownDesiredLevel;
+        if (gi.id != layers::Group::ID::Overlays) {
+            const std::vector<Layer*>& lyrs = _layerManager.layerGroup(gi.id).activeLayers();
+            for (Layer* layer : lyrs) {
+                const Tile::Status status = layer->tileStatus(chunk.tileIndex);
+                // Ensure that the current tile is OK and that the tileprovider for the
+                // current layer has enough data to support an additional level.
+                if (status == Tile::Status::OK &&
+                    layer->tileProvider()->maxLevel() > currLevel + 1)
+                {
+                    return UnknownDesiredLevel;
+                }
             }
         }
     }
