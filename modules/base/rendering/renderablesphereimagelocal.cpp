@@ -38,8 +38,7 @@ namespace {
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
         "that is applied to this sphere. This image is expected to be an equirectangular "
-        "projection",
-        // @VISIBILITY(2.33)
+        "projection.",
         openspace::properties::Property::Visibility::User
     };
 

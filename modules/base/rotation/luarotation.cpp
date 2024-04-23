@@ -43,8 +43,7 @@ namespace {
         "'rotation' that takes the current simulation time in seconds past the J2000 "
         "epoch as the first argument, the current wall time as milliseconds past the "
         "J2000 epoch as the second argument and computes the rotation returned as 9 "
-        "values",
-        // @VISIBILITY(3.25)
+        "values.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

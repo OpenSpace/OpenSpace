@@ -37,7 +37,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if this module should be enabled"
+        "Decides if this module should be enabled."
     };
 
     struct [[codegen::Dictionary(VideoModule)]] Parameters {

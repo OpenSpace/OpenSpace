@@ -56,8 +56,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PropertyUriInfo = {
         "URI",
         "Property URI",
-        "The URI of the property that is displayed in this dashboarditem",
-        // @VISIBILITY(2.67)
+        "The URI of the property that is displayed in this dashboard item.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -69,8 +68,7 @@ namespace {
         "instances of {}, which will be replaced with the value(s) of the property "
         "during rendering. For scalar types, there has to be exactly one instance of {}, "
         "for vector types, there need to be as many {} as there are compoents in the "
-        "vector, for example two {} for vec2 types, three for vec3 types, etc",
-        // @VISIBILITY(2.67)
+        "vector, for example two {} for vec2 types, three for vec3 types, etc.",
         openspace::properties::Property::Visibility::User
     };
 

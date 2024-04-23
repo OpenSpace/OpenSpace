@@ -51,7 +51,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "This setting determines whether this sceen space plane will be visible or not",
+        "This setting determines whether this sceen space plane will be visible or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -61,7 +61,7 @@ namespace {
         "If this value is 'true', this screenspace renderable is going to ignore the "
         "global blackout factor from the Render Engine and will always render at full "
         "opacity. If it is 'false', it will adhere to the factor and fade out like the "
-        "rest of the 3D rendering",
+        "rest of the 3D rendering.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -75,7 +75,7 @@ namespace {
         "using cartesian coordinates. By switching this value, the correct property will "
         "be shown or hidden. The Cartesian coordinate system is useful if a regular "
         "rendering is applied, whereas the radius azimuth elevation are most useful in a "
-        "planetarium environment",
+        "planetarium environment.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -83,8 +83,7 @@ namespace {
     {
         "UsePerspectiveProjection",
         "Use Perspective Projection",
-        "Determines whetether the z/radius values affects the size of the plane or not",
-        // @VISIBILITY(3.25)
+        "Determines whetether the z/radius values affects the size of the plane or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -92,7 +91,7 @@ namespace {
         "CartesianPosition",
         "Cartesian Coordinates",
         "This value determines the position of this screen space plane in Cartesian "
-        "three-dimensional coordinates (meters)",
+        "three-dimensional coordinates (meters).",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -101,7 +100,7 @@ namespace {
         "Radius Azimuth Elevation",
         "This value determines the position of this screen space plane in a "
         "coordinate system based on radius (meters), azimuth (radians) and elevation "
-        "(radians)",
+        "(radians).",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -110,15 +109,14 @@ namespace {
         "Scale Value",
         "This value determines a scale factor for the plane. The default size of a plane "
         "is determined by the concrete instance and reflects, for example, the size of "
-        "the image being displayed",
-        // @VISIBILITY(1.6)
+        "the image being displayed.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LocalRotationInfo = {
         "Rotation",
         "Local Rotation",
-        "An euler rotation (x, y, z) to apply to the plane",
+        "An euler rotation (x, y, z) to apply to the plane.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -126,7 +124,7 @@ namespace {
         "MultiplyColor",
         "Multiply Color",
         "If set, the plane's texture is multiplied with this color. Useful for applying "
-        "a color grayscale images",
+        "a color grayscale images.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -135,7 +133,7 @@ namespace {
         "Background Color",
         "The fixed color that is combined with the screen space renderable to create the "
         "final color. The actual color of the screen space renderable is alpha-blended "
-        "with the background color to produce the final result",
+        "with the background color to produce the final result.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -143,8 +141,7 @@ namespace {
         "Delete",
         "Delete",
         "If this property is triggered, this screen space plane is removed from the "
-        "scene",
-        // @VISIBILITY(2.25)
+        "scene.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -152,29 +149,28 @@ namespace {
         "FaceCamera",
         "Face Camera",
         "If enabled, the local rotation is applied after the plane is rotated to face "
-        "the camera",
-        // @VISIBILITY(1.25)
+        "the camera.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma Correction",
-        "Sets the gamma correction of the texture",
+        "Sets the gamma correction of the texture.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BorderWidthInfo = {
         "BorderWidth",
         "Border Width",
-        "The width of the border",
+        "The width of the border.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BorderColorInfo = {
         "BorderColor",
         "Border Color",
-        "Sets the color of the border",
+        "Sets the color of the border.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 

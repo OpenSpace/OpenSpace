@@ -73,8 +73,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the trail",
-        // @VISIBILITY(1.2)
+        "This value determines the RGB main color for the lines and points of the trail.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -83,8 +82,7 @@ namespace {
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is "
         "'true', the 'Fade' parameter determines the speed of fading. If this value is "
-        "'false', the entire trail is rendered at full opacity and color",
-        // @VISIBILITY(1.25)
+        "'false', the entire trail is rendered at full opacity and color.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -95,7 +93,6 @@ namespace {
         "value of 1 will result in a trail that covers the entire extent. The setting "
         "only applies if 'EnableFade' is 'true'. If it is 'false', this setting has "
         "no effect.",
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -110,7 +107,6 @@ namespace {
         "will result in a trail that starts fading immediately, becoming fully "
         "transparent by the end of the trail. This setting only applies if the "
         "'EnableFade' value is 'true'. If it is 'false', this setting has no effect.",
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -119,8 +115,7 @@ namespace {
         "Line Width",
         "This value specifies the line width of the trail if the selected rendering "
         "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored",
-        // @VISIBILITY(2.4)
+        "ignored.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -130,8 +125,7 @@ namespace {
         "This value specifies the base size of the points along the line if the selected "
         "rendering method includes points. If the rendering mode is set the Lines, this "
         "value is ignored. If a subsampling of the values is performed, the subsampled "
-        "values are half this size",
-        // @VISIBILITY(2.4)
+        "values are half this size.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -140,12 +134,13 @@ namespace {
         "Rendering Mode",
         "Determines how the trail should be rendered. If 'Lines' is "
         "selected, only the line part is visible, if 'Points' is selected, only the "
-        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both parts",
+        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both "
+        "parts.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
-        // This object is used to compute locations along the path. Any Translation 
+        // This object is used to compute locations along the path. Any Translation
         // object can be used here
         ghoul::Dictionary translation
             [[codegen::reference("core_transform_translation")]];

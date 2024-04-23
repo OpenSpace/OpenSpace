@@ -37,8 +37,7 @@ namespace {
         "The date at which this scale will be 0. The current value of the scale is "
         "computed by taking the difference between the current time and the reference "
         "date and multiplying it by the speed. This field must be formatted as: "
-        "YYYY-MM-DDThh:mm:ss.uuu  where h is a 24h clock and u microseconds",
-        // @VISIBILITY(2.75)
+        "YYYY-MM-DDThh:mm:ss.uuu  where h is a 24h clock and u microseconds.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -46,8 +45,7 @@ namespace {
         "Speed",
         "Speed",
         "The speed at which the value grows or shrinks. The units for this are meters "
-        "per second. The default value is 1 m/s",
-        // @VISIBILITY(2.75)
+        "per second. The default value is 1 m/s.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -57,7 +55,7 @@ namespace {
         "If this value is true, the velocity computation will be clamped to a positive "
         "value if the current simulation time is before the `ReferenceDate`. This is "
         "useful for instantaneous events that only propagate forwards in time. The "
-        "default value is 'true'",
+        "default value is 'true'.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

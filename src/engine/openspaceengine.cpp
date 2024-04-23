@@ -120,7 +120,7 @@ namespace {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
-        "printed to the log",
+        "printed to the log.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -128,7 +128,7 @@ namespace {
         "PropertyVisibility",
         "Property Visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
-        "are",
+        "are.",
         openspace::properties::Property::Visibility::Always
     };
 
@@ -146,8 +146,7 @@ namespace {
         "DisableMouseInputs",
         "Disable All Mouse Inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
-        "double inputs on touch (from both touch input and inserted mouse inputs)",
-        // @VISIBILITY(2.67)
+        "double inputs on touch (from both touch input and inserted mouse inputs).",
         openspace::properties::Property::Visibility::User
     };
 

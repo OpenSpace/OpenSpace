@@ -40,7 +40,7 @@ namespace {
         "FormatString",
         "Format String",
         "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will contain the date",
+        "must contain exactly one {} which is a placeholder that will contain the date.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -50,8 +50,7 @@ namespace {
         "The format string used for formatting the date/time before being passed to the "
         "string in FormatString. See "
         "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html for full "
-        "information about how to structure this format",
-        // @VISIBILITY(2.75)
+        "information about how to structure this format.",
         openspace::properties::Property::Visibility::User
     };
 

@@ -33,7 +33,7 @@ namespace {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this object. A value of 0 means "
-        "completely transparent",
+        "completely transparent.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -43,9 +43,7 @@ namespace {
         "This value is used by the system to be able to fade out objects "
         "independently from the Opacity value selected by the user. This value should "
         "not be directly manipulated through a user interface, but instead used by other "
-        "components of the system programmatically",
-        // The Developer mode should be used once the properties in the UI listen to this
-        // openspace::properties::Property::Visibility::Developer
+        "components of the system programmatically.",
         openspace::properties::Property::Visibility::Developer
     };
 } // namespace

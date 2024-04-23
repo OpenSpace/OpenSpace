@@ -38,8 +38,7 @@ namespace {
         "Image URL",
         "Sets the URL of the texture that is displayed on this sphere. If "
         "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. This image is expected to be an equirectangular projection",
-        // @VISIBILITY(2.25)
+        "and displayed. This image is expected to be an equirectangular projection.",
         openspace::properties::Property::Visibility::User
     };
 

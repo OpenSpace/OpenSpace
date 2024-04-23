@@ -36,7 +36,7 @@ namespace {
         "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
-        "coordinate transformation. This has to be a valid SPICE name",
+        "coordinate transformation. This has to be a valid SPICE name.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -44,14 +44,14 @@ namespace {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
-        "transformation. This has to be a valid SPICE name",
+        "transformation. This has to be a valid SPICE name.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeFrameInfo = {
         "TimeFrame",
         "Time Frame",
-        "The time frame in which the spice kernels are valid",
+        "The time frame in which the spice kernels are valid.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -59,7 +59,7 @@ namespace {
         "FixedDate",
         "Fixed Date",
         "A time to lock the rotation to. Setting this to an empty string will "
-        "unlock the time and return to rotation based on current simulation time",
+        "unlock the time and return to rotation based on current simulation time.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

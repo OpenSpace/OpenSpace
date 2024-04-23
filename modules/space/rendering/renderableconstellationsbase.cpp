@@ -44,30 +44,28 @@ namespace {
         "Constellation Names File Path",
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full names of the constellations. If this value is empty, the "
-        "abbreviations are used as the full names",
+        "abbreviations are used as the full names.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The line width of the constellation",
-        // @VISIBILITY(1.67)
+        "The line width of the constellation.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation Selection",
-        "The constellations that are selected are displayed on the celestial sphere",
-        // @VISIBILITY(1.33)
+        "The constellations that are selected are displayed on the celestial sphere.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the constellations"
+        "The labels for the constellations."
     };
 
     struct [[codegen::Dictionary(RenderableConstellationsBase)]] Parameters {

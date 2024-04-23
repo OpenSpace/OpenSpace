@@ -86,31 +86,28 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable Animation",
-        "Enable or disable the animation for the model if it has any",
+        "Enable or disable the animation for the model if it has any.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "A multiplier for ambient lighting",
-        // @VISIBILITY(2.4)
+        "A multiplier for ambient lighting.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse Intensity",
-        "A multiplier for diffuse lighting",
-        // @VISIBILITY(2.4)
+        "A multiplier for diffuse lighting.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular Intensity",
-        "A multiplier for specular lighting",
-        // @VISIBILITY(2.4)
+        "A multiplier for specular lighting.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -118,14 +115,14 @@ namespace {
         "PerformShading",
         "Perform Shading",
         "This value determines whether this model should be shaded by using the position "
-        "of the Sun",
+        "of the Sun.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {
         "EnableFaceCulling",
         "Enable Face Culling",
-        "Enable OpenGL automatic face culling optimization",
+        "Enable OpenGL automatic face culling optimization.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -133,14 +130,14 @@ namespace {
         "ModelTransform",
         "Model Transform",
         "This value specifies the model transform that is applied to the model before "
-        "all other transformations are applied",
+        "all other transformations are applied.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo PivotInfo = {
         "Pivot",
         "Pivot",
-        "A vector that moves the place of origin for the model",
+        "A vector that moves the place of origin for the model.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -151,29 +148,28 @@ namespace {
         "provided in the asset file, you can see and change it here. If instead a unit "
         "name was provided in the asset, this is the value that that name represents. "
         "For example 'Centimeter' becomes 0.01. For more information see "
-        "http://wiki.openspaceproject.com/docs/builders/models/model-scale.html",
+        "http://wiki.openspaceproject.com/docs/builders/models/model-scale.html.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
         "RotationVector",
         "Rotation Vector",
-        "Rotation Vector using degrees",
-        // @VISIBILITY(3.75)
+        "Rotation Vector using degrees.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
         "Light Sources",
-        "A list of light sources that this model should accept light from",
+        "A list of light sources that this model should accept light from.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableDepthTestInfo = {
         "EnableDepthTest",
         "Enable Depth Test",
-        "Enable Depth Testing for the Model",
+        "Enable Depth Testing for the Model.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -181,7 +177,7 @@ namespace {
         "BlendingOption",
         "Blending Options",
         "Changes the blending function used to calculate the colors of the model with "
-        "respect to the opacity",
+        "respect to the opacity.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

@@ -67,7 +67,7 @@ void log(int i, const EventParallelConnection& e) {
     LINFO(std::format("[{}] ParallelConnection ({})", i, state));
 }
 
-void log(int i, [[ maybe_unused ]] const EventProfileLoadingFinished& e) {
+void log(int i, [[maybe_unused]] const EventProfileLoadingFinished& e) {
     ghoul_assert(e.type == EventProfileLoadingFinished::Type, "Wrong type");
     LINFO(std::format("[{}] ProfileLoadingFinished", i));
 }
@@ -126,7 +126,7 @@ void log(int i, const EventTimeOfInterestReached& e) {
     ));
 }
 
-void log(int i, [[ maybe_unused ]] const EventMissionEventReached& e) {
+void log(int i, [[maybe_unused]] const EventMissionEventReached& e) {
     ghoul_assert(e.type == EventMissionEventReached::Type, "Wrong type");
     LINFO(std::format("[{}] MissionEventReached", i));
 }
@@ -136,7 +136,7 @@ void log(int i, const EventPlanetEclipsed& e) {
     LINFO(std::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
 }
 
-void log(int i, [[ maybe_unused ]] const EventInterpolationFinished& e) {
+void log(int i, [[maybe_unused]] const EventInterpolationFinished& e) {
     ghoul_assert(e.type == EventInterpolationFinished::Type, "Wrong type");
     LINFO(std::format("[{}] InterpolationFinished", i));
 }

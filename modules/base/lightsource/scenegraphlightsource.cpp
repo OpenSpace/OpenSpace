@@ -37,15 +37,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
-        "The intensity of this light source",
-        // @VISIBILITY(1.75)
+        "The intensity of this light source.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NodeCameraStateInfo = {
         "Node",
         "Node",
-        "The identifier of the scene graph node to follow",
+        "The identifier of the scene graph node to follow.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

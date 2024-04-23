@@ -62,7 +62,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
         "Text Color",
-        "The text color for the astronomical object",
+        "The text color for the astronomical object.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -70,14 +70,14 @@ namespace {
         "TextOpacity",
         "Text Opacity",
         "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent",
+        "and 0 fully transparent.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
         "Text Size",
-        "The text size for the astronomical object labels",
+        "The text size for the astronomical object labels.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -85,7 +85,7 @@ namespace {
         "LabelFile",
         "Label File",
         "The path to the label file that contains information about the astronomical "
-        "objects being rendered",
+        "objects being rendered.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -93,44 +93,42 @@ namespace {
         "TextMinMaxSize",
         "Text Min/Max Size",
         "The minimum and maximum size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered",
+        "astronomical objects being rendered.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "If the DU mesh is of wire type, this value determines the width of the lines",
-        // @VISIBILITY(1.75)
+        "If the DU mesh is of wire type, this value determines the width of the lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects",
+        "Enables/Disables the drawing of the astronomical objects.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw Labels",
-        "Determines whether labels should be drawn or hidden",
+        "Determines whether labels should be drawn or hidden.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
-        "The defined colors for the meshes to be rendered",
-        // @VISIBILITY(1.25)
+        "The defined colors for the meshes to be rendered.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
         "Render Option",
-        "Debug option for rendering of billboards and texts",
+        "Debug option for rendering of billboards and texts.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

@@ -56,7 +56,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
-        "The file path to the data file to read",
+        "The file path to the data file to read.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -66,8 +66,7 @@ namespace {
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
         "10 (highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit",
-        // @VISIBILITY(2.5)
+        "these automatically increase according to the eccentricity of the orbit.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -76,7 +75,7 @@ namespace {
         "Trail Width",
         "This value specifies the line width of the trail if the selected rendering "
         "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored",
+        "ignored.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -85,7 +84,6 @@ namespace {
         "Point Size Exponent",
         "This value is used as in exponential scaling to set the absolute size of the "
         "point.",
-        // @VISIBILITY(2.4)
         openspace::properties::Property::Visibility::User
     };
 
@@ -129,7 +127,6 @@ namespace {
         "TrailFade",
         "Trail Fade Factor",
         "This value determines how fast the trail fades and is an appearance property.",
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -161,14 +158,14 @@ namespace {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
         "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored)",
+        "be ignored).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
         "RenderSize",
         "Contiguous Size of Render Block",
-        "Number of objects to render sequentially from StartRenderIdx",
+        "Number of objects to render sequentially from StartRenderIdx.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

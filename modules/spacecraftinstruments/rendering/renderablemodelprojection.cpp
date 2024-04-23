@@ -58,8 +58,7 @@ namespace {
         "Perform Shading",
         "If this value is enabled, the model will be shaded based on the relative "
         "location to the Sun. If this value is disabled, shading is disabled and the "
-        "entire model is rendered brightly",
-        // @VISIBILITY(1.5)
+        "entire model is rendered brightly.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 

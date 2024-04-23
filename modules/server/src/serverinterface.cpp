@@ -40,35 +40,35 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "This setting determines whether this server interface is enabled or not",
+        "This setting determines whether this server interface is enabled or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
-        "Whether the interface is using a Socket or a WebSocket",
+        "Whether the interface is using a Socket or a WebSocket.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The network port to use for this sevrer interface",
+        "The network port to use for this sevrer interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultAccessInfo = {
         "DefaultAccess",
         "Default Access",
-        "Sets the default access policy: Allow, RequirePassword or Deny",
+        "Sets the default access policy: Allow, RequirePassword or Deny.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AllowAddressesInfo = {
         "AllowAddresses",
         "Allow Addresses",
-        "IP addresses or domains that should always be allowed access to this interface",
+        "IP addresses or domains that should always be allowed access to this interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -77,21 +77,21 @@ namespace {
         "RequirePasswordAddresses",
         "Require Password Addresses",
         "IP addresses or domains that should be allowed access if they provide a "
-        "password",
+        "password.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DenyAddressesInfo = {
         "DenyAddresses",
         "Deny Addresses",
-        "IP addresses or domains that should never be allowed access to this interface",
+        "IP addresses or domains that should never be allowed access to this interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
         "Password",
         "Password",
-        "Password for connecting to this interface",
+        "Password for connecting to this interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace

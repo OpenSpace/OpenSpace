@@ -98,16 +98,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile Cache Size",
-        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU",
+        "The maximum size of the MemoryAwareTileCache, on the CPU and GPU.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DefaultGeoPointTextureInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo DefaultGeoPointTextureInfo = {
         "DefaultGeoPointTexture",
         "Default Geo Point Texture",
-        "A path to a texture to use as default for GeoJson points"
+        "A path to a texture to use as default for GeoJson points."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MRFCacheEnabledInfo = {

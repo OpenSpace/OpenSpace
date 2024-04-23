@@ -56,7 +56,7 @@ namespace {
         "ShowExceptions",
         "Show Exceptions",
         "If enabled, errors from SPICE will be thrown and show up in the log. If "
-        "disabled, the errors will be ignored silently",
+        "disabled, the errors will be ignored silently.",
         openspace::properties::Property::Visibility::Developer
     };
 } // namespace

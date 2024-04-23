@@ -138,15 +138,14 @@ namespace {
         "FixedColor",
         "Fixed Color",
         "This value is used to define the color of the points when no color map is"
-        "used",
+        "used.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the points",
-        // @VISIBILITY(1.25)
+        "Enables/Disables the drawing of the points.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -169,7 +168,6 @@ namespace {
         "camera is outside this range and fully invisible when inside the range. With "
         "inverted fading the situation is the opposite: the points are visible inside "
         "hen closer than the min value of the range and invisible when further away.",
-        // @VISIBILITY(3.25)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -235,7 +233,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HasOrientationDataInfo = {
         "HasOrientationData",
         "Has Orientation Data",
-        "Set to true if orientation data was read from the dataset",
+        "Set to true if orientation data was read from the dataset.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
