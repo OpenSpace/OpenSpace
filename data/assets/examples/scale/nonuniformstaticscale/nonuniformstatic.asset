@@ -6,7 +6,7 @@
 -- hidden entirely by setting the scale value close to 0.
 
 local Node = {
-  Identifier = "NonUniformStaticScale_Example_Simple",
+  Identifier = "NonUniformStaticScale_Example",
   Transform = {
     Scale = {
       Type = "NonUniformStaticScale",
@@ -17,7 +17,7 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "NonUniformStaticScale Example (Simple)",
+    Name = "NonUniformStaticScale",
     Path = "/Examples"
   }
 }
