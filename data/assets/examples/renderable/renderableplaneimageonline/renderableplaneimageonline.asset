@@ -9,7 +9,7 @@ local Node = {
     URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
   },
   GUI = {
-    Name = "Plane Image Online"
+    Name = "Plane Image Online",
     Path = "/Examples"
   }
 }
