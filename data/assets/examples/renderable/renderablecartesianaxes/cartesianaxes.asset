@@ -3,7 +3,6 @@
 
 local Node = {
   Identifier = "Renderable_Cartesian_Axes_Example",
-  Parent = "Earth",
   Transform = {
     Scale = {
       Type = "StaticScale",
