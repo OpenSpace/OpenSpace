@@ -41,6 +41,7 @@
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #include <filesystem>
+#include <fstream>
 
 namespace {
     enum class KernelSize {
