@@ -23,9 +23,7 @@ local Node = {
     Labels = {
       Enabled = true,
       -- Give the labels a size that looks good
-      Size = 7.5,
-      -- And a color
-      Color = { 0.0, 1.0, 1.0 }
+      Size = 7.5
     }
   },
   GUI = {
@@ -59,7 +57,6 @@ local Node_LabelsFile = {
       Enabled = true,
       File = asset.resource("../data/dummydata.label"),
       Size = 7.5,
-      Color = { 0.0, 1.0, 1.0 },
       -- When we add an explicit label file we also have to specify the unit, if it is
       -- different than meters
       Unit = "Km"
