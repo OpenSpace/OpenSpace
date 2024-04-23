@@ -674,10 +674,8 @@ void PlanetaryTrailTileProvider::update() {
         _pointProgram->setUniform("projectionMatrix", projection);
 
         glPointSize(static_cast<GLfloat>(_pointSize));
-        // -2 to leave out leaves out the last point which
-        // is an interpolated point and not a real one +
-        // the duplication of that point necessary for line-rendering
-        glDrawArrays(GL_POINTS, 0, points.size() - 2);
+        // -1 to leave out the duplicated point necessary for line-rendering
+        glDrawArrays(GL_POINTS, 0, points.size() - 1);
     }
 
     if (_kernelSize.value() != static_cast<int>(KernelSize::Disabled)) {
