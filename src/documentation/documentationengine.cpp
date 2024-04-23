@@ -552,12 +552,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
     json.push_back(leftovers);
     sortJson(json, NameKey);
 
-    // I did not check the output of this for correctness ---abock
-    nlohmann::json result;
-    result[NameKey] = FactoryTitle;
-    result[DataKey] = json;
-
-    return result;
+    return json;
 }
 
 nlohmann::json DocumentationEngine::generateKeybindingsJson() const {
@@ -606,7 +601,7 @@ nlohmann::json DocumentationEngine::generatePropertyOwnerJson(
     return result;
 }
 
-void DocumentationEngine::writeDocumentation() const {
+void DocumentationEngine::writeJavascriptDocumentation() const {
     ZoneScoped;
 
     // Write documentation to json files if config file supplies path for doc files
@@ -628,8 +623,6 @@ void DocumentationEngine::writeDocumentation() const {
         global::renderEngine->scene()
     );
 
-    nlohmann::json scripting = generateScriptEngineJson();
-    nlohmann::json factory = generateFactoryManagerJson();
     nlohmann::json keybindings = generateKeybindingsJson();
     nlohmann::json license = generateLicenseGroupsJson();
     nlohmann::json sceneProperties = settings.get();
@@ -639,12 +632,6 @@ void DocumentationEngine::writeDocumentation() const {
 
     sceneProperties[NameKey] = SettingsTitle;
     sceneGraph[NameKey] = SceneTitle;
-
-    // Add this here so that the generateJson function is the same as before to ensure
-    // backwards compatibility
-    nlohmann::json scriptingResult;
-    scriptingResult[NameKey] = ScriptingTitle;
-    scriptingResult[DataKey] = scripting;
 
     nlohmann::json documentation = {
         sceneGraph, sceneProperties, actions, events, keybindings, license
@@ -657,16 +644,21 @@ void DocumentationEngine::writeDocumentation() const {
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/documentationData.js"));
     out << "var data = " << result.dump();
     out.close();
+}
+
+void DocumentationEngine::writeJsonDocumentation() const {
+    nlohmann::json factory = generateFactoryManagerJson();
+    nlohmann::json scripting = generateScriptEngineJson();
 
     // Write two json files for the static docs page - asset components and scripting api
-    out.open(absPath("${DOCUMENTATION}/assetComponents.json"));
+    std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/assetComponents.json"));
     if (out) {
         out << factory.dump();
     }
     out.close();
     out.open(absPath("${DOCUMENTATION}/scriptingApi.json"));
     if (out) {
-        out << scriptingResult.dump();
+        out << scripting.dump();
     }
     out.close();
 }
