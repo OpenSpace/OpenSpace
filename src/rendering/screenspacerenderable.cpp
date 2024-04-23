@@ -43,11 +43,6 @@
 #include <variant>
 
 namespace {
-    constexpr std::array<const char*, 9> UniformNames = {
-        "color", "opacity", "blackoutFactor", "mvpMatrix", "tex", "backgroundColor",
-        "gamma", "borderColor", "borderWidth"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
@@ -524,7 +519,7 @@ void ScreenSpaceRenderable::createShaders() {
         dict
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
@@ -660,14 +655,14 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform, float blackout
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
     _shader->setUniform(_uniformCache.borderColor, _borderColor);
     _shader->setUniform(
-        _uniformCache.mvp,
+        _uniformCache.mvpMatrix,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
     );
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     bindTexture();
-    _shader->setUniform(_uniformCache.texture, unit);
+    _shader->setUniform(_uniformCache.tex, unit);
 
     glBindVertexArray(rendering::helper::vertexObjects.square.vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);

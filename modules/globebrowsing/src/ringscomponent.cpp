@@ -53,24 +53,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RingsComponent";
 
-    constexpr std::array<const char*, 10> UniformNames = {
-        "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
-        "sunPosition", "ringTexture", "shadowMatrix", "shadowMapTexture",
-        "zFightingPercentage", "opacity"
-    };
-
-    constexpr std::array<const char*, 16> UniformNamesAdvancedRings = {
-        "modelViewProjectionMatrix", "textureOffset", "colorFilterValue", "nightFactor",
-        "sunPosition", "sunPositionObj", "camPositionObj", "ringTextureFwrd",
-        "ringTextureBckwrd", "ringTextureUnlit", "ringTextureColor",
-        "ringTextureTransparency", "shadowMatrix", "shadowMapTexture",
-        "zFightingPercentage", "opacity"
-    };
-
-    constexpr std::array<const char*, 3> GeomUniformNames = {
-        "modelViewProjectionMatrix", "textureOffset", "ringTexture"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
@@ -370,11 +352,7 @@ void RingsComponent::initializeGL() {
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_fs.glsl")
         );
 
-        ghoul::opengl::updateUniformLocations(
-            *_geometryOnlyShader,
-            _geomUniformCache,
-            GeomUniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_geometryOnlyShader, _geomUniformCache);
     }
     catch (const ghoul::RuntimeError& e) {
         LERROR(e.message);
@@ -502,7 +480,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 _uniformCacheAdvancedRings.ringTextureTransparency,
                 ringTextureTransparencyUnit
             );
-            _shader->setUniform(_uniformCacheAdvancedRings.opacityValue, opacity());
+            _shader->setUniform(_uniformCacheAdvancedRings.opacity, opacity());
 
             // Adding the model transformation to the final shadow matrix so we have a
             // complete transformation from the model coordinates to the clip space of
@@ -552,7 +530,7 @@ void RingsComponent::draw(const RenderData& data, RenderPass renderPass,
                 _uniformCache.modelViewProjectionMatrix,
                 modelViewProjectionTransform
             );
-            _shader->setUniform(_uniformCache.opacityValue, opacity());
+            _shader->setUniform(_uniformCache.opacity, opacity());
 
             ringTextureUnit.activate();
             _texture->bind();
@@ -620,11 +598,7 @@ void RingsComponent::update(const UpdateData& data) {
 
     if (_geometryOnlyShader->isDirty()) {
         _geometryOnlyShader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(
-            *_geometryOnlyShader,
-            _geomUniformCache,
-            GeomUniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_geometryOnlyShader, _geomUniformCache);
     }
 
     if (_planeIsDirty) {
@@ -853,7 +827,7 @@ void RingsComponent::compileShadowShader() {
         //     dict
         // );
 
-        // ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        // ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
         // Uses multiple textures for the Rings
         // See https://bjj.mmedia.is/data/s_rings/index.html for theory behind it
@@ -865,11 +839,7 @@ void RingsComponent::compileShadowShader() {
                 dict
             );
 
-            ghoul::opengl::updateUniformLocations(
-                *_shader,
-                _uniformCacheAdvancedRings,
-                UniformNamesAdvancedRings
-            );
+            ghoul::opengl::updateUniformLocations(*_shader, _uniformCacheAdvancedRings);
         }
         else {
             // Uses simple texture for the Rings
@@ -880,7 +850,7 @@ void RingsComponent::compileShadowShader() {
                 dict
             );
 
-            ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+            ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
         }
     }
     catch (const ghoul::RuntimeError& e) {

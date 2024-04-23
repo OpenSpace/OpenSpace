@@ -53,20 +53,6 @@ namespace {
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
-    constexpr std::array<const char*, 9> HDRUniformNames = {
-        "hdrFeedingTexture", "blackoutFactor", "hdrExposure", "gamma",
-        "Hue", "Saturation", "Value", "Viewport", "Resolution"
-    };
-
-    constexpr std::array<const char*, 4> FXAAUniformNames = {
-        "renderedTexture", "inverseScreenSize", "Viewport", "Resolution"
-    };
-
-    constexpr std::array<const char*, 4> DownscaledVolumeUniformNames = {
-        "downscaledRenderedVolume", "downscaledRenderedVolumeDepth", "viewport",
-        "resolution"
-    };
-
     constexpr std::string_view ExitFragmentShaderPath =
         "${SHADERS}/framebuffer/exitframebuffer.frag";
     constexpr std::string_view RaycastFragmentShaderPath =
@@ -355,20 +341,11 @@ void FramebufferRenderer::initialize() {
     // Sets back to default FBO
     glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
 
-    ghoul::opengl::updateUniformLocations(
-        *_hdrFilteringProgram,
-        _hdrUniformCache,
-        HDRUniformNames
-    );
-    ghoul::opengl::updateUniformLocations(
-        *_fxaaProgram,
-        _fxaaUniformCache,
-        FXAAUniformNames
-    );
+    ghoul::opengl::updateUniformLocations(*_hdrFilteringProgram, _hdrUniformCache);
+    ghoul::opengl::updateUniformLocations(*_fxaaProgram, _fxaaUniformCache);
     ghoul::opengl::updateUniformLocations(
         *_downscaledVolumeProgram,
-        _writeDownscaledVolumeUniformCache,
-        DownscaledVolumeUniformNames
+        _writeDownscaledVolumeUniformCache
     );
 
     global::raycasterManager->addListener(*this);
@@ -625,21 +602,13 @@ void FramebufferRenderer::update() {
     if (_hdrFilteringProgram->isDirty()) {
         _hdrFilteringProgram->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(
-            *_hdrFilteringProgram,
-            _hdrUniformCache,
-            HDRUniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_hdrFilteringProgram, _hdrUniformCache);
     }
 
     if (_fxaaProgram->isDirty()) {
         _fxaaProgram->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(
-            *_fxaaProgram,
-            _fxaaUniformCache,
-            FXAAUniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_fxaaProgram, _fxaaUniformCache);
     }
 
     if (_downscaledVolumeProgram->isDirty()) {
@@ -647,8 +616,7 @@ void FramebufferRenderer::update() {
 
         ghoul::opengl::updateUniformLocations(
             *_downscaledVolumeProgram,
-            _writeDownscaledVolumeUniformCache,
-            DownscaledVolumeUniformNames
+            _writeDownscaledVolumeUniformCache
         );
     }
 
