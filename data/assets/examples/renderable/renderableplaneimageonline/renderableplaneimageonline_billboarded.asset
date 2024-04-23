@@ -16,7 +16,6 @@ local Node = {
   }
 }
 
-
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)
 end)
