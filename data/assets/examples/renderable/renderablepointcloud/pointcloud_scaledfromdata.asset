@@ -20,7 +20,6 @@ local Node = {
         -- otherwise used by default
         Parameter = "b"
       },
-
       -- The size mapping can be used together with other scale parameters, such as a
       -- scale exponent or scale factor
       ScaleExponent = 4.8

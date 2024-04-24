@@ -21,7 +21,7 @@ local Node = {
         -- well as what range we want the color mapping to be done based on. If not
         -- included, all the columns in the data file would be exposed as options
         ParameterOptions = {
-          { Key = "number_withNan" }, -- no range => compute min and max
+          { Key = "number_withNan" }, -- No range => compute min and max
           { Key = "normaldist_withMissing", Range = { -0.5, 0.5 } }
         },
         -- Also show missing data values in a specific color
