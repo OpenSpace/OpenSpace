@@ -26,6 +26,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   syncmodule.h
+  dynamicfilesequencedownloader/dynamicfilesequencedownloader.h
   syncs/httpsynchronization.h
   syncs/urlsynchronization.h
 )
@@ -34,6 +35,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
   syncmodule.cpp
   syncmodule_lua.inl
+  dynamicfilesequencedownloader/dynamicfilesequencedownloader.cpp
   syncs/httpsynchronization.cpp
   syncs/urlsynchronization.cpp
 )

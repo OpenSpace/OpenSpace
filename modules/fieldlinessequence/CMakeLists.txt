@@ -30,7 +30,6 @@ set(HEADER_FILES
   util/fieldlinesstate.h
   util/commons.h
   util/kameleonfieldlinehelper.h
-  util/dynamicfilesequencedownloader.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -38,7 +37,6 @@ set(SOURCE_FILES
   rendering/renderablefieldlinessequence.cpp
   tasks/kameleonvolumetofieldlinestask.cpp
   util/fieldlinesstate.cpp
-  util/dynamicfilesequencedownloader.cpp
   util/commons.cpp
   util/kameleonfieldlinehelper.cpp
 )

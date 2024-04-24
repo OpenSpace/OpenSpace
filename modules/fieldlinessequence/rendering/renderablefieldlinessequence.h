@@ -28,7 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
-#include <modules/fieldlinessequence/util/dynamicfilesequencedownloader.h>
+#include <modules/sync/dynamicfilesequencedownloader/dynamicfilesequencedownloader.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
