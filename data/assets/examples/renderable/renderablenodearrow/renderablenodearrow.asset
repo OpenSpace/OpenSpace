@@ -3,7 +3,8 @@
 -- another. Here, it points from Earth to Mars.
 --
 -- Note that the arrows are generated as objects in 3D space and need to have a size
--- that is suitable for their 3D context. Here it is set based on the size of the Earth.
+-- that is suitable for the scene graph nodes they refer to. Here it is set based on
+-- the size of the Earth.
 
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")

@@ -4,12 +4,11 @@
 -- sphere of the start node). Here it points from Earth to the Moon.
 --
 -- Note that the arrows are generated as objects in 3D space and need to have a size
--- that is suitable for their 3D context. Here it is set based on the size of the Earth.
+-- that is suitable for the scene graph nodes they refer to. Here it is set based on
+-- the size of the start node, i.e. Earth.
 
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
-
-local EarthRadius = 6371000.0
 
 local Node = {
   Identifier = "RenderableNodeArrow_Example_Relative",
