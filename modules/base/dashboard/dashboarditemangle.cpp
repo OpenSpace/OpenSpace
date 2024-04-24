@@ -272,8 +272,8 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
             _buffer.data(),
             end - _buffer.data()
         );
-        RenderFont(*_font, penPosition, text);
         penPosition.y -= _font->height();
+        RenderFont(*_font, penPosition, text);
     }
     else {
         const double angle = glm::degrees(
@@ -288,8 +288,8 @@ void DashboardItemAngle::render(glm::vec2& penPosition) {
         const std::string_view text = std::string_view(
             _buffer.data(), end - _buffer.data()
         );
-        RenderFont(*_font, penPosition, text);
         penPosition.y -= _font->height();
+        RenderFont(*_font, penPosition, text);
     }
 }
 

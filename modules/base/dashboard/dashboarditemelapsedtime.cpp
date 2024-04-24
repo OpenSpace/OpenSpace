@@ -140,6 +140,8 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
 
     const double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
 
+    penPosition.y -= _font->height();
+
     if (_simplifyTime) {
         using namespace std::chrono;
 
@@ -176,8 +178,6 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
             std::vformat(_formatString.value(), std::make_format_args(time))
         );
     }
-
-    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemElapsedTime::size() const {

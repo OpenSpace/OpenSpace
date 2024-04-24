@@ -201,9 +201,9 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
         }
     }
 
+    penPosition.y -= _font->height();
     const std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
     RenderFont(*_font, penPosition, text);
-    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemGlobeLocation::size() const {

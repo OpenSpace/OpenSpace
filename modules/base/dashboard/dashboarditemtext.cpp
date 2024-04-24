@@ -69,8 +69,8 @@ DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
 void DashboardItemText::render(glm::vec2& penPosition) {
     ZoneScoped;
 
-    RenderFont(*_font, penPosition, _text.value());
     penPosition.y -= _font->height();
+    RenderFont(*_font, penPosition, _text.value());
 }
 
 glm::vec2 DashboardItemText::size() const {

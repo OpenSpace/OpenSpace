@@ -237,12 +237,8 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
         0 :
         static_cast<int>((std::count(text.begin(), text.end(), '\n') + 1));
 
-    ghoul::fontrendering::FontRenderer::defaultRenderer().render(
-        *_font,
-        penPosition,
-        text
-    );
     penPosition.y -= _font->height() * static_cast<float>(nLines);
+    RenderFont(*_font, penPosition, text);
 }
 
 glm::vec2 DashboardItemFramerate::size() const {

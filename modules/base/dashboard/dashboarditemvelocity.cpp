@@ -142,12 +142,12 @@ void DashboardItemVelocity::render(glm::vec2& penPosition) {
         dist = std::pair(convertedD, nameForDistanceUnit(unit, convertedD != 1.0));
     }
 
+    penPosition.y -= _font->height();
     RenderFont(
         *_font,
         penPosition,
         std::format("Camera velocity: {:.4f} {}/s", dist.first, dist.second)
     );
-    penPosition.y -= _font->height();
 
     _prevPosition = currentPos;
 }

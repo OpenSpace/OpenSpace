@@ -56,9 +56,7 @@ namespace openspace {
 Dashboard::Dashboard()
     : properties::PropertyOwner({ "Dashboard" })
     , _isEnabled(EnabledInfo, true)
-    , _startPositionOffset(
-        properties::IVec2Property(StartPositionOffsetInfo, glm::ivec2(10, -25))
-    )
+    , _startPositionOffset(StartPositionOffsetInfo, glm::ivec2(10, -10))
 {
     addProperty(_isEnabled);
     addProperty(_startPositionOffset);

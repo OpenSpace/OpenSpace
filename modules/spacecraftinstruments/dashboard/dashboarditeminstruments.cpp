@@ -127,7 +127,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     }
     ImageSequencer& sequencer = ImageSequencer::ref();
 
-    penPosition.y -= 25.f;
+    penPosition.y -= _font->height();
 
     constexpr glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
 
@@ -248,6 +248,10 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             );
         }
     }
+
+    // The last item added a CR but we want to undo it since it's the next item's
+    // responsibility to move down
+    penPosition.y += _font->height();
 }
 
 glm::vec2 DashboardItemInstruments::size() const {

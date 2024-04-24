@@ -93,6 +93,7 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     );
 
     try {
+        penPosition.y -= _font->height();
         RenderFont(
             *_font,
             penPosition,
@@ -103,7 +104,6 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
-    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemDate::size() const {

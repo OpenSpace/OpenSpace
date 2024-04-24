@@ -167,9 +167,9 @@ void DashboardItemInputState::render(glm::vec2& penPosition) {
     }
 
     if (!text.empty()) {
+        penPosition.y -= _font->height();
         const std::string t = ghoul::join(std::move(text), "\n");
         RenderFont(*_font, penPosition, t);
-        penPosition.y -= _font->height();
     }
 }
 
