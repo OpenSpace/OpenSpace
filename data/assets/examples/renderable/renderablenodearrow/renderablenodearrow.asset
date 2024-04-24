@@ -2,7 +2,7 @@
 -- This example shows an arrow pointing from one scene graph node in the direction of
 -- another. Here, it points from Earth to Mars.
 --
--- Note that the arrows are generated as objects in 3D space  and need to have a size
+-- Note that the arrows are generated as objects in 3D space and need to have a size
 -- that is suitable for their 3D context. Here it is set based on the size of the Earth.
 
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
