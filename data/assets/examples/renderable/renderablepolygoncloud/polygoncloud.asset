@@ -1,3 +1,4 @@
+-- Base Example
 -- Example of a polygon cloud, which is a point cloud where a uniform polygon is used
 -- for the shape of the points.
 
@@ -14,8 +15,8 @@ local Node = {
     PolygonSides = 6
   },
   GUI = {
-    Name = "Polygon Cloud",
-    Path = "/Examples"
+    Name = "Base Example",
+    Path = "/Examples/RenderablePolygonCloud"
   }
 }
 

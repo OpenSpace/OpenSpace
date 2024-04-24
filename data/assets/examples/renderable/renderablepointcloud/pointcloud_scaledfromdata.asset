@@ -1,3 +1,4 @@
+-- Point Size from Data
 -- This example creates a point cloud where the size of the points is computed based on
 -- a column in the dataset
 
@@ -26,10 +27,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Point Cloud (Size From Data)",
-    Path = "/Examples",
-    Description = [[Point cloud with a fixed color and sizing that can be set based on a
-      column in the dataset]]
+    Name = "Size from Data",
+    Path = "/Examples/RenderablePointCloud"
   }
 }
 

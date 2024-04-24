@@ -1,5 +1,6 @@
+-- Limit Max Size
 -- This example creates a point cloud where the size of the points is limited to a
--- given max size. The color is set to a fixed value
+-- given max size. The color is set to a fixed value.
 
 local Node = {
   Identifier = "RenderablePointCloud_Example_MaxSize",
@@ -17,9 +18,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Point Cloud (Max Size)",
-    Path = "/Examples",
-    Description = "Point cloud with a fixed color and sizing with a given max size"
+    Name = "Max Size",
+    Path = "/Examples/RenderablePointCloud"
   }
 }
 

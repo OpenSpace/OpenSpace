@@ -1,3 +1,4 @@
+-- Textured
 -- This example creates a point cloud using a texture to render each point.
 --
 -- Note that other color related settings, like color mapping, can still be applied.
@@ -21,8 +22,8 @@ local Node = {
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "Point Cloud (Textured)",
-    Path = "/Examples"
+    Name = "Textured",
+    Path = "/Examples/RenderablePointCloud"
   }
 }
 

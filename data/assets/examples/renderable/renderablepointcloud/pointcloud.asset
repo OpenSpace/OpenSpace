@@ -1,5 +1,6 @@
+-- Base Example (Fixed Color and Size)
 -- This example creates a point cloud with a fixed color and default size.
--- All the points will have the same size
+-- All the points will have the same size.
 
 local Node = {
   Identifier = "RenderablePointCloud_Example",
@@ -11,8 +12,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Point Cloud (Fixed Color and Size)",
-    Path = "/Examples"
+    Name = "Fixed Color and Size",
+    Path = "/Examples/RenderablePointCloud"
   }
 }
 

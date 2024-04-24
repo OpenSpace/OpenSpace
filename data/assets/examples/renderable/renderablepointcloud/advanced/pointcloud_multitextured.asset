@@ -1,10 +1,12 @@
+-- Multi-textured Points
 -- Example of point clouds where multiple textures are used for the points,
 -- based on information in the dataset. The dataset may be either CSV or Speck format.
 --
 -- Load data from a CSV file. This requires additional information to be provided through
 -- the DataMapping:
 -- 1) Which column in the dataset that corresponds to the texture, and
--- 2) a separate file that maps that value to a texture file
+-- 2) a separate file that maps that value to a texture file.
+
 local Node = {
   Identifier = "RenderablePointCloud_Example_MultiTextured_CSV",
   Renderable = {
@@ -25,8 +27,8 @@ local Node = {
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "Multi-Textured Points",
-    Path = "/Examples"
+    Name = "Multi-Textured",
+    Path = "/Examples/RenderablePointCloud/Advanced"
   }
 }
 
@@ -52,8 +54,8 @@ local Node_Interpolated = {
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "Multi-Textured Points (Interpolation)",
-    Path = "/Examples"
+    Name = "Multi-Textured (with interpolation)",
+    Path = "/Examples/RenderablePointCloud/Advanced"
   }
 }
 
@@ -75,8 +77,8 @@ local Node_Speck = {
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "Multi-Textured Points (Speck file)",
-    Path = "/Examples"
+    Name = "Multi-Textured (Speck file)",
+    Path = "/Examples/RenderablePointCloud/Advanced"
   }
 }
 

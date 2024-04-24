@@ -1,4 +1,5 @@
--- Example of a point cloud with distance-based fading
+-- Fading
+-- Example of a point cloud with distance-based fading.
 
 local Node = {
   Identifier = "RenderablePointCloud_Example_Fading",
@@ -17,8 +18,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Point Cloud - Fading",
-    Path = "/Examples",
+    Name = "Fading",
+    Path = "/Examples/RenderablePointCloud/Advanced",
     Description = [[Example of a point cloud with distance-based fading (the points
       are visible when the camera reaches a certain distance away from the origin)]]
   }
@@ -48,8 +49,8 @@ local Node_Invert = {
     }
   },
   GUI = {
-    Name = "Point Cloud - Fading (Inverted)",
-    Path = "/Examples",
+    Name = "Fading (Inverted)",
+    Path = "/Examples/RenderablePointCloud/Advanced",
     Description = [[Example of a point cloud with inverted distance-based fading
       (the points are visible when the camera is close to the origin, and invisible
       when further away)]]

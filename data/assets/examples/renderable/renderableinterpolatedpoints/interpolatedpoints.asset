@@ -1,3 +1,4 @@
+-- Base Example
 -- This example creates a point cloud that supports interpolation. The dataset is split
 -- up into 10 objects, so that every tenth row represents a new position for an item at a
 -- step in the interpolation.
@@ -15,8 +16,8 @@ local Node = {
     NumberOfObjects = 10
   },
   GUI = {
-    Name = "Interpolated Points",
-    Path = "/Examples"
+    Name = "Base Example",
+    Path = "/Examples/RenderableInterpolatedPoints"
   }
 }
 

@@ -1,3 +1,4 @@
+-- Smoother Interpolation (Spline-based)
 -- Example of interpolating points with spline-based interpolation for the position. This
 -- leads to smoother transitions at the nodes of the interpolation.
 
@@ -21,8 +22,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Interpolated Points (Spline)",
-    Path = "/Examples"
+    Name = "Spline (Smoother)",
+    Path = "/Examples/RenderableInterpolatedPoints"
   }
 }
 

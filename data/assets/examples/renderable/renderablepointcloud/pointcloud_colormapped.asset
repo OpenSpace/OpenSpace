@@ -1,3 +1,4 @@
+-- Color Mapping
 -- This example creates a point cloud where the color is set from a color map. All the
 -- data column in the dataset will be exposed in the user interface and can be used for
 -- color mapping during runtime. The range for the color mapping is set based on the min
@@ -20,9 +21,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Point Cloud (Color Mapped)",
-    Path = "/Examples",
-    Description = "Color mapped point cloud with fixed sizing"
+    Name = "Color Mapped",
+    Path = "/Examples/RenderablePointCloud"
   }
 }
 

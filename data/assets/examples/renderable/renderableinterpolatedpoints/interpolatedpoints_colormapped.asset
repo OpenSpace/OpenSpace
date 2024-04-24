@@ -1,3 +1,4 @@
+-- Interpolated Points with Color Mapping
 -- Example of interpolating points with a color map. The data value used for the coloring
 -- will also be interpolated, leading to the points changing color throughout the
 -- interpolation.
@@ -29,8 +30,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Interpolated Points (Color Mapped)",
-    Path = "/Examples"
+    Name = "Color Mapped",
+    Path = "/Examples/RenderableInterpolatedPoints"
   }
 }
 

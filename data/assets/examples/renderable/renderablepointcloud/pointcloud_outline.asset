@@ -1,5 +1,6 @@
+-- Draw Point Outline
 -- This example creates a point cloud where the points have a colored outline with a
--- given color and thickness (weight)
+-- given color and thickness (weight).
 
 local Node = {
   Identifier = "RenderablePointCloud_Example_Outline",
@@ -15,8 +16,8 @@ local Node = {
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "Point Cloud (Outline)",
-    Path = "/Examples"
+    Name = "Outlined",
+    Path = "/Examples/RenderablePointCloud"
   }
 }
 

@@ -1,3 +1,4 @@
+-- Advanced Color Mapping
 -- This example shows almost all the available settings for the color mapping used
 -- for point clouds. This includes handling missing data values, using
 -- separate colors for values outside the data range used for the color mapping, as well
@@ -51,8 +52,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Point Cloud (Advanced Color Mapping)",
-    Path = "/Examples",
+    Name = "Advanced Color Mapping",
+    Path = "/Examples/RenderablePointCloud/Advanced",
     Description = [[Example of a point cloud where the range is set explicitly and
       specific colors are used for values outside the range, as well as for missing
       data values.]]

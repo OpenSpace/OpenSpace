@@ -1,5 +1,6 @@
+-- Units
 -- This example creates a point cloud where the positions are interpreted to be in
--- another unit than meters.
+-- another unit than meters (here kilometers).
 
 local Node = {
   Identifier = "RenderablePointCloud_Example_Units",
@@ -9,9 +10,8 @@ local Node = {
     Unit = "Km"
   },
   GUI = {
-    Name = "Point Cloud (Units)",
-    Path = "/Examples",
-    Description = [[Example of a point cloud with positions specified in kilometers]]
+    Name = "Units",
+    Path = "/Examples/RenderablePointCloud"
   }
 }
 

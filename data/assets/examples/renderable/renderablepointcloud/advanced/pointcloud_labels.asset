@@ -1,3 +1,4 @@
+-- Labels
 -- This example creates a point cloud with labels created from a column in the dataset
 -- or from a separate .labels file.
 
@@ -27,8 +28,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Point Cloud (Labels)",
-    Path = "/Examples"
+    Name = "Labels",
+    Path = "/Examples/RenderablePointCloud/Advanced"
   }
 }
 
@@ -63,8 +64,8 @@ local Node_LabelsFile = {
     }
   },
   GUI = {
-    Name = "Point Cloud (Labels - Custom File)",
-    Path = "/Examples",
+    Name = "Labels - Custom File",
+    Path = "/Examples/RenderablePointCloud/Advanced",
     Description = [[Example of a point cloud with labels, created from a .label file]]
   }
 }
