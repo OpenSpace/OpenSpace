@@ -25,55 +25,22 @@
 #ifndef __OPENSPACE_MODULE_DEBUGGING___RENDERABLEDEBUGPLANE___H__
 #define __OPENSPACE_MODULE_DEBUGGING___RENDERABLEDEBUGPLANE___H__
 
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
-
-namespace documentation { struct Documentation; }
+#include <modules/base/rendering/renderableplane.h>
 
 namespace openspace {
 
-struct LinePoint;
-struct UpdateStructure;
-
-class RenderableDebugPlane : public Renderable {
+class RenderableDebugPlane : public RenderablePlane {
 public:
     RenderableDebugPlane(const ghoul::Dictionary& dictionary);
-    ~RenderableDebugPlane() override = default;
 
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
+    bool isReady() const;
 
     static documentation::Documentation Documentation();
 
 private:
-    void createPlane();
+    virtual void bindTexture() override;
 
     properties::IntProperty _texture;
-    properties::BoolProperty _billboard;
-    properties::FloatProperty _size;
-    properties::OptionProperty _origin;
-
-    bool _planeIsDirty = true;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
 };
 
 } // namespace openspace
