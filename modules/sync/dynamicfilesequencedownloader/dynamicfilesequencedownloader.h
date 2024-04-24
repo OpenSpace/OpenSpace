@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___DYNAMICFILESEQUENCEDOWNLOADER___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___DYNAMICFILESEQUENCEDOWNLOADER___H__
+#ifndef __OPENSPACE_MODULE_SYNC___DYNAMICFILESEQUENCEDOWNLOADER___H__
+#define __OPENSPACE_MODULE_SYNC___DYNAMICFILESEQUENCEDOWNLOADER___H__
 
 #include <openspace/util/httprequest.h>
 #include <ghoul/logging/logmanager.h>
@@ -170,4 +170,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___DYNAMICFILESEQUENCEDOWNLOADER___H__
+#endif // __OPENSPACE_MODULE_SYNC___DYNAMICFILESEQUENCEDOWNLOADER___H__
