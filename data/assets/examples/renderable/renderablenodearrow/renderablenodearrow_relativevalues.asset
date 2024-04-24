@@ -1,3 +1,4 @@
+-- Relative Units for Offset and Length
 -- This example shows an arrow pointing from one scene graph node in the direction of
 -- another, but where the size is specified using relative values (based on the bounding
 -- sphere of the start node). Here it points from Earth to the Moon
@@ -26,8 +27,8 @@ local Node = {
     Width = 900000.0
   },
   GUI = {
-    Name = "Node Arrow (Relative Units)",
-    Path = "/Example",
+    Name = "Relative Units",
+    Path = "/Example/RenderableNodeArrow",
   }
 }
 

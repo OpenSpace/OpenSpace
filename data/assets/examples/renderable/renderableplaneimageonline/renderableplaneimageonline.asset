@@ -1,3 +1,4 @@
+-- Base Example
 -- This example shows how to create a textured plane in 3D space, where the texture is
 -- loaded from the internet though a web URL.
 
@@ -9,8 +10,8 @@ local Node = {
     URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
   },
   GUI = {
-    Name = "Plane Image Online",
-    Path = "/Examples"
+    Name = "Base Example",
+    Path = "/Examples/RenderablePlaneImageOnline"
   }
 }
 
