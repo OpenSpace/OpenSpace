@@ -29,9 +29,11 @@
 namespace {
     // This TileProvider provides the ability to override the contents for tiles at
     // specific indices. A default tile provider `T` has to be specified that is used by
-    // default for the entrie globe and if a tile provider `P` is specified for a specific
-    // tile with index `I`, then `T` is used for all indices that are not `I` and `P` is
-    // used for the index `I`.
+    // default for the entire globe and if a tile provider `P` is specified for a specific
+    // tile with index `I`, then the default tile provide `T` is used for all indices that
+    // are not `I` and the specialized tile provider `P` is used for the index `I`. Any
+    // number of specialized tile providers can be provided to overwrite specific
+    // locations on the globe.
     //
     // This tile provider can be used to, for example, show an inset image that is merged
     // with a larger globe-spanning image.
@@ -39,23 +41,28 @@ namespace {
         ghoul::Dictionary defaultTileProvider
             [[codegen::reference("globebrowsing_layer")]];
 
+        // An IndexProvider is a tile provider that is only valid for a specific
+        // combination of x, y, and level. Whenever a globe tries to render a tile and
+        // this tile provider has an IndexProvider of that index, it will use the
+        // specialized tile provider instead.
         struct IndexProvider {
             struct Index {
                 // The x coordinate for this index. This specifies the horizontal
                 // direction (longitude) component. Acceptable values for this coordinate
-                // have to be smaller than $2 * 2^{level}$
+                // have to be smaller than $2 * 2^{level}$.
                 int x [[codegen::greaterequal(0)]];
 
                 // The y coordinate for this index. This specifies the vertical direction
                 // (latitude) component. Acceptable values for this coordinate have to be
-                // smaller than $2^{level}$
+                // smaller than $2^{level}$.
                 int y [[codegen::greaterequal(0)]];
 
                 // The z-level which corresponds to the depth of the tile pyramid, which
                 // directly impacts the applied resolution of the tileprovider shown here.
+                // Not that _in general_ the level would start at 2.
                 int level [[codegen::inrange(0, 23)]];
             };
-            // The index for which the provided tile provider is used
+            // The index for which the provided tile provider is used.
             Index index;
 
             // The dictionary that describes the TileProvider to be used by the provided
@@ -63,7 +70,7 @@ namespace {
             ghoul::Dictionary tileProvider [[codegen::reference("globebrowsing_layer")]];
         };
 
-        // The list of all TileProviders and the indices at which they are used
+        // The list of all TileProviders and the indices at which they are used.
         std::vector<IndexProvider> tileProviders;
     };
 #include "tileproviderbyindex_codegen.cpp"
@@ -78,7 +85,15 @@ documentation::Documentation TileProviderByIndex::Documentation() {
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
     ZoneScoped;
 
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    Parameters p = codegen::bake<Parameters>(dictionary);
+
+    // For now we need to impute the LayerGroupID this way. We don't want it to be part of
+    // the parameters struct as that would mean it would be visible to the end user, which
+    // we don't want since this value just comes from whoever creates us, not the user
+    ghoul_assert(dictionary.hasValue<int>("LayerGroupID"), "No Layer Group ID provided");
+    const layers::Group::ID group = static_cast<layers::Group::ID>(
+        dictionary.value<int>("LayerGroupID")
+    );
 
     layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
     if (p.defaultTileProvider.hasValue<std::string>("Type")) {
@@ -86,9 +101,10 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
         typeID = ghoul::from_string<layers::Layer::ID>(type);
     }
 
+    p.defaultTileProvider.setValue("LayerGroupID", static_cast<int>(group));
     _defaultTileProvider = createFromDictionary(typeID, p.defaultTileProvider);
 
-    for (const Parameters::IndexProvider& ip : p.tileProviders) {
+    for (Parameters::IndexProvider& ip : p.tileProviders) {
         const TileIndex tileIndex = TileIndex(
             ip.index.x,
             ip.index.y,
@@ -101,6 +117,7 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             providerID = ghoul::from_string<layers::Layer::ID>(type);
         }
 
+        ip.tileProvider.setValue("LayerGroupID", static_cast<int>(group));
         std::unique_ptr<TileProvider> stp = createFromDictionary(
             providerID,
             ip.tileProvider
@@ -114,13 +131,17 @@ Tile TileProviderByIndex::tile(const TileIndex& tileIndex) {
     ZoneScoped;
     const auto it = _providers.find(tileIndex.hashKey());
     const bool hasProvider = it != _providers.end();
-    return hasProvider ? it->second->tile(tileIndex) : Tile();
+    return hasProvider ?
+        it->second->tile(tileIndex) :
+        _defaultTileProvider->tile(tileIndex);
 }
 
 Tile::Status TileProviderByIndex::tileStatus(const TileIndex& index) {
     const auto it = _providers.find(index.hashKey());
     const bool hasProvider = it != _providers.end();
-    return hasProvider ? it->second->tileStatus(index) : Tile::Status::Unavailable;
+    return hasProvider ?
+        it->second->tileStatus(index) :
+        _defaultTileProvider->tileStatus(index);
 }
 
 TileDepthTransform TileProviderByIndex::depthTransform() {
@@ -150,7 +171,16 @@ int TileProviderByIndex::minLevel() {
 }
 
 int TileProviderByIndex::maxLevel() {
-    return _defaultTileProvider->maxLevel();
+    int result = _defaultTileProvider->maxLevel();
+
+    using K = TileIndex::TileHashKey;
+    using V = std::unique_ptr<TileProvider>;
+    for (std::pair<const K, V>& it : _providers) {
+        TileIndex index = TileIndex(it.first);
+        result = std::max(result, static_cast<int>(index.level));
+    }
+
+    return result;
 }
 
 float TileProviderByIndex::noDataValueAsFloat() {

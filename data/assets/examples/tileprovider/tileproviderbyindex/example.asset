@@ -1,13 +1,13 @@
--- This example file adds a base layer to a globe and then replaces of hemisphere of
--- the planet with a single image. Recommended reading for this example is the
--- documentation on the DefaultTileProvider.
+-- This example file adds a layer to a globe that has a base layer and then replaces one
+-- hemisphere of the planet with a single image. Recommended reading for this example is
+-- the documentation on the DefaultTileProvider.
 
 -- Download some example images that we can use
 local images = asset.resource({
   Name = "Earth Textures",
   Type = "HttpSynchronization",
   Identifier = "earth_textures",
-  Version = 2
+  Version = 3
 })
 
 -- Define the TileProvider
@@ -18,17 +18,15 @@ local TileProvider = {
   -- The default tile provider that is used for the whole globe
   DefaultTileProvider = {
     Identifier = "Blue_Marble",
-    Enabled = true,
     FilePath = images .. "earth_bluemarble.jpg"
   },
   TileProviders = {
     -- We only define one additional tile provider that overwrites the right
     -- hemisphere of the globe
     {
-      Index = { X = 0, Y = 1, Level = 0 },
+      Index = { X = 0, Y = 0, Level = 2 },
       TileProvider = {
         Identifier = "Blue_Marble_Night",
-        Enabled = true,
         FilePath = images .. "earth_night.png"
       }
     }
@@ -37,7 +35,7 @@ local TileProvider = {
 
 -- Define the scene graph node
 local Node = {
-  Identifier = "TileProviderByIndex_Example_Simple",
+  Identifier = "TileProviderByIndex_Example",
   Renderable = {
     Type = "RenderableGlobe",
     Layers = {
@@ -46,7 +44,7 @@ local Node = {
     }
   },
   GUI = {
-    Name = "",
+    Name = "Minimal",
     Path = "/Examples/TileProviderByIndex"
   }
 }
