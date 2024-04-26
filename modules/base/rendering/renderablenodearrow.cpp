@@ -62,30 +62,30 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the arrow.",
+        "The RGB color for the arrow.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value specifies the number of segments that the shapes for the arrow are "
-        "separated in. A higher number leads to a higher resolution.",
+        "The number of segments that the shapes for the arrow are divided into. A higher "
+        "number leads to a higher resolution, and smoother shape.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertInfo = {
         "Invert",
         "Invert Direction",
-        "If set to true, the arrow direction is inverted so that it points to the "
-        "start node instead of the end node",
+        "If true, the arrow direction is inverted so that it points to the start node "
+        "instead of the end node.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ArrowHeadSizeInfo = {
         "ArrowHeadSize",
         "Arrow Head Size",
-        "This size of the arrow head, given in relative value of the entire length of "
+        "The size of the arrow head, given in relative value of the entire length of "
         "the arrow. For example, 0.1 makes the arrow head length be 10% of the full "
         "arrow length.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -112,7 +112,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RelativeOffsetInfo = {
         "UseRelativeOffset",
         "Use Relative Offset Distance",
-        "Decide whether to use relative distances (in units of start node bounding "
+        "Decides whether to use relative distances (in units of start node bounding "
         "sphere) for the offset distance. If false, meters is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -129,7 +129,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RelativeLengthInfo = {
         "UseRelativeLength",
         "Use Relative Length",
-        "Decide whether to use relative size (in units of start node bounding "
+        "Decides whether to use relative size (in units of start node bounding "
         "sphere) for the length of the arrow. If false, meters is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -137,7 +137,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
         "Width",
         "Width",
-        "This value specifies the width of the arrow shape.",
+        "A value that affects the width of the arrow.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -165,7 +165,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShadingEnabledInfo = {
         "PerformShading",
         "Perform Shading",
-        "This value determines whether shading should be applied to the arrow model.",
+        "Determines whether shading should be applied to the arrow model.",
         openspace::properties::Property::Visibility::User
     };
 

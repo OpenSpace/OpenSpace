@@ -113,7 +113,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value affects the size scale of the label.",
+        "A value that affects the size scale of the label.",
         openspace::properties::Property::Visibility::User
     };
 

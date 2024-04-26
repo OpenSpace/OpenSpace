@@ -302,8 +302,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable Point Outline",
-        "This setting determines if each point should have an outline or not. An outline "
-        "is only applied when rendering as colored points (not when using textures).",
+        "This setting determines if each point should have an outline or not.",
         openspace::properties::Property::Visibility::User
     };
 

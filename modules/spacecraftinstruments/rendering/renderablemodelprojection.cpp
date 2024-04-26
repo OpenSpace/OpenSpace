@@ -56,17 +56,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform Shading",
-        "If this value is enabled, the model will be shaded based on the relative "
-        "location to the Sun. If this value is disabled, shading is disabled and the "
-        "entire model is rendered brightly.",
+        "If true, the model will be shaded based on the location of the Sun. If false, "
+        "shading is disabled and the model is fully illuminated.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
-        // The file or files that should be loaded in this RenderableModel. The file can
-        // contain filesystem tokens or can be specified relatively to the
-        // location of the .asset file.
-        // This specifies the model that is rendered by the Renderable.
+        // The file or files that should be loaded, that specifies the model to load. The
+        // file can contain filesystem tokens or can be specified relatively to the
+        // location of the `.asset` file.
         std::filesystem::path geometryFile;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
@@ -87,12 +85,12 @@ namespace {
         };
 
         // The scale of the model. For example if the model is in centimeters
-        // then ModelScale = Centimeter or ModelScale = 0.01
+        // then `ModelScale = `\"Centimeter\"` or `ModelScale = 0.01.
         std::optional<std::variant<ScaleUnit, double>> modelScale;
 
-        // By default the given ModelScale is used to scale the model down,
-        // by setting this setting to true the model is instead scaled up with the
-        // given ModelScale
+        // By default the given `ModelScale is used to scale down the model. By setting
+        // this setting to true the scaling is inverted to that the model is instead
+        // scaled up with the given `ModelScale`.
         std::optional<bool> invertModelScale;
 
         // Contains information about projecting onto this planet.

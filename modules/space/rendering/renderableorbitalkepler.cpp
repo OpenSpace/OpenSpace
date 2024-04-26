@@ -73,17 +73,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TrailWidthInfo = {
         "TrailWidth",
         "Trail Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored.",
+        "The line width to use for the trail, if the selected rendering method includes "
+        "lines. If the rendering mode is set to Points, this value is ignored.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeExponentInfo = {
         "PointSizeExponent",
         "Point Size Exponent",
-        "This value is used as in exponential scaling to set the absolute size of the "
-        "point.",
+        "A value used as an exponential scaling to set the absolute size of the point.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -99,11 +97,12 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
         "Max Size",
-        "This value controls the maximum allowed size for the points, when the max size "
-        "control feature is enabled. This limits the visual size of the points based on "
-        "the distance to the camera. The larger the value, the larger the points are "
-        "allowed to be. In the background, the computations are made to limit the size "
-        "of the angle between the CameraToPointMid and CameraToPointEdge vectors.",
+        "A value that controls the maximum allowed size for the points, when the max "
+        "size control feature is enabled. This limits the visual size of the points "
+        "based on the distance to the camera. The larger the value, the larger the "
+        "points are allowed to be. In the background, the computations are made to limit "
+        "the size of the angle between the CameraToPointMid and CameraToPointEdge "
+        "vectors.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -119,37 +118,35 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the trails and points.",
+        "The RGB main color for the trails and points.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail Fade Factor",
-        "This value determines how fast the trail fades and is an appearance property.",
+        "A value that determines how fast the trail fades.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable Point Outline",
-        "This setting determines if each point should have an outline or not. An outline "
-        "is only applied when rendering as colored points (not when using textures).",
+        "Determines if the points should be rendered with an outline or not.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
         "Outline Color",
-        "This value defines the color of the outline. Darker colors will be "
-        "less visible if Additive Blending is enabled.",
+        "The color of the outline.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
         "OutlineWeight",
         "Outline Weight",
-        "This setting determines the thickness of the outline. A value of 0 will "
+        "A value that determines the thickness of the outline. A value of 0 will "
         "not show any outline, while a value of 1 will cover the whole point.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -158,7 +155,7 @@ namespace {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
         "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored).",
+        "be ignored).", // @TODO
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -172,8 +169,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
         "Contiguous Mode",
-        "If enabled, then the contiguous set of objects starting from StartRenderIdx "
-        "of size RenderSize will be rendered. If disabled, then the number of objects "
+        "If enabled, the contiguous set of objects starting from StartRenderIdx "
+        "of size RenderSize will be rendered. If disabled, the number of objects "
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "
         "full length of the data file.",
         openspace::properties::Property::Visibility::User
@@ -184,14 +181,14 @@ namespace {
         std::filesystem::path path;
 
         enum class [[codegen::map(openspace::kepler::Format)]] Format {
-            // A NORAD-style Two-Line element
+            // A NORAD-style Two-Line element.
             TLE,
-            // Orbit Mean-Elements Message in the KVN notation
+            // Orbit Mean-Elements Message in the KVN notation.
             OMM,
-            // JPL's Small Bodies Database
+            // JPL's Small Bodies Database.
             SBDB
         };
-        // The file format that is contained in the file
+        // The file format that is contained in the file.
         Format format;
 
         // [[codegen::verbatim(SegmentQualityInfo.description)]]
@@ -384,7 +381,7 @@ void RenderableOrbitalKepler::initializeGL() {
            );
        }
    );
-   
+
     // Program for point rendering
     _pointProgram = SpaceModule::ProgramObjectManager.request(
         "OrbitalKeplerPoints",

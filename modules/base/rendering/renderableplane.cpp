@@ -53,48 +53,48 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
         "Billboard",
-        "Billboard mode",
-        "This value specifies whether the plane is a billboard, which means that it is "
-        "always facing the camera. If this is false, it can be oriented using other "
+        "Billboard Mode",
+        "Specifies whether plane the should be a billboard, which means that it is "
+        "always facing the camera. If it is not, it can be oriented using other "
         "transformations.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
         "MirrorBackside",
-        "Mirror backside of image plane",
-        "If this value is set to false, the image plane will not be mirrored when "
-        "looking from the backside. This is usually desirable when the image shows "
-        "data at a specific location, but not if it is displaying text for example.",
+        "Mirror Backside of Image Plane",
+        "If false, the image plane will not be mirrored when viewed from the backside. "
+        "This is usually desirable when the image shows data at a specific location, but "
+        "not if it is displaying text for example.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
-        "Size (in meters)",
-        "This value specifies the size of the plane in meters.",
+        "Size",
+        "The size of the plane, in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AutoScaleInfo = {
         "AutoScale",
         "Auto Scale",
-        "When true, the plane will automatically adjust in size to match the aspect "
-        "ratio of the content. Otherwise it will remain in the given size."
+        "Decides whether the plane should automatically adjust in size to match the "
+        "aspect ratio of the content. Otherwise it will remain in the given size."
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane.",
+        "Determines the blending mode that is applied to this plane.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
-        "If set, the plane's texture is multiplied with this color. Useful for applying "
-        "a color grayscale images.",
+        "An RGB color to multiply with the plane's texture. Useful for applying "
+        "a color to grayscale images.",
         openspace::properties::Property::Visibility::User
     };
 

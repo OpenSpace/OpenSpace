@@ -41,8 +41,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square.",
+        "The path to an image file to use as a texture for this plane. This image has to "
+        "be square.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -52,7 +52,7 @@ namespace {
 
         // If this value is set to 'true', the image for this plane will not be loaded at
         // startup but rather when image is shown for the first time. Additionally, if the
-        // plane is hidden, the image will automatically be unloaded
+        // plane is hidden, the image will automatically be unloaded.
         std::optional<bool> lazyLoading;
     };
 #include "renderableplaneimagelocal_codegen.cpp"

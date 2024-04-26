@@ -48,33 +48,33 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for the color.",
+        "The path to a file for a one-dimensional texture to be used for disc color. "
+        "The leftmost color will be innermost color when rendering the disc, and the "
+        "rightmost color will be the outermost color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the semi-major axis of the orbit, in meters.",
+        "The size of the semi-major axis of the orbit, in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
-        "This value determines the eccentricity, that is the deviation from a perfect "
-        "sphere, for this orbit.",
+        "The eccentricity of the orbit, that is the deviation from a perfect circle.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
-        "This property determines the width of the disc. The values specify the lower "
-        "and upper deviation from the semi major axis, respectively. The values are "
-        "relative to the size of the semi-major axis. That is, 0 means no deviation "
-        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
+        "The width of the disc, given as two values that specify the lower and upper "
+        "deviation from the semi major axis, respectively. The values are relative "
+        "to the size of the semi-major axis. That is, 0 means no deviation from the "
+        "semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
