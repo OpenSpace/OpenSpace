@@ -131,6 +131,8 @@ private:
     RenderInformation _fieldOfViewBounds;
 
     struct {
+        properties::PropertyOwner container;
+
         /// Start color for uninteresting times
         properties::Vec3Property defaultStart;
         /// End color for uninteresting times
