@@ -47,7 +47,7 @@ namespace {
     // point cloud rendering.
     struct [[codegen::Dictionary(RenderablePolygonCloud)]] Parameters {
         // The number of sides for the polygon used to represent each point. Default is
-        // 3, i.e. to use triangles
+        // 3, i.e. to use triangles.
         std::optional<int> polygonSides [[codegen::greaterequal(3)]];
     };
 

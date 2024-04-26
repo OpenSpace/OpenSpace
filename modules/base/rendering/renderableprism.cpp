@@ -74,14 +74,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width.",
+        "A value for the line width.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line.",
+        "The RGB color for the line.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 

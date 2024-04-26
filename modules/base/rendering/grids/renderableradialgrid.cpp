@@ -40,7 +40,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered.",
+        "The color to use for the grid lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -55,15 +55,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
         "Number of Circle Segments",
-        "This value specifies the number of segments that is used to render each circle "
-        "in the grid.",
+        "Specifies the number of segments that is used to render each circle in the "
+        "grid.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid.",
+        "A value for the line width.",
         openspace::properties::Property::Visibility::User
     };
 

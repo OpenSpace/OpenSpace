@@ -44,16 +44,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
         "Source Folder",
-        "This value specifies the image directory that is loaded from disk and "
-        "is used as a texture that is applied to this plane.",
+        "An image directory that is loaded from disk and contains the textures to use "
+        "for this plane.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderTypeInfo = {
        "RenderType",
        "Render Type",
-       "This value specifies if the plane should be rendered in the Background, "
-       "Opaque, Transparent, or Overlay rendering step.",
+       "Specifies if the plane should be rendered in the Background, Opaque, "
+       "Pre-/PostDeferredTransparent, or Overlay rendering step.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

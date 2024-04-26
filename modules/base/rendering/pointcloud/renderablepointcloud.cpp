@@ -116,9 +116,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "File",
         "Point Sprite Texture File",
-        "The path to the texture that should be used as the point sprite. Note that if "
-        "multiple textures option is set in the asset, by providing a texture folder, "
-        "this value will be ignored.",
+        "A path to a texture to use as the point sprite. Note that if multiple textures "
+        "option is set in the asset, by providing a texture folder, this value will be "
+        "ignored.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -137,8 +137,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PointColorInfo = {
         "FixedColor",
         "Fixed Color",
-        "This value is used to define the color of the points when no color map is"
-        "used.",
+        "The color of the points, when no color map is used.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -161,7 +160,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-In Start and End Distances",
-        "These values determine the initial and final distances from the origin of "
+        "Two values determining the initial and final distances from the origin of "
         "the dataset at which the points will start and end fading-in. The distances "
         "are specified in the same unit as the points, that is, the one provodied as the "
         "Unit, or meters. With normal fading the points are fully visible once the "
@@ -182,9 +181,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo InvertFadeInfo = {
         "Invert",
         "Invert",
-        "This property can be used the invert the fading so that the points are "
-        "invisible when the camera is further away than the max fade distance "
-        "and fully visible when it is closer than the min distance.",
+        "If true, inverts the fading so that the points are invisible when the camera "
+        "is further away than the max fade distance and fully visible when it is closer "
+        "than the min distance.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -202,9 +201,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseOrientationDataInfo = {
         "UseOrientationData",
         "Use Orientation Data",
-        "Include the orietation data in the dataset when rendering the points, if there "
-        "is any. To see the rotation, you also need to set the \"Orientation Render "
-        "Option\" to \"Fixed Rotation\".",
+        "If tue, include the orietation data in the dataset when rendering the points, "
+        "if there is any. To see the rotation, you also need to set the \"Orientation "
+        "Render Option\" to \"Fixed Rotation\".",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -225,8 +224,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NumShownDataPointsInfo = {
         "NumberOfDataPoints",
         "Number of Shown Data Points",
-        "This read only property includes information about how many points are being "
-        "rendered.",
+        "Shows information about how many points are being rendered.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -240,7 +238,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleExponentInfo = {
         "ScaleExponent",
         "Scale Exponent",
-        "This value is used as in exponential scaling to set the absolute size of the "
+        "A value to use as an exponential scaling to set the absolute size of the "
         "point. In general, the larger distance the dataset covers, the larger this "
         "value should be. If not included, it is computed based on the maximum "
         "positional component of the data points. This is useful for showing the "
@@ -253,7 +251,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
-        "This value is used as a multiplicative factor to adjust the size of the points, "
+        "A value to use as a multiplicative factor to adjust the size of the points, "
         "after the exponential scaling and any max size control effects. Simply just "
         "increases or decreases the visual size of the points.",
         openspace::properties::Property::Visibility::User
@@ -271,10 +269,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
         "Max Size",
-        "This value controls the maximum allowed size for the points, when the max size "
-        "control feature is enabled. This limits the visual size of the points based on "
-        "the distance to the camera. The larger the value, the larger the points are "
-        "allowed to become. In the background, the computations are made by limiting the "
+        "A value that controls the maximum allowed size for the points, when the max "
+        "size control feature is enabled. This limits the visual size of the points "
+        "based on the distance to the camera. The larger the value, the larger the "
+        "points may be. In the background, the computations are made by limiting the "
         "size to a certain angle based on the field of view of the camera. So a value of "
         "1 limits the point size to take up a maximum of one degree of the view space.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -283,51 +281,51 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
         "Enabled",
         "Size Mapping Enabled",
-        "If this value is set to 'true' and at least one column was loaded as an option "
-        "for size mapping, the chosen data column will be used to scale the size of the "
-        "points. The first option in the list is selected per default.",
+        "Decides whether size mapping should be enabled. If true and at least one column "
+        "was loaded as an option for size mapping, the chosen data column will be used "
+        "to scale the size of the points. The first option in the list is selected per "
+        "default.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeMappingOptionInfo = {
         "Parameter",
         "Parameter Option",
-        "This value determines which parameter is used for scaling of the point. The "
-        "parameter value will be used as a miltiplicative factor to scale the size of "
-        "the points. Note that they may however still be scaled by max size adjustment "
-        "effects.",
+        "The name of a data parameter to use for scaling of the point. The parameter "
+        "value will be used as a miltiplicative factor to scale the size of the points. "
+        "Note that they may however still be scaled by max size adjustment effects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable Point Outline",
-        "This setting determines if each point should have an outline or not.",
+        "Determines wheter each point should have an outline or not.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
         "Outline Color",
-        "This value defines the color of the outline. Darker colors will be "
-        "less visible if Additive Blending is enabled.",
+        "The color of the outline. Darker colors will be less visible if Additive "
+        "Blending is enabled.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
         "OutlineWeight",
         "Outline Weight",
-        "This setting determines the thickness of the outline. A value of 0 will "
-        "not show any outline, while a value of 1 will cover the whole point.",
+        "The thickness of the outline, given as a value relative to the size of the "
+        "point. A value of 0 will not show any outline, while a value of 1 will cover "
+        "the whole point.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineStyleInfo = {
         "OutlineStyle",
         "Outline Style",
-        "This setting decides the shape of points that have an outline (round, square, "
-        "or lust a line at the bottom). Note that anything but \"Round\" will lead to "
-        "the point being drawed as squares.",
+        "Decides the style of the outline (round, square, or a line at the bottom). "
+        "The stlye also affects the shape of points.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -377,11 +375,11 @@ namespace {
         // faster at a later time. This does however mean that any updates to the values
         // in the dataset will not lead to changes in the rendering without first removing
         // the cached file. Set it to false to disable caching. This can be useful for
-        // example when working on importing a new dataset
+        // example when working on importing a new dataset.
         std::optional<bool> useCaching;
 
         // A dictionary specifying details on how to load the dataset. Updating the data
-        // mapping will lead to a new cached version of the dataset
+        // mapping will lead to a new cached version of the dataset.
         std::optional<ghoul::Dictionary> dataMapping
             [[codegen::reference("dataloader_datamapping")]];
 
@@ -406,7 +404,7 @@ namespace {
             // [[codegen::verbatim(UseAlphaInfo.description)]]
             std::optional<bool> useAlphaChannel;
         };
-        // Settings related to the texturing of the points
+        // Settings related to the texturing of the points.
         std::optional<Texture> texture;
 
         // [[codegen::verbatim(DrawElementsInfo.description)]]
@@ -426,7 +424,7 @@ namespace {
         // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
         std::optional<bool> useAdditiveBlending;
 
-        // If true, skip the first data point in the loaded dataset
+        // If true, skip the first data point in the loaded dataset.
         std::optional<bool> skipFirstDataPoint;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
@@ -439,7 +437,7 @@ namespace {
             Gigalightyear [[codegen::key("Gly")]]
         };
         // The unit used for all distances. Should match the unit of any
-        // distances/positions in the data files
+        // distances/positions in the data files.
         std::optional<Unit> unit;
 
         // [[codegen::verbatim(LabelsInfo.description)]]
@@ -447,7 +445,7 @@ namespace {
             [[codegen::reference("labelscomponent")]];
 
         struct SizeSettings {
-            // Settings related to scaling the points based on data
+            // Settings related to scaling the points based on data.
             std::optional<ghoul::Dictionary> sizeMapping
                 [[codegen::reference("base_sizemappingcomponent")]];
 
@@ -511,10 +509,10 @@ namespace {
         };
         // Settings related to fading based on camera distance. Can be used to either
         // fade away or fade in the points when reaching a certain distance from the
-        // origin of the dataset
+        // origin of the dataset.
         std::optional<Fading> fading;
 
-        // Transformation matrix to be applied to the position of each object
+        // Transformation matrix to be applied to the position of each object.
         std::optional<glm::dmat4x4> transformationMatrix;
     };
 

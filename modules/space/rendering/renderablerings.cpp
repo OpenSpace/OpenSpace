@@ -47,41 +47,40 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for these rings.",
+        "The path to a texture on disk that contains a one-dimensional texture to used "
+        "for these rings.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the radius of the rings in meters.",
+        "The radius of the rings, in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
-        "This value is used to limit the width of the rings. Each of the two values is "
+        "A value that is used to limit the width of the rings. Each of the two values is "
         "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
-        "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
-        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
+        "maximum extent at the radius. For example, if the value is [0.5, 1.0], the "
+        "ring is only shown between radius/2 and radius. It defaults to [0.0, 1.0].",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
         "NightFactor",
         "Night Factor",
-        "This value is a multiplicative factor that is applied to the side of the rings "
-        "that is facing away from the Sun. If this value is equal to '1', no darkening "
-        "of the night side occurs.",
+        "A multiplicative factor that is applied to the side of the rings that is facing "
+        "away from the Sun. If 1, no darkening of the night side occurs.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorFilterInfo = {
         "ColorFilter",
         "Color Filter",
-        "This value affects the filtering out of part of the rings depending on the "
+        "A value that affects the filtering out of part of the rings depending on the "
         "color values of the texture. The higher value, the more rings are filtered out.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

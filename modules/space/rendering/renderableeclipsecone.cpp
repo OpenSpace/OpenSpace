@@ -47,7 +47,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "NumberOfPoints",
         "Points",
-        "The number of control points to use when constructing the shadow geometry. The "
+        "The number of control points to use for constructing the shadow geometry. The "
         "higher this number, the more detailed the shadow is. However, it will have a "
         "negative impact on the performance. Also note that rendering errors will occur "
         "if this value is even.",
