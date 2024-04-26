@@ -47,10 +47,10 @@ namespace {
         "modelViewTransform", "projectionTransform", "opacity", "color"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpeckInfo = {
+    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "Constellation Data File Path",
-        "The file that contains the data for the constellation lines.",
+        "The path a SPECK file that contains the data for the constellation lines.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -64,21 +64,26 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
         "Unit",
         "Unit",
-        "The distance unit used for the constellation lines data.",
+        "The distance unit to use for the constellation lines data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorsInfo = {
         "Colors",
         "Constellation Colors",
-        "The defined colors for the constellations to be rendered. There can be several "
-        "groups of constellaitons that can have distinct colors.",
+        "A list of colors to use for the constellations. A data file may include several "
+        "groups of constellations, where each group can a distinct color. The index for "
+        "the color parameter for each constellation in the data file corresponds to the "
+        "order of the colors in this list.",
         openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
-        // The path to the SPECK file that contains constellation lines data
+        // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
+
+        // [[codegen::verbatim(DrawElementsInfo.description)]]
+        std::optional<bool> drawElements;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] Unit {
             Meter [[codegen::key("m")]],
@@ -107,8 +112,8 @@ documentation::Documentation RenderableConstellationLines::Documentation() {
 RenderableConstellationLines::RenderableConstellationLines(
                                                       const ghoul::Dictionary& dictionary)
     : RenderableConstellationsBase(dictionary)
+    , _speckFile(FileInfo)
     , _drawElements(DrawElementsInfo, true)
-    , _speckFile(SpeckInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -117,6 +122,7 @@ RenderableConstellationLines::RenderableConstellationLines(
     _speckFile.onChange([this]() { loadData(); });
     addProperty(_speckFile);
 
+    _drawElements = p.drawElements.value_or(_drawElements);
     addProperty(_drawElements);
 
     if (p.unit.has_value()) {

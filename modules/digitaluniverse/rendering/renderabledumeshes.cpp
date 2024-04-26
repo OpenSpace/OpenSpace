@@ -134,7 +134,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
-        // object being rendered
+        // object being rendered.
         std::string file;
 
         // [[codegen::verbatim(DrawLabelInfo.description)]]
@@ -149,6 +149,7 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
+        // The unit to use when interpreting the positions in the dataset.
         std::optional<Unit> unit;
 
         // [[codegen::verbatim(TextColorInfo.description)]]
