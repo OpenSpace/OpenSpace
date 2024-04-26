@@ -28,7 +28,6 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
-#include <modules/sync/dynamicfilesequencedownloader/dynamicfilesequencedownloader.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -36,6 +35,7 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/dynamicfilesequencedownloader.h>
 #include <vector>
 
 namespace openspace {

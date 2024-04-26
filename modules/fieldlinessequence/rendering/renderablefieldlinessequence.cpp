@@ -627,9 +627,6 @@ void RenderableFieldlinesSequence::initializeGL() {
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_vs.glsl"),
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
-    if (_firstLoad && _atLeastOneFileLoaded){
-        firstUpdate();
-    }
     setupProperties();
     definePropertyCallbackFunctions();
 

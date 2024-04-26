@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/sync/dynamicfilesequencedownloader/dynamicfilesequencedownloader.h>
+#include <openspace/util/dynamicfilesequencedownloader.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/json.h>

@@ -74,7 +74,7 @@ struct FieldlineOption {
         //{1193, "trace_scs_outtoin"},    //same value as 1177        // adapt
         //{1194, "trace_pfss_intoout"},   //same value as 1178        // adapt
         //{1195, "trace_pfss_outtoin"},   //same value as 1179        // adapt
-        {1196, "ADAPT_WSA_OUT"},        // adapt
+        {1196, "ADAPT_WSA_OUT"},        // adapt fits files.
 
         // WSA 4.4
         {1176, "trace_sun_earth"},

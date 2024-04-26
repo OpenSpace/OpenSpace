@@ -34,9 +34,9 @@ end)
 asset.export(fieldlines)
 asset.meta = {
   Name = "WSAStreaming",
-  Version = "1.1",
+  Version = "1.0",
   Description = "WSAStreaming",
-  Author = "Shyam Thyagarajan, CCMC",
+  Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"
 }
