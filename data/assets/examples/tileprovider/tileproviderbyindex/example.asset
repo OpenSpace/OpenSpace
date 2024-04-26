@@ -10,43 +10,44 @@ local images = asset.resource({
   Version = 2
 })
 
+-- Define the TileProvider
+local TileProvider = {
+  Identifier = "Example",
+  Type = "TileProviderByIndex",
+  Enabled = true,
+  -- The default tile provider that is used for the whole globe
+  DefaultTileProvider = {
+    Identifier = "Blue_Marble",
+    Enabled = true,
+    FilePath = images .. "earth_bluemarble.jpg"
+  },
+  TileProviders = {
+    -- We only define one additional tile provider that overwrites the right
+    -- hemisphere of the globe
+    {
+      Index = { X = 0, Y = 1, Level = 0 },
+      TileProvider = {
+        Identifier = "Blue_Marble_Night",
+        Enabled = true,
+        FilePath = images .. "earth_night.png"
+      }
+    }
+  }
+}
+
 -- Define the scene graph node
 local Node = {
   Identifier = "TileProviderByIndex_Example_Simple",
   Renderable = {
     Type = "RenderableGlobe",
     Layers = {
-      -- The globe has exactly one layer with the TileProviderByIndex as its type
-      ColorLayers = {
-        {
-          Identifier = "Example",
-          Type = "TileProviderByIndex",
-          Enabled = true,
-          -- The default tile provider that is used for the whole globe
-          DefaultTileProvider = {
-            Identifier = "Blue_Marble",
-            Enabled = true,
-            FilePath = images .. "earth_bluemarble.jpg"
-          },
-          TileProviders = {
-            -- We only define one additional tile provider that overwrites the right
-            -- hemisphere of the globe
-            {
-              Index = { X = 0, Y = 1, Level = 0 },
-              TileProvider = {
-                Identifier = "Blue_Marble_Night",
-                Enabled = true,
-                FilePath = images .. "earth_night.png"
-              }
-            }
-          }
-        }
-      }
+      -- The globe has exactly one layer, which is the one we defined above
+      ColorLayers = { TileProvider }
     }
   },
   GUI = {
-    Name = "TileProviderByIndex Example (Simple)",
-    Path = "/Examples"
+    Name = "",
+    Path = "/Examples/TileProviderByIndex"
   }
 }
 
