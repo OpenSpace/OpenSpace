@@ -111,17 +111,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowChunkEdgeInfo = {
         "ShowChunkEdges",
         "Show chunk edges",
-        "If this value is set to 'true', the borders between chunks are shown using a "
-        "red highlight.",
+        "Shows the borders between chunks in a red highlight.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo LevelProjectedAreaInfo = {
         "LevelByProjectedAreaElseDistance",
         "Level by projected area (else distance)",
-        "If this value is set to 'true', the tile level is determined by the area "
-        "projected on screen. If it is 'false', the distance to the center of the tile "
-        "is used instead.",
+        "If 'true', the tile level is determined by the area projected on screen. If "
+        "'false', the distance to the center of the tile is used instead.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -135,8 +133,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
         "ResetTileProviders",
         "Reset tile providers",
-        "If this property is triggered, all tile provides for the globe are reset and "
-        "data is reloaded from scratch.",
+        "If triggered, all tile provides for the globe are reset and data is reloaded "
+        "from scratch.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -163,34 +161,34 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform shading",
-        "This value determines whether there should be lighting applied to the surface "
-        "of the globe. Note that if there is an atmosphere attached to the planet, there "
-        "is a separate setting to control the shadowing induced by the atmosphere part.",
+        "Specifies whether the planet should be shaded by the primary light source or "
+        "not.If disabled, all parts of the planet are illuminated. Note that if the "
+        "globe has a corresponding atmosphere, there is a separate setting to control "
+        "the shadowing induced by the atmosphere part.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AccurateNormalsInfo = {
         "UseAccurateNormals",
         "Use Accurate Normals",
-        "This value determines whether higher-accuracy normals should be used in the "
-        "rendering. These normals are calculated based on the height field information "
-        "and are thus only available if the planet has a height map.",
+        "Determines whether higher-accuracy normals should be used in the rendering. "
+        "These normals are calculated based on the height field information and are thus "
+        "only available if the planet has a height map.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceNodeInfo = {
         "LightSourceNode",
-        "Name of the light source",
-        "This value is the name of a scene graph node that should be used as the source "
-        "of illumination for the globe. If this value is not specified, the solar "
-        "system's Sun is used instead.",
+        "Light Source",
+        "The identifier of a scene graph node that should be used as the source of "
+        "illumination for the globe. If not specified, the solar system's Sun is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EclipseInfo = {
         "Eclipse",
         "Eclipse",
-        "Enables/Disable Eclipse shadows.",
+        "Enables/Disables Eclipse shadows on this globe.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -221,7 +219,7 @@ namespace {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
         "The percentage of the correct distance to the surface being shadowed. Possible "
-        "values: [0.0, 1.0].",
+        "values: [0.0, 1.0].", // @TODO (2024-04-26,  emmbr) clarify. I don't get it
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -267,29 +265,28 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NActiveLayersInfo = {
         "NActiveLayers",
         "Number of active layers",
-        "This is the number of currently active layers, if this value reaches the "
-        "maximum, bad things will happen.",
+        "The number of currently active layers. If this value reaches the maximum, "
+        "bad things will happen.",
         openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
-        // Specifies the radii for this planet. If the Double version of this is used, all
-        // three radii are assumed to be equal
+        // The radii for this planet. If one value is given, all three radii are assumed
+        // to be equal.
         std::optional<std::variant<glm::dvec3, double>> radii;
 
-        // Specifies whether the planet should be shaded by the primary light source or
-        // not. If it is disabled, all parts of the planet are illuminated
+        // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
 
-        // Specifies if distance culling should be disabled.
+        // [[codegen::verbatim(RenderAtDistanceInfo.description)]]
         std::optional<bool> renderAtDistance;
 
-        // A list of all the layers that should be added
+        // A list of layers that should be added to this globe.
         std::map<std::string, ghoul::Dictionary> layers
             [[codegen::reference("globebrowsing_layermanager")]];
 
         // Specifies information about planetary labels that can be rendered on the
-        // object's surface
+        // object's surface.
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("globebrowsing_globelabelscomponent")]];
 
@@ -298,16 +295,22 @@ namespace {
                 std::string name;
                 double radius;
             };
+            // A list of objects (light sources) that may cause shadows from the provided
+            // list of shadow casting objects.
             std::vector<Source> sources;
 
             struct Caster {
                 std::string name;
                 double radius;
             };
+            // A list of potential shadow casters.
             std::vector<Caster> casters;
         };
+        // Information about any object that might cause shadows to appear on this
+        // globe.
         std::optional<ShadowGroup> shadowGroup;
 
+        // Details about the rings og the globe, if it has any.
         std::optional<ghoul::Dictionary> rings
             [[codegen::reference("globebrowsing_rings_component")]];
 

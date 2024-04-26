@@ -77,16 +77,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VolumeRenderingEnabledInfo = {
         "VolumeRenderingEnabled",
         "Volume Rendering",
-        "If this value is enabled, the volume rendering component of the galaxy "
-        "rendering is turned on. Otherwise, the volume rendering is skipped.",
+        "Decides whether the volume rendering component of the galaxy rendering should "
+        "be enabled or not. If disabled, the volume rendering is skipped.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarRenderingEnabledInfo = {
         "StarRenderingEnabled",
         "Star Rendering",
-        "If this value is enabled, the point-based star rendering component of the "
-        "galaxy rendering is turned on. Otherwise, the volume rendering is skipped.",
+        "Decides whether the point-based star rendering component  of the galaxy "
+        "rendering should be enabled or not. If disabled, the point-based star rendering "
+        "is skipped.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -126,8 +127,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StarRenderingMethodInfo = {
         "StarRenderingMethod",
         "Star Rendering Method",
-        "This value determines which rendering method is used for visualization of the "
-        "stars.",
+        "The rendering method to use for the visualization of the stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -145,7 +145,7 @@ namespace {
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value sets the downscaling factor when rendering the current volume.",
+        "The downscaling factor to use when rendering the volume.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -153,7 +153,7 @@ namespace {
     {
         "Steps",
         "Number of RayCasting Steps",
-        "This value set the number of integration steps during the raycasting procedure.",
+        "The number of integration steps to use during the raycasting procedure.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -173,8 +173,8 @@ namespace {
         // [[codegen::verbatim(EmissionMultiplyInfo.description)]]
         std::optional<float> emissionMultiply;
 
-        // If this value is specified, the default raycasting shader is overwritten and
-        // the shader found at the provided location is used instead
+        // If specified, the default raycasting shader is overwritten and the shader at
+        // this location is used instead.
         std::optional<std::filesystem::path> raycastingShader;
 
         enum class [[codegen::map(StarRenderingMethod)]] StarRenderingMethod {
