@@ -94,7 +94,7 @@ namespace {
     // with images in the Sky Browser.
     //
     // A `ScreenSpaceSkyBrowser` should not be created from a `.asset` file, but is rather
-    // created from interacting with the Sky Browser user interface´panel. If created in
+    // created from interacting with the Sky Browser user interface panel. If created in
     // an asset, it requires some extra scripting to work with the Sky Browser feature.
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
