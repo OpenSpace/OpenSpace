@@ -46,7 +46,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The grid line width.",
+        "The thickness of the grid lines. The larger number, the thicker lines.",
         openspace::properties::Property::Visibility::User
     };
 
