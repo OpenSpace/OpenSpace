@@ -28,12 +28,11 @@
 
 namespace {
     // This TileProvider provides the ability to override the contents for tiles at
-    // specific indices. A default tile provider `T` has to be specified that is used by
-    // default for the entire globe and if a tile provider `P` is specified for a specific
-    // tile with index `I`, then the default tile provide `T` is used for all indices that
-    // are not `I` and the specialized tile provider `P` is used for the index `I`. Any
-    // number of specialized tile providers can be provided to overwrite specific
-    // locations on the globe.
+    // specific indices. A default tile provider has to be specified that is used by
+    // default for the entire globe. If a tile provider is specified for a specific tile,
+    // then the default tile provide is used for all other indices and the specialized
+    // tile provider `P` is used for the specified index. Any number of specialized tile
+    // providers can be provided to overwrite specific locations on the globe.
     //
     // This tile provider can be used to, for example, show an inset image that is merged
     // with a larger globe-spanning image.
@@ -87,9 +86,9 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
 
     Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // For now we need to impute the LayerGroupID this way. We don't want it to be part of
+    // For now we need to inject the LayerGroupID this way. We don't want it to be part of
     // the parameters struct as that would mean it would be visible to the end user, which
-    // we don't want since this value just comes from whoever creates us, not the user
+    // we don't want since this value just comes from whoever creates it, not the user
     ghoul_assert(dictionary.hasValue<int>("LayerGroupID"), "No Layer Group ID provided");
     const layers::Group::ID group = static_cast<layers::Group::ID>(
         dictionary.value<int>("LayerGroupID")

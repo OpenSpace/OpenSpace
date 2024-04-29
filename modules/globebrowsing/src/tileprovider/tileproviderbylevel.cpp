@@ -48,9 +48,9 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // For now we need to impute the LayerGroupID this way. We don't want it to be part of
+    // For now we need to inject the LayerGroupID this way. We don't want it to be part of
     // the parameters struct as that would mean it would be visible to the end user, which
-    // we don't want since this value just comes from whoever creates us, not the user
+    // we don't want since this value just comes from whoever creates it, not the user
     ghoul_assert(dictionary.hasValue<int>("LayerGroupID"), "No Layer Group ID provided");
     const layers::Group::ID group = static_cast<layers::Group::ID>(
         dictionary.value<int>("LayerGroupID")

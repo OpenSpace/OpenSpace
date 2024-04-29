@@ -51,7 +51,7 @@ TileIndex::TileIndex(TileHashKey hash) {
     hash -= hx;
     hash = hash >> 30;
 
-    // The remainder in the hash must then be the y index;
+    // The remainder in the hash must then be the y index
     uint64_t hy = hash;
     ghoul_assert(hy < (1 << 29), "Error in hashing for y");
 
