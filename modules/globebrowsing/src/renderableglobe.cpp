@@ -141,10 +141,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
         "ModelSpaceRenderingCutoffLevel",
         "Model Space Rendering Cutoff Level",
-        "This value determines the tile level that is used as the cut off between "
-        "rendering tiles using the globe model rendering vs the flat in-game rendering "
-        "method. This value is a tradeoff between not having precision errors in the "
-        "rendering and represting a tile as flat or curved.",
+        "The tile level that is used as the cut off between rendering tiles using the "
+        "globe model rendering vs the flat in-game rendering method. The value is a "
+        "trade-off between not having precision errors in the rendering and represting "
+        "a tile as flat or curved.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -310,7 +310,7 @@ namespace {
         // globe.
         std::optional<ShadowGroup> shadowGroup;
 
-        // Details about the rings og the globe, if it has any.
+        // Details about the rings of the globe, if it has any.
         std::optional<ghoul::Dictionary> rings
             [[codegen::reference("globebrowsing_rings_component")]];
 
