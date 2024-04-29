@@ -83,9 +83,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderFullPathInfo = {
         "ShowFullTrail",
         "Render Full Trail",
-        "If this value is set to 'true', the entire trail will be rendered; if it is "
-        "'false', only the trail until the current time in the application will be "
-        "shown.",
+        "If 'true', the entire trail will be rendered. If 'false', only the trail until "
+        "the current time in the application will be shown.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -207,7 +206,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
     _secondaryRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 
-    // Activate special render mode for renderableTrailTrajectory 
+    // Activate special render mode for renderableTrailTrajectory
     _useSplitRenderMode = true;
 }
 
@@ -366,7 +365,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
                 std::lower_bound(_timeVector.begin(), _timeVector.end(), j2k)
             )
         );
-        
+
         if (_renderFullTrail) {
             // Calculates number of vertices for the second segment (object to end point)
             _secondaryRenderInformation.first = _primaryRenderInformation.count;
