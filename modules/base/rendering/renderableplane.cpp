@@ -54,7 +54,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
         "Billboard",
         "Billboard Mode",
-        "Specifies whether plane the should be a billboard, which means that it is "
+        "Specifies whether the plane should be a billboard, which means that it is "
         "always facing the camera. If it is not, it can be oriented using other "
         "transformations.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -72,7 +72,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "The size of the plane, in meters.",
+        "The size of the plane in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

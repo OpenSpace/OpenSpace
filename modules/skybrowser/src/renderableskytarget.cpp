@@ -50,7 +50,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo crossHairSizeInfo = {
         "CrosshairSize",
         "Crosshair Size",
-        "The size of the crosshair, given as a field of view (in degrees).",
+        "The size of the crosshair given as a field of view (in degrees).",
         openspace::properties::Property::Visibility::User
     };
 
@@ -81,7 +81,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ApplyRollInfo = {
        "ApplyRoll",
        "Apply Roll",
-       "If true, always rotate the target to have it's up direction aligned with the up "
+       "If true, always rotate the target to have its up direction aligned with the up "
        "direction of the camera.",
        openspace::properties::Property::Visibility::User
     };

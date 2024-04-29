@@ -162,7 +162,7 @@ namespace {
         "PerformShading",
         "Perform shading",
         "Specifies whether the planet should be shaded by the primary light source or "
-        "not.If disabled, all parts of the planet are illuminated. Note that if the "
+        "not. If disabled, all parts of the planet are illuminated. Note that if the "
         "globe has a corresponding atmosphere, there is a separate setting to control "
         "the shadowing induced by the atmosphere part.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -173,7 +173,7 @@ namespace {
         "Use Accurate Normals",
         "Determines whether higher-accuracy normals should be used in the rendering. "
         "These normals are calculated based on the height field information and are thus "
-        "only available if the planet has a height map.",
+        "only available if the planet has a height map layer.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

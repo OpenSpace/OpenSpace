@@ -85,7 +85,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StarRenderingEnabledInfo = {
         "StarRenderingEnabled",
         "Star Rendering",
-        "Decides whether the point-based star rendering component  of the galaxy "
+        "Decides whether the point-based star rendering component of the galaxy "
         "rendering should be enabled or not. If disabled, the point-based star rendering "
         "is skipped.",
         openspace::properties::Property::Visibility::User

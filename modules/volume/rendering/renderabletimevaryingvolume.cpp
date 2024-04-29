@@ -144,7 +144,7 @@ namespace {
         // [[codegen::verbatim(SecondsAfterInfo.description)]]
         float secondsAfter;
 
-        // If ture, the volume data will be inverted at its z-axis.
+        // If true, the volume data will be inverted at its z-axis.
         std::optional<bool> invertDataAtZ;
 
         // [[codegen::verbatim(BrightnessInfo.description)]]

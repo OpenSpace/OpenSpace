@@ -63,7 +63,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
         // The file or files that should be loaded, that specifies the model to load. The
-        // file can contain filesystem tokens or can be specified relatively to the
+        // file can contain filesystem tokens or can be specified relative to the
         // location of the `.asset` file.
         std::filesystem::path geometryFile;
 
@@ -85,10 +85,10 @@ namespace {
         };
 
         // The scale of the model. For example if the model is in centimeters
-        // then `ModelScale = `\"Centimeter\"` or `ModelScale = 0.01.
+        // then `ModelScale = \"Centimeter\"` or `ModelScale = 0.01`.
         std::optional<std::variant<ScaleUnit, double>> modelScale;
 
-        // By default the given `ModelScale is used to scale down the model. By setting
+        // By default the given `ModelScale` is used to scale down the model. By setting
         // this setting to true the scaling is inverted to that the model is instead
         // scaled up with the given `ModelScale`.
         std::optional<bool> invertModelScale;

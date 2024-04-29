@@ -57,14 +57,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "The size of the semi-major axis of the orbit, in meters.",
+        "The size of the semi-major axis of the orbit in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
-        "The eccentricity of the orbit, that is the deviation from a perfect circle.",
+        "The eccentricity of the orbit, which is the deviation from a perfect circle.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

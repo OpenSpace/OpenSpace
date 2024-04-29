@@ -70,7 +70,7 @@ namespace {
         "Segments",
         "Number of Segments",
         "The number of segments that the shapes for the arrow are divided into. A higher "
-        "number leads to a higher resolution, and smoother shape.",
+        "number leads to a higher resolution and smoother shape.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

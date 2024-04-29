@@ -116,7 +116,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "File",
         "Point Sprite Texture File",
-        "A path to a texture to use as the point sprite. Note that if multiple textures "
+        "The path to the texture to use as the point sprite. Note that if multiple textures "
         "option is set in the asset, by providing a texture folder, this value will be "
         "ignored.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -201,7 +201,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseOrientationDataInfo = {
         "UseOrientationData",
         "Use Orientation Data",
-        "If tue, include the orietation data in the dataset when rendering the points, "
+        "If true, include the orientation data in the dataset when rendering the points, "
         "if there is any. To see the rotation, you also need to set the \"Orientation "
         "Render Option\" to \"Fixed Rotation\".",
         openspace::properties::Property::Visibility::AdvancedUser

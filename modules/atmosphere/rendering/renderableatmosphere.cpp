@@ -88,7 +88,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
         "OzoneLayerHeightScale",
-        "Ozone Scale Height (Km)",
+        "Ozone Scale Height (km)",
         "The vertical distance over which the density and pressure fall by a constant "
         "factor, given in kilometers.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -103,7 +103,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MieHeightScaleInfo = {
         "MieHeightScale",
-        "Mie Scale Height (Km)",
+        "Mie Scale Height (km)",
         "The vertical distance over which the density and pressure fall by a constant "
         "factor, given in kilometers.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -135,7 +135,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SunIntensityInfo = {
         "SunIntensity",
         "Sun Intensity",
-        "A value that controls the intensity/brightness of the Sun. Unitless for now.",
+        "A unitless value that controls the intensity/brightness of the Sun.",
         openspace::properties::Property::Visibility::User
     };
 

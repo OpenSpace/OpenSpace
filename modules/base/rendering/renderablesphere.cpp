@@ -48,7 +48,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "The radius of the sphere, in meters.",
+        "The radius of the sphere in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

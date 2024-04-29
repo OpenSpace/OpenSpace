@@ -55,7 +55,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "The radius of the rings, in meters.",
+        "The radius of the rings in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -64,8 +64,8 @@ namespace {
         "Offset",
         "A value that is used to limit the width of the rings. Each of the two values is "
         "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
-        "maximum extent at the radius. For example, if the value is [0.5, 1.0], the "
-        "ring is only shown between radius/2 and radius. It defaults to [0.0, 1.0].",
+        "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
+        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -73,7 +73,7 @@ namespace {
         "NightFactor",
         "Night Factor",
         "A multiplicative factor that is applied to the side of the rings that is facing "
-        "away from the Sun. If 1, no darkening of the night side occurs.",
+        "away from the Sun. If it is 1, no darkening of the night side occurs.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

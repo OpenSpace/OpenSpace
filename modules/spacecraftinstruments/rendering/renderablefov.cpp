@@ -269,14 +269,17 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     _colors.defaultEnd.setViewOption(properties::Property::ViewOptions::Color, true);
     _colors.active.setViewOption(properties::Property::ViewOptions::Color, true);
     _colors.targetInFieldOfView.setViewOption(
-        properties::Property::ViewOptions::Color, true
+        properties::Property::ViewOptions::Color,
+        true
     );
     _colors.intersectionStart.setViewOption(
-        properties::Property::ViewOptions::Color, true
+        properties::Property::ViewOptions::Color,
+        true
     );
     _colors.intersectionEnd.setViewOption(properties::Property::ViewOptions::Color, true);
     _colors.square.setViewOption(
-        properties::Property::ViewOptions::Color, true
+        properties::Property::ViewOptions::Color,
+        true
     );
     _colors.container.addProperty(_colors.defaultStart);
     _colors.container.addProperty(_colors.defaultEnd);
