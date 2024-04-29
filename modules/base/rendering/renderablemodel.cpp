@@ -256,7 +256,7 @@ namespace {
         // The mode of how the animation should be played back.
         // Default is animation is played back once at the start time.
         // For a more detailed description see:
-        // http://wiki.openspaceproject.com/docs/builders/model-animation
+        // http://wiki.openspaceproject.com/docs/builders/model-animation.
         std::optional<AnimationMode> animationMode;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]

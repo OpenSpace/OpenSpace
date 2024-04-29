@@ -140,8 +140,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
-        // This object is used to compute locations along the path. Any Translation
-        // object can be used here
+        // A [Translation](#core_transform_translation) object used to compute locations
+        // along the path.
         ghoul::Dictionary translation
             [[codegen::reference("core_transform_translation")]];
 
@@ -477,7 +477,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     //    global::renderEngine->openglStateCache().resetDepthState();
     //    return;
     //}
-    
+
     if (_useSplitRenderMode) {
         // Splits the trail up into three parts for more accurate rendering
         // of renderableTrailTrajectory trails
@@ -493,7 +493,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _useSplitRenderMode,
             _numberOfUniqueVertices
         );
-        
+
         const int floatingOffset = std::max(0, _primaryRenderInformation.count - 1);
         internalRender(
             renderLines,
@@ -521,7 +521,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _numberOfUniqueVertices,
             offset
         );
-        
+
     }
     else {
         // Render the primary batch of vertices
@@ -550,9 +550,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             );
         }
     }
-    
 
-    
+
+
 
     if (renderPoints) {
         glDisable(GL_PROGRAM_POINT_SIZE);

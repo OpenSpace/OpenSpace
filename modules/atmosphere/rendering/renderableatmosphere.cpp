@@ -187,35 +187,35 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
         struct ShadowGroup {
-            // Individual light sources
+            // Individual light sources.
             struct SourceElement {
-                // The scene graph node name of the source
+                // The scene graph node name of the source.
                 std::string name;
-                // The radius of the object in meters
+                // The radius of the object in meters.
                 double radius;
             };
-            // A list of light sources
+            // A list of light sources.
             std::vector<SourceElement> sources;
 
-            // Individual shadow casters
+            // Individual shadow casters.
             struct CasterElement {
-                // The scene graph node name of the source
+                // The scene graph node name of the source.
                 std::string name;
-                // The radius of the object in meters
+                // The radius of the object in meters.
                 double radius;
             };
 
-            // A list of objects that cast light on this atmosphere
+            // A list of objects that cast light on this atmosphere.
             std::vector<CasterElement> casters;
         };
         // Declares shadow groups, meaning which nodes are considered in shadow
-        // calculations
+        // calculations.
         std::optional<ShadowGroup> shadowGroup;
 
         // [[codegen::verbatim(AtmosphereHeightInfo.description)]]
         float atmosphereHeight;
 
-        // The radius of the planet in meters
+        // The radius of the planet in meters.
         float planetRadius;
 
         float planetAverageGroundReflectance;

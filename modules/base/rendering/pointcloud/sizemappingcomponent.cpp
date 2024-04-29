@@ -71,7 +71,7 @@ namespace {
         std::optional<bool> enabled;
 
         // A list specifying all parameters that may be used for size mapping, i.e.
-        // scaling the points based on the provided data columns
+        // scaling the points based on the provided data columns.
         std::optional<std::vector<std::string>> parameterOptions;
 
         // [[codegen::verbatim(OptionInfo.description)]]

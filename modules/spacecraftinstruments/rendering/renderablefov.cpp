@@ -189,7 +189,7 @@ namespace {
 
         // If `true`, the field of view's bounds values will be simplified on load. Bound
         // vectors will be removed if they are the strict linearinterpolation between the
-        // two neighboring vectors. This value is disabled on default.
+        // two neighboring vectors. This value is disabled by default.
         std::optional<bool> simplifyBounds;
     };
 #include "renderablefov_codegen.cpp"

@@ -347,7 +347,7 @@ namespace {
         std::optional<float> staticFilter;
 
         // A value that is used to replace statically filtered values. Setting this value
-        // only makes sense if 'StaticFilter' is set as as well.
+        // only makes sense if `StaticFilter` is set as as well.
         std::optional<float> staticFilterReplacement;
 
         struct Texture {

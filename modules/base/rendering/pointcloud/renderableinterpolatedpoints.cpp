@@ -136,7 +136,7 @@ namespace {
     // the used texture will be decided based on the first N set of points.
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
         // The number of objects to read from the dataset. Every N:th datapoint will
-        // be interpreted as the same point, but at a different step in the interpolation
+        // be interpreted as the same point, but at a different step in the interpolation.
         int numberOfObjects [[codegen::greaterequal(1)]];
 
         struct Interpolation {
@@ -149,7 +149,7 @@ namespace {
             // [[codegen::verbatim(UseSplineInfo.description)]]
             std::optional<bool> useSplineInterpolation;
         };
-        // Initial settings for the interpolation
+        // Initial settings for the interpolation.
         std::optional<Interpolation> interpolation;
     };
 
