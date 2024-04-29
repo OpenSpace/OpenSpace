@@ -29,7 +29,7 @@
 
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/uvec2property.h>
 #include <openspace/properties/triggerproperty.h>
 
 #ifdef _MSC_VER
@@ -72,8 +72,10 @@ public:
     void update() override;
     bool isReady() const override;
 
+    static documentation::Documentation Documentation();
+
 protected:
-    properties::Vec2Property _dimensions;
+    properties::UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 

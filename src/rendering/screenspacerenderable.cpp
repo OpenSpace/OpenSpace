@@ -51,17 +51,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "This setting determines whether this sceen space plane will be visible or not.",
+        "Determines whether this sceen space object will be rendered or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderDuringBlackoutInfo = {
         "RenderDuringBlackout",
         "Render during Blackout",
-        "If this value is 'true', this screenspace renderable is going to ignore the "
-        "global blackout factor from the Render Engine and will always render at full "
-        "opacity. If it is 'false', it will adhere to the factor and fade out like the "
-        "rest of the 3D rendering.",
+        "If 'true', this screenspace renderable is going to ignore the global blackout "
+        "factor from the Render Engine and will always render at full opacity. If "
+        "'false', it will adhere to the factor and fade out like the rest of the 3D "
+        "rendering.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -70,12 +70,11 @@ namespace {
     {
         "UseRadiusAzimuthElevation",
         "Use Radius Azimuth and Elevation",
-        "This value determines whether the location of this screen space plane will be "
-        "specified using radius, azimuth and elevation (if this is set to 'true') or "
-        "using cartesian coordinates. By switching this value, the correct property will "
-        "be shown or hidden. The Cartesian coordinate system is useful if a regular "
-        "rendering is applied, whereas the radius azimuth elevation are most useful in a "
-        "planetarium environment.",
+        "Determines whether the location of this screen space plane will be specified "
+        "using radius, azimuth and elevation (if 'true') or using cartesian coordinates. "
+        "The Cartesian coordinate system is useful if a regular rendering is applied, "
+        "whereas the radius azimuth elevation are most useful in a planetarium "
+        "environment.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -90,7 +89,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CartesianPositionInfo = {
         "CartesianPosition",
         "Cartesian Coordinates",
-        "This value determines the position of this screen space plane in Cartesian "
+        "Determines the position of this screen space plane in Cartesian "
         "three-dimensional coordinates (meters).",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -98,25 +97,24 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RadiusAzimuthElevationInfo = {
         "RadiusAzimuthElevation",
         "Radius Azimuth Elevation",
-        "This value determines the position of this screen space plane in a "
-        "coordinate system based on radius (meters), azimuth (radians) and elevation "
-        "(radians).",
+        "Determines the position of this screen space plane in a coordinate system based "
+        "on radius (meters), azimuth (radians) and elevation (radians).",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale Value",
-        "This value determines a scale factor for the plane. The default size of a plane "
-        "is determined by the concrete instance and reflects, for example, the size of "
-        "the image being displayed.",
+        "A scale factor for the plane that can be used to increase or decrease the visual "
+        "size. The default size is determined separately for each screen space renderable "
+        "type and may for example be affected by the size of an image being displayed.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LocalRotationInfo = {
         "Rotation",
         "Local Rotation",
-        "An euler rotation (x, y, z) to apply to the plane.",
+        "An Euler rotation (x, y, z) to apply to the screen space object.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -131,7 +129,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background Color",
-        "The fixed color that is combined with the screen space renderable to create the "
+        "A fixed color that is combined with the screen space renderable to create the "
         "final color. The actual color of the screen space renderable is alpha-blended "
         "with the background color to produce the final result.",
         openspace::properties::Property::Visibility::User
@@ -148,8 +146,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
         "Face Camera",
-        "If enabled, the local rotation is applied after the plane is rotated to face "
-        "the camera.",
+        "If enabled, the object will be rotated to face the camera position. Any local "
+        "rotation is then applied after this rotation.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -170,7 +168,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BorderColorInfo = {
         "BorderColor",
         "Border Color",
-        "Sets the color of the border.",
+        "The color of the border.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -178,20 +176,29 @@ namespace {
         return glm::mod(value - min, max - min) + min;
     }
 
+    // This is the base class of all `ScreenSpaceRenderable` types, which are objects
+    // that are rendered in their own coordinate system on top of the other 3D rendering.
+    //
+    // The coordinate system of these renderables is a custom one that has its own depth,
+    // to control how the screen space objects are sorted in the z-axis. There are also
+    // two ways of specifying the position of the object: in Cartesian coordinates using
+    // XYZ, or spherical using radius, azimuth, and elevation. The latter might be more
+    // useful in a planetarium context.
+    //
+    // Most screen space renderables are instantiated as image planes in one way or
+    // another, and this base class includes some properties for setting things like
+    // gamma settings, border and background colors, et cetera.
     struct [[codegen::Dictionary(ScreenSpaceRenderable)]] Parameters {
-        // The type of the Screenspace renderable that is to be created. The available
-        // types of Screenspace renderable depend on the configuration of the application
-        // and can be written to disk on application startup into the FactoryDocumentation
+        // The type of the `ScreenSpaceRenderable` that is to be created.
         std::string type
-            [[codegen::annotation("Must name a valid Screenspace renderable")]];
+            [[codegen::annotation("Must name a valid ScreenSpaceRenderable")]];
 
-        // Specifies the name of this screenspace renderable. This does not have to be
-        // unique to the scene, but it is recommended to be
+        // The name of `ScreenSpaceRenderable`, which will be shown in the GUI. This does
+        // not have to be unique to the scene, but it is recommended to be.
         std::optional<std::string> name;
 
-        // This is the unique identifier for this screenspace renderable. It has to be
-        // unique amongst all existing screenspace nodes that already have been added to
-        // the scene.
+        // The unique identifier for this screen space renderable. It has to be unique
+        // amongst all existing screen space nodes that have been added to the scene.
         std::optional<std::string> identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(EnabledInfo.description)]]
@@ -209,7 +216,7 @@ namespace {
         // [[codegen::verbatim(CartesianPositionInfo.description)]]
         std::optional<glm::vec3> cartesianPosition;
 
-        // [[codegen::verbatim(GammaInfo.description)]]
+        // [[codegen::verbatim(RadiusAzimuthElevationInfo.description)]]
         std::optional<glm::vec3> radiusAzimuthElevation;
 
         // [[codegen::verbatim(BorderWidthInfo.description)]]
@@ -221,7 +228,7 @@ namespace {
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
 
-        // [[codegen::verbatim(UseRadiusAzimuthElevationInfo.description)]]
+        // [[codegen::verbatim(GammaInfo.description)]]
         std::optional<float> gamma;
 
         // [[codegen::verbatim(UsePerspectiveProjectionInfo.description)]]
@@ -233,14 +240,13 @@ namespace {
         // [[codegen::verbatim(BackgroundColorInfo.description)]]
         std::optional<glm::vec4> backgroundColor [[codegen::color()]];
 
-        // This value determines the opacity of the screen space plane. If this value
-        // is 1, the plane is completely opaque, if this value is 0, the plane is
-        // completely transparent
+        // The opacity of the screen space object. If 1, the object is completely opaque.
+        // If 0, the object is completely transparent.
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
         // Defines either a single or multiple tags that apply to this
-        // ScreenSpaceRenderable, thus making it possible to address multiple, separate
-        // Renderables with a single property change
+        // `ScreenSpaceRenderable`, thus making it possible to address multiple, separate
+        // Renderables with a single property change.
         std::optional<std::variant<std::string, std::vector<std::string>>> tag;
     };
 #include "screenspacerenderable_codegen.cpp"

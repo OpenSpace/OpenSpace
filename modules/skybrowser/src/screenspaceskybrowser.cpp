@@ -88,6 +88,14 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `ScreenSpaceRenderable` is added by the Sky Browser feature of OpenSpace, to
+    // display a screen space window showing the intergrated World Wide Telescope view.
+    // The view will be dynamically updated when interacting with the view or interacting
+    // with images in the Sky Browser
+    //
+    // A `ScreenSpaceSkyBrowser` should not be created from a `.asset` file, but is rather
+    // created from interacting with the Sky Browser user interface´panel. If created in
+    // an asset, it requires some extra scripting to work with the Sky Browser feature.
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;

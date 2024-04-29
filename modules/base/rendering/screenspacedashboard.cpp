@@ -40,15 +40,12 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
-        "If this value is set to 'true', this ScreenSpaceDashboard will use the "
-        "main dashboard instead of creating an independent one.",
+        "If 'true', this ScreenSpaceDashboard will use the main dashboard instead of "
+        "creating an independent one.",
         openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
-        // Specifies the GUI name of the ScreenSpaceDashboard
-        std::optional<std::string> name;
-
         // [[codegen::verbatim(UseMainInfo.description)]]
         std::optional<bool> useMainDashboard;
     };
@@ -69,8 +66,6 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // @TODO (abock, 2021-01-29) Should this be the name variable? The identifier wasn't
-    // declared in the documentation
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);

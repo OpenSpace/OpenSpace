@@ -40,10 +40,14 @@ namespace openspace {
 documentation::Documentation ScreenSpaceVideo::Documentation() {
     documentation::Documentation doc = ScreenSpaceRenderable::Documentation();
     doc.name = "ScreenSpaceVideo";
-    doc.id = "video_screenspacevideo";
+    doc.id = "video_screenspace_video";
 
     documentation::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
+
+    doc.description =
+        "This `ScreenSpaceRenderable` can be used to display a video file over the "
+        "rendering.";
 
     return doc;
 }
@@ -52,8 +56,6 @@ ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _videoPlayer(dictionary)
 {
-    // @TODO (abock, 2021-02-02) Should this be the name variable? The identifier wasn't
-    // declared in the documentation
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);

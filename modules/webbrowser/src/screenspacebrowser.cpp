@@ -41,7 +41,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "Set the dimensions of the web browser windows.",
+        "The dimensions of the web browser window, in pixels.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -59,10 +59,18 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    // This `ScreenSpaceRenderable` can be used to render a webpage over the 3D rendering.
+    // This can be used to show various dynamic content, for example using the OpenSpace
+    // scripting API.
+    //
+    // Note that mouse input will not be passed to the rendered view, so it will not be
+    // possible to interact with the web page.
     struct [[codegen::Dictionary(ScreenSpaceBrowser)]] Parameters {
-        std::optional<std::string> identifier;
+        // [[codegen::verbatim(UrlInfo.description)]]
         std::optional<std::string> url;
-        std::optional<glm::vec2> dimensions;
+
+        // [[codegen::verbatim(DimensionsInfo.description)]]
+        std::optional<glm::vec2> dimensions [[codegen::greater({ 0, 0 })]];
     };
 #include "screenspacebrowser_codegen.cpp"
 
@@ -78,9 +86,13 @@ void ScreenSpaceBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
     _texture = t;
 }
 
+documentation::Documentation ScreenSpaceBrowser::Documentation() {
+    return codegen::doc<Parameters>("core_screenspace_browser");
+}
+
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
+    , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
     , _renderHandler(new ScreenSpaceRenderHandler)
     , _url(UrlInfo)
     , _reload(ReloadInfo)
