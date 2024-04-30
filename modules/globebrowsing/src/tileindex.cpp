@@ -36,6 +36,30 @@ TileIndex::TileIndex(uint32_t x_, uint32_t y_, uint8_t level_)
     , level(level_)
 {}
 
+TileIndex::TileIndex(TileHashKey hash) {
+    // Extract the level as the lowest 5 bits
+    uint64_t hlevel = hash & ((1 << 5) - 1);
+    ghoul_assert(hlevel < (1 << 5), "Error in hashing for level");
+    // And then shift the remainder down so that the next value is in the lowest bits
+    hash -= hlevel;
+    hash = hash >> 5;
+
+    // Extract the x as the lowest 30 bits
+    uint64_t hx = hash & ((1 << 30) - 1);
+    ghoul_assert(hx < (1 << 30), "Error in hashing for x");
+    // And then shift the remainder down so that the next value is in the lowest bits
+    hash -= hx;
+    hash = hash >> 30;
+
+    // The remainder in the hash must then be the y index
+    uint64_t hy = hash;
+    ghoul_assert(hy < (1 << 29), "Error in hashing for y");
+
+    level = static_cast<uint8_t>(hlevel);
+    x = static_cast<uint32_t>(hx);
+    y = static_cast<uint32_t>(hy);
+}
+
 TileIndex TileIndex::child(Quad q) const {
     return TileIndex(2 * x + q % 2, 2 * y + q / 2, level + 1);
 }
