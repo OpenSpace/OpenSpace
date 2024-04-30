@@ -39,14 +39,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The color to use for the grid lines.",
+        "The color of the grid lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "The number of segments to split the sphere into. Determines the resolution "
+        "The number of segments the sphere is split into. Determines the resolution "
         "of the rendered sphere. Should be an even value (if an odd value is provided, "
         "the value will be set to the new value minus one).",
         openspace::properties::Property::Visibility::User
@@ -55,7 +55,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The thickness of the grid lines. The larger number, the thicker lines.",
+        "The width of the grid lines. The larger number, the thicker lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 

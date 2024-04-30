@@ -55,7 +55,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
         "Number of Circle Segments",
-        "Specifies the number of segments that is used to render each circle in the "
+        "The number of segments that is used to render each circle in the "
         "grid.",
         openspace::properties::Property::Visibility::User
     };
@@ -63,7 +63,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The thickness of the grid lines. The larger number, the thicker lines.",
+        "The width of the grid lines. The larger number, the thicker lines.",
         openspace::properties::Property::Visibility::User
     };
 

@@ -116,7 +116,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpriteTextureInfo = {
         "File",
         "Point Sprite Texture File",
-        "The path to the texture to use as the point sprite. Note that if multiple textures "
+        "The path to the texture of the point sprite. Note that if multiple textures "
         "option is set in the asset, by providing a texture folder, this value will be "
         "ignored.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -160,7 +160,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-In Start and End Distances",
-        "Two values determining the initial and final distances from the origin of "
+        "Determines the initial and final distances from the origin of "
         "the dataset at which the points will start and end fading-in. The distances "
         "are specified in the same unit as the points, that is, the one provodied as the "
         "Unit, or meters. With normal fading the points are fully visible once the "
@@ -201,7 +201,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseOrientationDataInfo = {
         "UseOrientationData",
         "Use Orientation Data",
-        "If true, include the orientation data in the dataset when rendering the points, "
+        "If true, the orientation data in the dataset is included when rendering the points, "
         "if there is any. To see the rotation, you also need to set the \"Orientation "
         "Render Option\" to \"Fixed Rotation\".",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -269,7 +269,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
         "Max Size",
-        "A value that controls the maximum allowed size for the points, when the max "
+        "Controls the maximum allowed size for the points, when the max "
         "size control feature is enabled. This limits the visual size of the points "
         "based on the distance to the camera. The larger the value, the larger the "
         "points may be. In the background, the computations are made by limiting the "
@@ -292,15 +292,15 @@ namespace {
         "Parameter",
         "Parameter Option",
         "The name of a data parameter to use for scaling of the point. The parameter "
-        "value will be used as a miltiplicative factor to scale the size of the points. "
-        "Note that they may however still be scaled by max size adjustment effects.",
+        "value will be used as a multiplicative factor to scale the size of the points. "
+        "Note that they may still be scaled by max size adjustment effects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable Point Outline",
-        "Determines wheter each point should have an outline or not.",
+        "Determines whether each point should have an outline or not.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -325,7 +325,7 @@ namespace {
         "OutlineStyle",
         "Outline Style",
         "Decides the style of the outline (round, square, or a line at the bottom). "
-        "The stlye also affects the shape of points.",
+        "The style also affects the shape of the points.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
