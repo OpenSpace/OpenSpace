@@ -9,8 +9,6 @@
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
 
-local EarthRadius = 6371000.0
-
 local Node = {
   Identifier = "RenderableNodeArrow_Example",
   -- Parent to the start node, so that when we focus on the arrow this is where we end up
@@ -20,9 +18,9 @@ local Node = {
     StartNode = earth.Earth.Identifier,
     EndNode = mars.Mars.Identifier,
     -- How far away from the start node should the arrow start (meters)
-    Offset = 2 * EarthRadius,
+    Offset = 2 * 6371000.0,
     -- How long should the arrow be (meters)
-    Length = 5 * EarthRadius,
+    Length = 5 * 6371000.0,
     -- How wide should the arrow be (meters)
     Width = 900000.0
   },
