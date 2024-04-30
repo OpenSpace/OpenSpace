@@ -1,4 +1,4 @@
--- Minimal
+-- Basic
 -- This example creates a union out of two simpler TimeFrameIntervals and uses it for a
 -- SceneGraphNode. The first TimeFrameInterval covers January 1st, 2000 and the second
 -- TimeFrameInterval covers March 1st, 2002. The resulting TimeFrameUnion will cover both
@@ -27,7 +27,7 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "Minimal",
+    Name = "Basic",
     Path = "/Examples/TimeFrameUnion"
   }
 }
