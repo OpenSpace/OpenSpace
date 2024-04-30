@@ -22,12 +22,12 @@ local Node = {
     -- Specify relative values (times the size of Earth, in this case)
     Offset = 2.0,
     Length = 5.0,
-    -- Width is still in meters
+    -- Width is in meters
     Width = 900000.0
   },
   GUI = {
     Name = "Relative Units",
-    Path = "/Example/RenderableNodeArrow",
+    Path = "/Examples/RenderableNodeArrow",
   }
 }
 

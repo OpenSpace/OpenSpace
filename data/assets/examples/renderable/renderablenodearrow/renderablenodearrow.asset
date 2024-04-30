@@ -1,4 +1,4 @@
--- Base Example
+-- Basic
 -- This example shows an arrow pointing from one scene graph node in the direction of
 -- another. Here, it points from Earth to Mars.
 --
@@ -27,8 +27,8 @@ local Node = {
     Width = 900000.0
   },
   GUI = {
-    Name = "Base Example",
-    Path = "/Example/RenderableNodeArrow"
+    Name = "Basic",
+    Path = "/Examples/RenderableNodeArrow"
   }
 }
 

@@ -26,7 +26,7 @@ local Node = {
   },
   GUI = {
     Name = "Custom Appearance (Colored & Inverted)",
-    Path = "/Example/RenderableNodeArrow"
+    Path = "/Examples/RenderableNodeArrow"
   }
 }
 
