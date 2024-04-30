@@ -1,3 +1,4 @@
+-- Light Speed Indicator
 -- This example creates a speed indicator; a line that travels with the speed of
 -- light from the parent node (Earth) to the target node (the Moon). By default, the
 -- length of the line is set to match the distance traveled over 1 second.
@@ -13,8 +14,8 @@ local Node = {
     Target = moonAsset.Moon.Identifier
   },
    GUI = {
-    Path = "/Examples/RenderableTravelSpeed",
-    Name = "Light Speed Indicator"
+     Name = "Light Speed Indicator",
+    Path = "/Examples/RenderableTravelSpeed"
   }
 }
 

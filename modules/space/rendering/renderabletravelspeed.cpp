@@ -41,7 +41,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
-        "Speed of travel",
+        "Speed of Travel",
         "A value for how fast the speed indicator should travel, in meters per second. "
         "The default value is the speed of light.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -49,7 +49,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "TargetNode",
-        "Target object",
+        "Target Object",
         "The identifier of the scene graph node to target with the speed indicator. The "
         "speed indicator will travel from the parent node to this scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -94,27 +94,27 @@ namespace {
     // provided target. Per default, the speed is set to the speed of light.
     //
     // The length of the traveling line is set based on the travel speed and can be used
-    // to show more information related to the distance travelled. For example, a length
+    // to show more information related to the distance traveled. For example, a length
     // of 1 shows how far an object would move over a duration of one second based on the
     // selected speed.
     struct [[codegen::Dictionary(RenderableTravelSpeed)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
-        std::string target;
+        std::string target [[codegen::identifier()]];;
 
         // [[codegen::verbatim(SpeedInfo.description)]]
-        std::optional<double> travelSpeed;
+        std::optional<double> travelSpeed [[codegen::greater(0.f)]];
 
         // [[codegen::verbatim(LineColorInfo.description)]]
-        std::optional<glm::vec3> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greater(0.f)]];
 
         // [[codegen::verbatim(IndicatorLengthInfo.description)]]
-        std::optional<float> indicatorLength;
+        std::optional<float> indicatorLength [[codegen::greater(0.f)]];
 
         // [[codegen::verbatim(FadeLengthInfo.description)]]
-        std::optional<float> fadeLength;
+        std::optional<float> fadeLength [[codegen::greater(0.f)]];
     };
 #include "renderabletravelspeed_codegen.cpp"
 } // namespace
@@ -163,8 +163,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
         if (SceneGraphNode* n = sceneGraphNode(_targetName);  n) {
             _targetNode = n;
             _targetPosition = _targetNode->worldPosition();
-            _travelTime =
-                glm::distance(_targetPosition, _sourcePosition) / _travelSpeed;
+            _travelTime = glm::distance(_targetPosition, _sourcePosition) / _travelSpeed;
             calculateDirectionVector();
             reinitiateTravel();
         }
