@@ -1,7 +1,7 @@
 -- Basic
 -- This example renders a sphere with a texture that is provided by another application
 -- on the same computer using the SPOUT library. Note that this library is only available
--- under Windows. A SPOUT-enabled application can share a texture using a user-defined
+-- on Windows. A SPOUT-enabled application can share a texture using a user-defined
 -- name, which is used as the `SpoutName` here to receive that image. This allows the
 -- integration of any generated image.
 
