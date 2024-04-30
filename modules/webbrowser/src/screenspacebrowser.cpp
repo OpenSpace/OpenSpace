@@ -66,6 +66,9 @@ namespace {
     // Note that mouse input will not be passed to the rendered view, so it will not be
     // possible to interact with the web page.
     struct [[codegen::Dictionary(ScreenSpaceBrowser)]] Parameters {
+        // A unique identifier for this screen space browser.
+        std::optional<std::string> identifier [[codegen::identifier()]];
+
         // [[codegen::verbatim(UrlInfo.description)]]
         std::optional<std::string> url;
 
