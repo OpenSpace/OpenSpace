@@ -58,18 +58,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 37> UniformNames = {
-        "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
-        "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
-        "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
-        "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
-        "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
-        "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
-        "hasDvarScaling", "dvarScaleFactor", "enableOutline", "outlineColor",
-        "outlineWeight", "outlineStyle", "useCmapOutline", "aspectRatioScale",
-        "useOrientationData"
-    };
-
     enum RenderOption {
         ViewDirection = 0,
         PositionNormal,
@@ -899,7 +887,7 @@ void RenderablePointCloud::initializeGL() {
 
     initializeShadersAndGlExtras();
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     if (_hasSpriteTexture) {
         switch (_textureMode) {
@@ -1214,9 +1202,9 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
 
     _program->activate();
 
-    _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
+    _program->setUniform(_uniformCache.cameraPosition, data.camera.positionVec3());
     _program->setUniform(
-        _uniformCache.cameraLookup,
+        _uniformCache.cameraLookUp,
         glm::vec3(data.camera.lookUpVectorWorldSpace())
     );
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
@@ -1269,7 +1257,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     bool useColorMap = hasColorData() && _colorSettings.colorMapping->enabled &&
         _colorSettings.colorMapping->texture();
 
-    _program->setUniform(_uniformCache.useColormap, useColorMap);
+    _program->setUniform(_uniformCache.useColorMap, useColorMap);
 
     ghoul::opengl::TextureUnit colorMapTextureUnit;
     _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);

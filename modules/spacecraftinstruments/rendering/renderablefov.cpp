@@ -38,12 +38,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 9> UniformNames = {
-        "modelViewProjectionTransform", "colorStart", "colorEnd",
-        "activeColor", "targetInFieldOfViewColor", "intersectionStartColor",
-        "intersectionEndColor", "squareColor", "interpolation"
-    };
-
     constexpr int InterpolationSteps = 5;
     constexpr double Epsilon = 1e-4;
 
@@ -286,7 +280,7 @@ void RenderableFov::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     // Fetch information about the specific instrument
     SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
@@ -766,10 +760,13 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
     const glm::mat4 modelViewProjectionTransform =
         calcModelViewProjectionTransform(data);
 
-    _program->setUniform(_uniformCache.modelViewProjection, modelViewProjectionTransform);
+    _program->setUniform(
+        _uniformCache.modelViewProjectionTransform,
+        modelViewProjectionTransform
+    );
 
-    _program->setUniform(_uniformCache.defaultColorStart, _colors.defaultStart);
-    _program->setUniform(_uniformCache.defaultColorEnd, _colors.defaultEnd);
+    _program->setUniform(_uniformCache.colorStart, _colors.defaultStart);
+    _program->setUniform(_uniformCache.colorEnd, _colors.defaultEnd);
     _program->setUniform(_uniformCache.activeColor, _colors.active);
     _program->setUniform(
         _uniformCache.targetInFieldOfViewColor,
@@ -824,7 +821,7 @@ void RenderableFov::update(const UpdateData& data) {
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 
