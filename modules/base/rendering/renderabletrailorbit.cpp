@@ -93,7 +93,7 @@ namespace {
         "The objects period, i.e. the length of its orbit around the parent object given "
         "in (Earth) days. In the case of Earth, this would be a sidereal year "
         "(=365.242 days). If this values is specified as multiples of the period, it is "
-        "possible to show the effects of precession",
+        "possible to show the effects of precession.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -103,7 +103,7 @@ namespace {
         "The number of samples along the orbit. This determines the resolution of the "
         "trail; the tradeoff being that a higher resolution is able to resolve more "
         "detail, but will take more resources while rendering, too. The higher, the "
-        "smoother the trail, but also more memory will be used",
+        "smoother the trail, but also more memory will be used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -111,8 +111,7 @@ namespace {
        "RenderableType",
        "RenderableType",
        "This value specifies if the orbit should be rendered in the Background,"
-       "Opaque, Transparent, or Overlay rendering step. Default is Transparent",
-        // @VISIBILITY(3.25)
+       "Opaque, Transparent, or Overlay rendering step. Default is Transparent.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -229,8 +228,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // floating value
             glBufferSubData(
                 GL_ARRAY_BUFFER,
-                _primaryRenderInformation.first * sizeof(TrailVBOLayout),
-                sizeof(TrailVBOLayout),
+                _primaryRenderInformation.first * sizeof(TrailVBOLayout<float>),
+                sizeof(TrailVBOLayout<float>),
                 _vertexArray.data() + _primaryRenderInformation.first
             );
         }
@@ -242,7 +241,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // array
             glBufferData(
                 GL_ARRAY_BUFFER,
-                _vertexArray.size() * sizeof(TrailVBOLayout),
+                _vertexArray.size() * sizeof(TrailVBOLayout<float>),
                 _vertexArray.data(),
                 GL_STREAM_DRAW
             );
@@ -269,8 +268,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             auto upload = [this](int begin, int length) {
                 glBufferSubData(
                     GL_ARRAY_BUFFER,
-                    begin * sizeof(TrailVBOLayout),
-                    sizeof(TrailVBOLayout) * length,
+                    begin * sizeof(TrailVBOLayout<float>),
+                    sizeof(TrailVBOLayout<float>) * length,
                     _vertexArray.data() + begin
                 );
             };
@@ -417,8 +416,8 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     else {
         // See how many new points needs to be generated. Delta is negative, so we need
         // to invert the ratio
-        const uint64_t nNewPoints =
-            -(static_cast<uint64_t>(floor(delta / secondsPerPoint)));
+        const int nNewPoints =
+            -(static_cast<int>(floor(delta / secondsPerPoint)));
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
@@ -494,7 +493,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     glm::vec3 maxVertex(-std::numeric_limits<float>::max());
     glm::vec3 minVertex(std::numeric_limits<float>::max());
 
-    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout& vertexData) {
+    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout<float>& vertexData) {
         maxVertex.x = std::max(maxVertex.x, vertexData.x);
         maxVertex.y = std::max(maxVertex.y, vertexData.y);
         maxVertex.z = std::max(maxVertex.z, vertexData.z);

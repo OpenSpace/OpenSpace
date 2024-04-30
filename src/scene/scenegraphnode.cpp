@@ -47,36 +47,35 @@ namespace {
         "ComputeScreenSpaceData",
         "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
-        "at regular intervals. If these values are set to 'false', they are not updated",
+        "at regular intervals. If these values are set to 'false', they are not updated.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
         "ScreenSpacePosition",
-        "The x,y position in screen space. Can be used for placing GUI elements",
+        "The x,y position in screen space. Can be used for placing GUI elements.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
-        "Determines if the node is currently visible on screen",
+        "Determines if the node is currently visible on screen.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
-        "The distance from the camera to the node surface",
+        "The distance from the camera to the node surface.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
-        "The screen size of the radius of the node",
-        // @VISIBILITY(3.5)
+        "The screen size of the radius of the node.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -84,7 +83,7 @@ namespace {
         "VisibilityDistance",
         "VisibilityDistance",
         "The distace in world coordinates between node and camera at which the "
-        "screenspace object will become visible",
+        "screenspace object will become visible.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -95,7 +94,7 @@ namespace {
         "scene graph node renders must be contained within this sphere. This value is "
         "only used as an override to the bounding sphere calculated by the Renderable, "
         "if present. If this value is -1, the Renderable's computed bounding sphere is "
-        "used",
+        "used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -105,7 +104,7 @@ namespace {
         "The minimum radius that the camera is allowed to get close to this scene graph "
         "node. This value is only used as an override to the bounding sphere calculated "
         "by the Renderable, if present. If this value is -1, the Renderable's computed "
-        "interaction sphere is used",
+        "interaction sphere is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -115,7 +114,7 @@ namespace {
         "This read-only property contains the evaluated value for the bounding sphere. "
         "This is the actual value that is used internally within the software. If the "
         "BoundingSphere property is set to -1, it is the computed value, otherwise it "
-        "matches the one set in the property",
+        "matches the one set in the property.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -125,7 +124,7 @@ namespace {
         "This read-only property contains the evaluated value for the interaction "
         "sphere. This is the actual value that is used internally within the software. "
         "If the InteractionSphere property is set to -1, it is the computed value, "
-        "otherwise it matches the one set in the property",
+        "otherwise it matches the one set in the property.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -133,8 +132,7 @@ namespace {
         "ApproachFactor",
         "Approach Factor",
         "This value is a multiplication factor for the interaction sphere that "
-        "determines when the camera is 'approaching' the scene graph node",
-        // @VISIBILITY(3.5)
+        "determines when the camera is 'approaching' the scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -142,8 +140,7 @@ namespace {
         "ReachFactor",
         "Reach Factor",
         "This value is a multiplication factor for the interaction sphere that "
-        "determines when the camera has 'reached' the scene graph node",
-        // @VISIBILITY(3.5)
+        "determines when the camera has 'reached' the scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -151,14 +148,14 @@ namespace {
         "GuiPath",
         "Gui Path",
         "This is the path for the scene graph node in the gui example: "
-        "/Solar System/Planets/Earth",
+        "/Solar System/Planets/Earth.",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
         "GuiName",
         "Gui Name",
-        "This is the name for the scene graph node in the gui. Example: Earth",
+        "This is the name for the scene graph node in the gui. Example: Earth.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -166,7 +163,7 @@ namespace {
         "GuiDescription",
         "Gui Description",
         "This is the description for the scene graph node to be shown in the gui. "
-        "Example: Earth is a special place",
+        "Example: Earth is a special place.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -174,7 +171,7 @@ namespace {
         "GuiHidden",
         "Gui Hidden",
         "This represents if the scene graph node should be shown in the gui. "
-        "Example: false",
+        "Example: false.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -185,7 +182,6 @@ namespace {
         "method. The interaction sphere is rendered in cyan and the bounding sphere in "
         "purple. If only one is visible, this may be because the spheres have equal "
         "size and are overlapping.",
-        // @VISIBILITY(3.67)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

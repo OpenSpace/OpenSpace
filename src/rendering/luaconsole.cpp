@@ -73,7 +73,7 @@ namespace {
         "IsVisible",
         "Is Visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
-        "will fade the console in and out",
+        "will fade the console in and out.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -82,7 +82,7 @@ namespace {
        "Should Be Synchronized",
        "Determines whether the entered commands will only be executed locally (if this "
        "is disabled), or whether they will be send to other connected nodes, for "
-       "example in a cluster environment",
+       "example in a cluster environment.",
        openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -91,35 +91,35 @@ namespace {
         "Should Send To Remote",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remote instances (other "
-        "peers through a parallel connection)",
+        "peers through a parallel connection).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background Color",
-        "Sets the background color of the console",
+        "Sets the background color of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry Text Color",
-        "Sets the text color of the entry area of the console",
+        "Sets the text color of the entry area of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
         "History Text Color",
-        "Sets the text color of the history area of the console",
+        "Sets the text color of the history area of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
         "History Length",
-        "Determines the length of the history in number of lines",
+        "Determines the length of the history in number of lines.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -250,6 +250,10 @@ void LuaConsole::initialize() {
 
 void LuaConsole::deinitialize() {
     ZoneScoped;
+
+    if (!FileSys.cacheManager()) {
+        return;
+    }
 
     const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,

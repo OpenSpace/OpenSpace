@@ -21,7 +21,8 @@ local DebrisBreezem = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.25, 0.35, 0.45 },
-    Fade = 1.5,
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },

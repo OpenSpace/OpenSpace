@@ -22,54 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#version __CONTEXT__
 
-in vec4 viewSpacePosition;
-in float viewSpaceDepth;
-in float periodFraction;
-in float offsetPeriods;
+#include "PowerScaling/powerScalingMath.hglsl"
 
-uniform vec3 color;
-uniform float opacity = 1.0;
-uniform float lineFade;
+layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
+layout (location = 1) in vec2 orbitData; // 1: epoch, 2: period
+
+out vec4 viewSpacePosition;
+out float viewSpaceDepth;
+out float periodFraction;
+out float offsetPeriods;
+
+uniform dmat4 modelViewTransform;
+uniform mat4 projectionTransform;
+uniform double inGameTime;
 
 
-Fragment getFragment() {
-  // float offsetPeriods = offset / period;
-  // This is now done in the fragment shader instead to make smooth movement between
-  // vertices. We want vertexDistance to be double up to this point, I think, (hence the
-  // unnessesary float to float conversion)
-  float vertexDistance = periodFraction - offsetPeriods;
+void main() {
+  // The way the position and trail fade is calculated is:
+  // By using inGameTime, epoch and period of this orbit, we get how many revolutions it
+  // has done since epoch. The fract of that, is how far into a revolution it has traveled
+  // since epoch. Similarly we do the same but for this vertex, but calculating
+  // offsetPeriods. In the fragment shader the difference between periodFraction_f and
+  // offsetPeriods is calculated to know how much to fade that specific fragment.
 
-  // This is the alternative way of calculating
-  // the offsetPeriods: (vertexID_perOrbit/nrOfSegments_f)
-  // float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
-  // float nrOfSegments_f = float(numberOfSegments);
-  // float vertexDistance = periodFraction - (vertexID_perOrbit/nrOfSegments_f);
+  // If orbit_data is doubles, cast to float first
+  float epoch = orbitData.x;
+  float period = orbitData.y;
 
-  if (vertexDistance < 0.0) {
-    vertexDistance += 1.0;
+  // calculate nr of periods, get fractional part to know where the vertex closest to the
+  // debris part is right now
+  double nrOfRevolutions = (inGameTime - epoch) / period;
+  double frac = double(int(nrOfRevolutions));
+  double periodFractiond = nrOfRevolutions - frac;
+  if (periodFractiond < 0.0) {
+    periodFractiond += 1.0;
   }
+  periodFraction = float(periodFractiond);
 
-  float invert = pow((1.0 - vertexDistance), lineFade);
-  float fade = clamp(invert, 0.0, 1.0);
+  // same procedure for the current vertex
+  offsetPeriods = vertexData.w / float(period);
 
-  // Currently even fully transparent lines can occlude other lines, thus we discard these
-  // fragments since debris and satellites are rendered so close to each other
-  if (fade < 0.05) {
-    discard;
-  }
-
-  Fragment frag;
-  if (fade < 0.15) {
-    // Use additive blending for some values to make the discarding less abrupt
-    frag.blend = BLEND_MODE_ADDITIVE;
-  }
-
-  frag.color = vec4(color, fade * opacity);
-  frag.depth = viewSpaceDepth;
-  frag.gPosition = viewSpacePosition;
-  frag.gNormal = vec4(1.0, 1.0, 1.0, 0.0);
-
-  return frag;
+  viewSpacePosition = vec4(modelViewTransform * dvec4(vertexData.xyz, 1));
+  vec4 vs_position = z_normalization(projectionTransform * viewSpacePosition);
+  gl_Position = vs_position;
+  viewSpaceDepth = vs_position.w;
 }

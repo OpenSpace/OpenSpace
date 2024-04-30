@@ -321,12 +321,12 @@ void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {
     _program = BaseModule::ProgramObjectManager.request(
         "RenderablePointCloud_Interpolated",
         []() {
-            std::filesystem::path path = absPath("${MODULE_BASE}/shaders/pointcloud/");
+            std::filesystem::path path = absPath("${MODULE_BASE}/shaders/pointcloud");
             return global::renderEngine->buildRenderProgram(
                 "RenderablePointCloud_Interpolated",
-                path / "billboardpoint_interpolated_vs.glsl",
-                path / "billboardpoint_fs.glsl",
-                path / "billboardpoint_gs.glsl"
+                path / "pointcloud_interpolated_vs.glsl",
+                path / "pointcloud_fs.glsl",
+                path / "pointcloud_gs.glsl"
             );
         }
     );
@@ -368,9 +368,13 @@ int RenderableInterpolatedPoints::nAttributesPerPoint() const {
         // Use two more positions (xyz)
         n += 2 * 3;
     }
+    if (useOrientationData()) {
+        // Use one more orientation quaternion (wxyz)
+        n += 4;
+    }
     // And potentially some more color and size data
-    n += _hasColorMapFile ? 1 : 0;
-    n += _hasDatavarSize ? 1 : 0;
+    n += hasColorData() ? 1 : 0;
+    n += hasSizeData() ? 1 : 0;
 
     return n;
 }
@@ -430,27 +434,52 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
 }
 
 void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int index,
-                                                         std::vector<float>& result) const
+                                                        std::vector<float>& result) const
 {
     using namespace dataloader;
     auto [firstIndex, secondIndex] = interpolationIndices(index);
     const Dataset::Entry& e0 = _dataset.entries[firstIndex];
     const Dataset::Entry& e1 = _dataset.entries[secondIndex];
 
-    int colorParamIndex = currentColorParameterIndex();
-    if (_hasColorMapFile && colorParamIndex >= 0) {
+    if (hasColorData()) {
+        const int colorParamIndex = currentColorParameterIndex();
         result.push_back(e0.data[colorParamIndex]);
         result.push_back(e1.data[colorParamIndex]);
     }
 
-    int sizeParamIndex = currentSizeParameterIndex();
-    if (_hasDatavarSize && sizeParamIndex >= 0) {
+    if (hasSizeData()) {
+        const int sizeParamIndex = currentSizeParameterIndex();
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
-        result.push_back(e0.data[sizeParamIndex]);
-        result.push_back(e1.data[sizeParamIndex]);
+
+        // Convert to diameter if data is given as radius
+        float multiplier = _sizeSettings.sizeMapping->isRadius ? 2.f : 1.f;
+        result.push_back(multiplier * e0.data[sizeParamIndex]);
+        result.push_back(multiplier * e1.data[sizeParamIndex]);
     }
+}
+
+void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index,
+                                                        std::vector<float>& result) const
+{
+    using namespace dataloader;
+    auto [firstIndex, secondIndex] = interpolationIndices(index);
+    const Dataset::Entry& e0 = _dataset.entries[firstIndex];
+    const Dataset::Entry& e1 = _dataset.entries[secondIndex];
+
+    glm::quat q0 = orientationQuaternion(e0);
+    glm::quat q1 = orientationQuaternion(e1);
+
+    result.push_back(q0.x);
+    result.push_back(q0.y);
+    result.push_back(q0.z);
+    result.push_back(q0.w);
+
+    result.push_back(q1.x);
+    result.push_back(q1.y);
+    result.push_back(q1.z);
+    result.push_back(q1.w);
 }
 
 void RenderableInterpolatedPoints::initializeBufferData() {
@@ -481,14 +510,19 @@ void RenderableInterpolatedPoints::initializeBufferData() {
         offset = bufferVertexAttribute("in_position_after", 3, attibutesPerPoint, offset);
     }
 
-    if (_hasColorMapFile) {
+    if (hasColorData()) {
         offset = bufferVertexAttribute("in_colorParameter0", 1, attibutesPerPoint, offset);
         offset = bufferVertexAttribute("in_colorParameter1", 1, attibutesPerPoint, offset);
     }
 
-    if (_hasDatavarSize) {
+    if (hasSizeData()) {
         offset = bufferVertexAttribute("in_scalingParameter0", 1, attibutesPerPoint, offset);
         offset = bufferVertexAttribute("in_scalingParameter1", 1, attibutesPerPoint, offset);
+    }
+
+    if (useOrientationData()) {
+        offset = bufferVertexAttribute("in_orientation0", 4, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientation1", 4, attibutesPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {

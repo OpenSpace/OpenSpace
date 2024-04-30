@@ -1,0 +1,26 @@
+-- Basic (Fixed Color and Size)
+-- This example creates a point cloud with a fixed color and default size.
+-- All the points will have the same size.
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.0, 0.5, 0.0 }
+    }
+  },
+  GUI = {
+    Name = "Fixed Color and Size",
+    Path = "/Examples/RenderablePointCloud"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -50,13 +50,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
         "Play",
         "Play",
-        "Play video"
+        "Play video."
     };
 
     constexpr openspace::properties::Property::PropertyInfo PauseInfo = {
         "Pause",
         "Pause",
-        "Pause video"
+        "Pause video."
     };
 
     constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
@@ -75,7 +75,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
         "PlayAudio",
         "Play Audio",
-        "Play audio"
+        "Play audio."
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {

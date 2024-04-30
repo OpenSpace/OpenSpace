@@ -48,30 +48,30 @@ namespace {
     DefaultTimeInterpolationDurationInfo = {
         "DefaultTimeInterpolationDuration",
         "Default Time Interpolation Duration",
-        "The default duration taken to interpolate between times"
+        "The default duration taken to interpolate between times."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
     DefaultDeltaTimeInterpolationDurationInfo = {
         "DefaultDeltaTimeInterpolationDuration",
         "Default Delta Time Interpolation Duration",
-        "The default duration taken to interpolate between delta times"
+        "The default duration taken to interpolate between delta times."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
         DefaultPauseInterpolationDurationInfo = {
         "DefaultPauseInterpolationDuration",
         "Default Pause Interpolation Duration",
-        "The default duration taken to transition to the paused state, "
-        "when interpolating"
+        "The default duration taken to transition to the paused state, when "
+        "interpolating."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
         DefaultUnpauseInterpolationDurationInfo = {
         "DefaultUnpauseInterpolationDuration",
         "Default Unpause Interpolation Duration",
-        "The default duration taken to transition to the unpaused state, "
-        "when interpolating"
+        "The default duration taken to transition to the unpaused state, when "
+        "interpolating."
     };
 
     constexpr std::string_view DeltaTimeStepsGuiPath = "/Time/Simulation Speed/Steps";

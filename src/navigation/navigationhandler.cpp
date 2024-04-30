@@ -65,21 +65,21 @@ namespace {
         "DisableKeybindings",
         "Disable all Keybindings",
         "Disables all keybindings without removing them. Please note that this does not "
-        "apply to the key to open the console",
+        "apply to the key to open the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable all mouse inputs",
-        "Disables all mouse inputs and prevents them from affecting the camera",
+        "Disables all mouse inputs and prevents them from affecting the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableJoystickInputInfo = {
         "DisableJoystickInputs",
         "Disable all joystick inputs",
-        "Disables all joystick inputs and prevents them from affecting the camera",
+        "Disables all joystick inputs and prevents them from affecting the camera.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -87,7 +87,7 @@ namespace {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
-        "than using the mouse interaction",
+        "than using the mouse interaction.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -96,7 +96,8 @@ namespace {
         "JumpTo Fade Duration",
         "The number of seconds the fading of the rendering should take per default when "
         "navigating through a 'jump' transition. This is when the rendering is first "
-        "faded to black, then the camera is moved, and then the rendering fades in again",
+        "faded to black, then the camera is moved, and then the rendering fades in "
+        "again.",
         openspace::properties::Property::Visibility::User
     };
 } // namespace

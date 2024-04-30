@@ -67,7 +67,7 @@ private:
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _lineColor;
     properties::FloatProperty _length;
-    UniformCache(modelViewProjection, color) _uniformCache;
+    UniformCache(modelViewProjectionTransform, color) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     GLuint _vaoId = 0;

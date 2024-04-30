@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 6,
     Color = { 0.94, 0.96, 0.94 },
-    TrailFade = 18
+    TrailFade = 18,
+    PointSizeExponent = 10.2
   },
   GUI = {
     Name = "Centaur Asteroids",

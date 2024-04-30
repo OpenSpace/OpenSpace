@@ -44,6 +44,8 @@
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/vector_angle.hpp>
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -56,20 +58,16 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 34> UniformNames = {
-        "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
-        "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
-        "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
-        "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
-        "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
-        "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
-        "hasDvarScaling", "dvarScaleFactor", "enableOutline", "outlineColor",
-        "outlineWeight", "aspectRatioScale"
-    };
-
     enum RenderOption {
         ViewDirection = 0,
-        PositionNormal
+        PositionNormal,
+        FixedRotation
+    };
+
+    enum OutlineStyle {
+        Round = 0,
+        Square,
+        Bottom
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureEnabledInfo = {
@@ -128,15 +126,14 @@ namespace {
         "FixedColor",
         "Fixed Color",
         "This value is used to define the color of the points when no color map is"
-        "used",
+        "used.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the points",
-        // @VISIBILITY(1.25)
+        "Enables/Disables the drawing of the points.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -146,15 +143,7 @@ namespace {
         "The labels for the points. If no label file is provided, the labels will be "
         "created to match the points in the data file. For a CSV file, you should then "
         "specify which column is the 'Name' column in the data mapping. For SPECK files "
-        "the labels are created from the comment at the end of each line"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
-        "RenderOption",
-        "Render Option",
-        "Option wether the point billboards should face the camera or not. Used for "
-        "non-linear display environments such as fisheye.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "the labels are created from the comment at the end of each line."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -167,7 +156,6 @@ namespace {
         "camera is outside this range and fully invisible when inside the range. With "
         "inverted fading the situation is the opposite: the points are visible inside "
         "hen closer than the min value of the range and invisible when further away.",
-        // @VISIBILITY(3.25)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -199,12 +187,42 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseOrientationDataInfo = {
+        "UseOrientationData",
+        "Use Orientation Data",
+        "Include the orietation data in the dataset when rendering the points, if there "
+        "is any. To see the rotation, you also need to set the \"Orientation Render "
+        "Option\" to \"Fixed Rotation\".",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo = {
+        "OrientationRenderOption",
+        "Orientation Render Option",
+        "Controls how the planes for the points will be oriented. \"Camera View "
+        "Direction\" rotates the points so that the plane is orthogonal to the viewing "
+        "direction of the camera (useful for planar displays), and \"Camera Position "
+        "Normal\" rotates the points towards the position of the camera (useful for "
+        "spherical displays, like dome theaters). In both these cases the points will "
+        "be billboarded towards the camera. In contrast, \"Fixed Rotation\" does not "
+        "rotate the points at all based on the camera and should be used when the "
+        "dataset contains orientation information for the points.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo NumShownDataPointsInfo = {
         "NumberOfDataPoints",
         "Number of Shown Data Points",
         "This read only property includes information about how many points are being "
         "rendered.",
         openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HasOrientationDataInfo = {
+        "HasOrientationData",
+        "Has Orientation Data",
+        "Set to true if orientation data was read from the dataset.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleExponentInfo = {
@@ -215,7 +233,8 @@ namespace {
         "value should be. If not included, it is computed based on the maximum "
         "positional component of the data points. This is useful for showing the "
         "dataset at all, but you will likely want to change it to something that looks "
-        "good.",
+        "good. Note that a scale exponent of 0 leads to the points having a diameter of "
+        "1 meter, i.e. no exponential scaling.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -292,13 +311,30 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OutlineStyleInfo = {
+        "OutlineStyle",
+        "Outline Style",
+        "This setting decides the shape of points that have an outline (round, square, "
+        "or lust a line at the bottom). Note that anything but \"Round\" will lead to "
+        "the point being drawed as squares.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ApplyColorMapToOutlineInfo = {
+        "ApplyColorMapToOutline",
+        "Apply Color Map to Outline",
+        "If true and the outline is enabled, the color map will be applied to the "
+        "outline rather than the point body. Only works if color mapping is enabled.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     // A RenderablePointCloud can be used to render point-based datasets in 3D space,
     // optionally including color mapping, a sprite texture and labels. There are several
     // properties that affect the visuals of the points, such as settings for scaling,
     // fading, sprite texture, color mapping and whether the colors of overlapping points
     // should be blended additively or not.
     //
-    // The point size depends on a few different things:
+    // The points are rendered as planes whose size depends on a few different things:
     //
     // - At the core, scaling is done based on an exponential value, the 'ScaleExponent'.
     //   A relatively small change to this value will lead to a large change in size.
@@ -311,6 +347,9 @@ namespace {
     //
     // - There is also an option to limit the size of the points based on a given max
     //   size value.
+    //
+    // - And an option to scale the points based on a data value (see 'SizeMapping' in
+    //   'SizeSettings')
     //
     // - To easily change the visual size of the points, the multiplicative 'ScaleFactor'
     //   may be used. A value of 2 makes the points twice as large, visually, compared
@@ -364,10 +403,14 @@ namespace {
 
         enum class [[codegen::map(RenderOption)]] RenderOption {
             ViewDirection [[codegen::key("Camera View Direction")]],
-            PositionNormal [[codegen::key("Camera Position Normal")]]
+            PositionNormal [[codegen::key("Camera Position Normal")]],
+            FixedRotation [[codegen::key("Fixed Rotation")]]
         };
-        // [[codegen::verbatim(RenderOptionInfo.description)]]
-        std::optional<RenderOption> renderOption;
+        // [[codegen::verbatim(OrientationRenderOptionInfo.description)]]
+        std::optional<RenderOption> orientationRenderOption;
+
+        // [[codegen::verbatim(UseOrientationDataInfo.description)]]
+        std::optional<bool> useOrientationData;
 
         // [[codegen::verbatim(UseAdditiveBlendingInfo.description)]]
         std::optional<bool> useAdditiveBlending;
@@ -429,6 +472,17 @@ namespace {
 
             // [[codegen::verbatim(OutlineColorInfo.description)]]
             std::optional<float> outlineWeight;
+
+            enum class [[codegen::map(OutlineStyle)]] OutlineStyle {
+                Round,
+                Square,
+                Bottom
+            };
+            // [[codegen::verbatim(OutlineStyleInfo.description)]]
+            std::optional<OutlineStyle> outlineStyle;
+
+            // [[codegen::verbatim(ApplyColorMapToOutlineInfo.description)]]
+            std::optional<bool> applyColorMapToOutline;
         };
         // Settings related to the coloring of the points, such as a fixed color,
         // color map, etc.
@@ -465,7 +519,7 @@ documentation::Documentation RenderablePointCloud::Documentation() {
 RenderablePointCloud::SizeSettings::SizeSettings(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "Sizing", "Sizing", ""})
     , scaleExponent(ScaleExponentInfo, 1.f, 0.f, 25.f)
-    , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 50.f)
+    , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 100.f)
     , useMaxSizeControl(UseMaxSizeControlInfo, false)
     , maxAngularSize(MaxSizeInfo, 1.f, 0.f, 45.f)
 {
@@ -499,8 +553,28 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     , enableOutline(EnableOutlineInfo, false)
     , outlineColor(OutlineColorInfo, glm::vec3(0.23f), glm::vec3(0.f), glm::vec3(1.f))
     , outlineWeight(OutlineWeightInfo, 0.2f, 0.f, 1.f)
+    , outlineStyle(OutlineStyleInfo)
+    , applyCmapToOutline(ApplyColorMapToOutlineInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    pointColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(pointColor);
+
+    addProperty(enableOutline);
+
+    outlineColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(outlineColor);
+
+    addProperty(outlineWeight);
+
+    outlineStyle.addOption(OutlineStyle::Round, "Round");
+    outlineStyle.addOption(OutlineStyle::Square, "Square");
+    outlineStyle.addOption(OutlineStyle::Bottom, "Bottom");
+    outlineStyle = OutlineStyle::Round;
+    addProperty(outlineStyle);
+
+    addProperty(applyCmapToOutline);
 
     const bool hasColoring = p.coloring.has_value();
     if (hasColoring) {
@@ -517,16 +591,15 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
         enableOutline = p.coloring->enableOutline.value_or(enableOutline);
         outlineColor = p.coloring->outlineColor.value_or(outlineColor);
         outlineWeight = p.coloring->outlineWeight.value_or(outlineWeight);
+
+        if (p.coloring->outlineStyle.has_value()) {
+            outlineStyle = codegen::map<OutlineStyle>(*p.coloring->outlineStyle);
+        }
+
+        applyCmapToOutline = p.coloring->applyColorMapToOutline.value_or(
+            applyCmapToOutline
+        );
     }
-    pointColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(pointColor);
-
-    addProperty(enableOutline);
-
-    outlineColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(outlineColor);
-
-    addProperty(outlineWeight);
 }
 
 RenderablePointCloud::Texture::Texture()
@@ -586,8 +659,13 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _fading(dictionary)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
     , _drawElements(DrawElementsInfo, true)
-    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _useRotation(UseOrientationDataInfo, false)
+    , _renderOption(
+        OrientationRenderOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , _nDataPoints(NumShownDataPointsInfo, 0)
+    , _hasOrientationData(HasOrientationDataInfo, false)
 {
     ZoneScoped;
 
@@ -609,14 +687,19 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
+    _renderOption.addOption(RenderOption::FixedRotation, "Fixed Rotation");
 
-    if (p.renderOption.has_value()) {
-        _renderOption = codegen::map<RenderOption>(*p.renderOption);
+    if (p.orientationRenderOption.has_value()) {
+        _renderOption = codegen::map<RenderOption>(*p.orientationRenderOption);
     }
     else {
         _renderOption = RenderOption::ViewDirection;
     }
     addProperty(_renderOption);
+
+    _useRotation = p.useOrientationData.value_or(_useRotation);
+    _useRotation.onChange([this]() { _dataIsDirty = true; });
+    addProperty(_useRotation);
 
     _useAdditiveBlending = p.useAdditiveBlending.value_or(_useAdditiveBlending);
     addProperty(_useAdditiveBlending);
@@ -669,10 +752,11 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 
-    if (p.sizeSettings.has_value() && p.sizeSettings->sizeMapping.has_value()) {
+    if (_sizeSettings.sizeMapping != nullptr) {
         _sizeSettings.sizeMapping->parameterOption.onChange(
             [this]() { _dataIsDirty = true; }
         );
+        _sizeSettings.sizeMapping->isRadius.onChange([this]() { _dataIsDirty = true; });
         _hasDatavarSize = true;
     }
 
@@ -728,6 +812,9 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
 
     _nDataPoints.setReadOnly(true);
     addProperty(_nDataPoints);
+
+    _hasOrientationData.setReadOnly(true);
+    addProperty(_hasOrientationData);
 }
 
 bool RenderablePointCloud::isReady() const {
@@ -768,6 +855,7 @@ void RenderablePointCloud::initialize() {
         }
 
         _nDataPoints = static_cast<unsigned int>(_dataset.entries.size());
+        _hasOrientationData = _dataset.orientationDataIndex >= 0;
 
         // If no scale exponent was specified, compute one that will at least show the
         // points based on the scale of the positions in the dataset
@@ -799,7 +887,7 @@ void RenderablePointCloud::initializeGL() {
 
     initializeShadersAndGlExtras();
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     if (_hasSpriteTexture) {
         switch (_textureMode) {
@@ -835,9 +923,9 @@ void RenderablePointCloud::initializeShadersAndGlExtras() {
         []() {
             return global::renderEngine->buildRenderProgram(
                 "RenderablePointCloud",
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_fs.glsl"),
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_gs.glsl")
+                absPath("${MODULE_BASE}/shaders/pointcloud/pointcloud_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/pointcloud/pointcloud_fs.glsl"),
+                absPath("${MODULE_BASE}/shaders/pointcloud/pointcloud_gs.glsl")
             );
         }
     );
@@ -1090,11 +1178,11 @@ float RenderablePointCloud::computeDistanceFadeValue(const RenderData& data) con
 
 void RenderablePointCloud::setExtraUniforms() {}
 
-void RenderablePointCloud::renderBillboards(const RenderData& data,
-                                            const glm::dmat4& modelMatrix,
-                                            const glm::dvec3& orthoRight,
-                                            const glm::dvec3& orthoUp,
-                                            float fadeInVariable)
+void RenderablePointCloud::renderPoints(const RenderData& data,
+                                        const glm::dmat4& modelMatrix,
+                                        const glm::dvec3& orthoRight,
+                                        const glm::dvec3& orthoUp,
+                                        float fadeInVariable)
 {
     if (!_hasDataFile || _dataset.entries.empty()) {
         return;
@@ -1114,9 +1202,9 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
 
     _program->activate();
 
-    _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
+    _program->setUniform(_uniformCache.cameraPosition, data.camera.positionVec3());
     _program->setUniform(
-        _uniformCache.cameraLookup,
+        _uniformCache.cameraLookUp,
         glm::vec3(data.camera.lookUpVectorWorldSpace())
     );
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
@@ -1163,11 +1251,13 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
     _program->setUniform(_uniformCache.enableOutline, _colorSettings.enableOutline);
     _program->setUniform(_uniformCache.outlineColor, _colorSettings.outlineColor);
     _program->setUniform(_uniformCache.outlineWeight, _colorSettings.outlineWeight);
+    _program->setUniform(_uniformCache.outlineStyle, _colorSettings.outlineStyle);
+    _program->setUniform(_uniformCache.useCmapOutline, _colorSettings.applyCmapToOutline);
 
-    bool useColorMap = _hasColorMapFile && _colorSettings.colorMapping->enabled &&
+    bool useColorMap = hasColorData() && _colorSettings.colorMapping->enabled &&
         _colorSettings.colorMapping->texture();
 
-    _program->setUniform(_uniformCache.useColormap, useColorMap);
+    _program->setUniform(_uniformCache.useColorMap, useColorMap);
 
     ghoul::opengl::TextureUnit colorMapTextureUnit;
     _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
@@ -1211,6 +1301,8 @@ void RenderablePointCloud::renderBillboards(const RenderData& data,
             _colorSettings.colorMapping->useBelowRangeColor
         );
     }
+
+    _program->setUniform(_uniformCache.useOrientationData, useOrientationData());
 
     bool useTexture = _hasSpriteTexture && _texture.enabled;
     _program->setUniform(_uniformCache.hasSpriteTexture, useTexture);
@@ -1275,7 +1367,7 @@ void RenderablePointCloud::render(const RenderData& data, RendererTasks&) {
     glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
     if (_hasDataFile && _drawElements) {
-        renderBillboards(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
+        renderPoints(data, modelMatrix, orthoRight, orthoUp, fadeInVar);
     }
 
     if (_hasLabels) {
@@ -1314,10 +1406,52 @@ glm::dvec3 RenderablePointCloud::transformedPosition(
     return glm::dvec3(_transformationMatrix * position);
 }
 
+glm::quat RenderablePointCloud::orientationQuaternion(
+                                                const dataloader::Dataset::Entry& e) const
+{
+    const int orientationDataIndex = _dataset.orientationDataIndex;
+
+    const glm::vec3 u = glm::normalize(glm::vec3(
+        _transformationMatrix *
+        glm::dvec4(
+            e.data[orientationDataIndex + 0],
+            e.data[orientationDataIndex + 1],
+            e.data[orientationDataIndex + 2],
+            1.f
+        )
+    ));
+
+    const glm::vec3 v = glm::normalize(glm::vec3(
+        _transformationMatrix *
+        glm::dvec4(
+            e.data[orientationDataIndex + 3],
+            e.data[orientationDataIndex + 4],
+            e.data[orientationDataIndex + 5],
+            1.f
+        )
+    ));
+
+    // Get the quaternion that represents the rotation from XY plane to the plane that is
+    // spanned by the UV vectors.
+
+    // First rotate to align the z-axis with plane normal
+    const glm::vec3 planeNormal = glm::normalize(glm::cross(u, v));
+    glm::quat q = glm::normalize(glm::rotation(glm::vec3(0.f, 0.f, 1.f), planeNormal));
+
+    // Add rotation around plane normal (rotate new x-axis to u)
+    const glm::vec3 rotatedRight = glm::normalize(
+        glm::vec3(glm::mat4_cast(q) * glm::vec4(1.f, 0.f, 0.f, 1.f))
+    );
+    q = glm::normalize(glm::rotation(rotatedRight, u)) * q;
+
+    return q;
+}
+
 int RenderablePointCloud::nAttributesPerPoint() const {
     int n = 3; // position
-    n += _hasColorMapFile ? 1 : 0;
-    n += _hasDatavarSize ? 1 : 0;
+    n += hasColorData() ? 1 : 0;
+    n += hasSizeData() ? 1 : 0;
+    n += useOrientationData() ? 4 : 0;
     n += _hasSpriteTexture ? 1 : 0; // texture id
     return n;
 }
@@ -1370,12 +1504,16 @@ void RenderablePointCloud::updateBufferData() {
 
     offset = bufferVertexAttribute("in_position", 3, attibutesPerPoint, offset);
 
-    if (_hasColorMapFile) {
+    if (hasColorData()) {
         offset = bufferVertexAttribute("in_colorParameter", 1, attibutesPerPoint, offset);
     }
 
-    if (_hasDatavarSize) {
+    if (hasSizeData()) {
         offset = bufferVertexAttribute("in_scalingParameter", 1, attibutesPerPoint, offset);
+    }
+
+    if (useOrientationData()) {
+        offset = bufferVertexAttribute("in_orientation", 4, attibutesPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {
@@ -1432,7 +1570,7 @@ int RenderablePointCloud::currentColorParameterIndex() const {
         _colorSettings.colorMapping->dataColumn;
 
     if (!_hasColorMapFile || property.options().empty()) {
-        return 0;
+        return -1;
     }
 
     return _dataset.index(property.option().description);
@@ -1443,10 +1581,30 @@ int RenderablePointCloud::currentSizeParameterIndex() const {
         _sizeSettings.sizeMapping->parameterOption;
 
     if (!_hasDatavarSize || property.options().empty()) {
-        return 0;
+        return -1;
     }
 
     return _dataset.index(property.option().description);
+}
+
+bool RenderablePointCloud::hasColorData() const {
+    const int colorParamIndex = currentColorParameterIndex();
+    return _hasColorMapFile && colorParamIndex >= 0;
+}
+
+bool RenderablePointCloud::hasSizeData() const {
+    const int sizeParamIndex = currentSizeParameterIndex();
+    return _hasDatavarSize && sizeParamIndex >= 0;
+}
+
+bool RenderablePointCloud::hasMultiTextureData() const {
+    // What datavar is the texture, if any
+    const int textureIdIndex = _dataset.textureDataIndex;
+    return _hasSpriteTexture && textureIdIndex >= 0;
+}
+
+bool RenderablePointCloud::useOrientationData() const {
+    return _hasOrientationData && _useRotation;
 }
 
 void RenderablePointCloud::addPositionDataForPoint(unsigned int index,
@@ -1470,18 +1628,33 @@ void RenderablePointCloud::addColorAndSizeDataForPoint(unsigned int index,
 {
     const dataloader::Dataset::Entry& e = _dataset.entries[index];
 
-    int colorParamIndex = currentColorParameterIndex();
-    if (_hasColorMapFile && colorParamIndex >= 0) {
+    if (hasColorData()) {
+        const int colorParamIndex = currentColorParameterIndex();
         result.push_back(e.data[colorParamIndex]);
     }
 
-    int sizeParamIndex = currentSizeParameterIndex();
-    if (_hasDatavarSize && sizeParamIndex >= 0) {
+    if (hasSizeData()) {
+        const int sizeParamIndex = currentSizeParameterIndex();
         // @TODO: Consider more detailed control over the scaling. Currently the value
         // is multiplied with the value as is. Should have similar mapping properties
         // as the color mapping
-        result.push_back(e.data[sizeParamIndex]);
+
+        // Convert to diameter if data is given as radius
+        float multiplier = _sizeSettings.sizeMapping->isRadius ? 2.f : 1.f;
+        result.push_back(multiplier * e.data[sizeParamIndex]);
     }
+}
+
+void RenderablePointCloud::addOrientationDataForPoint(unsigned int index,
+                                                      std::vector<float>& result) const
+{
+    const dataloader::Dataset::Entry& e = _dataset.entries[index];
+    glm::quat q = orientationQuaternion(e);
+
+    result.push_back(q.x);
+    result.push_back(q.y);
+    result.push_back(q.z);
+    result.push_back(q.w);
 }
 
 std::vector<float> RenderablePointCloud::createDataSlice() {
@@ -1490,9 +1663,6 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
     if (_dataset.entries.empty()) {
         return std::vector<float>();
     }
-
-    // What datavar is the texture, if any
-    int textureIdIndex = _dataset.textureDataIndex;
 
     double maxRadius = 0.0;
 
@@ -1511,13 +1681,14 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         const dataloader::Dataset::Entry& e = _dataset.entries[i];
 
         unsigned int subresultIndex = 0;
+        // Default texture layer for single texture is zero
         float textureLayer = 0.f;
 
         bool useMultiTexture = (_textureMode == TextureInputMode::Multi) &&
-            (textureIdIndex >= 0);
+            hasMultiTextureData();
 
-        if (_hasSpriteTexture && useMultiTexture) {
-            int texId = static_cast<int>(e.data[textureIdIndex]);
+        if (useMultiTexture) {
+            int texId = static_cast<int>(e.data[_dataset.textureDataIndex]);
             size_t texIndex = _indexInDataToTextureIndex[texId];
             textureLayer = static_cast<float>(
                 _textureIndexToArrayMap[texIndex].layer
@@ -1530,6 +1701,10 @@ std::vector<float> RenderablePointCloud::createDataSlice() {
         // Add position, color and size data (subclasses may compute these differently)
         addPositionDataForPoint(i, subArrayToUse, maxRadius);
         addColorAndSizeDataForPoint(i, subArrayToUse);
+
+        if (useOrientationData()) {
+            addOrientationDataForPoint(i, subArrayToUse);
+        }
 
         // Texture layer
         if (_hasSpriteTexture) {

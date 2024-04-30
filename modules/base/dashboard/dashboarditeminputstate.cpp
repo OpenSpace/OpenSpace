@@ -37,40 +37,35 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowWhenEnabledInfo = {
         "ShowWhenEnabled",
         "Show when enabled",
-        "Show text when the input is enabled",
-        // @VISIBILITY(?)
+        "Show text when the input is enabled.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowWhenDisabledInfo = {
         "ShowWhenDisabled",
         "Show when disabled",
-        "Show text when the input is disabled",
-        // @VISIBILITY(?)
+        "Show text when the input is disabled.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowKeyboardInfo = {
         "ShowKeyboard",
         "Show Keyboard information",
-        "Display the state of the keyboard input",
-        // @VISIBILITY(?)
+        "Display the state of the keyboard input.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowMouseInfo = {
         "ShowMouse",
         "Show Mouse information",
-        "Display the state of the mouse input",
-        // @VISIBILITY(?)
+        "Display the state of the mouse input.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowJoystickInfo = {
         "ShowJoystick",
         "Show Joystick information",
-        "Display the state of the joystick input",
-        // @VISIBILITY(?)
+        "Display the state of the joystick input.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -172,9 +167,9 @@ void DashboardItemInputState::render(glm::vec2& penPosition) {
     }
 
     if (!text.empty()) {
+        penPosition.y -= _font->height();
         const std::string t = ghoul::join(std::move(text), "\n");
         RenderFont(*_font, penPosition, t);
-        penPosition.y -= _font->height();
     }
 }
 

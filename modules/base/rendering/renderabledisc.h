@@ -71,7 +71,8 @@ protected:
     std::unique_ptr<TextureComponent> _texture;
 
 private:
-    UniformCache(modelViewProjection, opacity, width, texture) _uniformCache;
+    UniformCache(modelViewProjectionTransform, opacity, width,
+        colorTexture) _uniformCache;
 
     bool _planeIsDirty = false;
 };

@@ -1,0 +1,30 @@
+-- Basic
+-- This asset creates a SceneGraphNode that only displays coordinate axes. The coordinate
+-- axis normally have a length of 1 meter and are scaled in this example by a factor of
+-- 149597870700, which means they will be 149597870700 m (1 AU) long, thus reaching the
+-- same distance as Earth's orbit around the Sun.
+
+local Node = {
+  Identifier = "StaticScale_Example",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 149597870700
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/StaticScale"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

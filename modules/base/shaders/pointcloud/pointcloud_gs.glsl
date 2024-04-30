@@ -30,6 +30,7 @@ layout(points) in;
 flat in float textureLayer[];
 flat in float colorParameter[];
 flat in float scalingParameter[];
+flat in vec4 orientation[]; // quaternion
 
 layout(triangle_strip, max_vertices = 4) out;
 flat out float gs_colorParameter;
@@ -48,6 +49,7 @@ uniform dmat4 modelMatrix;
 uniform bool enableMaxSizeControl;
 uniform bool hasDvarScaling;
 uniform float dvarScaleFactor;
+uniform bool useOrientationData;
 
 // RenderOption: CameraViewDirection
 uniform vec3 up;
@@ -72,6 +74,24 @@ const vec2 corners[4] = vec2[4](
 
 const int RenderOptionCameraViewDirection = 0;
 const int RenderOptionCameraPositionNormal = 1;
+const int RenderOptionFixedRotation = 2;
+
+// Quaternion math code from:
+// https://gist.github.com/mattatz/40a91588d5fb38240403f198a938a593
+
+vec4 quatMult(vec4 q1, vec4 q2) {
+  return vec4(
+    q2.xyz * q1.w + q1.xyz * q2.w + cross(q1.xyz, q2.xyz),
+    q1.w * q2.w - dot(q1.xyz, q2.xyz)
+  );
+}
+
+// Vector rotation with a quaternion
+// http://mathworld.wolfram.com/Quaternion.html
+vec3 rotate_vector(vec3 v, vec4 q) {
+  vec4 q_conjugate = q * vec4(-1.0, -1.0, -1.0, 1.0);
+  return quatMult(q, quatMult(vec4(v, 0.0), q_conjugate)).xyz;
+}
 
 void main() {
   vec4 pos = gl_in[0].gl_Position;
@@ -85,21 +105,32 @@ void main() {
     scaleMultiply *= scalingParameter[0] * dvarScaleFactor;
   }
 
-  vec3 scaledRight = vec3(0.0);
-  vec3 scaledUp = vec3(0.0);
+  vec3 scaledRight = vec3(1.0, 0.0, 0.0);
+  vec3 scaledUp = vec3(0.0, 1.0, 0.0);
 
   if (renderOption == RenderOptionCameraViewDirection) {
-    scaledRight = scaleMultiply * right * 0.5;
-    scaledUp = scaleMultiply * up * 0.5;
+    scaledRight = right;
+    scaledUp = up;
   }
   else if (renderOption == RenderOptionCameraPositionNormal) {
     vec3 normal = vec3(normalize(cameraPosition - dpos.xyz));
     vec3 newRight = normalize(cross(cameraLookUp, normal));
     vec3 newUp = cross(normal, newRight);
 
-    scaledRight = scaleMultiply * newRight * 0.5;
-    scaledUp = scaleMultiply * newUp * 0.5;
+    scaledRight = newRight;
+    scaledUp = newUp;
   }
+  else if (renderOption == RenderOptionFixedRotation) {
+    if (useOrientationData) {
+        vec4 quat = orientation[0];
+        scaledRight = normalize(rotate_vector(scaledRight, quat));
+        scaledUp =  normalize(rotate_vector(scaledUp, quat));
+    }
+    // Else use default
+  }
+
+  scaledRight *= scaleMultiply * 0.5;
+  scaledUp *= scaleMultiply * 0.5;
 
   if (enableMaxSizeControl) {
     // Limit the max size of the points, as the angle in "FOV" that the point is allowed

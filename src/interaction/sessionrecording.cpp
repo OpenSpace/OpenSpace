@@ -72,7 +72,7 @@ namespace {
         "RenderInfo",
         "Render Playback Information",
         "If enabled, information about a currently played back session recording is "
-        "rendering to screen",
+        "rendering to screen.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -80,7 +80,7 @@ namespace {
         "IgnoreRecordedScale",
         "Ignore Recorded Scale",
         "If this value is enabled, the scale value from a recording is ignored and the "
-        "computed values are used instead",
+        "computed values are used instead.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -89,7 +89,7 @@ namespace {
         "Add Model Matrix in ASCII recording",
         "If this is 'true', the model matrix is written into the ASCII recording format "
         "in the line before each camera keyframe. The model matrix is the full matrix "
-        "that converts the position into a J2000+Galactic reference frame",
+        "that converts the position into a J2000+Galactic reference frame.",
         openspace::properties::Property::Visibility::Developer
     };
 } // namespace

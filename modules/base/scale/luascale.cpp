@@ -42,8 +42,7 @@ namespace {
         "scaling factor for this transformation. The script needs to define a function "
         "'scale' that takes the current simulation time in seconds past the J2000 epoch "
         "as the first argument, the current wall time as milliseconds past the J2000 "
-        "epoch the second argument and computes the three scaling factors",
-        // @VISIBILITY(3.25)
+        "epoch the second argument and computes the three scaling factors.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

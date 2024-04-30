@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 10,
     Color = { 0.15, 0.1, 1.0 },
-    TrailFade = 25
+    TrailFade = 25,
+    PointSizeExponent = 10.5
   },
   GUI = {
     Name = "Chiron-type Comets",

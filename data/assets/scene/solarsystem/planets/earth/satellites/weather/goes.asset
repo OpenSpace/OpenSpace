@@ -21,7 +21,8 @@ local GoesSatellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
-    Fade = 1.5,
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },

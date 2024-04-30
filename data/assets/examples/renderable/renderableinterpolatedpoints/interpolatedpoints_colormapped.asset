@@ -1,0 +1,44 @@
+-- Interpolated Points with Color Mapping
+-- Example of interpolating points with a color map. The data value used for the coloring
+-- will also be interpolated, leading to the points changing color throughout the
+-- interpolation.
+--
+-- Note that the color map is loaded from another asset. This is a utility asset that
+-- includes some common color maps for general usage.
+
+local colormaps = asset.require("util/default_colormaps")
+
+local Node = {
+  Identifier = "RenderableInterpolatedPoints_Example_ColorMapped",
+  Renderable = {
+    Type = "RenderableInterpolatedPoints",
+    -- The dataset here is just a linearly expanding dataset, where the points move in
+    -- a straight line
+    File = asset.resource("data/interpolation_expand.csv"),
+    -- Specify how many objects the rows in the dataset represent. Here, the dataset is
+    -- consists of 10 objects with positions at 6 different time steps
+    NumberOfObjects = 10,
+    Coloring = {
+      ColorMapping = {
+        -- For this example, we are using one of the example colormaps "Viridis"
+        File = colormaps.Uniform.Viridis
+      }
+    },
+    -- Reduce the scale of the points a bit compared to default, so we see them more clearly
+    SizeSettings = {
+      ScaleExponent = 3.5
+    }
+  },
+  GUI = {
+    Name = "Color Mapped",
+    Path = "/Examples/RenderableInterpolatedPoints"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

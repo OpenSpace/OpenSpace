@@ -38,7 +38,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Whether the light source is enabled or not",
+        "Whether the light source is enabled or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

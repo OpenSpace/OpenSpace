@@ -71,10 +71,8 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "Stepsize",
-        //"StepSize",
-        "Fieldline Step Size",
+        "Fieldline Step Size.",
         "", // @TODO Missing documentation
-        // @VISIBILITY(2.75)
         openspace::properties::Property::Visibility::User
     };
 

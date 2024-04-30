@@ -67,7 +67,9 @@ private:
     void reset();
 
     /// The number of vertices that we calculate during each frame of the full sweep pass
-    unsigned int _sweepChunkSize = 200;
+    properties::IntProperty _sweepChunkSize;
+    /// Enables or disables iterative vertex calculations during a full sweep
+    properties::BoolProperty _enableSweepChunking;
 
     /// The start time of the trail
     properties::StringProperty _startTime;
@@ -80,6 +82,9 @@ private:
     properties::IntProperty _timeStampSubsamplingFactor;
     /// Determines whether the full trail should be rendered or the future trail removed
     properties::BoolProperty _renderFullTrail;
+    /// Determines how many vertices around the object that will be 
+    /// replaced during full trail rendering
+    properties::IntProperty _numberOfReplacementPoints;
 
     /// Dirty flag that determines whether the full vertex buffer needs to be resampled
     bool _needsFullSweep = true;
@@ -87,7 +92,7 @@ private:
     /// Dirty flag to determine whether the stride information needs to be changed
     bool _subsamplingIsDirty = true;
 
-    std::array<TrailVBOLayout, 2> _auxiliaryVboData = {};
+    std::array<TrailVBOLayout<float>, 2> _auxiliaryVboData = {};
 
     /// The conversion of the _startTime into the internal time format
     double _start = 0.0;
@@ -104,8 +109,17 @@ private:
     double _totalSampleInterval = 0.0;
 
     /// Max and min vertex used to calculate the bounding sphere
-    glm::vec3 _maxVertex;
-    glm::vec3 _minVertex;
+    glm::dvec3 _maxVertex;
+    glm::dvec3 _minVertex;
+
+    /// Contains all timestamps corresponding to the positions in _vertexArray
+    std::vector<double> _timeVector;
+    
+    /// Keeps track of all double precision vertices of trails
+    std::vector<TrailVBOLayout<double>> _dVertexArray;
+
+    /// Contains all the points that we will render in model-space
+    std::vector<TrailVBOLayout<float>> _replacementPoints;
 };
 
 } // namespace openspace

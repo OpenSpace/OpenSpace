@@ -32,13 +32,18 @@ namespace {
         "Scale",
         "Scale",
         "This value is used as a scaling factor for the scene graph node that this "
-        "transformation is attached to relative to its parent",
+        "transformation is attached to relative to its parent.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    // This Scale type scales the scene graph node that it is attached to by a fixed
+    // amount that does not change over time. It is possible to change the fixed scale
+    // after starting the application, but it otherwise remains unchanged. The scaling is
+    // a simple multiplication so that a `Scale` value of 10 means that the object will be
+    // 10 times larger than its original size.
     struct [[codegen::Dictionary(StaticScale)]] Parameters {
         // [[codegen::verbatim(ScaleInfo.description)]]
-        float scale;
+        double scale;
     };
 #include "staticscale_codegen.cpp"
 } // namespace
@@ -49,23 +54,25 @@ documentation::Documentation StaticScale::Documentation() {
     return codegen::doc<Parameters>("base_scale_static");
 }
 
-glm::dvec3 StaticScale::scaleValue(const UpdateData&) const {
-    return glm::dvec3(_scaleValue);
-}
-
-StaticScale::StaticScale() : _scaleValue(ScaleInfo, 1.f, 0.1f, 100.f) {
-    addProperty(_scaleValue);
-
-    _scaleValue.onChange([this]() {
-        requireUpdate();
-    });
-    _type = "StaticScale";
-}
-
-StaticScale::StaticScale(const ghoul::Dictionary& dictionary) : StaticScale() {
+StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
+    : StaticScale()
+{
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _scaleValue = p.scale;
     _type = "StaticScale";
+}
+
+StaticScale::StaticScale()
+    : _scaleValue(ScaleInfo, 1.0, 0.1, 100.0)
+{
+    addProperty(_scaleValue);
+
+    _scaleValue.onChange([this]() { requireUpdate(); });
+    _type = "StaticScale";
+}
+
+glm::dvec3 StaticScale::scaleValue(const UpdateData&) const {
+    return glm::dvec3(_scaleValue);
 }
 
 } // namespace openspace

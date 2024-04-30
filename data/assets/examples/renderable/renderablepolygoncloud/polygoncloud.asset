@@ -1,0 +1,29 @@
+-- Basic
+-- Example of a polygon cloud, which is a point cloud where a uniform polygon is used
+-- for the shape of the points.
+
+local Node = {
+  Identifier = "RenderablePolygonCloud_Example",
+  Renderable = {
+    Type = "RenderablePolygonCloud",
+    File = asset.resource("../renderablepointcloud/data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.8, 0.0, 0.0 }
+    },
+    -- Specify the number of sides for the polygon. 3 = triangle, 4 = square,
+    -- 5 = pentagon, 6 = hexagon, and so on
+    PolygonSides = 6
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/RenderablePolygonCloud"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

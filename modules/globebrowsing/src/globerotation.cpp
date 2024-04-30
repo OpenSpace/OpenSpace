@@ -40,8 +40,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
-        "The globe on which the longitude/latitude is specified",
-        // @VISIBILITY(2.5)
+        "The globe on which the longitude/latitude is specified.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -50,8 +49,7 @@ namespace {
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0",
-        // @VISIBILITY(2.25)
+        "globe. The default value is 0.0.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -60,8 +58,7 @@ namespace {
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0",
-        // @VISIBILITY(2.25)
+        "globe. The default value is 0.0.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -69,7 +66,7 @@ namespace {
         "Angle",
         "Angle",
         "A rotation angle that can be used to rotate the object around its own y-axis, "
-        "which will be pointing out of the globe's surface",
+        "which will be pointing out of the globe's surface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -78,16 +75,14 @@ namespace {
         "Use Heightmap",
         "If set to true, the heightmap will be used when computing the surface normal. "
         "This means that the object will be rotated to lay flat on the surface at the "
-        "given coordinate and follow the shape of the landscape",
-        // @VISIBILITY(2.5)
+        "given coordinate and follow the shape of the landscape.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseCameraInfo = {
         "UseCamera",
         "Use Camera",
-        "If this value is 'true', the lat and lon are updated to match the camera",
-        // @VISIBILITY(?)
+        "If this value is 'true', the lat and lon are updated to match the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

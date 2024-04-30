@@ -1,0 +1,48 @@
+-- Color Mapping with Pre-set Options and Missing Values
+-- This example creates a point cloud where the color is set from a color map and the
+-- options for parameters to color by are pre-set to a limited number of options,
+-- including settings for which range to use. It also includes settings to render
+-- missing data values in gray.
+--
+-- Note that the color map is loaded from another asset. This is a utility asset that
+-- includes some common color maps for general usage.
+
+local colormaps = asset.require("util/default_colormaps")
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_ColorMapped_More",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Coloring = {
+      ColorMapping = {
+        File = colormaps.Uniform.Viridis,
+        -- Specify which parameters we want to show up in the user interface, as
+        -- well as what range we want the color mapping to be done based on. If not
+        -- included, all the columns in the data file would be exposed as options
+        ParameterOptions = {
+          { Key = "number_withNan" }, -- No range => compute min and max
+          { Key = "normaldist_withMissing", Range = { -0.5, 0.5 } }
+        },
+        -- Also show missing data values in a specific color
+        ShowMissingData = true,
+        NoDataColor = { 0.5, 0.5, 0.5, 1.0 }
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 6.5
+    }
+  },
+  GUI = {
+    Name = "Color Mapped with Settings",
+    Path = "/Examples/RenderablePointCloud"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

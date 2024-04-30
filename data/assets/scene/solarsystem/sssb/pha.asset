@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 3,
     Color = { 0.98, 0.09, 0.06 },
-    TrailFade = 17
+    TrailFade = 17,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Potentially Hazardous Asteroids",

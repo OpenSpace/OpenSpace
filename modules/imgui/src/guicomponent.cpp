@@ -28,16 +28,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "This setting determines whether this object will be visible or not",
-        // @VISIBILITY(3.4)
+        "This setting determines whether this object will be visible or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is Collapsed",
-        "This setting determines whether this window is collapsed or not",
-        // @VISIBILITY(3.4)
+        "This setting determines whether this window is collapsed or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace

@@ -24,48 +24,23 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
-layout (location = 1) in vec2 orbitData; // 1: epoch, 2: period
+in vec3 in_position;
+in float in_textureLayer;
+in float in_colorParameter;
+in float in_scalingParameter;
+in vec4 in_orientation; // quaternion
 
-out vec4 viewSpacePosition;
-out float viewSpaceDepth;
-out float periodFraction;
-out float offsetPeriods;
-
-uniform dmat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform double inGameTime;
-
+flat out float textureLayer;
+flat out float colorParameter;
+flat out float scalingParameter;
+flat out vec4 orientation; // quaternion
 
 void main() {
-  // The way the position and line fade is calculated is:
-  // By using inGameTime, epoch and period of this orbit, we get how many revolutions it
-  // has done since epoch. The fract of that, is how far into a revolution it has traveled
-  // since epoch. Similarly we do the same but for this vertex, but calculating
-  // offsetPeriods. In the fragment shader the difference between periodFraction_f and
-  // offsetPeriods is calculated to know how much to fade that specific fragment.
-
-  // If orbit_data is doubles, cast to float first
-  float epoch = orbitData.x;
-  float period = orbitData.y;
-
-  // calculate nr of periods, get fractional part to know where the vertex closest to the
-  // debris part is right now
-  double nrOfRevolutions = (inGameTime - epoch) / period;
-  double frac = double(int(nrOfRevolutions));
-  double periodFractiond = nrOfRevolutions - frac;
-  if (periodFractiond < 0.0) {
-    periodFractiond += 1.0;
-  }
-  periodFraction = float(periodFractiond);
-
-  // same procedure for the current vertex
-  offsetPeriods = vertexData.w / float(period);
-
-  viewSpacePosition = vec4(modelViewTransform * dvec4(vertexData.xyz, 1));
-  vec4 vs_position = z_normalization(projectionTransform * viewSpacePosition);
-  gl_Position = vs_position;
-  viewSpaceDepth = vs_position.w;
+  textureLayer = in_textureLayer;
+  colorParameter = in_colorParameter;
+  scalingParameter = in_scalingParameter;
+  orientation = in_orientation;
+  gl_Position = vec4(in_position, 1.0);
 }

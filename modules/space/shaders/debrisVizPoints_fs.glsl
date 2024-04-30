@@ -24,93 +24,39 @@
 
 #include "fragment.glsl"
 
-flat in float gs_colorParameter;
-flat in float vs_screenSpaceDepth;
-flat in vec4 vs_positionViewSpace;
+in float projectionViewDepth;
+in vec4 viewSpace;
 in vec2 texCoord;
-flat in int layer;
+flat in int skip;
 
-uniform float opacity;
-uniform vec3 color;
-
-uniform vec4 nanColor = vec4(0.5);
-uniform bool useNanColor = true;
-
-uniform vec4 aboveRangeColor;
-uniform bool useAboveRangeColor;
-
-uniform vec4 belowRangeColor;
-uniform bool useBelowRangeColor;
-
-uniform bool hasSpriteTexture;
-uniform sampler2DArray spriteTexture;
-
-uniform bool useColorMap;
-uniform sampler1D colorMapTexture;
-uniform float cmapRangeMin;
-uniform float cmapRangeMax;
-uniform bool hideOutsideRange;
 uniform bool enableOutline;
 uniform vec3 outlineColor;
 uniform float outlineWeight;
-
-uniform float fadeInValue;
-
-vec4 sampleColorMap(float dataValue) {
-    if (useNanColor && isnan(dataValue)) {
-        return nanColor;
-    }
-
-    bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
-    if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
-        discard;
-    }
-
-    if (useBelowRangeColor && dataValue < cmapRangeMin) {
-        return belowRangeColor;
-    }
-
-    if (useAboveRangeColor && dataValue > cmapRangeMax) {
-        return aboveRangeColor;
-    }
-
-    float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
-    t = clamp(t, 0.0, 1.0);
-    return texture(colorMapTexture, t);
-}
+uniform vec3 color;
+uniform float opacity;
 
 Fragment getFragment() {
-  if (fadeInValue == 0.0 || opacity == 0.0) {
-    discard;
-  }
-
-  // Moving the origin to the center and calculating the length
-  float lengthFromCenter = length((texCoord - vec2(0.5)) * 2.0);
-  if (!hasSpriteTexture && (lengthFromCenter > 1.0)) {
-    discard;
-  }
-
-  vec4 fullColor = vec4(color, 1.0);
-  if (useColorMap) {
-    fullColor = sampleColorMap(gs_colorParameter);
-  }
-
-  if (hasSpriteTexture) {
-    fullColor *= texture(spriteTexture, vec3(texCoord, layer));
-  }
-  else if (enableOutline && (lengthFromCenter > (1.0 - outlineWeight))) {
-    fullColor.rgb = outlineColor;
-  }
-
-  fullColor.a *= opacity * fadeInValue;
-  if (fullColor.a < 0.01) {
-    discard;
-  }
-
   Fragment frag;
-  frag.color = fullColor;
-  frag.depth = vs_screenSpaceDepth;
-  frag.gPosition = vs_positionViewSpace;
+  
+  if (skip == 1) {
+    discard;
+  }
+
+  // Only draw circle instead of entire quad
+  vec2 st = (texCoord - vec2(0.5)) * 2.0;
+  if (length(st) > 1.0) {
+    discard;
+  }
+
+  // Creates outline for circle
+  vec3 _color = color;
+  if (enableOutline && (length(st) > (1.0 - outlineWeight) && length(st) < 1.0)) {
+    _color = outlineColor;
+  }
+
+  frag.color = vec4(_color, opacity);
+  frag.depth = projectionViewDepth;
+  frag.gPosition = viewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
   return frag;

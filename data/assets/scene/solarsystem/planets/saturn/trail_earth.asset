@@ -14,9 +14,9 @@ local SaturnTrailEarth = {
       Target = coreKernels.ID.Saturn,
       Observer = coreKernels.ID.Earth
     },
-    Color = { 1.0, 0.5, 0.2 },
-    Period = 224.695,
-    Resolution = 1000
+    Color = { 0.85, 0.75, 0.51 },
+    Period = 10746.94,
+    Resolution = 3000
   },
   Tag = { "planetTrail_solarSystem_alt", "planetTrail_terrestrial_alt" },
   GUI = {

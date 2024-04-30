@@ -51,7 +51,7 @@ namespace {
         "Use Fixed Time",
         "If this value is enabled, the time-varying timevarying dataset will always use "
         "the time that is specified in the 'FixedTime' property, rather than using the "
-        "actual time from OpenSpace",
+        "actual time from OpenSpace.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -59,7 +59,7 @@ namespace {
         "FixedTime",
         "Fixed Time",
         "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
-        "time taken from OpenSpace for the displayed tiles",
+        "time taken from OpenSpace for the displayed tiles.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

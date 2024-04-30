@@ -65,15 +65,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Enable/Disable Shadows",
+        "Enable/Disable Shadows.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
         "Save Depth Texture",
-        "Debug",
-        // @VISIBILITY(3.67)
+        "Debug.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -81,16 +80,14 @@ namespace {
         "DistanceFraction",
         "Distance Fraction",
         "Distance fraction of original distance from light source to the globe to be "
-        "considered as the new light source distance",
-        // @VISIBILITY(3.67)
+        "considered as the new light source distance.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DepthMapSizeInfo = {
         "DepthMapSize",
         "Depth Map Size",
-        "The depth map size in pixels. You must entry the width and height values",
-        // @VISIBILITY(3.67)
+        "The depth map size in pixels. You must entry the width and height values.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

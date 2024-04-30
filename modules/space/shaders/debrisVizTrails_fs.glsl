@@ -22,22 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include "fragment.glsl"
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+in vec4 viewSpacePosition;
+in float viewSpaceDepth;
+in float periodFraction;
+in float offsetPeriods;
 
-in vec3 in_position;
-in float in_textureLayer;
-in float in_colorParameter;
-in float in_scalingParameter;
+uniform vec3 color;
+uniform float opacity = 1.0;
+uniform float trailFade;
 
-flat out float textureLayer;
-flat out float colorParameter;
-flat out float scalingParameter;
+/// Different modes - sync with renderableorbitalkepler.cpp
+// RenderingModeLines = 0
+// RenderingModePoint = 1
 
-void main() {
-  textureLayer = in_textureLayer;
-  colorParameter = in_colorParameter;
-  scalingParameter = in_scalingParameter;
-  gl_Position = vec4(in_position, 1.0);
+Fragment getFragment() {
+  Fragment frag;
+
+  float invert = 1.0;
+  float fade = 1.0;
+
+  // float offsetPeriods = offset / period;
+  // This is now done in the fragment shader instead to make smooth movement between
+  // vertices. We want vertexDistance to be double up to this point, I think, (hence the
+  // unnessesary float to float conversion)
+  float vertexDistance = periodFraction - offsetPeriods;
+
+  // This is the alternative way of calculating
+  // the offsetPeriods: (vertexID_perOrbit/nrOfSegments_f)
+  // float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
+  // float nrOfSegments_f = float(numberOfSegments);
+  // float vertexDistance = periodFraction - (vertexID_perOrbit/nrOfSegments_f);
+  if (vertexDistance < 0.0) {
+    vertexDistance += 1.0;
+  }
+
+  invert = pow((1.0 - vertexDistance), trailFade);  
+  fade = clamp(invert, 0.0, 1.0);
+
+  // Currently even fully transparent lines can occlude other lines, thus we discard these
+  // fragments since debris and satellites are rendered so close to each other
+  if (fade < 0.05) {
+    discard;
+  }
+  
+  // Use additive blending for some values to make the discarding less abrupt
+  if (fade < 0.15) {
+    frag.blend = BLEND_MODE_ADDITIVE;
+  }
+  frag.color = vec4(color, fade * opacity);
+  frag.depth = viewSpaceDepth;
+  frag.gPosition = viewSpacePosition;
+  frag.gNormal = vec4(1.0, 1.0, 1.0, 0.0);
+
+  return frag;
 }

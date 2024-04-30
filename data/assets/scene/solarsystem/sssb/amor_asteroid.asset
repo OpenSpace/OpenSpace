@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 4,
     Color = { 1.0, 1.0, 1.0 },
-    TrailFade = 11
+    TrailFade = 11,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Amor Asteroids",

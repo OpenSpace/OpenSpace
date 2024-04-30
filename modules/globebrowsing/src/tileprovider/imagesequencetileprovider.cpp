@@ -33,8 +33,7 @@ namespace {
         "Index",
         "Index",
         "The index into the list of images that is used to pick the currently displayed "
-        "image",
-        // @VISIBILITY(2.33)
+        "image.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -42,16 +41,14 @@ namespace {
         "NumberImages",
         "Number of Images",
         "The number of images that can be shown. The 'Index' value must be between 0 and "
-        "this value - 1",
-        // @VISIBILITY(?)
+        "this value - 1.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentImageInfo = {
         "CurrentImage",
         "Current Image",
-        "The read-only value of the currently selected image",
-        // @VISIBILITY(2.33)
+        "The read-only value of the currently selected image.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -59,7 +56,7 @@ namespace {
         "FolderPath",
         "Folder Path",
         "The path that is used to look for images for this image provider. The path must "
-        "point to an existing folder that contains images",
+        "point to an existing folder that contains images.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

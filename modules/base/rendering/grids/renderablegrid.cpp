@@ -39,16 +39,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered",
-        // @VISIBILITY(1.25)
+        "This value determines the color of the grid lines that are rendered.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
         "Highlight Color",
-        "This value determines the color of the highlighted lines in the grid",
-        // @VISIBILITY(1.25)
+        "This value determines the color of the highlighted lines in the grid.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -56,8 +54,7 @@ namespace {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that are used to render the "
-        "grid in each direction",
-        // @VISIBILITY(2.75)
+        "grid in each direction.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -73,29 +70,28 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the grid",
-        // @VISIBILITY(1.5)
+        "This value specifies the line width of the grid.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
         "Highlight Line Width",
-        "This value specifies the line width of the highlighted lines in the grid",
+        "This value specifies the line width of the highlighted lines in the grid.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid Size",
-        "This value species the size of each dimensions of the grid",
+        "This value species the size of each dimensions of the grid.",
         openspace::properties::Property::Visibility::User
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the grid"
+        "The labels for the grid."
     };
 
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {

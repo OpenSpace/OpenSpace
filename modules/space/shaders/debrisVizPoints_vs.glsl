@@ -24,73 +24,25 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
+layout (location = 1) in vec2 orbitData; // 1: epoch, 2: period
 
-in vec3 in_position0;
-in vec3 in_position1;
+uniform double inGameTime;
+uniform dmat4 modelTransform;
 
-// Only used if spline interpolation is desired
-in vec3 in_position_before;
-in vec3 in_position_after;
-
-in float in_colorParameter0;
-in float in_colorParameter1;
-in float in_scalingParameter0;
-in float in_scalingParameter1;
-
-in float in_textureLayer;
-
-uniform bool useSpline;
-uniform float interpolationValue;
-
-flat out float textureLayer;
-flat out float colorParameter;
-flat out float scalingParameter;
-
-float interpolateDataValue(float v0, float v1, float t) {
-  const float Epsilon = 1E-7;
-  const float NaN = log(-1.0); // undefined
-  // To make sure we render values at knots with neighboring missing values,
-  // check 0 and 1 expicitly
-  if (abs(t) < Epsilon) {
-      return v0;
-  }
-  if (abs(1.0 - t) < Epsilon) {
-      return v1;
-  }
-  bool isMissing = isnan(v0) || isnan(v1);
-  return isMissing ? NaN : mix(v0, v1, t);
-}
-
-vec3 interpolateCatmullRom(float t, vec3 p0, vec3 p1, vec3 p2, vec3 p3) {
-    float t2 = t * t;
-    float t3 = t2 * t;
-    return 0.5 * (
-        2.0 * p1 +
-        t * (p2 - p0) +
-        t2 * (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) +
-        t3 * (3.0 * p1 - p0  - 3.0 * p2 + p3)
-    );
-}
+flat out double currentRevolutionFraction;
+flat out double vertexRevolutionFraction;
 
 void main() {
-  float t = interpolationValue;
+  float epoch = orbitData.x;
+  float period = orbitData.y;
+  double numOfRevolutions = (inGameTime - epoch) / period;
 
-  colorParameter = interpolateDataValue(in_colorParameter0, in_colorParameter1, t);
-  scalingParameter = interpolateDataValue(in_scalingParameter0, in_scalingParameter1, t);
-
-  vec3 position = mix(in_position0, in_position1, t);
-  if (useSpline) {
-    position = interpolateCatmullRom(
-      t,
-      in_position_before,
-      in_position0,
-      in_position1,
-      in_position_after
-    );
+  vertexRevolutionFraction = vertexData.w / period;
+  currentRevolutionFraction = numOfRevolutions - double(int(numOfRevolutions));
+  if (currentRevolutionFraction < 0.0) {
+    currentRevolutionFraction += 1.0;
   }
 
-  textureLayer = in_textureLayer;
-
-  gl_Position = vec4(position, 1.0);
+  gl_Position = vec4(vertexData.xyz, 1.0);
 }

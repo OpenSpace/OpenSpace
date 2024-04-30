@@ -64,30 +64,28 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Enables and disables labels' rendering",
+        "Enables and disables labels' rendering.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "Font size for the rendering labels. This is different fromt text size",
-        // @VISIBILITY(2.75)
+        "Font size for the rendering labels. This is different fromt text size.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min/Max Text Size",
-        "Minimum and maximum label size, in pixels",
+        "Minimum and maximum label size, in pixels.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "LabelsSize",
         "Labels Size",
-        "This value affects the size scale of the labels",
-        // @VISIBILITY(2.5)
+        "This value affects the size scale of the labels.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -95,16 +93,14 @@ namespace {
         "HeightOffset",
         "Height Offset",
         "This value moves the label away from the globe surface by the specified "
-        "distance (in meters)",
-        // @VISIBILITY(2.75)
+        "distance (in meters).",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The text color of the labels",
-        // @VISIBILITY(1.2)
+        "The text color of the labels.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -113,7 +109,7 @@ namespace {
         "Fade-In Distances",
         "The distances above the globe's surface at which the labels start fading in or "
         "out, given in meters. The final distances are also adjusted by the specified "
-        "height offset",
+        "height offset.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -121,7 +117,7 @@ namespace {
         "FadeInEnabled",
         "Fade In Enabled",
         "Sets whether the labels fade in when approaching the globe from a distance. If "
-        "false, no fading happens and the labels immediately has full opacity",
+        "false, no fading happens and the labels immediately has full opacity.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -129,29 +125,28 @@ namespace {
         "FadeOutEnabled",
         "Fade Out Enabled",
         "Sets whether the labels fade out when approaching the surface of the globe. If "
-        "false, no fading happens and the labels stays in full opacity",
+        "false, no fading happens and the labels stays in full opacity.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableCullingInfo = {
         "DisableCulling",
         "Culling Disabled",
-        "Labels culling disabled",
+        "Labels culling disabled.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceEPSInfo = {
         "DistanceEPS",
         "Culling Distance",
-        "Labels culling distance from globe's center",
+        "Labels culling distance from globe's center.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlignmentOptionInfo = {
         "AlignmentOption",
         "Alignment Option",
-        "Labels are aligned horizontally or circularly related to the planet",
-        // @VISIBILITY(2.75)
+        "Labels are aligned horizontally or circularly related to the planet.",
         openspace::properties::Property::Visibility::User
     };
 
