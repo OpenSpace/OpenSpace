@@ -74,7 +74,7 @@ namespace {
         "Indicator Length",
         "The length of the speed indicator line, given in seconds. The length will be "
         "computed as the speed times this value. For example, a value of 1 will make it "
-        "as long as the distance it would travel over one second.",
+        "as long as the distance it would travel over one second with the specified speed.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -88,12 +88,12 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    // This renderable can be used to visualize a certain travel speed, using a line that
-    // moves in the provided speed from a start object to a target. The start position
+    // This renderable can be used to visualize a certain travel speed using a line that
+    // moves at the provided speed from a start object to a target. The start position
     // will be set from the Parent scene graph node, and the end position is set from the
     // provided target. Per default, the speed is set to the speed of light.
     //
-    // The length of the travelling line is set based on the travel speed and can be used
+    // The length of the traveling line is set based on the travel speed and can be used
     // to show more information related to the distance travelled. For example, a length
     // of 1 shows how far an object would move over a duration of one second based on the
     // selected speed.
