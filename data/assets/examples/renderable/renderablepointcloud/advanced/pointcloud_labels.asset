@@ -1,0 +1,84 @@
+-- Labels
+-- This example creates a point cloud with labels created from a column in the dataset
+-- or from a separate .labels file.
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_Labels",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("../data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.0, 1.0, 0.3 }
+    },
+    DataMapping = {
+      -- When loading labels from a CSV file, we need to provide information about
+      -- which column corresponds to the name to be used for the labels (this is
+      -- not required for SPECK files)
+      Name = "number_withNan"
+    },
+    -- Add a unit to interpret the points to be in kilometers rather than meters
+    Unit = "Km",
+    -- Add some labels. We also need to enable them for them to be visible.
+    -- The positions and text of the labels will be set based on the information
+    -- in the CSV file
+    Labels = {
+      Enabled = true,
+      -- Give the labels a size that looks good
+      Size = 7.5
+    }
+  },
+  GUI = {
+    Name = "Labels",
+    Path = "/Examples/RenderablePointCloud/Advanced"
+  }
+}
+
+-- @TODO (2024-04-30, emmbr) These labels are not correctly oriented towards the camera.
+-- This is a known bug waiting to be fixed (related Github issues are #2493, #1605,
+-- and #1266).
+
+local Node_LabelsFile = {
+  Identifier = "RenderablePointCloud_Example_LabelsFile",
+  -- Rotate to not overlap with the other dataset
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, -0.5 * math.pi }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("../data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.0, 0.3, 1.0 }
+    },
+    -- Add a unit to interpret the points to be in kilometers rather than meters
+    Unit = "Km",
+    -- Also load a label file with the positions of the label (in this case they are the
+    -- same as in the CSV file, but that is not always the case)
+    Labels = {
+      Enabled = true,
+      File = asset.resource("../data/dummydata.label"),
+      Size = 7.5,
+      -- When we add an explicit label file we also have to specify the unit, if it is
+      -- different than meters
+      Unit = "Km"
+    }
+  },
+  GUI = {
+    Name = "Labels - Custom File",
+    Path = "/Examples/RenderablePointCloud/Advanced",
+    Description = [[Example of a point cloud with labels, created from a .label file]]
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+  openspace.addSceneGraphNode(Node_LabelsFile)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(Node_LabelsFile)
+end)
+
