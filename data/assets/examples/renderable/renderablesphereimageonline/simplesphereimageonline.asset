@@ -1,28 +1,27 @@
-local Radius = 696340000 * 20 -- The radius of the Sun in meters, times 20
+-- Basic
+-- This example will show a sphere that is covered with an image which is retrieved from
+-- an online URL. The image will be stretched over the entire sphere as an equirectangular
+-- projection
 
-local SimpleSphereOnlineImage = {
-  Identifier = "SimpleSphereOnlineImage",
+local Node = {
+  Identifier = "RenderableSphereImageOnline_Example",
   Renderable = {
     Type = "RenderableSphereImageOnline",
     URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg",
 
     -- Parameters from the parent class `RenderableSphere`
-    Size = Radius,
     Segments = 16
   },
   GUI = {
-    Name = "Simple Sphere Online Image",
-    Path = "/Examples",
-    Description = "Simple sphere with an online image of an owl"
+    Name = "Basic",
+    Path = "/Examples/RenderableSphereImageOnline"
   }
 }
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(SimpleSphereOnlineImage)
+  openspace.addSceneGraphNode(Node)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SimpleSphereOnlineImage)
+  openspace.removeSceneGraphNode(Node)
 end)
-
-asset.export(SimpleSphereOnlineImage)

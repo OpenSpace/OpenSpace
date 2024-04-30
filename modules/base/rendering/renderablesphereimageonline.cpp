@@ -66,8 +66,8 @@ namespace {
     }
 
     // A RenderableSphereImageOnline can be used to show an image from an online source
-    // (as a URL) on a sphere in the OpenSpace scene. For more informaiton about a general
-    // RenderableSphere see [RenderableSphere](#base_renderable_sphere).
+    // (as a URL) on a sphere in the OpenSpace scene. The image should be provided in an
+    // equirectangular projection, if it is a map that is draped over the sphere.
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
@@ -78,7 +78,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphereImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphere_image_online");
+    return codegen::doc<Parameters>(
+        "base_renderable_sphereimageonline",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableSphereImageOnline::RenderableSphereImageOnline(
