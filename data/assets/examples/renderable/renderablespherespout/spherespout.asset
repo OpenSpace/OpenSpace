@@ -1,0 +1,30 @@
+-- Basic
+-- This example renders a sphere with a texture that is provided by another application
+-- on the same computer using the SPOUT library. Note that this library is only available
+-- on Windows. A SPOUT-enabled application can share a texture using a user-defined
+-- name, which is used as the `SpoutName` here to receive that image. This allows the
+-- integration of any generated image.
+
+local Node = {
+  Identifier = "RenderableSphereSpout_Example",
+  Renderable = {
+    Type = "RenderableSphereSpout",
+    Size = 333,
+    Segments = 32,
+    -- The name under which the other application is sharing an image
+    SpoutName = "WV_SPOUT"
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/RenderableSphereSpout"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
