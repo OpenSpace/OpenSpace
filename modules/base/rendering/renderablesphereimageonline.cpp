@@ -64,7 +64,7 @@ namespace {
         );
     }
 
-    struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
+    struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
     };
@@ -74,7 +74,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphereImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphere_image_online");
+    return codegen::doc<Parameters>(
+        "base_renderable_sphere_image_online",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableSphereImageOnline::RenderableSphereImageOnline(
