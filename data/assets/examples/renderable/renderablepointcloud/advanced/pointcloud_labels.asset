@@ -33,7 +33,9 @@ local Node = {
   }
 }
 
--- @TODO These labels are not correctly oriented towards the camera!
+-- @TODO (2024-04-30, emmbr) These labels are not correctly oriented towards the camera.
+-- This is a known bug waiting to be fixed (related Github issues are #2493, #1605,
+-- and #1266).
 
 local Node_LabelsFile = {
   Identifier = "RenderablePointCloud_Example_LabelsFile",
