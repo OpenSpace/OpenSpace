@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGSPHERE___H__
 
 #include <modules/base/rendering/renderablesphere.h>
+#include <openspace/util/dynamicfilesequencedownloader.h>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -38,6 +39,14 @@ namespace documentation { struct Documentation; }
 
 class RenderableTimeVaryingSphere : public RenderableSphere {
 public:
+    //0: static loading and static downloading
+    //1: dynamic loading and static downloading
+    //2: dynamic loading and dynamic downloading
+    enum class LoadingType {
+        StaticLoading = 0,
+        DynamicLoading = 1,
+        DynamicDownloading = 2
+    };
     RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
@@ -48,24 +57,51 @@ public:
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
+    struct File {
+        enum class FileStatus {
+            Downloaded,
+            Loaded
+        };
+        FileStatus status;
+        std::filesystem::path path;
+        double time;
+        std::unique_ptr<ghoul::opengl::Texture> texture;
 
+        bool operator< (const File& other) const {
+            return time < other.time;
+        }
+    };
 protected:
     void bindTexture() override;
 
 private:
-    struct FileData {
-        std::string path;
-        double time;
-        std::unique_ptr<ghoul::opengl::Texture> texture;
-    };
+
     void loadTexture();
     void extractMandatoryInfoFromSourceFolder();
+    void readInFile(std::filesystem::path path);
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
+    void setupDynamicDownloading(const std::optional<int>& dataID,
+        const std::optional<int>& numberOfFiles,
+        const std::optional<std::string>& infoURL,
+        const std::optional<std::string>& dataURL);
+    void updateDynamicDownloading(const double currentTime, const double deltaTime);
 
     // If there's just one state it should never disappear!
     double _sequenceEndTime = std::numeric_limits<double>::max();
-    std::vector<FileData> _files;
+    // Static Loading on default / if not specified
+    LoadingType _loadingType = LoadingType::StaticLoading;
+    // dataID that corresponds to what dataset to use if using DynamicDownloading
+    int _dataID;
+    // number of files to queue up at a time
+    int _nOfFilesToQueue = 10;
+    std::string _infoURL = "";
+    std::string _dataURL = "";
+    //  DynamicFileSequenceDownloader downloads and updates the renderable with
+    //  data downloaded from the web.
+    std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
+
+    std::vector<File> _files;
     int _activeTriggerTimeIndex = 0;
 
     properties::StringProperty _textureSourcePath;

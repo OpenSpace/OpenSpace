@@ -944,7 +944,7 @@ void RenderableFieldlinesSequence::updateDynamicDownloading(const double current
     }
 
     // if all files are moved into _sourceFiles then we can
-    // empty the DynamicDownloaderManager _downloadedFiles;
+    // empty the DynamicFileSequenceDownloader _downloadedFiles;
     _dynamicFileDownloader->clearDownloaded();
 }
 

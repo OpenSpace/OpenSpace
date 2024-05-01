@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/sphere.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -36,9 +37,9 @@
 namespace {
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
-    double extractTriggerTimeFromFileName(const std::string& filePath) {
+    double extractTriggerTimeFromFileName(const std::filesystem::path filePath) {
         // Extract the filename from the path (without extension)
-        std::string timeString = std::filesystem::path(filePath).stem().string();
+        std::string timeString = filePath.stem().string();
 
         // Ensure the separators are correct
         timeString.replace(4, 1, "-");
@@ -62,6 +63,23 @@ namespace {
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
         std::string textureSource;
+        // choose type of loading:
+        //0: static loading and static downloading
+        //1: dynamic loading and static downloading
+        //2: dynamic loading and dynamic downloading
+        enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::LoadingType)]] LoadingType {
+            StaticLoading,
+            DynamicLoading,
+            DynamicDownloading
+        };
+        std::optional<LoadingType> loadingType;
+        // dataID that corresponds to what dataset to use if using dynamicWebContent
+        std::optional<int> dataID;
+        // number Of Files To Queue is a max value of the amount of files to queue up
+        // so that not to big of a data set is downloaded nessesarily.
+        std::optional<int> numberOfFilesToQueue;
+        std::optional<std::string> infoURL;
+        std::optional<std::string> dataURL;
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -80,6 +98,16 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _textureSourcePath = p.textureSource;
+    if (p.loadingType.has_value()) {
+        _loadingType = codegen::map<LoadingType>(*p.loadingType);
+    }
+    else {
+        _loadingType = LoadingType::StaticLoading;
+    }
+    if (_loadingType == LoadingType::DynamicDownloading) {
+        setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.infoURL, p.dataURL);
+    }
+
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
@@ -89,9 +117,33 @@ bool RenderableTimeVaryingSphere::isReady() const {
 void RenderableTimeVaryingSphere::initializeGL() {
     RenderableSphere::initializeGL();
 
-    extractMandatoryInfoFromSourceFolder();
-    computeSequenceEndTime();
-    loadTexture();
+    if (_loadingType == LoadingType::StaticLoading) {
+        extractMandatoryInfoFromSourceFolder();
+        computeSequenceEndTime();
+        loadTexture();
+    }
+}
+
+void RenderableTimeVaryingSphere::setupDynamicDownloading(
+                                           const std::optional<int>& dataID,
+                                           const std::optional<int>& numberOfFilesToQueue,
+                                           const std::optional<std::string>& infoURL,
+                                           const std::optional<std::string>& dataURL)
+{
+    _dataID = dataID.value_or(_dataID);
+    if (!_dataID) {
+        throw ghoul::RuntimeError(
+            "If running with dynamic downloading, dataID needs to be specified"
+        );
+    }
+    _nOfFilesToQueue = numberOfFilesToQueue.value_or(_nOfFilesToQueue);
+    _infoURL = infoURL.value();
+    if (_infoURL.empty()) { throw ghoul::RuntimeError("InfoURL has to be provided"); }
+    _dataURL = dataURL.value();
+    if (_dataURL.empty()) { throw ghoul::RuntimeError("DataURL has to be provided"); }
+    _dynamicFileDownloader = std::make_unique<DynamicFileSequenceDownloader>(
+        _dataID, _infoURL, _dataURL, _nOfFilesToQueue
+    );
 }
 
 void RenderableTimeVaryingSphere::deinitializeGL() {
@@ -99,6 +151,33 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
     _files.clear();
 
     RenderableSphere::deinitializeGL();
+}
+
+void RenderableTimeVaryingSphere::readInFile(std::filesystem::path(path)) {
+    File newFile;
+    newFile.path = path;
+    newFile.status = File::FileStatus::Loaded;
+    newFile.time = extractTriggerTimeFromFileName(path);
+    const std::string filePath = path.string();
+    const double time = extractTriggerTimeFromFileName(filePath);
+    std::unique_ptr<ghoul::opengl::Texture> t =
+        ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
+
+    t->setInternalFormat(GL_COMPRESSED_RGBA);
+    t->uploadTexture();
+    t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    t->purgeFromRAM();
+
+    newFile.texture = std::move(t);
+
+    const std::vector<File>::const_iterator iter = std::upper_bound(
+        _files.begin(), _files.end(),
+        time,
+        [](double timeRef, const File& fileRef) {
+            return timeRef < fileRef.time;
+        }
+    );
+    _files.insert(iter, std::move(newFile));
 }
 
 void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
@@ -118,26 +197,17 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         if (!e.is_regular_file()) {
             continue;
         }
-        const std::string filePath = e.path().string();
-        const double time = extractTriggerTimeFromFileName(filePath);
-        std::unique_ptr<ghoul::opengl::Texture> t =
-            ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
-
-        t->setInternalFormat(GL_COMPRESSED_RGBA);
-        t->uploadTexture();
-        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        t->purgeFromRAM();
-
-        _files.push_back({ filePath, time, std::move(t) });
+        readInFile(e);
     }
+    // Should no longer need to sort after using insert here above instead
+    //std::sort(
+    //    _files.begin(),
+    //    _files.end(),
+    //    [](const File& a, const File& b) {
+    //        return a.time < b.time;
+    //    }
+    //);
 
-    std::sort(
-        _files.begin(),
-        _files.end(),
-        [](const FileData& a, const FileData& b) {
-            return a.time < b.time;
-        }
-    );
     // Ensure that there are available and valid source files left
     if (_files.empty()) {
         throw ghoul::RuntimeError(
@@ -150,8 +220,15 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     RenderableSphere::update(data);
 
     const double currentTime = data.time.j2000Seconds();
-    const bool isInInterval = (currentTime >= _files[0].time) &&
-        (currentTime < _sequenceEndTime);
+    const double deltaTime = global::timeManager->deltaTime();
+
+    if (_loadingType == LoadingType::DynamicDownloading) {
+        updateDynamicDownloading(currentTime, deltaTime);
+    }
+
+    const bool isInInterval = _files.size() > 0 &&
+        currentTime >= _files[0].time &&
+        currentTime < _sequenceEndTime;
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
@@ -161,16 +238,12 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
         {
             updateActiveTriggerTimeIndex(currentTime);
-            _textureIsDirty = true;
+            loadTexture();
         } // else {we're still in same state as previous frame (no changes needed)}
     }
     else {
         // not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
-    }
-    if (_textureIsDirty) {
-        loadTexture();
-        _textureIsDirty = false;
     }
 }
 
@@ -188,7 +261,7 @@ void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTim
         _files.begin(),
         _files.end(),
         currentTime,
-        [](double value, const FileData& f) {
+        [](double value, const File& f) {
             return value < f.time;
         }
     );
@@ -204,6 +277,19 @@ void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTim
     else {
         _activeTriggerTimeIndex = static_cast<int>(_files.size()) - 1;
     }
+}
+void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentTime,
+                                                                   const double deltaTime)
+{
+    _dynamicFileDownloader->update(currentTime, deltaTime);
+    const std::vector<std::filesystem::path>& filesToRead =
+        _dynamicFileDownloader->downloadedFiles();
+    for (std::filesystem::path filePath : filesToRead) {
+        readInFile(filePath);
+    }
+    // if all files are moved into _sourceFiles then we can
+    // empty the DynamicFileSequenceDownloader _downloadedFiles;
+    _dynamicFileDownloader->clearDownloaded();
 }
 
 void RenderableTimeVaryingSphere::computeSequenceEndTime() {
