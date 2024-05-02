@@ -40,7 +40,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NodeLineInfo = {
         "NodeLine",
         "Node Line",
-        "The identifier of a scnene graph node with a RenderableNodeLine that this label "
+        "The identifier of a scene graph node with a RenderableNodeLine that this label "
         "should track. The label text will be updating based on the distance from the "
         "node line's start and end.",
         openspace::properties::Property::Visibility::AdvancedUser

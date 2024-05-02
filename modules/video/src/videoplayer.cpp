@@ -44,7 +44,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VideoInfo = {
         "Video",
         "Video",
-        "The video file to be played."
+        "The video file that is played."
     };
 
     constexpr openspace::properties::Property::PropertyInfo PlayInfo = {

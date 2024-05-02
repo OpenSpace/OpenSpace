@@ -53,7 +53,7 @@ namespace {
        "RenderType",
        "Render Type",
        "Specifies if the plane should be rendered in the Background, Opaque, "
-       "Pre-/PostDeferredTransparent, or Overlay rendering step.",
+       "Pre-/PostDeferredTransparent, or the Overlay rendering step.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
