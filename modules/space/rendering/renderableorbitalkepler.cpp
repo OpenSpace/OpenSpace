@@ -73,7 +73,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TrailWidthInfo = {
         "TrailWidth",
         "Trail Width",
-        "The line width to use for the trail, if the selected rendering method includes "
+        "The line width used for the trail, if the selected rendering method includes "
         "lines. If the rendering mode is set to Points, this value is ignored.",
         openspace::properties::Property::Visibility::NoviceUser
     };

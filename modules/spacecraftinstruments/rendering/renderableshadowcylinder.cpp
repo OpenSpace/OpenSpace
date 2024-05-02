@@ -41,7 +41,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "NumberOfPoints",
         "Points",
-        "The number of control points to use for constructing the shadow geometry. The "
+        "The number of control points used for constructing the shadow geometry. The "
         "higher this number, the more detailed the shadow is, but it will have a "
         "negative impact on the performance.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -59,7 +59,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow Color",
-        "The color to use for the shadow cylinder.",
+        "The color used for the shadow cylinder.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -73,7 +73,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light Source",
-        "The SPICE name of the object to use as the illuminator for computing the "
+        "The SPICE name of the object that is used as the illuminator for computing the "
         "shadow cylinder.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -103,9 +103,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AberrationInfo = {
         "Aberration",
         "Aberration",
-        "The aberration method to use for computing the shadow cylinder. The options are "
-        "\"NONE\", \"LT\" (Light Time), \"LT + S\" (Light Time Stellar), \"CN\" "
-        "(Converged Newtonian), and \"CN + S\" (Converged Newtonian Stellar).",
+        "The aberration method that is used for computing the shadow cylinder. The "
+        "options are \"NONE\", \"LT\" (Light Time), \"LT + S\" (Light Time Stellar), "
+        "\"CN\" (Converged Newtonian), and \"CN + S\" (Converged Newtonian Stellar).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

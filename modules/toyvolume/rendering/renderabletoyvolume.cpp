@@ -80,7 +80,7 @@ namespace {
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "The downscaling factor to use when rendering the current volume.",
+        "The downscaling factor used when rendering the current volume.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace

@@ -57,7 +57,7 @@ namespace {
             // The color at the end of the line.
             glm::vec4 end [[codegen::color()]];
         };
-        // The colors to used for the crawling line, given as one color at the start of
+        // The colors used for the crawling line, given as one color at the start of
         // the line and one at the end.
         Color color;
     };

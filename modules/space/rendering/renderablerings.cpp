@@ -47,7 +47,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "The path to a texture on disk that contains a one-dimensional texture to used "
+        "The path to a texture on disk that contains a one-dimensional texture to use "
         "for these rings.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

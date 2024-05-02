@@ -77,7 +77,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
         "DefaultStart",
         "Default Start",
-        "The color to use for the field of view frustum close to the instrument. The "
+        "The color used for the field of view frustum close to the instrument. The "
         "final colors are interpolated between this value and the end color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -85,7 +85,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorDefaultEndInfo = {
         "DefaultEnd",
         "Default End",
-        "The color to use for the field of view frustum close to the target. The final "
+        "The color used for the field of view frustum close to the target. The final "
         "colors are interpolated between this value and the start color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
