@@ -55,7 +55,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
-        "Specifies how often to sample during raycasting. Lower step size lead to "
+        "Specifies how often to sample during raycasting. Lower step size leads to "
         "higher resolution.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

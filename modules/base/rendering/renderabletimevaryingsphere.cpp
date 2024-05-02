@@ -54,7 +54,7 @@ namespace {
         "TextureSource",
         "Texture Source",
         "A directory containing images that are loaded from disk and used for texturing "
-        "this sphere. The images are expected to be an equirectangular projection.",
+        "the sphere. The images are expected to be equirectangular projections.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

@@ -45,7 +45,7 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
 
-        // If 'true', the image for this sphere will not be loaded at startup but rather
+        // If true, the image for this sphere will not be loaded at startup but rather
         // when the image is shown for the first time. Additionally, if the sphere is
         // disabled, the image will automatically be unloaded.
         std::optional<bool> lazyLoading;

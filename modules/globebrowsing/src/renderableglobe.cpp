@@ -143,7 +143,7 @@ namespace {
         "Model Space Rendering Cutoff Level",
         "The tile level that is used as the cut off between rendering tiles using the "
         "globe model rendering vs the flat in-game rendering method. The value is a "
-        "trade-off between not having precision errors in the rendering and represting "
+        "trade-off between not having precision errors in the rendering and representing "
         "a tile as flat or curved.",
         openspace::properties::Property::Visibility::Developer
     };
@@ -164,7 +164,7 @@ namespace {
         "Specifies whether the planet should be shaded by the primary light source or "
         "not. If disabled, all parts of the planet are illuminated. Note that if the "
         "globe has a corresponding atmosphere, there is a separate setting to control "
-        "the shadowing induced by the atmosphere part.",
+        "the shadowing induced by the atmosphere.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -281,7 +281,7 @@ namespace {
         // [[codegen::verbatim(RenderAtDistanceInfo.description)]]
         std::optional<bool> renderAtDistance;
 
-        // A list of layers that should be added to this globe.
+        // A list of layers that should be added to the globe.
         std::map<std::string, ghoul::Dictionary> layers
             [[codegen::reference("globebrowsing_layermanager")]];
 
@@ -306,7 +306,7 @@ namespace {
             // A list of potential shadow casters.
             std::vector<Caster> casters;
         };
-        // Information about any object that might cause shadows to appear on this
+        // Information about any object that might cause shadows to appear on the
         // globe.
         std::optional<ShadowGroup> shadowGroup;
 

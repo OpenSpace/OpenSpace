@@ -83,7 +83,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderFullPathInfo = {
         "ShowFullTrail",
         "Render Full Trail",
-        "If 'true', the entire trail will be rendered. If 'false', only the trail until "
+        "If true, the entire trail will be rendered. If false, only the trail until "
         "the current time in the application will be shown.",
         openspace::properties::Property::Visibility::NoviceUser
     };

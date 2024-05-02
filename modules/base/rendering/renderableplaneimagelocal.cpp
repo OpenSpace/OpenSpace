@@ -41,7 +41,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "The path to an image file to use as a texture for this plane. This image has to "
+        "The path to an image file to use as a texture for the plane. The image has to "
         "be square.",
         openspace::properties::Property::Visibility::User
     };
