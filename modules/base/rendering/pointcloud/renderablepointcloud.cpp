@@ -362,11 +362,12 @@ namespace {
         // rendered. Can be either a CSV or SPECK file
         std::optional<std::filesystem::path> file;
 
-        // If true (default), the loaded dataset will be cached so that it can be loaded
-        // faster at a later time. This does however mean that any updates to the values
-        // in the dataset will not lead to changes in the rendering without first removing
-        // the cached file. Set it to false to disable caching. This can be useful for
-        // example when working on importing a new dataset
+        // If true (default), the loaded dataset and color map will be cached so that they
+        // can be loaded faster at a later time. This does however mean that any updates
+        // to the values in the dataset will not lead to changes in the rendering without
+        // first removing the cached file. Set it to false to disable caching. This can be
+        // useful for example when working on importing a new dataset or when making
+        // changes to the color map.
         std::optional<bool> useCaching;
 
         // A dictionary specifying details on how to load the dataset. Updating the data
@@ -871,7 +872,7 @@ void RenderablePointCloud::initialize() {
     }
 
     if (_hasDataFile && _hasColorMapFile) {
-        _colorSettings.colorMapping->initialize(_dataset);
+        _colorSettings.colorMapping->initialize(_dataset, _useCaching);
     }
 
     if (_hasLabels) {
