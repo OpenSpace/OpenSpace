@@ -74,8 +74,6 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_blendMode);
-
     _texturePath = absPath(p.texture).string();
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
 

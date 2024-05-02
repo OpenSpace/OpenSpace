@@ -462,6 +462,8 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     // Rotation to point at the end node
     const glm::quat rotQuat = glm::rotation(glm::dvec3(0.0, 0.0, 1.0), arrowDirection);
     _pointDirectionRotation = glm::dmat4(glm::toMat4(rotQuat));
+
+    setBoundingSphere(length + offset);
 }
 
 void RenderableNodeArrow::render(const RenderData& data, RendererTasks&) {
