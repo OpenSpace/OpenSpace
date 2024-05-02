@@ -1,18 +1,19 @@
 -- Custom Appearance (Colored & Inverted)
 -- This example shows an arrow pointing from one scene graph node in the direction of
--- another. Here, it is created with the Root node as start node and Earth as end node,
--- but the arrow direction is inverted so that it points towards Root. Some appearance
--- related properties are also changes to customize the look of the arrow, but default
--- values are used for its size.
+-- another. Here, it is created with the Solar System barycenter as start node and
+-- Earth as end node, but the arrow direction is inverted so that it points towards
+-- the Solar System barycenter. Some appearance related properties are also changes to
+-- customize the look of the arrow, but default values are used for its size.
 
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 local Node = {
   Identifier = "RenderableNodeArrow_Example_Appearance",
   -- Parent to the start node, so that when we focus on the arrow this is where we end up
   Renderable = {
     Type = "RenderableNodeArrow",
-    StartNode = "Root",
+    StartNode = sunTransforms.SolarSystemBarycenter.Identifier,
     EndNode = earth.Earth.Identifier,
     -- Point to start node instead of end node
     Invert = true,
