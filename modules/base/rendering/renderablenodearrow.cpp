@@ -169,12 +169,20 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // A RenderableNodeArrow can be used to create a 3D arrow pointing in the direction
+    // of one scene graph node to another.
+    //
+    // The arrow will be placed at the `StartNode` at a distance of the provided
+    // `Offset` value. Per default, the `Length` and `Offset` of the arrow is specified
+    // in meters, but they may also be specified as a multiplier of the bounding sphere
+    // of the `StartNode`. The look of the arrow can be customized to change the width
+    // and length of both the arrow body and head.
     struct [[codegen::Dictionary(RenderableNodeArrow)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
-        std::string startNode [[codegen::notempty]];
+        std::string startNode [[codegen::identifier()]];
 
         // [[codegen::verbatim(EndNodeInfo.description)]]
-        std::string endNode [[codegen::notempty]];
+        std::string endNode [[codegen::identifier()]];
 
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
