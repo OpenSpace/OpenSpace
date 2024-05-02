@@ -145,10 +145,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ModelScaleInfo = {
         "ModelScale",
         "Model Scale",
-        "A value that specified the scale for the model. If a numeric value was provided "
-        "in the asset file, you can see and change it here. If instead a unit name was "
-        "provided in the asset, this is the value that that name represents. For example "
-        "'Centimeter' becomes 0.01. For more information see "
+        "The scale of the model. If a numeric value is provided in the asset file, the scale "
+        "will be that exact value. If instead a unit name is provided in the asset, this "
+        "is the value that that name represents. For example 'Centimeter' becomes 0.01."
+        "For more information see "
         "http://wiki.openspaceproject.com/docs/builders/models/model-scale.html.",
         // @TODO (2024-04-26, emmbr) update or remove this link? Also liks in Parameters below!
         openspace::properties::Property::Visibility::AdvancedUser
@@ -178,7 +178,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending Options",
-        "Controls the blend function used to calculate the colors of the model with "
+        "Controls the blending function used to calculate the colors of the model with "
         "respect to the opacity.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -216,7 +216,7 @@ namespace {
         // http://wiki.openspaceproject.com/docs/builders/models/model-scale.html.
         std::optional<std::variant<ScaleUnit, double>> modelScale;
 
-        // By default the given `ModelScale is used to scale down the model. By setting
+        // By default the given `ModelScale` is used to scale down the model. By setting
         // this setting to true the scaling is inverted to that the model is instead
         // scaled up with the given `ModelScale`.
         std::optional<bool> invertModelScale;
@@ -242,7 +242,7 @@ namespace {
 
         // The time scale for the animation relative to seconds. For example, if the
         // animation is in milliseconds then `AnimationTimeScale = 0.001` or
-        // `AnimationTimeScale = \"Millisecond\"`. Default is `\"Second\"`.
+        // `AnimationTimeScale = \"Millisecond\"`.
         std::optional<std::variant<AnimationTimeUnit, float>> animationTimeScale;
 
         enum class AnimationMode {

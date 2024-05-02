@@ -63,15 +63,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid Type",
-        "Specifies the grid type to use (Spherical or Cartesian).",
+        "The grid type to use for the volume.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
         "SecondsBefore",
         "Seconds before",
-        "The number of seconds to show the first timestep before its actual time. The "
-        "default value is 0.",
+        "The number of seconds to show the first timestep before its actual time.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

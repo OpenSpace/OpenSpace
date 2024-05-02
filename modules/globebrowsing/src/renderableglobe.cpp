@@ -118,23 +118,22 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LevelProjectedAreaInfo = {
         "LevelByProjectedAreaElseDistance",
         "Level by projected area (else distance)",
-        "If 'true', the tile level is determined by the area projected on screen. If "
-        "'false', the distance to the center of the tile is used instead.",
+        "If true, the tile level is determined by the area projected on screen. If "
+        "false, the distance to the center of the tile is used instead.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo PerformFrustumCullingInfo = {
         "PerformFrustumCulling",
         "Perform frustum culling",
-        "If this value is set to 'true', frustum culling will be performed.",
+        "If this value is set to true, frustum culling will be performed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
         "ResetTileProviders",
         "Reset tile providers",
-        "If triggered, all tile provides for the globe are reset and data is reloaded "
-        "from scratch.",
+        "Reset all tile provides for the globe and reload the data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -271,8 +270,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
-        // The radii for this planet. If one value is given, all three radii are assumed
-        // to be equal.
+        // The radii for this planet. If only one value is given, all three radii are
+        // set to that value.
         std::optional<std::variant<glm::dvec3, double>> radii;
 
         // [[codegen::verbatim(PerformShadingInfo.description)]]

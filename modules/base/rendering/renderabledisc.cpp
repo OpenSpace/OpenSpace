@@ -46,9 +46,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "The path to a file for a one-dimensional texture to be used for disc color. "
-        "The leftmost color will be innermost color when rendering the disc, and the "
-        "rightmost color will be the outermost color.",
+        "The path to a file with a one-dimensional texture to be used for the disc "
+        "color. The leftmost color will be innermost color when rendering the disc, "
+        "and the rightmost color will be the outermost color.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -62,9 +62,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
         "Width",
         "Width",
-        "A value used to set the disc width, given as a portion of the full disc size. "
-        "For example, a value of 1 results in a full circle, while 0.5 results in a disc "
-        "where the inner radius is half of the full size.",
+        "The disc width, given as a ratio of the full disc radius. For example, a value "
+        "of 1 results in a full circle, while 0.5 results in a disc where the inner "
+        "radius is half of the full radius.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

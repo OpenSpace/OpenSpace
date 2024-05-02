@@ -64,7 +64,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
         "Unit",
         "Unit",
-        "The distance unit to use for the constellation lines data.",
+        "The distance unit used for the constellation lines data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

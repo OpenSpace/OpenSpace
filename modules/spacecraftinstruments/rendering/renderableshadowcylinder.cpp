@@ -66,8 +66,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
         "Terminator Type",
-        "Determines the type of terminator to use for calculating the shadow eclipse "
-        "(UMBRAL or PENUMBRAL).",
+        "Determines the type of terminator to use for calculating the shadow eclipse.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

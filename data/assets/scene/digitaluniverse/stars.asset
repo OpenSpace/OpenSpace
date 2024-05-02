@@ -92,7 +92,6 @@ local SunStar = {
     ColorMap = colormaps .. "colorbv.cmap",
     SizeComposition = "Distance Modulus",
     FadeInDistances = { 0.0075, 0.1 },
-    RenderableType = "PostDeferredTransparent", -- @TODO this key does not exist. Doe we mean the renderbin?
     DataMapping = {
       Bv = "colorb_v",
       Luminance = "lum",

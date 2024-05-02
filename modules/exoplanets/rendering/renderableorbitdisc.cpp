@@ -48,9 +48,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "The path to a file for a one-dimensional texture to be used for disc color. "
-        "The leftmost color will be innermost color when rendering the disc, and the "
-        "rightmost color will be the outermost color.",
+        "The path to a file with a one-dimensional texture to be used for the disc "
+        "color. The leftmost color will be innermost color when rendering the disc, "
+        "and the rightmost color will be the outermost color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

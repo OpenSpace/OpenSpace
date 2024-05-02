@@ -137,7 +137,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
         "Width",
         "Width",
-        "The width of the arrow.",
+        "The width of the arrow, in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

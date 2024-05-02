@@ -132,16 +132,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering Mode",
-        "Determines how the trail should be rendered. If 'Lines' is "
-        "selected, only the line part is visible, if 'Points' is selected, only the "
-        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both "
-        "parts.",
+        "Determines how the trail should be rendered. If 'Lines' is selected, only the "
+        "line part is visible, if 'Points' is selected, only the corresponding points "
+        "(and subpoints) are shown. 'Lines+Points' shows both parts.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
-        // A [Translation](#core_transform_translation) object used to compute locations
-        // along the path.
+        // A translation used to compute locations along the path.
         ghoul::Dictionary translation
             [[codegen::reference("core_transform_translation")]];
 
