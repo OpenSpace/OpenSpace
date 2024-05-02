@@ -336,7 +336,7 @@ namespace {
     //
     // The points are rendered as planes whose size depends on a few different things:
     //
-    // - At the core, scaling is done based on an exponential value, the 'ScaleExponent'.
+    // - At the core, scaling is done based on an exponential value, the `ScaleExponent`.
     //   A relatively small change to this value will lead to a large change in size.
     //   When no exponent is set, one will be created based on the coordinates in the
     //   dataset. The points will be visible, but may be appeared as too large or small.
@@ -348,15 +348,12 @@ namespace {
     // - There is also an option to limit the size of the points based on a given max
     //   size value.
     //
-    // - And an option to scale the points based on a data value (see 'SizeMapping' in
-    //   'SizeSettings')
+    // - And an option to scale the points based on a data value (see `SizeMapping` in
+    //   `SizeSettings`)
     //
-    // - To easily change the visual size of the points, the multiplicative 'ScaleFactor'
+    // - To easily change the visual size of the points, the multiplicative `ScaleFactor`
     //   may be used. A value of 2 makes the points twice as large, visually, compared
     //   to 1.
-    //
-    // See example files in data/assets/examples/pointcloud for some concrete examples of
-    // point clouds with different settings.
     struct [[codegen::Dictionary(RenderablePointCloud)]] Parameters {
         // The path to the data file that contains information about the point to be
         // rendered. Can be either a CSV or SPECK file
