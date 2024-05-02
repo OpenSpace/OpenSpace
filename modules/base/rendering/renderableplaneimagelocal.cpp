@@ -50,7 +50,7 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
-        // If this value is set to 'true', the image for this plane will not be loaded at
+        // If this value is set to true, the image for this plane will not be loaded at
         // startup but rather when image is shown for the first time. Additionally, if the
         // plane is hidden, the image will automatically be unloaded.
         std::optional<bool> lazyLoading;

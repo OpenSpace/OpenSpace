@@ -81,8 +81,8 @@ namespace {
         "EnableFade",
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is "
-        "'true', the 'Fade' parameter determines the speed of fading. If this value is "
-        "'false', the entire trail is rendered at full opacity and color.",
+        "true, the 'Fade' parameter determines the speed of fading. If this value is "
+        "false, the entire trail is rendered at full opacity and color.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -91,7 +91,7 @@ namespace {
         "Line Length",
         "The extent of the rendered trail. A value of 0 will result in no trail and a "
         "value of 1 will result in a trail that covers the entire extent. The setting "
-        "only applies if 'EnableFade' is 'true'. If it is 'false', this setting has "
+        "only applies if 'EnableFade' is true. If it is false, this setting has "
         "no effect.",
         openspace::properties::Property::Visibility::User
     };
@@ -106,7 +106,7 @@ namespace {
         "will fade until completely transparent at the end of the trail. A value of 1 "
         "will result in a trail that starts fading immediately, becoming fully "
         "transparent by the end of the trail. This setting only applies if the "
-        "'EnableFade' value is 'true'. If it is 'false', this setting has no effect.",
+        "'EnableFade' value is true. If it is false, this setting has no effect.",
         openspace::properties::Property::Visibility::User
     };
 
