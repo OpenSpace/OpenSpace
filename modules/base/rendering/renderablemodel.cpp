@@ -69,20 +69,6 @@ namespace {
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
-    constexpr std::array<const char*, 26> UniformNames = {
-        "modelViewTransform", "projectionTransform", "normalTransform", "meshTransform",
-        "meshNormalTransform", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity", "performShading", "use_forced_color", "has_texture_diffuse",
-        "has_texture_normal", "has_texture_specular", "has_color_specular",
-        "texture_diffuse", "texture_normal", "texture_specular", "color_diffuse",
-        "color_specular", "opacity", "nLightSources", "lightDirectionsViewSpace",
-        "lightIntensities", "performManualDepthTest", "gBufferDepthTexture", "resolution"
-    };
-
-    constexpr std::array<const char*, 5> UniformOpacityNames = {
-        "opacity", "colorTexture", "depthTexture", "viewport", "resolution"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable Animation",
@@ -617,7 +603,7 @@ void RenderableModel::initializeGL() {
         ghoul::opengl::ProgramObject::IgnoreError::Yes
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     _quadProgram = BaseModule::ProgramObjectManager.request(
         "ModelOpacityProgram",
@@ -627,18 +613,13 @@ void RenderableModel::initializeGL() {
             const std::filesystem::path fs =
                 absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
 
-            return global::renderEngine->buildRenderProgram(
-                "ModelOpacityProgram",
+            return global::renderEngine->buildRenderProgram("ModelOpacityProgram",
                 vs,
                 fs
             );
         }
     );
-    ghoul::opengl::updateUniformLocations(
-        *_quadProgram,
-        _uniformOpacityCache,
-        UniformOpacityNames
-    );
+    ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
 
     // Screen quad VAO
     constexpr std::array<GLfloat, 24> QuadVtx = {
@@ -1016,16 +997,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 void RenderableModel::update(const UpdateData& data) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
     if (_quadProgram->isDirty()) {
         _quadProgram->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(
-            *_quadProgram,
-            _uniformOpacityCache,
-            UniformOpacityNames
-        );
+        ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
     }
 
     if (!hasOverrideRenderBin()) {

@@ -1,0 +1,33 @@
+-- Point Size / Scaling
+-- This example creates a point cloud where the size of the points is set by entering a
+-- a scale exponent. This makes it so that the points will be given a world-scale size of
+-- 10 to the power of the provided scale exponent.
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_Scaled",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.0, 0.0, 0.8 }
+    },
+    SizeSettings = {
+      -- We set the exponent for the scale explicitly, to a value that
+      -- gives the points a suitable size based on their world-space coordinates
+      ScaleExponent = 6.5
+    }
+  },
+  GUI = {
+    Name = "Point Size / Scaling",
+    Path = "/Examples/RenderablePointCloud",
+    Description = "Point cloud with configured point size"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -313,7 +313,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     // is necessary as they are usually far away from their reference
     const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
     _programObject->setUniform(
-        _uniformCache.modelView,
+        _uniformCache.modelViewTransform,
         modelViewTransform * info._localTransform
     );
 
@@ -327,7 +327,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     }(info.sorting);
 
     // The vertex sorting method is used to tweak the fading along the trajectory
-    _programObject->setUniform(_uniformCache.vertexSorting, sorting);
+    _programObject->setUniform(_uniformCache.vertexSortingMethod, sorting);
 
     // This value is subtracted from the vertex id in the case of a potential ring
     // buffer (as used in RenderableTrailOrbit) to keep the first vertex at its
@@ -418,7 +418,10 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     const glm::dmat4 modelTransform = calcModelTransform(data);
 
-    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
+    _programObject->setUniform(
+        _uniformCache.projectionTransform,
+        data.camera.projectionMatrix()
+    );
 
     _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
     _programObject->setUniform(_uniformCache.useLineFade, _appearance.useLineFade);

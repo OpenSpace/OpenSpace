@@ -31,40 +31,32 @@
 #include <openspace/util/sphere.h>
 #include <ghoul/opengl/texture.h>
 
+// The RenderableSphereSpout can be used to render a sphere with a texture that is
+// provided by another application on the same computer using the SPOUT library. Note that
+// this library is only available on Windows.
+
+namespace {
+    struct [[codegen::Dictionary(RenderableSphereSpout)]] Parameters {
+        // Specifies the GUI name of the RenderableSphereSpout
+        std::optional<std::string> name;
+    };
+#include "renderablespherespout_codegen.cpp"
+} // namespace
+
 namespace openspace {
 
 documentation::Documentation RenderableSphereSpout::Documentation() {
-    using namespace openspace::documentation;
-    return {
-        "Renderable Sphere Spout",
-        "spout_sphere_spout",
-        "",
-        {
-            {
-                "Name",
-                new StringVerifier,
-                Optional::Yes,
-                "Specifies the GUI name of the RenderableSphereSpout"
-            },
-            {
-                spout::SpoutReceiverPropertyProxy::NameInfoProperty().identifier,
-                new StringVerifier,
-                Optional::Yes,
-                spout::SpoutReceiverPropertyProxy::NameInfoProperty().description
-            }
-        }
-    };
+    return codegen::doc<Parameters>(
+        "spout_renderablespherespout",
+        spout::SpoutReceiverPropertyProxy::Documentation()
+    );
 }
 
 RenderableSphereSpout::RenderableSphereSpout(const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _spoutReceiver(*this, dictionary)
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "RenderableSphereSpout"
-    );
+    codegen::bake<Parameters>(dictionary);
 
     int iIdentifier = 0;
     if (_identifier.empty()) {

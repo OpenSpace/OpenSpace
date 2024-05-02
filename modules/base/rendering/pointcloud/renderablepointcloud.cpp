@@ -58,18 +58,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePointCloud";
 
-    constexpr std::array<const char*, 37> UniformNames = {
-        "cameraViewMatrix", "projectionMatrix", "modelMatrix", "cameraPosition",
-        "cameraLookUp", "renderOption", "maxAngularSize", "color", "opacity",
-        "scaleExponent", "scaleFactor", "up", "right", "fadeInValue", "hasSpriteTexture",
-        "spriteTexture", "useColorMap", "colorMapTexture", "cmapRangeMin", "cmapRangeMax",
-        "nanColor", "useNanColor", "hideOutsideRange", "enableMaxSizeControl",
-        "aboveRangeColor", "useAboveRangeColor", "belowRangeColor", "useBelowRangeColor",
-        "hasDvarScaling", "dvarScaleFactor", "enableOutline", "outlineColor",
-        "outlineWeight", "outlineStyle", "useCmapOutline", "aspectRatioScale",
-        "useOrientationData"
-    };
-
     enum RenderOption {
         ViewDirection = 0,
         PositionNormal,
@@ -348,7 +336,7 @@ namespace {
     //
     // The points are rendered as planes whose size depends on a few different things:
     //
-    // - At the core, scaling is done based on an exponential value, the 'ScaleExponent'.
+    // - At the core, scaling is done based on an exponential value, the `ScaleExponent`.
     //   A relatively small change to this value will lead to a large change in size.
     //   When no exponent is set, one will be created based on the coordinates in the
     //   dataset. The points will be visible, but may be appeared as too large or small.
@@ -360,25 +348,23 @@ namespace {
     // - There is also an option to limit the size of the points based on a given max
     //   size value.
     //
-    // - And an option to scale the points based on a data value (see 'SizeMapping' in
-    //   'SizeSettings')
+    // - And an option to scale the points based on a data value (see `SizeMapping` in
+    //   `SizeSettings`)
     //
-    // - To easily change the visual size of the points, the multiplicative 'ScaleFactor'
+    // - To easily change the visual size of the points, the multiplicative `ScaleFactor`
     //   may be used. A value of 2 makes the points twice as large, visually, compared
     //   to 1.
-    //
-    // See example files in data/assets/examples/pointcloud for some concrete examples of
-    // point clouds with different settings.
     struct [[codegen::Dictionary(RenderablePointCloud)]] Parameters {
         // The path to the data file that contains information about the point to be
         // rendered. Can be either a CSV or SPECK file
         std::optional<std::filesystem::path> file;
 
-        // If true (default), the loaded dataset will be cached so that it can be loaded
-        // faster at a later time. This does however mean that any updates to the values
-        // in the dataset will not lead to changes in the rendering without first removing
-        // the cached file. Set it to false to disable caching. This can be useful for
-        // example when working on importing a new dataset
+        // If true (default), the loaded dataset and color map will be cached so that they
+        // can be loaded faster at a later time. This does however mean that any updates
+        // to the values in the dataset will not lead to changes in the rendering without
+        // first removing the cached file. Set it to false to disable caching. This can be
+        // useful for example when working on importing a new dataset or when making
+        // changes to the color map.
         std::optional<bool> useCaching;
 
         // A dictionary specifying details on how to load the dataset. Updating the data
@@ -883,7 +869,7 @@ void RenderablePointCloud::initialize() {
     }
 
     if (_hasDataFile && _hasColorMapFile) {
-        _colorSettings.colorMapping->initialize(_dataset);
+        _colorSettings.colorMapping->initialize(_dataset, _useCaching);
     }
 
     if (_hasLabels) {
@@ -899,7 +885,7 @@ void RenderablePointCloud::initializeGL() {
 
     initializeShadersAndGlExtras();
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     if (_hasSpriteTexture) {
         switch (_textureMode) {
@@ -1214,9 +1200,9 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
 
     _program->activate();
 
-    _program->setUniform(_uniformCache.cameraPos, data.camera.positionVec3());
+    _program->setUniform(_uniformCache.cameraPosition, data.camera.positionVec3());
     _program->setUniform(
-        _uniformCache.cameraLookup,
+        _uniformCache.cameraLookUp,
         glm::vec3(data.camera.lookUpVectorWorldSpace())
     );
     _program->setUniform(_uniformCache.renderOption, _renderOption.value());
@@ -1269,7 +1255,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     bool useColorMap = hasColorData() && _colorSettings.colorMapping->enabled &&
         _colorSettings.colorMapping->texture();
 
-    _program->setUniform(_uniformCache.useColormap, useColorMap);
+    _program->setUniform(_uniformCache.useColorMap, useColorMap);
 
     ghoul::opengl::TextureUnit colorMapTextureUnit;
     _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);

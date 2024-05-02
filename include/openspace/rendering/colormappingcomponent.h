@@ -62,8 +62,9 @@ public:
      * Initialize the color map information (ranges, etc.) based on the input dataset.
      *
      * \param dataset The *loaded* input dataset
+     * \param useCaching Whether caching should be used when loading the color map file
      */
-    void initialize(const dataloader::Dataset& dataset);
+    void initialize(const dataloader::Dataset& dataset, bool useCaching = true);
 
     /**
      * Initialize a 1D texture based on the entries in the color map file.

@@ -227,9 +227,9 @@ protected:
     ghoul::opengl::ProgramObject* _program = nullptr;
 
     UniformCache(
-        cameraViewMatrix, projectionMatrix, modelMatrix, cameraPos, cameraLookup,
+        cameraViewMatrix, projectionMatrix, modelMatrix, cameraPosition, cameraLookUp,
         renderOption, maxAngularSize, color, opacity, scaleExponent, scaleFactor, up,
-        right, fadeInValue, hasSpriteTexture, spriteTexture, useColormap, colorMapTexture,
+        right, fadeInValue, hasSpriteTexture, spriteTexture, useColorMap, colorMapTexture,
         cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
         enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
         useBelowRangeColor, hasDvarScaling, dvarScaleFactor, enableOutline, outlineColor,

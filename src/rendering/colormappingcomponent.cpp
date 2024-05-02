@@ -329,10 +329,17 @@ ghoul::opengl::Texture* ColorMappingComponent::texture() const {
     return _texture.get();
 }
 
-void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
+void ColorMappingComponent::initialize(const dataloader::Dataset& dataset,
+                                       bool useCaching)
+{
     ZoneScoped;
 
-    _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
+    if (useCaching) {
+        _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
+    }
+    else {
+        _colorMap = dataloader::color::loadFile(colorMapFile.value());
+    }
 
     initializeParameterData(dataset);
 

@@ -42,7 +42,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
+    struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
@@ -57,7 +57,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphereImageLocal::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphere_image_local");
+    return codegen::doc<Parameters>(
+        "base_renderable_sphere_image_local",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableSphereImageLocal::RenderableSphereImageLocal(

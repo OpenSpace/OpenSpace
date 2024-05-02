@@ -50,8 +50,6 @@ namespace {
 
     ImFont* captionFont = nullptr;
 
-    constexpr std::array<const char*, 2> UniformNames = { "tex", "ortho" };
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
@@ -390,7 +388,7 @@ void ImGUIModule::internalInitializeGL() {
         absPath("${MODULE_IMGUI}/shaders/gui_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     {
         unsigned char* texData = nullptr;
@@ -499,7 +497,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
    //

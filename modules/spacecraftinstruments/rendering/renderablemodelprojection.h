@@ -80,6 +80,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
     UniformCache(projectionTexture, depthTexture, needShadowMap, ProjectorMatrix,
         ModelTransform, boresight) _fboUniformCache;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
     UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
 
