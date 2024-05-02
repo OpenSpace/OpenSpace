@@ -1384,7 +1384,7 @@ void RenderablePointCloud::update(const UpdateData&) {
     preUpdate();
 
     if (_hasColorMapFile) {
-        _colorSettings.colorMapping->update(_dataset);
+        _colorSettings.colorMapping->update(_dataset, _useCaching);
     }
 
     if (_spriteTextureIsDirty) {

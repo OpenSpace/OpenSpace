@@ -396,9 +396,9 @@ void ColorMappingComponent::initializeTexture() {
     _texture->uploadTexture();
 }
 
-void ColorMappingComponent::update(const dataloader::Dataset& dataset) {
+void ColorMappingComponent::update(const dataloader::Dataset& dataset, bool useCaching) {
     if (_colorMapFileIsDirty) {
-        initialize(dataset);
+        initialize(dataset, useCaching);
         _colorMapTextureIsDirty = true;
         _colorMapFileIsDirty = false;
     }

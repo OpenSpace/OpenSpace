@@ -71,7 +71,7 @@ public:
      */
     void initializeTexture();
 
-    void update(const dataloader::Dataset& dataset);
+    void update(const dataloader::Dataset& dataset, bool useCaching = true);
 
     static documentation::Documentation Documentation();
 
