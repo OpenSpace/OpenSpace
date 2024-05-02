@@ -81,7 +81,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PointSizeExponentInfo = {
         "PointSizeExponent",
         "Point Size Exponent",
-        "A value used as an exponential scaling to set the absolute size of the point.",
+        "An exponential scale value to set the absolute size of the point.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -97,12 +97,11 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
         "Max Size",
-        "A value that controls the maximum allowed size for the points, when the max "
-        "size control feature is enabled. This limits the visual size of the points "
-        "based on the distance to the camera. The larger the value, the larger the "
-        "points are allowed to be. In the background, the computations are made to limit "
-        "the size of the angle between the CameraToPointMid and CameraToPointEdge "
-        "vectors.",
+        "Controls the maximum allowed size for the points, when the max size control "
+        "feature is enabled. This limits the visual size of the points based on the "
+        "distance to the camera. The larger the value, the larger the points are allowed "
+        "to be. In the background, the computations are made to limit the size of the "
+        "angle between the CameraToPointMid and CameraToPointEdge vectors.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -125,7 +124,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail Fade Factor",
-        "A value that determines how fast the trail fades.",
+        "Determines how fast the trail fades out.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -146,16 +145,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
         "OutlineWeight",
         "Outline Weight",
-        "A value that determines the thickness of the outline. A value of 0 will "
-        "not show any outline, while a value of 1 will cover the whole point.",
+        "Determines the thickness of the outline. A value of 0 will not show any "
+        "outline, while a value of 1 will cover the whole point.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
-        "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored).", // @TODO
+        "Index of the first object in the block to render (all prior objects will be "
+        "ignored). The block of objects to render will be determined by StartRenderIdx "
+        "and RenderSize.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

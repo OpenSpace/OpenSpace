@@ -58,11 +58,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
         "StandOffDistance",
         "Standoff Distance Factor",
-        "This value determines the standoff distance factor which influences the "
-        "distance of the plane to the focus object. If this value is '1', the field of "
-        "view will be rendered exactly on the surface of, for example, a planet. With a "
-        "value of smaller than 1, the field of view will hover of ther surface, thus "
-        "making it more visible.",
+        "A standoff distance factor which influences the distance of the plane to the "
+        "focus object. If the value is 1, the field of view will be rendered exactly on "
+        "the surface of, for example, a planet. With a value of smaller than 1, the "
+        "field of view will hover of the surface, thus making it more visible.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -77,16 +76,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
         "DefaultStart",
         "Default Start",
-        "The color used for the field of view frustum close to the instrument. The "
-        "final colors are interpolated between this value and the end color.",
+        "The color that is used for the field of view frustum close to the instrument. "
+        "The final colors are interpolated between this value and the end color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorDefaultEndInfo = {
         "DefaultEnd",
         "Default End",
-        "The color used for the field of view frustum close to the target. The final "
-        "colors are interpolated between this value and the start color.",
+        "The color that is used for the field of view frustum close to the target. The "
+        "final colors are interpolated between this value and the start color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
