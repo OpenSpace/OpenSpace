@@ -113,19 +113,18 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored.",
+        "Specifies the line width of the trail lines, if the selected rendering method "
+        "includes lines. If the rendering mode is Points, this value is ignored.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point Size",
-        "This value specifies the base size of the points along the line if the selected "
-        "rendering method includes points. If the rendering mode is set the Lines, this "
-        "value is ignored. If a subsampling of the values is performed, the subsampled "
-        "values are half this size.",
+        "Specifies the base size of the points along the line, if the selected rendering "
+        "method includes points. If the rendering mode is Lines, this value is ignored. "
+        "If a subsampling of the values is performed, the subsampled values are half "
+        "this size.",
         openspace::properties::Property::Visibility::User
     };
 
