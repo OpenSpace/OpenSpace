@@ -33,8 +33,7 @@ namespace {
         "Spacing",
         "Spacing",
         "This value determines the spacing (in pixels) that this item represents. The "
-        "default value is 15",
-        // @VISIBILITY(2.33)
+        "default value is 15.",
         openspace::properties::Property::Visibility::User
     };
 

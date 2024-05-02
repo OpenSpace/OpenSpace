@@ -84,13 +84,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
     static constexpr glm::vec4 nonCurrentMissionColor = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
 
     // Add spacing
-    RenderFont(
-        *_font,
-        penPosition,
-        " ",
-        nonCurrentMissionColor,
-        ghoul::fontrendering::CrDirection::Down
-    );
+    penPosition.y -= _font->height();
 
     MissionPhase::Trace phaseTrace = mission.phaseTrace(currentTime);
     if (!phaseTrace.empty()) {
@@ -179,6 +173,8 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
             }
         }
     }
+
+    penPosition.y += _font->height();
 }
 
 glm::vec2 DashboardItemMission::size() const {

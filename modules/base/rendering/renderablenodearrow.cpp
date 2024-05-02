@@ -48,21 +48,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start Node",
-        "The identifier of the node the arrow starts from",
+        "The identifier of the node the arrow starts from.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
         "End Node",
-        "The identifier of the node the arrow should point towards",
+        "The identifier of the node the arrow should point towards.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the arrow",
+        "This value determines the RGB color for the arrow.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -70,7 +70,7 @@ namespace {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that the shapes for the arrow are "
-        "separated in. A higher number leads to a higher resolution",
+        "separated in. A higher number leads to a higher resolution.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -87,7 +87,7 @@ namespace {
         "Arrow Head Size",
         "This size of the arrow head, given in relative value of the entire length of "
         "the arrow. For example, 0.1 makes the arrow head length be 10% of the full "
-        "arrow length",
+        "arrow length.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -95,7 +95,7 @@ namespace {
         "ArrowHeadWidthFactor",
         "Arrow Head Width Factor",
         "A factor that is multiplied with the width, or the arrow itself, to determine "
-        "the width of the base of the arrow head",
+        "the width of the base of the arrow head.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -105,7 +105,7 @@ namespace {
         "The distance from the center of the start node where the arrow starts. "
         "If 'UseRelativeOffset' is true, the value should be given as a factor to "
         "multiply with the bounding sphere of the node. Otherwise, the value is "
-        "specified in meters",
+        "specified in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -113,7 +113,7 @@ namespace {
         "UseRelativeOffset",
         "Use Relative Offset Distance",
         "Decide whether to use relative distances (in units of start node bounding "
-        "sphere) for the offset distance. If false, meters is used",
+        "sphere) for the offset distance. If false, meters is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -122,7 +122,7 @@ namespace {
         "Length",
         "The length of the arrow, given either in meters or as a factor to be "
         "multiplied with the bounding sphere of the start node (if "
-        "'UseRelativeLength' is true)",
+        "'UseRelativeLength' is true).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -130,42 +130,42 @@ namespace {
         "UseRelativeLength",
         "Use Relative Length",
         "Decide whether to use relative size (in units of start node bounding "
-        "sphere) for the length of the arrow. If false, meters is used",
+        "sphere) for the length of the arrow. If false, meters is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
         "Width",
         "Width",
-        "This value specifies the width of the arrow shape",
+        "This value specifies the width of the arrow shape.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "A multiplier for ambient lighting for the shading of the arrow",
+        "A multiplier for ambient lighting for the shading of the arrow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse Intensity",
-        "A multiplier for diffuse lighting for the shading of the arrow",
+        "A multiplier for diffuse lighting for the shading of the arrow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular Intensity",
-        "A multiplier for specular lighting for the shading of the arrow",
+        "A multiplier for specular lighting for the shading of the arrow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadingEnabledInfo = {
         "PerformShading",
         "Perform Shading",
-        "This value determines whether shading should be applied to the arrow model",
+        "This value determines whether shading should be applied to the arrow model.",
         openspace::properties::Property::Visibility::User
     };
 

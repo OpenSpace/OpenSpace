@@ -30,7 +30,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UniqueBackgroundColors = {
         "UniqueBackgroundColor",
         "Unique Background Color",
-        "If 'true' each index tile will have a unique background color assigned to it",
+        "If 'true' each index tile will have a unique background color assigned to it.",
         openspace::properties::Property::Visibility::Developer
     };
 

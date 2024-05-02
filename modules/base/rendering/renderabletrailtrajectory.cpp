@@ -48,7 +48,7 @@ namespace {
         "StartTime",
         "Start Time",
         "The start time for the range of this trajectory. The date must be in ISO 8601 "
-        "format: YYYY MM DD HH:mm:ss.xxx",
+        "format: YYYY MM DD HH:mm:ss.xxx.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -56,7 +56,7 @@ namespace {
         "EndTime",
         "End Time",
         "The end time for the range of this trajectory. The date must be in ISO 8601 "
-        "format: YYYY MM DD HH:mm:ss.xxx",
+        "format: YYYY MM DD HH:mm:ss.xxx.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -66,7 +66,7 @@ namespace {
         "The interval between samples of the trajectory. This value (together with "
         "'TimeStampSubsampleFactor') determines how far apart (in time) the samples are "
         "spaced along the trajectory. The time interval between 'StartTime' and "
-        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments",
+        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -76,7 +76,7 @@ namespace {
         "The factor that is used to create subsamples along the trajectory. This value "
         "(together with 'SampleInterval') determines how far apart (in time) the samples "
         "are spaced along the trajectory. The time interval between 'StartTime' and "
-        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments",
+        "'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -84,8 +84,8 @@ namespace {
         "ShowFullTrail",
         "Render Full Trail",
         "If this value is set to 'true', the entire trail will be rendered; if it is "
-        "'false', only the trail until the current time in the application will be shown",
-        // @VISIBILITY(1.25)
+        "'false', only the trail until the current time in the application will be "
+        "shown.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -93,8 +93,8 @@ namespace {
         "SweepChunkSize",
         "Sweep Chunk Size",
         "The number of vertices that will be calculated each frame whenever the trail "
-        "needs to be recalculated. "
-        "A greater value will result in more calculations per frame.",
+        "needs to be recalculated. A greater value will result in more calculations per "
+        "frame.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -113,7 +113,8 @@ namespace {
         "AccurateTrailPositions",
         "Number of Accurate Trail Points",
         "The number of vertices, each side of the object, that will be recalculated "
-        "for greater accuracy. This also ensures that the object connects with the trail.",
+        "for greater accuracy. This also ensures that the object connects with the "
+        "trail.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

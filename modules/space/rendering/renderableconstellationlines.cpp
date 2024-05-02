@@ -50,21 +50,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeckInfo = {
         "File",
         "Constellation Data File Path",
-        "The file that contains the data for the constellation lines",
+        "The file that contains the data for the constellation lines.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
         "Draw Elements",
-        "Enables/Disables the drawing of the constellations",
+        "Enables/Disables the drawing of the constellations.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UnitInfo = {
         "Unit",
         "Unit",
-        "The distance unit used for the constellation lines data",
+        "The distance unit used for the constellation lines data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -101,7 +101,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableConstellationLines::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_constellationlines");
+    return codegen::doc<Parameters>(
+        "space_renderable_constellationlines",
+        RenderableConstellationsBase::Documentation()
+    );
 }
 
 RenderableConstellationLines::RenderableConstellationLines(

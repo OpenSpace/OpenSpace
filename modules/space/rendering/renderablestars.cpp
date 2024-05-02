@@ -106,7 +106,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
         "SpeckFile",
         "Speck File",
-        "The speck file that is loaded to get the data for rendering these stars",
+        "The speck file that is loaded to get the data for rendering these stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -114,7 +114,7 @@ namespace {
         "ColorMap",
         "ColorBV Texture",
         "The path to the texture that is used to convert from the B-V value of the star "
-        "to its color. The texture is used as a one dimensional lookup function",
+        "to its color. The texture is used as a one dimensional lookup function.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -122,7 +122,7 @@ namespace {
         "MappingBV",
         "Mapping (bv-color)",
         "The name of the variable in the speck file that is used as the b-v color "
-        "variable",
+        "variable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -130,7 +130,7 @@ namespace {
         "MappingLuminance",
         "Mapping (luminance)",
         "The name of the variable in the speck file that is used as the luminance "
-        "variable",
+        "variable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -138,7 +138,7 @@ namespace {
         "MappingAbsMagnitude",
         "Mapping (absolute magnitude)",
         "The name of the variable in the speck file that is used as the absolute "
-        "magnitude variable",
+        "magnitude variable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -146,7 +146,7 @@ namespace {
         "MappingVx",
         "Mapping (vx)",
         "The name of the variable in the speck file that is used as the star velocity "
-        "along the x-axis",
+        "along the x-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -154,7 +154,7 @@ namespace {
         "MappingVy",
         "Mapping (vy)",
         "The name of the variable in the speck file that is used as the star velocity "
-        "along the y-axis",
+        "along the y-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -162,14 +162,14 @@ namespace {
         "MappingVz",
         "Mapping (vz)",
         "The name of the variable in the speck file that is used as the star velocity "
-        "along the z-axis",
+        "along the z-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingSpeedInfo = {
         "MappingSpeed",
         "Mapping (speed)",
-        "The name of the variable in the speck file that is used as the speed",
+        "The name of the variable in the speck file that is used as the speed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -177,14 +177,14 @@ namespace {
         "ColorOption",
         "Color Option",
         "This value determines which quantity is used for determining the color of the "
-        "stars",
+        "stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataOptionInfo = {
         "OtherData",
         "Other Data Column",
-        "The index of the speck file data column that is used as the color input",
+        "The index of the speck file data column that is used as the color input.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -192,21 +192,21 @@ namespace {
         "OtherDataValueRange",
         "Range of the other data values",
         "This value is the min/max value range that is used to normalize the other data "
-        "values so they can be used by the specified color map",
+        "values so they can be used by the specified color map.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FixedColorInfo = {
         "FixedColorValue",
         "Color used for fixed star colors",
-        "The color that should be used if the 'Fixed Color' value is used",
+        "The color that should be used if the 'Fixed Color' value is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataColorMapInfo = {
         "OtherDataColorMap",
         "Other Data Color Map",
-        "The color map that is used if the 'Other Data' rendering method is selected",
+        "The color map that is used if the 'Other Data' rendering method is selected.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -214,26 +214,26 @@ namespace {
         "FilterOutOfRange",
         "Filter Out of Range",
         "Determines whether other data values outside the value range should be visible "
-        "or filtered away",
+        "or filtered away.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo HaloOwnerInfo = {
         "Halo",
         "Halo",
-        "Settings for the halo portion of the star"
+        "Settings for the halo portion of the star."
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo GlareOwnerInfo = {
         "Glare",
         "Glare",
-        "Settings for the central glare portion of the star"
+        "Settings for the central glare portion of the star."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture Path",
-        "The path to the texture that should be used",
+        "The path to the texture that should be used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -243,7 +243,7 @@ namespace {
         "An individual multiplication factor for this texture component. Using the "
         "multiplier and gamma values for both components, it is possible to fine tune "
         "the look of the stars or disable the contributions altogether by setting it to "
-        "0",
+        "0.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -260,8 +260,7 @@ namespace {
         "Magnitude Exponent",
         "Adjust star magnitude by 10^MagnitudeExponent. Stars closer than this distance "
         "are given full opacity. Farther away, stars dim proportionally to the "
-        "logarithm of their distance",
-        // @VISIBILITY(2.5)
+        "logarithm of their distance.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -283,21 +282,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeCompositionMethodInfo = {
         "Method",
         "Method",
-        "Method to determine the size for the stars",
+        "Method to determine the size for the stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LumPercentInfo = {
         "LumPercent",
         "Luminosity Contribution",
-        "Luminosity Contribution",
+        "Luminosity Contribution.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusPercentInfo = {
         "RadiusPercent",
         "Radius Contribution",
-        "Radius Contribution",
+        "Radius Contribution.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -306,14 +305,14 @@ namespace {
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
         "our galaxy from which the astronomical object will start and end "
-        "fading-in",
+        "fading-in.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadeInInfo = {
         "EnableFadeIn",
         "Enable Fade-in effect",
-        "Enables/Disables the Fade-in effect",
+        "Enables/Disables the Fade-in effect.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

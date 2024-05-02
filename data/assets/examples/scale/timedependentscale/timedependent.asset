@@ -1,3 +1,4 @@
+-- Basic
 -- This asset creates a SceneGraphNode that only displays coordinate axes, which grow at
 -- a speed of 1 m/s starting on January 1st, 2000 00:00:00. This means that on
 -- that date, the coordinate axes will disappear and, for example, on January 1st, 2000
@@ -15,8 +16,8 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "TimeDependentScale",
-    Path = "/Examples"
+    Name = "Basic",
+    Path = "/Examples/TimeDependentScale"
   }
 }
 

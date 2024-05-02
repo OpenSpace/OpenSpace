@@ -83,7 +83,7 @@ namespace {
         "ShowOverlayOnClients",
         "Show Overlay Information on Clients",
         "If this value is enabled, the overlay information text is also automatically "
-        "rendered on client nodes. This values is disabled by default",
+        "rendered on client nodes. This values is disabled by default.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -92,7 +92,7 @@ namespace {
         "Show the on-screen log",
         "This value determines whether the on-screen log will be shown or hidden. Even "
         "if it is shown, all 'Debug' and 'Trace' level messages are omitted from this "
-        "log",
+        "log.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -100,8 +100,7 @@ namespace {
         "VerticalLogOffset",
         "Vertical Log Offset",
         "The vertical offset for the on-screen log in [0,1] coordinates, a factor that "
-        "is scaled with the vertical resolution",
-        // @VISIBILITY(3.5)
+        "is scaled with the vertical resolution.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -109,7 +108,7 @@ namespace {
         "ShowVersion",
         "Shows the version on-screen information",
         "This value determines whether the Git version information (branch and commit) "
-        "hash are shown on the screen",
+        "hash are shown on the screen.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -117,8 +116,7 @@ namespace {
         "ShowCamera",
         "Shows information about the current camera state, such as friction",
         "This value determines whether the information about the current camera state is "
-        "shown on the screen",
-        // @VISIBILITY(2.5)
+        "shown on the screen.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -127,7 +125,7 @@ namespace {
         "Screenshow Window Ids",
         "The list of window identifiers whose screenshot will be taken the next time "
         "anyone triggers a screenshot. If this list is empty (the default), all windows "
-        "will have their screenshot taken. Id's that do not exist are silently ignored",
+        "will have their screenshot taken. Id's that do not exist are silently ignored.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -137,15 +135,14 @@ namespace {
         "This value determines whether a warping should be applied before taking a "
         "screenshot. If it is enabled, all post processing is applied as well, which "
         "includes everything rendered on top of the rendering, such as the user "
-        "interface",
+        "interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowStatisticsInfo = {
         "ShowStatistics",
         "Show Statistics",
-        "Show updating, rendering, and network statistics on all rendering nodes",
-        // @VISIBILITY(3.5)
+        "Show updating, rendering, and network statistics on all rendering nodes.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -153,7 +150,7 @@ namespace {
         "ScreenshotUseDate",
         "Screenshot Folder uses Date",
         "If this value is set to 'true', screenshots will be saved to a folder that "
-        "contains the time at which this value was enabled",
+        "contains the time at which this value was enabled.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -161,7 +158,7 @@ namespace {
         "ShowFrameInformation",
         "Show Frame Information",
         "If this value is enabled, the current frame number and frame times are rendered "
-        "into the window",
+        "into the window.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -172,7 +169,7 @@ namespace {
         "Every other aspect of the application will be unaffected by this and it will "
         "still respond to user input. This setting is reasonably only useful in the case "
         "of multi-pipeline environments, such as planetariums, where the output of the "
-        "master node is not required and performance can be gained by disabling it",
+        "master node is not required and performance can be gained by disabling it.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -182,7 +179,7 @@ namespace {
         "Applies a global view rotation. Use this to rotate the position of the "
         "focus node away from the default location on the screen. This setting "
         "persists even when a new focus node is selected. Defined using pitch, yaw, "
-        "roll in radians",
+        "roll in radians.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -190,7 +187,7 @@ namespace {
         "ScreenSpaceRotation",
         "Screen Space Rotation",
         "Applies a rotation to all screen space renderables. Defined using pitch, yaw, "
-        "roll in radians",
+        "roll in radians.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -199,16 +196,16 @@ namespace {
         "Master Rotation",
         "Applies a view rotation for only the master node, defined using pitch, yaw, "
         "roll in radians.This can be used to compensate the master view direction for "
-        "tilted display systems in clustered immersive environments",
+        "tilted display systems in clustered immersive environments.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableHDRPipelineInfo = {
-       "DisableHDRPipeline",
-       "Disable HDR Rendering",
-       "If this value is enabled, the rendering will disable the HDR color handling and "
-       "the LDR color pipeline will be used. Be aware of possible over exposure in the "
-        "final colors",
+        "DisableHDRPipeline",
+        "Disable HDR Rendering",
+        "If this value is enabled, the rendering will disable the HDR color handling and "
+        "the LDR color pipeline will be used. Be aware of possible over exposure in the "
+        "final colors.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -216,8 +213,7 @@ namespace {
         "HDRExposure",
         "HDR Exposure",
         "This value determines the amount of light per unit area reaching the equivalent "
-        "of an electronic image sensor",
-        // @VISIBILITY(3.5)
+        "of an electronic image sensor.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -232,21 +228,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HueInfo = {
         "Hue",
         "Hue",
-        "Hue",
+        "Hue.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaturationInfo = {
         "Saturation",
         "Saturation",
-        "Saturation",
+        "Saturation.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ValueInfo = {
         "Value",
         "Value",
-        "Value",
+        "Value.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -254,8 +250,7 @@ namespace {
         "FramerateLimit",
         "Framerate Limit",
         "If set to a value bigger than 0, the framerate will be limited to that many "
-        "frames per second without using V-Sync",
-        // @VISIBILITY(2.5)
+        "frames per second without using V-Sync.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -264,7 +259,7 @@ namespace {
         "Horizontal Field of View",
         "Adjusts the degrees of the horizontal field of view. The vertical field of "
         "view will be automatically adjusted to match, according to the current "
-        "aspect ratio",
+        "aspect ratio.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -272,8 +267,7 @@ namespace {
         "BlackoutFactor",
         "Blackout Factor",
         "The blackout factor of the rendering. This can be used for fading in or out the "
-        "rendering window",
-        // @VISIBILITY(2.5)
+        "rendering window.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -281,29 +275,28 @@ namespace {
         "ApplyBlackoutToMaster",
         "Apply Blackout to Master",
         "If this value is 'true', the blackout factor is applied to the master node. "
-        "Regardless of this value, the clients will always adhere to the factor",
+        "Regardless of this value, the clients will always adhere to the factor.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FXAAInfo = {
         "FXAA",
         "Enable FXAA",
-        "Enable FXAA",
-        // @VISIBILITY(3.5)
+        "Enable FXAA.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledFontColorInfo = {
         "EnabledFontColor",
         "Enabled Font Color",
-        "The font color used for enabled options",
+        "The font color used for enabled options.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisabledFontColorInfo = {
         "DisabledFontColor",
         "Disabled Font Color",
-        "The font color used for disabled options",
+        "The font color used for disabled options.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace

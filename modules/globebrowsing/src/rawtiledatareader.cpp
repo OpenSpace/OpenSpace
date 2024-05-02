@@ -220,7 +220,7 @@ PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch,
 }
 
 RawTile::ReadError postProcessErrorCheck(const RawTile& rawTile,
-                                         [[ maybe_unused ]] size_t nRasters,
+                                         [[maybe_unused]] size_t nRasters,
                                          float noDataValue)
 {
     ghoul_assert(nRasters == rawTile.tileMetaData.nValues, "Wrong numbers of max values");

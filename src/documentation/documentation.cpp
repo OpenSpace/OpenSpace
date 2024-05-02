@@ -231,6 +231,14 @@ TestResult testSpecification(const Documentation& documentation,
                 // if the key exists, it has to be correct, however
                 continue;
             }
+            if (!p.optional && !dictionary.hasKey(p.key)) {
+                result.success = false;
+                result.offenses.emplace_back(
+                    p.key,
+                    TestResult::Offense::Reason::MissingKey
+                );
+                continue;
+            }
             applyVerifier(*(p.verifier), p.key);
         }
     }

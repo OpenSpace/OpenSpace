@@ -87,7 +87,8 @@ public:
      */
     static DocumentationEngine& ref();
 
-    void writeDocumentation() const;
+    void writeJavascriptDocumentation() const;
+    void writeJsonDocumentation() const;
 
     nlohmann::json generateScriptEngineJson() const;
     nlohmann::json generateFactoryManagerJson() const;

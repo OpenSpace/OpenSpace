@@ -44,8 +44,7 @@ namespace {
         "Active Color",
         "This value determines the color that the active instrument is rendered in. "
         "Shortly after activation, the used color is mixture of this and the flash "
-        "color. The default value is (0.6, 1.0, 0.0)",
-        // @VISIBILITY(2.5)
+        "color. The default value is (0.6, 1.0, 0.0).",
         openspace::properties::Property::Visibility::User
     };
 
@@ -53,8 +52,7 @@ namespace {
         "FlashColor",
         "Flash Color",
         "This value determines the color that is used shortly after an instrument "
-        "activation. The default value is (0.9, 1.0, 0.75)",
-        // @VISIBILITY(2.5)
+        "activation. The default value is (0.9, 1.0, 0.75).",
         openspace::properties::Property::Visibility::User
     };
 
@@ -129,7 +127,7 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
     }
     ImageSequencer& sequencer = ImageSequencer::ref();
 
-    penPosition.y -= 25.f;
+    penPosition.y -= _font->height();
 
     constexpr glm::vec4 targetColor(0.f, 0.75f, 1.f, 1.f);
 
@@ -250,6 +248,10 @@ void DashboardItemInstruments::render(glm::vec2& penPosition) {
             );
         }
     }
+
+    // The last item added a CR but we want to undo it since it's the next item's
+    // responsibility to move down
+    penPosition.y += _font->height();
 }
 
 glm::vec2 DashboardItemInstruments::size() const {

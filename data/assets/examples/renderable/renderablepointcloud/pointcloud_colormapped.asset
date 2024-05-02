@@ -1,0 +1,35 @@
+-- Color Mapping
+-- This example creates a point cloud where the color is set from a color map. All the
+-- data column in the dataset will be exposed in the user interface and can be used for
+-- color mapping during runtime. The range for the color mapping is set based on the min
+-- and max values in the dataset, for each column respoectively.
+--
+-- Note that the color map is loaded from another asset. This is a utility asset that
+-- includes some common color maps for general usage.
+
+local colormaps = asset.require("util/default_colormaps")
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_ColorMapped",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Coloring = {
+      ColorMapping = {
+        File = colormaps.Uniform.Viridis
+      }
+    }
+  },
+  GUI = {
+    Name = "Color Mapped",
+    Path = "/Examples/RenderablePointCloud"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

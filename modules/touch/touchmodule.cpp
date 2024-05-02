@@ -52,7 +52,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "DetectedTouchEvent",
         "Detected Touch Event",
-        "True when there is an active touch event",
+        "True when there is an active touch event.",
         openspace::properties::Property::Visibility::Hidden
     };
 

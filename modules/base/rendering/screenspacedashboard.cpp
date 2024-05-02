@@ -41,7 +41,7 @@ namespace {
         "UseMainDashboard",
         "Use main dashboard",
         "If this value is set to 'true', this ScreenSpaceDashboard will use the "
-        "main dashboard instead of creating an independent one",
+        "main dashboard instead of creating an independent one.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -92,7 +92,7 @@ bool ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(10.f, _size.value().w);
+        glm::vec2 penPosition = glm::vec2(0.f, _size.value().w);
 
         if (_useMainDashboard) {
             global::dashboard->render(penPosition);

@@ -44,29 +44,28 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",
         "Enable Server Process",
-        "Enable the node js based process used to serve the Web GUI",
-        // @VISIBILITY(3.5)
+        "Enable the node js based process used to serve the Web GUI.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
-        "The network address to use when connecting to OpenSpace from the Web GUI",
+        "The network address to use when connecting to OpenSpace from the Web GUI.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The network port to use when serving the Web GUI over HTTP",
+        "The network port to use when serving the Web GUI over HTTP.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo WebSocketInterfaceInfo = {
         "WebSocketInterface",
         "WebSocket Interface",
-        "The identifier of the websocket interface to use when communicating",
+        "The identifier of the websocket interface to use when communicating.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -74,8 +73,7 @@ namespace {
     {
         "ServerProcessEntryPoint",
         "Server Process Entry Point",
-        "The node js command to invoke",
-        // @VISIBILITY(3.5)
+        "The node js command to invoke.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -84,8 +82,7 @@ namespace {
         "Directories",
         "Directories from which to to serve static content, as a string list "
         "with entries expressed as pairs, where every odd is the endpoint name and every "
-        "even is the directory",
-        // @VISIBILITY(3.5)
+        "even is the directory.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -93,8 +90,7 @@ namespace {
         "DefaultEndpoint",
         "Default Endpoint",
         "The 'default' endpoint. The server will redirect http requests from / to "
-        "/<DefaultEndpoint>",
-        // @VISIBILITY(3.5)
+        "/<DefaultEndpoint>.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -104,7 +100,7 @@ namespace {
         "Directories that are currently served. This value is set by the server process, "
         "as a verification of the actually served directories. For example, an onChange "
         "callback can be registered to this, to reload browsers when the server is "
-        "ready. Manual changes to this property have no effect",
+        "ready. Manual changes to this property have no effect.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

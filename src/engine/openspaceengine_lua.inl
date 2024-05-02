@@ -39,7 +39,7 @@ namespace {
  * Writes out documentation files
  */
 [[codegen::luawrap]] void writeDocumentation() {
-    DocEng.writeDocumentation();
+    DocEng.writeJavascriptDocumentation();
 }
 
 // Sets the folder used for storing screenshots or session recording frames

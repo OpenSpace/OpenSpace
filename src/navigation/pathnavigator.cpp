@@ -58,14 +58,14 @@ namespace {
         "Default Path Type",
         "The default path type chosen when generating a path or flying to a target. "
         "See wiki for alternatives. The shape of the generated path will be different "
-        "depending on the path type",
+        "depending on the path type.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
         "IncludeRoll",
         "Include Roll",
-        "If disabled, roll is removed from the interpolation of camera orientation",
+        "If disabled, roll is removed from the interpolation of camera orientation.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -74,7 +74,7 @@ namespace {
         "Speed Scale",
         "Scale factor that the speed will be multiplied with during path traversal. "
         "Can be used to speed up or slow down the camera motion, depending on if the "
-        "value is larger than or smaller than one",
+        "value is larger than or smaller than one.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -82,7 +82,7 @@ namespace {
         "ApplyIdleBehaviorOnFinish",
         "Apply Idle Behavior on Finish",
         "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
-        "triggered once the path has reached its target",
+        "triggered once the path has reached its target.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -92,7 +92,7 @@ namespace {
         "A factor used to compute the default distance from a target scene graph node "
         "when creating a camera path. The factor will be multipled with the node's "
         "bounding sphere to compute the target height from the bounding sphere of the "
-        "object",
+        "object.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -101,8 +101,7 @@ namespace {
         "Rotation Speed Factor (Linear Path)",
         "Affects how fast the camera rotates to the target rotation during a linear "
         "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
-        "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on",
-        // @VISIBILITY(2.5)
+        "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -111,7 +110,7 @@ namespace {
         "Minimal Valid Bounding Sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "
         "computation of target positions and path generation, to avoid issues when "
-        "there is no bounding sphere",
+        "there is no bounding sphere.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -119,8 +118,7 @@ namespace {
         "RelevantNodeTags",
         "Relevant Node Tags",
         "List of tags for the nodes that are relevant for path creation, for example "
-        "when avoiding collisions",
-        // @VISIBILITY(3.5)
+        "when avoiding collisions.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
