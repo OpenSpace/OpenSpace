@@ -224,7 +224,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NumShownDataPointsInfo = {
         "NumberOfDataPoints",
         "Number of Shown Data Points",
-        "Shows information about how many points are being rendered.",
+        "Information about how many points are being rendered.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -283,8 +283,7 @@ namespace {
         "Size Mapping Enabled",
         "Decides whether size mapping should be enabled. If true and at least one column "
         "was loaded as an option for size mapping, the chosen data column will be used "
-        "to scale the size of the points. The first option in the list is selected per "
-        "default.",
+        "to scale the size of the points.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 

@@ -69,7 +69,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "The number of segments that the shapes for the arrow are divided into. A higher "
+        "The number of segments that the shapes of the arrow are divided into. A higher "
         "number leads to a higher resolution and smoother shape.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -85,7 +85,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ArrowHeadSizeInfo = {
         "ArrowHeadSize",
         "Arrow Head Size",
-        "The size of the arrow head, given in relative value of the entire length of "
+        "The length of the arrow head, given in relative value of the entire length of "
         "the arrow. For example, 0.1 makes the arrow head length be 10% of the full "
         "arrow length.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -137,7 +137,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
         "Width",
         "Width",
-        "A value that affects the width of the arrow.",
+        "The width of the arrow.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
