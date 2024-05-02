@@ -127,7 +127,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StarRenderingMethodInfo = {
         "StarRenderingMethod",
         "Star Rendering Method",
-        "The rendering method to use for the visualization of the stars.",
+        "The rendering method used for visualizing the stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -145,7 +145,7 @@ namespace {
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "The downscaling factor to use when rendering the volume.",
+        "The downscaling factor used when rendering the volume.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -153,7 +153,7 @@ namespace {
     {
         "Steps",
         "Number of RayCasting Steps",
-        "The number of integration steps to use during the raycasting procedure.",
+        "The number of integration steps used during the raycasting procedure.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

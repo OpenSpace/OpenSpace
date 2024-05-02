@@ -149,7 +149,7 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
-        // The unit to use when interpreting the positions in the dataset.
+        // The unit used when interpreting the positions in the dataset.
         std::optional<Unit> unit;
 
         // [[codegen::verbatim(TextColorInfo.description)]]

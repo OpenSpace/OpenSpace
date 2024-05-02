@@ -40,7 +40,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The color to use for the grid lines.",
+        "The color used for the grid lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 

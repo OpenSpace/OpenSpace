@@ -238,22 +238,22 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleExponentInfo = {
         "ScaleExponent",
         "Scale Exponent",
-        "A value to use as an exponential scaling to set the absolute size of the "
-        "point. In general, the larger distance the dataset covers, the larger this "
-        "value should be. If not included, it is computed based on the maximum "
-        "positional component of the data points. This is useful for showing the "
-        "dataset at all, but you will likely want to change it to something that looks "
-        "good. Note that a scale exponent of 0 leads to the points having a diameter of "
-        "1 meter, i.e. no exponential scaling.",
+        "An exponential scale value used to set the absolute size of the point. In "
+        "general, the larger distance the dataset covers, the larger this value should "
+        "be. If not included, it is computed based on the maximum positional component "
+        "of the data points. This is useful for showing the dataset at all, but you will "
+        "likely want to change it to something that looks good. Note that a scale "
+        "exponent of 0 leads to the points having a diameter of 1 meter, i.e. no "
+        "exponential scaling.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleFactorInfo = {
         "ScaleFactor",
         "Scale Factor",
-        "A value to use as a multiplicative factor to adjust the size of the points, "
-        "after the exponential scaling and any max size control effects. Simply just "
-        "increases or decreases the visual size of the points.",
+        "A multiplicative factor used to adjust the size of the points, after the "
+        "exponential scaling and any max size control effects. Simply just increases "
+        "or decreases the visual size of the points.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -269,12 +269,12 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
         "Max Size",
-        "Controls the maximum allowed size for the points, when the max "
-        "size control feature is enabled. This limits the visual size of the points "
-        "based on the distance to the camera. The larger the value, the larger the "
-        "points may be. In the background, the computations are made by limiting the "
-        "size to a certain angle based on the field of view of the camera. So a value of "
-        "1 limits the point size to take up a maximum of one degree of the view space.",
+        "Controls the maximum allowed size for the points, when the max size control "
+        "feature is enabled. This limits the visual size of the points based on the "
+        "distance to the camera. The larger the value, the larger the points may be. "
+        "In the background, the computations are made by limiting the size to a certain "
+        "angle based on the field of view of the camera. So a value of 1 limits the "
+        "point size to take up a maximum of one degree of the view space.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -290,7 +290,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeMappingOptionInfo = {
         "Parameter",
         "Parameter Option",
-        "The name of a data parameter to use for scaling of the point. The parameter "
+        "The name of a data parameter used for scaling of the points. The parameter "
         "value will be used as a multiplicative factor to scale the size of the points. "
         "Note that they may still be scaled by max size adjustment effects.",
         openspace::properties::Property::Visibility::AdvancedUser

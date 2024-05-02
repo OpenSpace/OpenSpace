@@ -130,8 +130,7 @@ namespace {
         "ModelTransform",
         "Model Transform",
         "An extra model transform matrix that is applied to the model before all other "
-        "transformations are applied. By default it is the identity matrix and has no "
-        "effect on the rendering.",
+        "transformations are applied.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -254,7 +253,7 @@ namespace {
         };
 
         // The mode of how the animation should be played back.
-        // Default is animation is played back once at the start time.
+        // Default is that the animation is played back once at the start time.
         // For a more detailed description see:
         // http://wiki.openspaceproject.com/docs/builders/model-animation.
         std::optional<AnimationMode> animationMode;
@@ -296,7 +295,7 @@ namespace {
         // The path to a vertex shader program to use instead of the default shader.
         std::optional<std::filesystem::path> vertexShader;
 
-        // The path to a fragment shader program to used instead of the default shader.
+        // The path to a fragment shader program to use instead of the default shader.
         std::optional<std::filesystem::path> fragmentShader;
     };
 #include "renderablemodel_codegen.cpp"

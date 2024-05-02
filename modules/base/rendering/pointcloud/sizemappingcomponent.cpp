@@ -98,7 +98,7 @@ namespace {
             Gigalightyear
         };
 
-        // The scale to use for the size values in the dataset, given as either a string
+        // The scale used for the size values in the dataset, given as either a string
         // representing a specific unit or a value to multiply all the datapoints with
         // to convert the value to meter. The resulting value will be applied as a
         // multiplicative factor. For example, if the size data is given in is in
