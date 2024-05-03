@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
 
     // In order to initialize the engine, we need to specify the tokens
     // We start by registering the path of the executable,
-    // to make it possible to find other files in the same directory.
+    // to make it possible to find other files in the same directory
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::path(argv[0]).parent_path(),
