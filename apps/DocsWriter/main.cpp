@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     global::openSpaceEngine->initialize();
 
     // Print out the documentation to the documentation folder
-    // @TODO: ylvse-2024-05-02 change this directory when integrating with jenkins?
+    // @TODO (ylvse, 2024-05-02) change this directory when integrating with jenkins?
     DocEng.writeJsonDocumentation();
 
     return 0;
