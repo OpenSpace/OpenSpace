@@ -422,6 +422,7 @@ void OpenSpaceEngine::initialize() {
     }
 
     // Load the profile
+    LINFO(std::format("Loading profile '{}'", profile));
     *global::profile = Profile(profile);
 
     // Set up asset loader
