@@ -28,7 +28,7 @@
 #include <modules/base/rendering/renderablesphere.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
 
-namespace ghoul::opengl { class Texture; }
+//namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
@@ -78,7 +78,8 @@ private:
 
     void loadTexture();
     void extractMandatoryInfoFromSourceFolder();
-    void readInFile(std::filesystem::path path);
+    void readFileFromImage(std::filesystem::path path);
+    void readFileFromFits(std::filesystem::path path);
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
     void setupDynamicDownloading(const std::optional<int>& dataID,
@@ -105,6 +106,7 @@ private:
     int _activeTriggerTimeIndex = 0;
 
     properties::StringProperty _textureSourcePath;
+    bool _isFitsFormat = false;
     ghoul::opengl::Texture* _texture = nullptr;
     bool _textureIsDirty = false;
 };

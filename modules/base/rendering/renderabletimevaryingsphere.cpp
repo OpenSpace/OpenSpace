@@ -33,6 +33,8 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/opengl/texture.h>
+#include <modules/fitsfilereader/include/wsafitshelper.h>
+
 
 namespace {
     // Extract J2000 time from file names
@@ -62,7 +64,7 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
-        std::string textureSource;
+        std::optional<std::string> textureSource;
         // choose type of loading:
         //0: static loading and static downloading
         //1: dynamic loading and static downloading
@@ -97,7 +99,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _textureSourcePath = p.textureSource;
+    _textureSourcePath = p.textureSource.value_or(_textureSourcePath);
     if (p.loadingType.has_value()) {
         _loadingType = codegen::map<LoadingType>(*p.loadingType);
     }
@@ -153,15 +155,22 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
     RenderableSphere::deinitializeGL();
 }
 
-void RenderableTimeVaryingSphere::readInFile(std::filesystem::path(path)) {
+void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     File newFile;
     newFile.path = path;
     newFile.status = File::FileStatus::Loaded;
     newFile.time = extractTriggerTimeFromFileName(path);
-    const std::string filePath = path.string();
-    const double time = extractTriggerTimeFromFileName(filePath);
+    std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path);
+
+}
+
+void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) {
+    File newFile;
+    newFile.path = path;
+    newFile.status = File::FileStatus::Loaded;
+    newFile.time = extractTriggerTimeFromFileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t =
-        ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
+        ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
     t->setInternalFormat(GL_COMPRESSED_RGBA);
     t->uploadTexture();
@@ -172,7 +181,7 @@ void RenderableTimeVaryingSphere::readInFile(std::filesystem::path(path)) {
 
     const std::vector<File>::const_iterator iter = std::upper_bound(
         _files.begin(), _files.end(),
-        time,
+        newFile.time,
         [](double timeRef, const File& fileRef) {
             return timeRef < fileRef.time;
         }
@@ -197,7 +206,13 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         if (!e.is_regular_file()) {
             continue;
         }
-        readInFile(e);
+        std::string fileExtention = e.path().extension().string();
+        if (fileExtention == "fits") {
+            readFileFromFits(e.path());
+        }
+        else {
+            readFileFromImage(e.path());
+        }
     }
     // Should no longer need to sort after using insert here above instead
     //std::sort(
@@ -285,7 +300,7 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
     const std::vector<std::filesystem::path>& filesToRead =
         _dynamicFileDownloader->downloadedFiles();
     for (std::filesystem::path filePath : filesToRead) {
-        readInFile(filePath);
+        readFileFromImage(filePath);
     }
     // if all files are moved into _sourceFiles then we can
     // empty the DynamicFileSequenceDownloader _downloadedFiles;
