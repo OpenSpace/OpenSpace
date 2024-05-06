@@ -1,16 +1,15 @@
 {
   "profile": "juno",
   "commands": [
-    { "type": "pause", "value": true },
     { "type": "time", "value": "2016-07-01T00:00:01.00" },
     {
       "type": "navigationstate",
       "value": {
         "anchor": "Juno",
-        "pitch": -0.165756E-1,
-        "position": [ -2.249081E1, 1.191533E0, 2.635740E1 ],
-        "up": [ 0.288083E-1, 0.999373E0, -0.205962E-1 ],
-        "yaw": 0.152454E0
+        "pitch": -0.0165756,
+        "position": [ -22.49081, 1.191533, 26.35740 ],
+        "up": [ 0.0288083, 0.999373, -0.0205962 ],
+        "yaw": 0.152454
       }
     },
     { "type": "wait", "value": 2 },

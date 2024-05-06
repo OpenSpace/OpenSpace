@@ -1,15 +1,14 @@
 {
   "profile": "newhorizons",
   "commands": [
-    { "type": "pause", "value": true },
     {
       "type": "navigationstate",
       "value": {
         "anchor": "NewHorizons",
-        "pitch": 0.444246E-1,
-        "position": [ 3.319494E1, -1.500620E0, -8.950034E0 ],
-        "up": [ 0.469986E-1, 0.998872E0, 0.683673E-2 ],
-        "yaw": 0.146484E0
+        "pitch": 0.0444246,
+        "position": [ 33.19494, -1.500620, -8.950034 ],
+        "up": [ 0.0469986, 0.998872, 0.00683673 ],
+        "yaw": 0.146484
       }
     },
     { "type": "wait", "value": 5 },

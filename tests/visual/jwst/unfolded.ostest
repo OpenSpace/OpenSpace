@@ -1,7 +1,6 @@
 {
   "profile": "jwst",
   "commands": [
-    { "type": "pause", "value": true },
     { "type": "time", "value": "2022-01-22T05:24:50.00" },
     {
       "type": "navigationstate",

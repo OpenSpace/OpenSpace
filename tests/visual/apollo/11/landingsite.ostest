@@ -1,7 +1,6 @@
 {
   "profile": "apollo",
   "commands": [
-    { "type": "pause", "value": true },
     { "type": "action", "value": "os.apollo11.setup.LandingSite" },
     { "type": "wait", "value": 10 },
     {
@@ -9,10 +8,10 @@
       "value": {
         "anchor": "Apollo11LemPosition",
         "pitch": -0.275871E-1,
-        "position": [ -3.291966E2, 7.262499E2, -7.671269E2 ],
+        "position": [ -329.1966, 726.2499, -767.1269 ],
         "referenceFrame": "Root",
-        "up": [ -0.833341E0, -0.532887E0, -0.146881E0 ],
-        "yaw": -0.141130E-3
+        "up": [ -0.833341, -0.532887, -0.146881 ],
+        "yaw": -0.000141130
       }
     },
     { "type": "wait", "value": 10 },
@@ -20,10 +19,9 @@
       "type": "navigationstate",
       "value": {
         "anchor": "Apollo11LemPosition",
-        "pitch": -0.275880E-11,
-        "position": [ 6.249130E0, 2.576497E1, -1.435499E1 ],
-        "up": [ -0.860897E0, -0.718231E-1, -0.503684E0 ],
-        "yaw": -0.141143E-3
+        "position": [ 6.249130, 25.76497, -14.35499 ],
+        "up": [ -0.860897, -0.0718231, -0.503684 ],
+        "yaw": -0.000141143
       }
     },
     { "type": "wait", "value": 45 },

@@ -1,7 +1,6 @@
 {
   "profile": "apollo",
   "commands": [
-    { "type": "pause", "value": true },
     { "type": "time", "value": "2015-07-14T08:14:30.00" },
     {
       "type": "property",
@@ -14,10 +13,10 @@
       "type": "navigationstate",
       "value": {
         "anchor": "Pluto",
-        "pitch": -0.566951E-1,
-        "position": [ -2.300324E6, 2.259246E6, 3.521214E6 ],
-        "up": [ 0.862771E0, 0.403378E0, 0.304816E0 ],
-        "yaw": -0.119485E0
+        "pitch": -0.0566951,
+        "position": [ -2300324, 2259246, 3521214 ],
+        "up": [ 0.862771, 0.403378, 0.304816 ],
+        "yaw": -0.119485
       }
     },
     { "type": "deltatime", "value": 10 },

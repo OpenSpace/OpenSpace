@@ -1,16 +1,15 @@
 {
   "profile": "apollo",
   "commands": [
-    { "type": "pause", "value": true },
     { "type": "action", "value": "os.apollo17.setup.LandingSite" },
     {
       "type": "navigationstate",
       "value": {
         "anchor": "Moon",
-        "pitch": 0.191313E0,
-        "position": [ 1.403983E6, 8.358961E5, 6.005625E5 ],
-        "up": [ -0.316846E0, -0.141630E0, 0.937843E0 ],
-        "yaw": -0.143901E0
+        "pitch": 0.191313,
+        "position": [ 1403983, 835896.1, 600562.5 ],
+        "up": [ -0.316846, -0.141630, 0.937843 ],
+        "yaw": -0.143901
       }
     },
     { "type": "wait", "value": 10 },
@@ -18,10 +17,10 @@
       "type": "navigationstate",
       "value": {
         "anchor": "Moon",
-        "pitch": 0.953555E0,
-        "position": [ 1.399797E6, 8.334161E5, 5.988283E5 ],
-        "up": [ -0.381687E0, -0.228442E-1, 0.924009E0 ],
-        "yaw": -0.789410E-1
+        "pitch": 0.953555,
+        "position": [ 1399797, 833416.1, 598828.3 ],
+        "up": [ -0.381687, -0.0228442, 0.924009 ],
+        "yaw": -0.0789410
       }
     },
     { "type": "wait", "value": 45 },

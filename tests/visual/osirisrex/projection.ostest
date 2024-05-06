@@ -1,16 +1,15 @@
 {
   "profile": "osirisrex",
   "commands": [
-    { "type": "pause", "value": true },
     { "type": "time", "value": "2019-01-13T19:18:20.00" },
     {
       "type": "navigationstate",
       "value": {
         "anchor": "BennuBarycenter",
-        "pitch": -0.249726E-1,
-        "position": [ 6.343195E2, -7.381825E1, -2.105395E2 ],
-        "up": [ 0.260217E0, -0.340701E0, 0.903444E0 ],
-        "yaw": 0.593456E-1
+        "pitch": -0.0249726,
+        "position": [ 634.3195, -73.81825, -210.5395 ],
+        "up": [ 0.260217, -0.340701, 0.903444 ],
+        "yaw": 0.0593456
       }
     },
     { "type": "action", "value": "os.FadeDownTrails" },

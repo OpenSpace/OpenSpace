@@ -1,16 +1,15 @@
 {
   "profile": "rosetta",
   "commands": [
-    { "type": "pause", "value": true },
     { "type": "time", "value": "2014-08-06T23:07:00.00" },
     {
       "type": "navigationstate",
       "value": {
         "anchor": "67P",
-        "pitch": -0.608276E-2,
-        "position": [ 1.035920E3, 1.090395E4, 6.708170E3 ],
-        "up": [ -0.972426E0, 0.182052E0, -0.145753E0 ],
-        "yaw": 0.475854E-2
+        "pitch": -0.00608276,
+        "position": [ 103.5920, 10903.95, 6708.170 ],
+        "up": [ -0.972426, 0.182052, -0.145753 ],
+        "yaw": 0.00475854
       }
     },
     { "type": "action", "value": "os.FadeDownTrails" },

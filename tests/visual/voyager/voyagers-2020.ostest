@@ -1,7 +1,6 @@
 {
   "profile": "voyager",
   "commands": [
-    { "type": "pause", "value": true },
     { "type": "time", "value": "2020-01-01T00:00:00.00" },
     {
       "type": "navigationstate",
