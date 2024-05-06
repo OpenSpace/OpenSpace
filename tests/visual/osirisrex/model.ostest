@@ -1,0 +1,27 @@
+{
+  "profile": "osirisrex",
+  "commands": [
+    { "type": "pause", "value": true },
+    { "type": "time", "value": "2018-10-30T23:00:00.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "OsirisRex",
+        "pitch": -0.274542E-5,
+        "position": [ -3.894924E0,-9.051193E0,5.720444E0 ],
+        "up": [ -0.911098E0,0.149229E0,-0.384228E0 ],
+        "yaw": 0.270290E-4
+      }
+    },
+    { "type": "action", "value": "os.FadeDownTrails" },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.OsirisRexTrailBennu.Renderable.Enabled",
+        "value": false
+      }
+    },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

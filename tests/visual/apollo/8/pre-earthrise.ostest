@@ -1,0 +1,9 @@
+{
+  "profile": "apollo",
+  "commands": [
+    { "type": "pause", "value": true },
+    { "type": "action", "value": "os.apollo8.SetupEarthrise" },
+    { "type": "wait", "value": 60 },
+    { "type": "screenshot" }
+  ]
+}
