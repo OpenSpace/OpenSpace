@@ -77,7 +77,9 @@ namespace {
 
 namespace openspace::kameleonvolume {
 
-KameleonVolumeReader::KameleonVolumeReader(std::string path) : _path(std::move(path)) {
+KameleonVolumeReader::KameleonVolumeReader(std::filesystem::path path)
+    : _path(std::move(path))
+{
     if (!std::filesystem::is_regular_file(_path)) {
         throw ghoul::FileNotFoundError(_path);
     }

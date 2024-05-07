@@ -40,23 +40,18 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 7> UniformNames = {
-        "modelViewProjectionTransform", "offset", "opacity",
-        "discTexture", "eccentricity", "semiMajorAxis", "multiplyColor"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for the color",
+        "texture which is used for the color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the semi-major axis of the orbit, in meter",
+        "This value specifies the semi-major axis of the orbit, in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -64,7 +59,7 @@ namespace {
         "Eccentricity",
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
-        "sphere, for this orbit",
+        "sphere, for this orbit.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -74,7 +69,7 @@ namespace {
         "This property determines the width of the disc. The values specify the lower "
         "and upper deviation from the semi major axis, respectively. The values are "
         "relative to the size of the semi-major axis. That is, 0 means no deviation "
-        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation",
+        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -82,8 +77,7 @@ namespace {
         "MultiplyColor",
         "Multiply Color",
         "If set, the disc's texture is multiplied with this color. Useful for applying a "
-        "color grayscale images",
-        // @VISIBILITY(1.5)
+        "color grayscale images.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -165,7 +159,7 @@ void RenderableOrbitDisc::initializeGL() {
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     _texture->loadFromFile(_texturePath.value());
     _texture->uploadToGpu();
@@ -186,7 +180,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
     _shader->setUniform(
-        _uniformCache.modelViewProjection,
+        _uniformCache.modelViewProjectionTransform,
         glm::mat4(calcModelViewProjectionTransform(data))
     );
     _shader->setUniform(_uniformCache.offset, _offset);
@@ -198,7 +192,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _shader->setUniform(_uniformCache.texture, unit);
+    _shader->setUniform(_uniformCache.discTexture, unit);
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -218,7 +212,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
 void RenderableOrbitDisc::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_planeIsDirty) {

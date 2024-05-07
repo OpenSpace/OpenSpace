@@ -28,8 +28,6 @@
 
 namespace {
     struct [[codegen::Dictionary(TileProviderByLevel)]] Parameters {
-        int layerGroupID;
-
         struct Provider {
             int maxLevel [[codegen::greaterequal(0)]];
             ghoul::Dictionary tileProvider;
@@ -50,7 +48,13 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const layers::Group::ID group = static_cast<layers::Group::ID>(p.layerGroupID);
+    // For now we need to inject the LayerGroupID this way. We don't want it to be part of
+    // the parameters struct as that would mean it would be visible to the end user, which
+    // we don't want since this value just comes from whoever creates it, not the user
+    ghoul_assert(dictionary.hasValue<int>("LayerGroupID"), "No Layer Group ID provided");
+    const layers::Group::ID group = static_cast<layers::Group::ID>(
+        dictionary.value<int>("LayerGroupID")
+    );
 
     for (Parameters::Provider provider : p.levelTileProviders) {
         ghoul::Dictionary& tileProviderDict = provider.tileProvider;

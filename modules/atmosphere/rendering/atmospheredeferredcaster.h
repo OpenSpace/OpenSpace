@@ -88,7 +88,7 @@ public:
         float mieHeightScale, float miePhaseConstant, float sunRadiance,
         glm::vec3 rayScatteringCoefficients, glm::vec3 ozoneExtinctionCoefficients,
         glm::vec3 mieScatteringCoefficients, glm::vec3 mieExtinctionCoefficients,
-        bool sunFollowing, float sunAngularSize);
+        bool sunFollowing, float sunAngularSize, SceneGraphNode* lightSourceNode);
 
     void setHardShadows(bool enabled);
 
@@ -117,9 +117,10 @@ private:
     UniformCache(cullAtmosphere, opacity, Rg, Rt, groundRadianceEmission, HR,
         betaRayleigh, HM, betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO,
         betaOzoneExtinction, SAMPLES_R, SAMPLES_MU, SAMPLES_MU_S, SAMPLES_NU,
-        inverseModelTransformMatrix, modelTransformMatrix, projectionToModelTransform,
-        viewToWorldMatrix, camPosObj, sunDirectionObj, hardShadows, transmittanceTexture,
-        irradianceTexture, inscatterTexture, sunAngularSize) _uniformCache;
+        inverseModelTransformMatrix, modelTransformMatrix,
+        projectionToModelTransformMatrix, viewToWorldMatrix, camPosObj, sunDirectionObj,
+        hardShadows, transmittanceTexture, irradianceTexture, inscatterTexture,
+        sunAngularSize) _uniformCache;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
@@ -142,6 +143,7 @@ private:
     float _miePhaseConstant = 0.f;
     float _sunRadianceIntensity = 5.f;
     float _sunAngularSize = 0.3f;
+    SceneGraphNode* _lightSourceNode = nullptr;
 
     glm::vec3 _rayleighScatteringCoeff = glm::vec3(0.f);
     glm::vec3 _ozoneExtinctionCoeff = glm::vec3(0.f);

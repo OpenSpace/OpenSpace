@@ -25,6 +25,7 @@
 #include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -57,6 +58,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo IsRadiusInfo = {
+        "IsRadius",
+        "Size is Radius",
+        "If true, the size value in the data is interpreted as the radius of the points. "
+        "Otherwise, it is interpreted as the diameter.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(SizeMappingComponent)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -69,7 +78,36 @@ namespace {
         std::optional<std::string> parameter;
 
         // [[codegen::verbatim(ScaleFactorInfo.description)]]
-        std::optional<float> scaleFactor;
+        enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
+            Nanometer,
+            Micrometer,
+            Millimeter,
+            Centimeter,
+            Decimeter,
+            Meter,
+            Kilometer,
+            AU,
+            Lighthour,
+            Lightday,
+            Lightmonth,
+            Lightyear,
+            Parsec,
+            Kiloparsec,
+            Megaparsec,
+            Gigaparsec,
+            Gigalightyear
+        };
+
+        // The scale to use for the size values in the dataset, given as either a string
+        // representing a specific unit or a value to multiply all the datapoints with
+        // to convert the value to meter. The resulting value will be applied as a
+        // multiplicative factor. For example, if the size data is given in is in
+        // kilometers then specify either <code>ScaleFactor = 'Kilometer'</code> or
+        // <code>ScaleFactor = 1000.0</code>.
+        std::optional<std::variant<ScaleUnit, double>> scaleFactor;
+
+        // [[codegen::verbatim(IsRadiusInfo.description)]]
+        std::optional<bool> isRadius;
     };
 #include "sizemappingcomponent_codegen.cpp"
 }  // namespace
@@ -88,10 +126,12 @@ SizeMappingComponent::SizeMappingComponent()
         properties::OptionProperty::DisplayType::Dropdown
     )
     , scaleFactor(ScaleFactorInfo, 1.f, 0.f, 1000.f)
+    , isRadius(IsRadiusInfo, false)
 {
     addProperty(enabled);
     addProperty(parameterOption);
     addProperty(scaleFactor);
+    addProperty(isRadius);
 }
 
 SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
@@ -110,7 +150,7 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
             parameterOption.addOption(static_cast<int>(i), opts[i]);
 
             if (p.parameter.has_value() && *p.parameter == opts[i]) {
-                indexOfProvidedOption = i;
+                indexOfProvidedOption = static_cast<int>(i);
             }
         }
     }
@@ -125,7 +165,19 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
         ));
     }
 
-    scaleFactor = p.scaleFactor.value_or(scaleFactor);
+    if (p.scaleFactor.has_value()) {
+        if (std::holds_alternative<Parameters::ScaleUnit>(*p.scaleFactor)) {
+            const Parameters::ScaleUnit scaleUnit =
+                std::get<Parameters::ScaleUnit>(*p.scaleFactor);
+            const DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
+            scaleFactor = toMeter(distanceUnit);
+        }
+        else if (std::holds_alternative<double>(*p.scaleFactor)) {
+            scaleFactor = std::get<double>(*p.scaleFactor);
+        }
+    }
+
+    isRadius = p.isRadius.value_or(isRadius);
 }
 
 } // namespace openspace

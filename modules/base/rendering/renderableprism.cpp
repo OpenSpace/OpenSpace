@@ -37,15 +37,10 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 2> UniformNames = {
-        "modelViewProjectionTransform", "vs_color"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
-        "The number of segments the shape of the prism should have",
-        // @VISIBILITY(2.8)
+        "The number of segments the shape of the prism should have.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -53,16 +48,14 @@ namespace {
         "NumLines",
         "Number of Lines",
         "The number of lines connecting the two shapes of the prism. They will be evenly "
-        "distributed around the bounding circle that makes up the shape of the prism",
-        // @VISIBILITY(2.8)
+        "distributed around the bounding circle that makes up the shape of the prism.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
-        "The radius of the prism's shape in meters",
-        // @VISIBILITY(2.8)
+        "The radius of the prism's shape in meters.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -70,32 +63,28 @@ namespace {
         "BaseRadius",
         "Base Radius",
         "The radius of the base of the prism's shape, in meters. By default it is given "
-        "the same radius as the outer shape",
-        // @VISIBILITY(2.8)
+        "the same radius as the outer shape.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width",
-        // @VISIBILITY(2.0)
+        "This value specifies the line width.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line",
-        // @VISIBILITY(1.2)
+        "This value determines the RGB color for the line.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
-        "The length of the prism in meters",
-        // @VISIBILITY(2.8)
+        "The length of the prism in meters.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -190,7 +179,7 @@ void RenderablePrism::initializeGL() {
         absPath("${MODULE_BASE}/shaders/prism_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/prism_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     glGenVertexArrays(1, &_vaoId);
     glGenBuffers(1, &_vboId);
@@ -333,7 +322,7 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
 
     // Uniforms
     _shader->setUniform(
-        _uniformCache.modelViewProjection,
+        _uniformCache.modelViewProjectionTransform,
         glm::mat4(modelViewProjectionTransform)
     );
     _shader->setUniform(_uniformCache.color, glm::vec4(_lineColor.value(), opacity()));
@@ -361,7 +350,7 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
 void RenderablePrism::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
     if (_prismIsDirty) {
         updateVertexData();

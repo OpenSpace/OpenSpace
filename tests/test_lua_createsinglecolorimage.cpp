@@ -42,20 +42,14 @@ TEST_CASE("CreateSingleColorImage: Create image and check return value",
         glm::dvec3(1.0, 0.0, 0.0)
     );
 
-    CHECK_THAT(
-        path.string(),
-        Catch::Matchers::ContainsSubstring("colorFile.ppm")
-    );
+    CHECK_THAT(path.string(), Catch::Matchers::ContainsSubstring("colorFile.ppm"));
 }
 
 TEST_CASE("CreateSingleColorImage: Faulty color value (invalid values)",
           "[createsinglecolorimage]")
 {
     CHECK_THROWS_WITH(
-        createSingleColorImage(
-            "notCreatedColorFile",
-            glm::dvec3(255.0, 0.0, 0.0)
-        ).string(),
+        createSingleColorImage("notCreatedColorFile", glm::dvec3(255.0, 0.0, 0.0)),
         Catch::Matchers::Equals(
             "Invalid color. Expected three double values {r, g, b} in range 0 to 1"
         )

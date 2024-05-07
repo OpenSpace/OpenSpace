@@ -1,0 +1,30 @@
+-- Draw Point Outline
+-- This example creates a point cloud where the points have a colored outline with a
+-- given color and thickness (weight).
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_Outline",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Coloring = {
+      EnableOutline = true,
+      OutlineColor = { 0.2, 0.2, 1.0 },
+      OutlineWeight = 0.1
+    },
+    -- It might be desired to disable additive blending when using an outline
+    UseAdditiveBlending = false
+  },
+  GUI = {
+    Name = "Outlined",
+    Path = "/Examples/RenderablePointCloud"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -70,7 +70,9 @@ namespace {
 
         // This variable determines the validity period of a file(s) in seconds before it
         // needs to be re-downloaded. The default value keeps the file permanently cached,
-        // while a value of 0 forces the file to be downloaded on every startup.
+        // while a value of 0 forces the file to be downloaded on every startup. If the
+        // symbolic value `math.huge` is used, a file is never redownloaded after the
+        // first time.
         std::optional<double> secondsUntilResync [[codegen::greaterequal(0.0)]];
     };
 #include "urlsynchronization_codegen.cpp"
@@ -222,8 +224,11 @@ bool UrlSynchronization::isEachFileValid() {
     // Valid to: yyyy-mm-ddThr:mn:sc.xxx
 
     if (ossyncVersion == "1.0") {
+        // We need to mutex-protect the access to the time conversion for now
+        std::lock_guard guard(_mutex);
+
         ghoul::getline(file >> std::ws, line);
-        std::string& fileIsValidToDate = line;
+        const std::string& fileIsValidToDate = line;
         const double fileValidAsJ2000 = Time::convertTime(fileIsValidToDate);
 
         const std::string todaysDate = Time::currentWallTime();

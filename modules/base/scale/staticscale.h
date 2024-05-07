@@ -27,7 +27,7 @@
 
 #include <openspace/scene/scale.h>
 
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {
 
@@ -42,7 +42,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    properties::FloatProperty _scaleValue;
+    properties::DoubleProperty _scaleValue;
 };
 
 } // namespace openspace

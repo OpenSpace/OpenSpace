@@ -32,10 +32,20 @@ namespace {
         "Scale",
         "Scale",
         "These values are used as scaling factors for the scene graph node that this "
-        "transformation is attached to relative to its parent",
+        "transformation is attached to relative to its parent.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    // This Scale type scales the scene graph node that it is attached to by a fixed
+    // amount that does not change over time. It is possible to change the fixed scale
+    // after starting the application, but it otherwise remains unchanged. The scaling is
+    // a simple multiplication so that a `Scale` value of 10 means that the object will be
+    // 10 times larger than its original size. In comparison to the StaticScale type, this
+    // type has the ability to scale an object by different amounts for each direction.
+    //
+    // This type can be used to adjust the aspect ratio of Renderable types, for example
+    // to make a RenderableSphericalGrid that is not a perfect spherical grid, but a
+    // tri-axial ellipsoid instead.
     struct [[codegen::Dictionary(NonUniformStaticScale)]] Parameters {
         // [[codegen::verbatim(ScaleInfo.description)]]
         glm::dvec3 scale;
@@ -49,25 +59,18 @@ documentation::Documentation NonUniformStaticScale::Documentation() {
     return codegen::doc<Parameters>("base_scale_nonuniformstatic");
 }
 
-glm::dvec3 NonUniformStaticScale::scaleValue(const UpdateData&) const {
-    return _scaleValue;
-}
-
-NonUniformStaticScale::NonUniformStaticScale()
+NonUniformStaticScale::NonUniformStaticScale(const ghoul::Dictionary& dictionary)
     : _scaleValue(ScaleInfo, glm::dvec3(1.0), glm::dvec3(0.1), glm::dvec3(100.0))
 {
-    addProperty(_scaleValue);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _scaleValue.onChange([this]() {
-        requireUpdate();
-    });
+    _scaleValue = p.scale;
+    _scaleValue.onChange([this]() { requireUpdate(); });
+    addProperty(_scaleValue);
 }
 
-NonUniformStaticScale::NonUniformStaticScale(const ghoul::Dictionary& dictionary)
-    : NonUniformStaticScale()
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    _scaleValue = p.scale;
+glm::dvec3 NonUniformStaticScale::scaleValue(const UpdateData&) const {
+    return _scaleValue;
 }
 
 } // namespace openspace

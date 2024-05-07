@@ -71,10 +71,8 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "Stepsize",
-        //"StepSize",
-        "Fieldline Step Size",
+        "Fieldline Step Size.",
         "", // @TODO Missing documentation
-        // @VISIBILITY(2.75)
         openspace::properties::Property::Visibility::User
     };
 
@@ -437,8 +435,9 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         LERROR(std::format("'{}' does not name a file", KeyVectorField));
         return {};
     }
-    std::string fileName = _vectorFieldInfo.value<std::string>(KeyVectorFieldFile);
-    fileName = absPath(fileName).string();
+    std::filesystem::path fileName = absPath(
+        _vectorFieldInfo.value<std::string>(KeyVectorFieldFile)
+    );
 
     //KameleonWrapper::Model modelType;
     if (model != VectorFieldKameleonModelBATSRUS) {
@@ -473,7 +472,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         std::string yVariable = _vectorFieldInfo.value<std::string>(v2);
         std::string zVariable = _vectorFieldInfo.value<std::string>(v3);
 
-        KameleonWrapper kw(fileName);
+        KameleonWrapper kw = KameleonWrapper(fileName);
         return kw.classifiedFieldLines(
             xVariable,
             yVariable,
@@ -484,7 +483,7 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
     }
 
     if (lorentzForce) {
-        KameleonWrapper kw(fileName);
+        KameleonWrapper kw = KameleonWrapper(fileName);
         return kw.lorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
     }
 

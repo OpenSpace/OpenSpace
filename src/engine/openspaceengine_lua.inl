@@ -39,7 +39,7 @@ namespace {
  * Writes out documentation files
  */
 [[codegen::luawrap]] void writeDocumentation() {
-    DocEng.writeDocumentation();
+    DocEng.writeJavascriptDocumentation();
 }
 
 // Sets the folder used for storing screenshots or session recording frames
@@ -223,9 +223,8 @@ namespace {
         throw ghoul::lua::LuaError(std::format("Could not find file '{}'", file));
     }
 
-    std::vector<std::vector<std::string>> res =
-        ghoul::loadCSVFile(file.string(), includeFirstLine);
-    return res;
+    std::vector<std::vector<std::string>> r = ghoul::loadCSVFile(file, includeFirstLine);
+    return r;
 }
 
 /**

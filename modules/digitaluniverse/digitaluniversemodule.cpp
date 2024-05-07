@@ -25,7 +25,6 @@
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 
 #include <modules/digitaluniverse/rendering/renderabledumeshes.h>
-#include <modules/digitaluniverse/rendering/renderableplanescloud.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -46,7 +45,6 @@ void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
 
-    fRenderable->registerClass<RenderablePlanesCloud>("RenderablePlanesCloud");
     fRenderable->registerClass<RenderableDUMeshes>("RenderableDUMeshes");
 }
 
@@ -57,7 +55,6 @@ void DigitalUniverseModule::internalDeinitializeGL() {
 
 std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
     return {
-        RenderablePlanesCloud::Documentation(),
         RenderableDUMeshes::Documentation()
     };
 }

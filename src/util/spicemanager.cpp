@@ -170,7 +170,8 @@ SpiceManager::SpiceManager() {
 
 SpiceManager::~SpiceManager() {
     for (const KernelInformation& i : _loadedKernels) {
-        unload_c(i.path.c_str());
+        const std::string p = i.path.string();
+        unload_c(p.c_str());
     }
 
     // Set values back to default
@@ -214,7 +215,7 @@ void throwSpiceError(const std::string& errorMessage) {
     }
 }
 
-SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
+SpiceManager::KernelHandle SpiceManager::loadKernel(std::filesystem::path filePath) {
     ghoul_assert(!filePath.empty(), "Empty file path");
     ghoul_assert(
         std::filesystem::is_regular_file(filePath),
@@ -228,11 +229,10 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         )
     );
 
-    const std::filesystem::path path = absPath(std::move(filePath));
     const auto it = std::find_if(
         _loadedKernels.begin(),
         _loadedKernels.end(),
-        [path](const KernelInformation& info) { return info.path == path; }
+        [filePath](const KernelInformation& info) { return info.path == filePath; }
     );
 
     if (it != _loadedKernels.end()) {
@@ -245,12 +245,13 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
     // kernels
     const std::filesystem::path currentDirectory = std::filesystem::current_path();
 
-    const std::filesystem::path p = path.parent_path();
+    const std::filesystem::path p = filePath.parent_path();
     std::filesystem::current_path(p);
 
-    LINFO(std::format("Loading SPICE kernel '{}'", path));
+    LINFO(std::format("Loading SPICE kernel '{}'", filePath));
     // Load the kernel
-    furnsh_c(path.string().c_str());
+    const std::string k = filePath.string();
+    furnsh_c(k.c_str());
 
     // Reset the current directory to the previous one
     std::filesystem::current_path(currentDirectory);
@@ -259,17 +260,17 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::string filePath) {
         throwSpiceError("Kernel loading");
     }
 
-    const std::filesystem::path fileExtension = path.extension();
+    const std::filesystem::path fileExtension = filePath.extension();
     if (fileExtension == ".bc" || fileExtension == ".BC") {
-        findCkCoverage(path.string()); // binary ck kernel
+        findCkCoverage(filePath); // binary ck kernel
     }
     else if (fileExtension == ".bsp" || fileExtension == ".BSP") {
-        findSpkCoverage(path.string()); // binary spk kernel
+        findSpkCoverage(filePath); // binary spk kernel
     }
 
     const KernelHandle kernelId = ++_lastAssignedKernel;
     ghoul_assert(kernelId != 0, "Kernel Handle wrapped around to 0");
-    _loadedKernels.push_back({ path.string(), kernelId, 1 });
+    _loadedKernels.push_back({ std::move(filePath), kernelId, 1 });
     return kernelId;
 }
 
@@ -288,7 +289,8 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
         if (it->refCount == 1) {
             // No need to check for errors as we do not allow empty path names
             LINFO(std::format("Unloading SPICE kernel '{}'", it->path));
-            unload_c(it->path.c_str());
+            const std::string p = it->path.string();
+            unload_c(p.c_str());
             _loadedKernels.erase(it);
         }
         // Otherwise, we hold on to it, but reduce the reference counter by 1
@@ -299,21 +301,19 @@ void SpiceManager::unloadKernel(KernelHandle kernelId) {
     }
 }
 
-void SpiceManager::unloadKernel(std::string filePath) {
+void SpiceManager::unloadKernel(std::filesystem::path filePath) {
     ghoul_assert(!filePath.empty(), "Empty filename");
-
-    const std::filesystem::path path = absPath(std::move(filePath));
 
     const auto it = std::find_if(
         _loadedKernels.begin(),
         _loadedKernels.end(),
-        [&path](const KernelInformation& info) { return info.path == path; }
+        [&filePath](const KernelInformation& info) { return info.path == filePath; }
     );
 
     if (it == _loadedKernels.end()) {
         if (_useExceptions) {
             throw SpiceException(
-                std::format("'{}' did not correspond to a loaded kernel", path)
+                std::format("'{}' did not correspond to a loaded kernel", filePath)
             );
         }
         else {
@@ -323,8 +323,9 @@ void SpiceManager::unloadKernel(std::string filePath) {
     else {
         // If there was only one part interested in the kernel, we can unload it
         if (it->refCount == 1) {
-            LINFO(std::format("Unloading SPICE kernel '{}'", path));
-            unload_c(path.string().c_str());
+            LINFO(std::format("Unloading SPICE kernel '{}'", filePath));
+            const std::string p = filePath.string();
+            unload_c(p.c_str());
             _loadedKernels.erase(it);
         }
         else {
@@ -335,8 +336,8 @@ void SpiceManager::unloadKernel(std::string filePath) {
     }
 }
 
-std::vector<std::string> SpiceManager::loadedKernels() const {
-    std::vector<std::string> res;
+std::vector<std::filesystem::path> SpiceManager::loadedKernels() const {
+    std::vector<std::filesystem::path> res;
     res.reserve(_loadedKernels.size());
     for (const KernelInformation& info : _loadedKernels) {
         res.push_back(info.path);
@@ -1048,7 +1049,7 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
     return res;
 }
 
-void SpiceManager::findCkCoverage(const std::string& path) {
+void SpiceManager::findCkCoverage(const std::filesystem::path& path) {
     ghoul_assert(!path.empty(), "Empty file path");
     ghoul_assert(
         std::filesystem::is_regular_file(path),
@@ -1069,7 +1070,8 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     SPICEINT_CELL(ids, MaxObj);
     SPICEDOUBLE_CELL(cover, WinSiz);
 
-    ckobj_c(path.c_str(), &ids);
+    const std::string p = path.string();
+    ckobj_c(p.c_str(), &ids);
     if (failed_c()) {
         throwSpiceError("Error finding Ck Coverage");
     }
@@ -1084,7 +1086,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
 #endif
 
         scard_c(0, &cover);
-        ckcov_c(path.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
+        ckcov_c(p.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
         if (failed_c()) {
             throwSpiceError("Error finding Ck Coverage");
         }
@@ -1108,7 +1110,7 @@ void SpiceManager::findCkCoverage(const std::string& path) {
     }
 }
 
-void SpiceManager::findSpkCoverage(const std::string& path) {
+void SpiceManager::findSpkCoverage(const std::filesystem::path &path) {
     ghoul_assert(!path.empty(), "Empty file path");
     ghoul_assert(
         std::filesystem::is_regular_file(path),
@@ -1129,7 +1131,8 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
     SPICEINT_CELL(ids, MaxObj);
     SPICEDOUBLE_CELL(cover, WinSiz);
 
-    spkobj_c(path.c_str(), &ids);
+    const std::string p = path.string();
+    spkobj_c(p.c_str(), &ids);
     if (failed_c()) {
         throwSpiceError("Error finding Spk ID for coverage");
     }
@@ -1144,7 +1147,7 @@ void SpiceManager::findSpkCoverage(const std::string& path) {
 #endif
 
         scard_c(0, &cover);
-        spkcov_c(path.c_str(), obj, &cover);
+        spkcov_c(p.c_str(), obj, &cover);
         if (failed_c()) {
             throwSpiceError("Error finding Spk coverage");
         }
@@ -1537,7 +1540,7 @@ const std::filesystem::path path = std::filesystem::temp_directory_path();
         std::ofstream f(file);
         f << Naif00012tlsSource;
     }
-    loadKernel(file.string());
+    loadKernel(file);
     std::filesystem::remove(file);
 }
 
@@ -1671,7 +1674,7 @@ References:
           std::ofstream f(file);
           f << GeoPhysicalConstantsKernelSource;
       }
-      loadKernel(file.string());
+      loadKernel(file);
       std::filesystem::remove(file);
 }
 

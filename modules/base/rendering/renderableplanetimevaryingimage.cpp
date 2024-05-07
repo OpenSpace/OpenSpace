@@ -45,7 +45,7 @@ namespace {
         "SourceFolder",
         "Source Folder",
         "This value specifies the image directory that is loaded from disk and "
-        "is used as a texture that is applied to this plane",
+        "is used as a texture that is applied to this plane.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -53,8 +53,7 @@ namespace {
        "RenderType",
        "Render Type",
        "This value specifies if the plane should be rendered in the Background, "
-       "Opaque, Transparent, or Overlay rendering step",
-        // @VISIBILITY(3.67)
+       "Opaque, Transparent, or Overlay rendering step.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -145,7 +144,7 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
     _textureFiles.resize(_sourceFiles.size());
     for (size_t i = 0; i < _sourceFiles.size(); i++) {
         _textureFiles[i] = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_sourceFiles[i]).string(),
+            absPath(_sourceFiles[i]),
             2
         );
         _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
@@ -168,7 +167,7 @@ bool RenderablePlaneTimeVaryingImage::extractMandatoryInfoFromDictionary() {
     namespace fs = std::filesystem;
     for (const fs::directory_entry& e : fs::directory_iterator(sourceFolder)) {
         if (e.is_regular_file()) {
-            _sourceFiles.push_back(e.path().string());
+            _sourceFiles.push_back(e.path());
         }
     }
     std::sort(_sourceFiles.begin(), _sourceFiles.end());
@@ -246,9 +245,9 @@ void RenderablePlaneTimeVaryingImage::render(const RenderData& data, RendererTas
 
 // Requires time to be formated as such: 'YYYY-MM-DDTHH-MM-SS-XXX'
 void RenderablePlaneTimeVaryingImage::extractTriggerTimesFromFileNames() {
-    for (const std::string& filePath : _sourceFiles) {
+    for (const std::filesystem::path& filePath : _sourceFiles) {
         // Extract the filename from the path (without extension)
-        std::string timeString = std::filesystem::path(filePath).stem().string();
+        std::string timeString = filePath.stem().string();
 
         // Ensure the separators are correct
         timeString.replace(4, 1, "-");

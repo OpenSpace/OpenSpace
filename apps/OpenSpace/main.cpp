@@ -282,7 +282,7 @@ void mainInitFunc(GLFWwindow*) {
     // We save the startup value of the screenshots just in case we want to add a date
     // to them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
-    sgct::Settings::instance().setCapturePath(screenshotPath.string());
+    sgct::Settings::instance().setCapturePath(screenshotPath);
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", std::move(screenshotPath));
 
     LDEBUG("Initializing OpenSpace Engine started");
@@ -296,7 +296,8 @@ void mainInitFunc(GLFWwindow*) {
         int x = 0;
         int y = 0;
         int n = 0;
-        unsigned char* data = stbi_load(path.string().c_str(), &x, &y, &n, 0);
+        const std::string p = path.string();
+        unsigned char* data = stbi_load(p.c_str(), &x, &y, &n, 0);
 
         GLFWimage icon;
         icon.pixels = data;
@@ -993,34 +994,6 @@ void setSgctDelegateFunctions() {
     };
 }
 
-void checkCommandLineForSettings(int& argc, char** argv, bool& hasSGCT, bool& hasProfile,
-                                 std::string& sgctFunctionName)
-{
-    for (int i = 1; i < argc; i++) {
-        const std::string arg = argv[i];
-        if (arg == "-c" || arg == "--config") {
-            std::string p = ((i + 1) < argc) ? argv[i + 1] : "";
-            p.erase(std::remove_if(p.begin(), p.end(), ::isspace), p.end());
-
-            const std::string sgctAssignment = "SGCTConfig=";
-            const size_t findSgct = p.find(sgctAssignment);
-            const size_t findBracket = p.find('}');
-            if (findSgct != std::string::npos) {
-                if (findBracket != std::string::npos) {
-                    sgctFunctionName = arg.substr(
-                        findSgct + sgctAssignment.length(),
-                        findBracket - findSgct
-                    );
-                }
-                hasSGCT = true;
-            }
-            if (p.find("Profile=") != std::string::npos) {
-                hasProfile = true;
-            }
-        }
-    }
-}
-
 std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,
                                         bool haveCliSGCTConfig)
 {
@@ -1236,7 +1209,7 @@ int main(int argc, char* argv[]) {
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
         *global::configuration = loadConfigurationFromFile(
-            configurationFilePath.string(),
+            configurationFilePath,
             findSettings(),
             size
         );
@@ -1332,7 +1305,7 @@ int main(int argc, char* argv[]) {
                 nullptr,
                 "OpenSpace",
                 QString::fromStdString(std::format(
-                    "The OpenSpace folder is started must not contain any of \"'\", "
+                    "The OpenSpace folder is started from must not contain any of \"'\", "
                     "\"\"\", [, or ]. Path is: {}. Unexpected errors will occur when "
                     "proceeding to run the software", pwd
                 ))
@@ -1389,7 +1362,7 @@ int main(int argc, char* argv[]) {
 #endif // WIN32
 
         *global::configuration = loadConfigurationFromFile(
-            configurationFilePath.string(),
+            configurationFilePath,
             findSettings(),
             size
         );

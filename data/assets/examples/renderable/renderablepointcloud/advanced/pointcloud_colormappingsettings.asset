@@ -1,0 +1,70 @@
+-- Advanced Color Mapping
+-- This example shows almost all the available settings for the color mapping used
+-- for point clouds. This includes handling missing data values, using
+-- separate colors for values outside the data range used for the color mapping, as well
+-- as setting the default parameter and range.
+
+local colormaps = asset.require("util/default_colormaps")
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_AdvancedColorMapping",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("../data/dummydata.csv"),
+    Coloring = {
+      ColorMapping = {
+        -- Use white-to-black color map
+        File = colormaps.Sequential.Greys,
+        -- Invert the color map so it goes from dark to bright (black-to-white) instead
+        -- of from bright to dark
+        Invert = true,
+        -- Set the default choice of parameter and value range explicitly. Values
+        -- outside this range will be given special colors
+        Parameter = "normaldist_withMissing",
+        ValueRange = { -0.25, 0.25 },
+        -- Show missing data values, so we can show these in a specific color
+        ShowMissingData = true,
+        -- Color for missing data points
+        NoDataColor = { 1.0, 0.0, 0.0, 1.0 },
+        -- Color for point with values above the given range. If not set, or if
+        -- UseAboveRangeColor is false, the color will be set to the last value
+        -- in the color map (as per default)
+        AboveRangeColor = { 0.0, 1.0, 0.0, 1.0 },
+        -- Color for point with values below the given range. If not set, or if
+        -- UseAboveRangeColor is false, the color will be set to the first value
+        -- in the color map (as per default)
+        BelowRangeColor = { 0.0, 0.0, 1.0, 1.0 },
+
+        -- Some other parameters that can be set are the following (these are all the
+        -- default values):
+
+        -- If true, completely hide all values outside the range
+        HideValuesOutsideRange = false,
+        -- Toggle whether the above range color should be used
+        UseAboveRangeColor = true,
+        -- Toggle whether the below range color should be used
+        UseBelowRangeColor = true
+      }
+    },
+    SizeSettings = {
+      -- Reduce the size of the point a little bit so that they don't overlap so much
+      ScaleFactor = 0.5
+    }
+  },
+  GUI = {
+    Name = "Advanced Color Mapping",
+    Path = "/Examples/RenderablePointCloud/Advanced",
+    Description = [[Example of a point cloud where the range is set explicitly and
+      specific colors are used for values outside the range, as well as for missing
+      data values.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

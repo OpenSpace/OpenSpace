@@ -37,8 +37,7 @@ namespace {
         "The date at which this scale will be 0. The current value of the scale is "
         "computed by taking the difference between the current time and the reference "
         "date and multiplying it by the speed. This field must be formatted as: "
-        "YYYY-MM-DDThh:mm:ss.uuu  where h is a 24h clock and u microseconds",
-        // @VISIBILITY(2.75)
+        "YYYY-MM-DDThh:mm:ss.uuu  where h is a 24h clock and u microseconds.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -46,26 +45,34 @@ namespace {
         "Speed",
         "Speed",
         "The speed at which the value grows or shrinks. The units for this are meters "
-        "per second. The default value is 1 m/s",
-        // @VISIBILITY(2.75)
+        "per second. The default value is 1 m/s.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClampToPositiveInfo = {
         "ClampToPositive",
         "Clamp to Positive",
-        "If this value is true, the velocity computation will never result in any "
-        "negative values. This is useful for instantaneous events that only propagate "
-        "forwards. The default value is 'true'",
+        "If this value is true, the velocity computation will be clamped to a positive "
+        "value if the current simulation time is before the `ReferenceDate`. This is "
+        "useful for instantaneous events that only propagate forwards in time. The "
+        "default value is 'true'.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This Scale type provides the ability to scale an object dynamically as time in the
+    // simulation passes. The provided `ReferenceDate`, specifies when the total scale
+    // should be equal to 0 and the scales grows by `Speed` meters for every second in the
+    // simulation. If `ClampToPositive` is specified as `true`, then the resulting scale
+    // will always be positive or 0 if the simulation time is before the `ReferenceDate`.
+    //
+    // A common use-case for this Scale type would be to represent the Radiosphere, which
+    // grows at the speed of light.
     struct [[codegen::Dictionary(TimeDependentScale)]] Parameters {
         // [[codegen::verbatim(ReferenceDateInfo.description)]]
-        std::string referenceDate;
+        std::string referenceDate [[codegen::datetime()]];
 
         // [[codegen::verbatim(SpeedInfo.description)]]
-        std::optional<double> speed;
+        std::optional<double> speed [[codegen::greaterequal(0.0)]];
 
         // [[codegen::verbatim(ClampToPositiveInfo.description)]]
         std::optional<bool> clampToPositive;
@@ -93,8 +100,7 @@ TimeDependentScale::TimeDependentScale(const ghoul::Dictionary& dictionary)
     _speed = p.speed.value_or(_speed);
     addProperty(_speed);
 
-    // @TODO (abock, 2021-01-09) The clamp to positive value from the dictionary was never
-    // actually read. I think this should probably be done here?
+    _clampToPositive = p.clampToPositive.value_or(_clampToPositive);
     addProperty(_clampToPositive);
 }
 

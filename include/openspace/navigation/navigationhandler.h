@@ -85,7 +85,9 @@ public:
     OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator();
     PathNavigator& pathNavigator();
+
     bool isKeyFrameInteractionEnabled() const;
+    float jumpToFadeDuration() const;
     float interpolationTime() const;
 
     // Callback functions
@@ -166,6 +168,18 @@ public:
     void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
 
     /**
+     * Trigger a transition script after first fading out the rendering, and fading in
+     * the rendering when the script is finished. One example use case could be to fade
+     * out, move the camera to another focus node, and then fade in
+     *
+     * \param transitionScript The Lua script to handle the transition. Can be anything
+     * \param fadeDuration An optional duration for the fading. If unspecified, use the
+     *                     JumpToFadeDuration property
+     */
+    void triggerFadeToTransition(const std::string& transitionScript,
+        std::optional<float> fadeDuration = std::nullopt);
+
+    /**
      * \return The Lua library that contains all Lua functions available to affect the
      *         interaction
      */
@@ -195,6 +209,7 @@ private:
     properties::BoolProperty _disableMouseInputs;
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
+    properties::FloatProperty _jumpToFadeDuration;
 };
 
 } // namespace openspace::interaction

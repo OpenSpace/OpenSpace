@@ -50,7 +50,7 @@ namespace {
         "This value determines the number of control points that is used to construct "
         "the shadow geometry. The higher this number, the more detailed the shadow is, "
         "but it will have a negative impact on the performance. Also note that rendering "
-        "errors will occur if this value is even",
+        "errors will occur if this value is even.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -59,14 +59,14 @@ namespace {
         "Shadow Length",
         "This value determines the length of the shadow that is cast by the target "
         "object. The total distance of the shadow is equal to the distance from the "
-        "target to the Sun multiplied with this value",
+        "target to the Sun multiplied with this value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowUmbralShadowInfo = {
         "ShowUmbralShadow",
         "Show Umbral Shadow",
-        "If this is enabled, the umbral portioon of the shadow is shown",
+        "If this is enabled, the umbral portioon of the shadow is shown.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -74,15 +74,14 @@ namespace {
         "UmbralShadowColor",
         "Umbral Shadow Color",
         "This value determines the color that is used for the shadow cylinder of the "
-        "umbral shadow",
-        // @VISIBILITY(2.5)
+        "umbral shadow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowPenumbralShadowInfo = {
         "ShowPenumbralShadow",
         "Show Penumbral Shadow",
-        "If this is enabled, the penumbral portioon of the shadow is shown",
+        "If this is enabled, the penumbral portioon of the shadow is shown.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -90,8 +89,7 @@ namespace {
         "PenumbralShadowColor",
         "Penumbral Shadow Color",
         "This value determines the color that is used for the shadow cylinder of the "
-        "penumbral shadow",
-        // @VISIBILITY(2.5)
+        "penumbral shadow.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -99,7 +97,7 @@ namespace {
         "LightSource",
         "Light Source",
         "This value determines the SPICE name of the object that is used as the "
-        "illuminator for computing the shadow cylinder",
+        "illuminator for computing the shadow cylinder.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -107,7 +105,7 @@ namespace {
         "LightSourceFrame",
         "Light Source Frame",
         "This value is the SPICE name of the body-fixed reference frame for the light "
-        "source",
+        "source.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -115,14 +113,15 @@ namespace {
         "Shadower",
         "Shadower",
         "This value specifies the SPICE name of the object that is casting the shadow on "
-        "the shadowee",
+        "the shadowee.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowerFrameInfo = {
         "ShadowerFrame",
         "Shadower Frame",
-        "This value is the SPICE name of the body-fixed reference frame for the shadower",
+        "This value is the SPICE name of the body-fixed reference frame for the "
+        "shadower.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -130,7 +129,7 @@ namespace {
         "Shadowee",
         "Shadowee",
         "This value is the SPICE name of object that is receiving the shadow from the "
-        "shadower",
+        "shadower.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

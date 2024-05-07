@@ -59,7 +59,6 @@ namespace {
         "Translation",
         "Translation",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -67,7 +66,6 @@ namespace {
         "Rotation",
         "Euler rotation",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -82,7 +80,7 @@ namespace {
     {
         "Downscale",
         "Downscale Factor Volume Rendering",
-        "This value set the downscaling factor when rendering the current volume",
+        "This value set the downscaling factor when rendering the current volume.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace

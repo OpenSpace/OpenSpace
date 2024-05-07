@@ -117,12 +117,12 @@ private:
 
     int _timestep = 0;
 
-    std::string _filename;
+    std::filesystem::path _filename;
 
     std::string _transferFunctionName;
     std::string _volumeName;
 
-    std::string _transferFunctionPath;
+    std::filesystem::path _transferFunctionPath;
     std::filesystem::path _errorHistogramsPath;
 
     std::shared_ptr<TransferFunction> _transferFunction;

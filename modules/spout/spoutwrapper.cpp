@@ -37,7 +37,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NameSenderInfo = {
         "SpoutName",
         "Spout Sender Name",
-        "This value sets the Spout sender to use a specific name",
+        "This value sets the Spout sender to use a specific name.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -45,7 +45,7 @@ namespace {
         "SpoutName",
         "Spout Receiver Name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
-        "is not a valid name, an empty image is used",
+        "is not a valid name, the first Spout image is used instead",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -54,16 +54,28 @@ namespace {
         "Spout Selection",
         "This property displays all available Spout sender on the system. If one them is "
         "selected, its value is stored in the 'SpoutName' property, overwriting its "
-        "previous value",
+        "previous value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update Selection",
-        "If this property is trigged, the 'SpoutSelection' options will be refreshed",
+        "If this property is trigged, the 'SpoutSelection' options will be refreshed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    struct [[codegen::Dictionary(SpoutReceiver)]] ReceiverParameters {
+        // [[codegen::verbatim(NameReceiverInfo.description)]]
+        std::optional<std::string> spoutName;
+    };
+
+    struct [[codegen::Dictionary(SpoutSender)]] SenderParameters {
+        // [[codegen::verbatim(NameSenderInfo.description)]]
+        std::string spoutName;
+    };
+
+#include "spoutwrapper_codegen.cpp"
 } // namespace
 
 namespace openspace::spout {
@@ -127,7 +139,7 @@ SpoutReceiver::SpoutReceiver() {}
 
 SpoutReceiver::~SpoutReceiver() {}
 
-const std::vector<std::string> &SpoutReceiver::spoutReceiverList() {
+const std::vector<std::string>& SpoutReceiver::spoutReceiverList() {
     if (!_spoutHandle) {
         return _receiverList;
     }
@@ -338,18 +350,20 @@ const properties::Property::PropertyInfo& SpoutReceiverPropertyProxy::UpdateInfo
     return UpdateInfo;
 }
 
+documentation::Documentation SpoutReceiverPropertyProxy::Documentation() {
+    return codegen::doc<ReceiverParameters>("spout_receiver");
+}
+
 SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner& owner,
                                                       const ghoul::Dictionary& dictionary)
     : _spoutName(NameReceiverInfo)
     , _spoutSelection(SelectionInfo)
     , _updateSelection(UpdateInfo)
 {
-    if (dictionary.hasKey(NameReceiverInfo.identifier)) {
-        _spoutName = dictionary.value<std::string>(NameReceiverInfo.identifier);
-    }
-    else {
-        _isSelectAny = true;
-    }
+    const ReceiverParameters p = codegen::bake<ReceiverParameters>(dictionary);
+
+    _spoutName = p.spoutName.value_or(_spoutName);
+    _isSelectAny = !p.spoutName.has_value();
 
     _spoutName.onChange([this]() { _isSpoutDirty = true; });
     owner.addProperty(_spoutName);
@@ -406,7 +420,6 @@ void SpoutReceiverPropertyProxy::releaseReceiver() {
     _isSpoutDirty = true;
     SpoutReceiver::releaseReceiver();
 }
-
 
 SpoutSender::SpoutSender() {}
 
@@ -580,17 +593,17 @@ const properties::Property::PropertyInfo& SpoutSenderPropertyProxy::NameInfoProp
     return NameSenderInfo;
 }
 
+documentation::Documentation SpoutSenderPropertyProxy::Documentation() {
+    return codegen::doc<SenderParameters>("spout_sender");
+}
+
 SpoutSenderPropertyProxy::SpoutSenderPropertyProxy(properties::PropertyOwner& owner,
                                                    const ghoul::Dictionary& dictionary)
     : _spoutName(NameSenderInfo)
 {
-    if (dictionary.hasKey(NameSenderInfo.identifier)) {
-        _spoutName = dictionary.value<std::string>(NameSenderInfo.identifier);
-    }
-    else {
-        LWARNING(std::format("Sender does not have a name"));
-    }
+    const SenderParameters p = codegen::bake<SenderParameters>(dictionary);
 
+    _spoutName = p.spoutName;
     _spoutName.onChange([this]() { _isSpoutDirty = true; });
     owner.addProperty(_spoutName);
 }

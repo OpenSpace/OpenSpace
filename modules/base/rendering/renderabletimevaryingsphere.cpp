@@ -39,7 +39,7 @@
 namespace {
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
-    double extractTriggerTimeFromFileName(const std::filesystem::path filePath) {
+    double extractTriggerTimeFromFileName(const std::filesystem::path& filePath) {
         // Extract the filename from the path (without extension)
         std::string timeString = filePath.stem().string();
 
@@ -58,7 +58,7 @@ namespace {
         "Texture Source",
         "This value specifies a directory of images that are loaded from disk and is "
         "used as a texture that is applied to this sphere. The images are expected to "
-        "be an equirectangular projection",
+        "be an equirectangular projection.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

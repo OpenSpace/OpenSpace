@@ -39,8 +39,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
-        "The globe on which the longitude/latitude is specified",
-        // @VISIBILITY(2.5)
+        "The globe on which the longitude/latitude is specified.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -49,8 +48,7 @@ namespace {
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0",
-        // @VISIBILITY(2.25)
+        "globe. The default value is 0.0.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -59,8 +57,7 @@ namespace {
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0",
-        // @VISIBILITY(2.25)
+        "globe. The default value is 0.0.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -69,8 +66,7 @@ namespace {
         "Altitude",
         "The altitude in meters. If the 'UseHeightmap' property is 'true', this is an "
         "offset from the actual surface of the globe. If not, this is an offset from the "
-        "reference ellipsoid. The default value is 0.0",
-        // @VISIBILITY(2.75)
+        "reference ellipsoid. The default value is 0.0.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -79,24 +75,21 @@ namespace {
         "Use Heightmap",
         "If this value is 'true', the altitude specified in 'Altitude' will be treated "
         "as an offset from the heightmap. Otherwise, it will be an offset from the "
-        "globe's reference ellipsoid. The default value is 'false'",
-        // @VISIBILITY(2.5)
+        "globe's reference ellipsoid. The default value is 'false'.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseCameraInfo = {
         "UseCamera",
         "Use Camera",
-        "If this value is 'true', the lat and lon are updated to match the camera",
-        // @VISIBILITY(?)
+        "If this value is 'true', the lat and lon are updated to match the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseCameraAltitudeInfo = {
         "UseCameraAltitude",
         "Use Camera Altitude",
-        "If this value is 'true', the altitude is updated to match the camera",
-        // @VISIBILITY(?)
+        "If this value is 'true', the altitude is updated to match the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

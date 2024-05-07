@@ -120,7 +120,7 @@ namespace {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
-        "printed to the log",
+        "printed to the log.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -128,7 +128,7 @@ namespace {
         "PropertyVisibility",
         "Property Visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
-        "are",
+        "are.",
         openspace::properties::Property::Visibility::Always
     };
 
@@ -146,8 +146,7 @@ namespace {
         "DisableMouseInputs",
         "Disable All Mouse Inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
-        "double inputs on touch (from both touch input and inserted mouse inputs)",
-        // @VISIBILITY(2.67)
+        "double inputs on touch (from both touch input and inserted mouse inputs).",
         openspace::properties::Property::Visibility::User
     };
 
@@ -267,9 +266,9 @@ void OpenSpaceEngine::initialize() {
     _printEvents = global::configuration->isPrintingEvents;
     _visibility = static_cast<int>(global::configuration->propertyVisibility);
 
-    std::string cacheFolder = absPath("${CACHE}").string();
+    std::filesystem::path cacheFolder = absPath("${CACHE}");
     if (global::configuration->usePerProfileCache) {
-        cacheFolder = cacheFolder + "-" + global::configuration->profile;
+        cacheFolder = std::format("{}-{}", cacheFolder, global::configuration->profile);
 
         LINFO(std::format("Old cache: {}", absPath("${CACHE}")));
         LINFO(std::format("New cache: {}", cacheFolder));
@@ -346,8 +345,8 @@ void OpenSpaceEngine::initialize() {
             // Move all of the existing logs one position up
 
             const std::filesystem::path file = absPath(global::configuration->scriptLog);
-            const std::string fname = file.stem().string();
-            const std::string ext = file.extension().string();
+            const std::filesystem::path fname = file.stem();
+            const std::filesystem::path ext = file.extension();
 
             std::filesystem::path newCandidate = file;
             newCandidate.replace_filename(std::format("{}-{}{}", fname, rot, ext));
@@ -806,7 +805,7 @@ void OpenSpaceEngine::loadAssets() {
     runGlobalCustomizationScripts();
 
     _writeDocumentationTask = std::async(
-        &documentation::DocumentationEngine::writeDocumentation,
+        &documentation::DocumentationEngine::writeJavascriptDocumentation,
         DocEng
     );
 
@@ -897,6 +896,9 @@ void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
     if (!std::filesystem::exists(absPath("${USER_CONFIG}"))) {
         std::filesystem::create_directories(absPath("${USER_CONFIG}"));
     }
+    if (!std::filesystem::is_directory(absPath("${USER_WEBPANELS}"))) {
+        std::filesystem::create_directories(absPath("${USER_WEBPANELS}"));
+    }
 }
 
 void OpenSpaceEngine::runGlobalCustomizationScripts() {
@@ -911,7 +913,7 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
         if (std::filesystem::is_regular_file(s)) {
             try {
                 LINFO(std::format("Running global customization script: {}", s));
-                ghoul::lua::runScriptFile(state, s.string());
+                ghoul::lua::runScriptFile(state, s);
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
@@ -995,10 +997,18 @@ void OpenSpaceEngine::preSynchronization() {
             global::timeManager->time().j2000Seconds()
         );
         for (const std::string& script : schedScripts) {
+            if (script.empty()) {
+                continue;
+            }
+
             global::scriptEngine->queueScript(
                 script,
                 scripting::ScriptEngine::ShouldBeSynchronized::Yes,
                 scripting::ScriptEngine::ShouldSendToRemote::Yes
+            );
+
+            global::eventEngine->publishEvent<events::EventScheduledScriptExecuted>(
+                script
             );
         }
 
@@ -1374,7 +1384,8 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     const ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
     const std::filesystem::path path = absPath("${SCRIPTS}/drag_drop_handler.lua");
-    int status = luaL_loadfile(s, path.string().c_str());
+    const std::string p = path.string();
+    int status = luaL_loadfile(s, p.c_str());
     if (status != LUA_OK) {
         const std::string error = lua_tostring(s, -1);
         LERROR(error);
@@ -1384,7 +1395,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     ghoul::lua::push(s, file);
     lua_setglobal(s, "filename");
 
-    std::string basename = file.filename().string();
+    std::filesystem::path basename = file.filename();
     ghoul::lua::push(s, std::move(basename));
     lua_setglobal(s, "basename");
 

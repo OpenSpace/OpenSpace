@@ -51,12 +51,7 @@ Fragment getFragment() {
     vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
     //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
     float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
-    float transparencyCorrection = frag.color.a * circleClipping;
-    if (transparencyCorrection < 0.9) {
-      discard;
-    }
-
-    frag.color.a = transparencyCorrection;
+    frag.color.a *= circleClipping;
   }
 
   frag.gPosition = vs_gPosition;

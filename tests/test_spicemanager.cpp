@@ -37,54 +37,54 @@ namespace {
     // The remaining methods rely on multiple kernels, loaded as a SPICE 'meta-kernel'
     void loadMetaKernel() {
         const int k1 = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
         );
         CHECK(k1 == 1);
 
         const int k2 = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cas00084.tsc").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/cas00084.tsc")
         );
         CHECK(k2 == 2);
 
         const int k3 = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/981005_PLTEPH-DE405S.bsp").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/981005_PLTEPH-DE405S.bsp")
         );
         CHECK(k3 == 3);
 
         const int k4 = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/020514_SE_SAT105.bsp").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/020514_SE_SAT105.bsp")
         );
         CHECK(k4 == 4);
 
         const int k5 = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/030201AP_SK_SM546_T45.bsp").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/030201AP_SK_SM546_T45.bsp")
         );
         CHECK(k5 == 5);
 
         const int k6 = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cas_v37.tf").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/cas_v37.tf")
         );
         CHECK(k6 == 6);
 
         const int k7 = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/04135_04171pc_psiv2.bc").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/04135_04171pc_psiv2.bc")
         );
         CHECK(k7 == 7);
 
         const int k8 = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
         );
         CHECK(k8 == 8);
 
         const int k9 = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cas_iss_v09.ti").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/cas_iss_v09.ti")
         );
         CHECK(k9 == 9);
     }
 
     int loadLSKKernel() {
         const int kernelID = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
         );
         CHECK(kernelID == 1);
         return kernelID;
@@ -92,7 +92,7 @@ namespace {
 
     int loadPCKKernel() {
         const int kernelID = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc").string()
+            absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
         );
         CHECK(kernelID == 1);
         return kernelID;
@@ -160,7 +160,7 @@ TEST_CASE("SpiceManager: Unload Kernel String", "[spicemanager]") {
 
     // unload using string keyword
     SpiceManager::ref().unloadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     found = SPICEFALSE;

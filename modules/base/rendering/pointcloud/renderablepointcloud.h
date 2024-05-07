@@ -42,6 +42,7 @@
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <filesystem>
 #include <functional>
 
 namespace ghoul::opengl {
@@ -97,6 +98,7 @@ protected:
     virtual void preUpdate();
 
     glm::dvec3 transformedPosition(const dataloader::Dataset::Entry& e) const;
+    glm::quat orientationQuaternion(const dataloader::Dataset::Entry& e) const;
 
     virtual int nAttributesPerPoint() const;
 
@@ -117,9 +119,16 @@ protected:
     /// Find the index of the currently chosen size parameter in the dataset
     int currentSizeParameterIndex() const;
 
+    bool hasColorData() const;
+    bool hasSizeData() const;
+    bool hasMultiTextureData() const;
+    bool useOrientationData() const;
+
     virtual void addPositionDataForPoint(unsigned int index, std::vector<float>& result,
         double& maxRadius) const;
     virtual void addColorAndSizeDataForPoint(unsigned int index,
+        std::vector<float>& result) const;
+    virtual void addOrientationDataForPoint(unsigned int index,
         std::vector<float>& result) const;
 
     std::vector<float> createDataSlice();
@@ -145,7 +154,7 @@ protected:
 
     float computeDistanceFadeValue(const RenderData& data) const;
 
-    void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
+    void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
     gl::GLenum internalGlFormat(bool useAlpha) const;
@@ -181,6 +190,8 @@ protected:
         properties::BoolProperty enableOutline;
         properties::Vec3Property outlineColor;
         properties::FloatProperty outlineWeight;
+        properties::OptionProperty outlineStyle;
+        properties::BoolProperty applyCmapToOutline;
     };
     ColorSettings _colorSettings;
 
@@ -193,11 +204,13 @@ protected:
     Fading _fading;
 
     properties::BoolProperty _useAdditiveBlending;
+    properties::BoolProperty _useRotation;
 
     properties::BoolProperty _drawElements;
     properties::OptionProperty _renderOption;
 
     properties::UIntProperty _nDataPoints;
+    properties::BoolProperty _hasOrientationData;
 
     struct Texture : properties::PropertyOwner {
         Texture();
@@ -214,22 +227,23 @@ protected:
     ghoul::opengl::ProgramObject* _program = nullptr;
 
     UniformCache(
-        cameraViewMatrix, projectionMatrix, modelMatrix, cameraPos, cameraLookup,
+        cameraViewMatrix, projectionMatrix, modelMatrix, cameraPosition, cameraLookUp,
         renderOption, maxAngularSize, color, opacity, scaleExponent, scaleFactor, up,
-        right, fadeInValue, hasSpriteTexture, spriteTexture, useColormap, colorMapTexture,
+        right, fadeInValue, hasSpriteTexture, spriteTexture, useColorMap, colorMapTexture,
         cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
         enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
         useBelowRangeColor, hasDvarScaling, dvarScaleFactor, enableOutline, outlineColor,
-        outlineWeight, aspectRatioScale
+        outlineWeight, outlineStyle, useCmapOutline, aspectRatioScale, useOrientationData
     ) _uniformCache;
 
-    std::string _dataFile;
+    std::filesystem::path _dataFile;
 
     DistanceUnit _unit = DistanceUnit::Parsec;
 
     bool _useCaching = true;
     bool _shouldComputeScaleExponent = false;
     bool _createLabelsFromDataset = false;
+    bool _skipFirstDataPoint = false;
 
     dataloader::Dataset _dataset;
     dataloader::DataMapping _dataMapping;

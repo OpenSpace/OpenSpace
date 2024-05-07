@@ -35,8 +35,7 @@ namespace documentation { struct Documentation; }
 
 class NonUniformStaticScale : public Scale {
 public:
-    NonUniformStaticScale();
-    NonUniformStaticScale(const ghoul::Dictionary& dictionary);
+    explicit NonUniformStaticScale(const ghoul::Dictionary& dictionary);
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 
     static documentation::Documentation Documentation();

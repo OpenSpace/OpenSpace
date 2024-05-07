@@ -140,7 +140,7 @@ void StateMachineModule::saveToFile(const std::string& filename,
         directory += '/';
     }
 
-    const std::string outputFile = absPath(directory + filename).string();
+    const std::filesystem::path outputFile = absPath(directory + filename);
     _machine->saveToDotFile(outputFile);
 }
 

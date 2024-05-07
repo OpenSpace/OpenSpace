@@ -70,16 +70,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "AtmosphereDeferredcaster";
 
-    constexpr std::array<const char*, 29> UniformNames = {
-        "cullAtmosphere", "opacity", "Rg", "Rt", "groundRadianceEmission", "HR",
-        "betaRayleigh", "HM", "betaMieExtinction", "mieG", "sunRadiance",
-        "ozoneLayerEnabled", "HO", "betaOzoneExtinction", "SAMPLES_R", "SAMPLES_MU",
-        "SAMPLES_MU_S", "SAMPLES_NU", "inverseModelTransformMatrix",
-        "modelTransformMatrix", "projectionToModelTransformMatrix", "viewToWorldMatrix",
-        "camPosObj", "sunDirectionObj", "hardShadows", "transmittanceTexture",
-        "irradianceTexture", "inscatterTexture", "sunAngularSize"
-    };
-
     constexpr float ATM_EPS = 2000.f;
     constexpr float KM_TO_M = 1000.f;
 
@@ -376,13 +366,18 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
 
         const glm::dmat4 invWholePipeline = invModelMatrix * viewToWorld * dInvProj;
 
-        program.setUniform(_uniformCache.projectionToModelTransform, invWholePipeline);
+        program.setUniform(
+            _uniformCache.projectionToModelTransformMatrix,
+            invWholePipeline
+        );
 
         const glm::dvec4 camPosObjCoords =
             invModelMatrix * glm::dvec4(data.camera.eyePositionVec3(), 1.0);
         program.setUniform(_uniformCache.camPosObj, glm::dvec3(camPosObjCoords));
 
-        SceneGraphNode* node = sceneGraph()->sceneGraphNode("Sun");
+        // For the lighting we use the provided node, or the Sun
+        SceneGraphNode* node =
+            _lightSourceNode ? _lightSourceNode : sceneGraph()->sceneGraphNode("Sun");
         const glm::dvec3 sunPosWorld = node ? node->worldPosition() : glm::dvec3(0.0);
 
         glm::dvec3 sunPosObj;
@@ -553,7 +548,7 @@ std::filesystem::path AtmosphereDeferredcaster::helperPath() const {
 void AtmosphereDeferredcaster::initializeCachedVariables(
                                                     ghoul::opengl::ProgramObject& program)
 {
-    ghoul::opengl::updateUniformLocations(program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(program, _uniformCache);
 }
 
 void AtmosphereDeferredcaster::setModelTransform(glm::dmat4 transform) {
@@ -574,7 +569,8 @@ void AtmosphereDeferredcaster::setParameters(float atmosphereRadius, float plane
                                              glm::vec3 ozoneExtinctionCoefficients,
                                              glm::vec3 mieScatteringCoefficients,
                                              glm::vec3 mieExtinctionCoefficients,
-                                             bool sunFollowing, float sunAngularSize)
+                                             bool sunFollowing, float sunAngularSize,
+                                             SceneGraphNode* lightSourceNode)
 {
     _atmosphereRadius = atmosphereRadius;
     _atmospherePlanetRadius = planetRadius;
@@ -592,6 +588,8 @@ void AtmosphereDeferredcaster::setParameters(float atmosphereRadius, float plane
     _mieExtinctionCoeff = std::move(mieExtinctionCoefficients);
     _sunFollowingCameraEnabled = sunFollowing;
     _sunAngularSize = sunAngularSize;
+    // The light source may be nullptr which we interpret to mean a position of (0,0,0)
+    _lightSourceNode = lightSourceNode;
 }
 
 void AtmosphereDeferredcaster::setHardShadows(bool enabled) {

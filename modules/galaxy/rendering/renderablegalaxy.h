@@ -32,6 +32,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <filesystem>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -84,10 +85,10 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
 
-    std::string _volumeFilename;
+    std::filesystem::path _volumeFilename;
     glm::ivec3 _volumeDimensions = glm::ivec3(0);
-    std::string _pointsFilename;
-    std::string _pointSpreadFunctionTexturePath;
+    std::filesystem::path _pointsFilename;
+    std::filesystem::path _pointSpreadFunctionTexturePath;
     std::filesystem::path _raycastingShader;
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;
@@ -100,12 +101,10 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _billboardsProgram;
     UniformCache(
-        modelMatrix, cameraViewProjectionMatrix, eyePosition,
-        opacityCoefficient
+        modelMatrix, viewProjectionMatrix, eyePosition, opacityCoefficient
     ) _uniformCachePoints;
     UniformCache(
-        modelMatrix, cameraViewProjectionMatrix,
-        cameraUp, eyePosition, psfTexture
+        modelMatrix, viewProjectionMatrix, cameraUp, eyePosition, psfTexture
     ) _uniformCacheBillboards;
     std::vector<float> _pointsData;
     size_t _nPoints = 0;

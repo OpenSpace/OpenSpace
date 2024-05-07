@@ -37,7 +37,7 @@
 using namespace openspace;
 
 namespace {
-    std::string stringify(const std::string& filename) {
+    std::string stringify(const std::filesystem::path& filename) {
         const std::ifstream myfile = std::ifstream(filename);
         std::stringstream buffer;
         buffer << myfile.rdbuf();
@@ -46,9 +46,7 @@ namespace {
 
     void attemptValidation(const std::string& cfgString) {
         const std::filesystem::path schemaDir = absPath("${TESTDIR}/../config/schema");
-        const std::string schemaString = stringify(
-            schemaDir.string() + "/sgcteditor.schema.json"
-        );
+        const std::string schemaString = stringify(schemaDir / "sgcteditor.schema.json");
         sgct::validateConfigAgainstSchema(cfgString, schemaString, schemaDir);
     }
 } // namespace
@@ -450,9 +448,9 @@ R"({
 
 TEST_CASE("SgctEdit: minimumVersion", "[sgctedit]") {
     const sgct::config::GeneratorVersion minVersion { "SgctWindowConfig", 1, 1 };
-    const std::string inputCfg =
-        absPath("${TESTDIR}/sgctedit/fails_minimum_version.json").string();
-    const sgct::config::GeneratorVersion ver = sgct::readConfigGenerator(inputCfg);
+    const std::filesystem::path cfg =
+        absPath("${TESTDIR}/sgctedit/fails_minimum_version.json");
+    const sgct::config::GeneratorVersion ver = sgct::readConfigGenerator(cfg);
     CHECK_FALSE(ver.versionCheck(minVersion));
 }
 

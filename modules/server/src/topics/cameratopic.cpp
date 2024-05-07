@@ -24,7 +24,9 @@
 
 #include <modules/server/include/topics/cameratopic.h>
 
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
 #include <modules/globebrowsing/globebrowsingmodule.h>
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
 #include <openspace/engine/moduleengine.h>
@@ -79,6 +81,7 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
 }
 
 void CameraTopic::sendCameraData() {
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     glm::dvec3 position = module->geoPosition();
     std::pair<double, std::string_view> altSimplified = simplifyDistance(position.z);
@@ -91,6 +94,12 @@ void CameraTopic::sendCameraData() {
     };
 
     _connection->sendJson(wrappedPayload(jsonData));
+#else // ^^^ OPENSPACE_MODULE_SPACE_ENABLED ||| !OPENSPACE_MODULE_SPACE_ENABLED vvv
+    LWARNINGC(
+        "CameraTopic",
+        "Cannot send camera data, compiled without globebrowsing support"
+    );
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 } // namespace openspace

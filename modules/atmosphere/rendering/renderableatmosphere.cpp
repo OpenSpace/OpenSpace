@@ -30,6 +30,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/query/query.h>
 #include <ghoul/misc/profiling.h>
 #include <openspace/properties/property.h>
 #include <openspace/rendering/deferredcastermanager.h>
@@ -42,7 +43,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AtmosphereHeightInfo = {
         "AtmosphereHeight",
         "Atmosphere Height (KM)",
-        "The thickness of the atmosphere in km",
+        "The thickness of the atmosphere in kilometers.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -51,22 +52,22 @@ namespace {
         "AverageGroundReflectance",
         "Average Ground Reflectance (%)",
         "Average percentage of light reflected by the ground during the pre-calculation "
-        "phase",
+        "phase.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GroundRadianceEmissionInfo = {
         "GroundRadianceEmission",
         "Percentage of initial radiance emitted from ground",
-        "Multiplier of the ground radiance color during the rendering phase",
+        "Multiplier of the ground radiance color during the rendering phase.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RayleighHeightScaleInfo = {
         "RayleighHeightScale",
         "Rayleigh Scale Height (KM)",
-        "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor",
+        "The vertical distance over which the density and pressure falls by a constant "
+        "factor.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -74,14 +75,14 @@ namespace {
     {
         "RayleighScatteringCoeff",
         "Rayleigh Scattering Coeff",
-        "Rayleigh sea-level scattering coefficients in meters",
+        "Rayleigh sea-level scattering coefficients in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OzoneLayerInfo = {
         "Ozone",
         "Ozone Layer Enabled",
-        "Enables/Disable Ozone Layer during pre-calculation phase",
+        "Enables/Disable Ozone Layer during pre-calculation phase.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -89,14 +90,14 @@ namespace {
         "OzoneLayerHeightScale",
         "Ozone Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor",
+        "constant factor.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffInfo = {
         "OzoneLayerCoeff",
         "Ozone Layer Extinction Coeff",
-        "Ozone scattering coefficients in meters",
+        "Ozone scattering coefficients in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -104,16 +105,14 @@ namespace {
         "MieHeightScale",
         "Mie Scale Height (KM)",
         "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor",
-        // @VISIBILITY(3.2)
+        "constant factor.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffInfo = {
         "MieScatteringCoeff",
         "Mie Scattering Coeff",
-        "Mie sea-level scattering coefficients in meters",
-        // @VISIBILITY(3.2)
+        "Mie sea-level scattering coefficients in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -122,24 +121,21 @@ namespace {
     {
         "MieScatteringExtinctionPropCoefficient",
         "Mie Scattering/Extinction Proportion Coefficient (%)",
-        "Mie Scattering/Extinction Proportion Coefficient (%)",
-        // @VISIBILITY(3.2)
+        "Mie Scattering/Extinction Proportion Coefficient.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MieAsymmetricFactorGInfo = {
         "MieAsymmetricFactorG",
         "Mie Asymmetric Factor G",
-        "Averaging of the scattering angle over a high number of scattering events",
-        // @VISIBILITY(3.2)
+        "Averaging of the scattering angle over a high number of scattering events.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SunIntensityInfo = {
         "SunIntensity",
         "Sun Intensity",
-        "Unitless for now",
-        // @VISIBILITY(2.6)
+        "Unitless for now.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -148,7 +144,7 @@ namespace {
     {
         "SunFollowingCamera",
         "Enable Sun On Camera Position",
-        "When selected the Sun is artificially positioned behind the observer all times",
+        "When selected the Sun is artificially positioned behind the observer all times.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -156,14 +152,13 @@ namespace {
         "EclipseHardShadowsInfo",
         "Enable Hard Shadows for Eclipses",
         "Enable/Disables hard shadows through the atmosphere",
-        // @VISIBILITY(2.8)
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereDimmingHeightInfo ={
         "AtmosphereDimmingHeight",
         "Atmosphere Dimming Height",
-        "Percentage of the atmosphere where other objects, such as the stars, are faded",
+        "Percentage of the atmosphere where other objects, such as the stars, are faded.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -171,14 +166,23 @@ namespace {
         "AtmosphereDimmingSunsetAngle",
         "Atmosphere Dimming Sunset Angle",
         "The angle (degrees) between the Camera and the Sun where the sunset starts, and "
-        "the atmosphere starts to fade in objects such as the stars",
+        "the atmosphere starts to fade in objects such as the stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SunAngularSize = {
         "SunAngularSize",
         "Angular Size of the Sun",
-        "Specifies the angular size of the Sun in degrees",
+        "Specifies the angular size of the Sun in degrees.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LightSourceNodeInfo = {
+        "LightSourceNode",
+        "Name of the light source",
+        "This value is the name of a scene graph node that should be used as the source "
+        "of illumination for the atmosphere. If this value is not specified, the solar "
+        "system's Sun is used instead.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -270,6 +274,9 @@ namespace {
 
         // [[codegen::verbatim(SunAngularSize.description)]]
         std::optional<float> sunAngularSize [[codegen::inrange(0.0, 180.0)]];
+
+        // [[codegen::verbatim(LightSourceNodeInfo.description)]]
+        std::optional<std::string> lightSourceNode;
     };
 #include "renderableatmosphere_codegen.cpp"
 
@@ -311,6 +318,7 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     , _sunFollowingCameraEnabled(EnableSunOnCameraPositionInfo, false)
     , _hardShadowsEnabled(EclipseHardShadowsInfo, false)
     , _sunAngularSize(SunAngularSize, 0.3f, 0.f, 180.f)
+    , _lightSourceNodeName(LightSourceNodeInfo)
     , _atmosphereDimmingHeight(AtmosphereDimmingHeightInfo, 0.7f, 0.f, 1.f)
     , _atmosphereDimmingSunsetAngle(
         SunsetAngleInfo,
@@ -435,6 +443,30 @@ RenderableAtmosphere::RenderableAtmosphere(const ghoul::Dictionary& dictionary)
     _sunAngularSize = p.sunAngularSize.value_or(_sunAngularSize);
     _sunAngularSize.onChange(updateWithoutCalculation);
     addProperty(_sunAngularSize);
+
+    _lightSourceNodeName.onChange([this]() {
+        if (_lightSourceNodeName.value().empty()) {
+            _lightSourceNode = nullptr;
+            return;
+        }
+
+        SceneGraphNode* n = sceneGraphNode(_lightSourceNodeName);
+        if (!n) {
+            LERRORC(
+                "RenderabeAtmosphere",
+                std::format(
+                    "Could not find node '{}' as illumination for '{}'",
+                    _lightSourceNodeName.value(), identifier()
+                )
+            );
+        }
+        else {
+            _lightSourceNode = n;
+            _deferredCasterNeedsUpdate = true;
+        }
+    });
+    _lightSourceNodeName = p.lightSourceNode.value_or("");
+    addProperty(_lightSourceNodeName);
 }
 
 void RenderableAtmosphere::deinitializeGL() {
@@ -510,7 +542,8 @@ void RenderableAtmosphere::updateAtmosphereParameters() {
         _mieScatteringCoeff,
         _mieExtinctionCoeff,
         _sunFollowingCameraEnabled,
-        _sunAngularSize
+        _sunAngularSize,
+        _lightSourceNode
     );
     _deferredcaster->setHardShadows(_hardShadowsEnabled);
 }

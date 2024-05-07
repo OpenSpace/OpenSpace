@@ -41,22 +41,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "Set the dimensions of the web browser windows",
-        // @VISIBILITY(2.33)
+        "Set the dimensions of the web browser windows.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
-        "The URL to load",
+        "The URL to load.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Reload the web browser",
+        "Reload the web browser.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -83,9 +82,9 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
     , _renderHandler(new ScreenSpaceRenderHandler)
-    , _keyboardHandler(new WebKeyboardHandler)
     , _url(UrlInfo)
     , _reload(ReloadInfo)
+    , _keyboardHandler(new WebKeyboardHandler)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

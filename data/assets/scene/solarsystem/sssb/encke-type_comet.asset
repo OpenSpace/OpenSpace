@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 2,
     Color = { 0.8, 0.34, 1.0 },
-    TrailFade = 23
+    TrailFade = 23,
+    PointSizeExponent = 10.0
   },
   GUI = {
     Name = "Encke-type Comets",

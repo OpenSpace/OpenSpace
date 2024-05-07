@@ -80,6 +80,7 @@ struct Event {
         CameraPathStarted,
         CameraPathFinished,
         CameraMovedPosition,
+        ScheduledScriptExecuted,
         Custom,
         Last // sentinel value
     };
@@ -572,6 +573,20 @@ struct EventCameraMovedPosition : public Event {
      * Creates an instance of an EventCameraMovedPosition event.
      */
     EventCameraMovedPosition();
+};
+
+/**
+ * This event is created when a scheduled script is executed.
+ */
+struct EventScheduledScriptExecuted : public Event {
+    static constexpr Type Type = Event::Type::ScheduledScriptExecuted;
+
+    /**
+     * Creates an instance of an ScheduledScriptExecuted event.
+     */
+    EventScheduledScriptExecuted(std::string_view script_);
+
+    const tstring script;
 };
 
 /**

@@ -42,8 +42,7 @@ namespace {
         "Texture",
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square",
-        // @VISIBILITY(2.25)
+        "that is applied to this plane. This image has to be square.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -168,10 +167,7 @@ void RenderablePlaneImageLocal::loadTexture() {
             std::to_string(hash),
             [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(
-                        absPath(path).string(),
-                        2
-                    );
+                    ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",

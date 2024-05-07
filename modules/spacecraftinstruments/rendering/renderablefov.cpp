@@ -38,12 +38,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 9> UniformNames = {
-        "modelViewProjectionTransform", "colorStart", "colorEnd",
-        "activeColor", "targetInFieldOfViewColor", "intersectionStartColor",
-        "intersectionEndColor", "squareColor", "interpolation"
-    };
-
     constexpr int InterpolationSteps = 5;
     constexpr double Epsilon = 1e-4;
 
@@ -51,7 +45,7 @@ namespace {
         "LineWidth",
         "Line Width",
         "This value determines width of the lines connecting the instrument to the "
-        "corners of the field of view",
+        "corners of the field of view.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -62,7 +56,7 @@ namespace {
         "distance of the plane to the focus object. If this value is '1', the field of "
         "view will be rendered exactly on the surface of, for example, a planet. With a "
         "value of smaller than 1, the field of view will hover of ther surface, thus "
-        "making it more visible",
+        "making it more visible.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -70,8 +64,7 @@ namespace {
         "AlwaysDrawFov",
         "Always Draw FOV",
         "If this value is enabled, the field of view will always be drawn, regardless of "
-        "whether image information has been loaded or not",
-        // @VISIBILITY(2.5)
+        "whether image information has been loaded or not.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -80,7 +73,7 @@ namespace {
         "Start of default color",
         "This value determines the color of the field of view frustum close to the "
         "instrument. The final colors are interpolated between this value and the end "
-        "color",
+        "color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -89,7 +82,7 @@ namespace {
         "End of default color",
         "This value determines the color of the field of view frustum close to the "
         "target. The final colors are interpolated between this value and the start "
-        "color",
+        "color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -97,7 +90,7 @@ namespace {
         "Colors.Active",
         "Active Color",
         "This value determines the color that is used when the instrument's field of "
-        "view is active",
+        "view is active.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -105,7 +98,7 @@ namespace {
         "Colors.TargetInFieldOfView",
         "Target in field-of-view Color",
         "This value determines the color that is used if the target is inside the field "
-        "of view of the instrument but the instrument is not yet active",
+        "of view of the instrument but the instrument is not yet active.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -114,7 +107,7 @@ namespace {
         "Start of the intersection",
         "This value determines the color that is used close to the instrument if one of "
         "the field of view corners is intersecting the target object. The final color is "
-        "retrieved by interpolating between this color and the intersection end color",
+        "retrieved by interpolating between this color and the intersection end color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -123,7 +116,7 @@ namespace {
         "End of the intersection",
         "This value determines the color that is used close to the target if one of the "
         "field of view corners is intersecting the target object. The final color is "
-        "retrieved by interpolating between this color and the intersection begin color",
+        "retrieved by interpolating between this color and the intersection begin color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -132,7 +125,7 @@ namespace {
         "Orthogonal Square",
         "This value determines the color that is used for the field of view square in "
         "the case that there is no intersection and that the instrument is not currently "
-        "active",
+        "active.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -287,7 +280,7 @@ void RenderableFov::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     // Fetch information about the specific instrument
     SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
@@ -767,10 +760,13 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
     const glm::mat4 modelViewProjectionTransform =
         calcModelViewProjectionTransform(data);
 
-    _program->setUniform(_uniformCache.modelViewProjection, modelViewProjectionTransform);
+    _program->setUniform(
+        _uniformCache.modelViewProjectionTransform,
+        modelViewProjectionTransform
+    );
 
-    _program->setUniform(_uniformCache.defaultColorStart, _colors.defaultStart);
-    _program->setUniform(_uniformCache.defaultColorEnd, _colors.defaultEnd);
+    _program->setUniform(_uniformCache.colorStart, _colors.defaultStart);
+    _program->setUniform(_uniformCache.colorEnd, _colors.defaultEnd);
     _program->setUniform(_uniformCache.activeColor, _colors.active);
     _program->setUniform(
         _uniformCache.targetInFieldOfViewColor,
@@ -825,7 +821,7 @@ void RenderableFov::update(const UpdateData& data) {
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 

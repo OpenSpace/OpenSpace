@@ -230,9 +230,10 @@ void GuiSpaceTimeComponent::render() {
 
         const float duration = global::timeManager->defaultTimeInterpolationDuration();
 
-        const TimeKeyframeData predictedTime = global::timeManager->interpolate(
-            global::windowDelegate->applicationTime() + duration
-        );
+        const TimeManager::TimeKeyframeData predictedTime =
+            global::timeManager->interpolate(
+                global::windowDelegate->applicationTime() + duration
+            );
         const double j2000 = predictedTime.time.j2000Seconds();
         const long long seconds = duration_cast<std::chrono::seconds>(
             std::chrono::hours(24) * std::abs(days)

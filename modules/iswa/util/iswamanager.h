@@ -83,7 +83,8 @@ public:
     void addIswaCygnet(int id, const std::string& type = "Texture",
         std::string group = "");
     void addKameleonCdf(std::string group, int pos);
-    void createFieldline(std::string name, std::string cdfPath, std::string seedPath);
+    void createFieldline(std::string name, std::filesystem::path cdfPath,
+        std::string seedPath);
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp);

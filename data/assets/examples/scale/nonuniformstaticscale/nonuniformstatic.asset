@@ -1,0 +1,32 @@
+-- Basic
+-- This asset creates a SceneGraphNode that only displays coordinate axes. The coordinate
+-- axis normally have a length of 1 meter and are scaled in this example by different
+-- values for each axis. The x axis is scaled by a factor of 149597870700,  which means
+-- they will be 149597870700 m (1 AU) long and thus reaching the same distance as Earth's
+-- orbit around the Sun. The y-axis stays at its original size, and the z-axis will be
+-- hidden entirely by setting the scale value close to 0.
+
+local Node = {
+  Identifier = "NonUniformStaticScale_Example",
+  Transform = {
+    Scale = {
+      Type = "NonUniformStaticScale",
+      Scale = { 149597870700, 1.0, 0.0005 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/NonUniformStaticScale"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

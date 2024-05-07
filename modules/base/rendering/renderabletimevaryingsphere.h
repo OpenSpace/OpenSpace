@@ -75,7 +75,6 @@ protected:
     void bindTexture() override;
 
 private:
-
     void loadTexture();
     void extractMandatoryInfoFromSourceFolder();
     void readFileFromImage(std::filesystem::path path);

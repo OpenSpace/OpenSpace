@@ -34,6 +34,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
@@ -111,7 +112,7 @@ namespace {
         "ShowChunkEdges",
         "Show chunk edges",
         "If this value is set to 'true', the borders between chunks are shown using a "
-        "red highlight",
+        "red highlight.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -120,8 +121,7 @@ namespace {
         "Level by projected area (else distance)",
         "If this value is set to 'true', the tile level is determined by the area "
         "projected on screen. If it is 'false', the distance to the center of the tile "
-        "is used instead",
-        // @VISIBILITY(?)
+        "is used instead.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -136,8 +136,7 @@ namespace {
         "ResetTileProviders",
         "Reset tile providers",
         "If this property is triggered, all tile provides for the globe are reset and "
-        "data is reloaded from scratch",
-        // @VISIBILITY(3.67)
+        "data is reloaded from scratch.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -147,7 +146,7 @@ namespace {
         "This value determines the tile level that is used as the cut off between "
         "rendering tiles using the globe model rendering vs the flat in-game rendering "
         "method. This value is a tradeoff between not having precision errors in the "
-        "rendering and represting a tile as flat or curved",
+        "rendering and represting a tile as flat or curved.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -157,7 +156,7 @@ namespace {
         "Data availability checks before LOD factor impact",
         "The number of checks that have to fail/succeed in a row before the dynamic "
         "level-of-detail adjusts the actual level-of-detail up or down during a session "
-        "recording",
+        "recording.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -166,7 +165,7 @@ namespace {
         "Perform shading",
         "This value determines whether there should be lighting applied to the surface "
         "of the globe. Note that if there is an atmosphere attached to the planet, there "
-        "is a separate setting to control the shadowing induced by the atmosphere part",
+        "is a separate setting to control the shadowing induced by the atmosphere part.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -175,31 +174,37 @@ namespace {
         "Use Accurate Normals",
         "This value determines whether higher-accuracy normals should be used in the "
         "rendering. These normals are calculated based on the height field information "
-        "and are thus only available if the planet has a height map",
-        // @VISIBILITY(3.5)
+        "and are thus only available if the planet has a height map.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LightSourceNodeInfo = {
+        "LightSourceNode",
+        "Name of the light source",
+        "This value is the name of a scene graph node that should be used as the source "
+        "of illumination for the globe. If this value is not specified, the solar "
+        "system's Sun is used instead.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EclipseInfo = {
         "Eclipse",
         "Eclipse",
-        "Enables/Disable Eclipse shadows",
+        "Enables/Disable Eclipse shadows.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
         "EclipseHardShadows",
         "Eclipse Hard Shadows",
-        "Enables the rendering of eclipse shadows using hard shadows",
-        // @VISIBILITY(2.67)
+        "Enables the rendering of eclipse shadows using hard shadows.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowMappingInfo = {
         "ShadowMapping",
         "Shadow Mapping",
-        "Enables shadow mapping algorithm. Used by renderable rings too",
-        // @VISIBILITY(3.5)
+        "Enables shadow mapping algorithm. Used by renderable rings, too.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -208,8 +213,7 @@ namespace {
         "Render at Distance",
         "Tells the rendering engine not to perform distance based performance culling "
         "for this globe. Turning this property on will let the globe to be seen at far "
-        "away distances when normally it would be hidden",
-        // @VISIBILITY(3.5)
+        "away distances when normally it would be hidden.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -217,7 +221,7 @@ namespace {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
         "The percentage of the correct distance to the surface being shadowed. Possible "
-        "values: [0.0, 1.0]",
+        "values: [0.0, 1.0].",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -225,7 +229,7 @@ namespace {
         "NumberShadowSamples",
         "Number of Shadow Samples",
         "The number of samples used during shadow mapping calculation (Percentage Closer "
-        "Filtering)",
+        "Filtering).",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -234,7 +238,7 @@ namespace {
         "Target Level of Detail Scale Factor",
         "Determines the targeted level-of-detail of the tiles for this globe. A higher "
         "value means that the tiles rendered are a higher resolution for the same "
-        "distance of the camera to the planet",
+        "distance of the camera to the planet.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -242,21 +246,21 @@ namespace {
         "CurrentLodScaleFactor",
         "Current Level of Detail Scale Factor (Read Only)",
         "The currently used scale factor whose target value is deteremined by "
-        "'TargetLodScaleFactor'",
+        "'TargetLodScaleFactor'.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrenNayarRoughnessInfo = {
         "OrenNayarRoughness",
         "orenNayarRoughness",
-        "The roughness factor that is used for the Oren-Nayar lighting mode",
+        "The roughness factor that is used for the Oren-Nayar lighting mode.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient Intensity",
-        "The intensity factor for the ambient light used for light shading",
+        "The intensity factor for the ambient light used for light shading.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -264,8 +268,7 @@ namespace {
         "NActiveLayers",
         "Number of active layers",
         "This is the number of currently active layers, if this value reaches the "
-        "maximum, bad things will happen",
-        // @VISIBILITY(2.5)
+        "maximum, bad things will happen.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -310,6 +313,9 @@ namespace {
 
         std::optional<ghoul::Dictionary> shadows
             [[codegen::reference("globebrowsing_shadows_component")]];
+
+        // [[codegen::verbatim(LightSourceNodeInfo.description)]]
+        std::optional<std::string> lightSourceNode;
     };
 #include "renderableglobe_codegen.cpp"
 } // namespace
@@ -531,6 +537,24 @@ bool intersects(const AABB3& bb, const AABB3& o) {
         && (bb.min.z <= o.max.z) && (o.min.z <= bb.max.z);
 }
 
+/**
+ * Calculates the direction towards the local light source. If \p illumination is a
+ * `nullptr`, it is interpreted to be (0,0,0)
+ */
+glm::dvec3 directionToLightSource(const glm::dvec3& pos, SceneGraphNode* lightSource) {
+    // For the lighting we use the provided node, or the Sun
+    SceneGraphNode* node =
+        lightSource ? lightSource : sceneGraph()->sceneGraphNode("Sun");
+
+    if (node) {
+        return node->worldPosition() - pos;
+    }
+    else {
+        const glm::dvec3 dir = length(pos) > 0.0 ? glm::normalize(-pos) : glm::dvec3(0.0);
+        return dir;
+    }
+}
+
 } // namespace
 
 Chunk::Chunk(const TileIndex& ti)
@@ -573,6 +597,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
+    , _lightSourceNodeName(LightSourceNodeInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -614,6 +639,26 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.useAccurateNormals);
     addProperty(_generalProperties.renderAtDistance);
+
+    _lightSourceNodeName.onChange([this]() {
+        if (_lightSourceNodeName.value().empty()) {
+            _lightSourceNode = nullptr;
+            return;
+        }
+
+        SceneGraphNode* n = sceneGraphNode(_lightSourceNodeName);
+        if (!n) {
+            LERROR(std::format(
+                "Could not find node '{}' as illumination for '{}'",
+                _lightSourceNodeName.value(), identifier()
+            ));
+        }
+        else {
+            _lightSourceNode = n;
+        }
+    });
+    _lightSourceNodeName = p.lightSourceNode.value_or("");
+    addProperty(_lightSourceNodeName);
 
     if (p.shadowGroup.has_value()) {
         std::vector<Ellipsoid::ShadowConfiguration> shadowConfArray;
@@ -884,8 +929,7 @@ void RenderableGlobe::update(const UpdateData& data) {
 
         ghoul::opengl::updateUniformLocations(
             *_localRenderer.program,
-            _localRenderer.uniformCache,
-            { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalCameraSpace" }
+            _localRenderer.uniformCache
         );
     }
 
@@ -902,8 +946,7 @@ void RenderableGlobe::update(const UpdateData& data) {
 
         ghoul::opengl::updateUniformLocations(
             *_globalRenderer.program,
-            _globalRenderer.uniformCache,
-            { "skirtLength", "minLatLon", "lonLatScalingFactor" }
+            _globalRenderer.uniformCache
         );
     }
 
@@ -1165,9 +1208,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     if (nightLayersActive || waterLayersActive || _generalProperties.performShading) {
         const glm::dvec3 directionToSunWorldSpace =
-            length(data.modelTransform.translation) > 0.0 ?
-            glm::normalize(-data.modelTransform.translation) :
-            glm::dvec3(0.0);
+            directionToLightSource(data.modelTransform.translation, _lightSourceNode);
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
@@ -1193,9 +1234,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
 
     if (nightLayersActive || waterLayersActive || _generalProperties.performShading) {
         const glm::dvec3 directionToSunWorldSpace =
-            length(data.modelTransform.translation) > 0.0 ?
-            glm::normalize(-data.modelTransform.translation) :
-            glm::dvec3(0.0);
+            directionToLightSource(data.modelTransform.translation, _lightSourceNode);
 
         const glm::vec3 directionToSunCameraSpace = glm::vec3(viewTransform *
             glm::dvec4(directionToSunWorldSpace, 0));
@@ -1825,8 +1864,7 @@ void RenderableGlobe::recompileShaders() {
 
     ghoul::opengl::updateUniformLocations(
         *_localRenderer.program,
-        _localRenderer.uniformCache,
-        { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalCameraSpace" }
+        _localRenderer.uniformCache
     );
 
 
@@ -1852,8 +1890,7 @@ void RenderableGlobe::recompileShaders() {
 
     ghoul::opengl::updateUniformLocations(
         *_globalRenderer.program,
-        _globalRenderer.uniformCache,
-        { "skirtLength", "minLatLon", "lonLatScalingFactor" }
+        _globalRenderer.uniformCache
     );
 
     _globalRenderer.updatedSinceLastCall = true;

@@ -42,8 +42,7 @@ namespace {
         "AllModules",
         "All Modules",
         "The list of all modules that were compiled for this version of OpenSpace in the "
-        "same order in which they were initialized",
-        // @VISIBILITY(3.5)
+        "same order in which they were initialized.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace

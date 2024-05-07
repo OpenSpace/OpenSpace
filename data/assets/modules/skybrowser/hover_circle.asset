@@ -23,7 +23,8 @@ local circle = {
     Description = [[A circular marker that shows the position on the night sky
       of the object hovered in the sky browser UI. The circle will hide/show up
       dynamically, depending on the interaction with the items in the UI]],
-    Path = "/SkyBrowser"
+    Path = "/SkyBrowser",
+    Hidden = true
   }
 }
 

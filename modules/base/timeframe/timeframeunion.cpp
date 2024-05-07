@@ -35,11 +35,17 @@ namespace {
         "TimeFrames",
         "Time Frames",
         "A vector of time frames to combine into one. The time frame is active when any "
-        "of the contained time frames are, but not in gaps between contained time frames",
-        // @VISIBILITY(3.75)
+        "of the contained time frames are, but not in gaps between contained time "
+        "frames.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This TimeFrame class will accept the union of all passed-in TimeFrames. This means
+    // that this TimeFrame will be active if at least one of the child TimeFrames is
+    // active and it will be inactive if none of the child TimeFrames are active.
+    //
+    // This can be used to create more complex TimeFrames that are made up of several,
+    // simpler TimeFrames themselves.
     struct [[codegen::Dictionary(TimeFrameUnion)]] Parameters {
         // [[codegen::verbatim(TimeFramesInfo.description)]]
         std::vector<ghoul::Dictionary> timeFrames
@@ -51,7 +57,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation TimeFrameUnion::Documentation() {
-    return codegen::doc<Parameters>("base_time_frame_union");
+    return codegen::doc<Parameters>("base_timeframe_union");
 }
 
 bool TimeFrameUnion::isActive(const Time& time) const {
@@ -64,21 +70,15 @@ bool TimeFrameUnion::isActive(const Time& time) const {
 }
 
 TimeFrameUnion::TimeFrameUnion(const ghoul::Dictionary& dictionary) {
-    // I don't know how we can actually help the reference attribute properly. Since the
-    // Parameter list only contains the monostate, there is no need to actually create
-    // the object here
-    codegen::bake<Parameters>(dictionary);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    const ghoul::Dictionary frames =
-        dictionary.value<ghoul::Dictionary>(TimeFramesInfo.identifier);
-
-    for (const std::string_view k : frames.keys()) {
-        const ghoul::Dictionary& subDictionary = frames.value<ghoul::Dictionary>(k);
-        _timeFrames.push_back(TimeFrame::createFromDictionary(subDictionary));
+    for (size_t i = 0; i < p.timeFrames.size(); i++) {
+        const ghoul::Dictionary& frame = p.timeFrames[i];
+        _timeFrames.push_back(TimeFrame::createFromDictionary(frame));
         TimeFrame& subFrame = *_timeFrames.back();
-        subFrame.setIdentifier(std::string(k));
-        subFrame.setGuiName(std::string(k));
-        subFrame.setDescription(std::string(k));
+        subFrame.setIdentifier(std::format("{}", i));
+        subFrame.setGuiName(std::format("{}", i));
+        subFrame.setDescription(std::format("{}", i));
         addPropertySubOwner(*_timeFrames.back());
     }
 }

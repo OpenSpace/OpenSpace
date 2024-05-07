@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SPOUT___SPOUTWRAPPER___H__
 #define __OPENSPACE_MODULE_SPOUT___SPOUTWRAPPER___H__
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
@@ -123,6 +124,8 @@ public:
     bool updateReceiver() override;
     void releaseReceiver() override;
 
+    static documentation::Documentation Documentation();
+
 private:
     properties::StringProperty _spoutName;
     properties::OptionProperty _spoutSelection;
@@ -178,6 +181,8 @@ public:
 
     bool updateSender(unsigned int texture, unsigned int textureType) override;
     void releaseSender() override;
+
+    static documentation::Documentation Documentation();
 
 private:
     properties::StringProperty _spoutName;

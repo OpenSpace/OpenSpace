@@ -72,7 +72,7 @@ namespace {
         "RenderInfo",
         "Render Playback Information",
         "If enabled, information about a currently played back session recording is "
-        "rendering to screen",
+        "rendering to screen.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -80,7 +80,7 @@ namespace {
         "IgnoreRecordedScale",
         "Ignore Recorded Scale",
         "If this value is enabled, the scale value from a recording is ignored and the "
-        "computed values are used instead",
+        "computed values are used instead.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -89,7 +89,7 @@ namespace {
         "Add Model Matrix in ASCII recording",
         "If this is 'true', the model matrix is written into the ASCII recording format "
         "in the line before each camera keyframe. The model matrix is the full matrix "
-        "that converts the position into a J2000+Galactic reference frame",
+        "that converts the position into a J2000+Galactic reference frame.",
         openspace::properties::Property::Visibility::Developer
     };
 } // namespace
@@ -157,11 +157,6 @@ void SessionRecording::removeTrailingPathSlashes(std::string& filename) const {
 }
 
 bool SessionRecording::handleRecordingFile(std::string filenameIn) {
-    if (isPath(filenameIn)) {
-        LERROR("Recording filename must not contain path (/) elements");
-        return false;
-    }
-
     if (_recordingDataMode == DataMode::Binary) {
         if (hasFileExtension(filenameIn, FileExtensionAscii)) {
             LERROR("Specified filename for binary recording has ascii file extension");
@@ -181,7 +176,21 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
         }
     }
 
-    std::filesystem::path absFilename = absPath("${RECORDINGS}/" + filenameIn);
+    std::filesystem::path absFilename = filenameIn;
+    if (absFilename.parent_path().empty() || absFilename.parent_path() == absFilename) {
+        absFilename = absPath("${RECORDINGS}/" + filenameIn);
+    }
+    else if (absFilename.parent_path().is_relative()) {
+        LERROR("If path is provided with the filename, then it must be an absolute path");
+        return false;
+    }
+    else if (!std::filesystem::exists(absFilename.parent_path())) {
+        LERROR(std::format(
+            "The recording filename path '{}' is not a valid location in the filesytem",
+            absFilename.parent_path().string()
+        ));
+        return false;
+    }
 
     if (std::filesystem::is_regular_file(absFilename)) {
         LERROR(std::format(

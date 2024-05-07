@@ -31,6 +31,7 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/exception.h>
 #include <array>
+#include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
@@ -214,7 +215,7 @@ public:
      *
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
      */
-    KernelHandle loadKernel(std::string filePath);
+    KernelHandle loadKernel(std::filesystem::path filePath);
 
     /**
      * Unloads a SPICE kernel identified by the \p kernelId which was returned by the
@@ -238,7 +239,7 @@ public:
      *
      * \return The list of all loaded kernels that have been loaded through this manager
      */
-    std::vector<std::string> loadedKernels() const;
+    std::vector<std::filesystem::path> loadedKernels() const;
 
     /**
      * Unloads a SPICE kernel identified by the \p filePath which was used in the
@@ -254,7 +255,7 @@ public:
      *
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
-    void unloadKernel(std::string filePath);
+    void unloadKernel(std::filesystem::path filePath);
 
     /**
      * Returns whether a given \p target has an SPK kernel covering it at the designated
@@ -1017,7 +1018,7 @@ private:
      */
     struct KernelInformation {
         /// The path from which the kernel was loaded
-        std::string path;
+        std::filesystem::path path;
         /// A unique identifier for each kernel
         KernelHandle id;
         /// How many parts loaded this kernel and are interested in it
@@ -1049,7 +1050,7 @@ private:
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckobj_c.html
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckcov_c.html
      */
-    void findCkCoverage(const std::string& path);
+    void findCkCoverage(const std::filesystem::path& path);
 
     /**
      * Function to find and store the intervals covered by a spk file, this is done
@@ -1063,7 +1064,7 @@ private:
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkobj_c.html
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkcov_c.html
      */
-    void findSpkCoverage(const std::string& path);
+    void findSpkCoverage(const std::filesystem::path& path);
 
     /**
      * If a position is requested for an uncovered time in the SPK kernels, this function

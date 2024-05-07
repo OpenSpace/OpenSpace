@@ -47,16 +47,14 @@ namespace {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture to be used for the color",
-        // @VISIBILITY(2.75)
+        "texture to be used for the color.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the outer radius of the disc in meter",
-        // @VISIBILITY(2.75)
+        "This value specifies the outer radius of the disc in meters.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -65,7 +63,7 @@ namespace {
         "Width",
         "This value is used to set the width of the disc. The actual width is set "
         "based on the given size and this value should be set between 0 and 1. A value "
-        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size",
+        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -152,7 +150,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
         calcModelViewProjectionTransform(data);
 
     _shader->setUniform(
-        _uniformCache.modelViewProjection,
+        _uniformCache.modelViewProjectionTransform,
         glm::mat4(modelViewProjectionTransform)
     );
     _shader->setUniform(_uniformCache.width, _width);
@@ -161,7 +159,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _shader->setUniform(_uniformCache.texture, unit);
+    _shader->setUniform(_uniformCache.colorTexture, unit);
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

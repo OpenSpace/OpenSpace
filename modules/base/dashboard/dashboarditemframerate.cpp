@@ -48,8 +48,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FrametimeInfo = {
         "FrametimeType",
         "Type of the frame time display",
-        "This value determines the units in which the frame time is displayed",
-        // @VISIBILITY(2.75)
+        "This value determines the units in which the frame time is displayed.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -57,11 +56,11 @@ namespace {
         "ClearCache",
         "Clear Cache",
         "Clears the cache of this DashboardItemFramerate item. If the selected option "
-        "does not use any caching, this trigger does not do anything",
+        "does not use any caching, this trigger does not do anything.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    [[ nodiscard ]] char* formatDt(std::vector<char>& buffer) {
+    [[nodiscard]] char* formatDt(std::vector<char>& buffer) {
         return std::format_to(
             buffer.data(),
             "Avg. Frametime: {:.2f} ms\0",
@@ -69,7 +68,7 @@ namespace {
         );
     }
 
-    [[ nodiscard ]] char* formatDtExtremes(std::vector<char>& buffer,
+    [[nodiscard]] char* formatDtExtremes(std::vector<char>& buffer,
                                            double minFrametimeCache,
                                            double maxFrametimeCache)
     {
@@ -84,7 +83,7 @@ namespace {
         );
     }
 
-    [[ nodiscard ]] char* formatDtStandardDeviation(std::vector<char>& buffer) {
+    [[nodiscard]] char* formatDtStandardDeviation(std::vector<char>& buffer) {
         return std::format_to(
             buffer.data(),
             "Frametime standard deviation : {:.2f} ms\0",
@@ -92,7 +91,7 @@ namespace {
         );
     }
 
-    [[ nodiscard ]] char* formatDtCoefficientOfVariation(std::vector<char>& buffer) {
+    [[nodiscard]] char* formatDtCoefficientOfVariation(std::vector<char>& buffer) {
         return std::format_to(
             buffer.data(),
             "Frametime coefficient of variation : {:.2f} %\0",
@@ -101,7 +100,7 @@ namespace {
         );
     }
 
-    [[ nodiscard ]] char* formatFps(std::vector<char>& buffer) {
+    [[nodiscard]] char* formatFps(std::vector<char>& buffer) {
         return std::format_to(
             buffer.data(),
             "FPS: {:3.2f}\0",
@@ -109,7 +108,7 @@ namespace {
         );
     }
 
-    [[ nodiscard ]] char* formatAverageFps(std::vector<char>& buffer) {
+    [[nodiscard]] char* formatAverageFps(std::vector<char>& buffer) {
         return std::format_to(
             buffer.data(),
             "Avg. FPS: {:3.2f}\0",
@@ -117,7 +116,7 @@ namespace {
         );
     }
 
-    [[ nodiscard ]] char* format(std::vector<char>& buffer, FrametimeType frametimeType,
+    [[nodiscard]] char* format(std::vector<char>& buffer, FrametimeType frametimeType,
                                        double minFrametimeCache, double maxFrametimeCache)
     {
         using namespace openspace;
@@ -238,12 +237,8 @@ void DashboardItemFramerate::render(glm::vec2& penPosition) {
         0 :
         static_cast<int>((std::count(text.begin(), text.end(), '\n') + 1));
 
-    ghoul::fontrendering::FontRenderer::defaultRenderer().render(
-        *_font,
-        penPosition,
-        text
-    );
     penPosition.y -= _font->height() * static_cast<float>(nLines);
+    RenderFont(*_font, penPosition, text);
 }
 
 glm::vec2 DashboardItemFramerate::size() const {

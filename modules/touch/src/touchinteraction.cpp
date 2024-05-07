@@ -67,7 +67,7 @@ namespace {
         "Take a unit test saving the LM data into file",
         "LM - least-squares minimization using Levenberg-Marquardt algorithm."
         "Used to find a new camera state from touch points when doing direct "
-        "manipulation",
+        "manipulation.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -75,7 +75,6 @@ namespace {
         "DisableZoom",
         "Disable zoom navigation",
         "", // @TODO Missing documentation
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -83,7 +82,6 @@ namespace {
         "DisableRoll",
         "Disable roll navigation",
         "", // @TODO Missing documentation
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -105,7 +103,6 @@ namespace {
         "DeceleratesPerSecond",
         "Number of times velocity is decelerated per second",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -127,7 +124,7 @@ namespace {
         "PinchZoomFactor",
         "Scaling distance travelled on pinch",
         "This value is used to reduce the amount of pinching needed. A linear kind of "
-        "sensitivity that will alter the pinch-zoom speed",
+        "sensitivity that will alter the pinch-zoom speed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -142,7 +139,6 @@ namespace {
         "ZoomSensitivityExp",
         "Sensitivity of exponential zooming in relation to distance from focus node",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -150,7 +146,6 @@ namespace {
         "ZoomSensitivityProp",
         "Sensitivity of zooming proportional to distance from focus node",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -161,7 +156,6 @@ namespace {
         "Threshold of distance to target node for whether or not to use exponential "
         "zooming",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -170,9 +164,8 @@ namespace {
     {
         "ZoomInBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom in & prevent "
-        "surface collision",
+        "surface collision.",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -187,14 +180,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ConstantTimeDecaySecsInfo = {
         "ConstantTimeDecaySecs",
         "Time duration that a pitch/roll/zoom/pan should take to decay to zero (seconds)",
-        "",
+        "",  // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
         "Threshold for interpreting input as still",
-        "",
+        "",  // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -223,7 +216,6 @@ namespace {
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
         "", // @TODO Missing documentation
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -232,8 +224,7 @@ namespace {
         "Zoom Out Limit",
         "The maximum distance you are allowed to navigate away from the anchor. "
         "This should always be larger than the zoom in value if you want to be able "
-        "to zoom. Defaults to maximum allowed double",
-        // @VISIBILITY(2.5)
+        "to zoom. Defaults to maximum allowed double.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -243,7 +234,6 @@ namespace {
         "The minimum distance from the anchor that you are allowed to navigate to. "
         "Its purpose is to limit zooming in on a node. If this value is not set it "
         "defaults to the surface of the current anchor.",
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -263,7 +253,7 @@ namespace {
         "Direct manipulation threshold",
         "This threshold affects the distance from the interaction sphere at which the "
         "direct manipulation interaction mode starts being active. The value is given "
-        "as a factor times the interaction sphere",
+        "as a factor times the interaction sphere.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

@@ -61,14 +61,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "This setting determines whether this object will be visible or not",
+        "This setting determines whether this object will be visible or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "File",
-        "Path to the GeoJSON file to base the rendering on",
+        "Path to the GeoJSON file to base the rendering on.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -76,7 +76,7 @@ namespace {
         "HeightOffset",
         "Height Offset",
         "A height offset value, in meters. Useful for moving a feature closer to or "
-        "farther away from the surface",
+        "farther away from the surface.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -86,7 +86,7 @@ namespace {
         "A latitude and longitude offset value, in decimal degrees. Can be used to "
         "move the object on the surface and correct potential mismatches with other "
         "renderings. Note that changing it during runtime leads to all positions being "
-        "recomputed",
+        "recomputed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -94,7 +94,7 @@ namespace {
         "DrawWireframe",
         "Wireframe",
         "If true, draw the wire frame of the polygons. Used for testing and to "
-        "investigate tessellation results",
+        "investigate tessellation results.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -103,7 +103,7 @@ namespace {
         "Prevent Update From Heightmap",
         "If true, the polygon mesh will not be automatically updated based on the "
         "heightmap, even if the 'RelativeToGround' altitude option is set and the "
-        "heightmap updates. The data can still be force updated",
+        "heightmap updates. The data can still be force updated.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -111,7 +111,7 @@ namespace {
         "ForceUpdateHeightData",
         "Force Update Height Data",
         "Triggering this leads to a recomputation of the heights based on the globe "
-        "height map value at the geometry's positions",
+        "height map value at the geometry's positions.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -120,7 +120,7 @@ namespace {
         "Points Aligned to",
         "Decides how the billboards for the points should be rendered in terms of up "
         "direction and whether the plane should face the camera. See details on the "
-        "different options in the wiki",
+        "different options in the wiki.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -128,7 +128,7 @@ namespace {
         "FlyToFeature",
         "Fly To Feature",
         "Triggering this leads to the camera flying to a position that show the GeoJson "
-        "feature. The flight will account for any lat, long or height offset",
+        "feature. The flight will account for any lat, long or height offset.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -136,7 +136,7 @@ namespace {
         "CentroidCoordinate",
         "Centroid Coordinate",
         "The lat long coordinate of the centroid position of the read geometry. Note "
-        "that this value does not incude the offset",
+        "that this value does not incude the offset.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -144,7 +144,7 @@ namespace {
         "BoundingBox",
         "Bounding Box",
         "The lat long coordinates of the lower and upper corner of the bounding box of "
-        "the read geometry. Note that this value does not incude the offset",
+        "the read geometry. Note that this value does not incude the offset.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -152,7 +152,7 @@ namespace {
         "PointSizeScale",
         "Point Size Scale",
         "An extra scale value that can be used to increase or decrease the scale of any "
-        "rendered points in the component, even if a value is set from the GeoJson file",
+        "rendered points in the component, even if a value is set from the GeoJson file.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 

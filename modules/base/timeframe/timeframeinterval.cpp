@@ -34,32 +34,28 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HasStartInfo = {
         "HasStart",
         "Has Start",
-        "If enabled, this TimeFrame will be inactive before the Start",
-        // @VISIBILITY(2.75)
+        "If enabled, this TimeFrame will be inactive before the Start.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartInfo = {
         "Start",
         "Start",
-        "Specifies the time when this TimeFrame becomes active",
-        // @VISIBILITY(2.75)
+        "Specifies the time when this TimeFrame becomes active.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HasEndInfo = {
         "HasEnd",
         "Has End",
-        "If enabled, this TimeFrame will be inactive after the End",
-        // @VISIBILITY(2.75)
+        "If enabled, this TimeFrame will be inactive after the End.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndInfo = {
         "End",
         "End",
-        "Specifies the time when this TimeFrame becomes inactive",
-        // @VISIBILITY(2.75)
+        "Specifies the time when this TimeFrame becomes inactive.",
         openspace::properties::Property::Visibility::User
     };
 

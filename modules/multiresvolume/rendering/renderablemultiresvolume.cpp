@@ -189,7 +189,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
     if (dictionary.hasValue<std::string>(KeyDataSource)) {
-        _filename = absPath(dictionary.value<std::string>(KeyDataSource)).string();
+        _filename = absPath(dictionary.value<std::string>(KeyDataSource));
     }
     else {
         LERROR(std::format("Node did not contain a valid '{}'", KeyDataSource));
@@ -241,7 +241,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
         _transferFunctionPath = absPath(
             dictionary.value<std::string>(KeyTransferFunction)
-        ).string();
+        );
         _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
     }
     else {
@@ -474,10 +474,7 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::TF:
             if (_errorHistogramManager) {
                  std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                     std::format(
-                         "{}_{}_errorHistograms",
-                         std::filesystem::path(_filename).stem().string(), nHistograms
-                     ),
+                     std::format("{}_{}_errorHistograms", _filename.stem(), nHistograms),
                      ""
                 );
                 std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
@@ -494,9 +491,7 @@ bool RenderableMultiresVolume::initializeSelector() {
                     LINFO(std::format(
                         "Loading histograms from scene data '{}'", _errorHistogramsPath
                     ));
-                    success &= _errorHistogramManager->loadFromFile(
-                        _errorHistogramsPath.string()
-                    );
+                    success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
                 }
                 else {
                     // Build histograms from tsp file
@@ -514,9 +509,7 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::SIMPLE:
             if (_histogramManager) {
                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                    std::format("{}_{}_histogram",
-                        std::filesystem::path(_filename).stem().string(), nHistograms
-                    ),
+                    std::format("{}_{}_histogram", _filename.stem(), nHistograms),
                     ""
                 );
                 std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
@@ -546,8 +539,7 @@ bool RenderableMultiresVolume::initializeSelector() {
             if (_localErrorHistogramManager) {
                  std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
                     std::format(
-                        "{}_{}_localErrorHistograms",
-                        std::filesystem::path(_filename).stem().string(), nHistograms
+                        "{}_{}_localErrorHistograms", _filename.stem(), nHistograms
                     ),
                     ""
                 );

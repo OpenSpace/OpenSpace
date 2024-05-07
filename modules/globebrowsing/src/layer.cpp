@@ -48,7 +48,7 @@ namespace {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
-        "changed",
+        "changed.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -56,7 +56,7 @@ namespace {
         "BlendMode",
         "Blend Mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
-        "mode determines how this layer is added to the underlying layers beneath",
+        "mode determines how this layer is added to the underlying layers beneath.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -65,8 +65,7 @@ namespace {
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
         "the planet. If this value is disabled, the layer will be ignored in the "
-        "composition",
-        // @VISIBILITY(1.17)
+        "composition.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -74,8 +73,7 @@ namespace {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
-        "local cache for this layer and will trigger a fresh load of all tiles",
-        // @VISIBILITY(2.5)
+        "local cache for this layer and will trigger a fresh load of all tiles.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -83,8 +81,7 @@ namespace {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
-        "layer before the next frame",
-        // @VISIBILITY(2.75)
+        "layer before the next frame.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -92,8 +89,7 @@ namespace {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
-        "solid color is",
-        // @VISIBILITY(2.5)
+        "solid color is.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -101,7 +97,7 @@ namespace {
         "GuiDescription",
         "Gui Description",
         "This is the description for the scene graph node to be shown in the gui "
-        "example: Earth is a special place",
+        "example: Earth is a special place.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -178,10 +174,6 @@ namespace {
         // Sets the blend mode of this layer to determine how it interacts with other
         // layers on top of this
         std::optional<BlendMode> blendMode;
-
-        // If the primary layer creation fails, this layer is used as a fallback
-        std::optional<ghoul::Dictionary>
-            fallback [[codegen::reference("globebrowsing_layer")]];
     };
 #include "layer_codegen.cpp"
 } // namespace

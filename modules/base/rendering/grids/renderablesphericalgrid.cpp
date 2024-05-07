@@ -39,8 +39,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered",
-        // @VISIBILITY(1.25)
+        "This value determines the color of the grid lines that are rendered.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -48,23 +47,21 @@ namespace {
         "Segments",
         "Number of Segments",
         "This value specifies the number of segments that are used to render the "
-        "surrounding sphere",
-        // @VISIBILITY(2.25)
+        "surrounding sphere.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid",
-        // @VISIBILITY(1.67)
+        "This value specifies the line width of the spherical grid.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the grid"
+        "The labels for the grid."
     };
 
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {

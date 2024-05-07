@@ -25,17 +25,17 @@
 #version __CONTEXT__
 
 in vec3 in_position;
-in vec4 in_bvLumAbsMagAppMag;
+in vec3 in_bvLumAbsMag;
 in vec3 in_velocity;
 in float in_speed;
 
-out vec4 vs_bvLumAbsMagAppMag;
+out vec3 vs_bvLumAbsMag;
 out vec3 vs_velocity;
 out float vs_speed;
 
 
 void main() {
-  vs_bvLumAbsMagAppMag = in_bvLumAbsMagAppMag;
+  vs_bvLumAbsMag = in_bvLumAbsMag;
   vs_velocity = in_velocity;
   vs_speed = in_speed;
 

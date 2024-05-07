@@ -43,8 +43,7 @@ namespace {
         "Target",
         "This is the SPICE NAIF name for the body whose translation is to be computed by "
         "the SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') "
-        "or a NAIF integer id code (such as '399')",
-        // @VISIBILITY(3.5)
+        "or a NAIF integer id code (such as '399').",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -53,8 +52,7 @@ namespace {
         "Observer",
         "This is the SPICE NAIF name for the parent of the body whose translation is to "
         "be computed by the SpiceTranslation. It can either be a fully qualified name "
-        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')",
-        // @VISIBILITY(3.5)
+        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0').",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -62,8 +60,7 @@ namespace {
         "Frame",
         "Reference Frame",
         "This is the SPICE NAIF name for the reference frame in which the position "
-        "should be retrieved. The default value is GALACTIC",
-        // @VISIBILITY(3.33)
+        "should be retrieved. The default value is GALACTIC.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -71,8 +68,7 @@ namespace {
         "FixedDate",
         "Fixed Date",
         "A time to lock the position to. Setting this to an empty string will "
-        "unlock the time and return to position based on current simulation time",
-        // @VISIBILITY(2.5)
+        "unlock the time and return to position based on current simulation time.",
         openspace::properties::Property::Visibility::User
     };
 

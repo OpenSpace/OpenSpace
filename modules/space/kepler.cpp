@@ -266,15 +266,20 @@ namespace {
             epoch.end(),
             [](char c) { return c == '-'; }
         );
-        const std::string format = (nDashes == 2) ? "{:4}-{:2}-{:2}{}" : "{:4}{:2}{:2}{}";
-        auto res = scn::scan<int, int, int, double>(e, scn::runtime_format(format));
+        const std::string format = (nDashes == 2) ? "{:4d}-{:2d}-{}" : "{:4d}{:2d}{}";
+        auto res = scn::scan<int, int, double>(e, scn::runtime_format(format));
         if (!res) {
             throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
         }
-        auto [year, monthNum, dayOfMonthNum, fractionOfDay] = res->values();
+        auto [year, monthNum, dayOfMonth] = res->values();
         const int daysSince2000 = countDays(year);
-        const int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
-        const double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
+        const int daysInto = daysIntoGivenYear(
+            year,
+            monthNum,
+            static_cast<int>(dayOfMonth)
+        );
+        const double daysInYear = static_cast<double>(daysInto) +
+            (dayOfMonth - std::floor(dayOfMonth));
 
         // 3
         using namespace std::chrono;
