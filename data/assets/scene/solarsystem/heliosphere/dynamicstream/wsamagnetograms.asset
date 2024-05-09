@@ -13,7 +13,7 @@ local WSA_Magnetograms = {
     LoadingType = "DynamicDownloading",
     InfoURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id=",
     DataURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=",
-    DataID = 1196,
+    DataID = 1180, --1196
     ShowAtAllTimes = true,
     Opacity = 1,
     Segments = 132
@@ -33,3 +33,16 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(WSA_Magnetograms)
 end)
+
+asset.export(WSA_Magnetograms)
+
+
+
+asset.meta = {
+  Name = "WSA Streaming Fits Files",
+  Version = "1.0",
+  Description = "WSAStreaming fits files",
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

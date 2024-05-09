@@ -39,9 +39,27 @@
 namespace {
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
-    double extractTriggerTimeFromFileName(const std::filesystem::path& filePath) {
+    double extractTriggerTimeFromISO8601FileName(const std::filesystem::path& filePath) {
         // Extract the filename from the path (without extension)
         std::string timeString = filePath.stem().string();
+
+        // Ensure the separators are correct
+        timeString.replace(4, 1, "-");
+        timeString.replace(7, 1, "-");
+        timeString.replace(13, 1, ":");
+        timeString.replace(16, 1, ":");
+        timeString.replace(19, 1, ".");
+
+        return openspace::Time::convertTime(timeString);
+    }
+    // Extract J2000 time from file names
+    // Requires file to be named as example : 'wsa_202209291400R011_agong.fits'
+    // Looks for timestamp after first '_'
+    double extractTriggerTimeFromISO8601FileName(const std::filesystem::path& filePath) {
+        // Extract the filename from the path (without extension)
+        std::string timeString = filePath.stem().string();
+
+
 
         // Ensure the separators are correct
         timeString.replace(4, 1, "-");
@@ -113,7 +131,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
-    return RenderableSphere::isReady() && _texture;
+    return RenderableSphere::isReady();
 }
 
 void RenderableTimeVaryingSphere::initializeGL() {
@@ -159,16 +177,22 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     File newFile;
     newFile.path = path;
     newFile.status = File::FileStatus::Loaded;
-    newFile.time = extractTriggerTimeFromFileName(path);
+    newFile.time = extractTriggerTimeFromISO8601FileName(path);
+    newFile.time = extractTriggerTimeFromFits1FileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path);
+    t->setInternalFormat(GL_COMPRESSED_RGBA);
+    t->uploadTexture();
+    t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    //t->purgeFromRAM();
 
+    newFile.texture = std::move(t);
 }
 
 void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) {
     File newFile;
     newFile.path = path;
     newFile.status = File::FileStatus::Loaded;
-    newFile.time = extractTriggerTimeFromFileName(path);
+    newFile.time = extractTriggerTimeFromISO8601FileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t =
         ghoul::io::TextureReader::ref().loadTexture(path.string(), 2);
 
@@ -207,7 +231,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
             continue;
         }
         std::string fileExtention = e.path().extension().string();
-        if (fileExtention == "fits") {
+        if (fileExtention == ".fits") {
             readFileFromFits(e.path());
         }
         else {
@@ -300,7 +324,13 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
     const std::vector<std::filesystem::path>& filesToRead =
         _dynamicFileDownloader->downloadedFiles();
     for (std::filesystem::path filePath : filesToRead) {
-        readFileFromImage(filePath);
+        std::string fileExtention = filePath.extension().string();
+        if (fileExtention == ".fits") {
+            readFileFromFits(filePath);
+        }
+        else {
+            readFileFromImage(filePath);
+        }
     }
     // if all files are moved into _sourceFiles then we can
     // empty the DynamicFileSequenceDownloader _downloadedFiles;

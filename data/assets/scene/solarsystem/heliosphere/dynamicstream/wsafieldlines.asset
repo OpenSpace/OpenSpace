@@ -33,7 +33,7 @@ end)
 
 asset.export(fieldlines)
 asset.meta = {
-  Name = "WSAStreaming",
+  Name = "WSA Streaming field lines",
   Version = "1.0",
   Description = "WSAStreaming",
   Author = "CCMC",
