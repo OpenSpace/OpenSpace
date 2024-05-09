@@ -55,20 +55,49 @@ namespace {
     // Extract J2000 time from file names
     // Requires file to be named as example : 'wsa_202209291400R011_agong.fits'
     // Looks for timestamp after first '_'
-    double extractTriggerTimeFromISO8601FileName(const std::filesystem::path& filePath) {
+    double extractTriggerTimeFromFitsFileName(const std::filesystem::path& filePath) {
         // Extract the filename from the path (without extension)
-        std::string timeString = filePath.stem().string();
+        std::string fileName= filePath.stem().string();
 
+        std::string digits;
+        bool foundDigits = false;
 
+        // Iterate over the characters in the file name
+        for (char c : fileName) {
+            if (std::isdigit(c)) {
+                // If current character is a digit, append it to digits string
+                digits += c;
+                foundDigits = true;
+            }
+            else {
+                // If current character is not a digit, reset digits string
+                digits.clear();
+                foundDigits = false;
+            }
 
-        // Ensure the separators are correct
-        timeString.replace(4, 1, "-");
-        timeString.replace(7, 1, "-");
-        timeString.replace(13, 1, ":");
-        timeString.replace(16, 1, ":");
-        timeString.replace(19, 1, ".");
+            // If we have found at least 12 consecutive digits, break the loop
+            if (digits.size() >= 12) {
+                break;
+            }
+        }
+        // If no digits found, return an empty string
+        if (!foundDigits || digits.size() < 12) {
+            return -1;
+        }
 
-        return openspace::Time::convertTime(timeString);
+        // Extract digits from the substring and construct ISO 8601 formatted string
+        std::ostringstream oss;
+        oss << digits.substr(0, 4) << "-" // Year
+            << digits.substr(4, 2) << "-" // Month
+            << digits.substr(6, 2) << "T" // Day
+            << digits.substr(8, 2) << ":" // Hour
+            << digits.substr(10, 2) << ":" // Minute
+            << "00"
+            << digits.substr(12, 2) << "." // Second
+            << "000";
+            //<< digits.substr(14); // Milliseconds
+
+        return openspace::Time::convertTime(oss.str());
     }
 
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
@@ -178,7 +207,7 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     newFile.path = path;
     newFile.status = File::FileStatus::Loaded;
     newFile.time = extractTriggerTimeFromISO8601FileName(path);
-    newFile.time = extractTriggerTimeFromFits1FileName(path);
+    newFile.time = extractTriggerTimeFromFitsFileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path);
     t->setInternalFormat(GL_COMPRESSED_RGBA);
     t->uploadTexture();
