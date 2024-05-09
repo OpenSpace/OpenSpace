@@ -206,7 +206,7 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     File newFile;
     newFile.path = path;
     newFile.status = File::FileStatus::Loaded;
-    newFile.time = extractTriggerTimeFromISO8601FileName(path);
+    //newFile.time = extractTriggerTimeFromISO8601FileName(path);
     newFile.time = extractTriggerTimeFromFitsFileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path);
     t->setInternalFormat(GL_COMPRESSED_RGBA);
@@ -215,6 +215,15 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     //t->purgeFromRAM();
 
     newFile.texture = std::move(t);
+
+        const std::vector<File>::const_iterator iter = std::upper_bound(
+        _files.begin(), _files.end(),
+        newFile.time,
+        [](double timeRef, const File& fileRef) {
+            return timeRef < fileRef.time;
+        }
+    );
+    _files.insert(iter, std::move(newFile));
 }
 
 void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) {

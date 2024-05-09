@@ -55,11 +55,11 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
 
     // Create texture from imagedata
     auto texture = std::make_unique<ghoul::opengl::Texture>(
-        std::move(imageData.data()),
+        imageData.data(),
         glm::vec3(180, 90, 1),
         GL_TEXTURE_2D,
         ghoul::opengl::Texture::Format::RGB,
-        GL_RGB32F,
+        GL_RGB,
         GL_FLOAT
     );
     texture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
