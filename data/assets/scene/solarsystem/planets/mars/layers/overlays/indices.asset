@@ -5,7 +5,8 @@ local globe = asset.require("../../mars")
 local Layer = {
   Identifier = "Indices",
   Type = "TileIndexTileProvider",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  Zindex = 10
 }
 
 

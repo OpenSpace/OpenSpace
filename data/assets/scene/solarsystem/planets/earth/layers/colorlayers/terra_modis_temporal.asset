@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Terra_Modis_Temporal",
   Name = "Terra Modis (Temporal)",
   Enabled = asset.enabled,
+  Zindex = 70,
   Type = "TemporalTileProvider",
   Mode = "Prototyped",
   Prototyped = {

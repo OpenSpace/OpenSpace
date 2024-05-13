@@ -5,7 +5,8 @@ local globe = asset.require("../../earth")
 local Layer = {
   Identifier = "Coastlines",
   FilePath = asset.resource("coastlines.wms"),
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  Zindex = 10
 }
 
 

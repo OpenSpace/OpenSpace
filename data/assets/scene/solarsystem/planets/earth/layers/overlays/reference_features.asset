@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Reference_Features",
   Name = "Reference Features",
   Enabled = asset.enabled,
+  Zindex = 20,
   FilePath = asset.resource("reference_features.wms")
 }
 
