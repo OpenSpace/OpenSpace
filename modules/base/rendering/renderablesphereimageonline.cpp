@@ -64,6 +64,9 @@ namespace {
         );
     }
 
+    // A RenderableSphereImageOnline can be used to show an image from an online source
+    // (as a URL) on a sphere in the OpenSpace scene. The image should be provided in an
+    // equirectangular projection, if it is a map that is draped over the sphere.
     struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
