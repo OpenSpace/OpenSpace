@@ -57,12 +57,16 @@ public:
     layers::Blend::ID blendMode() const;
     TileDepthTransform depthTransform() const;
     void setEnabled(bool enabled);
+    void setZIndex(unsigned int value);
+    void setHasGivenZIndex(bool value);
     bool enabled() const;
     bool isInitialized() const;
     TileProvider* tileProvider() const;
     glm::vec3 solidColor() const;
     const LayerRenderSettings& renderSettings() const;
     const LayerAdjustment& layerAdjustment() const;
+    unsigned int zIndex() const;
+    bool hasGivenZIndex() const;
 
     void onChange(std::function<void(Layer*)> callback);
 
@@ -96,6 +100,8 @@ private:
 
     std::function<void(Layer*)> _onChangeCallback;
     bool _isInitialized = false;
+    unsigned int _zIndex = 0;
+    bool _hasGivenZIndex = false;
   };
 
 } // namespace openspace::globebrowsing

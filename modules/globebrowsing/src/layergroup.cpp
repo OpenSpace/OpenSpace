@@ -123,11 +123,35 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     layer->onChange(_onChangeCallback);
     Layer* ptr = layer.get();
     _layers.push_back(std::move(layer));
+
+    // Re-sort the layer list according to the z-index
+    auto compareZIndex = [](const std::unique_ptr<Layer>& a,
+                            const std::unique_ptr<Layer>& b)
+    {
+        return a->zIndex() < b->zIndex();
+    };
+    std::stable_sort(_layers.begin(), _layers.end(), compareZIndex);
+
     update();
     if (_onChangeCallback) {
         _onChangeCallback(ptr);
     }
     addPropertySubOwner(ptr);
+
+    // Re-sort the SubPropertyOwner list according to the z-index so the list in the GUI
+    // is sorted correctly.
+    // TODO (malej 2024-MAY-07): Add event so the GUI can be aware that it needs to reload
+    // all or parts of itself. Right now it is up the caller to reload it if needed.
+    auto compareZIndexSubOwners = [](const PropertyOwner* a, const PropertyOwner* b) {
+        const Layer* aLayer = dynamic_cast<const Layer*>(a);
+        const Layer* bLayer = dynamic_cast<const Layer*>(b);
+        ghoul_assert(aLayer, "a is not a layer");
+        ghoul_assert(bLayer, "b is not a layer");
+
+        return aLayer->zIndex() < bLayer->zIndex();
+    };
+    std::stable_sort(_subOwners.begin(), _subOwners.end(), compareZIndexSubOwners);
+
     _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
 
     properties::PropertyOwner* layerGroup = ptr->owner();
@@ -199,15 +223,65 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     oldPosition = std::max(0, oldPosition);
     newPosition = std::min(newPosition, static_cast<int>(_layers.size() - 1));
 
-    // There are two synchronous vectors that we have to update here.  The _layers vector
-    // is used to determine the order while rendering, the _subowners is the order in
+    // There are two synchronous vectors that we have to update here. The _layers vector
+    // is used to determine the order while rendering, the _subOwners is the order in
     // which the layers are shown in the UI
+
+    // Layer list
     auto oldPosLayers = _layers.begin() + oldPosition;
-    std::unique_ptr<Layer> v = std::move(*oldPosLayers);
+    std::unique_ptr<Layer> layer = std::move(*oldPosLayers);
     _layers.erase(oldPosLayers);
     auto newPosLayers = _layers.begin() + newPosition;
-    _layers.insert(newPosLayers, std::move(v));
 
+    // Since this layer has now manually been moved, it now is considered to have been
+    // given a z-index by the user
+    layer->setHasGivenZIndex(true);
+
+    // The z-index of the layer just before the new postion the layer is moved into
+    int prevZIndex;
+
+    // Check if the layer is moved to the last spot in the list
+    if (newPosLayers < _layers.end()) {
+        prevZIndex = newPosLayers->get()->zIndex();
+    }
+    else {
+        // In that case use the value for the last item to not go beyond the list
+        prevZIndex = (_layers.end() - 1)->get()->zIndex();
+    }
+
+    // Check if the layer is moved to the first spot in the list
+    if (newPosition == 0) {
+        // Check if there is an item afterwards
+        auto nextLayer = _layers.begin() + 1;
+        if (nextLayer < _layers.end()) {
+            // Take the same value as the next item in the list and rely on the
+            // stable_sort to keep the order
+            layer->setZIndex(nextLayer->get()->zIndex());
+        }
+        else {
+            // There are no next layer in the list so put the item first
+            layer->setZIndex(1);
+        }
+    }
+    // Otherwise take the same value for the z-index as what already exist before and
+    // rely on the stable_sort to keep the order
+    else {
+        layer->setZIndex(prevZIndex);
+    }
+
+    _layers.insert(newPosLayers, std::move(layer));
+    ghoul_assert(
+        std::is_sorted(
+            _layers.begin(),
+            _layers.end(),
+            [](const std::unique_ptr<Layer>& a, const std::unique_ptr<Layer>& b) {
+                return a->zIndex() < b->zIndex();
+            }
+        ),
+        "Layer list is not sorted after move"
+    );
+
+    // SubOwners list
     auto oldPosOwner = _subOwners.begin() + oldPosition;
     PropertyOwner* owner = *oldPosOwner;
     _subOwners.erase(oldPosOwner);

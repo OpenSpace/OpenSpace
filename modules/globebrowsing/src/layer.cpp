@@ -43,6 +43,7 @@ namespace {
     constexpr std::string_view KeyDesc = "Description";
     constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
     constexpr std::string_view KeyAdjustment = "Adjustment";
+    constexpr unsigned int ZIndexMultiplier = 10;
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
@@ -93,6 +94,15 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ZIndexInfo = {
+        "ZIndex",
+        "Z-Index",
+        "Determines where the layer is placed in the list of available layers. A higher "
+        "value means further down in the layer list in the GUI, which would mean that "
+        "the layer is placed more on top of the globe.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
         "Gui Description",
@@ -127,6 +137,9 @@ namespace {
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
         std::optional<bool> enabled;
+
+        // [[codegen::verbatim(ZIndexInfo.description)]]
+        std::optional<int> zindex [[codegen::greater(0)]];
 
         // The opacity value of the layer
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
@@ -209,6 +222,33 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     initializeBasedOnType(typeID, layerDict);
 
     _enabled = p.enabled.value_or(_enabled);
+
+    if (p.zindex.has_value()) {
+        _hasGivenZIndex = true;
+        _zIndex = *p.zindex * ZIndexMultiplier;
+    }
+    else {
+        _hasGivenZIndex = false;
+
+        // If this layer is first, i.e. there are no previous, then the index becomes 1
+        if (_parent.layers().empty()) {
+            _zIndex = 1;
+        }
+        else {
+            // Find the previous layer in the layer group that this is part of
+            Layer* prevLayer = _parent.layers().back();
+
+            // If the layer before does not have a given z-index, then set this layer's
+            // value to the same index
+            if (!prevLayer->_hasGivenZIndex) {
+                _zIndex = prevLayer->_zIndex;
+            }
+            // Take the previous layer's z index and add 1 to get this layer's value.
+            else {
+                _zIndex = prevLayer->_zIndex + 1;
+            }
+        }
+    }
 
     if (p.description.has_value()) {
         _guiDescription = description();
@@ -410,6 +450,17 @@ void Layer::setEnabled(bool enabled) {
     _enabled = enabled;
 }
 
+// NOTE (malej 2024-MAY-08): This function does not automatically re-sort any layer list
+// depending on the new z-index, it is up to the caller to make sure the re-sort happen
+// when it is needed
+void Layer::setZIndex(unsigned int value) {
+    _zIndex = value;
+}
+
+void Layer::setHasGivenZIndex(bool value) {
+    _hasGivenZIndex = value;
+}
+
 bool Layer::enabled() const {
     return _enabled;
 }
@@ -432,6 +483,14 @@ const LayerRenderSettings& Layer::renderSettings() const {
 
 const LayerAdjustment& Layer::layerAdjustment() const {
     return _layerAdjustment;
+}
+
+unsigned int Layer::zIndex() const {
+    return _zIndex;
+}
+
+bool Layer::hasGivenZIndex() const {
+    return _hasGivenZIndex;
 }
 
 void Layer::onChange(std::function<void(Layer*)> callback) {
