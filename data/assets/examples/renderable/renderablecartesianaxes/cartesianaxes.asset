@@ -1,6 +1,6 @@
 -- Basic
 -- This asset creates a SceneGraphNode that only displays coordinate axes. The 
--- parent is set to Earth which means the center of the axes will be at the center of Earth.
+-- parent is not set which defaults to placing the axes at the center the Sun.
 
 local Node = {
   Identifier = "RenderableCartesianAxes_Example",
