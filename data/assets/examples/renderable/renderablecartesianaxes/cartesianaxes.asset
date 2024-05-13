@@ -2,7 +2,7 @@
 -- parent is set to Earth which means the center of the axes will be at the center of Earth.
 
 local Node = {
-  Identifier = "Renderable_Cartesian_Axes_Example",
+  Identifier = "RenderableCartesianAxes_Example",
   Transform = {
     Scale = {
       Type = "StaticScale",
