@@ -24,7 +24,6 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)
 end)
 
-
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Node)
 end)
