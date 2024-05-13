@@ -1,0 +1,41 @@
+-- Basic
+-- This example creates a union out of two simpler TimeFrameIntervals and uses it for a
+-- SceneGraphNode. The first TimeFrameInterval covers January 1st, 2000 and the second
+-- TimeFrameInterval covers March 1st, 2002. The resulting TimeFrameUnion will cover both
+-- January 1st, 2000 and March 1st, 2002.
+
+local Node = {
+  Identifier = "TimeFrameUnion_Example",
+  TimeFrame = {
+    Type = "TimeFrameUnion",
+    TimeFrames = {
+      -- The first TimeFrameInterval for the first day
+      {
+        Type = "TimeFrameInterval",
+        Start = "2000 JAN 01 00:00:00.000",
+        End = "2000 JAN 01 23:59:59.999"
+      },
+      -- The second TimeFrameInterval for the second day
+      {
+        Type = "TimeFrameInterval",
+        Start = "2002 MAR 01 00:00:00.000",
+        End = "2002 MAR 01 23:59:59.999"
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/TimeFrameUnion"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

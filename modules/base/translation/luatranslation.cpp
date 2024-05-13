@@ -41,10 +41,9 @@ namespace {
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
         "translation for this transformation. The script needs to define a function "
-        "'translate' that takes the current simulation time in seconds past the J2000 "
+        "'translation' that takes the current simulation time in seconds past the J2000 "
         "epoch as the first argument, the current wall time as milliseconds past the "
-        "J2000 epoch as the second argument and computes the translation",
-        // @VISIBILITY(3.75)
+        "J2000 epoch as the second argument and computes the translation.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -90,7 +89,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     const bool isFunction = lua_isfunction(_state, -1);
     if (!isFunction) {
         LERRORC(
-            "LuaScale",
+            "LuaTranslation",
             std::format(
                 "Script '{}' does not have a function 'translation'",
                 _luaScriptFile.value()
@@ -114,7 +113,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     const int success = lua_pcall(_state, 2, 3, 0);
     if (success != 0) {
         LERRORC(
-            "LuaScale",
+            "LuaTranslation",
             std::format("Error executing 'translation': {}", lua_tostring(_state, -1))
         );
     }

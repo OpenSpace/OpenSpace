@@ -120,7 +120,7 @@ namespace {
         "PrintEvents",
         "Print Events",
         "If this is enabled, all events that are propagated through the system are "
-        "printed to the log",
+        "printed to the log.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -128,7 +128,7 @@ namespace {
         "PropertyVisibility",
         "Property Visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
-        "are",
+        "are.",
         openspace::properties::Property::Visibility::Always
     };
 
@@ -146,8 +146,7 @@ namespace {
         "DisableMouseInputs",
         "Disable All Mouse Inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
-        "double inputs on touch (from both touch input and inserted mouse inputs)",
-        // @VISIBILITY(2.67)
+        "double inputs on touch (from both touch input and inserted mouse inputs).",
         openspace::properties::Property::Visibility::User
     };
 
@@ -806,7 +805,7 @@ void OpenSpaceEngine::loadAssets() {
     runGlobalCustomizationScripts();
 
     _writeDocumentationTask = std::async(
-        &documentation::DocumentationEngine::writeDocumentation,
+        &documentation::DocumentationEngine::writeJavascriptDocumentation,
         DocEng
     );
 
@@ -896,6 +895,9 @@ void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
     }
     if (!std::filesystem::exists(absPath("${USER_CONFIG}"))) {
         std::filesystem::create_directories(absPath("${USER_CONFIG}"));
+    }
+    if (!std::filesystem::is_directory(absPath("${USER_WEBPANELS}"))) {
+        std::filesystem::create_directories(absPath("${USER_WEBPANELS}"));
     }
 }
 
@@ -995,10 +997,18 @@ void OpenSpaceEngine::preSynchronization() {
             global::timeManager->time().j2000Seconds()
         );
         for (const std::string& script : schedScripts) {
+            if (script.empty()) {
+                continue;
+            }
+
             global::scriptEngine->queueScript(
                 script,
                 scripting::ScriptEngine::ShouldBeSynchronized::Yes,
                 scripting::ScriptEngine::ShouldSendToRemote::Yes
+            );
+
+            global::eventEngine->publishEvent<events::EventScheduledScriptExecuted>(
+                script
             );
         }
 

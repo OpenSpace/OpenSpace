@@ -39,8 +39,7 @@ namespace {
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed",
-        // @VISIBILITY(2.25)
+        "and displayed.",
         openspace::properties::Property::Visibility::User
     };
 

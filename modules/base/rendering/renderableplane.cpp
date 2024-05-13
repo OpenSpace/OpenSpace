@@ -41,11 +41,6 @@
 #include <variant>
 
 namespace {
-    constexpr std::array<const char*, 6> UniformNames = {
-        "modelViewProjection", "modelViewTransform", "colorTexture", "opacity",
-        "mirrorBackside", "multiplyColor"
-    };
-
     enum BlendMode {
         Normal = 0,
         Additive
@@ -56,7 +51,7 @@ namespace {
         "Billboard mode",
         "This value specifies whether the plane is a billboard, which means that it is "
         "always facing the camera. If this is false, it can be oriented using other "
-        "transformations",
+        "transformations.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -65,15 +60,14 @@ namespace {
         "Mirror backside of image plane",
         "If this value is set to false, the image plane will not be mirrored when "
         "looking from the backside. This is usually desirable when the image shows "
-        "data at a specific location, but not if it is displaying text for example",
-        // @VISIBILITY(2.67)
+        "data at a specific location, but not if it is displaying text for example.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
-        "This value specifies the size of the plane in meters",
+        "This value specifies the size of the plane in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -87,7 +81,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane",
+        "This determines the blending mode that is applied to this plane.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -95,7 +89,7 @@ namespace {
         "MultiplyColor",
         "Multiply Color",
         "If set, the plane's texture is multiplied with this color. Useful for applying "
-        "a color grayscale images",
+        "a color grayscale images.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -215,7 +209,7 @@ void RenderablePlane::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderablePlane::deinitializeGL() {
@@ -311,7 +305,7 @@ void RenderablePlane::update(const UpdateData&) {
 
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_planeIsDirty) {

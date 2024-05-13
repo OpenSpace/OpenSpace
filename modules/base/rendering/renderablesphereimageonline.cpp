@@ -38,8 +38,7 @@ namespace {
         "Image URL",
         "Sets the URL of the texture that is displayed on this sphere. If "
         "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. This image is expected to be an equirectangular projection",
-        // @VISIBILITY(2.25)
+        "and displayed. This image is expected to be an equirectangular projection.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -68,7 +67,7 @@ namespace {
     // A RenderableSphereImageOnline can be used to show an image from an online source
     // (as a URL) on a sphere in the OpenSpace scene. The image should be provided in an
     // equirectangular projection, if it is a map that is draped over the sphere.
-    struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
+    struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
     };
@@ -79,7 +78,7 @@ namespace openspace {
 
 documentation::Documentation RenderableSphereImageOnline::Documentation() {
     return codegen::doc<Parameters>(
-        "base_renderable_sphereimageonline",
+        "base_renderable_sphere_image_online",
         RenderableSphere::Documentation()
     );
 }

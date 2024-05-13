@@ -35,16 +35,14 @@ namespace {
         "FontName",
         "Font Name",
         "This value is the name of the font that is used. It can either refer to an "
-        "internal name registered previously, or it can refer to a path that is used",
-        // @VISIBILITY(2.33)
+        "internal name registered previously, or it can refer to a path that is used.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "This value determines the size of the font that is used to render the distance",
-        // @VISIBILITY(2.33)
+        "This value determines the size of the font that is used to render the distance.",
         openspace::properties::Property::Visibility::User
     };
 

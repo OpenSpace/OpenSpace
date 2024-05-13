@@ -1,34 +1,42 @@
-local planeTextures = asset.resource({
+local textures = asset.resource({
   Name = "Milky Way Plane Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_milkyway_textures",
   Version = 2
 })
 
-local planeSpeck = asset.resource({
+local speck = asset.resource({
   Name = "Milky Way Plane Speck",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_milkyway_speck",
-  Version = 1
+  Version = 3
 })
 
 
 local Object = {
   Identifier = "MilkyWayGalaxyArmLabelsImage",
-  Parent = "Root",
   Renderable = {
-    Type = "RenderablePlanesCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.99,
-    ScaleFactor = 2.8,
-    File = planeSpeck .. "galaxyArmLabels.speck",
-    TexturePath = planeTextures,
-    Luminosity = "size",
-    ScaleLuminosity = 1.0,
-    FadeInDistances = { 3000.0, 50000.0 },
-    PlaneMinSize = 5.0,
-    Unit = "pc"
+    File = speck .. "galaxyArmLabels.speck",
+    Texture = {
+      Folder = textures
+    },
+    -- Use fixed orientation, and rotate planes based on orientation information in
+    -- the dataset
+    OrientationRenderOption = "Fixed Rotation",
+    UseOrientationData = true,
+    Unit = "pc",
+    Fading = {
+      FadeInDistances = { 8000.0, 140000.0 } -- Fade in value in the same unit as "Unit"
+    },
+    SizeSettings = {
+      SizeMapping = {
+        ParameterOptions = { "size" }
+      },
+      ScaleExponent = 16.936
+    },
   },
   GUI = {
     Name = "Milky Way Arms Labels",
@@ -56,7 +64,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Milky Way Arms Labels",
-  Version = "1.1",
+  Version = "2.0",
   Description = "Image with arm labels for the Milky Way galaxy",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

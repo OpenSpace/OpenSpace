@@ -63,7 +63,7 @@ protected:
     /**
      * Create the rendering data for the positions for the point with the given index
      * and append that to the result. Compared to the base class, this class may require
-     * 2-4 positions, depending on if * spline interpolation is used or not.
+     * 2-4 positions, depending on if spline interpolation is used or not.
      *
      * The values are computed based on the current interpolation value.
      *
@@ -80,6 +80,9 @@ protected:
      * The values are computed based on the current interpolation value.
      */
     void addColorAndSizeDataForPoint(unsigned int index,
+        std::vector<float>& result) const override;
+
+    void addOrientationDataForPoint(unsigned int index,
         std::vector<float>& result) const override;
 
     void initializeBufferData();

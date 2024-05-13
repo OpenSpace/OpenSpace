@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Deep Sky Objects Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_deepsky_speck",
-  Version = 1
+  Version = 2
 })
 
 
@@ -57,19 +57,27 @@ local DeepSkyObjects = {
 local DeepSkyObjectsImages = {
   Identifier = "DeepSkyObjectsImages",
   Renderable = {
-    Type = "RenderablePlanesCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.99,
-    ScaleFactor = 1.0,
     File = speck .. "dso.speck",
-    TexturePath = textures,
-    Luminosity = "radius",
-    ScaleLuminosity = 0.001,
+    Texture = {
+      Folder = textures
+    },
+    -- Use fixed orientation, and rotate planes based on orientation information in
+    -- the dataset
+    OrientationRenderOption = "Fixed Rotation",
+    UseOrientationData = true,
     Unit = "pc",
-    -- Fade in value in the same unit as "Unit"
-    --FadeInDistances = {0.001, 0.05010},
-    PlaneMinSize = 5.0
+    SizeSettings = {
+      SizeMapping = {
+        ParameterOptions = { "radius" },
+        ScaleFactor = "Parsec",
+        IsRadius = true
+      },
+      -- No exponential scaling, just use size mapping to set the correct size
+      ScaleExponent = 0.0
+    }
   },
   Transform = {
     Rotation = {
@@ -111,7 +119,7 @@ asset.export(DeepSkyObjectsImages)
 
 asset.meta = {
   Name = "Deep Sky Objects Images",
-  Version = "2.0",
+  Version = "3.0",
   Description = "Digital Universe asset for Deep Sky Objects and their Images",
   Author = "Nate Greenstein, Matt Everhart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

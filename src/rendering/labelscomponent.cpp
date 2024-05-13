@@ -43,44 +43,42 @@ namespace {
         "Enabled",
         "Enabled",
         "This setting determines whether the labels will be visible or not. They are "
-        "disabled per default",
-        // @VISIBILITY(?)
+        "disabled per default.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "File",
-        "The speck label file with the data for the labels",
+        "The speck label file with the data for the labels.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The color of the labels",
+        "The color of the labels.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "The size of the labels in pixels",
-        // @VISIBILITY(2.5)
+        "The size of the labels in pixels.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "Font size for the labels. This is different from the text size",
+        "Font size for the labels. This is different from the text size.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxInfo = {
         "MinMaxSize",
         "Min/Max Size",
-        "The minimum and maximum size (in pixels) of the labels",
+        "The minimum and maximum size (in pixels) of the labels.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -95,8 +93,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
-        "Transformation matrix to be applied to the labels",
-        // @VISIBILITY(?)
+        "Transformation matrix to be applied to the labels.",
         openspace::properties::Property::Visibility::Developer
     };
 

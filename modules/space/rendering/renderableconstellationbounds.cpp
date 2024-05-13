@@ -48,7 +48,7 @@ namespace {
         "File",
         "Vertex File Path",
         "The file pointed to with this value contains the vertex locations of the "
-        "constellations",
+        "constellations.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -56,7 +56,7 @@ namespace {
         "Color",
         "Color of constellation lines",
         "Specifies the color of the constellation lines. The lines are always drawn at "
-        "full opacity",
+        "full opacity.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -73,7 +73,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableConstellationBounds::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_constellationbounds");
+    return codegen::doc<Parameters>(
+        "space_renderable_constellationbounds",
+        RenderableConstellationsBase::Documentation()
+    );
 }
 
 RenderableConstellationBounds::RenderableConstellationBounds(

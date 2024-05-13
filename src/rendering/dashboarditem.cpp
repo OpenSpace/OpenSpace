@@ -37,8 +37,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "If this value is set to 'true' this dashboard item is shown in the dashboard",
-        // @VISIBILITY(1.75)
+        "If this value is set to 'true' this dashboard item is shown in the dashboard.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

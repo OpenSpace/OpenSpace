@@ -56,8 +56,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PropertyUriInfo = {
         "URI",
         "Property URI",
-        "The URI of the property that is displayed in this dashboarditem",
-        // @VISIBILITY(2.67)
+        "The URI of the property that is displayed in this dashboard item.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -69,8 +68,7 @@ namespace {
         "instances of {}, which will be replaced with the value(s) of the property "
         "during rendering. For scalar types, there has to be exactly one instance of {}, "
         "for vector types, there need to be as many {} as there are compoents in the "
-        "vector, for example two {} for vec2 types, three for vec3 types, etc",
-        // @VISIBILITY(2.67)
+        "vector, for example two {} for vec2 types, three for vec3 types, etc.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -117,214 +115,213 @@ void DashboardItemPropertyValue::render(glm::vec2& penPosition) {
         _propertyIsDirty = false;
     }
 
-    if (_property) {
-        const std::string_view type = _property->className();
-        if (type == "DoubleProperty") {
-            double value = static_cast<properties::DoubleProperty*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(value))
-            );
-        }
-        else if (type == "FloatProperty") {
-            float value = static_cast<properties::FloatProperty*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(value))
-            );
-        }
-        else if (type == "IntProperty") {
-            int value = static_cast<properties::IntProperty*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(value))
-            );
-        }
-        else if (type == "LongProperty") {
-            long value = static_cast<properties::LongProperty*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(value))
-            );
-        }
-        else if (type == "ShortProperty") {
-            short value = static_cast<properties::ShortProperty*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(value))
-            );
-        }
-        else if (type == "UIntProperty") {
-            unsigned int v = static_cast<properties::UIntProperty*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v))
-            );
-        }
-        else if (type == "ULongProperty") {
-            unsigned long v = static_cast<properties::ULongProperty*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v))
-            );
-        }
-        else if (type == "UShortProperty") {
-            unsigned short v =
-                static_cast<properties::UShortProperty*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v))
-            );
-        }
-        else if (type == "DVec2Property") {
-            glm::dvec2 v = static_cast<properties::DVec2Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
-            );
-        }
-        else if (type == "DVec3Property") {
-            glm::dvec3 v = static_cast<properties::DVec3Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
-            );
-        }
-        else if (type == "DVec4Property") {
-            glm::dvec4 v = static_cast<properties::DVec4Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(
-                    _displayString.value(),
-                    std::make_format_args(v.x, v.y, v.z, v.w)
-                )
-            );
-        }
-        else if (type == "IVec2Property") {
-            glm::ivec2 v = static_cast<properties::IVec2Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
-            );
-        }
-        else if (type == "IVec3Property") {
-            glm::ivec3 v = static_cast<properties::IVec3Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
-            );
-        }
-        else if (type == "IVec4Property") {
-            glm::ivec4 v = static_cast<properties::IVec4Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(
-                    _displayString.value(),
-                    std::make_format_args(v.x, v.y, v.z, v.w)
-                )
-            );
-        }
-        else if (type == "UVec2Property") {
-            glm::uvec2 v = static_cast<properties::UVec2Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
-            );
-        }
-        else if (type == "UVec3Property") {
-            glm::uvec3 v = static_cast<properties::UVec3Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
-            );
-        }
-        else if (type == "UVec4Property") {
-            glm::uvec4 v = static_cast<properties::UVec4Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(
-                    _displayString.value(),
-                    std::make_format_args(v.x, v.y, v.z, v.w)
-                )
-            );
-        }
-        else if (type == "Vec2Property") {
-            glm::vec2 v = static_cast<properties::Vec2Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
-            );
-        }
-        else if (type == "Vec3Property") {
-            glm::vec3 v = static_cast<properties::Vec3Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
-            );
-        }
-        else if (type == "Vec4Property") {
-            glm::vec4 v = static_cast<properties::Vec4Property*>(_property)->value();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(
-                    _displayString.value(),
-                    std::make_format_args(v.x, v.y, v.z, v.w)
-                )
-            );
-        }
-        else {
-            // Fallback if we don't have a special case above
+    if (!_property) {
+        return;
+    }
+    const std::string_view type = _property->className();
+    penPosition.y -= _font->height();
+    if (type == "DoubleProperty") {
+        double value = static_cast<properties::DoubleProperty*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(value))
+        );
+    }
+    else if (type == "FloatProperty") {
+        float value = static_cast<properties::FloatProperty*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(value))
+        );
+    }
+    else if (type == "IntProperty") {
+        int value = static_cast<properties::IntProperty*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(value))
+        );
+    }
+    else if (type == "LongProperty") {
+        long value = static_cast<properties::LongProperty*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(value))
+        );
+    }
+    else if (type == "ShortProperty") {
+        short value = static_cast<properties::ShortProperty*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(value))
+        );
+    }
+    else if (type == "UIntProperty") {
+        unsigned int v = static_cast<properties::UIntProperty*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v))
+        );
+    }
+    else if (type == "ULongProperty") {
+        unsigned long v = static_cast<properties::ULongProperty*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v))
+        );
+    }
+    else if (type == "UShortProperty") {
+        unsigned short v = static_cast<properties::UShortProperty*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v))
+        );
+    }
+    else if (type == "DVec2Property") {
+        glm::dvec2 v = static_cast<properties::DVec2Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
+        );
+    }
+    else if (type == "DVec3Property") {
+        glm::dvec3 v = static_cast<properties::DVec3Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
+        );
+    }
+    else if (type == "DVec4Property") {
+        glm::dvec4 v = static_cast<properties::DVec4Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(
+                _displayString.value(),
+                std::make_format_args(v.x, v.y, v.z, v.w)
+            )
+        );
+    }
+    else if (type == "IVec2Property") {
+        glm::ivec2 v = static_cast<properties::IVec2Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
+        );
+    }
+    else if (type == "IVec3Property") {
+        glm::ivec3 v = static_cast<properties::IVec3Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
+        );
+    }
+    else if (type == "IVec4Property") {
+        glm::ivec4 v = static_cast<properties::IVec4Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(
+                _displayString.value(),
+                std::make_format_args(v.x, v.y, v.z, v.w)
+            )
+        );
+    }
+    else if (type == "UVec2Property") {
+        glm::uvec2 v = static_cast<properties::UVec2Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
+        );
+    }
+    else if (type == "UVec3Property") {
+        glm::uvec3 v = static_cast<properties::UVec3Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
+        );
+    }
+    else if (type == "UVec4Property") {
+        glm::uvec4 v = static_cast<properties::UVec4Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(
+                _displayString.value(),
+                std::make_format_args(v.x, v.y, v.z, v.w)
+            )
+        );
+    }
+    else if (type == "Vec2Property") {
+        glm::vec2 v = static_cast<properties::Vec2Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v.x, v.y))
+        );
+    }
+    else if (type == "Vec3Property") {
+        glm::vec3 v = static_cast<properties::Vec3Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(v.x, v.y, v.z))
+        );
+    }
+    else if (type == "Vec4Property") {
+        glm::vec4 v = static_cast<properties::Vec4Property*>(_property)->value();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(
+                _displayString.value(),
+                std::make_format_args(v.x, v.y, v.z, v.w)
+            )
+        );
+    }
+    else {
+        // Fallback if we don't have a special case above
 
-            std::string value = _property->stringValue();
-            RenderFont(
-                *_font,
-                penPosition,
-                // @CPP26(abock): This can be replaced with std::runtime_format
-                std::vformat(_displayString.value(), std::make_format_args(value))
-            );
-        }
-
-        penPosition.y -= _font->height();
+        std::string value = _property->stringValue();
+        RenderFont(
+            *_font,
+            penPosition,
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_displayString.value(), std::make_format_args(value))
+        );
     }
 }
 

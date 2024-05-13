@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 10,
     Color = { 0.2, 0.8, 0.2 },
-    TrailFade = 28
+    TrailFade = 28,
+    PointSizeExponent = 10.5
   },
   GUI = {
     Name = "Jupiter-family Comets",

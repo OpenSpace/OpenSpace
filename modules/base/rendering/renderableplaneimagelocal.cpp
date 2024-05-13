@@ -42,8 +42,7 @@ namespace {
         "Texture",
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square",
-        // @VISIBILITY(2.25)
+        "that is applied to this plane. This image has to be square.",
         openspace::properties::Property::Visibility::User
     };
 

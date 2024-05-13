@@ -316,7 +316,8 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
     }
 
     const std::string dateTime = dict.value<std::string>(key);
-    const std::string format = "%Y %m %d %H:%M:%S"; // YYYY MM DD hh:mm:ss
+    const std::string format = "%Y %b %d %H:%M:%S"; // YYYY MMM DD hh:mm:ss
+    const std::string format2 = "%Y %m %d %H:%M:%S"; // YYYY MM DD hh:mm:ss
 
     std::tm t = {};
     std::istringstream ss(dateTime);
@@ -324,13 +325,22 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
 
     // first check format (automatically checks if valid time)
     if (ss.fail()) {
-        res.success = false;
-        TestResult::Offense o = {
-            .offender = key,
-            .reason = TestResult::Offense::Reason::Verification,
-            .explanation = "Not a valid format, should be: YYYY MM DD hh:mm:ss"
-        };
-        res.offenses.push_back(std::move(o));
+        // The format might be of the type "YYYY MM DD hh:mm:ss"
+        std::istringstream ss2(dateTime);
+        ss2 >> std::get_time(&t, format2.c_str());
+
+        if (ss2.fail()) {
+            // It fails if it is neither of the two formats
+            res.success = false;
+            TestResult::Offense o = {
+                .offender = key,
+                .reason = TestResult::Offense::Reason::Verification,
+                .explanation =
+                    "Not a valid format, should be: "
+                    "YYYY MM DD hh:mm:ss or YYYY MMM DD hh:mm:ss"
+            };
+            res.offenses.push_back(std::move(o));
+        }
     }
     return res;
 }

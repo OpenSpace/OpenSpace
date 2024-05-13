@@ -1,34 +1,41 @@
-local planeTextures = asset.resource({
+local textures = asset.resource({
   Name = "Milky Way Plane Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_milkyway_textures",
   Version = 2
 })
 
-local planeSpeck = asset.resource({
+local speck = asset.resource({
   Name = "Milky Way Plane Speck",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_milkyway_speck",
-  Version = 1
+  Version = 3
 })
 
 
-local Plane = {
+local Object = {
   Identifier = "MilkyWayGalaxyImage",
-  Parent = "Root",
   Renderable = {
-    Type = "RenderablePlanesCloud",
-    Enabled = true,
-    Color = { 1.0, 1.0, 1.0 },
+    Type = "RenderablePointCloud",
     Opacity = 0.99,
-    ScaleFactor = 2.8,
-    File = planeSpeck .. "galaxy.speck",
-    TexturePath = planeTextures,
-    Luminosity = "size",
-    ScaleLuminosity = 1.0,
-    FadeInDistances = { 3000.0, 50000.0 },
-    PlaneMinSize = 5.0,
-    Unit = "pc"
+    File = speck .. "galaxy.speck",
+    Texture = {
+      Folder = textures
+    },
+    -- Use fixed orientation, and rotate planes based on orientation information in
+    -- the dataset
+    OrientationRenderOption = "Fixed Rotation",
+    UseOrientationData = true,
+    Unit = "pc",
+    Fading = {
+      FadeInDistances = { 16000.0, 100000.0 } -- Fade in value in the same unit as "Unit"
+    },
+    SizeSettings = {
+      SizeMapping = {
+        ParameterOptions = { "size" }
+      },
+      ScaleExponent = 16.936
+    },
   },
   GUI = {
     Name = "Milky Way Galaxy Image",
@@ -46,20 +53,20 @@ local Plane = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Plane)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Plane)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(Plane)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "MilkyWay Galaxy",
-  Version = "2.1",
+  Version = "3.0",
   Description = [[Digital Universe asset containt 2D image of the MilkyWay. For
     extragalactic viewing]],
   Author = "Brian Abbott, Carter Emmart (AMNH)",

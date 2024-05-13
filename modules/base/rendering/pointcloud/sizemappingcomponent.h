@@ -49,6 +49,7 @@ struct SizeMappingComponent : public properties::PropertyOwner {
     properties::BoolProperty enabled;
     properties::OptionProperty parameterOption;
     properties::FloatProperty scaleFactor;
+    properties::BoolProperty isRadius;
 };
 
 } // namespace openspace

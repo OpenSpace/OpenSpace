@@ -50,8 +50,7 @@ namespace {
         "PerformProjection",
         "Perform Projections",
         "If this value is enabled, this ProjectionComponent will perform projections. If "
-        "it is disabled, projections will be ignored",
-        // @VISIBILITY(2.5)
+        "it is disabled, projections will be ignored.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -59,8 +58,7 @@ namespace {
         "ClearAllProjections",
         "Clear Projections",
         "If this property is triggered, it will remove all the projections that have "
-        "already been applied",
-        // @VISIBILITY(2.5)
+        "already been applied.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -69,8 +67,7 @@ namespace {
         "Projection Fading",
         "This value fades the previously performed projections in or out. If this value "
         "is equal to '1', the projections are fully visible, if the value is equal to "
-        "'0', the performed projections are completely invisible",
-        // @VISIBILITY(2.5)
+        "'0', the performed projections are completely invisible.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -80,7 +77,7 @@ namespace {
         "This value determines the size of the texture into which the images are "
         "projected and thus provides the limit to the resolution of projections that can "
         "be applied. Changing this value will not cause the texture to be automatically "
-        "updated, but triggering the 'ApplyTextureSize' property is required",
+        "updated, but triggering the 'ApplyTextureSize' property is required.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -88,7 +85,7 @@ namespace {
         "ApplyTextureSize",
         "Apply Texture Size",
         "Triggering this property applies a new size to the underlying projection "
-        "texture. The old texture is resized and interpolated to fit the new size",
+        "texture. The old texture is resized and interpolated to fit the new size.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

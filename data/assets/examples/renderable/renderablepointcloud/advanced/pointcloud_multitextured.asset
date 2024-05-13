@@ -1,0 +1,95 @@
+-- Multi-textured Points
+-- Example of point clouds where multiple textures are used for the points,
+-- based on information in the dataset. The dataset may be either CSV or Speck format.
+--
+-- Load data from a CSV file. This requires additional information to be provided through
+-- the DataMapping:
+-- 1) Which column in the dataset that corresponds to the texture, and
+-- 2) a separate file that maps that value to a texture file.
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_MultiTextured_CSV",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("../data/multitextured_csv/textured_points.csv"),
+    DataMapping = {
+      -- The name of the column in the CSV file that corresponds to the texture (should
+      -- be an integer)
+      TextureColumn = "texture",
+      -- A Texture mapping file that provides information about which value/index
+      -- corresponds to which texture file
+      TextureMapFile = asset.resource("../data/multitextured_csv/texturemap.tmap")
+    },
+    Texture = {
+      -- Where to find the texture files (in this case, in the OpenSpace data folder)
+      Folder = openspace.absPath("${DATA}")
+    },
+    UseAdditiveBlending = false
+  },
+  GUI = {
+    Name = "Multi-Textured",
+    Path = "/Examples/RenderablePointCloud/Advanced"
+  }
+}
+
+
+-- Interpolated
+-- Multi-texturing works also for interpolated point clouds. Here, we let the same
+-- dataset as used above be interpreted as representing only two points, with a different
+-- texture. Note that the textures will be set based on the first two data items and will
+-- not be changed during interpolation
+local Node_Interpolated = {
+  Identifier = "RenderablePointCloud_Example_MultiTextured_Interpolated",
+  Renderable = {
+    Type = "RenderableInterpolatedPoints",
+    File = asset.resource("../data/multitextured_csv/textured_points.csv"),
+    NumberOfObjects = 2,
+    DataMapping = {
+      TextureColumn = "texture",
+      TextureMapFile = asset.resource("../data/multitextured_csv/texturemap.tmap")
+    },
+    Texture = {
+      Folder = openspace.absPath("${DATA}")
+    },
+    UseAdditiveBlending = false
+  },
+  GUI = {
+    Name = "Multi-Textured (with interpolation)",
+    Path = "/Examples/RenderablePointCloud/Advanced"
+  }
+}
+
+-- Load data from a Speck file. This allows storing all data in one single file, including
+-- the texture mapping) Note that we disable this scene graph node per default here, as it
+-- shows the same information as the CSV version
+local Node_Speck = {
+  Identifier = "RenderablePointCloud_Example_MultiTextured_Speck",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    -- When loading multi-texture information from a speck file, we do not need a
+    -- DataMapping entry - all information is in the file
+    File = asset.resource("../data/multitextured_speck/textures_points.speck"),
+    Texture = {
+      -- However, we do still need to specify where the textures are located
+      Folder = openspace.absPath("${DATA}")
+    },
+    UseAdditiveBlending = false
+  },
+  GUI = {
+    Name = "Multi-Textured (Speck file)",
+    Path = "/Examples/RenderablePointCloud/Advanced"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+  openspace.addSceneGraphNode(Node_Interpolated)
+  openspace.addSceneGraphNode(Node_Speck)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node_Speck)
+  openspace.removeSceneGraphNode(Node_Interpolated)
+  openspace.removeSceneGraphNode(Node)
+end)

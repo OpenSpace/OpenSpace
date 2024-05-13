@@ -176,8 +176,7 @@ void initialize() {
     );
     ghoul::opengl::updateUniformLocations(
         *shaders.xyuvrgba.program,
-        shaders.xyuvrgba.cache,
-        { "tex", "hasTexture", "shouldFlipTexture", "proj", "color" }
+        shaders.xyuvrgba.cache
     );
 
     //
@@ -206,8 +205,7 @@ void initialize() {
     );
     ghoul::opengl::updateUniformLocations(
         *shaders.screenfilling.program,
-        shaders.screenfilling.cache,
-        { "tex", "hasTexture", "shouldFlipTexture", "proj", "color" }
+        shaders.screenfilling.cache
     );
 
 

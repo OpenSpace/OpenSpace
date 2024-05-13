@@ -37,14 +37,14 @@ namespace {
         "Color Map Enabled",
         "If this value is set to 'true', the provided color map is used (if one was "
         "provided in the configuration). If no color map was provided, changing this "
-        "setting does not do anything",
+        "setting does not do anything.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "Color Map File",
-        "The path to the color map file to use for coloring the points",
+        "The path to the color map file to use for coloring the points.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -55,14 +55,14 @@ namespace {
         "on the color map. The property is set based on predefined options specified in "
         "the asset file. When changing the parameter, the value range to used for the"
         "mapping will also be changed. Per default, it is set to the last parameter in "
-        "the list of options",
+        "the list of options.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RangeInfo = {
         "ValueRange",
         "Value Range",
-        "This value changes the range of values to be mapped with the current color map",
+        "This value changes the range of values to be mapped with the current color map.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -70,7 +70,7 @@ namespace {
         "SetRangeFromData",
         "Set Data Range from Data",
         "Set the data range for the color mapping based on the available data for the "
-        "curently selected data column",
+        "curently selected data column.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -78,7 +78,7 @@ namespace {
         "HideValuesOutsideRange",
         "Hide Values Outside Range",
         "If true, points with values outside the provided range for the coloring will be "
-        "hidden, i.e. not rendered at all",
+        "hidden, i.e. not rendered at all.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -86,7 +86,7 @@ namespace {
         "ShowMissingData",
         "Show Missing Data",
         "If true, use a separate color (see NoDataColor) for items with values "
-        "corresponding to missing data values",
+        "corresponding to missing data values.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -97,7 +97,7 @@ namespace {
         "if enabled. This color can also be read from the color map, but setting this "
         "value overrides any value in the color map. If a color value for the below "
         "range values is provided, the ShowMissingData property will automatically be "
-        "set to true",
+        "set to true.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -107,7 +107,7 @@ namespace {
         "If true, use a separate color (see AboveRangeColor) for items with values "
         "larger than the one in the provided data range. Otherwise, the values will "
         "be clamped to use the color at the upper limit of the color map. If a color is "
-        "provided in the color map, this value will automatically be set to true",
+        "provided in the color map, this value will automatically be set to true.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -118,7 +118,7 @@ namespace {
         "data range, if enabled. This color can also be read from the color map, but "
         "setting this value overrides any value in the color map. If a color value for "
         "the above range values is provided, the UseAboveRangeColor property will "
-        "automatically be set to true",
+        "automatically be set to true.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -128,7 +128,7 @@ namespace {
         "If true, use a separate color (see BelowRangeColor) for items with values "
         "smaller than the one in the provided data range. Otherwise, the values will "
         "be clamped to use the color at the lower limit of the color map. If a color is "
-        "provided in the color map, this value will automatically be set to true",
+        "provided in the color map, this value will automatically be set to true.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -139,14 +139,14 @@ namespace {
         "data range, if enabled. This color can also be read from the color map, but "
         "setting this value overrides any value in the color map. If a color value for "
         "the below range values is provided, the UseBelowRangeColor property will "
-        "automatically be set to true",
+        "automatically be set to true.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertColorMapInfo = {
         "Invert",
         "Invert Color Map",
-        "If true, the colors of the color map will be read in the inverse order",
+        "If true, the colors of the color map will be read in the inverse order.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -329,10 +329,17 @@ ghoul::opengl::Texture* ColorMappingComponent::texture() const {
     return _texture.get();
 }
 
-void ColorMappingComponent::initialize(const dataloader::Dataset& dataset) {
+void ColorMappingComponent::initialize(const dataloader::Dataset& dataset,
+                                       bool useCaching)
+{
     ZoneScoped;
 
-    _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
+    if (useCaching) {
+        _colorMap = dataloader::color::loadFileWithCache(colorMapFile.value());
+    }
+    else {
+        _colorMap = dataloader::color::loadFile(colorMapFile.value());
+    }
 
     initializeParameterData(dataset);
 
@@ -389,9 +396,9 @@ void ColorMappingComponent::initializeTexture() {
     _texture->uploadTexture();
 }
 
-void ColorMappingComponent::update(const dataloader::Dataset& dataset) {
+void ColorMappingComponent::update(const dataloader::Dataset& dataset, bool useCaching) {
     if (_colorMapFileIsDirty) {
-        initialize(dataset);
+        initialize(dataset, useCaching);
         _colorMapTextureIsDirty = true;
         _colorMapFileIsDirty = false;
     }

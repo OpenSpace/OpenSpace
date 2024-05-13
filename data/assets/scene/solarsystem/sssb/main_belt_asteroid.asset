@@ -21,6 +21,7 @@ local Object = {
     SegmentQuality = 1,
     Color = { 0.0, 0.5, 0.0 },
     TrailFade = 0.1,
+    PointSizeExponent = 9.2,
     RenderSize = 50000
   },
   GUI = {

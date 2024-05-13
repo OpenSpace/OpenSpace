@@ -42,8 +42,7 @@ namespace {
         "Enabled",
         "If this value is 'true', all the machinery of this rotation is used, of it is "
         "'false', it provides the ability to change its attributes without risking some "
-        "undefined behavior",
-        // @VISIBILITY(2.75)
+        "undefined behavior.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -53,7 +52,7 @@ namespace {
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
-        "vectors",
+        "vectors.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -63,7 +62,7 @@ namespace {
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
-        "vectors",
+        "vectors.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -73,7 +72,7 @@ namespace {
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
-        "vectors",
+        "vectors.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -82,7 +81,7 @@ namespace {
         "xAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
-        "stay fixed to the current position of that object",
+        "stay fixed to the current position of that object.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -91,7 +90,7 @@ namespace {
         "yAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
-        "stay fixed to the current position of that object",
+        "stay fixed to the current position of that object.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -100,7 +99,7 @@ namespace {
         "zAxis: Focus Object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
-        "stay fixed to the current position of that object",
+        "stay fixed to the current position of that object.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -109,7 +108,7 @@ namespace {
         "xAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
-        "referenced object",
+        "referenced object.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -118,7 +117,7 @@ namespace {
         "yAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
-        "referenced object",
+        "referenced object.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -127,7 +126,7 @@ namespace {
         "zAxis: Invert Object Point Direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
-        "referenced object",
+        "referenced object.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -135,7 +134,7 @@ namespace {
         "xAxisVector",
         "xAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
-        "rotation",
+        "rotation.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -143,7 +142,7 @@ namespace {
         "yAxisVector",
         "yAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
-        "rotation",
+        "rotation.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -151,7 +150,7 @@ namespace {
         "zAxisVector",
         "zAxis: Direction vector",
         "This value specifies a static direction vector that is used for a fixed "
-        "rotation",
+        "rotation.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -160,7 +159,7 @@ namespace {
         "xAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
-        "construct an orthogonal vector instead",
+        "construct an orthogonal vector instead.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -169,7 +168,7 @@ namespace {
         "yAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
-        "construct an orthogonal vector instead",
+        "construct an orthogonal vector instead.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -178,7 +177,7 @@ namespace {
         "zAxis: Vector is orthogonal",
         "This value determines whether the vector specified is used directly, or whether "
         "it is used together with another non-coordinate system completion vector to "
-        "construct an orthogonal vector instead",
+        "construct an orthogonal vector instead.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -187,7 +186,7 @@ namespace {
         "Attached Node",
         "This is the name of the node that this rotation is attached to, this value is "
         "only needed if any of the three axis uses the Object type. In this case, the "
-        "location of the attached node is required to compute the relative direction",
+        "location of the attached node is required to compute the relative direction.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

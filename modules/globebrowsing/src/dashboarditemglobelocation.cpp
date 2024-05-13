@@ -45,15 +45,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DisplayFormatInfo = {
         "DisplayFormat",
         "Display Format",
-        "Choosing the format in which the camera location is displayed",
+        "Choosing the format in which the camera location is displayed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
         "Significant Digits",
-        "Determines the number of significant digits that are shown in the location text",
-        // @VISIBILITY(3.25)
+        "Determines the number of significant digits that are shown in the location "
+        "text.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -201,9 +201,9 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
         }
     }
 
+    penPosition.y -= _font->height();
     const std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
     RenderFont(*_font, penPosition, text);
-    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemGlobeLocation::size() const {

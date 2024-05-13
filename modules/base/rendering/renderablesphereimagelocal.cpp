@@ -38,12 +38,11 @@ namespace {
         "Texture",
         "This value specifies an image that is loaded from disk and is used as a texture "
         "that is applied to this sphere. This image is expected to be an equirectangular "
-        "projection",
-        // @VISIBILITY(2.33)
+        "projection.",
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
+    struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
@@ -58,7 +57,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphereImageLocal::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphere_image_local");
+    return codegen::doc<Parameters>(
+        "base_renderable_sphere_image_local",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableSphereImageLocal::RenderableSphereImageLocal(

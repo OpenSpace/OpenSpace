@@ -36,8 +36,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value explicitly specifies the size of the screen space plane",
-        // @VISIBILITY(3.75)
+        "This value explicitly specifies the size of the screen space plane.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
@@ -47,7 +46,7 @@ namespace openspace {
 documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
     using namespace documentation;
     return {
-        "ScreenSpace Framebuffer",
+        "ScreenSpaceFramebuffer",
         "base_screenspace_framebuffer",
         {}
     };
