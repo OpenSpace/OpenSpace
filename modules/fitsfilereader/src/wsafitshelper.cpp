@@ -12,9 +12,11 @@ namespace openspace {
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                         const std::filesystem::path path)
 {
-    // Convirt fits path with fits-file-reader functions
-    const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(path);
+    std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
 
+    // Convirt fits path with fits-file-reader functions
+    const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(file);
+    LWARNING(std::format("width: '{}', and hight: '{}'", fitsValues->width, fitsValues->height));
     // Magnetogram slice
     // The numbers 64800, 16200 means, grab the fifth layer in the fits file, where the
     // photospheric map is, in the wsa file
@@ -24,7 +26,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
     std::vector<glm::vec3> rgbLayers;
     for (float mapValue : magnetogram) {
         float colorIntensity = abs(mapValue) / maxValue; // normalized value
-        float r, g, b = 0.5f;
+        float r = 0.5f, g = 0.5f, b = 0.5f;
         if (mapValue < 0) {
             r = colorIntensity * 0.5f + 0.5f;
             g = colorIntensity * 0.5f + 0.5f;
@@ -43,7 +45,15 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
 
     // Longitude leading edge of map header value
     // //todo do I need this?
-    // const int long0 = *fitsFileReader.readHeaderValueFloat("CARRLONG");
+    const int long0 = static_cast<int>(readHeaderValueFloat("CARRLONG", file));
+    const int resolutionFactor = 360 / fitsValues->width;
+    const int shift = (360 - long0) / resolutionFactor;
+    for (int i = 0; i < fitsValues->height; ++i) {
+        std::rotate(
+            rgbLayers.begin() + (i * 180),
+            rgbLayers.begin() + (i * 180) + shift,
+            rgbLayers.begin() + (i * 180) + 179);
+    }
 
     // Make into imagedata
     std::vector<float> imageData;
@@ -56,7 +66,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
     // Create texture from imagedata
     auto texture = std::make_unique<ghoul::opengl::Texture>(
         imageData.data(),
-        glm::vec3(180, 90, 1),
+        glm::vec3(fitsValues->width, fitsValues->height, 1),
         GL_TEXTURE_2D,
         ghoul::opengl::Texture::Format::RGB,
         GL_RGB,
@@ -70,9 +80,8 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
 
 // It was easier to make this into a little function to return right away than store it
 // passed the if-statements
-std::shared_ptr<ImageData<float>> callCorrectImageReader(const std::filesystem::path& path) {
+std::shared_ptr<ImageData<float>> callCorrectImageReader(const std::unique_ptr<FITS>& file) {
     try {
-        std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
         bool isPrimaryHDU = file->extension().empty();
         isPrimaryHDU = true;
         if (isPrimaryHDU) {
@@ -125,7 +134,12 @@ std::shared_ptr<ImageData<T>> readImageInternal(PHDU& image) {
     return nullptr;
 }
 
-
+float readHeaderValueFloat(const std::string key, const std::unique_ptr<FITS>& file) {
+    float value;
+    HDU& image = static_cast<HDU&>(file->pHDU());
+    image.readKey(key, value);
+    return value;
+}
 
 
 
