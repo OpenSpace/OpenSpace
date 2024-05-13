@@ -71,10 +71,12 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath = p.texture;
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
     _texturePath.onChange([this]() {
         loadTexture();
     });
     addProperty(_texturePath);
+    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 
 bool RenderableSphereImageLocal::isReady() const {
