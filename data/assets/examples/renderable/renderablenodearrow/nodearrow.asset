@@ -1,0 +1,39 @@
+-- Basic
+-- This example shows an arrow pointing from one scene graph node in the direction of
+-- another. Here, it points from Earth to Mars.
+--
+-- Note that the arrows are generated as objects in 3D space and need to have a size
+-- that is suitable for the scene graph nodes they refer to. Here it is set based on
+-- the size of the Earth.
+
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
+
+local Node = {
+  Identifier = "RenderableNodeArrow_Example",
+  -- Parent to the start node, so that when we focus on the arrow this is where we end up
+  Parent = earth.Earth.Identifier,
+  Renderable = {
+    Type = "RenderableNodeArrow",
+    StartNode = earth.Earth.Identifier,
+    EndNode = mars.Mars.Identifier,
+    -- How far away from the start node should the arrow start (meters)
+    Offset = 2 * 6371000.0,
+    -- How long should the arrow be (meters)
+    Length = 5 * 6371000.0,
+    -- How wide should the arrow be (meters)
+    Width = 900000.0
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/RenderableNodeArrow"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

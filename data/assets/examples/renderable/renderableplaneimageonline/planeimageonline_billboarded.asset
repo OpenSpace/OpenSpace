@@ -1,0 +1,26 @@
+-- Billboarded Image
+-- This example shows how to create a textured plane in 3D space, where the texture is
+-- loaded from the internet though a web URL and the plane is billboarded to always
+-- face the camera.
+
+local Node = {
+  Identifier = "RenderablePlaneImageOnline_Example_Billboarded",
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 3.0E11,
+    URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg",
+    Billboarded = true
+  },
+  GUI = {
+    Name = "Billboarded",
+    Path = "/Examples/RenderablePlaneImageOnline"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
