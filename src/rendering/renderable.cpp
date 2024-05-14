@@ -61,7 +61,7 @@ namespace {
         "RenderBinMode",
         "Render Bin Mode",
         "A value that specifies if the renderable should be rendered in the Background, "
-        "Opaque, Pre-/PostDeferredTransparency, or Overlay rendering step.",
+        "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

@@ -49,28 +49,9 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderTypeInfo = {
-       "RenderType",
-       "Render Type",
-       "Specifies if the plane should be rendered in the Background, Opaque, "
-       "Pre-/PostDeferredTransparent, or the Overlay rendering step.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
         // [[codegen::verbatim(SourceFolderInfo.description)]]
         std::string sourceFolder;
-
-        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderType {
-            Background,
-            Opaque,
-            PreDeferredTransparent [[codegen::key("PreDeferredTransparency")]],
-            PostDeferredTransparent [[codegen::key("PostDeferredTransparency")]],
-            Overlay
-        };
-
-        // [[codegen::verbatim(RenderTypeInfo.description)]]
-        std::optional<RenderType> renderType;
     };
 #include "renderableplanetimevaryingimage_codegen.cpp"
 } // namespace
@@ -103,13 +84,6 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
 
     addProperty(_sourceFolder);
     _sourceFolder.onChange([this]() { _texture = loadTexture(); });
-
-    if (p.renderType.has_value()) {
-        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderType));
-    }
-    else {
-        setRenderBin(Renderable::RenderBin::Opaque);
-    }
 
     if (dictionary.hasKey(KeyLazyLoading)) {
         _isLoadingLazily = dictionary.value<bool>(KeyLazyLoading);
