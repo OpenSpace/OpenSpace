@@ -55,8 +55,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
         "Number of Circle Segments",
-        "The number of segments that is used to render each circle in the "
-        "grid.",
+        "The number of segments that is used to render each circle in the grid.",
         openspace::properties::Property::Visibility::User
     };
 

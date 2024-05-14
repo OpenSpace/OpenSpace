@@ -146,10 +146,7 @@ namespace {
         "Model Scale",
         "The scale of the model. If a numeric value is provided in the asset file, the scale "
         "will be that exact value. If instead a unit name is provided in the asset, this "
-        "is the value that that name represents. For example 'Centimeter' becomes 0.01."
-        "For more information see "
-        "http://wiki.openspaceproject.com/docs/builders/models/model-scale.html.",
-        // @TODO (2024-04-26, emmbr) update or remove this link? Also liks in Parameters below!
+        "is the value that that name represents. For example 'Centimeter' becomes 0.01.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -205,14 +202,12 @@ namespace {
             Mile
         };
 
-        // The scale of the model. For example, if the model is in centimeters
-        // then <code>ModelScale = 'Centimeter'</code> or <code>ModelScale = 0.01</code>.
-        // The value that this needs to be in order for the model to be in the correct
-        // scale relative to the rest of OpenSpace can be tricky to find.
-        // Essentially it depends on the model software that the model was created
-        // with and the original intention of the modeler. For more information see
-        // our wiki page for this parameter:
-        // http://wiki.openspaceproject.com/docs/builders/models/model-scale.html.
+        // The scale of the model. For example, if the model is in centimeters then
+        // `ModelScale = 'Centimeter'` or `ModelScale = 0.01`. The value that this needs
+        // to be in order for the model to be in the correct scale relative to the rest
+        // of OpenSpace can be tricky to find. Essentially, it depends on the model
+        // software that the model was created with and the original intention of the
+        // modeler.
         std::optional<std::variant<ScaleUnit, double>> modelScale;
 
         // By default the given `ModelScale` is used to scale down the model. By setting
@@ -252,10 +247,8 @@ namespace {
             BounceInfinitely
         };
 
-        // The mode of how the animation should be played back.
-        // Default is that the animation is played back once at the start time.
-        // For a more detailed description see:
-        // http://wiki.openspaceproject.com/docs/builders/model-animation.
+        // The mode of how the animation should be played back. Default is that the
+        // animation is played back once at the start time.
         std::optional<AnimationMode> animationMode;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]

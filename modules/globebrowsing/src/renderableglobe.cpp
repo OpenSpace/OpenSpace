@@ -217,8 +217,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
         "Z-Fighting Percentage",
-        "The percentage of the correct distance to the surface being shadowed. Possible "
-        "values: [0.0, 1.0].", // @TODO (2024-04-26,  emmbr) clarify. I don't get it
+        "The percentage of the correct distance to the surface being shadowed.",
         openspace::properties::Property::Visibility::Developer
     };
 

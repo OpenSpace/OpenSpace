@@ -160,13 +160,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-In Start and End Distances",
-        "Determines the initial and final distances from the origin of "
-        "the dataset at which the points will start and end fading-in. The distances "
-        "are specified in the same unit as the points, that is, the one provodied as the "
-        "Unit, or meters. With normal fading the points are fully visible once the "
-        "camera is outside this range and fully invisible when inside the range. With "
-        "inverted fading the situation is the opposite: the points are visible inside "
-        "hen closer than the min value of the range and invisible when further away.",
+        "Determines the initial and final distances from the origin of the dataset at "
+        "which the points will start and end fading-in. The distances are specified in "
+        "the same unit as the points, that is, the one provodied as the Unit, or meters. "
+        "With normal fading the points are fully visible once the camera is outside this "
+        "range and fully invisible when inside the range. With inverted fading the "
+        "case is the opposite: the points are visible inside when closer than the min "
+        "value of the range and invisible when further away.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
