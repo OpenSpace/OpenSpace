@@ -1310,7 +1310,10 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     std::vector<RenderableModel::DepthMapData> depthMapData;
     for (const RenderableModel* model : _shadowers) {
         if (model->isReady()) {
-            depthMapData.push_back(model->renderDepthMap());
+            const std::optional<RenderableModel::DepthMapData> data = model->renderDepthMap();
+            if (data.has_value()) {
+                depthMapData.push_back(data.value());
+            }
         }
     }
 

@@ -1284,7 +1284,10 @@ const bool RenderableModel::isCastingShadow() const {
     return _castShadow;
 }
 
-RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
+std::optional<RenderableModel::DepthMapData> RenderableModel::renderDepthMap() const {
+    if (_lightSources.size() < 1) {
+        return std::nullopt;
+    }
 
     const openspace::SceneGraphLightSource* light =
         dynamic_cast<const openspace::SceneGraphLightSource*>(_lightSources.front().get());
@@ -1351,7 +1354,7 @@ RenderableModel::DepthMapData RenderableModel::renderDepthMap() const {
     glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
     glViewport(prevVp[0], prevVp[1], prevVp[2], prevVp[3]);
 
-    return { _lightVP, _depthMap };
+    return std::optional<RenderableModel::DepthMapData>({ _lightVP, _depthMap });
 }
 
 }  // namespace openspace
