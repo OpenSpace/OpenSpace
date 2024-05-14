@@ -75,7 +75,7 @@ private:
         /// Specifies the color of the point outline
         properties::Vec3Property outlineColor;
         /// Specifies how much if the point should be covered by the outline
-        properties::FloatProperty outlineWeight;
+        properties::FloatProperty outlineWidth;
     };
 
     void updateBuffers();

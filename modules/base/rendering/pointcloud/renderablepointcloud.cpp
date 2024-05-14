@@ -299,9 +299,9 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
-        "OutlineWeight",
-        "Outline Weight",
+    constexpr openspace::properties::Property::PropertyInfo OutlineWidthInfo = {
+        "OutlineWidth",
+        "Outline Width",
         "The thickness of the outline, given as a value relative to the size of the "
         "point. A value of 0 will not show any outline, while a value of 1 will cover "
         "the whole point.",
@@ -464,8 +464,8 @@ namespace {
             // [[codegen::verbatim(OutlineColorInfo.description)]]
             std::optional<glm::vec3> outlineColor;
 
-            // [[codegen::verbatim(OutlineColorInfo.description)]]
-            std::optional<float> outlineWeight;
+            // [[codegen::verbatim(OutlineWidthInfo.description)]]
+            std::optional<float> outlineWidth;
 
             enum class [[codegen::map(OutlineStyle)]] OutlineStyle {
                 Round,
@@ -546,7 +546,7 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     , pointColor(PointColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , enableOutline(EnableOutlineInfo, false)
     , outlineColor(OutlineColorInfo, glm::vec3(0.23f), glm::vec3(0.f), glm::vec3(1.f))
-    , outlineWeight(OutlineWeightInfo, 0.2f, 0.f, 1.f)
+    , outlineWidth(OutlineWidthInfo, 0.2f, 0.f, 1.f)
     , outlineStyle(OutlineStyleInfo)
     , applyCmapToOutline(ApplyColorMapToOutlineInfo, false)
 {
@@ -560,7 +560,7 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
     outlineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(outlineColor);
 
-    addProperty(outlineWeight);
+    addProperty(outlineWidth);
 
     outlineStyle.addOption(OutlineStyle::Round, "Round");
     outlineStyle.addOption(OutlineStyle::Square, "Square");
@@ -584,7 +584,7 @@ RenderablePointCloud::ColorSettings::ColorSettings(const ghoul::Dictionary& dict
 
         enableOutline = p.coloring->enableOutline.value_or(enableOutline);
         outlineColor = p.coloring->outlineColor.value_or(outlineColor);
-        outlineWeight = p.coloring->outlineWeight.value_or(outlineWeight);
+        outlineWidth = p.coloring->outlineWidth.value_or(outlineWidth);
 
         if (p.coloring->outlineStyle.has_value()) {
             outlineStyle = codegen::map<OutlineStyle>(*p.coloring->outlineStyle);
@@ -1244,7 +1244,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     _program->setUniform(_uniformCache.color, _colorSettings.pointColor);
     _program->setUniform(_uniformCache.enableOutline, _colorSettings.enableOutline);
     _program->setUniform(_uniformCache.outlineColor, _colorSettings.outlineColor);
-    _program->setUniform(_uniformCache.outlineWeight, _colorSettings.outlineWeight);
+    _program->setUniform(_uniformCache.outlineWeight, _colorSettings.outlineWidth);
     _program->setUniform(_uniformCache.outlineStyle, _colorSettings.outlineStyle);
     _program->setUniform(_uniformCache.useCmapOutline, _colorSettings.applyCmapToOutline);
 

@@ -142,9 +142,9 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
-        "OutlineWeight",
-        "Outline Weight",
+    constexpr openspace::properties::Property::PropertyInfo OutlineWidthInfo = {
+        "OutlineWidth",
+        "Outline Width",
         "Determines the thickness of the outline. A value of 0 will not show any "
         "outline, while a value of 1 will cover the whole point.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -235,8 +235,8 @@ namespace {
         // [[codegen::verbatim(OutlineColorInfo.description)]]
         std::optional<glm::vec3> outlineColor;
 
-        // [[codegen::verbatim(OutlineColorInfo.description)]]
-        std::optional<float> outlineWeight;
+        // [[codegen::verbatim(OutlineWidthInfo.description)]]
+        std::optional<float> outlineWidth;
     };
 #include "renderableorbitalkepler_codegen.cpp"
 } // namespace
@@ -265,7 +265,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     , maxSize(MaxSizeInfo, 1.f, 0.f, 45.f)
     , enableOutline(EnableOutlineInfo, true)
     , outlineColor(OutlineColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , outlineWeight(OutlineWeightInfo, 0.2f, 0.f, 1.f)
+    , outlineWidth(OutlineWidthInfo, 0.2f, 0.f, 1.f)
 {
     renderingModes.addOptions({
         { RenderingModeTrail, "Trails" },
@@ -284,7 +284,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     addProperty(enableOutline);
     outlineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(outlineColor);
-    addProperty(outlineWeight);
+    addProperty(outlineWidth);
 }
 
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
@@ -310,7 +310,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _appearance.maxSize = p.maxSize.value_or(_appearance.maxSize);
     _appearance.enableOutline = p.enableOutline.value_or(_appearance.enableOutline);
     _appearance.outlineColor = p.outlineColor.value_or(_appearance.outlineColor);
-    _appearance.outlineWeight = p.outlineWeight.value_or(_appearance.outlineWeight);
+    _appearance.outlineWidth = p.outlineWidth.value_or(_appearance.outlineWidth);
     _appearance.pointSizeExponent =
         p.pointSizeExponent.value_or(_appearance.pointSizeExponent);
 
@@ -481,28 +481,50 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
     if (renderPoints) {
         _pointProgram->activate();
-        _pointProgram->setUniform(_uniformPointCache.modelTransform,
-            calcModelTransform(data));
-        _pointProgram->setUniform(_uniformPointCache.viewTransform,
-            data.camera.combinedViewMatrix());
-        _pointProgram->setUniform(_uniformPointCache.projectionTransform,
-            data.camera.projectionMatrix());
-        _pointProgram->setUniform(_uniformPointCache.cameraPositionWorld,
-            data.camera.positionVec3());
-        _pointProgram->setUniform(_uniformPointCache.cameraUpWorld,
-            data.camera.lookUpVectorWorldSpace());
-        _pointProgram->setUniform(_uniformPointCache.inGameTime,
-            data.time.j2000Seconds());
-        _pointProgram->setUniform(_uniformPointCache.pointSizeExponent,
-            _appearance.pointSizeExponent);
-        _pointProgram->setUniform(_uniformPointCache.enableMaxSize,
-            _appearance.enableMaxSize);
-        _pointProgram->setUniform(_uniformPointCache.enableOutline,
-            _appearance.enableOutline);
-        _pointProgram->setUniform(_uniformPointCache.outlineColor,
-            _appearance.outlineColor);
-        _pointProgram->setUniform(_uniformPointCache.outlineWeight,
-            _appearance.outlineWeight);
+        _pointProgram->setUniform(
+            _uniformPointCache.modelTransform,
+            calcModelTransform(data)
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.viewTransform,
+            data.camera.combinedViewMatrix()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.projectionTransform,
+            data.camera.projectionMatrix()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.cameraPositionWorld,
+            data.camera.positionVec3()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.cameraUpWorld,
+            data.camera.lookUpVectorWorldSpace()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.inGameTime,
+            data.time.j2000Seconds()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.pointSizeExponent,
+            _appearance.pointSizeExponent
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.enableMaxSize,
+            _appearance.enableMaxSize
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.enableOutline,
+            _appearance.enableOutline
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.outlineColor,
+            _appearance.outlineColor
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.outlineWeight,
+            _appearance.outlineWidth
+        );
         _pointProgram->setUniform(_uniformPointCache.color, _appearance.color);
         _pointProgram->setUniform(_uniformPointCache.maxSize, _appearance.maxSize);
         _pointProgram->setUniform(_uniformPointCache.opacity, opacity());
@@ -523,12 +545,18 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         _trailProgram->activate();
         _trailProgram->setUniform(_uniformTrailCache.opacity, opacity());
         _trailProgram->setUniform(_uniformTrailCache.color, _appearance.color);
-        _trailProgram->setUniform(_uniformTrailCache.inGameTime,
-            data.time.j2000Seconds());
-        _trailProgram->setUniform(_uniformTrailCache.modelView,
-            calcModelViewTransform(data));
-        _trailProgram->setUniform(_uniformTrailCache.projection,
-            data.camera.projectionMatrix());
+        _trailProgram->setUniform(
+            _uniformTrailCache.inGameTime,
+            data.time.j2000Seconds()
+        );
+        _trailProgram->setUniform(
+            _uniformTrailCache.modelView,
+            calcModelViewTransform(data)
+        );
+        _trailProgram->setUniform(
+            _uniformTrailCache.projection,
+            data.camera.projectionMatrix()
+        );
 
         // Because we want the property to work similar to the planet trails
         const float fade = pow(
