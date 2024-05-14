@@ -180,10 +180,10 @@ namespace {
     // that are rendered in their own coordinate system on top of the other 3D rendering.
     //
     // The coordinate system of these renderables is a custom one that has its own depth,
-    // to control how the screen space objects are sorted. There are also
-    // two ways of specifying the position of the object: in Cartesian coordinates using
-    // XYZ, or spherical using radius, azimuth, and elevation. The latter might be more
-    // useful in a planetarium context.
+    // to control how the screen space objects are sorted. There are also two ways of
+    // specifying the position of the object: in Cartesian coordinates using XYZ, or
+    // spherical using radius, azimuth, and elevation. The latter might be more useful in
+    // a planetarium context.
     //
     // Most screen space renderables are instantiated as image planes in one way or
     // another, and this base class includes some properties for setting things like
@@ -193,8 +193,8 @@ namespace {
         std::string type
             [[codegen::annotation("Must name a valid ScreenSpaceRenderable")]];
 
-        // The name of the `ScreenSpaceRenderable`, which will be shown in the GUI. This does
-        // not have to be unique to the scene, but it is recommended to be.
+        // The name of the `ScreenSpaceRenderable`, which will be shown in the GUI. This
+        // does not have to be unique to the scene, but it is recommended to be.
         std::optional<std::string> name;
 
         // The unique identifier for this screen space renderable. It has to be unique
