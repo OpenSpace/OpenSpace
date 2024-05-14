@@ -12,6 +12,7 @@ local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 local Node = {
   Identifier = "RenderableNodeArrow_Example_Relative",
+  -- Parent to the start node, so that when we focus on the arrow this is where we end up
   Parent = earth.Earth.Identifier,
   Renderable = {
     Type = "RenderableNodeArrow",
