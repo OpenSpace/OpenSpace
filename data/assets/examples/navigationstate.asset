@@ -1,6 +1,6 @@
 -- Basic
--- Example of using getNavigationState and setNavigationState to manipulate
--- the camera view
+-- Example of an action that uses getNavigationState and setNavigationState
+-- to manipulate the camera view
 
 local FlipUpsideDown = {
   Identifier = "os.examples.FlipUpsideDown",
@@ -9,7 +9,7 @@ local FlipUpsideDown = {
     -- Get the current navigation state
     local currentNavState = openspace.navigation.getNavigationState()
     -- Create a new navigation state and populate with all original orientation
-    -- values, except for a new Up vector
+    -- values, except for a new Up vector to flip the camera upside-down
     local newNavState = {
       Pitch = currentNavState["Pitch"],
       Anchor = currentNavState["Anchor"],
@@ -20,7 +20,6 @@ local FlipUpsideDown = {
     -- Set the navigation state with the new navigation state variable
     openspace.navigation.setNavigationState(newNavState) 
   ]],
-  Documentation = "Flips the camera upside-down.",
   GuiPath = "/Examples/View",
   IsLocal = false
 }
