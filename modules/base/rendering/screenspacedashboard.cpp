@@ -40,7 +40,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
-        "If 'true', this ScreenSpaceDashboard will use the main dashboard instead of "
+        "If true, this ScreenSpaceDashboard will use the main dashboard instead of "
         "creating an independent one.",
         openspace::properties::Property::Visibility::Developer
     };

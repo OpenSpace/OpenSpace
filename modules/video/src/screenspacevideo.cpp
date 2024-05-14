@@ -40,14 +40,14 @@ namespace openspace {
 documentation::Documentation ScreenSpaceVideo::Documentation() {
     documentation::Documentation doc = ScreenSpaceRenderable::Documentation();
     doc.name = "ScreenSpaceVideo";
-    doc.id = "video_screenspace_video";
+    doc.id = "screenspace_video";
 
     documentation::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
 
     doc.description =
-        "This `ScreenSpaceRenderable` can be used to display a video file over the "
-        "rendering.";
+        "This `ScreenSpaceRenderable` can be used to play a video file in front of the "
+        "camera.";
 
     return doc;
 }

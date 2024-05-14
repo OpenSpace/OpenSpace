@@ -41,7 +41,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "The dimensions of the web browser window, in pixels.",
+        "The dimensions of the web browser window in pixels.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -59,8 +59,8 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    // This `ScreenSpaceRenderable` can be used to render a webpage over the 3D rendering.
-    // This can be used to show various dynamic content, for example using the OpenSpace
+    // This `ScreenSpaceRenderable` can be used to render a webpage in front of the camera.
+    // This can be used to show various dynamic content, for example using the
     // scripting API.
     //
     // Note that mouse input will not be passed to the rendered view, so it will not be

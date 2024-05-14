@@ -58,9 +58,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderDuringBlackoutInfo = {
         "RenderDuringBlackout",
         "Render during Blackout",
-        "If 'true', this screenspace renderable is going to ignore the global blackout "
+        "If true, this screenspace renderable is going to ignore the global blackout "
         "factor from the Render Engine and will always render at full opacity. If "
-        "'false', it will adhere to the factor and fade out like the rest of the 3D "
+        "false, it will adhere to the factor and fade out like the rest of the 3D "
         "rendering.",
         openspace::properties::Property::Visibility::User
     };
@@ -71,7 +71,7 @@ namespace {
         "UseRadiusAzimuthElevation",
         "Use Radius Azimuth and Elevation",
         "Determines whether the location of this screen space plane will be specified "
-        "using radius, azimuth and elevation (if 'true') or using cartesian coordinates. "
+        "using radius, azimuth and elevation (if 'true') or using Cartesian coordinates. "
         "The Cartesian coordinate system is useful if a regular rendering is applied, "
         "whereas the radius azimuth elevation are most useful in a planetarium "
         "environment.",
@@ -98,7 +98,7 @@ namespace {
         "RadiusAzimuthElevation",
         "Radius Azimuth Elevation",
         "Determines the position of this screen space plane in a coordinate system based "
-        "on radius (meters), azimuth (radians) and elevation (radians).",
+        "on radius (meters), azimuth (radians), and elevation (radians).",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -180,7 +180,7 @@ namespace {
     // that are rendered in their own coordinate system on top of the other 3D rendering.
     //
     // The coordinate system of these renderables is a custom one that has its own depth,
-    // to control how the screen space objects are sorted in the z-axis. There are also
+    // to control how the screen space objects are sorted. There are also
     // two ways of specifying the position of the object: in Cartesian coordinates using
     // XYZ, or spherical using radius, azimuth, and elevation. The latter might be more
     // useful in a planetarium context.
@@ -193,7 +193,7 @@ namespace {
         std::string type
             [[codegen::annotation("Must name a valid ScreenSpaceRenderable")]];
 
-        // The name of `ScreenSpaceRenderable`, which will be shown in the GUI. This does
+        // The name of the `ScreenSpaceRenderable`, which will be shown in the GUI. This does
         // not have to be unique to the scene, but it is recommended to be.
         std::optional<std::string> name;
 
