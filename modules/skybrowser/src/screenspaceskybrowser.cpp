@@ -88,10 +88,9 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    // This `ScreenSpaceRenderable` is added by the Sky Browser feature of OpenSpace, to
-    // display a screen space window showing the integrated World Wide Telescope view.
-    // The view will be dynamically updated when interacting with the view or interacting
-    // with images in the Sky Browser.
+    // This `ScreenSpaceRenderable` is used to display a screen space window showing the
+    // integrated World Wide Telescope view. The view will be dynamically updated when
+    // interacting with the view or interacting with images in the Sky Browser.
     //
     // A `ScreenSpaceSkyBrowser` should not be created from a `.asset` file, but is rather
     // created from interacting with the SkyBrowser user interface panel. If created in
