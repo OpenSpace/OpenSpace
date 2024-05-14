@@ -106,7 +106,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableConstellationLines::Documentation() {
-    return codegen::doc<Parameters>("space_renderable_constellationlines");
+    return codegen::doc<Parameters>(
+        "space_renderable_constellationlines",
+        RenderableConstellationsBase::Documentation()
+    );
 }
 
 RenderableConstellationLines::RenderableConstellationLines(

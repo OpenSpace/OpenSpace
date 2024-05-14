@@ -404,12 +404,12 @@ std::string InListVerifier<T>::documentation() const {
     std::copy(
         values.begin(),
         values.end(),
-        std::ostream_iterator<typename T::Type>(s, ",")
+        std::ostream_iterator<typename T::Type>(s, ", ")
     );
 
     std::string joined = s.str();
-    // We need to remove a trailing ',' at the end of the string
-    result += joined.substr(0, joined.size() - 1);
+    // We need to remove a trailing ',' and whitespace at the end of the string
+    result += joined.substr(0, joined.size() - 2);
 
     result += " }";
     return result;

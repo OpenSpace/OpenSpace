@@ -97,15 +97,15 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
         sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage,
-        opacityValue
+        opacity
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
         sunPosition, sunPositionObj, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
         ringTextureUnlit, ringTextureColor, ringTextureTransparency, shadowMatrix,
-        shadowMapTexture, zFightingPercentage, opacityValue
+        shadowMapTexture, zFightingPercentage, opacity
     ) _uniformCacheAdvancedRings;
-    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture
-    ) _geomUniformCache;
+    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _textureForwards;
     std::unique_ptr<ghoul::opengl::Texture> _textureBackwards;

@@ -35,6 +35,7 @@ struct TileIndex {
     using TileHashKey = uint64_t;
 
     TileIndex(uint32_t x_, uint32_t y_, uint8_t level_);
+    explicit TileIndex(TileHashKey hash);
 
     uint32_t x = 0;
     uint32_t y = 0;

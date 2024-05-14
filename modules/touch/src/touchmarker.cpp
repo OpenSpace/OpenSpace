@@ -31,10 +31,6 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr std::array<const char*, 4> UniformNames = {
-        "radius", "opacity", "thickness", "color"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "Visibility",
         "Toggle visibility of markers",
@@ -101,7 +97,7 @@ void TouchMarker::initialize() {
         absPath("${MODULE_TOUCH}/shaders/marker_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void TouchMarker::deinitialize() {

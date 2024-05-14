@@ -76,7 +76,7 @@ private:
 
     glm::dvec3 _sourcePosition;
     glm::dvec3 _targetPosition;
-    double _lightTravelTime;
+    double _travelTime = 0.0;
     glm::dvec3 _directionVector;
     double _initiationTime = -1.0;
     double _arrivalTime;

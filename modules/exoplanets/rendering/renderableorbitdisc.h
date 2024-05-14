@@ -70,7 +70,7 @@ private:
     properties::Vec3Property _multiplyColor;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, offset, opacity, texture,
+    UniformCache(modelViewProjectionTransform, offset, opacity, discTexture,
         eccentricity, semiMajorAxis, multiplyColor) _uniformCache;
 
     std::unique_ptr<PlaneGeometry> _plane;

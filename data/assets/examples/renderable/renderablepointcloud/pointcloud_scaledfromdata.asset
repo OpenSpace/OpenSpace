@@ -1,0 +1,40 @@
+-- Point Size from Data
+-- This example creates a point cloud where the size of the points is computed based on
+-- a column in the dataset
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_ScaledFromData",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.5, 0.5, 0.0 }
+    },
+    SizeSettings = {
+      SizeMapping = {
+        -- The options for the columns that the points can be scaled by. The first
+        -- alternative in the list is chosen per default
+        ParameterOptions = { "a", "b" },
+        -- Specify which option we want to use for size mapping at start up. Here we
+        -- use the last of the provided options rather than the first one, which is
+        -- otherwise used by default
+        Parameter = "b"
+      },
+      -- The size mapping can be used together with other scale parameters, such as a
+      -- scale exponent or scale factor
+      ScaleExponent = 4.8
+    }
+  },
+  GUI = {
+    Name = "Size from Data",
+    Path = "/Examples/RenderablePointCloud"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

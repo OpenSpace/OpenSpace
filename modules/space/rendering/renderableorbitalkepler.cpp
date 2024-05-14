@@ -272,9 +272,9 @@ RenderableOrbitalKepler::Appearance::Appearance()
         { RenderingModePoint, "Points" },
         { RenderingModePointTrail , "Points+Trails" }
     });
+    addProperty(renderingModes);
 
     color.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(renderingModes);
     addProperty(color);
     addProperty(trailWidth);
     addProperty(trailFade);
@@ -282,6 +282,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     addProperty(enableMaxSize);
     addProperty(maxSize);
     addProperty(enableOutline);
+    outlineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(outlineColor);
     addProperty(outlineWeight);
 }

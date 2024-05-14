@@ -39,17 +39,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr std::array<const char*, 12> MainUniformNames = {
-        "sun_pos", "modelTransform", "modelViewProjectionTransform", "hasBaseMap",
-        "hasHeightMap", "heightExaggeration", "meridianShift", "ambientBrightness",
-        "projectionFading", "baseTexture", "projectionTexture", "heightTexture"
-    };
-
-    constexpr std::array<const char*, 6> FboUniformNames = {
-        "projectionTexture", "ProjectorMatrix", "ModelTransform",
-        "boresight", "radius", "segments"
-    };
-
     constexpr std::string_view NoImageText = "No Image";
 
     constexpr openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
@@ -318,11 +307,7 @@ void RenderablePlanetProjection::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(
-        *_programObject,
-        _mainUniformCache,
-        MainUniformNames
-    );
+    ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
 
     _fboProgramObject = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "FBOPassProgram",
@@ -341,11 +326,7 @@ void RenderablePlanetProjection::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(
-        *_fboProgramObject,
-        _fboUniformCache,
-        FboUniformNames
-    );
+    ghoul::opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
 
     loadColorTexture();
     loadHeightTexture();
@@ -412,8 +393,8 @@ void RenderablePlanetProjection::imageProjectGPU(
     projectionTexture.bind();
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
-    _fboProgramObject->setUniform(_fboUniformCache.projectorMatrix, projectorMatrix);
-    _fboProgramObject->setUniform(_fboUniformCache.modelTransform, _transform);
+    _fboProgramObject->setUniform(_fboUniformCache.ProjectorMatrix, projectorMatrix);
+    _fboProgramObject->setUniform(_fboUniformCache.ModelTransform, _transform);
     _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
     _fboProgramObject->setUniform(_fboUniformCache.radius, _radius);
     _fboProgramObject->setUniform(_fboUniformCache.segments, _segments);
@@ -519,7 +500,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     // Main renderpass
     _programObject->activate();
-    _programObject->setUniform(_mainUniformCache.sunPos, static_cast<glm::vec3>(sunPos));
+    _programObject->setUniform(_mainUniformCache.sun_pos, static_cast<glm::vec3>(sunPos));
 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 modelTransform = calcModelTransform(data);
@@ -573,21 +554,13 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(
-            *_programObject,
-            _mainUniformCache,
-            MainUniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
     }
 
     if (_fboProgramObject->isDirty()) {
         _fboProgramObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(
-            *_fboProgramObject,
-            _fboUniformCache,
-            FboUniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
     }
 
     if (_colorTextureDirty) {

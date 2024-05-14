@@ -34,10 +34,6 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    constexpr std::array<const char*, 3> UniformNames = {
-        "modelViewProjectionTransform", "shadowColor", "opacity"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
         "NumberOfPoints",
         "Points",
@@ -236,7 +232,7 @@ void RenderableShadowCylinder::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderableShadowCylinder::deinitializeGL() {
@@ -292,7 +288,7 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
 
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
     createCylinder(data.time.j2000Seconds());
 }

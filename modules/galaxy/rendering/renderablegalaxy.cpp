@@ -64,16 +64,6 @@ namespace {
         Billboards
     };
 
-    constexpr std::array<const char*, 4> UniformNamesPoints = {
-        "modelMatrix", "viewProjectionMatrix", "eyePosition",
-        "opacityCoefficient"
-    };
-
-    constexpr std::array<const char*, 5> UniformNamesBillboards = {
-        "modelMatrix", "viewProjectionMatrix",
-        "cameraUp", "eyePosition", "psfTexture"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo VolumeRenderingEnabledInfo = {
         "VolumeRenderingEnabled",
         "Volume Rendering",
@@ -471,16 +461,8 @@ void RenderableGalaxy::initializeGL() {
         );
     }
 
-    ghoul::opengl::updateUniformLocations(
-        *_pointsProgram,
-        _uniformCachePoints,
-        UniformNamesPoints
-    );
-    ghoul::opengl::updateUniformLocations(
-        *_billboardsProgram,
-        _uniformCacheBillboards,
-        UniformNamesBillboards
-    );
+    ghoul::opengl::updateUniformLocations(*_pointsProgram, _uniformCachePoints);
+    ghoul::opengl::updateUniformLocations(*_billboardsProgram, _uniformCacheBillboards);
 
     glGenVertexArrays(1, &_pointsVao);
     glGenBuffers(1, &_positionVbo);
@@ -647,7 +629,7 @@ void RenderableGalaxy::renderPoints(const RenderData& data) {
 
     _pointsProgram->setUniform(_uniformCachePoints.modelMatrix, modelTransform);
     _pointsProgram->setUniform(
-        _uniformCachePoints.cameraViewProjectionMatrix,
+        _uniformCachePoints.viewProjectionMatrix,
         cameraViewProjectionMatrix
     );
 
@@ -698,7 +680,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
 
     _billboardsProgram->setUniform(_uniformCacheBillboards.modelMatrix, modelTransform);
     _billboardsProgram->setUniform(
-        _uniformCacheBillboards.cameraViewProjectionMatrix,
+        _uniformCacheBillboards.viewProjectionMatrix,
         cameraViewProjectionMatrix
     );
 
