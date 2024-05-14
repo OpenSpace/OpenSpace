@@ -37,6 +37,7 @@
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
+#include <optional>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -73,7 +74,7 @@ public:
     void update(const UpdateData& data) override;
 
     const bool isCastingShadow() const;
-    DepthMapData renderDepthMap() const;
+    std::optional<DepthMapData> renderDepthMap() const;
 
     static documentation::Documentation Documentation();
 
