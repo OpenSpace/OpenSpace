@@ -17,6 +17,7 @@ local Node = {
     Type = "RenderableNodeArrow",
     StartNode = earth.Earth.Identifier,
     EndNode = moon.Moon.Identifier,
+    -- Use relative values for offset and length
     UseRelativeOffset = true,
     UseRelativeLength = true,
     -- Specify relative values (times the size of Earth, in this case)

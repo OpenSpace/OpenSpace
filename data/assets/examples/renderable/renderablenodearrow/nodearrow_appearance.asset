@@ -2,7 +2,7 @@
 -- This example shows an arrow pointing from one scene graph node in the direction of
 -- another. Here, it is created with the Solar System barycenter as start node and
 -- Earth as end node, but the arrow direction is inverted so that it points towards
--- the Solar System barycenter. Some appearance related properties are also changes to
+-- the Solar System barycenter. Some appearance related properties are also changed to
 -- customize the look of the arrow, but default values are used for its size.
 
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
