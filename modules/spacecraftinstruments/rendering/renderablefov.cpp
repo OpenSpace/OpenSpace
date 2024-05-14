@@ -108,7 +108,7 @@ namespace {
         "IntersectionStart",
         "Intersection Start",
         "The color that is used close to the instrument if one of the field of view "
-        "corners are intersecting the target object. The final color is is an "
+        "corners are intersecting the target object. The final color is an "
         "interpolation of this color and the intersection end color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
