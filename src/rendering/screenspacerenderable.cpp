@@ -58,7 +58,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderDuringBlackoutInfo = {
         "RenderDuringBlackout",
         "Render during Blackout",
-        "If true, this screenspace renderable is going to ignore the global blackout "
+        "If true, this screen space renderable is going to ignore the global blackout "
         "factor from the Render Engine and will always render at full opacity. If "
         "false, it will adhere to the factor and fade out like the rest of the 3D "
         "rendering.",
