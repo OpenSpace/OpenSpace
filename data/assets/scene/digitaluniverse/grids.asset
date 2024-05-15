@@ -70,7 +70,8 @@ local RadioSphere = {
   },
   GUI = {
     Name = "Radio Sphere",
-    Path = "/Milky Way/Grids"
+    Path = "/Milky Way/Grids",
+    Description = [[The radio sphere describes the theoretical extent of Earth's radio signals in space. Before television carrier waves, early-warning radar first used in World War II, and the detonation of atomic weapons, Earth was radio-quiet to the universe (AM and FM radio signals bounce off the atmosphere and do not escape it). After the use of these and other radio emitters began, in the late 1930s and early 1940s, signals were able to escape the atmosphere and travel into space at the speed of light. Since then, we have been broadcasting to the universe. We mention earlier that this is the theoretical extent of these signals. In reality, these signals will dissipate rapidly into the ambient cosmic noise of the universe. All light falls off as the square of the distance, and radio waves are no different. The signals that emanate from Earth are likely lost in the noise before they leave the solar system, but the radio sphere remains a visually compelling astronomical concept.]]
   }
 }
 
@@ -81,7 +82,7 @@ local EquatorialSphere = {
     Transform = {
       Scale = {
         Type = "StaticScale",
-        Scale = 7.5686E17
+        Scale = 7.5686E17   -- 80 light years
       },
       Rotation = {
         Type = "StaticRotation",
@@ -98,7 +99,8 @@ local EquatorialSphere = {
     },
     GUI = {
       Name = "Equatorial Coordinates",
-      Path = "/Night Sky/Coordinate Systems/Equatorial"
+      Path = "/Night Sky/Coordinate Systems/Equatorial",
+      Description = [[An 80-light-year sphere representing equatorial coordinates (right ascension and declination).]]
     }
   }
   
@@ -123,7 +125,8 @@ local EquatorialSphere = {
     },
     GUI = {
       Name = "Equatorial Coordinates Labels",
-      Path = "/Night Sky/Coordinate Systems/Equatorial"
+      Path = "/Night Sky/Coordinate Systems/Equatorial",
+      Description = [[Labels on a sphere representing right ascension in hours and declination in degrees.]]
     }
   }
 
@@ -138,7 +141,6 @@ local EclipticSphere = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      -- Scale = 9.46377307652E17,
       Scale = OneHundredLY
     },
     Rotation = {
@@ -155,7 +157,8 @@ local EclipticSphere = {
   },
   GUI = {
     Name = "Ecliptic Coordinates",
-    Path = "/Night Sky/Coordinate Systems/Ecliptic"
+    Path = "/Night Sky/Coordinate Systems/Ecliptic",
+    Description = [[A 100-light-year sphere representing ecliptic coordinates (ecliptic longitude and latitude).]]
   }
 }
 
@@ -180,7 +183,8 @@ local EclipticSphereLabels = {
   },
   GUI = {
     Name = "Ecliptic Coordinates Labels",
-    Path = "/Night Sky/Coordinate Systems/Ecliptic"
+    Path = "/Night Sky/Coordinate Systems/Ecliptic",
+    Description = [[Labels on a sphere representing ecliptic longitude and latitude in degrees.]]
   }
 }
 
@@ -205,7 +209,8 @@ local GalacticSphere = {
   },
   GUI = {
     Name = "Galactic Coordinates",
-    Path = "/Night Sky/Coordinate Systems/Galactic"
+    Path = "/Night Sky/Coordinate Systems/Galactic",
+    Description = [[A 1000-light-year sphere representing galactic coordinates (galactic longitude and latitude).]]
   }
 }
 
@@ -228,7 +233,8 @@ local GalacticSphereLabels = {
   },
   GUI = {
     Name = "Galactic Coordinates Labels",
-    Path = "/Night Sky/Coordinate Systems/Galactic"
+    Path = "/Night Sky/Coordinate Systems/Galactic",
+    Description = [[Labels on a sphere representing galactic longitude and latitude in degrees.]]
   }
 }
 
@@ -261,7 +267,8 @@ local Plane1lh = {
   },
   GUI = {
     Name = "A. 1-light-hour Grid",
-    Path = "/Solar System/Grids"
+    Path = "/Solar System/Grids",
+    Description = [[A 1-light-hour Cartesian grid aligned on the plane of the Solar System.]]
   }
 }
 
@@ -296,7 +303,7 @@ local Plane1lh = {
 --   },
 --   GUI = {
 --     Name = "A. Radius - Half Light Hour",
---     Description = "",
+--     Description = [[]],
 --     Path = "/Solar System/Grids"
 --   }
 -- }
@@ -331,7 +338,8 @@ local Plane1ld = {
   },
   GUI = {
     Name = "B. 1-light-day Grid",
-    Path = "/Solar System/Grids"
+    Path = "/Solar System/Grids",
+    Description = [[A 1-light-day Cartesian grid aligned on the plane of the Solar System.]]
   }
 }
 
@@ -362,7 +370,8 @@ local Plane1lm = {
   },
   GUI = {
     Name = "C. 1-light-month Grid",
-    Path = "/Solar System/Grids"
+    Path = "/Solar System/Grids",
+    Description = [[A 1-light-month Cartesian grid aligned on the plane of the Solar System.]]
   }
 }
 
@@ -393,7 +402,8 @@ local Plane1ly = {
   },
   GUI = {
     Name = "D. 1-light-year Grid",
-    Path = "/Solar System/Grids"
+    Path = "/Solar System/Grids",
+    Description = [[A 1-light-year Cartesian grid aligned on the plane of the Solar System.]]
   }
 }
 
@@ -424,7 +434,8 @@ local Plane10ly = {
   },
   GUI = {
     Name = "A. 10-light-year Grid",
-    Path = "/Milky Way/Grids"
+    Path = "/Milky Way/Grids",
+    Description = [[A 10-light-year Cartesian grid aligned on the plane of the Solar System.]]
   }
 }
 
@@ -455,7 +466,8 @@ local Plane100ly = {
   },
   GUI = {
     Name = "B. 100-light-year Grid",
-    Path = "/Milky Way/Grids"
+    Path = "/Milky Way/Grids",
+    Description = [[A 100-light-year Cartesian grid aligned on the plane of the Solar System.]]
   }
 }
 
@@ -485,8 +497,9 @@ local Plane1kly = {
     Size = { 1000 * 2 * LightYear, 1000 * 2 * LightYear }
   },
   GUI = {
-    Name = "C. 1000-light-year Grid",
-    Path = "/Milky Way/Grids"
+    Name = "C. 1,000-light-year Grid",
+    Path = "/Milky Way/Grids",
+    Description = [[A 1,000-light-year Cartesian grid aligned on the plane of the Solar System.]]
   }
 }
 
@@ -517,7 +530,8 @@ local Plane10kly = {
   },
   GUI = {
     Name = "D. 10,000-light-year Grid",
-    Path = "/Milky Way/Grids"
+    Path = "/Milky Way/Grids",
+    Description = [[A 10,000-light-year Cartesian grid aligned on the plane of the Solar System.]]
   }
 }
 
@@ -543,7 +557,8 @@ local Plane100kly = {
   },
   GUI = {
     Name = "A. 100,000-light-year Grid",
-    Path = "/Universe/Grids"
+    Path = "/Universe/Grids",
+    Description = [[A 100,000-light-year Cartesian grid aligned on the plane of the Milky Way.]]
   }
 }
 
@@ -569,7 +584,8 @@ local Plane1Mly = {
   },
   GUI = {
     Name = "B. 1-million-light-year Grid",
-    Path = "/Universe/Grids"
+    Path = "/Universe/Grids",
+    Description = [[A 1-million-light-year Cartesian grid aligned on the plane of the Milky Way.]]
   }
 }
 
@@ -595,7 +611,8 @@ local Plane10Mly = {
   },
   GUI = {
     Name = "C. 10-million-light-year Grid",
-    Path = "/Universe/Grids"
+    Path = "/Universe/Grids",
+    Description = [[A 10-million-light-year Cartesian grid aligned on the plane of the Milky Way.]]
   }
 }
 
@@ -621,7 +638,8 @@ local Plane100Mly = {
   },
   GUI = {
     Name = "D. 100-million-light-year Grid",
-    Path = "/Universe/Grids"
+    Path = "/Universe/Grids",
+    Description = [[A 100-million-light-year Cartesian grid aligned on the plane of the Milky Way.]]
   }
 }
 
@@ -647,7 +665,8 @@ local Plane20Gly = {
   },
   GUI = {
     Name = "E. 20-billion-light-year Grid",
-    Path = "/Universe/Grids"
+    Path = "/Universe/Grids",
+    Description = [[A 20-billion-light-year Cartesian grid aligned on the plane of the Milky Way.]]
   }
 }
 
@@ -724,13 +743,7 @@ asset.export(Plane20Gly)
 asset.meta = {
   Name = "Grids",
   Version = "3.0",
-  Description = [[Various grids for showing size reference. Included: 10,000 light year
-    grid, 10 light year grid, 20 billion light year grid, 10 million light year grid,
-    100 light year grid, 100 million light year grid, Ecliptic Coordinate Sphere
-    (500-light-year radius), Galactic Coordinate Sphere (1000-light-year radius),
-    Galaxy Coordinate Grid, Celestial Coordinates / Radio Sphere (dynamic radius), 1
-    billion light year grid, Celestial Coordinate Sphere (1000000-light-year radius),
-    1,000 light year grid, 1 million light year grid, 1 light year grid]],
+  Description = [[Various grids and spheres for showing size reference. Included: 10,000 light year grid, 10 light year grid, 20 billion light year grid, 10 million light year grid, 100 light year grid, 100 million light year grid, Ecliptic Coordinate Sphere (500-light-year radius), Galactic Coordinate Sphere (1000-light-year radius), Galaxy Coordinate Grid, Celestial Coordinates / Radio Sphere (dynamic radius), 1 billion light year grid, Celestial Coordinate Sphere (1000000-light-year radius), 1,000 light year grid, 1 million light year grid, 1 light year grid.]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
