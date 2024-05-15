@@ -77,7 +77,7 @@ asset.export(OortSphere)
 asset.meta = {
   Name = "Oort Cloud Sphere",
   Version = "1.0",
-  Description = Object.GUI.description,
+  Description = OortSphere.GUI.description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
