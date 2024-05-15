@@ -15,6 +15,7 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "HIIRegions",
+  -- DU Version = 5.07
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,
@@ -40,8 +41,8 @@ local Object = {
   },
   GUI = {
     Name = "HII Regions",
-    Path = "/Milky Way",
-    Description = [[H II (H-two) regions are glowing clouds of hydrogen where the light from young stars are exciting and illuminating the gas that enshrouds them. They trace new star formation in the galaxy.]]
+    Path = "/Milky Way/Nebulae",
+    Description = [[HII (pronounced "H-two") regions are stellar nurseries for newborn stars. Stars are born from condensing clouds of hydrogen gas. As these clouds condense, the densities become high enough to form stars. An HII region is the surrounding clouds of hydrogen that glow from the stars born within them. The result is a bright, glowing nebula which is seen to great distances. One local celebrity among HII regions is the Orion Nebula (M42). These star-forming regions lie in the plane of the Galaxy because that is where star formation occurs in spiral galaxies such as our Milky Way. Because of this, they are great tracers of the spiral arms of the Galaxy. Census: 1,108 star-forming regions.]]
   }
 }
 
@@ -61,8 +62,7 @@ asset.export(Object)
 asset.meta = {
   Name = "HII Regions",
   Version = "2.1",
-  Description = "H II (H-two) regions are glowing clouds of hydrogen where the light from young stars are exciting and illuminating the gas that enshrouds them. They trace new star formation in the galaxy.",
-  Author = "Brian Abbott, Zack Reeves (AMNH)",
+  Description = Object.GUI.description,
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

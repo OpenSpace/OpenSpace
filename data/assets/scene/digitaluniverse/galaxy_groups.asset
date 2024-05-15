@@ -15,14 +15,15 @@ local TransformMatrix = {
 
 local Object = {
   Identifier = "NearbyGalaxyGroups",
+  -- DU Version = 1.02
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
     Labels = {
       Enabled = true,
       File = speck .. "groups.label",
-      Color = { 0.1, 0.6, 0.2 },
-      Size = 21.5,
+      Color = { 0.1, 0.4, 0.2 },
+      Size = 20.4,
       MinMaxSize = { 8, 20 },
       Unit = "Mpc",
       TransformationMatrix = TransformMatrix
@@ -33,11 +34,8 @@ local Object = {
   },
   GUI = {
     Name = "Galaxy Group Labels",
-    Path = "/Universe/Galaxies",
-    Description = [[Census: 62 galaxy group labels. DU Version 1.2. <br> The Galaxy
-    Groups data are a set of labels that mark the nearby galaxy groups. The Milky Way
-    is in the Local Group, and we are surrounded by many other groups.(Description
-    from URL) <br><br> Data Reference: Brian Abbott (AMNH)]]
+    Path = "/Universe/Local Universe",
+    Description = [[The Galaxy Groups data are a set of labels that mark the nearby galaxy groups. The Milky Way is in the Local Group, and we are surrounded by many other groups delineated by these labels. Census: 62 galaxy group labels.]]
   }
 }
 
@@ -58,7 +56,7 @@ asset.meta = {
   Name = "Galaxy Group Labels",
   Version = "2.0",
   Author = "Brian Abbott (AMNH)",
-  Description = "Digital Universe asset for Galaxy Groups",
+  Description = Object.GUI.description,
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

@@ -15,6 +15,7 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "PlanetaryNebulae",
+  -- DU Version = 3.09
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,
@@ -40,8 +41,8 @@ local Object = {
   },
   GUI = {
     Name = "Planetary Nebulae",
-    Path = "/Milky Way",
-    Description = [[A planetary nebula appears when an average-sized star begins to die. An expanding shell of gas is illuminated by the stellar remnant, creating a glowing gas cloud.]]
+    Path = "/Milky Way/Nebulae",
+    Description = [[A planetary nebula is an expanding shell of gas ejected from an average-sized star late in its life cycle. Appearing like greenish disks to a telescopic observer, planetary nebulae received their name from their resemblance to the gaseous planets of our solar system. In no way are they related to planets, rather, they are products of dying stars. As the gas from the star expands, it sweeps up the cooler gas like a snowplow. The gas glows because of the ultraviolet light from the stellar remnant at the center. Because the planetary nebula phase of a star's evolution is relatively short, we observe only those that have occurred recently in the younger stellar population. Therefore, we expect to see planetary nebulae in the disk of the Galaxy. Census: 1,657 planetary nebulae.]]
   }
 }
 
@@ -60,8 +61,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Planetary Nebulae",
-  Version = "3.1",
-  Description = "A planetary nebula appears when an average-sized star begins to die. An expanding shell of gas is illuminated by the stellar remnant, creating a glowing gas cloud.",
+  Version = "4.0",
+  Description = Object.GUI.description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

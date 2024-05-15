@@ -6,8 +6,9 @@ local speck = asset.resource({
 })
 
 
-local StarUncertainty = {
+local Object = {
   Identifier = "StarUncertainty",
+  -- DU Version = 1.08
   Renderable = {
     Type = "RenderableConstellationLines",
     Enabled = false,
@@ -23,7 +24,7 @@ local StarUncertainty = {
     LineWidth = 5.0,
     File = speck .. "star_uncertainty.speck",
     NamesFile = speck .. "star_uncertainty.dat",
-    Colors = { { 1.0, 1.0, 0.0 }, { 0.475, 0.941, 0.404 }, { 0.957, 0.51, 0.10 } },
+    Colors = { { 1.0, 1.0, 0.0 }, { 0.0, 0.8, 1.0 }, { 0.957, 0.51, 0.10 } },
     Unit = "pc",
     DimInAtmosphere = true
   },
@@ -31,27 +32,27 @@ local StarUncertainty = {
   GUI = {
     Name = "Star Distance Uncertainty",
     Path = "/Milky Way/Stars",
-    Description = [[The uncertainty of a star's position is derived from the uncertainty in its parallax measurement. This results in a range in distance where the star could exist. Green lines are stars with Gaia geometric parallax measurements (the most accurate), yellow lines are stars with Gaia photogeomentric parallaxes, and orange lines indicate stars with Hipparcos geometric parallaxes. The label includes the length of the uncertainty in light years.]]
+    Description = [[The uncertainty of a star's position is derived from the uncertainty in its parallax measurement. This results in a range in distance where the star could exist. Here we draw lines on top of select stars which give us a visual cue of the range in possible distances for that star. Colors: Aqua lines are stars with Gaia geometric parallax measurements (the most accurate), orange lines indicate stars with Hipparcos geometric parallaxes, and yellow lines are stars with Gaia photogeomentric parallaxes (the least accurate). The label includes the star name and the length of the uncertainty in light years. Census: 3,440 stars with uncertainty.]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(StarUncertainty)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(StarUncertainty)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(StarUncertainty)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "Star Distance Uncertainty",
   Version = "1.0",
-  Description = "The uncertainty of a star's position is derived from the uncertainty in its parallax measurement. This results in a range in distance where the star could exist. Green lines are stars with Gaia geometric parallax measurements (the most accurate), yellow lines are stars with Gaia photogeomentric parallaxes, and orange lines indicate stars with Hipparcos geometric parallaxes. The label includes the length of the uncertainty in light years.",
+  Description = Object.GUI.description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

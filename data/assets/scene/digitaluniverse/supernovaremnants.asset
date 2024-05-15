@@ -15,6 +15,7 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "SupernovaRemnants",
+  -- DU Version = 4.08
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,
@@ -40,8 +41,8 @@ local Object = {
   },
   GUI = {
     Name = "Supernova Remnants",
-    Path = "/Milky Way",
-    Description = [[A supernova remnant is the ejected gas that results from a supernova. It glows for a cosmically short period (hence we don't see many in our galaxy) of time before mixing with the interstellar medium.]]
+    Path = "/Milky Way/Nebulae",
+    Description = [[A supernova remnant is the nebulous gas left over from a supernova explosion. This gas expands at great speeds and rams into the surrounding interstellar gas. This excites the surrounding gas and causes it to glow, producing the nebulous cloud we observe from Earth. A supernova remnant contains a neutron star or pulsar at its center, the core of the dying star. The cloud that enshrouds the core does not last long, though. After about 50,000 years, the gas mixes into the interstellar medium and no longer glows. Astronomically, this is a very short time, so the supernova remnants we see must be left from explosions that have occurred recently, cosmically speaking. Census: 112 supernova remnants.]]
   }
 }
 
@@ -59,8 +60,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Supernova Remnants",
-  Version = "3.1",
-  Description = "A supernova remnant is the ejected gas that results from a supernova. It glows for a cosmically short period (hence we don't see many in our galaxy) of time before mixing with the interstellar medium.",
+  Version = "4.0",
+  Description = Object.GUI.description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

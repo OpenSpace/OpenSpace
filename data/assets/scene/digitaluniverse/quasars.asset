@@ -22,6 +22,7 @@ local colormaps = asset.resource({
 
 local Object = {
   Identifier = "Quasars",
+  -- DU Version = 4.03
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = true,
@@ -52,8 +53,8 @@ local Object = {
   },
   GUI = {
     Name = "Quasars",
-    Path = "/Universe",
-    Description = [[Quasars are the most distant objects we see. They are extremely active galaxies that contain supermassive black holes which are gobbling up material at a furious rate.]]
+    Path = "/Universe/Deep Sky Surveys",
+    Description = [[Quasars are the most distant objects we see. They are extremely active galaxies that contain supermassive black holes which gobble up material at a furious rate. As the material falls into the black hole, it forms a disk and emits high-energy light that we see to great distances. Census: 755,850 quasars.]]
   }
 }
 
@@ -73,7 +74,7 @@ asset.export(Object)
 asset.meta = {
   Name = "Quasars",
   Version = "4.0",
-  Description = "Quasars are the most distant objects we see. They are extremely active galaxies that contain supermassive black holes which are gobbling up material at a furious rate.",
+  Description = Object.GUI.description,
   Author = "Brian Abbott, Sohum Udani (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

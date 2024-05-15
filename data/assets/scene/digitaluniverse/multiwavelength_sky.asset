@@ -13,8 +13,42 @@ local textures = asset.resource({
 })
 
 
-local HAlpha = {
-  Identifier = "HAlpha",
+
+local AllSkyVisible = {
+    Identifier = "AllSkyVisible",
+    -- DU Version = 1.04
+    Transform = {
+      Rotation = {
+        Type = "StaticRotation",
+        Rotation = { 0, 0, math.pi }
+      }
+    },
+    Renderable = {
+      Type = "RenderableSphereImageLocal",
+      Size = 9.2E21,
+      Segments = 40,
+      Opacity = 0.25,
+      Texture = textures .. "DarkUniverse_mellinger_4k.jpg",
+      Orientation = "Inside",
+      MirrorTexture = true,
+      FadeOutThreshold = 0.0015,
+      Background = true,
+      DimInAtmosphere = true
+    },
+    Tag = { "daytime_hidden" },
+    GUI = {
+      Name = "Visible Milky Way",
+      Path = "/Milky Way/All Sky Images",
+      Description = [[An all-sky image of the night sky as our eye sees it (in the visible spectrum), with the stars removed. You will see the brightest part of the Galaxy if you look toward Galactic center toward the constellations Scorpius and Sagittarius. This bright haze is the light from millions of stars; the dark lanes are foreground dust clouds, obscuring our view of the stars behind them. Census: 1 all-sky image.]]
+    }
+  }
+
+
+
+
+local AllSkyHAlpha = {
+  Identifier = "AllSkyHAlpha",
+  -- DU Version = 2.02
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -34,30 +68,35 @@ local HAlpha = {
     Background = true
   },
   GUI = {
-    Name = "H Alpha",
+    Name = "Hydrogen Alpha",
     Path = "/Milky Way/All Sky Images",
-    Description = [[An image of the sky in hydrogen-alpha light, a narrow part of the visible, red spectrum. This image shows excited regions of gas, including star-forming regions and nebulae.]]
+    Description = [[Hydrogen-alpha is a term that describes light from the ground state of the hydrogen atom. When an electron in an atom moves from one energy level to a higher one, we say the atom is excited. When the electron moves back down to the lower energy level, light is released at a wavelength commensurate with the energy between the two levels. For the H-alpha line, this energy difference translates to a wavelength in the extreme red end of the visible spectrum. This survey of the sky is a snapshot of light from this wavelength.
+
+    One distinctive element of the sky at this wavelength is the presence of large, spherical bubbles surrounding hot stars. Many nebulae and star-forming regions are visible, including the Great Nebula of Orion. We also see that galaxies emit H-alpha light, including the Andromeda Galaxy and the faint M33, the large face-on spiral in Triangulum, and the Large and Small Magellanic Clouds (LMC and SMC) in the southern sky. Census: 1 all-sky image.]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(HAlpha)
+  openspace.addSceneGraphNode(AllSkyVisible)
+  openspace.addSceneGraphNode(AllSkyHAlpha)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HAlpha)
+  openspace.removeSceneGraphNode(AllSkyHAlpha)
+  openspace.removeSceneGraphNode(AllSkyVisible)
 end)
 
-asset.export(HAlpha)
+asset.export(AllSkyVisible)
+asset.export(AllSkyHAlpha)
 
 
 
 asset.meta = {
   Name = "The Multiwavelength Milky Way All-Sky Images",
   Version = "1.0",
-  Description = [[Various all-sky images taken by telescopes across the spectrum of light.]],
-  Author = "Brian Abbott (AMNH), OpenSpace Team",
+  Description = [[An asset with various all-sky images from the perspective of Earth, including the visible light and the Hydrogen-alpha light in the red end of the visible spectrum.]],
+  Author = "Brian Abbott, Carter Emmart (AMNH), OpenSpace Team",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }
