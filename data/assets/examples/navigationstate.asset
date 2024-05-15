@@ -3,7 +3,7 @@
 -- to manipulate the camera view
 
 local FlipUpsideDown = {
-  Identifier = "os.examples.FlipUpsideDown",
+  Identifier = "NavigationState_Example",
   Name = "Flip View Upside-Down",
   Command = [[
     -- Get the current navigation state
@@ -20,8 +20,10 @@ local FlipUpsideDown = {
     -- Set the navigation state with the new navigation state variable
     openspace.navigation.setNavigationState(newNavState) 
   ]],
-  GuiPath = "/Examples/View",
-  IsLocal = false
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/NavigationState"
+  }
 }
 
 asset.onInitialize(function()
