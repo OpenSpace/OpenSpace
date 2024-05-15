@@ -55,6 +55,7 @@
 #include <modules/base/rendering/renderablenodeline.h>
 #include <modules/base/rendering/renderablesphereimagelocal.h>
 #include <modules/base/rendering/renderablesphereimageonline.h>
+#include <modules/base/rendering/renderableswitch.h>
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplaneimagelocal.h>
@@ -162,6 +163,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableSphereImageOnline>(
         "RenderableSphereImageOnline"
     );
+    fRenderable->registerClass<RenderableSwitch>("RenderableSwitch");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
@@ -245,6 +247,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableRadialGrid::Documentation(),
         RenderableSphereImageLocal::Documentation(),
         RenderableSphereImageOnline::Documentation(),
+        RenderableSwitch::Documentation(),
         RenderableSphericalGrid::Documentation(),
         RenderableTimeVaryingSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),

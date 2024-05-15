@@ -62,6 +62,7 @@ set(HEADER_FILES
   rendering/renderablesphere.h
   rendering/renderablesphereimagelocal.h
   rendering/renderablesphereimageonline.h
+  rendering/renderableswitch.h
   rendering/renderabletimevaryingsphere.h
   rendering/renderabletrail.h
   rendering/renderabletrailorbit.h
@@ -125,6 +126,7 @@ set(SOURCE_FILES
   rendering/renderablesphere.cpp
   rendering/renderablesphereimagelocal.cpp
   rendering/renderablesphereimageonline.cpp
+  rendering/renderableswitch.cpp
   rendering/renderabletimevaryingsphere.cpp
   rendering/renderabletrail.cpp
   rendering/renderabletrailorbit.cpp

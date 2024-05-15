@@ -22,14 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESWITCH___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESWITCH___H__
 
+#include <modules/base/rendering/RenderablePlaneImageLocal.h>
 #include <modules/base/rendering/renderableplane.h>
-#include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtx/vector_angle.hpp> 
+#include <memory>
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+#include <modules/base/basemodule.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/crc32.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace openspace {
 
@@ -38,9 +54,9 @@ struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
-class RenderablePlaneImageLocal : public RenderablePlane {
+class RenderableSwitch : public Renderable {
 public:
-    RenderablePlaneImageLocal(const ghoul::Dictionary& dictionary);
+    RenderableSwitch(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -48,24 +64,16 @@ public:
     bool isReady() const override;
 
     void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    virtual void bindTexture() override;
-
 private:
-    void loadTexture();
-
-    properties::StringProperty _texturePath;
-    ghoul::opengl::Texture* _texture = nullptr;
-    glm::vec2 _textureDimensions = glm::vec2(0.f);
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
-
-    bool _isLoadingLazily = false;
-    bool _textureIsDirty = false;
+    std::unique_ptr<RenderablePlaneImageLocal> _renderable1;
+    std::unique_ptr<RenderablePlaneImageLocal> _renderable2;
+    float _distanceThreshold;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANEIMAGELOCAL___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESWITCH___H__
