@@ -15,6 +15,7 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "Exoplanets",
+  -- DU Version = 21.13
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
@@ -40,7 +41,7 @@ local Object = {
   GUI = {
     Name = "Exoplanets",
     Path = "/Milky Way/Exoplanets",
-    Description = [[Stars with known planetary systems.]]
+    Description = [[Extrasolar planets, or exoplanets, are a relatively new phenomenon in astronomy--no observational evidence was available until 1995. To the eye, exoplanets are lost in the glare of their host star. Unconventional techniques are required to infer or observe them. Here, exoplanet systems are represented by a blue ring centered on each host star. The ring is not intended to signify an orbit, but serve only as a marker. The labels list the host star name, and if there is more than one planet, will list the number of planets in parentheses. Census: 5,589 planets in 4,139 systems.]]
   }
 }
 
@@ -59,8 +60,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Exoplanets",
-  Version = "2.1",
-  Description = "Stars with known planetary systems.",
+  Version = "3.0",
+  Description = Object.GUI.description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

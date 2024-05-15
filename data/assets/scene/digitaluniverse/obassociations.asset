@@ -15,6 +15,7 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "OBAssociations",
+  -- DU Version  = 2.04
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,
@@ -48,8 +49,8 @@ local Object = {
   },
   GUI = {
     Name = "OB Associations",
-    Path = "/Milky Way",
-    Description = [[Stellar associations are loose agglomerations of stars that form from the same gas cloud. OB associations typically have on the order of dozens of O and B stars in them (hotter, massive, younger stars) in addition to cooler stars. Over time the stars dispurse and the association is less concentrated.]]
+    Path = "/Milky Way/Star Clusters",
+    Description = [[Stellar associations are loose agglomerations of stars that form from the same gas cloud. OB associations typically have on the order of dozens of O and B stars in them (hotter, massive, younger stars) in addition to cooler stars. Over time the stars dispurse and the association is less concentrated. These associations track relatviey recent star formation. Colors: Blue trace the Sagittarius Arm, Purple are in the local Orion Spur, and Orange are in the Perseus Arm. Census: 61 OB associations.]]
   }
 }
 
@@ -69,7 +70,7 @@ asset.export(Object)
 asset.meta = {
   Name = "OB Associations",
   Version = "3.1",
-  Description = "Stellar associations are loose agglomerations of stars that form from the same gas cloud. OB associations typically have on the order of dozens of O and B stars in them (hotter, massive, younger stars) in addition to cooler stars. Over time the stars dispurse and the association is less concentrated.",
+  Description = Object.GUI.description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

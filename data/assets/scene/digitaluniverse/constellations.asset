@@ -35,34 +35,10 @@ local function zodiacsString(zodiacsList)
   return zodiacsString
 end
 
--- local ConstellationsExtragalactic = {
---   Identifier = "ConstellationsExtragalactic",
---   Renderable = {
---     Type = "RenderableConstellationLines",
---     Enabled = false,
---     Labels = {
---       File = speck .. "constellationsEXGAL.label",
---       Opacity = 0.4,
---       Color = { 0.8, 0.8, 0.8 },
---       Size = 20.0,
---       MinMaxSize = { 20, 30 },
---       Unit = "Mpc"
---     },
---     Opacity = 0.4,
---     File = speck .. "constellationsEXGAL.speck",
---     NamesFile = speck .. "constellations.dat",
---     Colors = { { 0.6, 0.4, 0.4 }, { 0.8, 0.0, 0.0 }, { 0.0, 0.3, 0.8 } },
---     Unit = "Mpc",
---     -- Selection = zodiacs
---   },
---   GUI = {
---     Name = "Constellations (Extragalactic)",
---     Path = "/Milky Way/Constellations"
---   }
--- }
 
 local Constellations = {
   Identifier = "Constellations",
+  -- DU Version = 3.05
   Renderable = {
     Type = "RenderableConstellationLines",
     Enabled = false,
@@ -83,9 +59,9 @@ local Constellations = {
   },
   Tag = { "daytime_hidden" },
   GUI = {
-    Name = "Constellations",
+    Name = "Constellation Lines",
     Path = "/Milky Way/Constellations",
-    Description = [[Lines connecting the stars that make up the constellation figures.]]
+    Description = [[Lines connecting the stars that make up the constellation figures. We represent the constellations by connecting the main stars that make up the constellation "stick figures," as seen from Earth. Colors: most constellations are pink, while the zodical constellations are red. We also color Orion and Ursa Major blue as two recognizable constellations in the night sky. Census: 88 constellations.]]
   }
 }
 
@@ -129,7 +105,6 @@ local ShowZodiacs = {
 
 
 asset.onInitialize(function()
-  -- openspace.addSceneGraphNode(ConstellationsExtragalactic)
   openspace.addSceneGraphNode(Constellations)
 
   openspace.action.registerAction(ShowConstellations)
@@ -143,10 +118,8 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(ShowConstellations)
 
   openspace.removeSceneGraphNode(Constellations)
-  -- openspace.removeSceneGraphNode(ConstellationsExtragalactic)
 end)
 
--- asset.export(ConstellationsExtragalactic)
 asset.export(Constellations)
 asset.export("ShowConstellations", ShowConstellations.Identifier)
 asset.export("HideConstellations", HideConstellations.Identifier)
@@ -155,9 +128,8 @@ asset.export("ShowZodiacs", ShowZodiacs.Identifier)
 
 
 asset.meta = {
-  Name = "Constellation Lines",
-  Version = "1.4",
-  Description = "Lines connecting the stars that make up the constellation figures.",
+  Version = "2.0",
+  Description = Constellations.GUI.description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

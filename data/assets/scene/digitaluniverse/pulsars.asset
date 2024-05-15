@@ -15,6 +15,7 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "Pulsars",
+  -- DU Version = 7.07
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,
@@ -40,8 +41,8 @@ local Object = {
   },
   GUI = {
     Name = "Pulsars",
-    Path = "/Milky Way",
-    Description = [[A pulsar is a spinning neutron star, an ultra-dense stellar remnant resulting from a supernova-driven collapse of the stellar core.]]
+    Path = "/Milky Way/Stellar Remnants",
+    Description = [[A pulsar is a spinning neutron star, an ultra-dense stellar remnant resulting from a supernova-driven collapse of the stellar core. Upon death, stars leave behind one of three possible remnants: a white dwarf, a neutron star, or a black hole. Stars that are more massive than the sun will often become neutron stars in a violent explosion called a supernova. Pulsars are not pulsing but are spinning neutron stars whose beams of radiation point toward Earth just as a lighthouse sweeps the horizon. Their strong magnetic fields funnel beams of light from its poles. When these beams point to Earth, we see a strong radio signal. Census: 3,221 pulsars.]]
   }
 }
 
@@ -60,8 +61,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Pulsars",
-  Version = "3.1",
-  Description = "A pulsar is a spinning neutron star, an ultra-dense stellar remnant resulting from a supernova-driven collapse of the stellar core.",
+  Version = "4.0",
+  Description = Object.GUI.description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

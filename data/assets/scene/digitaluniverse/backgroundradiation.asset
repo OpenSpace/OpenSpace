@@ -14,34 +14,36 @@ local textures = asset.resource({
 
 
 local COBE = {
-    Identifier = "COBE",
-    Transform = {
-      Rotation = {
-        Type = "StaticRotation",
-        Rotation = { 0, 0, math.pi }
-      }
-    },
-    Renderable = {
-      Type = "RenderableSphereImageLocal",
-      Enabled = false,
-      Size = 3975.41417036064E23,
-      Segments = 80,
-      Opacity = 0.5,
-      Texture = textures .. "COBErect.png",
-      Orientation = "Both",
-      MirrorTexture = true,
-      FadeInThreshold = 0.4
-    },
-    GUI = {
-      Name = "1990 COBE CMB",
-      Path = "/Universe/Cosmic Microwave Background",
-      Description = [[In 1990, COBE, the Cosmic Background Explorer, took the first detailed map of the cosmic microwave background light. The red areas are relatively hotter areas of the CMB, while the blue areas are cooler than the average. The lines of latitude and longitude are baked into this image, and reflect galactic coordinates. Image resolution is 7 degrees.]]
+  Identifier = "COBE",
+  -- DU Version = 2.02
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.pi }
     }
+  },
+  Renderable = {
+    Type = "RenderableSphereImageLocal",
+    Enabled = false,
+    Size = 3975.41417036064E23,
+    Segments = 80,
+    Opacity = 0.5,
+    Texture = textures .. "COBErect.png",
+    Orientation = "Both",
+    MirrorTexture = true,
+    FadeInThreshold = 0.4
+  },
+  GUI = {
+    Name = "1990 COBE CMB",
+    Path = "/Universe/Cosmic Microwave Background",
+    Description = [[In 1990, COBE, the Cosmic Background Explorer, took the first detailed map of the cosmic microwave background light. The red areas are relatively hotter areas of the CMB, while the blue areas are cooler than the average. The lines of latitude and longitude are baked into this image, and reflect galactic coordinates. Image resolution is 7 degrees. Census: 1 all-sky image.]]
+  }
 }
 
   
 local WMAP = {
   Identifier = "WMAP",
+  -- DU Version = 4.02
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -62,13 +64,14 @@ local WMAP = {
   GUI = {
     Name = "2003 WMAP CMB",
     Path = "/Universe/Cosmic Microwave Background",
-    Description = [[WMAP, the Wilkinson Microwave Anisotropy Probe, released this all-sky image of the cosmic microwave background light in 2003. The blue colors are slightly cooler than average and red is slightly warmer, with fluctuations of about a 100,000th of a degree above or below the average. The resolution on this image is 0.5 degrees.]]
+    Description = [[WMAP, the Wilkinson Microwave Anisotropy Probe, released this all-sky image of the cosmic microwave background light in 2003. The blue colors are slightly cooler than average and red is slightly warmer, with fluctuations of about a 100,000th of a degree above or below the average. The resolution on this image is 0.5 degrees. Census: 1 all-sky image.]]
   }
 }
 
 
 local Planck = {
   Identifier = "Planck",
+  -- DU Version = 2.03
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -89,7 +92,7 @@ local Planck = {
   GUI = {
     Name = "2013 Planck CMB",
     Path = "/Universe/Cosmic Microwave Background",
-    Description = [[The Planck mission's image (2013) of the cosmic microwave background light release in 2013 is the most detailed view of the CMB we have to date. The orange areas represent the slightly hotter areas, and the blue areas show the areas that are slightly cooler. The resolution on this image is 0.16 degrees.]]
+    Description = [[The Planck mission's 2013 image of the cosmic microwave background light release is the most detailed view of the CMB we have to date. The orange areas represent the slightly hotter areas, and the blue areas show the areas that are slightly cooler. The resolution on this image is 0.16 degrees. Census: 1 all-sky image.]]
   }
 }
 

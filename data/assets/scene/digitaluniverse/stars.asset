@@ -29,6 +29,7 @@ local textures = asset.resource({
 
 local Stars = {
   Identifier = "Stars",
+  -- DU Version = 8.10
   Renderable = {
     Type = "RenderableStars",
     File = speck .. "stars.speck",
@@ -62,7 +63,7 @@ local Stars = {
   GUI = {
     Name = "Stars",
     Path = "/Milky Way/Stars",
-    Description = [[The nearby stars that surround the Sun and make up our night sky. The base catalog is Hipparcos, with Gaia DR3 data applied for distance and velocity when available.]]
+    Description = [[These are the nearby stars that surround the Sun and are close enough to get accurate distances. These include all the stars we see with the unaided eye and many stars dimmer than that. Over the entire night sky, all year round, and in the northern and southern hemispheres, we can see roughly 9,000 stars total with the unaided eye. Stars are the light factories of the universe, and come in a variety of sizes, colors, and brightnesses. The base catalog is Hipparcos, with Gaia DR3 data applied for distance and velocity when available. Census: 112,746 stars.]]
   }
 }
 
@@ -99,10 +100,9 @@ local SunStar = {
     DimInAtmosphere = true
   },
   GUI = {
-    Name = "Sun Star",
+    Name = "Sun",
     Path = "/Milky Way/Stars",
-    Description = [[Individual star to represent the sun when outside of the solar
-      system]]
+    Description = [[Individual star to represent the sun when outside of the solar system.]]
   }
 }
 
@@ -124,8 +124,8 @@ asset.export(SunStar)
 
 asset.meta = {
   Name = "Stars",
-  Version = "3.0",
-  Description = "The nearby stars that surround the Sun and make up our night sky. The base catalog is Hipparcos, with Gaia DR3 data applied for distance and velocity when available.",
+  Version = "4.0",
+  Description = Stars.GUI.description,
   Author = "Brian Abbott, Zack Reeves, Andrew Ayala, Jackie Faherty (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

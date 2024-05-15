@@ -15,6 +15,7 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "OpenStarClusters",
+  -- DU Version = 8.09
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,
@@ -40,8 +41,8 @@ local Object = {
   },
   GUI = {
     Name = "Open Star Clusters",
-    Path = "/Milky Way",
-    Description = [[Open star clusters in the Milky Way galaxy.]]
+    Path = "/Milky Way/Star Clusters",
+    Description = [[An open star cluster is a loose assemblage of stars numbering from hundreds to thousands that are bound by their mutual gravitation. Because these are young stars, we expect to see them in the star-forming regions of our Galaxy, namely in the spiral arms. For this reason, open clusters exist, for the most part, in the plane of the Galaxy and indicate relatively recent star formation. Census: 1,867 star clusters.]]
   }
 }
 
@@ -60,8 +61,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Open Star Clusters",
-  Version = "3.1",
-  Description = "Open star clusters in the Milky Way galaxy.",
+  Version = "4.0",
+  Description = Object.GUI.description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
