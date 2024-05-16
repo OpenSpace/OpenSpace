@@ -69,8 +69,8 @@ void SyncEngine::preSynchronization(IsMaster isMaster) {
 void SyncEngine::postSynchronization(IsMaster isMaster) {
     ZoneScoped;
 
-    for (Syncable* syncable : _syncables) {
-        syncable->postSync(isMaster);
+    for (size_t i = 0; i < _syncables.size(); i++) {
+        _syncables[i]->postSync(isMaster);
     }
 }
 
