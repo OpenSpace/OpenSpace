@@ -579,7 +579,14 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     });
 
-    _castShadow.onChange([]() {
+    _castShadow.onChange([this]() {
+        if (_castShadow) {
+            createDepthMapResources();
+        }
+        else {
+            releaseDepthMapResources();
+        }
+
         // To update list of shadowers for our parent
         global::eventEngine->publishEvent<events::CustomEvent>("Cast Shadow Changed", "nada");
     });
@@ -802,60 +809,7 @@ void RenderableModel::initializeGL() {
     setInteractionSphere(boundingSphere() * 0.1);
 
     if (_castShadow) {
-        _depthMapProgram = BaseModule::ProgramObjectManager.request(
-            "ModelDepthMapProgram",
-            [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                std::filesystem::path vs =
-                    absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl");
-                std::filesystem::path fs =
-                    absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl");
-
-                std::unique_ptr<ghoul::opengl::ProgramObject> prog =
-                    global::renderEngine->buildRenderProgram(
-                        "ModelDepthMapProgram",
-                        vs,
-                        fs
-                    );
-                prog->setIgnoreAttributeLocationError(
-                    ghoul::opengl::ProgramObject::IgnoreError::Yes
-                );
-                prog->setIgnoreUniformLocationError(
-                    ghoul::opengl::ProgramObject::IgnoreError::Yes
-                );
-                return prog;
-            }
-        );
-
-        // Twice the res
-        _depthMapResolution = global::renderEngine->renderingResolution();
-
-        glGenFramebuffers(1, &_depthMapFBO);
-
-        glGenTextures(1, &_depthMap);
-        glBindTexture(GL_TEXTURE_2D, _depthMap);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_DEPTH_COMPONENT,
-            _depthMapResolution.x,
-            _depthMapResolution.y,
-            0,
-            GL_DEPTH_COMPONENT,
-            GL_FLOAT,
-            nullptr
-        );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _depthMap, 0);
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        createDepthMapResources();
     }
 }
 
@@ -894,16 +848,79 @@ void RenderableModel::deinitializeGL() {
     ghoul::opengl::FramebufferObject::deactivate();
 
     if (_castShadow) {
+        releaseDepthMapResources();
+    }
+}
+
+void RenderableModel::createDepthMapResources() {
+    _depthMapProgram = BaseModule::ProgramObjectManager.request(
+        "ModelDepthMapProgram",
+        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            std::filesystem::path vs =
+                absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl");
+            std::filesystem::path fs =
+                absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl");
+
+            std::unique_ptr<ghoul::opengl::ProgramObject> prog =
+                global::renderEngine->buildRenderProgram(
+                    "ModelDepthMapProgram",
+                    vs,
+                    fs
+                );
+            prog->setIgnoreAttributeLocationError(
+                ghoul::opengl::ProgramObject::IgnoreError::Yes
+            );
+            prog->setIgnoreUniformLocationError(
+                ghoul::opengl::ProgramObject::IgnoreError::Yes
+            );
+            return prog;
+        }
+    );
+
+    // Twice the res
+    _depthMapResolution = global::renderEngine->renderingResolution();
+
+    glGenFramebuffers(1, &_depthMapFBO);
+
+    glGenTextures(1, &_depthMap);
+    glBindTexture(GL_TEXTURE_2D, _depthMap);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT,
+        _depthMapResolution.x,
+        _depthMapResolution.y,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void RenderableModel::releaseDepthMapResources() {
+    if (_depthMapProgram) {
         BaseModule::ProgramObjectManager.release(
-            "ModelDepthMapProgram",
+            _depthMapProgram->name(),
             [](ghoul::opengl::ProgramObject* p) {
                 global::renderEngine->removeRenderProgram(p);
             }
         );
-
-        glDeleteFramebuffers(1, &_depthMapFBO);
-        glDeleteTextures(1, &_depthMap);
     }
+
+    glDeleteFramebuffers(1, &_depthMapFBO);
+    glDeleteTextures(1, &_depthMap);
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
