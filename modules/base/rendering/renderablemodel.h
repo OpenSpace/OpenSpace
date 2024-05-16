@@ -67,6 +67,8 @@ public:
     void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
+    void createDepthMapResources();
+    void releaseDepthMapResources();
 
     bool isReady() const override;
 
