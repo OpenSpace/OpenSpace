@@ -109,6 +109,15 @@ namespace {
     return e;
 }
 
+/**
+ * Creates a directory at the provided path, returns true if directory was newly created
+ * and false otherwise
+ */
+[[codegen::luawrap]] bool createDirectory(std::filesystem::path path) {
+    const bool e = std::filesystem::create_directory(std::move(path));
+    return e;
+}
+
 std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
                                               bool recursive, bool sorted,
                                  std::function<bool(const std::filesystem::path&)> filter)
