@@ -103,7 +103,7 @@ namespace {
     return contents;
 }
 
-// Checks whether the provided file exists.
+// Checks whether the provided directory exists.
 [[codegen::luawrap]] bool directoryExists(std::filesystem::path file) {
     const bool e = std::filesystem::is_directory(absPath(std::move(file)));
     return e;
