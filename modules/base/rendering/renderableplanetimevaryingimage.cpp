@@ -44,9 +44,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
         "Source Folder",
-        "An image directory that is loaded from disk and contains the textures to use "
-        "for this plane.",
-        openspace::properties::Property::Visibility::AdvancedUser
+       "An image directory that is loaded from disk and contains the textures to use "
+       "for this plane.",
+       openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {

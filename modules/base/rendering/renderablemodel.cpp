@@ -131,7 +131,7 @@ namespace {
         "ModelScale",
         "Model Scale",
         "The scale of the model. If a numeric value is provided in the asset file, the scale "
-        "will be that exact value. If instead a unit name is provided in the asset, this "
+        "will be that exact value. If instead a unit name is provided, this "
         "is the value that that name represents. For example 'Centimeter' becomes 0.01.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

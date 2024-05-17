@@ -50,7 +50,7 @@ namespace {
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
         // The file or files that should be loaded, that specifies the model to load. The
         // file can contain filesystem tokens or can be specified relative to the
-        // location of the `.asset` file.
+        // location of the asset file.
         std::filesystem::path geometryFile;
 
         enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {

@@ -70,7 +70,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The width of the lines. The larger number, the thicker lines.",
+        "The width of the lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::User
     };
 
