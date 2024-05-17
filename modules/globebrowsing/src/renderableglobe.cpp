@@ -929,8 +929,7 @@ void RenderableGlobe::update(const UpdateData& data) {
 
         ghoul::opengl::updateUniformLocations(
             *_localRenderer.program,
-            _localRenderer.uniformCache,
-            { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalCameraSpace" }
+            _localRenderer.uniformCache
         );
     }
 
@@ -947,8 +946,7 @@ void RenderableGlobe::update(const UpdateData& data) {
 
         ghoul::opengl::updateUniformLocations(
             *_globalRenderer.program,
-            _globalRenderer.uniformCache,
-            { "skirtLength", "minLatLon", "lonLatScalingFactor" }
+            _globalRenderer.uniformCache
         );
     }
 
@@ -1866,8 +1864,7 @@ void RenderableGlobe::recompileShaders() {
 
     ghoul::opengl::updateUniformLocations(
         *_localRenderer.program,
-        _localRenderer.uniformCache,
-        { "skirtLength", "p01", "p11", "p00", "p10", "patchNormalCameraSpace" }
+        _localRenderer.uniformCache
     );
 
 
@@ -1893,8 +1890,7 @@ void RenderableGlobe::recompileShaders() {
 
     ghoul::opengl::updateUniformLocations(
         *_globalRenderer.program,
-        _globalRenderer.uniformCache,
-        { "skirtLength", "minLatLon", "lonLatScalingFactor" }
+        _globalRenderer.uniformCache
     );
 
     _globalRenderer.updatedSinceLastCall = true;

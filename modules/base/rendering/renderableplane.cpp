@@ -41,11 +41,6 @@
 #include <variant>
 
 namespace {
-    constexpr std::array<const char*, 6> UniformNames = {
-        "modelViewProjection", "modelViewTransform", "colorTexture", "opacity",
-        "mirrorBackside", "multiplyColor"
-    };
-
     enum BlendMode {
         Normal = 0,
         Additive
@@ -108,6 +103,9 @@ namespace {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::variant<float, glm::vec2> size;
 
+        // [[codegen::verbatim(AutoScaleInfo.description)]]
+        std::optional<bool> autoScale;
+
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
             Additive
@@ -138,6 +136,11 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
 
+    _opacity.onChange([this]() {
+        if (_blendMode == static_cast<int>(BlendMode::Normal)) {
+            setRenderBinFromOpacity();
+        }
+    });
     addProperty(Fadeable::_opacity);
 
     if (std::holds_alternative<float>(p.size)) {
@@ -146,9 +149,9 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     else {
         _size = std::get<glm::vec2>(p.size);
     }
-
-    _billboard = p.billboard.value_or(_billboard);
-    _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
+    _size.setExponent(15.f);
+    _size.onChange([this]() { _planeIsDirty = true; });
+    addProperty(_size);
 
     _blendMode.addOptions({
         { static_cast<int>(BlendMode::Normal), "Normal" },
@@ -166,27 +169,22 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         }
     });
 
-    _opacity.onChange([this]() {
-        if (_blendMode == static_cast<int>(BlendMode::Normal)) {
-            setRenderBinFromOpacity();
-        }
-    });
-
     if (p.blendMode.has_value()) {
         _blendMode = codegen::map<BlendMode>(*p.blendMode);
     }
+    addProperty(_blendMode);
+
+    _billboard = p.billboard.value_or(_billboard);
+    addProperty(_billboard);
+
+    _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
+    addProperty(_mirrorBackside);
+
+    _autoScale = p.autoScale.value_or(_autoScale);
+    addProperty(_autoScale);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
-
-    addProperty(_billboard);
-
-    _size.setExponent(15.f);
-    addProperty(_size);
-    _size.onChange([this](){ _planeIsDirty = true; });
-
-    addProperty(_autoScale);
-
     addProperty(_multiplyColor);
 
     setBoundingSphere(glm::compMax(_size.value()));
@@ -214,7 +212,7 @@ void RenderablePlane::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderablePlane::deinitializeGL() {
@@ -310,7 +308,7 @@ void RenderablePlane::update(const UpdateData&) {
 
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_planeIsDirty) {

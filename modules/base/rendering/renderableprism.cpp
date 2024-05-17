@@ -37,10 +37,6 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 2> UniformNames = {
-        "modelViewProjectionTransform", "vs_color"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
@@ -183,7 +179,7 @@ void RenderablePrism::initializeGL() {
         absPath("${MODULE_BASE}/shaders/prism_vs.glsl"),
         absPath("${MODULE_BASE}/shaders/prism_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     glGenVertexArrays(1, &_vaoId);
     glGenBuffers(1, &_vboId);
@@ -326,7 +322,7 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
 
     // Uniforms
     _shader->setUniform(
-        _uniformCache.modelViewProjection,
+        _uniformCache.modelViewProjectionTransform,
         glm::mat4(modelViewProjectionTransform)
     );
     _shader->setUniform(_uniformCache.color, glm::vec4(_lineColor.value(), opacity()));
@@ -354,7 +350,7 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
 void RenderablePrism::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
     if (_prismIsDirty) {
         updateVertexData();

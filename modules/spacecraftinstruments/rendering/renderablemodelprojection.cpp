@@ -39,20 +39,6 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr std::array<const char*, 7> MainUniformNames = {
-        "performShading", "directionToSunViewSpace", "modelViewTransform",
-        "projectionTransform", "projectionFading", "baseTexture", "projectionTexture"
-    };
-
-    constexpr std::array<const char*, 6> FboUniformNames = {
-        "projectionTexture", "depthTexture", "needShadowMap", "ProjectorMatrix",
-        "ModelTransform", "boresight"
-    };
-
-    constexpr std::array<const char*, 2> DepthFboUniformNames = {
-        "ProjectorMatrix", "ModelTransform"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform Shading",
@@ -165,11 +151,7 @@ void RenderableModelProjection::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(
-        *_programObject,
-        _mainUniformCache,
-        MainUniformNames
-    );
+    ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build(
         "ProjectionPass",
@@ -181,11 +163,7 @@ void RenderableModelProjection::initializeGL() {
         )
     );
 
-    ghoul::opengl::updateUniformLocations(
-        *_fboProgramObject,
-        _fboUniformCache,
-        FboUniformNames
-    );
+    ghoul::opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
 
     _depthFboProgramObject = ghoul::opengl::ProgramObject::Build(
         "DepthPass",
@@ -193,15 +171,12 @@ void RenderableModelProjection::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(
-        *_depthFboProgramObject,
-        _depthFboUniformCache,
-        DepthFboUniformNames
-    );
+    ghoul::opengl::updateUniformLocations(*_depthFboProgramObject, _depthFboUniformCache);
 
     _projectionComponent.initializeGL();
 
     _geometry->initialize();
+    _geometry->calculateBoundingRadius();
     setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 
     // Set Interaction sphere size to be 10% of the bounding sphere
@@ -308,21 +283,13 @@ void RenderableModelProjection::update(const UpdateData& data) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(
-            *_programObject,
-            _mainUniformCache,
-            MainUniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
     }
 
     if (_fboProgramObject->isDirty()) {
         _fboProgramObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(
-            *_fboProgramObject,
-            _fboUniformCache,
-            FboUniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
     }
 
     _projectionComponent.update();
@@ -332,8 +299,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
 
         ghoul::opengl::updateUniformLocations(
             *_depthFboProgramObject,
-            _depthFboUniformCache,
-            DepthFboUniformNames
+            _depthFboUniformCache
         );
     }
 

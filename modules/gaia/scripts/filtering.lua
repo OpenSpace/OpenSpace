@@ -13,11 +13,6 @@ openspace.gaia.documentation = {
         Name = "addClippingSphere",
         Arguments = { name = "String", radius = "Number" },
         Documentation = "Creates a clipping sphere for the Gaia renderable in the first argument"
-    },
-    {
-        Name = "removeClippingBox",
-        Arguments = {},
-        Documentation = ""
     }
 }
 

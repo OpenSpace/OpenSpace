@@ -1,0 +1,32 @@
+-- Limit Max Size
+-- This example creates a point cloud where the size of the points is limited to a
+-- given max size. The color is set to a fixed value.
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_MaxSize",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.0, 0.8, 0.8 }
+    },
+    -- Set the max size of the points. The larger the "MaxSize" value, the larger the
+    -- points are allowed to get when moving the camera closer to them
+    SizeSettings = {
+      MaxSize = 0.7,
+      EnableMaxSizeControl = true
+    }
+  },
+  GUI = {
+    Name = "Max Size",
+    Path = "/Examples/RenderablePointCloud"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

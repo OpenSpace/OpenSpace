@@ -1,0 +1,59 @@
+-- Basic
+-- This example file adds a layer to a globe that has a base layer and then replaces one
+-- hemisphere of the planet with a single image. Recommended reading for this example is
+-- the documentation on the DefaultTileProvider.
+
+-- Download some example images that we can use
+local images = asset.resource({
+  Name = "Earth Textures",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures",
+  Version = 3
+})
+
+-- Define the TileProvider
+local TileProvider = {
+  Identifier = "Example",
+  Type = "TileProviderByIndex",
+  Enabled = true,
+  -- The default tile provider that is used for the whole globe
+  DefaultTileProvider = {
+    Identifier = "Blue_Marble",
+    FilePath = images .. "earth_bluemarble.jpg"
+  },
+  TileProviders = {
+    -- We only define one additional tile provider that overwrites the right
+    -- hemisphere of the globe
+    {
+      Index = { X = 0, Y = 0, Level = 2 },
+      TileProvider = {
+        Identifier = "Blue_Marble_Night",
+        FilePath = images .. "earth_night.png"
+      }
+    }
+  }
+}
+
+-- Define the scene graph node
+local Node = {
+  Identifier = "TileProviderByIndex_Example",
+  Renderable = {
+    Type = "RenderableGlobe",
+    Layers = {
+      -- The globe has exactly one layer, which is the one we defined above
+      ColorLayers = { TileProvider }
+    }
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/TileProviderByIndex"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

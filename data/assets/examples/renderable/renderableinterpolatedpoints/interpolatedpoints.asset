@@ -1,0 +1,30 @@
+-- Basic
+-- This example creates a point cloud that supports interpolation. The dataset is split
+-- up into 10 objects, so that every tenth row represents a new position for an item at a
+-- step in the interpolation.
+
+local Node = {
+  Identifier = "RenderableInterpolatedPoints_Example",
+  Renderable = {
+    Type = "RenderableInterpolatedPoints",
+    -- The dataset here is just a linearly expanding dataset, where the points move in
+    -- a straight line
+    File = asset.resource("data/interpolation_expand.csv"),
+    -- Specify how many objects the rows in the dataset represent. Here, the dataset is
+    -- consists of 10 objects with positions at 6 different time steps. This information
+    -- is required
+    NumberOfObjects = 10
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/RenderableInterpolatedPoints"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

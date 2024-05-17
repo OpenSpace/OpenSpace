@@ -1,0 +1,28 @@
+-- Light Speed Indicator
+-- This example creates a speed indicator; a line that travels with the speed of
+-- light from the parent node (Earth) to the target node (the Moon). By default, the
+-- length of the line is set to match the distance traveled over 1 second.
+
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+local Node = {
+  Identifier = "RenderableTravelSpeed_Example",
+  Parent = earthAsset.Earth.Identifier,
+  Renderable = {
+    Type = "RenderableTravelSpeed",
+    Target = moonAsset.Moon.Identifier
+  },
+   GUI = {
+     Name = "Light Speed Indicator",
+    Path = "/Examples/RenderableTravelSpeed"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

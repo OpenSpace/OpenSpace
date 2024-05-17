@@ -1,14 +1,16 @@
-local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+-- Advanced Color Mapping
+-- This example shows almost all the available settings for the color mapping used
+-- for point clouds. This includes handling missing data values, using
+-- separate colors for values outside the data range used for the color mapping, as well
+-- as setting the default parameter and range.
+
 local colormaps = asset.require("util/default_colormaps")
 
-
-
-local Example = {
-  Identifier = "ExamplePoints_ColorMapping",
-  Parent = earthAsset.Earth.Identifier,
+local Node = {
+  Identifier = "RenderablePointCloud_Example_AdvancedColorMapping",
   Renderable = {
     Type = "RenderablePointCloud",
-    File = asset.resource("data/dummydata.csv"),
+    File = asset.resource("../data/dummydata.csv"),
     Coloring = {
       ColorMapping = {
         -- Use white-to-black color map
@@ -50,8 +52,8 @@ local Example = {
     }
   },
   GUI = {
-    Name = "Advanced Color Mapping Settings",
-    Path = "/Example/Point Clouds",
+    Name = "Advanced Color Mapping",
+    Path = "/Examples/RenderablePointCloud/Advanced",
     Description = [[Example of a point cloud where the range is set explicitly and
       specific colors are used for values outside the range, as well as for missing
       data values.]]
@@ -60,24 +62,9 @@ local Example = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Example)
+  openspace.addSceneGraphNode(Node)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(Example)
+  openspace.removeSceneGraphNode(Node)
 end)
-
-asset.export(Example)
-
-
-
-asset.meta = {
-  Name = "Example - Advanced Color Mapping Settings",
-  Version = "1.0",
-  Description = [[Example of a point cloud where the range is set explicitly and
-    specific colors are used for values outside the range, as well as for missing
-    data values]],
-  Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
-  License = "MIT license"
-}
