@@ -26,6 +26,7 @@
 
 #include <modules/base/basemodule.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
+#include <modules/base/rendering/directionallightsource.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -41,6 +42,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
 #include <ghoul/io/model/modelgeometry.h>
+
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
@@ -347,6 +349,10 @@ namespace {
 
         // [[codegen::verbatim(CastShadowInfo.description)]]
         std::optional<bool> castShadow;
+
+        std::optional<std::string> lightSource;
+
+        std::optional<std::string> shadowGroup;
     };
 #include "renderablemodel_codegen.cpp"
 } // namespace
@@ -507,6 +513,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _useCache = p.useCache.value_or(_useCache);
     _castShadow = p.castShadow.value_or(_castShadow);
+    _lightSource = p.lightSource.value_or("");
+    _shadowGroup = p.shadowGroup.value_or("");
 
     addProperty(_enableAnimation);
     addPropertySubOwner(_lightSourcePropertyOwner);
@@ -619,6 +627,24 @@ void RenderableModel::initialize() {
 
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
+
+        if (_castShadow) {
+            SceneGraphLightSource* ptr = dynamic_cast<SceneGraphLightSource*>(ls.get());
+            if (ptr != nullptr) {
+                const auto parent = this->parent();
+                ptr->registerShadowCaster(parent->identifier());
+            }
+        }
+    }
+
+    if (_lightSource.size() > 0) {
+        SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(_lightSource);
+        if (node != nullptr) {
+            DirectionalLightSource* src = dynamic_cast<DirectionalLightSource*>(node->renderable());
+            if (src != nullptr) {
+                src->registerShadowCaster(_shadowGroup, parent()->identifier());
+            }
+        }
     }
 }
 
@@ -876,37 +902,6 @@ void RenderableModel::createDepthMapResources() {
             return prog;
         }
     );
-
-    // Twice the res
-    _depthMapResolution = global::renderEngine->renderingResolution();
-
-    glGenFramebuffers(1, &_depthMapFBO);
-
-    glGenTextures(1, &_depthMap);
-    glBindTexture(GL_TEXTURE_2D, _depthMap);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_DEPTH_COMPONENT,
-        _depthMapResolution.x,
-        _depthMapResolution.y,
-        0,
-        GL_DEPTH_COMPONENT,
-        GL_FLOAT,
-        nullptr
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _depthMap, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void RenderableModel::releaseDepthMapResources() {
@@ -918,9 +913,6 @@ void RenderableModel::releaseDepthMapResources() {
             }
         );
     }
-
-    glDeleteFramebuffers(1, &_depthMapFBO);
-    glDeleteTextures(1, &_depthMap);
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
@@ -1041,7 +1033,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _program->setUniform("has_shadow_depth_map", _castShadow);
 
     if (_castShadow) {
-        _program->setUniform("model", modelTransform);
+        /*_program->setUniform("model", modelTransform);
         _program->setUniform("light_vp", _lightVP);
         _program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
 
@@ -1050,7 +1042,29 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glBindTexture(
             GL_TEXTURE_2D,
             _depthMap
-        );
+        );*/
+
+        if (_lightSource.size() > 0) {
+            SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(_lightSource);
+            if (node != nullptr) {
+                DirectionalLightSource* src = dynamic_cast<DirectionalLightSource*>(node->renderable());
+                if (src != nullptr) {
+                    GLuint depthMap = src->depthMap(_shadowGroup);
+                    glm::dmat4 vp = src->viewProjectionMatrix(_shadowGroup);
+
+                    _program->setUniform("model", modelTransform);
+                    _program->setUniform("light_vp", vp);
+                    _program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
+
+                    _program->setUniform("shadow_depth_map", 13);
+                    glActiveTexture(GL_TEXTURE13);
+                    glBindTexture(
+                        GL_TEXTURE_2D,
+                        depthMap
+                    );
+                }
+            }
+        }
     }
 
     if (!_shouldRenderTwice) {
@@ -1301,77 +1315,44 @@ const bool RenderableModel::isCastingShadow() const {
     return _castShadow;
 }
 
-std::optional<RenderableModel::DepthMapData> RenderableModel::renderDepthMap() const {
-    if (_lightSources.size() < 1) {
-        return std::nullopt;
-    }
-
-    const openspace::SceneGraphLightSource* light =
-        dynamic_cast<const openspace::SceneGraphLightSource*>(_lightSources.front().get());
-
-    GLint prevProg;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &prevProg);
-
-    GLint prevFbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-
-    GLint prevVp[4];
-    glGetIntegerv(GL_VIEWPORT, prevVp);
-
+void RenderableModel::renderForDepthMap(const glm::dmat4& vp) const {
     _depthMapProgram->activate();
 
-    const double frustumSize = static_cast<double>(_frustumSize);
-    const double distance = frustumSize * 500.;
-
-    // Model
     glm::dmat4 transform = glm::translate(glm::dmat4(1), glm::dvec3(_pivot.value()));
     transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
     glm::dmat4 model = this->parent()->modelTransform() * transform;
 
-    // View
-    glm::dvec3 center;
-    if (_modelHasAnimation) {
-        center = model * glm::dvec4(_geometry->center(), 1.);
-    }
-    else {
-        center = dynamic_cast<SceneGraphNode*>(this->owner())->worldPosition();
-    }
-
-    glm::dvec3 light_dir = glm::normalize(center - light->positionWorldSpace());
-    glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), light_dir));
-    glm::dvec3 eye = center - light_dir * distance;
-    glm::dvec3 up = glm::cross(right, light_dir);
-    glm::dmat4 view = glm::lookAt(eye, center, up);
-
-    // Projection
-    glm::dmat4 projection = glm::ortho(
-        -frustumSize,
-        frustumSize,
-        -frustumSize,
-        frustumSize,
-        distance - frustumSize,
-        distance + frustumSize
-    );
-
-    _lightVP = projection * view;
     _depthMapProgram->setUniform("model", model);
-    _depthMapProgram->setUniform("light_vp", _lightVP);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
-    glViewport(0, 0, _depthMapResolution.x, _depthMapResolution.y);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    _depthMapProgram->setUniform("light_vp", vp);
 
     glCullFace(GL_FRONT);
     if (isEnabled()) {
         _geometry->render(*_depthMapProgram, false, true);
     }
     glCullFace(GL_BACK);
-
-    glUseProgram(prevProg);
-    glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
-    glViewport(prevVp[0], prevVp[1], prevVp[2], prevVp[3]);
-
-    return std::optional<RenderableModel::DepthMapData>({ _lightVP, _depthMap });
 }
+
+glm::dvec3 RenderableModel::center() const {
+    glm::dmat4 transform = glm::translate(glm::dmat4(1), glm::dvec3(_pivot.value()));
+    transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
+    glm::dmat4 model = this->parent()->modelTransform() * transform;
+    if (_modelHasAnimation) {
+        return model * glm::dvec4(_geometry->center(), 1.);
+    }
+
+    return model * glm::dvec4(0, 0, 0, 1);
+}
+
+const std::string RenderableModel::lightsource() const {
+    return _lightSource;
+}
+
+const std::string RenderableModel::shadowGroup() const {
+    return _shadowGroup;
+}
+const double RenderableModel::shadowFrustumSize() const {
+    return _frustumSize;
+}
+
 
 }  // namespace openspace
