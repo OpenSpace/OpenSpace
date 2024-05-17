@@ -1020,8 +1020,8 @@ void RenderableGlobe::update(const UpdateData& data) {
     const events::Event* e = global::eventEngine->firstEvent();
     while (e) {
         switch (e->type) {
-            case events::Event::Type::SceneGraphNodeAdded:
-            case events::Event::Type::SceneGraphNodeRemoved:
+            case events::Event::Type::PropertyTreeUpdated:
+            case events::Event::Type::PropertyTreePruned:
             case events::Event::Type::RenderableDisabled:
             case events::Event::Type::RenderableEnabled:
             case events::Event::Type::Custom:

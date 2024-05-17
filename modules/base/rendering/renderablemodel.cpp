@@ -627,14 +627,6 @@ void RenderableModel::initialize() {
 
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
-
-        if (_castShadow) {
-            SceneGraphLightSource* ptr = dynamic_cast<SceneGraphLightSource*>(ls.get());
-            if (ptr != nullptr) {
-                const auto parent = this->parent();
-                ptr->registerShadowCaster(parent->identifier());
-            }
-        }
     }
 
     if (_lightSource.size() > 0) {

@@ -95,7 +95,6 @@ inline interaction::InteractionMonitor* interactionMonitor;
 inline interaction::JoystickInputStates* joystickInputStates;
 inline interaction::WebsocketInputStates* websocketInputStates;
 inline interaction::KeybindingManager* keybindingManager;
-inline interaction::KeyframeRecording* keyframeRecording;
 inline interaction::NavigationHandler* navigationHandler;
 inline interaction::SessionRecording* sessionRecording;
 inline interaction::KeyframeRecording* keyframeRecording;
