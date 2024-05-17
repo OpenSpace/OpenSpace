@@ -294,8 +294,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
         "Outline Color",
-        "The color of the outline. Darker colors will be less visible if Additive "
-        "Blending is enabled.",
+        "The color of the outline. Darker colors will be less visible if \"Additive "
+        "Blending\" is enabled.",
         openspace::properties::Property::Visibility::User
     };
 
