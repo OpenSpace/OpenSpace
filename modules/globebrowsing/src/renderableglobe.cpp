@@ -1030,6 +1030,11 @@ void RenderableGlobe::update(const UpdateData& data) {
                 if (prevSize != _shadowers.size()) {
                     _shadowersUpdated = true;
                     _shadowersOk = false;
+
+                    _shadowSpec.clear();
+                    for (const auto model : _shadowers) {
+                        _shadowSpec[model->lightsource()].push_back(model->shadowGroup());
+                    }
                 }
                 break;
         }
@@ -1307,12 +1312,20 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
     }
 
-    std::vector<RenderableModel::DepthMapData> depthMapData;
-    for (const RenderableModel* model : _shadowers) {
-        if (model->isReady()) {
-            const std::optional<RenderableModel::DepthMapData> data = model->renderDepthMap();
-            if (data.has_value()) {
-                depthMapData.push_back(data.value());
+    std::vector<DirectionalLightSource::DepthMapData> depthMapData;
+    for (const auto& [key, groups] : _shadowSpec) {
+        const auto node = global::renderEngine->scene()->sceneGraphNode(key);
+        if (node != nullptr) {
+            const auto src = dynamic_cast<DirectionalLightSource*>(node->renderable());
+            if (src != nullptr) {
+                for (const auto& grp : groups) {
+                    depthMapData.push_back(
+                        {
+                        .viewProjecion = src->viewProjectionMatrix(grp),
+                        .depthMap = src->depthMap(grp)
+                        }
+                    );
+                }
             }
         }
     }
@@ -1512,7 +1525,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data,
                                          const ShadowComponent::ShadowMapData& shadowData,
                                          bool renderGeomOnly,
-                                         std::vector<RenderableModel::DepthMapData> depthMapData)
+                                         std::vector<DirectionalLightSource::DepthMapData> depthMapData)
 {
     ZoneScoped;
     TracyGpuZone("renderChunkLocally");
@@ -1638,7 +1651,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     std::vector<glm::dmat4> light_vps;
     std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
-    for (const RenderableModel::DepthMapData& data : depthMapData) {
+    for (const DirectionalLightSource::DepthMapData& data : depthMapData) {
         light_vps.push_back(data.viewProjecion);
         depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), data.depthMap);
     }
@@ -1937,7 +1950,12 @@ void RenderableGlobe::recompileShaders() {
 
     // Local shader uses depthmap shadows
     shaderDictionary.setValue("useDepthmapShadows", 1);
-    shaderDictionary.setValue("nDepthMaps", static_cast<int>(_shadowers.size()));
+    int nmaps = 0;
+    for (const auto& [src, grps] : _shadowSpec) {
+        nmaps += static_cast<int>(grps.size());
+    }
+
+    shaderDictionary.setValue("nDepthMaps", nmaps);
     //
     // Create local shader
     //

@@ -56,10 +56,6 @@ namespace documentation { struct Documentation; }
 
 class RenderableModel : public Renderable {
 public:
-    struct DepthMapData {
-        glm::dmat4 viewProjecion;
-        GLuint depthMap;
-    };
 
     RenderableModel(const ghoul::Dictionary& dictionary);
     ~RenderableModel() override = default;
@@ -76,7 +72,14 @@ public:
     void update(const UpdateData& data) override;
 
     const bool isCastingShadow() const;
-    std::optional<DepthMapData> renderDepthMap() const;
+
+    void renderForDepthMap(const glm::dmat4& vp) const;
+
+    glm::dvec3 center() const;
+
+    const std::string lightsource() const;
+    const std::string shadowGroup() const;
+    const double shadowFrustumSize() const;
 
     static documentation::Documentation Documentation();
 
@@ -119,6 +122,8 @@ private:
 
     properties::BoolProperty _useCache;
     properties::BoolProperty _castShadow;
+    std::string _lightSource;
+    std::string _shadowGroup;
 
     bool _autoSizeFrustum = false;
 
@@ -156,10 +161,6 @@ private:
     // Store the original RenderBin
     Renderable::RenderBin _originalRenderBin;
 
-    GLuint _depthMapFBO = 0;
-    GLuint _depthMap = 0;
-    glm::ivec2 _depthMapResolution;
-    mutable glm::dmat4 _lightVP;
     ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
 };
 

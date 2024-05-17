@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 #include <modules/base/rendering/renderablemodel.h>
+#include <modules/base/rendering/directionallightsource.h>
 #include <modules/globebrowsing/src/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
@@ -223,7 +224,7 @@ private:
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
         const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false,
-        std::vector<RenderableModel::DepthMapData> depthMapData = {}
+        std::vector<DirectionalLightSource::DepthMapData> depthMapData = {}
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
@@ -312,6 +313,8 @@ private:
     std::vector<const RenderableModel*> _shadowers;
     bool _shadowersUpdated = false;
     bool _shadowersOk = false;
+
+    std::map<std::string, std::vector<std::string>> _shadowSpec;
 
     // Components
     std::unique_ptr<RingsComponent> _ringsComponent;
