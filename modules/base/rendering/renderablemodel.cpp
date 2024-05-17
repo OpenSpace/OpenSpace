@@ -153,7 +153,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnableDepthTestInfo = {
         "EnableDepthTest",
         "Enable Depth Test",
-        "If true, depth testing is enabled for the model.",
+        "If true, depth testing is enabled for the model. This means that parts of the "
+        "model that are occluded by other parts will not be rendered. If disabled, the "
+        "depth of the model part will not be taken into account in rendering and some "
+        "parts that should be hidden behind a model might be rendered in front.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
