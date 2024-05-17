@@ -1,7 +1,7 @@
 local textures = asset.resource({
   Name = "Brown Dwarf Textures",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_brown_dwarfs_textures",
+  Identifier = "digitaluniverse_dwarfs_textures",
   Version = 1
 })
 
