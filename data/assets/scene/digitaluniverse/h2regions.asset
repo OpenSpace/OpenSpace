@@ -34,7 +34,7 @@ local Object = {
     PolygonSides = 6,
     Unit = "pc",
     SizeSettings = {
-      ScaleExponent = 18.24,
+      ScaleExponent = 18.5,
       MaxSize = 8.0,
       EnableMaxSizeControl = true
     }
