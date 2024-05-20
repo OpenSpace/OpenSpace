@@ -33,7 +33,8 @@ local TransformGONG = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0, 0, 2.09439510239} -- 120 degrees
+      --Rotation = {0, 0, 2.09439510239} -- 120 degrees
+      Rotation = {0, 0, 0.34906585} -- 20 degrees
     }
   },
   GUI = {

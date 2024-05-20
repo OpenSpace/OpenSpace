@@ -1,5 +1,6 @@
 # Build and editor thing
 /build*/
+/data/assets/util/joysticks/space-mouse-compact.asset
 *~
 *.dir
 *.idea/

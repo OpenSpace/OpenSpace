@@ -13,7 +13,7 @@ local WSA_Magnetograms = {
     LoadingType = "DynamicDownloading",
     InfoURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id=",
     DataURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=",
-    DataID = 1180, --1196
+    DataID = 2148, --1233, --1196 --1180
     ShowAtAllTimes = true,
     Opacity = 1,
     Segments = 132

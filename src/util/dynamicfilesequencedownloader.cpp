@@ -116,12 +116,30 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
 
     // Get big window/ list of available files for the specified data set.
     // If it expands to more of a API call rather than a http-request, that code goes here
-    // TODO: make_unique!
+    // TODO: make_unique?
+    nlohmann::json jsonResult;
     HttpMemoryDownload respons(httpDataRequest);
-    respons.start();
-    respons.wait();
+    try {
+        respons.start();
+        respons.wait();
 
-    nlohmann::json jsonResult = nlohmann::json::parse(respons.downloadedData());
+        const std::vector<char>& data = respons.downloadedData();
+        if (data.size() > std::numeric_limits<std::size_t>::max()) {
+            LERROR("To large");
+        }
+
+        jsonResult = nlohmann::json::parse(data);
+
+    }
+    catch (const nlohmann::json::parse_error& ex) {
+        LERROR(std::format("JSON parsing error: '{}'", ex.what()));
+    }
+    catch (const std::bad_alloc& ex) {
+        LERROR(std::format("Memory allocation error while parsing JSON: '{}'",ex.what()));
+    }
+    catch (const std::exception& ex) {
+        LERROR(std::format("An error occurred: '{}'", ex.what()));
+    }
 
     /********************
     *   Example respons

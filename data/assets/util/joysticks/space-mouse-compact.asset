@@ -46,7 +46,7 @@ local SpaceMouse = {
 
 asset.onInitialize(function()
   local controller = SpaceMouse
-  local name = "SpaceNavigator"
+  local name = "SpaceMouse Compact"
 
   openspace.navigation.bindJoystickAxis(name, controller.Push.LeftRight, "Orbit X", false, "JoystickLike", true, false, 40.0)
   openspace.navigation.bindJoystickAxis(name, controller.Push.BackForth, "Orbit Y", false, "JoystickLike", true, false, 40.0)

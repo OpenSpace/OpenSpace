@@ -1,4 +1,5 @@
 #include <modules/fitsfilereader/include/wsafitshelper.h>
+#include <ghoul/opengl/textureconversion.h>
 #include <ghoul/logging/logmanager.h>
 #include <CCfits>
 
@@ -21,60 +22,58 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
     // The numbers 64800, 16200 means, grab the fifth layer in the fits file, where the
     // photospheric map is, in the wsa file
     std::valarray<float> magnetogram = fitsValues->contents[std::slice(64800, 16200, 1)];
-    const float maxValue = abs(magnetogram.max());
 
+    // Calculate median:
+
+    //std::valarray<float> sorted = magnetogram;
+    //std::sort(std::begin(sorted), std::end(sorted));
+    //float median;
+    //if (sorted.size() % 2 == 0)
+    //    median = (sorted[sorted.size() / 2 - 1] + sorted[sorted.size() / 2]) / 2;
+    //else
+    //    median = sorted[sorted.size() / 2];
+
+    const float maxValue = 50.f;// magnetogram.max();
+    const float minValue = -50.f;// magnetogram.min();
+    std::vector<float> imageData;
+    //test.assign(std::begin(magnetogram), std::end(magnetogram));
     std::vector<glm::vec3> rgbLayers;
     for (float mapValue : magnetogram) {
-        float colorIntensity = abs(mapValue) / maxValue; // normalized value
-        float r = 0.5f, g = 0.5f, b = 0.5f;
-        if (mapValue < 0) {
-            r = colorIntensity * 0.5f + 0.5f;
-            g = colorIntensity * 0.5f + 0.5f;
-            b = colorIntensity * 0.5f + 0.5f;
-        }
-        else if (mapValue > 0) {
-            r = 1.0f - (colorIntensity * 0.5f + 0.5f);
-            g = 1.0f - (colorIntensity * 0.5f + 0.5f);
-            b = 1.0f - (colorIntensity * 0.5f + 0.5f);
-        }
-        glm::vec3 rgb = glm::vec3(r, g, b);
-        rgbLayers.emplace_back(rgb);
+
+        float normalizedValue = (mapValue - minValue) / (maxValue - minValue); // actual normalization
+        normalizedValue = std::clamp(normalizedValue, 0.f, 1.f);
+
+        imageData.emplace_back(normalizedValue);
     }
 
     // Potentially shifting the image goes here
-
     // Longitude leading edge of map header value
     // //todo do I need this?
-    const int long0 = static_cast<int>(readHeaderValueFloat("CARRLONG", file));
-    const int resolutionFactor = 360 / fitsValues->width;
-    const int shift = (360 - long0) / resolutionFactor;
-    for (int i = 0; i < fitsValues->height; ++i) {
-        std::rotate(
-            rgbLayers.begin() + (i * 180),
-            rgbLayers.begin() + (i * 180) + shift,
-            rgbLayers.begin() + (i * 180) + 179);
-    }
+    //const int long0 = static_cast<int>(readHeaderValueFloat("CARRLONG", file));
+    //const int resolutionFactor = 360 / fitsValues->width;
+    //const int shift = (360 - long0) / resolutionFactor;
+    //for (int i = 0; i < fitsValues->height; ++i) {
+    //    std::rotate(
+    //        rgbLayers.begin() + (i * 180),
+    //        rgbLayers.begin() + (i * 180) + shift,
+    //        rgbLayers.begin() + (i * 180) + 179);
+    //}
 
-    // Make into imagedata
-    std::vector<float> imageData;
-    for (glm::vec3 val : rgbLayers) {
-        imageData.emplace_back(val.x);
-        imageData.emplace_back(val.y);
-        imageData.emplace_back(val.z);
-    }
+
 
     // Create texture from imagedata
     auto texture = std::make_unique<ghoul::opengl::Texture>(
         imageData.data(),
-        glm::vec3(fitsValues->width, fitsValues->height, 1),
+        glm::size3_t(fitsValues->width, fitsValues->height, 1),
         GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RGB,
-        GL_RGB,
+        ghoul::opengl::Texture::Format::Red,
+        GL_RED,
         GL_FLOAT
     );
     texture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     texture->uploadTexture();
-
+    // Tell it to use the single color channel as grayscale
+    convertTextureFormat(*texture, ghoul::opengl::Texture::Format::RGB);
     return std::move(texture);
 }
 

@@ -35,7 +35,7 @@ local Fieldlines = {
     LineWidth = 1,
     ShowAtAllTimes = false,
     ColorQuantity = 0,
-    ColorTablePath = asset.resource("transferfunctions/density-fieldlines.txt"),
+    ColorTablePaths = {asset.resource("transferfunctions/density-fieldlines.txt")},
     ColorMinMaxRange = {
       0, 1000000
       --{ 100, 2000 }

@@ -1,7 +1,7 @@
 local transforms = asset.require('../transforms_heliosphere')
 local sunRadius = 695508000
 local fieldlines = {
-  Identifier = "WSA_Fieldlines_PFSS_IO",
+  Identifier = "WSA_Fieldlines_SCS_OI",
   Parent = transforms.TransformGONG.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -9,12 +9,12 @@ local fieldlines = {
     LoadingType = "DynamicDownloading",
     InfoURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id=",
     DataURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=",
-    DataID = 1768,
+    DataID = 2286, --2284 IO, 2285 OI, 2286 SCS-OI, 2287 Earth
     ShowAtAllTimes = true,
   },
   GUI = {
     Path = "/Solar System/Heliosphere",
-    Name = "WSA PFSS In to Out Lines"
+    Name = "WSA SCS Out to In Lines"
   },
   Transform = {
     Scale = {

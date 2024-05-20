@@ -209,9 +209,8 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     //newFile.time = extractTriggerTimeFromISO8601FileName(path);
     newFile.time = extractTriggerTimeFromFitsFileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path);
-    t->setInternalFormat(GL_COMPRESSED_RGBA);
     t->uploadTexture();
-    t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
     //t->purgeFromRAM();
 
     newFile.texture = std::move(t);

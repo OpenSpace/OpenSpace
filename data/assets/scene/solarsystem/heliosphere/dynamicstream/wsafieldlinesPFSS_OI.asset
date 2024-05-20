@@ -1,0 +1,42 @@
+local transforms = asset.require('../transforms_heliosphere')
+local sunRadius = 695508000
+local fieldlines = {
+  Identifier = "WSA_Fieldlines_PFSS_OI",
+  Parent = transforms.TransformGONG.Identifier,
+  Renderable = {
+    Type = "RenderableFieldlinesSequence",
+    InputFileType = "Osfls",
+    LoadingType = "DynamicDownloading",
+    InfoURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id=",
+    DataURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=",
+    DataID = 2285, --2284 IO, 2285 OI, 2286 SCS-OI, 2287 Earth
+    ShowAtAllTimes = true,
+  },
+  GUI = {
+    Path = "/Solar System/Heliosphere",
+    Name = "WSA PFSS Out to In Lines"
+  },
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = sunRadius
+    },
+  }
+}
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(fieldlines)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(fieldlines)
+end)
+
+asset.export(fieldlines)
+asset.meta = {
+  Name = "WSA Streaming field lines",
+  Version = "1.0",
+  Description = "WSAStreaming",
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

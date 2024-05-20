@@ -51,10 +51,13 @@ struct FieldlineOption {
     std::unordered_map<int, std::string> _keyToValue;
     std::unordered_map<std::string, int> _valueToKey;
     const std::vector<std::pair<int, std::string>> pairs = {
+        // WSA 5.4  GONG
         {2284,"GONG_Z/trace_pfss_intoout"}, //GONG_Z/trace_pfss_intoout
         {2285,"GONG_Z/trace_pfss_outtoin"}, //GONG_Z/trace_pfss_outtoin
         {2286,"GONG_Z/trace_scs_outtoin"}, //GONG_Z/trace_scs_outtoin
         {2287,"GONG_Z/trace_sun_earth"}, //GONG_Z/trace_sun_earth
+
+        {2148, "GONG WSA 5.4 output fits file using GONG-Z Map (RADOUT =  5.0)"},
 
         // WSA 5.x GONG
         {1768, "WSA 5.X real"}, // - time output of the field line trace from the solar surface to the source surface using GONGZ as input
