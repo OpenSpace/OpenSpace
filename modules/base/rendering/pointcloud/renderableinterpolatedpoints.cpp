@@ -43,7 +43,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
         "Value",
         "Value",
-        "The value to use for interpolation. The max value is set from the number of "
+        "The value used for interpolation. The max value is set from the number of "
         "steps in the dataset, so a step of one corresponds to one step in the dataset "
         "and values in-between will be determined using interpolation.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -136,7 +136,7 @@ namespace {
     // the used texture will be decided based on the first N set of points.
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
         // The number of objects to read from the dataset. Every N:th datapoint will
-        // be interpreted as the same point, but at a different step in the interpolation
+        // be interpreted as the same point, but at a different step in the interpolation.
         int numberOfObjects [[codegen::greaterequal(1)]];
 
         struct Interpolation {
@@ -149,7 +149,7 @@ namespace {
             // [[codegen::verbatim(UseSplineInfo.description)]]
             std::optional<bool> useSplineInterpolation;
         };
-        // Initial settings for the interpolation
+        // Initial settings for the interpolation.
         std::optional<Interpolation> interpolation;
     };
 

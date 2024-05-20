@@ -88,30 +88,30 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OzoneHeightScaleInfo = {
         "OzoneLayerHeightScale",
-        "Ozone Scale Height (KM)",
-        "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor.",
+        "Ozone Scale Height (km)",
+        "The vertical distance over which the density and pressure fall by a constant "
+        "factor, given in kilometers.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OzoneLayerCoeffInfo = {
         "OzoneLayerCoeff",
-        "Ozone Layer Extinction Coeff",
+        "Ozone Layer Extinction Coefficient",
         "Ozone scattering coefficients in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MieHeightScaleInfo = {
         "MieHeightScale",
-        "Mie Scale Height (KM)",
-        "It is the vertical distance over which the density and pressure fall by a "
-        "constant factor.",
+        "Mie Scale Height (km)",
+        "The vertical distance over which the density and pressure fall by a constant "
+        "factor, given in kilometers.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MieScatteringCoeffInfo = {
         "MieScatteringCoeff",
-        "Mie Scattering Coeff",
+        "Mie Scattering Coefficient",
         "Mie sea-level scattering coefficients in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -135,7 +135,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SunIntensityInfo = {
         "SunIntensity",
         "Sun Intensity",
-        "Unitless for now.",
+        "A unitless value that controls the intensity/brightness of the Sun.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -149,9 +149,9 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo EclipseHardShadowsInfo = {
-        "EclipseHardShadowsInfo",
+        "EclipseHardShadows",
         "Enable Hard Shadows for Eclipses",
-        "Enable/Disables hard shadows through the atmosphere",
+        "Enables/Disables hard shadows through the atmosphere.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -173,50 +173,49 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SunAngularSize = {
         "SunAngularSize",
         "Angular Size of the Sun",
-        "Specifies the angular size of the Sun in degrees.",
+        "The angular size of the Sun in degrees.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceNodeInfo = {
         "LightSourceNode",
-        "Name of the light source",
-        "This value is the name of a scene graph node that should be used as the source "
-        "of illumination for the atmosphere. If this value is not specified, the solar "
-        "system's Sun is used instead.",
+        "Light Source",
+        "The name of a scene graph node to be used as the source of illumination "
+        "for the atmosphere. If not specified, the solar system's Sun is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableAtmosphere)]] Parameters {
         struct ShadowGroup {
-            // Individual light sources
+            // Individual light sources.
             struct SourceElement {
-                // The scene graph node name of the source
+                // The scene graph node name of the source.
                 std::string name;
-                // The radius of the object in meters
+                // The radius of the object in meters.
                 double radius;
             };
-            // A list of light sources
+            // A list of light sources.
             std::vector<SourceElement> sources;
 
-            // Individual shadow casters
+            // Individual shadow casters.
             struct CasterElement {
-                // The scene graph node name of the source
+                // The scene graph node name of the source.
                 std::string name;
-                // The radius of the object in meters
+                // The radius of the object in meters.
                 double radius;
             };
 
-            // A list of objects that cast light on this atmosphere
+            // A list of objects that cast light on this atmosphere.
             std::vector<CasterElement> casters;
         };
         // Declares shadow groups, meaning which nodes are considered in shadow
-        // calculations
+        // calculations.
         std::optional<ShadowGroup> shadowGroup;
 
         // [[codegen::verbatim(AtmosphereHeightInfo.description)]]
         float atmosphereHeight;
 
-        // The radius of the planet in meters
+        // The radius of the planet in meters.
         float planetRadius;
 
         float planetAverageGroundReflectance;

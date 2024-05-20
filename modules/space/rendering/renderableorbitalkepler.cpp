@@ -73,17 +73,15 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TrailWidthInfo = {
         "TrailWidth",
         "Trail Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored.",
+        "The line width used for the trail, if the selected rendering method includes "
+        "lines. If the rendering mode is set to Points, this value is ignored.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeExponentInfo = {
         "PointSizeExponent",
         "Point Size Exponent",
-        "This value is used as in exponential scaling to set the absolute size of the "
-        "point.",
+        "An exponential scale value to set the absolute size of the point.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -99,11 +97,11 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
         "Max Size",
-        "This value controls the maximum allowed size for the points, when the max size "
-        "control feature is enabled. This limits the visual size of the points based on "
-        "the distance to the camera. The larger the value, the larger the points are "
-        "allowed to be. In the background, the computations are made to limit the size "
-        "of the angle between the CameraToPointMid and CameraToPointEdge vectors.",
+        "Controls the maximum allowed size for the points, when the max size control "
+        "feature is enabled. This limits the visual size of the points based on the "
+        "distance to the camera. The larger the value, the larger the points are allowed "
+        "to be. In the background, the computations are made to limit the size of the "
+        "angle between the CameraToPointMid and CameraToPointEdge vectors.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -119,46 +117,45 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the trails and points.",
+        "The RGB main color for the trails and points.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail Fade Factor",
-        "This value determines how fast the trail fades and is an appearance property.",
+        "Determines how fast the trail fades out.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable Point Outline",
-        "This setting determines if each point should have an outline or not. An outline "
-        "is only applied when rendering as colored points (not when using textures).",
+        "Determines if the points should be rendered with an outline or not.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
         "Outline Color",
-        "This value defines the color of the outline. Darker colors will be "
-        "less visible if Additive Blending is enabled.",
+        "The color of the outline.",
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OutlineWeightInfo = {
-        "OutlineWeight",
-        "Outline Weight",
-        "This setting determines the thickness of the outline. A value of 0 will "
-        "not show any outline, while a value of 1 will cover the whole point.",
+    constexpr openspace::properties::Property::PropertyInfo OutlineWidthInfo = {
+        "OutlineWidth",
+        "Outline Width",
+        "Determines the thickness of the outline. A value of 0 will not show any "
+        "outline, while a value of 1 will cover the whole point.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
         "Contiguous Starting Index of Render",
-        "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored).",
+        "Index of the first object in the block to render (all prior objects will be "
+        "ignored). The block of objects to render will be determined by StartRenderIdx "
+        "and RenderSize.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -172,8 +169,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
         "Contiguous Mode",
-        "If enabled, then the contiguous set of objects starting from StartRenderIdx "
-        "of size RenderSize will be rendered. If disabled, then the number of objects "
+        "If enabled, the contiguous set of objects starting from StartRenderIdx "
+        "of size RenderSize will be rendered. If disabled, the number of objects "
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "
         "full length of the data file.",
         openspace::properties::Property::Visibility::User
@@ -184,14 +181,14 @@ namespace {
         std::filesystem::path path;
 
         enum class [[codegen::map(openspace::kepler::Format)]] Format {
-            // A NORAD-style Two-Line element
+            // A NORAD-style Two-Line element.
             TLE,
-            // Orbit Mean-Elements Message in the KVN notation
+            // Orbit Mean-Elements Message in the KVN notation.
             OMM,
-            // JPL's Small Bodies Database
+            // JPL's Small Bodies Database.
             SBDB
         };
-        // The file format that is contained in the file
+        // The file format that is contained in the file.
         Format format;
 
         // [[codegen::verbatim(SegmentQualityInfo.description)]]
@@ -238,8 +235,8 @@ namespace {
         // [[codegen::verbatim(OutlineColorInfo.description)]]
         std::optional<glm::vec3> outlineColor;
 
-        // [[codegen::verbatim(OutlineColorInfo.description)]]
-        std::optional<float> outlineWeight;
+        // [[codegen::verbatim(OutlineWidthInfo.description)]]
+        std::optional<float> outlineWidth;
     };
 #include "renderableorbitalkepler_codegen.cpp"
 } // namespace
@@ -268,7 +265,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     , maxSize(MaxSizeInfo, 1.f, 0.f, 45.f)
     , enableOutline(EnableOutlineInfo, true)
     , outlineColor(OutlineColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , outlineWeight(OutlineWeightInfo, 0.2f, 0.f, 1.f)
+    , outlineWidth(OutlineWidthInfo, 0.2f, 0.f, 1.f)
 {
     renderingModes.addOptions({
         { RenderingModeTrail, "Trails" },
@@ -287,7 +284,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     addProperty(enableOutline);
     outlineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(outlineColor);
-    addProperty(outlineWeight);
+    addProperty(outlineWidth);
 }
 
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
@@ -313,7 +310,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _appearance.maxSize = p.maxSize.value_or(_appearance.maxSize);
     _appearance.enableOutline = p.enableOutline.value_or(_appearance.enableOutline);
     _appearance.outlineColor = p.outlineColor.value_or(_appearance.outlineColor);
-    _appearance.outlineWeight = p.outlineWeight.value_or(_appearance.outlineWeight);
+    _appearance.outlineWidth = p.outlineWidth.value_or(_appearance.outlineWidth);
     _appearance.pointSizeExponent =
         p.pointSizeExponent.value_or(_appearance.pointSizeExponent);
 
@@ -484,28 +481,50 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
     if (renderPoints) {
         _pointProgram->activate();
-        _pointProgram->setUniform(_uniformPointCache.modelTransform,
-            calcModelTransform(data));
-        _pointProgram->setUniform(_uniformPointCache.viewTransform,
-            data.camera.combinedViewMatrix());
-        _pointProgram->setUniform(_uniformPointCache.projectionTransform,
-            data.camera.projectionMatrix());
-        _pointProgram->setUniform(_uniformPointCache.cameraPositionWorld,
-            data.camera.positionVec3());
-        _pointProgram->setUniform(_uniformPointCache.cameraUpWorld,
-            data.camera.lookUpVectorWorldSpace());
-        _pointProgram->setUniform(_uniformPointCache.inGameTime,
-            data.time.j2000Seconds());
-        _pointProgram->setUniform(_uniformPointCache.pointSizeExponent,
-            _appearance.pointSizeExponent);
-        _pointProgram->setUniform(_uniformPointCache.enableMaxSize,
-            _appearance.enableMaxSize);
-        _pointProgram->setUniform(_uniformPointCache.enableOutline,
-            _appearance.enableOutline);
-        _pointProgram->setUniform(_uniformPointCache.outlineColor,
-            _appearance.outlineColor);
-        _pointProgram->setUniform(_uniformPointCache.outlineWeight,
-            _appearance.outlineWeight);
+        _pointProgram->setUniform(
+            _uniformPointCache.modelTransform,
+            calcModelTransform(data)
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.viewTransform,
+            data.camera.combinedViewMatrix()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.projectionTransform,
+            data.camera.projectionMatrix()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.cameraPositionWorld,
+            data.camera.positionVec3()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.cameraUpWorld,
+            data.camera.lookUpVectorWorldSpace()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.inGameTime,
+            data.time.j2000Seconds()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.pointSizeExponent,
+            _appearance.pointSizeExponent
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.enableMaxSize,
+            _appearance.enableMaxSize
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.enableOutline,
+            _appearance.enableOutline
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.outlineColor,
+            _appearance.outlineColor
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.outlineWeight,
+            _appearance.outlineWidth
+        );
         _pointProgram->setUniform(_uniformPointCache.color, _appearance.color);
         _pointProgram->setUniform(_uniformPointCache.maxSize, _appearance.maxSize);
         _pointProgram->setUniform(_uniformPointCache.opacity, opacity());
@@ -526,12 +545,18 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         _trailProgram->activate();
         _trailProgram->setUniform(_uniformTrailCache.opacity, opacity());
         _trailProgram->setUniform(_uniformTrailCache.color, _appearance.color);
-        _trailProgram->setUniform(_uniformTrailCache.inGameTime,
-            data.time.j2000Seconds());
-        _trailProgram->setUniform(_uniformTrailCache.modelView,
-            calcModelViewTransform(data));
-        _trailProgram->setUniform(_uniformTrailCache.projection,
-            data.camera.projectionMatrix());
+        _trailProgram->setUniform(
+            _uniformTrailCache.inGameTime,
+            data.time.j2000Seconds()
+        );
+        _trailProgram->setUniform(
+            _uniformTrailCache.modelView,
+            calcModelViewTransform(data)
+        );
+        _trailProgram->setUniform(
+            _uniformTrailCache.projection,
+            data.camera.projectionMatrix()
+        );
 
         // Because we want the property to work similar to the planet trails
         const float fade = pow(
