@@ -61,14 +61,18 @@ void SyncEngine::decodeSyncables(std::vector<std::byte> data) {
 void SyncEngine::preSynchronization(IsMaster isMaster) {
     ZoneScoped;
 
-    for (Syncable* syncable : _syncables) {
-        syncable->preSync(isMaster);
+    // We use a raw for-loop because a syncable can add to the `_syncables` list which
+    // can invalidate the pointers of a range-based for-loop
+    for (size_t i = 0; i < _syncables.size(); i++) {
+        _syncables[i]->preSync(isMaster);
     }
 }
 
 void SyncEngine::postSynchronization(IsMaster isMaster) {
     ZoneScoped;
 
+    // We use a raw for-loop because a syncable can add to the `_syncables` list which
+    // can invalidate the pointers of a range-based for-loop
     for (size_t i = 0; i < _syncables.size(); i++) {
         _syncables[i]->postSync(isMaster);
     }
