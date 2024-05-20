@@ -33,8 +33,8 @@ local Object = {
     },
     Unit = "pc",
     SizeSettings = {
-      ScaleExponent = 16.6,
-      MaxSize = 3.5,
+      ScaleExponent = 16.9,
+      MaxSize = 2.8,
       EnableMaxSizeControl = true
     }
   },
