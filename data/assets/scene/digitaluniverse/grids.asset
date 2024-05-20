@@ -42,10 +42,6 @@ local LightDay = 2.59020684E13
 local LightMonth = 7.771E14
 local LightYear = 9.4605284E15
 
-local OneHundredLY = 9.4607379E17
-local FiveHundredLY = 4.7303690E18
-local OneThousandLY = 9.4607379E18
-
 local RadioSphere = {
   Identifier = "RadioSphere",
   Parent = earthTransforms.EarthBarycenter.Identifier,
@@ -81,7 +77,7 @@ local EquatorialSphere = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 7.5686E17   -- 80 light years
+      Scale = 80 * LightYear
     },
     Rotation = {
       Type = "StaticRotation",
@@ -135,7 +131,7 @@ local EclipticSphere = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = OneHundredLY
+      Scale = 100 * LightYear
     },
     Rotation = {
       Type = "StaticRotation",
@@ -188,7 +184,7 @@ local GalacticSphere = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = OneThousandLY
+      Scale = 1000 * LightYear
     }
   },
   Renderable = {

@@ -23,13 +23,6 @@ local EclipticTransformationMatrix = {
    0.0       ,  0.0      ,  0.0      ,    1.0
 }
 
-local LightHour = 1.0792528488E12
-local LightDay = 2.59020684E13
-local LightMonth = 7.771E14
-local LightYear = 9.4605284E15
-
-
-
 local OortSphere = {
   Identifier = "OortSphere",
   Parent = transforms.SolarSystemBarycenter.Name,
@@ -59,9 +52,6 @@ local OortSphere = {
 }
 
 
-
-
-
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OortSphere)
 end)
@@ -71,6 +61,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(OortSphere)
+
 
 
 asset.meta = {
