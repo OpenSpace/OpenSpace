@@ -22,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
-#include <openspace/documentation/documentationengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/ghoul.h>
 #include <ghoul/logging/logmanager.h>
