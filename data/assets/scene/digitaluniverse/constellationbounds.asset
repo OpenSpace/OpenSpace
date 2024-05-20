@@ -38,7 +38,10 @@ local Object = {
   GUI = {
     Name = "Constellation Boundaries",
     Path = "/Milky Way/Constellations",
-    Description = [[As a continent is divided into countries, astronomers divide the sky into 88 regions called constellations. Every object falls into one of these 88 regions. The boundaries of these regions are shown in this asset. Use these in concert with the constellation labels. Census: 88 constellations.]]
+    Description = [[As a continent is divided into countries, astronomers divide the sky
+      into 88 regions called constellations. Every object falls into one of these 88
+      regions. The boundaries of these regions are shown in this asset. Use these in
+      concert with the constellation labels. Census: 88 constellations.]]
   }
 }
 

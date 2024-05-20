@@ -42,7 +42,15 @@ local Object = {
   GUI = {
     Name = "HII Regions",
     Path = "/Milky Way/Nebulae",
-    Description = [[HII (pronounced "H-two") regions are stellar nurseries for newborn stars. Stars are born from condensing clouds of hydrogen gas. As these clouds condense, the densities become high enough to form stars. An HII region is the surrounding clouds of hydrogen that glow from the stars born within them. The result is a bright, glowing nebula which is seen to great distances. One local celebrity among HII regions is the Orion Nebula (M42). These star-forming regions lie in the plane of the Galaxy because that is where star formation occurs in spiral galaxies such as our Milky Way. Because of this, they are great tracers of the spiral arms of the Galaxy. Census: 1,108 star-forming regions.]]
+    Description = [[HII (pronounced "H-two") regions are stellar nurseries for newborn
+      stars. Stars are born from condensing clouds of hydrogen gas. As these clouds
+      condense, the densities become high enough to form stars. An HII region is the
+      surrounding clouds of hydrogen that glow from the stars born within them. The
+      result is a bright, glowing nebula which is seen to great distances. One local
+      celebrity among HII regions is the Orion Nebula (M42). These star-forming regions
+      lie in the plane of the Galaxy because that is where star formation occurs in
+      spiral galaxies such as our Milky Way. Because of this, they are great tracers of
+      the spiral arms of the Galaxy. Census: 1,108 star-forming regions.]]
   }
 }
 

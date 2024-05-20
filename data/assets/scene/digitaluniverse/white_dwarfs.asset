@@ -36,7 +36,13 @@ local Object = {
   GUI = {
     Name = "White Dwarfs",
     Path = "/Milky Way/Stellar Remnants",
-    Description = [[A white dwarf is the core of a dying star. These are dim objects that are roughly the size of Earth but with the desity of a sunlike star. Stars that are not massive enough to end in a neutraon star or black hole will evolve into a white dwarf. This is the ultimate fate of over 95% of the stars in our Galaxy. As the star is dying, the outer layers will expand out and the gas will glow and become a planetaery nebula, while the core of the star transforms into a white dwarf. Census: 192,613 white dwarfs.]]
+    Description = [[A white dwarf is the core of a dying star. These are dim objects that
+      are roughly the size of Earth but with the desity of a sunlike star. Stars that are
+      not massive enough to end in a neutraon star or black hole will evolve into a white
+      dwarf. This is the ultimate fate of over 95% of the stars in our Galaxy. As the
+      star is dying, the outer layers will expand out and the gas will glow and become a
+      planetaery nebula, while the core of the star transforms into a white dwarf. Census:
+      192,613 white dwarfs.]]
   }
 }
 

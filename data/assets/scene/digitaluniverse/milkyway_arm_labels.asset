@@ -42,7 +42,14 @@ local Object = {
   GUI = {
     Name = "Milky Way Arms Labels",
     Path = "/Milky Way/Galaxy",
-    Description = [[This is an image that contains labels for the Milky Way's spiral arms. We label them in this manner--"hard-coding" the labels into an image rather than having native labels--so that they can retain their size, shape, and location as they overlay the galaxy. These labels are designed to be a guide, and they map more accurately to the various datasets in the Digital Universe. For example, the pulsars, the star-forming (HII) regions, and open clusters all show the local spiral structure. We can use trends in these data sets to map the arms of the Milky Way. Census: 1 image.]]
+    Description = [[This is an image that contains labels for the Milky Way's spiral
+      arms. We label them in this manner--"hard-coding" the labels into an image rather
+      than having native labels--so that they can retain their size, shape, and location
+      as they overlay the galaxy. These labels are designed to be a guide, and they map
+      more accurately to the various datasets in the Digital Universe. For example, the
+      pulsars, the star-forming (HII) regions, and open clusters all show the local spiral
+      structure. We can use trends in these data sets to map the arms of the Milky Way.
+      Census: 1 image.]]
   }
 }
 

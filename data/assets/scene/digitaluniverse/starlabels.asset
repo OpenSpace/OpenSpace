@@ -25,7 +25,8 @@ local Object = {
   GUI = {
     Name = "Stars Labels",
     Path = "/Milky Way/Stars",
-    Description = "Common name labels for nearby stars in the Milky Way. See 'Stars' for more information."
+    Description = [[Common name labels for nearby stars in the Milky Way. See 'Stars'
+      for more information.]]
   }
 }
 

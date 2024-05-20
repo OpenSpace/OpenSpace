@@ -42,7 +42,19 @@ local Object = {
   GUI = {
     Name = "Brown Dwarfs",
     Path = "/Milky Way/Substellar Objects",
-    Description = [[For decades it was believed that M stars were the coolest stars in the Galaxy. Some M stars, called red dwarfs, make up 70% of the stars in the Galaxy. However, a new class of objects, even cooler than M stars, was recently discovered and given a spectral type of L. L-type objects straddle the boundary between red dwarfs and brown dwarfs and they are typically very dim stars or brown dwarfs. Even cooler than L-type objects are T-type objects. These are mostly brown dwarfs and resemble large, massive, Jupiter-like objects, too large to be planets and typically too small to be stars. Beyond the T dwarfs are the Y-type objects, which are even more dim. Brown dwarfs are extremely difficult to see, mainly because they are so dim in optical light. However, they appear brighter in infrared light. Colors: We represent these objects as exaggeratged points and they are either red for L type objects, Maroon for T type, and purple for Y type objects. Census: 2,196 objects.]]
+    Description = [[For decades it was believed that M stars were the coolest stars in
+      the Galaxy. Some M stars, called red dwarfs, make up 70% of the stars in the
+      Galaxy. However, a new class of objects, even cooler than M stars, was recently
+      discovered and given a spectral type of L. L-type objects straddle the boundary
+      between red dwarfs and brown dwarfs and they are typically very dim stars or brown
+      dwarfs. Even cooler than L-type objects are T-type objects. These are mostly brown
+      dwarfs and resemble large, massive, Jupiter-like objects, too large to be planets
+      and typically too small to be stars. Beyond the T dwarfs are the Y-type objects,
+      which are even more dim. Brown dwarfs are extremely difficult to see, mainly because
+      they are so dim in optical light. However, they appear brighter in infrared light.
+      Colors: We represent these objects as exaggeratged points and they are either red
+      for L type objects, Maroon for T type, and purple for Y type objects. Census:
+      2,196 objects.]]
   }
 }
 

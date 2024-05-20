@@ -67,7 +67,19 @@ local RadioSphere = {
   GUI = {
     Name = "Radio Sphere",
     Path = "/Milky Way/Grids",
-    Description = [[The radio sphere describes the theoretical extent of Earth's radio signals in space. Before television carrier waves, early-warning radar first used in World War II, and the detonation of atomic weapons, Earth was radio-quiet to the universe (AM and FM radio signals bounce off the atmosphere and do not escape it). After the use of these and other radio emitters began, in the late 1930s and early 1940s, signals were able to escape the atmosphere and travel into space at the speed of light. Since then, we have been broadcasting to the universe. We mention earlier that this is the theoretical extent of these signals. In reality, these signals will dissipate rapidly into the ambient cosmic noise of the universe. All light falls off as the square of the distance, and radio waves are no different. The signals that emanate from Earth are likely lost in the noise before they leave the solar system, but the radio sphere remains a visually compelling astronomical concept.]]
+    Description = [[The radio sphere describes the theoretical extent of Earth's radio
+      signals in space. Before television carrier waves, early-warning radar first used
+      in World War II, and the detonation of atomic weapons, Earth was radio-quiet to the
+      universe (AM and FM radio signals bounce off the atmosphere and do not escape it).
+      After the use of these and other radio emitters began, in the late 1930s and early
+      1940s, signals were able to escape the atmosphere and travel into space at the speed
+      of light. Since then, we have been broadcasting to the universe. We mention earlier
+      that this is the theoretical extent of these signals. In reality, these signals
+      will dissipate rapidly into the ambient cosmic noise of the universe. All light
+      falls off as the square of the distance, and radio waves are no different. The
+      signals that emanate from Earth are likely lost in the noise before they leave the
+      solar system, but the radio sphere remains a visually compelling astronomical
+      concept.]]
   }
 }
 
@@ -690,7 +702,14 @@ asset.export(Plane20Gly)
 asset.meta = {
   Name = "Grids",
   Version = "4.0",
-  Description = [[Various grids and spheres for showing size reference. Included: 10,000 light year grid, 10 light year grid, 20 billion light year grid, 10 million light year grid, 100 light year grid, 100 million light year grid, Ecliptic Coordinate Sphere (500-light-year radius), Galactic Coordinate Sphere (1000-light-year radius), Galaxy Coordinate Grid, Celestial Coordinates / Radio Sphere (dynamic radius), 1 billion light year grid, Celestial Coordinate Sphere (1000000-light-year radius), 1,000 light year grid, 1 million light year grid, 1 light year grid.]],
+  Description = [[Various grids and spheres for showing size reference. Included:
+    10,000 light year grid, 10 light year grid, 20 billion light year grid, 10 million
+    light year grid, 100 light year grid, 100 million light year grid, Ecliptic
+    Coordinate Sphere (500-light-year radius), Galactic Coordinate Sphere
+    (1000-light-year radius), Galaxy Coordinate Grid, Celestial Coordinates / Radio Sphere
+    (dynamic radius), 1 billion light year grid, Celestial Coordinate Sphere
+    (1000000-light-year radius), 1,000 light year grid, 1 million light year grid,
+    1 light year grid.]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

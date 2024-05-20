@@ -44,7 +44,13 @@ local Object = {
   GUI = {
     Name = "2MASS Galaxies",
     Path = "/Universe/Local Universe",
-    Description = [[The Two Micron All-Sky Survey (2MASS) is an infrared survey of the sky published in 2003. Taken from two telescopes in Arizona and Chile, it offers a all-sky view of galaxies beyond the Milky Way. Because it is infrared, the light detected is mostly from cool stars within the galaxies, which comprises the majority of mass in a galaxy. Colors: Orange galaxies show dense regions of galaxies, aqua galaxies are areas of intermediate density, and green galaxies are areas of lower density. Census: 43,533 galaxies.]]
+    Description = [[The Two Micron All-Sky Survey (2MASS) is an infrared survey of the
+      sky published in 2003. Taken from two telescopes in Arizona and Chile, it offers a
+      all-sky view of galaxies beyond the Milky Way. Because it is infrared, the light
+      detected is mostly from cool stars within the galaxies, which comprises the majority
+      of mass in a galaxy. Colors: Orange galaxies show dense regions of galaxies, aqua
+      galaxies are areas of intermediate density, and green galaxies are areas of lower
+      density. Census: 43,533 galaxies.]]
   }
 }
 

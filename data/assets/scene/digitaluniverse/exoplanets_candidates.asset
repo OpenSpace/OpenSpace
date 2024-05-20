@@ -43,7 +43,14 @@ local Object = {
   GUI = {
     Name = "Exoplanetary Candidates",
     Path = "/Milky Way/Exoplanets",
-    Description = [[The exoplanet candidate stars are likely hosts for exoplanets. These are stars plucked from NASA's Kepler and TESS space telescopes. Further observations are needed to confirm a planet's existence. Rather than represent them photo-realistically, with accurate colors, we choose to visualize them as generic, colored stars. The nature of these stars is not important, it is the sheer numbers of potential exoplanets that allows us to wonder just how many we will find in the entire Galaxy. Colors: Yellow denote Kepler candidates, Orange stars are from the K2 mission, and green stars are from TESS. Census: 7,225 candidate stars.]]
+    Description = [[The exoplanet candidate stars are likely hosts for exoplanets. These
+      are stars plucked from NASA's Kepler and TESS space telescopes. Further observations
+      are needed to confirm a planet's existence. Rather than represent them
+      photo-realistically, with accurate colors, we choose to visualize them as generic,
+      colored stars. The nature of these stars is not important, it is the sheer numbers
+      of potential exoplanets that allows us to wonder just how many we will find in the
+      entire Galaxy. Colors: Yellow denote Kepler candidates, Orange stars are from the K2
+      mission, and green stars are from TESS. Census: 7,225 candidate stars.]]
   }
 }
 

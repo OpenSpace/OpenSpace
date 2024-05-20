@@ -42,7 +42,15 @@ local Object = {
   GUI = {
     Name = "Supernova Remnants",
     Path = "/Milky Way/Nebulae",
-    Description = [[A supernova remnant is the nebulous gas left over from a supernova explosion. This gas expands at great speeds and rams into the surrounding interstellar gas. This excites the surrounding gas and causes it to glow, producing the nebulous cloud we observe from Earth. A supernova remnant contains a neutron star or pulsar at its center, the core of the dying star. The cloud that enshrouds the core does not last long, though. After about 50,000 years, the gas mixes into the interstellar medium and no longer glows. Astronomically, this is a very short time, so the supernova remnants we see must be left from explosions that have occurred recently, cosmically speaking. Census: 112 supernova remnants.]]
+    Description = [[A supernova remnant is the nebulous gas left over from a supernova
+      explosion. This gas expands at great speeds and rams into the surrounding
+      interstellar gas. This excites the surrounding gas and causes it to glow, producing
+      the nebulous cloud we observe from Earth. A supernova remnant contains a neutron
+      star or pulsar at its center, the core of the dying star. The cloud that enshrouds
+      the core does not last long, though. After about 50,000 years, the gas mixes into
+      the interstellar medium and no longer glows. Astronomically, this is a very short
+      time, so the supernova remnants we see must be left from explosions that have
+      occurred recently, cosmically speaking. Census: 112 supernova remnants.]]
   }
 }
 

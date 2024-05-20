@@ -61,7 +61,12 @@ local Constellations = {
   GUI = {
     Name = "Constellation Lines",
     Path = "/Milky Way/Constellations",
-    Description = [[Lines connecting the stars that make up the constellation figures. We represent the constellations by connecting the main stars that make up the constellation "stick figures," as seen from Earth. Colors: most constellations are pink, while the zodical constellations are red. We also color Orion and Ursa Major blue as two recognizable constellations in the night sky. Census: 88 constellations.]]
+    Description = [[Lines connecting the stars that make up the constellation figures.
+      We represent the constellations by connecting the main stars that make up the
+      constellation "stick figures," as seen from Earth. Colors: most constellations
+      are pink, while the zodical constellations are red. We also color Orion and Ursa
+      Major blue as two recognizable constellations in the night sky. Census: 88
+      constellations.]]
   }
 }
 

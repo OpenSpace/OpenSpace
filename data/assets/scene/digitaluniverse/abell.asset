@@ -55,7 +55,13 @@ local Object = {
   GUI = {
     Name = "Abell Galaxy Clusters",
     Path = "/Universe/Deep Sky Surveys",
-    Description = [[The Abell catalog includes all the nearby, and not so nearby, galaxy clusters. The northern hemisphere survey, published in 1958, was compiled by George Abell from the Palomar Sky Survey plates. A subsequent southern hemisphere catalog was published posthumously in 1989. Each point in this data set represents a cluster of tens to hundreds (possibly even thousands) of galaxies, similar to the Virgo or Fornax Clusters. The data have an arbitrary cut-off for completeness, resulting in the rectangular shape of the data set. Census: 2,246 galaxy clusters.]]
+    Description = [[The Abell catalog includes all the nearby, and not so nearby, galaxy
+      clusters. The northern hemisphere survey, published in 1958, was compiled by George
+      Abell from the Palomar Sky Survey plates. A subsequent southern hemisphere catalog
+      was published posthumously in 1989. Each point in this data set represents a
+      cluster of tens to hundreds (possibly even thousands) of galaxies, similar to the
+      Virgo or Fornax Clusters. The data have an arbitrary cut-off for completeness,
+      resulting in the rectangular shape of the data set. Census: 2,246 galaxy clusters.]]
   }
 }
 

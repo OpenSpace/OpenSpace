@@ -44,7 +44,12 @@ local Object = {
   GUI = {
     Name = "6dF Galaxies",
     Path = "/Universe/Deep Sky Surveys",
-    Description = [[The Six-degree Field (6dF) Galaxy Survey mapped nearly half the sky from the Anglo-Australian Observatory. Because it's a southern hemisphere survey, there is no coverage in these data for the northern hemisphere's sky. As with all galaxy surveys, the organge galaxies are in relatively dense areas, the green galaxies are in relatively sparce areas, and the aqua galaxies are between. Census: 109,569 galaxies.]]
+    Description = [[The Six-degree Field (6dF) Galaxy Survey mapped nearly half the sky
+      from the Anglo-Australian Observatory. Because it's a southern hemisphere survey,
+      there is no coverage in these data for the northern hemisphere's sky. As with all
+      galaxy surveys, the organge galaxies are in relatively dense areas, the green
+      galaxies are in relatively sparce areas, and the aqua galaxies are between. Census:
+      109,569 galaxies.]]
   }
 }
 

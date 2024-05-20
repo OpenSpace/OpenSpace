@@ -46,7 +46,15 @@ local Object = {
   GUI = {
     Name = "Sloan Digital Sky Survey",
     Path = "/Universe/Deep Sky Surveys",
-    Description = [[The Sloan Digital Sky Survey (SDSS) is an ambitious project to image about 35% of the sky, deep into the universe. The SDSS galaxies form triangular wedges, revealing those parts of the sky observed by the telescope. If the entire sky were covered, you would see a spherical distribution of galaxies surrounding the Milky Way. With only 35% of the entire sky observed, we see only a few select slices or larger wedgelike portions from that sphere. The weblike cosmic structure is echoed in these data, with orange clusters standing out among the less dense aqua-colored galaxies and the less dense regions of green-colored galaxies. Census: 2,862,767 galaxies.]]
+    Description = [[The Sloan Digital Sky Survey (SDSS) is an ambitious project to image
+      about 35% of the sky, deep into the universe. The SDSS galaxies form triangular
+      wedges, revealing those parts of the sky observed by the telescope. If the entire
+      sky were covered, you would see a spherical distribution of galaxies surrounding
+      the Milky Way. With only 35% of the entire sky observed, we see only a few select
+      slices or larger wedgelike portions from that sphere. The weblike cosmic structure
+      is echoed in these data, with orange clusters standing out among the less dense
+      aqua-colored galaxies and the less dense regions of green-colored galaxies.
+      Census: 2,862,767 galaxies.]]
   }
 }
 

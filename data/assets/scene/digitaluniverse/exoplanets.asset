@@ -41,7 +41,14 @@ local Object = {
   GUI = {
     Name = "Exoplanets",
     Path = "/Milky Way/Exoplanets",
-    Description = [[Extrasolar planets, or exoplanets, are a relatively new phenomenon in astronomy--no observational evidence was available until 1995. To the eye, exoplanets are lost in the glare of their host star. Unconventional techniques are required to infer or observe them. Here, exoplanet systems are represented by a blue ring centered on each host star. The ring is not intended to signify an orbit, but serve only as a marker. The labels list the host star name, and if there is more than one planet, will list the number of planets in parentheses. Census: 5,589 planets in 4,139 systems.]]
+    Description = [[Extrasolar planets, or exoplanets, are a relatively new phenomenon in
+      astronomy - no observational evidence was available until 1995. To the eye,
+      exoplanets are lost in the glare of their host star. Unconventional techniques are
+      required to infer or observe them. Here, exoplanet systems are represented by a blue
+      ring centered on each host star. The ring is not intended to signify an orbit, but
+      serve only as a marker. The labels list the host star name, and if there is more
+      than one planet, will list the number of planets in parentheses. Census: 5,589
+      planets in 4,139 systems.]]
   }
 }
 

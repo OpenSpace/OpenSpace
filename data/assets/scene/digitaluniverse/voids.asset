@@ -27,7 +27,14 @@ local Object = {
   GUI = {
     Name = "Voids",
     Path = "/Universe/Local Universe",
-    Description = [[Cosmic voids are vast, empty spaces where there are either no galaxies, or very few galaxies. They are associated with cold spots in the cosmic microwave background (CMB) light, the earliest picture we have of the universe. Those cold spots in the CMB evolved into large voids, some as much as 300 million light years in diameter. Labels roughly denote the location of cosmic voids in the Tully galaxies. Voids are only visible with motion cuing as you spin around these data. The labels help to guide the eye and provide sign posts for the largest voids in our cosmic neighborhood. Census: 24 cosmic void labels.]]
+    Description = [[Cosmic voids are vast, empty spaces where there are either no
+      galaxies, or very few galaxies. They are associated with cold spots in the cosmic
+      microwave background (CMB) light, the earliest picture we have of the universe.
+      Those cold spots in the CMB evolved into large voids, some as much as 300 million
+      light years in diameter. Labels roughly denote the location of cosmic voids in the
+      Tully galaxies. Voids are only visible with motion cuing as you spin around these
+      data. The labels help to guide the eye and provide sign posts for the largest voids
+      in our cosmic neighborhood. Census: 24 cosmic void labels.]]
   }
 }
 

@@ -47,7 +47,13 @@ local OortSphere = {
   GUI = {
     Name = "Oort Sphere",
     Path = "/Solar System/Comets",
-    Description = [[The Oort cloud is a region of space surrounding the Sun where comets are believed to originate. It is believed to extend from 20,000-100,000 Astronomical Units (AU), with its greatest concentration around 50,000 AU (1 AU is the average Earth-Sun distance, which equals 149 million kilometers, or 93 million miles). We represent the Oort cloud with a 50,000-AU-radius, wire-frame sphere representing the location of the central concentration. Fifty thousand astronomical units is equal to about 10 light months, which is 0.8 light years, or 4.8 trillion miles.]]
+    Description = [[The Oort cloud is a region of space surrounding the Sun where comets
+      are believed to originate. It is believed to extend from 20,000-100,000 Astronomical
+      Units (AU), with its greatest concentration around 50,000 AU (1 AU is the average
+      Earth-Sun distance, which equals 149 million kilometers, or 93 million miles). We
+      represent the Oort cloud with a 50,000-AU-radius, wire-frame sphere representing
+      the location of the central concentration. Fifty thousand astronomical units is
+      equal to about 10 light months, which is 0.8 light years, or 4.8 trillion miles.]]
   }
 }
 
