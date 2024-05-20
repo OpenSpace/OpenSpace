@@ -112,8 +112,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RelativeOffsetInfo = {
         "UseRelativeOffset",
         "Use Relative Offset Distance",
-        "Decides whether to use relative distances (in units of start node bounding "
-        "sphere) for the offset distance. If false, meters is used.",
+        "Decides whether to use relative distances for the offset distance. This means "
+        "that the offset distance will be computed as the provided 'Offset' value times "
+        "the bounding sphere of the start node. If false, meters is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -129,8 +130,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RelativeLengthInfo = {
         "UseRelativeLength",
         "Use Relative Length",
-        "Decides whether to use relative size (in units of start node bounding "
-        "sphere) for the length of the arrow. If false, meters is used.",
+        "Decides whether to use relative size for the length of the arrow. This means "
+        "that the arrow length will be computed as the provided 'Length' value times "
+        "the bounding sphere of the start node. If false, meters is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
