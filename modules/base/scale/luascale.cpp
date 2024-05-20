@@ -107,8 +107,6 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     const auto now = std::chrono::high_resolution_clock::now();
     ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
-    std::string vs = ghoul::lua::stackInformation(_state);
-
     // Execute the scaling function
     const int success = lua_pcall(_state, 3, 3, 0);
     if (success != 0) {
@@ -117,8 +115,6 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
             std::format("Error executing 'scale': {}", lua_tostring(_state, -1))
         );
     }
-
-    std::string vs2 = ghoul::lua::stackInformation(_state);
 
     auto [x, y, z] = ghoul::lua::values<double, double, double>(_state);
     return glm::dvec3(x, y, z);
