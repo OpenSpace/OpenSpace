@@ -111,11 +111,18 @@ namespace {
 
 /**
  * Creates a directory at the provided path, returns true if directory was newly created
- * and false otherwise
+ * and false otherwise. If `recursive` flag is set to true, it will automatically create
+ * any missing parent folder as well
  */
-[[codegen::luawrap]] bool createDirectory(std::filesystem::path path) {
-    const bool e = std::filesystem::create_directory(std::move(path));
-    return e;
+[[codegen::luawrap]] bool createDirectory(std::filesystem::path path,
+    bool recursive = false)
+{
+    if (recursive) {
+        return std::filesystem::create_directories(std::move(path));
+    }
+    else {
+        return std::filesystem::create_directory(std::move(path));
+    }
 }
 
 std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
