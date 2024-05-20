@@ -35,7 +35,6 @@ local EclipticLine = {
     Color = { 0.5, 0.24, 0.24 },
     LineWidth = 4.0,
     GridSegments = { 1, 1 },
-    -- Radii = { 0.5, 0.5 },
     Enabled = asset.enabled
   },
   GUI = {
@@ -57,7 +56,6 @@ local EclipticBand = {
   Renderable = {
     Type = "RenderableSphereImageLocal",
     Texture = textures .. "band2x.png",
-    --Size = 4.28601E17,
     Size = 9.46377307652E17,
     Segments = 50,
     DisableFadeInOut = true,
@@ -163,9 +161,10 @@ asset.export("HideEclipticBand", HideEclipticBand.Identifier)
 asset.export("ToggleEclipticBand", ToggleEclipticBand.Identifier)
 
 
+
 asset.meta = {
   Name = "Ecliptic Band/Line",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[A line and band representation of the Ecliptic plane, including actions
     to toggle, hide and show each of them.]],
   Author = "OpenSpace Team",

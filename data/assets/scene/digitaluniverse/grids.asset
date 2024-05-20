@@ -75,65 +75,59 @@ local RadioSphere = {
   }
 }
 
-
 local EquatorialSphere = {
-    Identifier = "EquatorialSphere",
-    Parent = transforms.SolarSystemBarycenter.Name,
-    Transform = {
-      Scale = {
-        Type = "StaticScale",
-        Scale = 7.5686E17   -- 80 light years
-      },
-      Rotation = {
-        Type = "StaticRotation",
-        Rotation = EquatorialRotationMatrix
-      }
+  Identifier = "EquatorialSphere",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 7.5686E17   -- 80 light years
     },
-    Renderable = {
-      Type = "RenderableSphericalGrid",
-      Enabled = false,
-      Opacity = 1.0,
-      Color = { 0.3, 0.3, 0.15 },
-      LineWidth = 2.0,
-      GridSegments = { 18, 24 },
-    },
-    GUI = {
-      Name = "Equatorial Coordinates",
-      Path = "/Night Sky/Coordinate Systems/Equatorial",
-      Description = [[An 80-light-year sphere representing equatorial coordinates (right ascension and declination).]]
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EquatorialRotationMatrix
     }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = false,
+    Opacity = 1.0,
+    Color = { 0.3, 0.3, 0.15 },
+    LineWidth = 2.0,
+    GridSegments = { 18, 24 },
+  },
+  GUI = {
+    Name = "Equatorial Coordinates",
+    Path = "/Night Sky/Coordinate Systems/Equatorial",
+    Description = [[An 80-light-year sphere representing equatorial coordinates (right ascension and declination).]]
   }
-  
-  local EquatorialSphereLabels = {
-    Identifier = "EquatorialSphereLabels",
-    Parent = transforms.SolarSystemBarycenter.Name,
-    Renderable = {
-      Type = "RenderablePointCloud",
-      Enabled = false,
-      Labels = {
-        Enabled = true,
-        File = speck .. "radec.label",
-        Color = { 0.5, 0.5, 0.5 },
-        Size = 14.5,
-        MinMaxSize = { 2, 70 },
-        Unit = "pc",
-        TransformationMatrix = EquatorialTransformationMatrix
-      },
-      Opacity = 0.65,
+}
+
+local EquatorialSphereLabels = {
+  Identifier = "EquatorialSphereLabels",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    Labels = {
+      Enabled = true,
+      File = speck .. "radec.label",
+      Color = { 0.5, 0.5, 0.5 },
+      Size = 14.5,
+      MinMaxSize = { 2, 70 },
       Unit = "pc",
       TransformationMatrix = EquatorialTransformationMatrix
     },
-    GUI = {
-      Name = "Equatorial Coordinates Labels",
-      Path = "/Night Sky/Coordinate Systems/Equatorial",
-      Description = [[Labels on a sphere representing right ascension in hours and declination in degrees.]]
-    }
+    Opacity = 0.65,
+    Unit = "pc",
+    TransformationMatrix = EquatorialTransformationMatrix
+  },
+  GUI = {
+    Name = "Equatorial Coordinates Labels",
+    Path = "/Night Sky/Coordinate Systems/Equatorial",
+    Description = [[Labels on a sphere representing right ascension in hours and declination in degrees.]]
   }
-
-
-
-
-
+}
 
 local EclipticSphere = {
   Identifier = "EclipticSphere",
@@ -188,15 +182,12 @@ local EclipticSphereLabels = {
   }
 }
 
-
-
 local GalacticSphere = {
   Identifier = "GalacticSphere",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
     Scale = {
       Type = "StaticScale",
-      -- Scale = 9.46377307652E18,
       Scale = OneThousandLY
     }
   },
@@ -238,7 +229,6 @@ local GalacticSphereLabels = {
   }
 }
 
-
 local Plane1lh = {
   Identifier = "1lhGrid",
   Parent = transforms.SolarSystemBarycenter.Name,
@@ -271,45 +261,6 @@ local Plane1lh = {
     Description = [[A 1-light-hour Cartesian grid aligned on the plane of the Solar System.]]
   }
 }
-
-
--- local RadiusHalfLightHour = {
---   Identifier = "RadiusHalfLightHour",
---   Parent = transforms.SolarSystemBarycenter.Name,
---   Transform = {
---     Rotation = {
---       Type = "StaticRotation",
---       Rotation = EclipticRotationMatrix
---     },
---     Scale = {
---       Type = "StaticScale",
---       Scale = 5.396264E11
---     }
---   },
---   Renderable = {
---     Type = "RenderableRadialGrid",
---     Opacity = 0.3,
---     Color = { 0.1, 0.5, 0.6 },
---     LineWidth = 2.0,
---     GridSegments = { 1, 1 },
---     CircleSegments = 60,
---     Labels = {
---         File = speck .. "1lh.label",
---         Color = { 0.0, 0.2, 0.5 },
---         Size = 8.9,
---         MinMaxSize = { 0, 30 },
---         Unit = "Km"
---       },
---   },
---   GUI = {
---     Name = "A. Radius - Half Light Hour",
---     Description = [[]],
---     Path = "/Solar System/Grids"
---   }
--- }
-
-  
-
 
 local Plane1ld = {
   Identifier = "1ldGrid",
@@ -742,7 +693,7 @@ asset.export(Plane20Gly)
 
 asset.meta = {
   Name = "Grids",
-  Version = "3.0",
+  Version = "4.0",
   Description = [[Various grids and spheres for showing size reference. Included: 10,000 light year grid, 10 light year grid, 20 billion light year grid, 10 million light year grid, 100 light year grid, 100 million light year grid, Ecliptic Coordinate Sphere (500-light-year radius), Galactic Coordinate Sphere (1000-light-year radius), Galaxy Coordinate Grid, Celestial Coordinates / Radio Sphere (dynamic radius), 1 billion light year grid, Celestial Coordinate Sphere (1000000-light-year radius), 1,000 light year grid, 1 million light year grid, 1 light year grid.]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

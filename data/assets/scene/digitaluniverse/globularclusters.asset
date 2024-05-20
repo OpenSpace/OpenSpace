@@ -61,7 +61,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Globular Clusters",
-  Version = "3.1",
+  Version = "3.2",
   Description = Object.GUI.description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

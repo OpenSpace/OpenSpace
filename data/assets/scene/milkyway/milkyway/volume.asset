@@ -66,7 +66,7 @@ asset.export(MilkyWayVolume)
 
 asset.meta = {
   Name = "Milky Way Volume",
-  Version = "1.1",
+  Version = "1.2",
   Description = "Volumetric rendering of Milky Way galaxy based on simulations from NAOJ",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

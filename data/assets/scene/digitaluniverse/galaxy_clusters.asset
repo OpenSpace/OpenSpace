@@ -54,7 +54,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Galaxy Clusters Labels",
-  Version = "2.0",
+  Version = "2.1",
   Description = Object.GUI.description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

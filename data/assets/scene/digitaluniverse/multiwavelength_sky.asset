@@ -1,10 +1,3 @@
--- local speck = asset.resource({
---   Name = "Multiwavelength Milky Way Data Files",
---   Type = "HttpSynchronization",
---   Identifier = "digitaluniverse_multiwavelength_milkyway_data",
---   Version = 1
--- })
-
 local textures = asset.resource({
   Name = "Multiwavelength Milky Way Textures",
   Type = "HttpSynchronization",
@@ -13,38 +6,34 @@ local textures = asset.resource({
 })
 
 
-
 local AllSkyVisible = {
-    Identifier = "AllSkyVisible",
-    -- DU Version = 1.04
-    Transform = {
-      Rotation = {
-        Type = "StaticRotation",
-        Rotation = { 0, 0, math.pi }
-      }
-    },
-    Renderable = {
-      Type = "RenderableSphereImageLocal",
-      Size = 9.2E21,
-      Segments = 40,
-      Opacity = 0.25,
-      Texture = textures .. "DarkUniverse_mellinger_4k.jpg",
-      Orientation = "Inside",
-      MirrorTexture = true,
-      FadeOutThreshold = 0.0015,
-      Background = true,
-      DimInAtmosphere = true
-    },
-    Tag = { "daytime_hidden" },
-    GUI = {
-      Name = "Visible Milky Way",
-      Path = "/Milky Way/All Sky Images",
-      Description = [[An all-sky image of the night sky as our eye sees it (in the visible spectrum), with the stars removed. You will see the brightest part of the Galaxy if you look toward Galactic center toward the constellations Scorpius and Sagittarius. This bright haze is the light from millions of stars; the dark lanes are foreground dust clouds, obscuring our view of the stars behind them. Census: 1 all-sky image.]]
+  Identifier = "AllSkyVisible",
+  -- DU Version = 1.04
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.pi }
     }
+  },
+  Renderable = {
+    Type = "RenderableSphereImageLocal",
+    Size = 9.2E21,
+    Segments = 40,
+    Opacity = 0.25,
+    Texture = textures .. "DarkUniverse_mellinger_4k.jpg",
+    Orientation = "Inside",
+    MirrorTexture = true,
+    FadeOutThreshold = 0.0015,
+    Background = true,
+    DimInAtmosphere = true
+  },
+  Tag = { "daytime_hidden" },
+  GUI = {
+    Name = "Visible Milky Way",
+    Path = "/Milky Way/All Sky Images",
+    Description = [[An all-sky image of the night sky as our eye sees it (in the visible spectrum), with the stars removed. You will see the brightest part of the Galaxy if you look toward Galactic center toward the constellations Scorpius and Sagittarius. This bright haze is the light from millions of stars; the dark lanes are foreground dust clouds, obscuring our view of the stars behind them. Census: 1 all-sky image.]]
   }
-
-
-
+}
 
 local AllSkyHAlpha = {
   Identifier = "AllSkyHAlpha",

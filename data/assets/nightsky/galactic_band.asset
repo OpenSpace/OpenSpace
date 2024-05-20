@@ -17,7 +17,6 @@ local GalacticLine = {
         Color = { 0.08, 0.40, 0.40 },
         LineWidth = 4.0,
         GridSegments = { 1, 1 },
-        --Radii = { 0.5, 0.5 },
         Enabled = asset.enabled
     },
     GUI = {
@@ -76,9 +75,10 @@ asset.export("ShowGalacticBand", ShowGalacticBand.Identifier)
 asset.export("HideGalacticBand", HideGalacticBand.Identifier)
 
 
+
 asset.meta = {
   Name = "Galactic Line",
-  Version = "1.0",
+  Version = "2.0",
   Description = [[A line representation of the Galactic Equator plane, including actions
     to toggle, hide and show it.]],
   Author = "OpenSpace Team",

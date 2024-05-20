@@ -158,9 +158,10 @@ asset.export("ShowNeswLettersSmall", ShowNeswLettersSmall.Identifier)
 asset.export("HideNesw", HideNesw.Identifier)
 
 
+
 asset.meta = {
   Name = "Cardinal Directions",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Adds a sphere showing the cardinal directions, that follows the camera
     around when navigating on the planet surface. It also includes actions to change the
     texture of the sphere to different styles.

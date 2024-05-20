@@ -41,7 +41,7 @@ asset.require("./white_dwarfs")
 
 asset.meta = {
   Name = "Digital Universe",
-  Version = "1.0",
+  Version = "2.0",
   Description = [[This asset is a meta asset, containing all the assets from the AMNH Digital Universe.]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

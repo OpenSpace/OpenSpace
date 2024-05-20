@@ -257,7 +257,7 @@ asset.export("UndoLightPollution", UndoLightPollution.Identifier)
 
 asset.meta = {
   Name = "Light Pollution",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[Includes a sphere used to simulate the effect of light pollution on
     the night sky, and actions to set the desired level of pollution (with a scale
     from 1-9).]],

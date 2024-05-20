@@ -57,7 +57,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Constellation Bounds",
-  Version = "1.2",
+  Version = "1.3",
   Description = Object.GUI.description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

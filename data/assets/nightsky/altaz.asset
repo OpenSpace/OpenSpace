@@ -126,9 +126,10 @@ asset.export("HideAltaz", HideAltaz.Identifier)
 asset.export("ToggleAltaz", ToggleAltaz.Identifier)
 
 
+
 asset.meta = {
   Name = "Altitude/Azimuth Grid",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[A local Altitude/Azimuth grid centered around your position on a
     planetary surface. The asset also includes some actions to toggle, hide or
     show the grid.]],

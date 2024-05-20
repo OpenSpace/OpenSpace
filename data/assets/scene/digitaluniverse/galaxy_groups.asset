@@ -54,7 +54,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Galaxy Group Labels",
-  Version = "2.0",
+  Version = "2.1",
   Author = "Brian Abbott (AMNH)",
   Description = Object.GUI.description,
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

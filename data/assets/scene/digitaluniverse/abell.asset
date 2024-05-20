@@ -74,7 +74,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Abell Galaxy Clusters",
-  Version = "3.0",
+  Version = "3.1",
   Description = Object.GUI.Description,
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

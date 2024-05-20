@@ -35,7 +35,7 @@ local MeridianPlane = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 1000000,
+      Scale = 1000000
     }
   },
   Renderable = {
@@ -121,9 +121,10 @@ asset.export("HideMeridian", HideMeridian.Identifier)
 asset.export("ToggleMeridian", ToggleMeridian.Identifier)
 
 
+
 asset.meta = {
   Name = "Meridian",
-  Version = "1.0",
+  Version = "1.1",
   Description = [[A line representation of the Local Meridian, including actions
     to toggle, hide and show it.]],
   Author = "OpenSpace Team",

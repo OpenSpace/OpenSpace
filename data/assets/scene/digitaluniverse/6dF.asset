@@ -63,7 +63,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "6dF Galaxies",
-  Version = "3.0",
+  Version = "3.1",
   Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
