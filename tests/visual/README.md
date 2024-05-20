@@ -33,7 +33,7 @@ Each test must have a `screenshot` instruction as the last entry, which causes a
 
     Script Equivalent: `openspace.navigation.setNavigationState`
 
-  - `pause`: Determines whether the in-game clock should be paused or resumed. The provided value must be a boolean that is the paused state after the instruction
+  - `pause`: Determines whether the in-game clock should be paused or resumed. The provided value must be a boolean that is the clock state after the instruction
 
     Example: `{ "type": "pause", "value": false }`
 
