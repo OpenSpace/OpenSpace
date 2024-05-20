@@ -25,7 +25,7 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
 
 create_new_application(DocsWriter
-  ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+    main.cpp
 )
 
 target_link_libraries(DocsWriter PRIVATE openspace-core openspace-module-collection)
