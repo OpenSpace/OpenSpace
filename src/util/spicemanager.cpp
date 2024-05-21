@@ -271,8 +271,9 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::filesystem::path filePa
     else if (fileExtension == ".bsp" ||
             fileExtension == ".BSP" ||
             fileExtension == ".spk" ||
-            fileExtension == ".SPK") {
-                findSpkCoverage(filePath); // spk kernel
+            fileExtension == ".SPK")
+        {
+            findSpkCoverage(filePath); // spk kernel
     }
 
     const KernelHandle kernelId = ++_lastAssignedKernel;
