@@ -363,6 +363,10 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
     // if delta time direction got changed
     if (_forward && deltaTime < 0 || !_forward && deltaTime > 0) {
         _forward = !_forward;
+        // Remove from queue when time changed, to start downloading most relevant files
+        for (auto file : _queuedFilesToDownload) {
+            file->state = File::State::Available;
+        }
         _queuedFilesToDownload.clear();
     }
 

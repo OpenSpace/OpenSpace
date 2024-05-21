@@ -1,0 +1,6 @@
+width 2.0
+lower 0.0
+upper 1.0
+
+mappingkey 0.0  40  40   20   255
+mappingkey 1.0  255 40   40   255

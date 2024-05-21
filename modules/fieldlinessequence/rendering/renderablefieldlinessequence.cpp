@@ -1027,7 +1027,9 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         currentTime < _files[_activeIndex].timestamp ||
         // if currentTime >= next timestamp, it means that we stepped forward to a
         // time represented by another state
-        (nextIndex < _files.size() && currentTime >= _files[nextIndex].timestamp))
+        (nextIndex < _files.size() && currentTime >= _files[nextIndex].timestamp) ||
+        // if this case is not taken care of yet
+        _files[_activeIndex].status == File::FileStatus::Downloaded)
     {
         int previousIndex = _activeIndex;
         _activeIndex = updateActiveIndex(currentTime);

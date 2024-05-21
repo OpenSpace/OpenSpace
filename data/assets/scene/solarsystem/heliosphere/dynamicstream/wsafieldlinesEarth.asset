@@ -1,16 +1,34 @@
 local transforms = asset.require('../transforms_heliosphere')
+
+local transferFunctions = asset.localResource("transferfunctions")
+local polarityColorTable = transferFunctions .. "/polarity_spec.txt"
+local subEarthLevelColorTable = transferFunctions .. "/subearth_spec.txt"
+
+
 local sunRadius = 695508000
+
 local fieldlines = {
   Identifier = "WSA_Fieldlines_Earth",
   Parent = transforms.TransformGONG.Identifier,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
+    Enabled = false,
     InputFileType = "Osfls",
     LoadingType = "DynamicDownloading",
     InfoURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/DataInfoServlet?id=",
     DataURL = "https://iswa.gsfc.nasa.gov/IswaSystemWebApp/FilesInRangeServlet?dataID=",
     DataID = 2287, --2284 IO, 2285 OI, 2286 SCS-OI, 2287 Earth
-    ShowAtAllTimes = true,
+    ShowAtAllTimes = false,
+    ColorMethod = "ByQuantity", -- Color by Quantity
+    ColorQuantity = 0, -- Wind speed & polarity
+    ColorTablePaths = {
+      polarityColorTable,
+      subEarthLevelColorTable
+    },
+    ColorTableRanges = {
+        { 0.0, 1.0 },
+        { 0.0, 2.0 }
+    },
   },
   GUI = {
     Path = "/Solar System/Heliosphere",
