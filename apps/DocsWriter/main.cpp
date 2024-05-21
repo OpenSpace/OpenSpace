@@ -55,8 +55,7 @@ int main(int argc, char** argv) {
 
     // Register the base path as the directory where the configuration file lives
     std::filesystem::path base = configFile.parent_path();
-    constexpr std::string_view BasePathToken = "${BASE}";
-    FileSys.registerPathToken(BasePathToken.data(), base);
+    FileSys.registerPathToken("${BASE}", base);
 
     *global::configuration = loadConfigurationFromFile(
         configFile.string(),
