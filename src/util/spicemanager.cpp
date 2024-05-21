@@ -264,8 +264,9 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::filesystem::path filePa
     if (fileExtension == ".bc" ||
         fileExtension == ".BC" ||
         fileExtension == ".ck" ||
-        fileExtension == ".CK") {
-            findCkCoverage(filePath); // binary ck kernel
+        fileExtension == ".CK")
+    {
+        findCkCoverage(filePath); // binary ck kernel
     }
     else if (fileExtension == ".bsp" ||
             fileExtension == ".BSP" ||
