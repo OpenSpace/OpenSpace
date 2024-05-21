@@ -30,7 +30,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/ghoul.h>
 #include <ghoul/logging/logmanager.h>
-#include <iostream>
 
 int main(int argc, char** argv) {
     using namespace openspace;
