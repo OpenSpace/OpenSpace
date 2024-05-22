@@ -88,7 +88,7 @@ public:
     static DocumentationEngine& ref();
 
     void writeJavascriptDocumentation() const;
-    void writeJsonDocumentation(std::string folderName = "${DOCUMENTATION}") const;
+    void writeJsonDocumentation() const;
 
     nlohmann::json generateScriptEngineJson() const;
     nlohmann::json generateFactoryManagerJson() const;

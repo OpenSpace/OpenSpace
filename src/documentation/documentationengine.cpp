@@ -646,22 +646,18 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
     out.close();
 }
 
-void DocumentationEngine::writeJsonDocumentation(std::string folderName) const {
+void DocumentationEngine::writeJsonDocumentation() const {
     nlohmann::json factory = generateFactoryManagerJson();
     nlohmann::json scripting = generateScriptEngineJson();
 
     // Write two json files for the static docs page - asset components and scripting api
-    std::ofstream out = std::ofstream(absPath(
-        std::format("{}/assetComponents.json", folderName)
-    ));
+    std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/assetComponents.json"));
     if (out) {
         out << factory.dump();
     }
     out.close();
 
-    out.open(absPath(
-        std::format("{}/scriptingApi.json", folderName)
-    ));
+    out.open(absPath("${DOCUMENTATION}/scriptingApi.json"));
     if (out) {
         out << scripting.dump();
     }
