@@ -66,6 +66,7 @@ local PrometheusTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_shepherd",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -92,7 +93,13 @@ local PrometheusLabel = {
     FadeDistances = { 75.0, 1000.0 },
     FadeWidths = { 25.0, 800.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
   GUI = {
     Name = "Prometheus Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus",
@@ -148,6 +155,7 @@ local PandoraTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_shepherd",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -174,7 +182,13 @@ local PandoraLabel = {
     FadeDistances = { 75.0, 1000.0 },
     FadeWidths = { 25.0, 800.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
   GUI = {
     Name = "Pandora Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora",
@@ -230,6 +244,7 @@ local AtlasTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_shepherd",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -256,7 +271,13 @@ local AtlasLabel = {
     FadeDistances = { 75.0, 1000.0 },
     FadeWidths = { 25.0, 800.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
   GUI = {
     Name = "Atlas Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas",
@@ -312,6 +333,7 @@ local JanusTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_shepherd",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -338,7 +360,13 @@ local JanusLabel = {
     FadeDistances = { 75.0, 1000.0 },
     FadeWidths = { 25.0, 800.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
   GUI = {
     Name = "Janus Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus",
@@ -394,6 +422,7 @@ local EpimetheusTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_shepherd",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -420,7 +449,13 @@ local EpimetheusLabel = {
     FadeDistances = { 75.0, 1000.0 },
     FadeWidths = { 25.0, 800.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
   GUI = {
     Name = "Epimetheus Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus",
@@ -476,6 +511,7 @@ local DaphnisTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_shepherd",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -502,7 +538,13 @@ local DaphnisLabel = {
     FadeDistances = { 75.0, 1000.0 },
     FadeWidths = { 25.0, 800.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
   GUI = {
     Name = "Daphnis Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis",
@@ -558,6 +600,7 @@ local PanTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_shepherd",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -584,7 +627,13 @@ local PanLabel = {
     FadeDistances = { 75.0, 1000.0 },
     FadeWidths = { 25.0, 800.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_shepherd"
+  },
   GUI = {
     Name = "Pan Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan",

@@ -53,6 +53,7 @@ local CarpoTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carpo",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -79,7 +80,13 @@ local CarpoLabel = {
     FadeDistances = { 1.0, 100.0 },
     FadeWidths = { 0.0, 100.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
   GUI = {
     Name = "Carpo Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
@@ -104,7 +111,13 @@ local CarpoLabelNear = {
     FadeDistances = { 0.2, 1.0 },
     FadeWidths = { 0.1, 0.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
   GUI = {
     Name = "Carpo Label (Near)",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
@@ -160,6 +173,7 @@ local S2018J4Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carpo",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -186,7 +200,13 @@ local S2018J4Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
   GUI = {
     Name = "S/2018 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
@@ -211,7 +231,13 @@ local S2018J4LabelNear = {
     FadeDistances = { 0.2, 1.0 },
     FadeWidths = { 0.1, 0.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
   GUI = {
     Name = "S2018J4 Label (Near)",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",

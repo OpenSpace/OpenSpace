@@ -53,6 +53,7 @@ local LedaTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_himalia",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -79,7 +80,13 @@ local LedaLabel = {
     FadeDistances = { 1.0, 120.0 },
     FadeWidths = { 1.0, 120.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
   GUI = {
     Name = "Leda Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Leda",
@@ -135,6 +142,7 @@ local HimaliaTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_himalia",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -161,7 +169,13 @@ local HimaliaLabel = {
     FadeDistances = { 1.0, 120.0 },
     FadeWidths = { 1.0, 120.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
   GUI = {
     Name = "Himalia Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Himalia",
@@ -217,6 +231,7 @@ local LysitheaTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_himalia",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -243,7 +258,13 @@ local LysitheaLabel = {
     FadeDistances = { 1.0, 120.0 },
     FadeWidths = { 1.0, 120.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
   GUI = {
     Name = "Lysithea Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Lysithea",
@@ -299,6 +320,7 @@ local ElaraTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_himalia",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -325,7 +347,13 @@ local ElaraLabel = {
     FadeDistances = { 1.0, 120.0 },
     FadeWidths = { 1.0, 120.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
   GUI = {
     Name = "Elara Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Elara",
@@ -381,6 +409,7 @@ local DiaTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_himalia",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -407,7 +436,13 @@ local DiaLabel = {
     FadeDistances = { 1.0, 120.0 },
     FadeWidths = { 1.0, 120.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
   GUI = {
     Name = "Dia Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Dia",
@@ -463,6 +498,7 @@ local S2011J3Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_himalia",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -489,7 +525,13 @@ local S2011J3Label = {
     FadeDistances = { 1.0, 120.0 },
     FadeWidths = { 1.0, 120.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
   GUI = {
     Name = "S/2011 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2011J3",
@@ -545,6 +587,7 @@ local S2018J2Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_himalia",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -571,7 +614,13 @@ local S2018J2Label = {
     FadeDistances = { 1.0, 120.0 },
     FadeWidths = { 1.0, 120.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
   GUI = {
     Name = "S/2018 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/S2018J2",
@@ -627,6 +676,7 @@ local PandiaTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_himalia",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -653,7 +703,13 @@ local PandiaLabel = {
     FadeDistances = { 1.0, 120.0 },
     FadeWidths = { 1.0, 120.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
   GUI = {
     Name = "Pandia Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Pandia",
@@ -709,6 +765,7 @@ local ErsaTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_himalia",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -735,7 +792,13 @@ local ErsaLabel = {
     FadeDistances = { 1.0, 120.0 },
     FadeWidths = { 1.0, 120.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_himalia"
+  },
   GUI = {
     Name = "Ersa Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Himalia Group/Ersa",

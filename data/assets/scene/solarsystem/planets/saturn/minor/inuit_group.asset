@@ -52,6 +52,7 @@ local KiviuqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -78,7 +79,13 @@ local KiviuqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Kiviuq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq",
@@ -134,6 +141,7 @@ local IjiraqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -160,7 +168,13 @@ local IjiraqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Ijiraq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq",
@@ -216,6 +230,7 @@ local PaaliaqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -242,7 +257,13 @@ local PaaliaqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Paaliaq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq",
@@ -298,6 +319,7 @@ local SiarnaqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -324,7 +346,13 @@ local SiarnaqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Siarnaq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq",
@@ -380,6 +408,7 @@ local TarqeqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -406,7 +435,13 @@ local TarqeqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Tarqeq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq",
@@ -462,6 +497,7 @@ local S2004S29Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -488,7 +524,13 @@ local S2004S29Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "S/2004 S 29 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29",
@@ -544,6 +586,7 @@ local S2004S31Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -570,7 +613,13 @@ local S2004S31Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "S/2004 S 31 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31",
@@ -626,6 +675,7 @@ local S2019S01Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -652,7 +702,13 @@ local S2019S01Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "S/2019 S 01 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01",
