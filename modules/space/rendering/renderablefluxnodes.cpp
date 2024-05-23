@@ -273,12 +273,15 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {
-        // path to source folder with the 3 binary files in it
+        // Path to a source folder with the three binary files in it.
         std::filesystem::path sourceFolder [[codegen::directory()]];
+
         // [[codegen::verbatim(ColorTablePathInfo.description)]]
         std::string colorTablePath;
+
         // [[codegen::verbatim(GoesEnergyBinsInfo.description)]]
         std::optional<int> energyBin;
+
         // [[codegen::verbatim(colorTableRangeInfo.description)]]
         std::optional<glm::vec2> colorTableRange;
     };

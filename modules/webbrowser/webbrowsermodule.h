@@ -58,6 +58,8 @@ public:
     void detachEventHandler();
     bool isEnabled() const;
 
+    std::vector<documentation::Documentation> documentations() const override;
+
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
     void internalDeinitialize() override;

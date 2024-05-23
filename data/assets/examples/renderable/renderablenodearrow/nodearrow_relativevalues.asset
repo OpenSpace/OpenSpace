@@ -1,0 +1,42 @@
+-- Relative Units for Offset and Length
+-- This example shows an arrow pointing from one scene graph node in the direction of
+-- another, but where the size is specified using relative values (based on the bounding
+-- sphere of the start node). Here it points from Earth to the Moon.
+--
+-- Note that the arrows are generated as objects in 3D space and need to have a size
+-- that is suitable for the scene graph nodes they refer to. Here it is set based on
+-- the size of the start node, i.e. Earth.
+
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+
+local Node = {
+  Identifier = "RenderableNodeArrow_Example_Relative",
+  -- Parent to the start node, so that when we focus on the arrow this is where we end up
+  Parent = earth.Earth.Identifier,
+  Renderable = {
+    Type = "RenderableNodeArrow",
+    StartNode = earth.Earth.Identifier,
+    EndNode = moon.Moon.Identifier,
+    -- Use relative values for offset and length
+    UseRelativeOffset = true,
+    UseRelativeLength = true,
+    -- Specify relative values (times the size of Earth, in this case)
+    Offset = 2.0,
+    Length = 5.0,
+    -- Width is in meters
+    Width = 900000.0
+  },
+  GUI = {
+    Name = "Relative Units",
+    Path = "/Examples/RenderableNodeArrow",
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

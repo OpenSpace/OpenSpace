@@ -53,15 +53,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
         "Texture Source",
-        "This value specifies a directory of images that are loaded from disk and is "
-        "used as a texture that is applied to this sphere. The images are expected to "
-        "be an equirectangular projection.",
+        "A directory containing images that are loaded from disk and used for texturing "
+        "the sphere. The images are expected to be equirectangular projections.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
-        std::string textureSource;
+        std::filesystem::path textureSource [[codegen::directory()]];
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -79,7 +78,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _textureSourcePath = p.textureSource;
+    _textureSourcePath = p.textureSource.string();
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {

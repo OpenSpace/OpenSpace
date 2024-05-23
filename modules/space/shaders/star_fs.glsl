@@ -61,6 +61,7 @@ const int ColorOptionFixedColor = 4;
 vec4 bv2rgb(float bv) {
   // BV is [-0.4,2.0]
   float t = (bv + 0.4) / (2.0 + 0.4);
+  t = clamp(t, 0.0, 1.0);
   return texture(colorTexture, t);
 }
 

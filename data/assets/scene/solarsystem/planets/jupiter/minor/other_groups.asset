@@ -52,6 +52,7 @@ local EuphemeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -78,7 +79,13 @@ local EuphemeLabel = {
     FadeDistances = { 1.0, 150.0 },
     FadeWidths = { 1.0, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Eupheme Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Other Group/Eupheme",
@@ -134,6 +141,7 @@ local S2003J19Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -160,7 +168,13 @@ local S2003J19Label = {
     FadeDistances = { 1.0, 150.0 },
     FadeWidths = { 1.0, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "S/2003 J 19 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J19",
@@ -216,6 +230,7 @@ local ValetudoTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -242,7 +257,13 @@ local ValetudoLabel = {
     FadeDistances = { 1.0, 150.0 },
     FadeWidths = { 1.0, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Valetudo Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Valetudo",

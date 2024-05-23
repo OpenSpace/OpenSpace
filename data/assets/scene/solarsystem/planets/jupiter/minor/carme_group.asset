@@ -53,6 +53,7 @@ local HerseTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -79,7 +80,13 @@ local HerseLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Herse Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Herse",
@@ -135,6 +142,7 @@ local AitneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -161,7 +169,13 @@ local AitneLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Aitne Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Aitne",
@@ -217,6 +231,7 @@ local KaleTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -243,7 +258,13 @@ local KaleLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Kale Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kale",
@@ -299,6 +320,7 @@ local TaygeteTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -325,7 +347,13 @@ local TaygeteLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Taygete Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Taygete",
@@ -381,6 +409,7 @@ local ChaldeneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -407,7 +436,13 @@ local ChaldeneLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Chaldene Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Chaldene",
@@ -463,6 +498,7 @@ local ErinomeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -489,7 +525,13 @@ local ErinomeLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Erinome Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Erinome",
@@ -545,6 +587,7 @@ local KallichoreTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -571,7 +614,13 @@ local KallichoreLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Kallichore Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kallichore",
@@ -627,6 +676,7 @@ local KalykeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -653,7 +703,13 @@ local KalykeLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Kalyke Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Kalyke",
@@ -709,6 +765,7 @@ local PasitheeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -735,7 +792,13 @@ local PasitheeLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Pasithee Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Pasithee",
@@ -791,6 +854,7 @@ local S2010J1Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -817,7 +881,13 @@ local S2010J1Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2010 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2010J1",
@@ -873,6 +943,7 @@ local EukeladeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -899,7 +970,13 @@ local EukeladeLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Eukelade Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Eukelade",
@@ -955,6 +1032,7 @@ local ArcheTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -981,7 +1059,13 @@ local ArcheLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Arche Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Arche",
@@ -1037,6 +1121,7 @@ local IsonoeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1063,7 +1148,13 @@ local IsonoeLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Isonoe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Isonoe",
@@ -1119,6 +1210,7 @@ local CarmeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1145,7 +1237,13 @@ local CarmeLabel = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "Carme Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/Carme",
@@ -1201,6 +1299,7 @@ local S2003J5Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1227,7 +1326,13 @@ local S2003J5Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2003 J 5 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J5",
@@ -1283,6 +1388,7 @@ local S2018J3Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1309,7 +1415,13 @@ local S2018J3Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2018 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2018J3",
@@ -1365,6 +1477,7 @@ local S2021J4Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1391,7 +1504,13 @@ local S2021J4Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2021 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J4",
@@ -1447,6 +1566,7 @@ local S2021J5Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1473,7 +1593,13 @@ local S2021J5Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2021 J 5 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J5",
@@ -1529,6 +1655,7 @@ local S2021J6Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1555,7 +1682,13 @@ local S2021J6Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2021 J 6 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2021J6",
@@ -1611,6 +1744,7 @@ local S2016J3Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1637,7 +1771,13 @@ local S2016J3Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2016 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2016J3",
@@ -1693,6 +1833,7 @@ local S2022J1Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1719,7 +1860,13 @@ local S2022J1Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2022 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J1",
@@ -1775,6 +1922,7 @@ local S2022J2Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1801,7 +1949,13 @@ local S2022J2Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2022 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2022J2",
@@ -1857,6 +2011,7 @@ local S2017J2Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1883,7 +2038,13 @@ local S2017J2Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2017 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J2",
@@ -1939,6 +2100,7 @@ local S2017J5Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1965,7 +2127,13 @@ local S2017J5Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2017 J 5 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J5",
@@ -2021,6 +2189,7 @@ local S2017J8Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -2047,7 +2216,13 @@ local S2017J8Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2017 J 8 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2017J8",
@@ -2103,6 +2278,7 @@ local S2011J1Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -2129,7 +2305,13 @@ local S2011J1Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2011 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2011J1",
@@ -2185,6 +2367,7 @@ local S2003J9Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -2211,7 +2394,13 @@ local S2003J9Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2003 J 9 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J9",
@@ -2267,6 +2456,7 @@ local S2003J10Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carme",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -2293,7 +2483,13 @@ local S2003J10Label = {
     FadeDistances = { 2.0, 125.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carme"
+  },
   GUI = {
     Name = "S/2003 J 10 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carme Group/S2003J10",

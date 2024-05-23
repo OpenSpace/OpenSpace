@@ -7,7 +7,7 @@ local models = asset.resource({
   Name = "Voyager Model",
   Type = "HttpSynchronization",
   Identifier = "voyager_model",
-  Version = 1
+  Version = 2
 })
 
 local kernels = asset.resource({
@@ -57,56 +57,22 @@ local Voyager1 = {
       }
     }
   },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = asset.enabled,
+    GeometryFile = models .. "Voyager.glb",
+    ModelTransform = RotationMatrix,
+    LightSources = {
+      sunTransforms.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
+  },
   GUI = {
     Name = "Voyager 1",
-    Path = "/Solar System/Missions/Voyager 1"
-  }
-}
-
-local Voyager1Main = {
-  Identifier = "Voyager_1_Main",
-  Parent = Voyager1.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Enabled = asset.enabled,
-    GeometryFile = models .. "voyager-main.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sunTransforms.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  Tag = { "voyager1_part" },
-  GUI = {
-    Name = "Voyager 1 Main",
-    Path = "/Solar System/Missions/Voyager 1"
-  }
-}
-
-local Voyager1Antenna = {
-  Identifier = "Voyager_1_Antenna",
-  Parent = Voyager1.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Enabled = asset.enabled,
-    GeometryFile = models .. "voyager-antenna.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sunTransforms.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  Tag = { "voyager1_part" },
-  GUI = {
-    Name = "Voyager 1 Antenna",
     Path = "/Solar System/Missions/Voyager 1"
   }
 }
@@ -258,8 +224,6 @@ asset.onInitialize(function()
   openspace.spice.loadKernel(Kernels)
 
   openspace.addSceneGraphNode(Voyager1)
-  openspace.addSceneGraphNode(Voyager1Main)
-  openspace.addSceneGraphNode(Voyager1Antenna)
   openspace.addSceneGraphNode(VoyagerTrailCruiseEarthJupiter)
   openspace.addSceneGraphNode(VoyagerTrailEncounterJupiter)
   openspace.addSceneGraphNode(VoyagerTrailCruiseJupiterSaturn)
@@ -277,18 +241,26 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VoyagerTrailCruiseJupiterSaturn)
   openspace.removeSceneGraphNode(VoyagerTrailEncounterJupiter)
   openspace.removeSceneGraphNode(VoyagerTrailCruiseEarthJupiter)
-  openspace.removeSceneGraphNode(Voyager1Antenna)
-  openspace.removeSceneGraphNode(Voyager1Main)
   openspace.removeSceneGraphNode(Voyager1)
 
   openspace.spice.unloadKernel(Kernels)
 end)
 
 asset.export(Voyager1)
-asset.export(Voyager1Main)
-asset.export(Voyager1Antenna)
 asset.export(VoyagerTrailCruiseEarthJupiter)
 asset.export(VoyagerTrailEncounterJupiter)
 asset.export(VoyagerTrailCruiseJupiterSaturn)
 asset.export(VoyagerTrailEncounterSaturn)
 asset.export(VoyagerTrailCruiseSaturnInf)
+
+asset.meta = {
+  Name = "Voyager 1 Model and Trails",
+  Version = "2.0",
+  Description = [[
+    Voyager 1 model and trails from 1977 SEP 05 to 2100 JAN 01. Model credit:
+    NASA Visualization Technology Applications And Development (VTAD)
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

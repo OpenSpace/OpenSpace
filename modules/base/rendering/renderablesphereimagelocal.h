@@ -57,6 +57,7 @@ private:
 
     properties::StringProperty _texturePath;
 
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     bool _isLoadingLazily = false;
     bool _textureIsDirty = false;

@@ -105,8 +105,8 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
         "SpeckFile",
-        "Speck File",
-        "The speck file that is loaded to get the data for rendering these stars.",
+        "SPECK File",
+        "The path to the SPECK file containing the data for rendering these stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -121,7 +121,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingBvInfo = {
         "MappingBV",
         "Mapping (bv-color)",
-        "The name of the variable in the speck file that is used as the b-v color "
+        "The name of the variable in the SPECK file that is used as the b-v color "
         "variable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -129,7 +129,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingLuminanceInfo = {
         "MappingLuminance",
         "Mapping (luminance)",
-        "The name of the variable in the speck file that is used as the luminance "
+        "The name of the variable in the SPECK file that is used as the luminance "
         "variable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -137,7 +137,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingAbsMagnitudeInfo = {
         "MappingAbsMagnitude",
         "Mapping (absolute magnitude)",
-        "The name of the variable in the speck file that is used as the absolute "
+        "The name of the variable in the SPECK file that is used as the absolute "
         "magnitude variable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -145,7 +145,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingVxInfo = {
         "MappingVx",
         "Mapping (vx)",
-        "The name of the variable in the speck file that is used as the star velocity "
+        "The name of the variable in the SPECK file that is used as the star velocity "
         "along the x-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -153,7 +153,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingVyInfo = {
         "MappingVy",
         "Mapping (vy)",
-        "The name of the variable in the speck file that is used as the star velocity "
+        "The name of the variable in the SPECK file that is used as the star velocity "
         "along the y-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -161,7 +161,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingVzInfo = {
         "MappingVz",
         "Mapping (vz)",
-        "The name of the variable in the speck file that is used as the star velocity "
+        "The name of the variable in the SPECK file that is used as the star velocity "
         "along the z-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -169,7 +169,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingSpeedInfo = {
         "MappingSpeed",
         "Mapping (speed)",
-        "The name of the variable in the speck file that is used as the speed.",
+        "The name of the variable in the SPECK file that is used as the speed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -184,7 +184,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OtherDataOptionInfo = {
         "OtherData",
         "Other Data Column",
-        "The index of the speck file data column that is used as the color input.",
+        "The index of the SPECK file data column that is used as the color input.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -317,8 +317,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
-        // The path to the SPECK file containing information about the stars being
-        // rendered
+        // [[codegen::verbatim(SpeckFileInfo.description)]]
         std::filesystem::path speckFile [[codegen::key("File")]];
 
         // [[codegen::verbatim(ColorTextureInfo.description)]]
@@ -343,12 +342,12 @@ namespace {
         // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
 
-        // This value specifies a value that is always filtered out of the value ranges on
-        // loading. This can be used to trim the dataset's automatic value range
+        // Specifies a value that is always filtered out of the value ranges on load.
+        // This can be used to trim the dataset's automatic value range.
         std::optional<float> staticFilter;
 
-        // This is the value that is used to replace statically filtered values. Setting
-        // this value only makes sense if 'StaticFilter' is 'true', as well
+        // A value that is used to replace statically filtered values. Setting this value
+        // only makes sense if `StaticFilter` is set as well.
         std::optional<float> staticFilterReplacement;
 
         struct Texture {
@@ -401,8 +400,8 @@ namespace {
             // [[codegen::verbatim(MappingSpeedInfo.description)]]
             std::optional<std::string> speed;
         };
-        // The mappings between data values and the variable names specified in the speck
-        // file
+        // The mappings between data values and the variable names specified in the SPECK
+        // file.
         DataMapping dataMapping;
 
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]

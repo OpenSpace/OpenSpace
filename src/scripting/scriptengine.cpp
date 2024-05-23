@@ -47,7 +47,7 @@ namespace {
 
     struct [[codegen::Dictionary(Documentation)]] Parameters {
         std::string name;
-        std::map<std::string, std::string> arguments;
+        std::vector<std::vector<std::string>> arguments;
         std::optional<std::string> returnValue [[codegen::key("Return")]];
         std::optional<std::string> documentation;
     };
@@ -347,11 +347,11 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 
                 LuaLibrary::Function func;
                 func.name = p.name;
-                for (const std::pair<const std::string, std::string>& pair : p.arguments)
+                for (const std::vector<std::string>& pair : p.arguments)
                 {
                     LuaLibrary::Function::Argument arg;
-                    arg.name = pair.first;
-                    arg.type = pair.second;
+                    arg.name = pair[0];
+                    arg.type = pair[1];
                     func.arguments.push_back(arg);
                 }
                 func.returnType = p.returnValue.value_or(func.returnType);
@@ -646,6 +646,7 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::FileExists,
             codegen::lua::ReadFile,
             codegen::lua::DirectoryExists,
+            codegen::lua::CreateDirectory,
             codegen::lua::WalkDirectory,
             codegen::lua::WalkDirectoryFiles,
             codegen::lua::WalkDirectoryFolders,

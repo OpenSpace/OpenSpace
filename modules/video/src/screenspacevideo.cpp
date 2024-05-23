@@ -38,12 +38,9 @@
 namespace openspace {
 
 documentation::Documentation ScreenSpaceVideo::Documentation() {
-    documentation::Documentation doc = ScreenSpaceRenderable::Documentation();
+    documentation::Documentation doc = VideoPlayer::Documentation();
     doc.name = "ScreenSpaceVideo";
     doc.id = "video_screenspacevideo";
-
-    documentation::Documentation vp = VideoPlayer::Documentation();
-    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
 
     return doc;
 }

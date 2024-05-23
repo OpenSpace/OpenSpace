@@ -52,6 +52,7 @@ local ThemistoTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_themisto",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -78,7 +79,13 @@ local ThemistoLabel = {
     FadeDistances = { 1.5, 120.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_themisto"
+  },
   GUI = {
     Name = "Themisto Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto",

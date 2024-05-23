@@ -1,0 +1,27 @@
+-- Basic
+-- This example will show a sphere that is covered with an image which is retrieved from
+-- an online URL. The image will be stretched over the entire sphere as an equirectangular
+-- projection
+
+local Node = {
+  Identifier = "RenderableSphereImageOnline_Example",
+  Renderable = {
+    Type = "RenderableSphereImageOnline",
+    URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg",
+
+    -- Parameters from the parent class `RenderableSphere`
+    Segments = 16
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/RenderableSphereImageOnline"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
