@@ -62,7 +62,6 @@ namespace {
     openspace::global::navigationHandler->pathNavigator().skipToEnd();
 }
 
-// @TODO: Split this up into two functions and then document (to remove the confusion)
 /**
  * Move the camera to the node with the specified identifier. The optional double
  * specifies the duration of the motion, in seconds. If the optional bool is set to true
@@ -118,7 +117,6 @@ namespace {
     }
 }
 
-// @TODO: Split this up into two functions and then document (to remove the confusion)
 /**
  * Move the camera to the node with the specified identifier. The second argument is the
  * desired target height above the target node's bounding sphere, in meters. The optional

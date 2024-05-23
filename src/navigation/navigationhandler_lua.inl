@@ -204,7 +204,6 @@ namespace {
     global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
 
-// @TODO: consider adding enum types for axis type and joysticktype
 /**
  * Bind an axis of a joystick to be used as a certain type, and optionally define
  * detailed settings for the axis.
@@ -280,8 +279,6 @@ namespace {
     );
 }
 
-// @TODO: Should this be a concrete Type in the documentation? Could also be used in bind
-// joystick functions above//
 struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
     // The current type of axis binding
     std::string type;
@@ -324,10 +321,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
     // actions)
     std::optional<bool> isRemote;
 };
-
-// @TODO: How to create a reference to the above object as the return type?
-// Should we really create documentation for the JoyStickCameraStates::AxisInfomation
-// struct instead?
 
 /**
  * Return all the information bound to a certain joystick axis.
