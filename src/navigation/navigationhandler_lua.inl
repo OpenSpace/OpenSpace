@@ -470,15 +470,15 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 /**
  * Directly add to the global rotation of the camera (around the focus node).
  *
- * \param v1 the value to add in the x-direction (a positive value rotates to the
- *           right and a negative value to the left)
- * \param v2 the value to add in the y-direction (a positive value rotates the focus
- *           upwards and a negative value downwards)
+ * \param xValue the value to add in the x-direction (a positive value rotates to the
+ *               right and a negative value to the left)
+ * \param yValue the value to add in the y-direction (a positive value rotates the focus
+ *               upwards and a negative value downwards)
  */
-[[codegen::luawrap]] void addGlobalRotation(double v1, double v2) {
+[[codegen::luawrap]] void addGlobalRotation(double xValue, double yValue) {
     using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRotation(
-        glm::dvec2(v1, v2)
+        glm::dvec2(xValue, yValue)
     );
 }
 
@@ -486,15 +486,15 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * Directly adds to the local rotation of the camera (around the camera's current
  * position).
  *
- * \param v1 the value to add in the x-direction (a positive value rotates to the
- *           left and a negative value to the right)
- * \param v2 the value to add in the y-direction (a positive value rotates the camera
- *           upwards and a negative value downwards)
+ * \param xValue the value to add in the x-direction (a positive value rotates to the
+ *               left and a negative value to the right)
+ * \param yValue the value to add in the y-direction (a positive value rotates the camera
+ *               upwards and a negative value downwards)
  */
-[[codegen::luawrap]] void addLocalRotation(double v1, double v2) {
+[[codegen::luawrap]] void addLocalRotation(double xValue, double yValue) {
     using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRotation(
-        glm::dvec2(v1, v2)
+        glm::dvec2(xValue, yValue)
     );
 }
 
@@ -506,14 +506,14 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * A positive value moves the camera closer to the focus, and a negative value moves the
  * camera further away.
  *
- * \param v the value to add
+ * \param value the value to add
  */
-[[codegen::luawrap]] void addTruckMovement(double v) {
+[[codegen::luawrap]] void addTruckMovement(double value) {
     using namespace openspace;
     // @TODO: Note that the x value isn't actually used and the code in the navigation
     // handlers for these should be cleaned up. The same goes for the roll funcitons below
     global::navigationHandler->orbitalNavigator().scriptStates().addTruckMovement(
-        glm::dvec2(0.0, v)
+        glm::dvec2(0.0, value)
     );
 }
 
@@ -521,12 +521,12 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * Directly adds to the local roll of the camera. This is the rotation around the camera's
  * forward/view direction.
  *
- * \param v the value to add
+ * \param value the value to add
  */
-[[codegen::luawrap]] void addLocalRoll(double v) {
+[[codegen::luawrap]] void addLocalRoll(double value) {
     using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRoll(
-        glm::dvec2(v, 0.0)
+        glm::dvec2(value, 0.0)
     );
 }
 
@@ -535,12 +535,12 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * between the focus node and the camera (not always the same as the camera view
  * direction)
  *
- * \param v the value to add
+ * \param value the value to add
  */
-[[codegen::luawrap]] void addGlobalRoll(double v) {
+[[codegen::luawrap]] void addGlobalRoll(double value) {
     using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRoll(
-        glm::dvec2(v, 0.0)
+        glm::dvec2(value, 0.0)
     );
 }
 
