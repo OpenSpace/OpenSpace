@@ -15,7 +15,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "GalaxySuperclusters",
-  -- DU Version = 1.03
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,

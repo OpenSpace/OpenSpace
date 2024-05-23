@@ -8,7 +8,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "StarUncertainty",
-  -- DU Version = 1.08
   Renderable = {
     Type = "RenderableConstellationLines",
     Enabled = false,

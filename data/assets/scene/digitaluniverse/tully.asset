@@ -22,7 +22,6 @@ local TransformMatrix = {
 
 local TullyGalaxies = {
   Identifier = "TullyGalaxies",
-  -- DU Version = 1.05
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = true,
@@ -79,7 +78,6 @@ local TullyGalaxies = {
 
 local TullyGalaxiesImages = {
   Identifier = "TullyGalaxiesImages",
-  -- DU Version = 1.05
   Renderable = {
     Type = "RenderablePointCloud",
     Opacity = 0.99,

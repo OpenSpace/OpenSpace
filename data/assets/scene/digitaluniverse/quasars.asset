@@ -22,7 +22,6 @@ local colormaps = asset.resource({
 
 local Object = {
   Identifier = "Quasars",
-  -- DU Version = 4.03
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = true,

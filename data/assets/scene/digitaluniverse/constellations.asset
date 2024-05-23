@@ -38,7 +38,6 @@ end
 
 local Constellations = {
   Identifier = "Constellations",
-  -- DU Version = 3.05
   Renderable = {
     Type = "RenderableConstellationLines",
     Enabled = false,

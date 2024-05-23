@@ -15,7 +15,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "OpenStarClusters",
-  -- DU Version = 8.09
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,

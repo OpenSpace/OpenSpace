@@ -13,7 +13,6 @@ local speck = asset.resource({
 
 local SunOrbit = {
   Identifier = "SunOrbit",
-  -- DU Version = 1.06
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
@@ -35,7 +34,6 @@ local SunOrbit = {
 
 local BarnardsOrbit = {
   Identifier = "BarnardsOrbit",
-  -- DU Version = 1.06
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
@@ -58,7 +56,6 @@ local BarnardsOrbit = {
 
 local KapteynsOrbit = {
   Identifier = "KapteynsOrbit",
-  -- DU Version = 1.06
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
@@ -81,7 +78,6 @@ local KapteynsOrbit = {
 
 local Lacaille9352Orbit = {
   Identifier = "Lacaille9352Orbit",
-  -- DU Version = 1.06
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
@@ -104,7 +100,6 @@ local Lacaille9352Orbit = {
 
 local LSR1826Orbit = {
   Identifier = "LSR1826Orbit",
-  -- DU Version = 1.06
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
@@ -127,7 +122,6 @@ local LSR1826Orbit = {
 
 local LSRJ0822Orbit = {
   Identifier = "LSRJ0822Orbit",
-  -- DU Version = 1.06
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
@@ -150,7 +144,6 @@ local LSRJ0822Orbit = {
 
 local PM_J13420Orbit = {
   Identifier = "PM_J13420Orbit",
-  -- DU Version = 1.06
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",

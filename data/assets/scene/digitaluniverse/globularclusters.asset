@@ -15,7 +15,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "GlobularClusters",
-  -- DU Version = 4.07
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,

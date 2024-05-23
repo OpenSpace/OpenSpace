@@ -15,7 +15,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "SloanDigitalSkySurvey",
-  -- DU Version = 12.08
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = true,

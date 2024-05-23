@@ -15,7 +15,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "2dF",
-  -- DU Version = 1.08
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,

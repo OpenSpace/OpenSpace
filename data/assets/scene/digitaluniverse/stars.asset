@@ -29,7 +29,6 @@ local textures = asset.resource({
 
 local Stars = {
   Identifier = "Stars",
-  -- DU Version = 8.10
   Renderable = {
     Type = "RenderableStars",
     File = speck .. "stars.speck",

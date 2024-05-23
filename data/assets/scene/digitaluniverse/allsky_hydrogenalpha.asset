@@ -8,7 +8,6 @@ local textures = asset.resource({
 
 local Object = {
   Identifier = "AllSky_HAlpha",
-  -- DU Version = 2.02
   Transform = {
     Rotation = {
       Type = "StaticRotation",

@@ -15,7 +15,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "PlanetaryNebulae",
-  -- DU Version = 3.09
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,

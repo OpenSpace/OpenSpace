@@ -16,7 +16,6 @@ local zodiacs = {
 
 local Object = {
   Identifier = "ConstellationBounds",
-  -- DU Version = 1.01
   Renderable = {
     Type = "RenderableConstellationBounds",
     Enabled = false,

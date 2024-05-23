@@ -15,7 +15,6 @@ local TransformMatrix = {
 
 local Object = {
   Identifier = "NearbyGalaxyGroups",
-  -- DU Version = 1.02
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,

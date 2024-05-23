@@ -15,7 +15,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "MilkyWayGalaxyArmLabelsImage",
-  -- DU Version = 1.02
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,

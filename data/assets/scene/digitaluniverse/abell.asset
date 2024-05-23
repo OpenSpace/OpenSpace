@@ -22,7 +22,6 @@ local TransformMatrix = {
 
 local Object = {
   Identifier = "Abell",
-  -- DU Version = 1.03
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,

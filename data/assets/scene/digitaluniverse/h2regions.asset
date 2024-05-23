@@ -15,7 +15,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "HIIRegions",
-  -- DU Version = 5.07
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,

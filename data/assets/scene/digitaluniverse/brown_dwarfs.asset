@@ -15,7 +15,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "BrownDwarfs",
-  -- DU Version = 7.05
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,

@@ -15,7 +15,6 @@ local textures = asset.resource({
 
 local COBE = {
   Identifier = "COBE",
-  -- DU Version = 2.02
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -48,7 +47,6 @@ local COBE = {
 
 local WMAP = {
   Identifier = "WMAP",
-  -- DU Version = 4.02
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -80,7 +78,6 @@ local WMAP = {
 
 local Planck = {
   Identifier = "Planck",
-  -- DU Version = 2.03
   Transform = {
     Rotation = {
       Type = "StaticRotation",

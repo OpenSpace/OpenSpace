@@ -15,7 +15,6 @@ local speck = asset.resource({
 
 local Object = {
   Identifier = "LocalDwarfGalaxies",
-  -- DU Version = 6.04
   Renderable = {
     Type = "RenderablePolygonCloud",
     Enabled = false,
