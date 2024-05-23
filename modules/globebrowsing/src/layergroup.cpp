@@ -124,13 +124,16 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     Layer* ptr = layer.get();
     _layers.push_back(std::move(layer));
 
-    // Re-sort the layer list according to the z-index
-    auto compareZIndex = [](const std::unique_ptr<Layer>& a,
-                            const std::unique_ptr<Layer>& b)
-    {
-        return a->zIndex() < b->zIndex();
-    };
-    std::stable_sort(_layers.begin(), _layers.end(), compareZIndex);
+    // Re-sort the layer list according to the z-index. Using the stable_sort here is
+    // important as we need to keep the same order as it already exists _within_ each
+    // z-index grouping
+    std::stable_sort(
+        _layers.begin(),
+        _layers.end(),
+        [](const std::unique_ptr<Layer>& a, const std::unique_ptr<Layer>& b) {
+            return a->zIndex() < b->zIndex();
+        }
+    );
 
     update();
     if (_onChangeCallback) {
@@ -139,9 +142,10 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     addPropertySubOwner(ptr);
 
     // Re-sort the SubPropertyOwner list according to the z-index so the list in the GUI
-    // is sorted correctly.
-    // TODO (malej 2024-MAY-07): Add event so the GUI can be aware that it needs to reload
-    // all or parts of itself. Right now it is up the caller to reload it if needed.
+    // is sorted correctly. Using the stable_sort here is important as we need to keep the
+    // same order as it already exists _within_ each z-index grouping
+    // @TODO (malej, 2024-05-07): Add event so the GUI can be aware that it needs to
+    // reload all or parts of itself. Right now it is up the caller to reload it if needed
     auto compareZIndexSubOwners = [](const PropertyOwner* a, const PropertyOwner* b) {
         const Layer* aLayer = dynamic_cast<const Layer*>(a);
         const Layer* bLayer = dynamic_cast<const Layer*>(b);
@@ -220,6 +224,18 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
 }
 
 void LayerGroup::moveLayer(int oldPosition, int newPosition) {
+    if (_layers.size() == 1) {
+        ghoul_assert(
+            oldPosition == newPosition,
+            "There is only one item but different positions"
+        );
+
+        // If there is only one item in the list, there is no need to move anything, but
+        // we still want to fix the layer index
+        _layers[oldPosition]->setZIndex(1);
+        return;
+    }
+
     oldPosition = std::max(0, oldPosition);
     newPosition = std::min(newPosition, static_cast<int>(_layers.size() - 1));
 
@@ -228,48 +244,33 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     // which the layers are shown in the UI
 
     // Layer list
-    auto oldPosLayers = _layers.begin() + oldPosition;
-    std::unique_ptr<Layer> layer = std::move(*oldPosLayers);
-    _layers.erase(oldPosLayers);
-    auto newPosLayers = _layers.begin() + newPosition;
+    auto oldLayerPos = _layers.begin() + oldPosition;
+    std::unique_ptr<Layer> layer = std::move(*oldLayerPos);
+    _layers.erase(oldLayerPos);
+    auto newLayerPos = _layers.begin() + newPosition;
 
-    // Since this layer has now manually been moved, it now is considered to have been
-    // given a z-index by the user
-    layer->setHasGivenZIndex(true);
-
-    // The z-index of the layer just before the new postion the layer is moved into
-    int prevZIndex;
-
-    // Check if the layer is moved to the last spot in the list
-    if (newPosLayers < _layers.end()) {
-        prevZIndex = newPosLayers->get()->zIndex();
+    // There is a separate check at the top of the function to ensure that there is more
+    // than one item
+    ghoul_assert(!_layers.empty(), "The list should not be empty at this point");
+    if (newLayerPos == _layers.begin()) {
+        // If the layer is moved to the first spot in the list
+        Layer* nextLayer = (_layers.begin() + 1)->get();
+        layer->setZIndex(nextLayer->zIndex());
+    }
+    else if (newLayerPos == _layers.end()) {
+        // If the layer is moved to the last spot in the list, we use the previously last
+        // layer's z-index
+        unsigned int zIndex = _layers.back()->zIndex();
+        layer->setZIndex(zIndex);
     }
     else {
-        // In that case use the value for the last item to not go beyond the list
-        prevZIndex = (_layers.end() - 1)->get()->zIndex();
+        // If the layer is moved to somewhere in the middle, we use the z-index of the
+        // layer that is currently in that location
+        unsigned int zIndex = (*newLayerPos)->zIndex();
+        layer->setZIndex(zIndex);
     }
 
-    // Check if the layer is moved to the first spot in the list
-    if (newPosition == 0) {
-        // Check if there is an item afterwards
-        auto nextLayer = _layers.begin() + 1;
-        if (nextLayer < _layers.end()) {
-            // Take the same value as the next item in the list and rely on the
-            // stable_sort to keep the order
-            layer->setZIndex(nextLayer->get()->zIndex());
-        }
-        else {
-            // There are no next layer in the list so put the item first
-            layer->setZIndex(1);
-        }
-    }
-    // Otherwise take the same value for the z-index as what already exist before and
-    // rely on the stable_sort to keep the order
-    else {
-        layer->setZIndex(prevZIndex);
-    }
-
-    _layers.insert(newPosLayers, std::move(layer));
+    _layers.insert(newLayerPos, std::move(layer));
     ghoul_assert(
         std::is_sorted(
             _layers.begin(),
