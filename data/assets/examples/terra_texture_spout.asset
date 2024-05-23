@@ -1,4 +1,4 @@
-local globe = asset.require("../../earth")
+local globe = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
