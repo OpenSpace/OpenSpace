@@ -69,7 +69,7 @@ asset.export(Object)
 asset.meta = {
   Name = "HII Regions",
   Version = "2.1",
-  Description = Object.GUI.description,
+  Description = Object.GUI.Description,
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

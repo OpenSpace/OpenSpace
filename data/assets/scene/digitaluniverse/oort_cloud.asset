@@ -16,14 +16,7 @@ local EclipticRotationMatrix = {
   -0.09647644,  0.8622859,  0.4971472
 }
 
-local EclipticTransformationMatrix = {
-  -0.05487554,  0.4941095, -0.8676661,    0.0,
-  -0.9938214 , -0.1109906, -0.0003515167, 0.0,
-  -0.09647644,  0.8622859,  0.4971472,    0.0,
-   0.0       ,  0.0      ,  0.0      ,    1.0
-}
-
-local OortSphere = {
+local Object = {
   Identifier = "OortSphere",
   Parent = transforms.SolarSystemBarycenter.Name,
   Transform = {
@@ -59,21 +52,21 @@ local OortSphere = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(OortSphere)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(OortSphere)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(OortSphere)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "Oort Cloud Sphere",
   Version = "1.0",
-  Description = OortSphere.GUI.description,
+  Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

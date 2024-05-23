@@ -124,7 +124,7 @@ asset.export(SunStar)
 asset.meta = {
   Name = "Stars",
   Version = "4.0",
-  Description = Stars.GUI.description,
+  Description = Stars.GUI.Description,
   Author = "Brian Abbott, Zack Reeves, Andrew Ayala, Jackie Faherty (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

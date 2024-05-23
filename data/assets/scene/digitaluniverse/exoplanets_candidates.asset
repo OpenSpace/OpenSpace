@@ -69,7 +69,7 @@ asset.export(Object)
 asset.meta = {
   Name = "Exoplanetary Candidates",
   Version = "4.0",
-  Description = Object.GUI.description,
+  Description = Object.GUI.Description,
   Author = "Brian Abbott, Zack Reeves, Emily Rice, and Jason No (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

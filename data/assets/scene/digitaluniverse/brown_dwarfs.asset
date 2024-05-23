@@ -20,7 +20,7 @@ local Object = {
     Enabled = false,
     File = speck .. "bd.speck",
     Texture = {
-      File = textures .. "point3.png",
+      File = textures .. "point3.png"
     },
     Unit = "pc",
     Coloring = {
@@ -74,7 +74,7 @@ asset.meta = {
   Name = "Brown Dwarfs",
   Version = "1.0",
   Author = "Brian Abbott, Zack Reeves, Jackie Faherty (AMNH)",
-  Description = Object.GUI.description,
+  Description = Object.GUI.Description,
   License = "AMNH Digital Universe",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
 }

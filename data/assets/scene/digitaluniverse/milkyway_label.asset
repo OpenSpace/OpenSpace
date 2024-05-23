@@ -52,7 +52,7 @@ asset.export(Object)
 asset.meta = {
   Name = "Home Label",
   Version = "2.1",
-  Description = Object.GUI.description,
+  Description = Object.GUI.Description,
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

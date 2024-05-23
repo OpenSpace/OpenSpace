@@ -259,7 +259,6 @@ local Plane1lh = {
     Opacity = 0.4,
     Color = { 0.1, 0.5, 0.6 },
     LineWidth = 2.0,
-
     Segments = { 20, 20 },
     Size = { 2 * LightHour, 2 * LightHour }
   },
