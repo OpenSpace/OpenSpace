@@ -1,12 +1,18 @@
-[ 
-    { "type": "pause", 
-      "value": "true"},
-    { "type": "time",
-      "value": "2021-12-25T20:12:51.00"},
-    { "type": "navigationstate", 
-      "value": "{Anchor='JWSTModel',Pitch=-0.0016564658365626121,Position={29.160003662109375,-2.7035293579101562,-15.113174438476562},ReferenceFrame='Root',Up={0.2476631160089928,0.916590399238525,0.3138869557539424},Yaw=-0.005731161690830819}"},
-    { "type": "wait", 
-      "value": "45"}, 
-    { "type": "screenshot", 
-      "value": "earthorbit"}
-] 
+{
+  "profile": "jwst",
+  "commands": [
+    { "type": "time", "value": "2021-12-25T20:12:51.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "JWSTModel",
+        "pitch": -0.0016564658365626121,
+        "position": [ 29.160003662109375, -2.7035293579101562, -15.113174438476562 ],
+        "up": [ 0.2476631160089928, 0.916590399238525, 0.3138869557539424 ],
+        "yaw": -0.005731161690830819
+      }
+    },
+    { "type": "wait", "value": 45 },
+    { "type": "screenshot" }
+  ]
+}

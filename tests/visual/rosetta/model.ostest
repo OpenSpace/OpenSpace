@@ -1,0 +1,26 @@
+{
+  "profile": "rosetta",
+  "commands": [
+    { "type": "time", "value": "2014-08-01T00:00:00.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Rosetta",
+        "pitch": -0.0741904,
+        "position": [ -13.84875, -5.509888, 1.692047 ],
+        "up": [ 0.377490, -0.812217, 0.444752 ],
+        "yaw": -0.0388182
+      }
+    },
+    { "type": "action", "value": "os.FadeDownTrails" },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.NAVCAM_FOV.Renderable.Enabled",
+        "value": false
+      }
+    },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

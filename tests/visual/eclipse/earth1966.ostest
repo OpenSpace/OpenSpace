@@ -1,12 +1,16 @@
-[ 
-    { "type": "pause", 
-      "value": "true"},
-    { "type": "time", 
-      "value": "1966-11-12T14:28:39.00"}, 
-    { "type": "navigationstate", 
-      "value": "{Anchor='Earth',Position={8117064.770626424,-15651002.199110571,-9165703.435119975},Up={-0.39241745239503034,-0.6078072727788707,0.6903469143937023}"},
-    { "type": "wait", 
-      "value": "30"}, 
-    { "type": "screenshot", 
-      "value": ""}
-] 
+{
+  "profile": "eclipse",
+  "commands": [
+    { "type": "time", "value": "1966-11-12T14:28:39.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [ 8117064.770626424, -15651002.199110571, -9165703.435119975 ],
+        "up": [ -0.39241745239503034, -0.6078072727788707, 0.6903469143937023 ]
+      }
+    },
+    { "type": "wait", "value": 30 },
+    { "type": "screenshot" }
+  ]
+}

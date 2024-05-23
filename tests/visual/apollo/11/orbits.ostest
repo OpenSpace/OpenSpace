@@ -1,0 +1,19 @@
+{
+  "profile": "apollo",
+  "commands": [
+    { "type": "action", "value": "os.apollo11.setup.LandingSite" },
+    { "type": "wait", "value": 10 },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Apollo11LemPosition",
+        "pitch": 0.00776040,
+        "position": [ -711349.3, 2688364, 539334.1 ],
+        "up": [ -0.382741, 0.0833124, -0.920091 ],
+        "yaw": 0.00288877
+      }
+    },
+    { "type": "wait", "value": 30 },
+    { "type": "screenshot" }
+  ]
+}
