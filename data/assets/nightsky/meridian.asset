@@ -44,7 +44,6 @@ local MeridianPlane = {
     Color = { 0.4, 0.8, 0.4 },
     LineWidth = 6.0,
     GridSegments = { 1, 1 },
-    --Radii = { 0.5, 0.5 },
     Enabled = asset.enabled,
     RenderBinMode = "PostDeferredTransparent"
   },
