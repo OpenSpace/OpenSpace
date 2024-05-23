@@ -68,9 +68,13 @@ public:
 
     static documentation::Documentation Documentation();
 
-private:
+protected:
+    properties::BoolProperty _autoScale;
     std::unique_ptr<RenderablePlaneImageLocal> _renderable1;
     std::unique_ptr<RenderablePlaneImageLocal> _renderable2;
+
+private:
+    
     float _distanceThreshold;
 };
 

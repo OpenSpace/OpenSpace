@@ -128,7 +128,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _billboard(BillboardInfo, false)
     , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
-    , _autoScale(AutoScaleInfo, false)
+    , _autoScale(AutoScaleInfo, true)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
