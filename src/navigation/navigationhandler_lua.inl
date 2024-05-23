@@ -25,12 +25,13 @@
 namespace {
 
 /**
- * Set the camera position by loading a navigation state from file. The file should be in
- * json format, such as the output files of `saveNavigationState`.
+ * Set the camera position by loading a [NavigationState](#core_navigation_state) from
+ * file. The file should be in json format, such as the output files of
+ * `saveNavigationState`.
  *
  * \param filePath the path to the file, including the file name (and extension, if it is
  *                 anything other than `.navstate`)
- * \param useTimeStamp if true, and the provided navigation state includes a timestamp,
+ * \param useTimeStamp if true, and the provided NavigationState includes a timestamp,
  *                     the time will be set as well.
  */
 [[codegen::luawrap]] void loadNavigationState(std::string filePath,
@@ -47,17 +48,16 @@ namespace {
 }
 
 /**
- * Return the current navigation state as a Lua table.
+ * Return the current [NavigationState](#core_navigation_state) as a Lua table.
  *
  * By default, the reference frame will be picked based on whether the orbital navigator is
  * currently following the anchor node rotation. If it is, the anchor will be chosen as
  * reference frame. If not, the reference frame will be set to the scene graph root.
  *
  * \param frame the identifier of an optional scene graph node to use as reference frame
- *              for the navigation state
+ *              for the NavigationState
  *
- * \return a Lua table representing the current [navigation state](#core_navigation_state)
- *         of the camera
+ * \return a Lua table representing the current NavigationState of the camera
  */
 [[codegen::luawrap]] ghoul::Dictionary getNavigationState(
                                                          std::optional<std::string> frame)
@@ -82,11 +82,10 @@ namespace {
 }
 
 /**
- * Set the camera position from a provided navigation state.
+ * Set the camera position from a provided [NavigationState](#core_navigation_state).
  *
- * \param navigationState a table describing the [NavigationState](#core_navigation_state)
- *                        to set
- * \param useTimeStamp if true, and the provided navigation state includes a timestamp,
+ * \param navigationState a table describing the NavigationState to set
+ * \param useTimeStamp if true, and the provided NavigationState includes a timestamp,
  *                     the time will be set as well
  */
 [[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState,
@@ -104,16 +103,17 @@ namespace {
 }
 
 /**
- * Save the current navigation state to a file with the path given by the first argument.
+ * Save the current [NavigationState](#core_navigation_state) to a file with the path
+ * given by the first argument.
  *
  * By default, the reference frame will be picked based on whether the orbital navigator
  * is currently following the anchor node rotation. If it is, the anchor will be chosen as
  * reference frame. If not, the reference frame will be set to the scene graph root.
  *
- * \param path the file path for where to save the navigation state, including the file
+ * \param path the file path for where to save the NavigationState, including the file
  *             name. If no extension is added, the file is saved as a `.navstate` file.
  * \param frame the identifier of the scene graph node which coordinate system should be
- *              used as a reference frame for the navigation state.
+ *              used as a reference frame for the NavigationState.
  */
 [[codegen::luawrap]] void saveNavigationState(std::string path, std::string frame = "") {
     if (path.empty()) {
