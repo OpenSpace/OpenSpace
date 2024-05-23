@@ -14,7 +14,7 @@ local Clouds = {
   Identifier = "Clouds",
   FilePath = texturesPath .. "venus_clouds.jpg",
   Enabled = asset.enabled,
-  Zindex = 20,
+  ZIndex = 20,
   CacheSettings = { Enabled = false }
 }
 
@@ -22,7 +22,7 @@ local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "venus.jpg",
   Enabled = asset.enabled,
-  Zindex = 30,
+  ZIndex = 5,
   Settings = {
     Opacity = 0.48,
     Gamma = 0.48

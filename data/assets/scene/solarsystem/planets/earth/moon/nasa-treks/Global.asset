@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_Apollo15_MetricCam_Mosaic_Global_4096ppd = {
   Identifier = "Apollo15_MetricCam_Mosaic_Global_4096ppd",
   Name = [[Apollo 15 Metric Cam Image Mosaic]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/Apollo_15_Metric_Cam_Image_Mosaic.vrt"),
   Description = [[]]
 }
@@ -16,6 +17,7 @@ local treks_Apollo15_MetricCam_Mosaic_Global_4096ppd = {
 local treks_Apollo17_MetricCam_Mosaic_Global_3033ppd = {
   Identifier = "Apollo17_MetricCam_Mosaic_Global_3033ppd",
   Name = [[Apollo 17 Metric Cam Image Mosaic]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/Apollo_17_Metric_Cam_Image_Mosaic.vrt"),
   Description = [[]]
 }
@@ -23,6 +25,7 @@ local treks_Apollo17_MetricCam_Mosaic_Global_3033ppd = {
 local treks_ApolloZone_MetricCam_Mosaic_Global_3033ppd = {
   Identifier = "ApolloZone_MetricCam_Mosaic_Global_3033ppd",
   Name = [[Apollo Zone Metric Cam Image Mosaic]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/Apollo_Zone_Metric_Cam_Image_Mosaic.vrt"),
   Description = [[]]
 }
@@ -30,6 +33,7 @@ local treks_ApolloZone_MetricCam_Mosaic_Global_3033ppd = {
 local treks_Clem_UVVIS_FeO_Clr_Global_152ppd = {
   Identifier = "Clem_UVVIS_FeO_Clr_Global_152ppd",
   Name = [[Clementine UVVIS FeO Weight Percent]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/Clementine_UVVIS_FeO_Weight_Percent.vrt"),
   Description = [[]]
 }
@@ -37,6 +41,7 @@ local treks_Clem_UVVIS_FeO_Clr_Global_152ppd = {
 local treks_Clem_UVVIS_OpticalMaturity_Gray_Global_152ppd = {
   Identifier = "Clem_UVVIS_OpticalMaturity_Gray_Global_152ppd",
   Name = [[Clementine UVVIS Optical Maturity]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/Clementine_UVVIS_Optical_Maturity.vrt"),
   Description = [[]]
 }
@@ -44,6 +49,7 @@ local treks_Clem_UVVIS_OpticalMaturity_Gray_Global_152ppd = {
 local treks_Clem_UVVIS_TiO2_Clr_Global_152ppd = {
   Identifier = "Clem_UVVIS_TiO2_Clr_Global_152ppd",
   Name = [[Clementine UVVIS TiO2 Weight Percent]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/Clementine_UVVIS_TiO2_Weight_Percent.vrt"),
   Description = [[]]
 }
@@ -51,6 +57,7 @@ local treks_Clem_UVVIS_TiO2_Clr_Global_152ppd = {
 local treks_Kaguya_TCortho_Mosaic_Global_4096ppd = {
   Identifier = "Kaguya_TCortho_Mosaic_Global_4096ppd",
   Name = [[Kaguya TC Ortho Mosaic]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/Kaguya_TC_Ortho_Mosaic.vrt"),
   Description = [[]]
 }
@@ -58,6 +65,7 @@ local treks_Kaguya_TCortho_Mosaic_Global_4096ppd = {
 local treks_LP_NS_H_Clr_Global_2ppd = {
   Identifier = "LP_NS_H_Clr_Global_2ppd",
   Name = [[LP NS H Abundance]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LP_NS_H_Abundance.vrt"),
   Description = [[]]
 }
@@ -65,6 +73,7 @@ local treks_LP_NS_H_Clr_Global_2ppd = {
 local treks_LRO_Diviner_CF_NoFill_Global_8ppd = {
   Identifier = "LRO_Diviner_CF_NoFill_Global_8ppd",
   Name = [[LRO Diviner CF Mosaic]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LRO_Diviner_CF_Mosaic.vrt"),
   Description = [[]]
 }
@@ -72,6 +81,7 @@ local treks_LRO_Diviner_CF_NoFill_Global_8ppd = {
 local treks_LRO_WAC_Mosaic_Global_303ppd = {
   Identifier = "LRO_WAC_Mosaic_Global_303ppd",
   Name = [[LRO LROC WAC Image Mosaic]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LRO_LROC_WAC_Image_Mosaic.vrt"),
   Description = [[]]
 }
@@ -79,6 +89,7 @@ local treks_LRO_WAC_Mosaic_Global_303ppd = {
 local treks_LRO_MiniRF_S1_Gray_Global_128ppd = {
   Identifier = "LRO_MiniRF_S1_Gray_Global_128ppd",
   Name = [[LRO Mini-RF First Stokes Parameter]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LRO_Mini-RF_First_Stokes_Parameter.vrt"),
   Description = [[]]
 }
@@ -86,6 +97,7 @@ local treks_LRO_MiniRF_S1_Gray_Global_128ppd = {
 local treks_LRO_WAC_Mosaic_Global_303ppd_v02 = {
   Identifier = "LRO_WAC_Mosaic_Global_303ppd_v02",
   Name = [[LRO WAC Mosaic v2]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LRO_WAC_Mosaic_v2.vrt"),
   Description = [[]]
 }
@@ -93,6 +105,7 @@ local treks_LRO_WAC_Mosaic_Global_303ppd_v02 = {
 local treks_SchrodingerCraterMareUnit_50cmV10eq = {
   Identifier = "SchrodingerCraterMareUnit_50cmV10eq",
   Name = [[LROC NAC Uncontrolled Mosaic of Mare Unit in Schrodinger Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LROC_NAC_Uncontrolled_Mosaic_of_Mare_Unit_in_Schrodinger_Crater.vrt"),
   Description = [[This is a 50cm/px uncontrolled visible image mosaic generated using Lunar Reconnaissance Orbiter Camera (LROC) Narrow Angle Camera (NAC) images from the Lunar Reconnaissance Orbiter mission. Each NAC image was registered horizontally to the LRO's Lunar Orbiter Laser Altimeter (LOLA) global DEM, and then mosaicked together and color balanced. ]]
 }
@@ -100,6 +113,7 @@ local treks_SchrodingerCraterMareUnit_50cmV10eq = {
 local treks_SchrodingerCraterMassif_50cmV10eq = {
   Identifier = "SchrodingerCraterMassif_50cmV10eq",
   Name = [[LROC NAC Uncontrolled Mosaic of Massif in Schrodinger Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LROC_NAC_Uncontrolled_Mosaic_of_Massif_in_Schrodinger_Crater.vrt"),
   Description = [[This is a 50cm/px uncontrolled visible image mosaic generated using Lunar Reconnaissance Orbiter Camera (LROC) Narrow Angle Camera (NAC) images from the Lunar Reconnaissance Orbiter mission. Each NAC image was registered horizontally to the LRO's Lunar Orbiter Laser Altimeter (LOLA) global DEM, and then mosaicked together and color balanced. ]]
 }
@@ -107,6 +121,7 @@ local treks_SchrodingerCraterMassif_50cmV10eq = {
 local treks_LRO_LOLAKaguya_ClrHillshade_60N60S_512ppd = {
   Identifier = "LRO_LOLAKaguya_ClrHillshade_60N60S_512ppd",
   Name = [[LRO LOLA and Kaguya TC Color Hillshade 512ppd]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LRO_LOLA_and_Kaguya_TC_Color_Hillshade_512ppd.vrt"),
   Description = [[This is a colorized shaded-relief representation of the Lunar surface generated from the LOLA and Kaguya merged DEM product. The LOLA and Kaguya Teams have created an improved lunar digital elevation model (DEM) covering latitudes within &plusmn;60&deg;, at a horizontal resolution of 512 pixels per degree (&sim;59 m at the equator) and a typical vertical accuracy &sim;3 to 4 m. This DEM is constructed from &sim;4.5&times;109 geodetically-accurate topographic heights from the Lunar Orbiter Laser Altimeter (LOLA) onboard the Lunar Reconnaissance Orbiter, to which we co-registered 43,200 stereo-derived DEMs (each 1&times;1 degree) from the SELENE Terrain Camera (TC) (&sim;1010 pixels total). After co-registration, approximately 90&percnt; of the TC DEMs show root-mean-square vertical residuals with the LOLA data of &lt;5 m compared to &sim;50&percnt; prior to co-registration. We use the co-registered TC data to estimate and correct orbital and pointing geolocation errors from the LOLA altimetric profiles (typically amounting to &lt;10 m horizontally and &lt;1 m vertically). By combining both co-registered datasets, we obtain a near-global DEM with high geodetic accuracy, and without the need for surface interpolation. We evaluate the resulting LOLA + TC merged DEM (designated as &ldquo;SLDEM2015&rdquo;) with particular attention to quantifying seams and crossover errors. The legend coveys the mapping colors to elevation values (meters) and map values are referred to a radius of 1737400 m.]]
 }
@@ -114,6 +129,7 @@ local treks_LRO_LOLAKaguya_ClrHillshade_60N60S_512ppd = {
 local treks_LRO_LOLAKaguya_Hillshade_60N60S_512ppd = {
   Identifier = "LRO_LOLAKaguya_Hillshade_60N60S_512ppd",
   Name = [[LRO LOLA and Kaguya TC Hillshade 512ppd]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LRO_LOLA_and_Kaguya_TC_Hillshade_512ppd.vrt"),
   Description = [[This is a shaded-relief representation of the Lunar surface generated from the LOLA and Kaguya merged DEM product. The LOLA and Kaguya Teams have created an improved lunar digital elevation model (DEM) covering latitudes within &plusmn;60&deg;, at a horizontal resolution of 512 pixels per degree (&sim;59 m at the equator) and a typical vertical accuracy &sim;3 to 4 m. This DEM is constructed from &sim;4.5&times;109 geodetically-accurate topographic heights from the Lunar Orbiter Laser Altimeter (LOLA) onboard the Lunar Reconnaissance Orbiter, to which we co-registered 43,200 stereo-derived DEMs (each 1&times;1 degree) from the SELENE Terrain Camera (TC) (&sim;1010 pixels total). After co-registration, approximately 90&percnt; of the TC DEMs show root-mean-square vertical residuals with the LOLA data of &lt;5 m compared to &sim;50&percnt; prior to co-registration. We use the co-registered TC data to estimate and correct orbital and pointing geolocation errors from the LOLA altimetric profiles (typically amounting to &lt;10 m horizontally and &lt;1 m vertically). By combining both co-registered datasets, we obtain a near-global DEM with high geodetic accuracy, and without the need for surface interpolation. We evaluate the resulting LOLA + TC merged DEM (designated as &ldquo;SLDEM2015&rdquo;) with particular attention to quantifying seams and crossover errors. Elevation values are in meters and map values are referred to a radius of 1737400 m.]]
 }
@@ -121,6 +137,7 @@ local treks_LRO_LOLAKaguya_Hillshade_60N60S_512ppd = {
 local treks_Lunar_Clementine_UVVIS_Warp_ClrRatio_Global_200m = {
   Identifier = "Lunar_Clementine_UVVIS_Warp_ClrRatio_Global_200m",
   Name = [[Clementine UVVIS Warped Color Ratio]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/Clementine_UVVIS_Warped_Color_Ratio.vrt"),
   Description = [[This base represents the Clementine Ultraviolet/Visible (UVVIS) warped color-ratio mineral map. This was generated from the UVVIS mosaics using three spectral filters (415, 750, and 1000 nm) and which were previously warped (spatially adjusted) to the ULCN2005 control network. The mosaic is a composite in which the ratio of the 750/415nm bands is used for the red-channel brightness, 415/750nm for the blue channel, and the 750/1000nm ratio controls the green channel. Resolution of this mosaic is 200 meters per pixel (m).
 
@@ -134,6 +151,7 @@ For more information on how the color ratio was derived, please see Lucy et al.,
 local treks_LRO_LOLA_Illumination_NPole65N_240m_EQ = {
   Identifier = "LRO_LOLA_Illumination_NPole65N_240m_EQ",
   Name = [[LOLA Permanently Shadowed Regions Northpole 240m]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LOLA_Permanently_Shadowed_Regions_Northpole_240m.vrt"),
   Description = [[This data product is a map of the permanently shadowed regions (PSRs) in the lunar North Pole. The map resolution is 240m/pix by 240m/pix, true at the pole in polar stereographic (spherical) projection. The calculations are based on the LOLA elevation map LDEM_75N_240M and are described in. The values are binary, indicating whether a pixel is in permanent shadow (1) or not (0, NoDATA).]]
 }
@@ -141,6 +159,7 @@ local treks_LRO_LOLA_Illumination_NPole65N_240m_EQ = {
 local treks_LRO_LOLA_Illumination_SPole65S_240m_EQ = {
   Identifier = "LRO_LOLA_Illumination_SPole65S_240m_EQ",
   Name = [[LOLA Permanently Shadowed Regions Southpole 240m]],
+  ZIndex = 50,
   FilePath = asset.resource("Global/LOLA_Permanently_Shadowed_Regions_Southpole_240m.vrt"),
   Description = [[This data product is a map of the permanently shadowed regions (PSRs) in the lunar South Pole. The map resolution is 240m/pix by 240m/pix, true at the pole in polar stereographic (spherical) projection. The calculations are based on the LOLA elevation map LDEM_75S_240M and are described in. The values are binary, indicating whether a pixel is in permanent shadow (1) or not (0, NoDATA).]]
 }

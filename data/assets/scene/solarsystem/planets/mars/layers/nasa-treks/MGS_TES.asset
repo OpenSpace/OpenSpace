@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Ma
 local treks_TES_Dust = {
   Identifier = "TES_Dust",
   Name = [[MGS TES, Global Dust]],
+  ZIndex = 50,
   FilePath = asset.resource("MGS_TES/Global_Dust.vrt"),
   Description = [[The Thermal Emission Spectrometer (TES) is one of the instruments aboard the Mars Global Surveyor spacecraft. TES is designed to measure the thermal infrared energy (heat) emitted from Mars. This technique, called thermal emission spectroscopy, can tell us much about the geology and atmosphere of Mars. Dust is widespread and abundant across the surface of Mars. However, in the wind-blown environment of Mars, dust accumulates tickly in some areas and is blown clear of other areas. Thick accumulations of dust mask the underlying surface, making measurements of surface composition from orbit difficult or even impossible. Preferred landing site candidates will ideally be relatively dust free. An index of the relative abundance of spectrally obscuring dust across the Martian surface was developed using data from TES. While closely correlated with albedo, the TES dust cover index (DCI) is a more direct metric for the presence or absence of dust on a particular surface and is independent of albedo. This becomes important for the types of light-toned layered deposits and surfaces that likely will be among the candidates for future landing sites. Map resolution/scale: 16ppd/3.5km. Ruff and Christensen, 2002, JGR, VOL. 107, NO. E12, 5127]]
 }
@@ -16,6 +17,7 @@ local treks_TES_Dust = {
 local treks_tes_ruffdust = {
   Identifier = "tes_ruffdust",
   Name = [[MGS TES, Global Dust Index]],
+  ZIndex = 50,
   FilePath = asset.resource("MGS_TES/Global_Dust_Index.vrt"),
   Description = [[The Thermal Emission Spectrometer (TES) is one of the instruments aboard the Mars Global Surveyor spacecraft. TES is designed to measure the thermal infrared energy (heat) emitted from Mars. This technique, called thermal emission spectroscopy, can tell us much about the geology and atmosphere of Mars. Dust is widespread and abundant across the surface of Mars. However, in the wind-blown environment of Mars, dust accumulates tickly in some areas and is blown clear of other areas. Thick accumulations of dust mask the underlying surface, making measurements of surface composition from orbit difficult or even impossible. Preferred landing site candidates will ideally be relatively dust free. An index of the relative abundance of spectrally obscuring dust across the Martian surface was developed using data from TES. While closely correlated with albedo, the TES dust cover index (DCI) is a more direct metric for the presence or absence of dust on a particular surface and is independent of albedo. This becomes important for the types of light-toned layered deposits and surfaces that likely will be among the candidates for future landing sites. Map resolution/scale: 16ppd/3.5km. Ruff and Christensen, 2002, JGR, VOL. 107, NO. E12, 5127]]
 }
@@ -23,6 +25,7 @@ local treks_tes_ruffdust = {
 local treks_TES_Clinopyroxene = {
   Identifier = "TES_Clinopyroxene",
   Name = [[MGS TES, Global High-Ca Pyroxene Abundance]],
+  ZIndex = 50,
   FilePath = asset.resource("MGS_TES/Global_High-Ca_Pyroxene_Abundance.vrt"),
   Description = [[The Thermal Emission Spectrometer (TES) is one of the instruments aboard the Mars Global Surveyor spacecraft. TES is designed to measure the thermal infrared energy (heat) emitted from Mars. This technique, called thermal emission spectroscopy, can tell us much about the geology and atmosphere of Mars. A deconvolution method was used to remove atmospheric components and determine surface mineralogy from TES data at 1 pixel per degree (ppd). Minerals were grouped into categories on the basis of compositional and spectral similarity, and global concentration maps were produced. High-Ca pyroxenes are identified in concentrations of 0.10 - 0.20 in equatorial low albedo regions. The highest concentrations are present in Syrtis Major. High-latitude, low-albedo regions are characterized by concentrations of 0 - 0.10. Light regions have 0 - 0.05 high-Ca pyroxene concentrations. Only equatorial low-albedo regions have pyroxene concentrations above the detection limit. Map resolution/scale: 4 ppd/16km. Joshua L. Bandfield, 2002, JGR, VOL. 107, NO. E6, 5042]]
 }

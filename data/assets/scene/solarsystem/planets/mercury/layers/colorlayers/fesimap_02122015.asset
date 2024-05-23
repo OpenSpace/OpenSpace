@@ -14,7 +14,7 @@ local Layer = {
   Name = "Iron Abundance",
   Identifier = "fesimap_02122015",
   Enabled = asset.enabled,
-  Zindex = 130,
+  ZIndex = 100,
   FilePath = texturesPath .. "fesimap_02122015.png",
   BlendMode = "Multiply",
   CacheSettings = { Enabled = false }

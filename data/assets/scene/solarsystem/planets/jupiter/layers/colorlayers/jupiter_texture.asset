@@ -14,7 +14,7 @@ local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "jupiter_os.tif",
   Enabled = asset.enabled,
-  Zindex = 10,
+  ZIndex = 5,
   CacheSettings = { Enabled = false }
 }
 

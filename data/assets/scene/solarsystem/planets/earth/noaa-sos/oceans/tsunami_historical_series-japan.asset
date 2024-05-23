@@ -44,6 +44,7 @@ local syncedDirectory = asset.resource({
 local LayerCoastal = {
   Identifier = Identifier .. "-coastal",
   Name = Name .. " (Coastal)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "Tsunami_Coastal_Map_Japan_2011_4k.jpg",
   Description = Description
 }
@@ -51,6 +52,7 @@ local LayerCoastal = {
 local LayerEnergyCoastal = {
   Identifier = Identifier .. "-energy_coastal",
   Name = Name .. " (Energy Coastal)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "Tsunami_Energy+Coastal_Map_Japan_2011_4k.jpg",
   Description = Description
 }
@@ -58,6 +60,7 @@ local LayerEnergyCoastal = {
 local LayerEnergy = {
   Identifier = Identifier .. "-energy",
   Name = Name .. " (Energy)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "Tsunami_Energy_Map_Japan_2011_4k.jpg",
   Description = Description
 }
@@ -65,6 +68,7 @@ local LayerEnergy = {
 local LayerNull = {
   Identifier = Identifier .. "-null",
   Name = Name .. " (Null)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "Tsunami_Null_Coastal_Map_Japan_2011_4k.jpg",
   Description = Description
 }

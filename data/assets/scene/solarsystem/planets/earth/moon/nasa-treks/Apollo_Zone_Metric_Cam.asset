@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_ApolloZone_MetricCam_Shade_Global_1024ppd = {
   Identifier = "ApolloZone_MetricCam_Shade_Global_1024ppd",
   Name = [[Apollo Zone Metric Cam, Hillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("Apollo_Zone_Metric_Cam/Hillshade.vrt"),
   Description = [[]]
 }

@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_NAC_Mosaic_03N280E_70cm = {
   Identifier = "LRO_NAC_Mosaic_03N280E_70cm",
   Name = [[LRO LROC Mosaic, Fresh Crater East of Lents]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Mosaic/Fresh_Crater_East_of_Lents.vrt"),
   Description = [[]]
 }

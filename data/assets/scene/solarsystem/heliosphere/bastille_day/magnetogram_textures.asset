@@ -43,6 +43,7 @@ asset.onInitialize(function()
         Description = "",
         FilePath = imagename,
         Enabled = false,
+        ZIndex = 100,
         CacheSettings = { Enabled = false }
       }
     )

@@ -35,6 +35,7 @@ local syncedDirectory = asset.resource({
 local Layer2012 = {
   Identifier = Identifier .. "-2012",
   Name = Name .. " (2012)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2012_2048.jpg",
   Description = Description
 }
@@ -42,6 +43,7 @@ local Layer2012 = {
 local Layer2030 = {
   Identifier = Identifier .. "-2030",
   Name = Name .. " (2030)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2030_2048.jpg",
   Description = Description
 }
@@ -49,6 +51,7 @@ local Layer2030 = {
 local Layer2050 = {
   Identifier = Identifier .. "-2050",
   Name = Name .. " (2050)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2050_2048.jpg",
   Description = Description
 }

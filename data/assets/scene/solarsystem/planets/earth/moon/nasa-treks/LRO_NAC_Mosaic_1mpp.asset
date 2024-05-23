@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_NAC_Mosaic_1mpp = {
   Identifier = "LRO_NAC_Mosaic_1mpp",
   Name = [[LRO NAC Mosaic 1mpp, Von Karman]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_NAC_Mosaic_1mpp/Von_Karman.vrt"),
   Description = [[This is an orthorectified NAC mosaic of the Von Karman Crater region for the south pole of the Moon. This mosaic includes 118 individual orthorectified NAC images sampled at 1 m/px. NAC orthoimages have been constructed from EDRs downloaded from the Planetary Data System (PDS) and subsequent USGS-ISIS processing. This mosaic has been coaligned to Chang&rsquo;e 2 20 m/px DEM which has been coaligned to the USGS 59 m/px LOLA-SELENE DEM using ENVI (v5.6.2) patented auto-coreg. Individual NAC orthoimages have been mosaicked together using ArcGIS Pro (v2.9.0). A color balancing algorithm has been applied to roughly correct for color differences at the seams of NAC images. This data has been made available by and should be credited to: Yu Tao and Jan-Peter Muller, Imaging Group, Mullard Space Science Laboratory, University College London.]]
 }

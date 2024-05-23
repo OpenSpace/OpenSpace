@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Phobos_Global_Shaded_Relief_USGS",
   Name = "Phobos Global Shaded Relief [USGS]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = "WMS:https://wms.wr.usgs.gov/cgi-bin/mapserv?map=/maps/mars/phobos_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Phobos_Simple_Cylindrical_Rasters&SRS=EPSG:4326&BBOX=-180,-90,360,90",
   Description = "Viking-base Phobos shaded relief created by USGS"
 }

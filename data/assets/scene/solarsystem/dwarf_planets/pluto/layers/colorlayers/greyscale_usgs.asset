@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Greyscale_USGS",
   Name = "Black & White [USGS]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/pluto_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_PLUTO_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90,360,90"
 }
 

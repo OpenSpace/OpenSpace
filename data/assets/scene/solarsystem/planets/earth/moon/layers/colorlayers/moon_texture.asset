@@ -14,6 +14,7 @@ local Layer = {
   Identifier = "Moon_Texture",
   Name = "Moon Texture",
   Enabled = asset.enabled,
+  ZIndex = 5,
   FilePath = texturesPath .. "WAC_GLOBAL_E000N0000_032P.png",
   Description = "Lower Resolution offline version of WAC layer",
   CacheSettings = { Enabled = false }

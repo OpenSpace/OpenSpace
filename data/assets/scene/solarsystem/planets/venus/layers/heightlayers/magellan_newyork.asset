@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "MagellanElevation_NewYork",
   Name = "Magellan Elevation [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("magellan_newyork.wms"),
   TilePixelSize = 129,
   Settings = {

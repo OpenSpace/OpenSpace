@@ -32,6 +32,7 @@ local imagesDestination = syncedDirectory .. "images"
 local LayerBase = {
   Identifier = Identifier .. "-base",
   Name = Name .. " (Base)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2048.jpg",
   Description = Description
 }
@@ -39,6 +40,7 @@ local LayerBase = {
 local LayerAll = {
   Identifier = Identifier .. "-all",
   Name = Name .. " (All)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "all_earthquakes.png",
   Description = Description
 }
@@ -46,6 +48,7 @@ local LayerAll = {
 local LayerNew = {
   Identifier = Identifier .. "-new",
   Name = Name .. " (New)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "new.jpg",
   Description = Description
 }
@@ -53,6 +56,7 @@ local LayerNew = {
 local LayerNuclear = {
   Identifier = Identifier .. "-nuclear",
   Name = Name .. " (Nuclear)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "nuclear_plants.png",
   Description = Description
 }
@@ -61,6 +65,7 @@ local LayerImages = {
   Identifier = Identifier .. "-images",
   Name = Name .. " (Images)",
   Type = "ImageSequenceTileProvider",
+  ZIndex = 100,
   FolderPath = imagesDestination,
   Description = Description
 }

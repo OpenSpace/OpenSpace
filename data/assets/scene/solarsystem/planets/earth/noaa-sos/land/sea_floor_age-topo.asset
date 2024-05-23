@@ -29,6 +29,7 @@ local syncedDirectory = asset.resource({
 local LayerBase = {
   Identifier = Identifier,
   Name = Name,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
@@ -36,6 +37,7 @@ local LayerBase = {
 local LayerAol = {
   Identifier = Identifier .. "-aol",
   Name = Name .. " (AOL)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096_aol.png",
   Description = Description
 }
@@ -43,6 +45,7 @@ local LayerAol = {
 local LayerOrig = {
   Identifier = Identifier .. "-orig",
   Name = Name .. " (Original)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096_orig.png",
   Description = Description
 }

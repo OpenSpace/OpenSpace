@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_apollo14_28cm_mosaic_byte_geo_1_2_highContrast = {
   Identifier = "apollo14_28cm_mosaic_byte_geo_1_2_highContrast",
   Name = [[LRO LROC Image Mosaic 28cm, Apollo 14]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Image_Mosaic_28cm/Apollo_14.vrt"),
   Description = [[]]
 }

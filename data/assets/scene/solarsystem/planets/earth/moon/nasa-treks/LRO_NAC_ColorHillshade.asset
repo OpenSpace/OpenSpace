@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_20191118demmoseqccolorhillshade = {
   Identifier = "20191118demmoseqccolorhillshade",
   Name = [[LRO NAC ColorHillshade, Lacus Mortis]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_NAC_ColorHillshade/Lacus_Mortis.vrt"),
   Description = [[TBD]]
 }

@@ -29,6 +29,7 @@ local Background1Layer = {
   Identifier = Identifier .. "-background-14a",
   Name = Name .. " (Background Week 14a)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2012_week14a.png",
   Description = Description
 }
@@ -37,6 +38,7 @@ local Background2Layer = {
   Identifier = Identifier .. "-background-14",
   Name = Name .. " (Background Week 14)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2012week14.png",
   Description = Description
 }
@@ -45,6 +47,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {

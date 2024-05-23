@@ -24,6 +24,7 @@ local syncedDirectory = asset.resource({
 local LayerCombined = {
   Identifier = Identifier,
   Name = Name,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "combined.png",
   Description = Description
 }
@@ -31,6 +32,7 @@ local LayerCombined = {
 local LayerExtent = {
   Identifier = Identifier .. "-extent",
   Name = Name .. " (Extent)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "extent.png",
   Description = Description
 }
@@ -38,6 +40,7 @@ local LayerExtent = {
 local LayerGain = {
   Identifier = Identifier .. "-gain",
   Name = Name .. " (Gain)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "gain.png",
   Description = Description
 }
@@ -45,6 +48,7 @@ local LayerGain = {
 local LayerLoss = {
   Identifier = Identifier .. "-loss",
   Name = Name .. " (Loss)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "loss.png",
   Description = Description
 }
@@ -52,6 +56,7 @@ local LayerLoss = {
 local LayerMap = {
   Identifier = Identifier .. "-map",
   Name = Name .. " (Map)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "map.png",
   Description = Description
 }

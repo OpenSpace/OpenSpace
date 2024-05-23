@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_SchrodingerMareNortheq = {
   Identifier = "SchrodingerMareNortheq",
   Name = [[LROC NAC Uncontrolled Mosaic of Region Inside Schrodinger Crater, 50cm/px]],
+  ZIndex = 50,
   FilePath = asset.resource("LROC_NAC_Uncontrolled_Mosaic_of_Region_Inside_Schrodinger_Crater/50cmpx.vrt"),
   Description = [[This is a 50cm/px uncontrolled visible image mosaic generated using Lunar Reconnaissance Orbiter Camera (LROC) Narrow Angle Camera (NAC) images from the Lunar Reconnaissance Orbiter mission. Each NAC image was registered horizontally to the LRO's Lunar Orbiter Laser Altimeter (LOLA) global DEM, and then mosaicked together and color balanced.]]
 }

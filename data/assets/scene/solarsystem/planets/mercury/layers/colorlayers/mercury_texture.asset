@@ -14,6 +14,7 @@ local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "Mercury_MESSENGER_MDIS_Basemap_BDR_Mosaic_Global_32ppd.jpg",
   Enabled = asset.enabled,
+  ZIndex = 5,
   Description = [[The Map Projected Basemap RDR (BDR) data set consists of a global
     monochrome map of reflectance at a resolution of 256 pixels per degree (~166 m/p).
     This is an offline version with lower resoution than the Messenger BDR layer.]],

@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_MiniRF_CPR_Gray_Global_128ppd = {
   Identifier = "LRO_MiniRF_CPR_Gray_Global_128ppd",
   Name = [[LRO Mini-RF Circular Polarization Ratio, Grayscale]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_Mini-RF_Circular_Polarization_Ratio/Grayscale.vrt"),
   Description = [[]]
 }
