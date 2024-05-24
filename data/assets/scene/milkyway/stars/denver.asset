@@ -25,7 +25,7 @@ local Object = {
   Renderable = {
     Type = "RenderableStars",
     File = speck .. "denver_stars.speck",
-    Halo = {
+    Glare = {
       Texture = textures .. "halo.png"
     },
     ColorMap = colorLUT .. "denver_colorbv.cmap",
