@@ -30,7 +30,7 @@ local Object = {
   },
   GUI = {
     Name = "Home Label",
-    Path = "/Universe/Local Universe",
+    Path = "/Universe/Nearby Surveys",
     Description = [[Label for the Milky Way titled 'Home', sized for viewing outside
       the Milky Way Galaxy.]]
   }
