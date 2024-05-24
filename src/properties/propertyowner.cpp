@@ -138,6 +138,20 @@ PropertyOwner* PropertyOwner::propertyOwner(const std::string& uri) const {
         }
     }
 }
+
+std::string PropertyOwner::uri() const {
+    std::string identifier = _identifier;
+    PropertyOwner* currentOwner = owner();
+    while (currentOwner) {
+        const std::string& ownerId = currentOwner->identifier();
+        if (!ownerId.empty()) {
+            identifier = std::format("{}.{}", ownerId, identifier);
+        }
+        currentOwner = currentOwner->owner();
+    }
+    return identifier;
+}
+
 bool PropertyOwner::hasProperty(const std::string& uri) const {
     return property(uri) != nullptr;
 }

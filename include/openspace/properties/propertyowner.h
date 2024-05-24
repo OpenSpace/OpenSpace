@@ -153,6 +153,9 @@ public:
     Property* property(const std::string& uri) const;
 
     PropertyOwner* propertyOwner(const std::string& uri) const;
+
+    std::string uri() const;
+
     /**
      * This method checks if a Property with the provided \p uri exists in this
      * PropertyOwner (or any sub-owner). If the identifier contains one or more `.`, the
