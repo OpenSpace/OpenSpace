@@ -44,7 +44,7 @@ namespace {
         "as the first argument, the simulation time in seconds past the J2000 epoch of "
         "the last frame as the second argument, and the current wall time as "
         "milliseconds past the J2000 epoch the third argument and computes the three "
-        "scaling factors returned as a tuple.",
+        "scaling factors returned as a table.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -108,7 +108,7 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
     // Execute the scaling function
-    const int success = lua_pcall(_state, 3, 3, 0);
+    const int success = lua_pcall(_state, 3, 1, 0);
     if (success != 0) {
         LERRORC(
             "LuaScale",
@@ -116,8 +116,8 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
         );
     }
 
-    auto [x, y, z] = ghoul::lua::values<double, double, double>(_state);
-    return glm::dvec3(x, y, z);
+    const glm::dvec3 scale = ghoul::lua::value<glm::dvec3>(_state);
+    return scale;
 }
 
 } // namespace openspace
