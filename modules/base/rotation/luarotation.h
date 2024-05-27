@@ -39,8 +39,7 @@ namespace documentation { struct Documentation; }
 
 class LuaRotation : public Rotation {
 public:
-    LuaRotation();
-    LuaRotation(const ghoul::Dictionary& dictionary);
+    explicit LuaRotation(const ghoul::Dictionary& dictionary);
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 
