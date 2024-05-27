@@ -24,44 +24,57 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+layout(lines) in;
+flat in float currentRevolutionFraction[];
+flat in float vertexRevolutionFraction[];
+flat in vec4 viewSpacePositions[];
 
-layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
-layout (location = 1) in vec2 orbitData; // 1: epoch, 2: period
+layout(line_strip, max_vertices = 2) out;
+out float viewSpaceDepth;
+out float periodFraction;
+out float offsetPeriods;
+out vec4 viewSpacePosition;
 
-flat out float currentRevolutionFraction;
-flat out float vertexRevolutionFraction;
-flat out vec4 viewSpacePositions;
-
-uniform dmat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform double inGameTime;
-
+uniform float trailFadeExponent;
+uniform float colorFadeCutoffPoint;
 
 void main() {
-  // The way the position and trail fade is calculated is:
-  // By using inGameTime, epoch and period of this orbit, we get how many revolutions it
-  // has done since epoch. The fract of that, is how far into a revolution it has traveled
-  // since epoch. Similarly we do the same but for this vertex, but calculating
-  // offsetPeriods. In the fragment shader the difference between periodFraction_f and
-  // offsetPeriods is calculated to know how much to fade that specific fragment.
+  float cFrac = currentRevolutionFraction[0];
+  float v0Frac = vertexRevolutionFraction[0];
+  float v1Frac = vertexRevolutionFraction[1];
 
-  // If orbit_data is doubles, cast to float first
-  float epoch = orbitData.x;
-  float period = orbitData.y;
+  // Distance between current recolution fraction and revolution factor for vertex0 and vertex1
+  float vd0 = cFrac - v0Frac;
+  if (vd0 < 0.0) {
+    vd0 += 1.0;
+  }
 
-  // calculate nr of periods, get fractional part to know where the vertex closest to the
-  // debris part is right now
-  double nrOfRevolutions = (inGameTime - epoch) / period;
-  currentRevolutionFraction = float(nrOfRevolutions - double(int(nrOfRevolutions)));
-  if (currentRevolutionFraction < 0.0) {
-    currentRevolutionFraction += 1.0;
-  } 
+  float vd1 = cFrac - v1Frac;
+  if (vd1 < 0.0) {
+    vd1 += 1.0;
+  }
+  // ==========================
 
-  // Same procedure for the current vertex
-  vertexRevolutionFraction = vertexData.w / period;
-  
-  viewSpacePositions = vec4(modelViewTransform * dvec4(vertexData.xyz, 1));
-  vec4 vs_position = z_normalization(projectionTransform * viewSpacePositions);
-  gl_Position = vs_position;
+  // Calculates if vertex0 is close enough to NOT be discarded in fragment shader
+  float invert = pow(1.0 - vd1, trailFadeExponent);  
+  float fade = clamp(invert, 0.0, 1.0);
+
+  // Only emit vertices for line segments where both vertices should be rendered
+  if ( (fade > colorFadeCutoffPoint) || (vd0 < vd1) ) {
+    gl_Position = gl_in[0].gl_Position;
+    viewSpaceDepth = gl_Position.w;
+    periodFraction = cFrac;
+    offsetPeriods = v0Frac;
+    viewSpacePosition = viewSpacePositions[0];
+    EmitVertex();
+
+    gl_Position = gl_in[1].gl_Position;
+    viewSpaceDepth = gl_Position.w;
+    periodFraction = cFrac;
+    offsetPeriods = v1Frac;
+    viewSpacePosition = viewSpacePositions[1];
+    EmitVertex();
+  }
+
+  EndPrimitive();
 }

@@ -123,8 +123,9 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
-        "Trail Fade Factor",
-        "Determines how fast the trail fades out.",
+        "Trail Fade",
+        "Determines how fast the trail fades out. A smaller number shows less of the "
+        "trail and a larger number shows more.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -378,7 +379,8 @@ void RenderableOrbitalKepler::initializeGL() {
            return global::renderEngine->buildRenderProgram(
                "OrbitalKeplerTrails",
                absPath("${MODULE_SPACE}/shaders/debrisVizTrails_vs.glsl"),
-               absPath("${MODULE_SPACE}/shaders/debrisVizTrails_fs.glsl")
+               absPath("${MODULE_SPACE}/shaders/debrisVizTrails_fs.glsl"),
+               absPath("${MODULE_SPACE}/shaders/debrisVizTrails_gs.glsl")
            );
        }
    );
@@ -401,7 +403,8 @@ void RenderableOrbitalKepler::initializeGL() {
         _trailProgram->uniformLocation("modelViewTransform");
     _uniformTrailCache.projection =
         _trailProgram->uniformLocation("projectionTransform");
-    _uniformTrailCache.trailFade = _trailProgram->uniformLocation("trailFade");
+    _uniformTrailCache.trailFadeExponent = _trailProgram->uniformLocation("trailFadeExponent");
+    _uniformTrailCache.colorFadeCutoffPoint = _trailProgram->uniformLocation("colorFadeCutoffPoint");
     _uniformTrailCache.inGameTime = _trailProgram->uniformLocation("inGameTime");
     _uniformTrailCache.color = _trailProgram->uniformLocation("color");
     _uniformTrailCache.opacity = _trailProgram->uniformLocation("opacity");
@@ -562,7 +565,9 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         const float fade = pow(
             _appearance.trailFade.maxValue() - _appearance.trailFade, 2.f
         );
-        _trailProgram->setUniform(_uniformTrailCache.trailFade, fade);
+        _trailProgram->setUniform(_uniformTrailCache.trailFadeExponent, fade);
+
+        _trailProgram->setUniform(_uniformTrailCache.colorFadeCutoffPoint, 0.05f);
 
         glLineWidth(_appearance.trailWidth);
 

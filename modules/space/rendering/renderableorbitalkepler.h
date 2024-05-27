@@ -112,7 +112,7 @@ private:
     RenderableOrbitalKepler::Appearance _appearance;
 
     // Line cache
-    UniformCache(modelView, projection, trailFade, inGameTime, color, opacity)
+    UniformCache(modelView, projection, trailFadeExponent, colorFadeCutoffPoint, inGameTime, color, opacity)
         _uniformTrailCache;
     
     // Point cache
