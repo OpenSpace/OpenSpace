@@ -27,7 +27,6 @@
 in float projectionViewDepth;
 in vec4 viewSpace;
 in vec2 texCoord;
-flat in int skip;
 
 uniform bool enableOutline;
 uniform vec3 outlineColor;
@@ -38,10 +37,6 @@ uniform float opacity;
 Fragment getFragment() {
   Fragment frag;
   
-  if (skip == 1) {
-    discard;
-  }
-
   // Only draw circle instead of entire quad
   vec2 st = (texCoord - vec2(0.5)) * 2.0;
   if (length(st) > 1.0) {
