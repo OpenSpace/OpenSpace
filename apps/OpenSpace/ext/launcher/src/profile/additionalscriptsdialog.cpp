@@ -103,9 +103,9 @@ void AdditionalScriptsDialog::parseScript() {
 }
 
 void AdditionalScriptsDialog::chooseScripts() {
-    ScriptlogDialog d(this);
+    ScriptLogDialog d = ScriptLogDialog(this);
     connect(
-        &d, &ScriptlogDialog::scriptsSelected,
+        &d, &ScriptLogDialog::scriptsSelected,
         this, &AdditionalScriptsDialog::appendScriptsToTextfield
     );
     d.exec();
