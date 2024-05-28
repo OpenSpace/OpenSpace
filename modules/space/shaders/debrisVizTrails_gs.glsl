@@ -43,7 +43,8 @@ void main() {
   float v0Frac = vertexRevolutionFraction[0];
   float v1Frac = vertexRevolutionFraction[1];
 
-  // Distance between current recolution fraction and revolution factor for vertex0 and vertex1
+  // Distance between current recolution fraction and revolution factor for
+  // vertex0 and vertex1
   float vd0 = cFrac - v0Frac;
   if (vd0 < 0.0) {
     vd0 += 1.0;
@@ -60,7 +61,7 @@ void main() {
   float fade = clamp(invert, 0.0, 1.0);
 
   // Only emit vertices for line segments where both vertices should be rendered
-  if ( (fade > colorFadeCutoffPoint) || (vd0 < vd1) ) {
+  if ((fade > colorFadeCutoffPoint) || (vd0 < vd1)) {
     gl_Position = gl_in[0].gl_Position;
     viewSpaceDepth = gl_Position.w;
     periodFraction = cFrac;
