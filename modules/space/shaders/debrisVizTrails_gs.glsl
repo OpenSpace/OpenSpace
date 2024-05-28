@@ -43,7 +43,7 @@ void main() {
   float v0Frac = vertexRevolutionFraction[0];
   float v1Frac = vertexRevolutionFraction[1];
 
-  // Distance between current recolution fraction and revolution factor for
+  // Distance between current revolution fraction and revolution fraction for
   // vertex0 and vertex1
   float vd0 = cFrac - v0Frac;
   if (vd0 < 0.0) {
