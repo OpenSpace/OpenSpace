@@ -44,7 +44,7 @@ namespace {
         "epoch as the first argument, the simulation time in seconds past the J2000 "
         "epoch of the last frame as the second argument, and the current wall time as "
         "milliseconds past the J2000 epoch the third argument and computes the rotation "
-        "values factors returned as a table containing the 9 values that make up the "
+        "value factors returned as a table containing the 9 values that make up the "
         "resulting rotation matrix.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
