@@ -226,7 +226,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     if (_hasManualZIndex) {
         // We need to space the z indices apart a bit in order to make space for the
         // automatically defined indices. A multiplier of two is enough as there all
-        // onautomatic indices will be sharing the same number
+        // automatic indices will be sharing the same number
         constexpr unsigned int ZIndexManualSpacing = 2;
         _zIndex = *p.zIndex * ZIndexManualSpacing;
     }
