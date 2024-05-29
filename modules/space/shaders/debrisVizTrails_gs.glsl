@@ -39,6 +39,10 @@ uniform float trailFadeExponent;
 uniform float colorFadeCutoffPoint;
 
 void main() {
+  // cFrac is how far along the trail orbit the head of the trail is.
+  // v0Frac and v1Frac are how far the two vertices that creates the current line strip
+  // are along the trail orbit. The variables span between 0 and 1, where 0 is the
+  // beginning of the trail and 1 is the end of the trail (a full orbit).
   float cFrac = currentRevolutionFraction[0];
   float v0Frac = vertexRevolutionFraction[0];
   float v1Frac = vertexRevolutionFraction[1];
