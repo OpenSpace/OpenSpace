@@ -161,7 +161,7 @@ private:
     std::vector<double> _startTimes;
     // Stores the FieldlineStates
     std::vector<FieldlinesState> _states;
-
+    bool abc = true;
     // Group to hold the color properties
     properties::PropertyOwner _colorGroup;
     // Uniform/transfer function/topology?

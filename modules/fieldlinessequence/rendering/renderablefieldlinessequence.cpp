@@ -1059,6 +1059,32 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
                               (currentTime < _sequenceEndTime);
 
+
+    if (abc == true)
+    {
+        const std::vector<std::vector<float>>&quantities = _states[0].extraQuantities();
+        const std::vector<std::string>& extraNamesVec =
+            _states[0].extraQuantityNames();
+        for (int i = 0; i < quantities.size(); ++i) {
+            _colorQuantity.addOption(i, extraNamesVec[i]);
+            _maskingQuantity.addOption(i, extraNamesVec[i]);
+        }
+
+        for (int i = 0; i < extraNamesVec.size(); ++i) {
+            //if not given range, use min and max of data?
+            std::vector<float> q = quantities[i];
+            float minNr = *std::min_element(q.begin(), q.end());
+            std::string min = std::to_string(minNr);
+            float maxNr = *std::max_element(q.begin(), q.end());
+            std::string max = std::to_string(maxNr);
+            LWARNING(std::format("min :{}", min));
+            LWARNING(std::format("max :{}", max));
+            std::string name = extraNamesVec[i];
+            LWARNING(std::format("name:{}", name));
+        }
+        abc = false;
+    }
+    
     // Check if current time in OpenSpace is within sequence interval
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
