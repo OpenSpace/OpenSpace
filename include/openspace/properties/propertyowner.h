@@ -166,6 +166,13 @@ public:
      */
     PropertyOwner* propertyOwner(const std::string& uri) const;
 
+    /**
+     * Creates a uri for this PropertyOwner. This is created by looking up all the owners
+     * of this PropertyOwner. The owner identifiers are separated by ".", which make up
+     * the uri of this PropertyOwner.
+     * 
+     * \return The uri of this PropertyOwner 
+     */
     std::string uri() const;
 
     /**

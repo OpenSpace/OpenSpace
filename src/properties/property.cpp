@@ -78,13 +78,9 @@ const std::string& Property::identifier() const {
 
 std::string Property::fullyQualifiedIdentifier() const {
     std::string identifier = _identifier;
-    PropertyOwner* currentOwner = owner();
-    while (currentOwner) {
-        const std::string& ownerId = currentOwner->identifier();
-        if (!ownerId.empty()) {
-            identifier = std::format("{}.{}", ownerId, identifier);
-        }
-        currentOwner = currentOwner->owner();
+    const std::string& ownerUri = owner()->uri();
+    if (!ownerUri.empty()) {
+        identifier = std::format("{}.{}", ownerUri, identifier);
     }
     return identifier;
 }

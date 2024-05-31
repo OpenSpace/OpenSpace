@@ -60,7 +60,6 @@ properties::PropertyOwner* propertyOwner(const std::string& uri) {
     return property;
 }
 
-
 std::vector<properties::Property*> allProperties() {
     return global::rootPropertyOwner->propertiesRecursive();
 }

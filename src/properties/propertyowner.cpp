@@ -129,13 +129,7 @@ PropertyOwner* PropertyOwner::propertyOwner(const std::string& uri) const {
         const std::string ownerName = uri.substr(ownerSeparator + 1);
 
         PropertyOwner* owner = propertySubOwner(parentName);
-        if (!owner) {
-            return nullptr;
-        }
-        else {
-            // Recurse into the subOwner
-            return owner->propertyOwner(ownerName);
-        }
+        return owner ? owner->propertyOwner(ownerName) : nullptr;
     }
 }
 
