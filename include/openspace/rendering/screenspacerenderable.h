@@ -61,7 +61,14 @@ public:
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceRenderable() override;
 
-    virtual void render(float blackoutFactor);
+    struct RenderData {
+        float blackoutFactor;
+        float hue;
+        float value;
+        float saturation;
+        float gamma;
+    };
+    virtual void render(const RenderData& renderData);
 
     virtual bool initialize();
     virtual bool initializeGL();
@@ -102,7 +109,7 @@ protected:
     glm::vec3 raeToCartesian(const glm::vec3& rae) const;
     glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
-    void draw(const glm::mat4& modelTransform, float blackoutFactor);
+    void draw(const glm::mat4& modelTransform, const RenderData& renderData);
 
     virtual void bindTexture() = 0;
     virtual void unbindTexture();
@@ -135,14 +142,14 @@ protected:
     properties::Vec3Property _borderColor;
 
     properties::FloatProperty _scale;
-    properties::FloatProperty _gamma;
+    properties::FloatProperty _gammaOffset;
     properties::Vec3Property _multiplyColor;
     properties::Vec4Property _backgroundColor;
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
-    UniformCache(color, opacity, blackoutFactor, mvpMatrix, tex, backgroundColor, gamma,
-        borderColor, borderWidth) _uniformCache;
+    UniformCache(color, opacity, blackoutFactor, hue, value, saturation, mvpMatrix, tex,
+        backgroundColor, gamma, borderColor, borderWidth) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 

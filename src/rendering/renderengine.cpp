@@ -759,8 +759,15 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        ScreenSpaceRenderable::RenderData data = {
+            .blackoutFactor = combinedBlackoutFactor(),
+            .hue = _hue / 360.f,
+            .value = _value,
+            .saturation = _saturation,
+            .gamma = _gamma
+        };
         for (ScreenSpaceRenderable* ssr : ssrs) {
-            ssr->render(combinedBlackoutFactor());
+            ssr->render(data);
         }
         glDisable(GL_BLEND);
     }
