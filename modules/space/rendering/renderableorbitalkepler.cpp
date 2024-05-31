@@ -403,8 +403,8 @@ void RenderableOrbitalKepler::initializeGL() {
         _trailProgram->uniformLocation("modelViewTransform");
     _uniformTrailCache.projection =
         _trailProgram->uniformLocation("projectionTransform");
-    _uniformTrailCache.colorFadeCutoffPoint =
-        _trailProgram->uniformLocation("colorFadeCutoffPoint");
+    _uniformTrailCache.colorFadeCutoffValue =
+        _trailProgram->uniformLocation("colorFadeCutoffValue");
     _uniformTrailCache.trailFadeExponent =
         _trailProgram->uniformLocation("trailFadeExponent");
     _uniformTrailCache.inGameTime = _trailProgram->uniformLocation("inGameTime");
@@ -574,7 +574,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         // on the distance from the head of the trail to the part that's being rendered.
         // Value is passed as uniform due to it being used in both geometry and fragment
         // shader.
-        _trailProgram->setUniform(_uniformTrailCache.colorFadeCutoffPoint, 0.05f);
+        _trailProgram->setUniform(_uniformTrailCache.colorFadeCutoffValue, 0.05f);
 
         glLineWidth(_appearance.trailWidth);
 

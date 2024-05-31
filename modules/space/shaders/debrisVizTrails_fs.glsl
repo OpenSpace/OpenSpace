@@ -32,7 +32,7 @@ in float offsetPeriods;
 uniform vec3 color;
 uniform float opacity = 1.0;
 uniform float trailFadeExponent;
-uniform float colorFadeCutoffPoint;
+uniform float colorFadeCutoffValue;
 
 Fragment getFragment() {
   Fragment frag;
@@ -56,7 +56,7 @@ Fragment getFragment() {
 
   // Currently even fully transparent lines can occlude other lines, thus we discard these
   // fragments since debris and satellites are rendered so close to each other
-  if (fade < colorFadeCutoffPoint) {
+  if (fade < colorFadeCutoffValue) {
     discard;
   }
 

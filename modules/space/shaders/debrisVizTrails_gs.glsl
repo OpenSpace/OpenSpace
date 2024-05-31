@@ -36,7 +36,7 @@ out float offsetPeriods;
 out vec4 viewSpacePosition;
 
 uniform float trailFadeExponent;
-uniform float colorFadeCutoffPoint;
+uniform float colorFadeCutoffValue;
 
 void main() {
   // cFrac is how far along the trail orbit the head of the trail is.
@@ -65,7 +65,7 @@ void main() {
   float fade = clamp(invert, 0.0, 1.0);
 
   // Only emit vertices for line segments where both vertices should be rendered
-  if ((fade > colorFadeCutoffPoint) || (vd0 < vd1)) {
+  if ((fade > colorFadeCutoffValue) || (vd0 < vd1)) {
     gl_Position = gl_in[0].gl_Position;
     viewSpaceDepth = gl_Position.w;
     periodFraction = cFrac;
