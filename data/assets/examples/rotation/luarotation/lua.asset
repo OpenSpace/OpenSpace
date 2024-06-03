@@ -1,0 +1,34 @@
+-- Basic
+-- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
+-- coordinate axes are determined by executing a Lua file that returns the rotation matrix
+-- to be used.
+--
+-- ```{literalinclude} example.lua
+-- :language: lua
+-- :caption: The script file that is used in this example
+-- ```
+
+local Node = {
+  Identifier = "LuaRotation_Example",
+  Transform = {
+    Rotation = {
+      Type = "LuaRotation",
+      Script = asset.resource("example.lua")
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/LuaRotation"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
