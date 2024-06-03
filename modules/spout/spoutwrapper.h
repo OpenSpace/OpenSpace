@@ -117,13 +117,15 @@ public:
     static const properties::Property::PropertyInfo& UpdateInfoProperty();
 
     SpoutReceiverPropertyProxy(properties::PropertyOwner& owner,
-        const ghoul::Dictionary& dictionary);
+        const ghoul::Dictionary& dictionary, std::string ownerIdentifier = "Spout");
     virtual ~SpoutReceiverPropertyProxy();
 
     bool updateReceiver() override;
     void releaseReceiver() override;
 
 private:
+    properties::PropertyOwner _subowner;
+
     properties::StringProperty _spoutName;
     properties::OptionProperty _spoutSelection;
     properties::TriggerProperty _updateSelection;

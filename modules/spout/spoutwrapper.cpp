@@ -339,10 +339,12 @@ const properties::Property::PropertyInfo& SpoutReceiverPropertyProxy::UpdateInfo
 }
 
 SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner& owner,
-                                                      const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary,
+                                                      std::string ownerIdentifier)
     : _spoutName(NameReceiverInfo)
     , _spoutSelection(SelectionInfo)
     , _updateSelection(UpdateInfo)
+    , _subowner({ ownerIdentifier, ownerIdentifier })
 {
     if (dictionary.hasKey(NameReceiverInfo.identifier)) {
         _spoutName = dictionary.value<std::string>(NameReceiverInfo.identifier);
@@ -352,7 +354,7 @@ SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner
     }
 
     _spoutName.onChange([this]() { _isSpoutDirty = true; });
-    owner.addProperty(_spoutName);
+    _subowner.addProperty(_spoutName);
 
     _spoutSelection.onChange([this]() {
         if (_spoutName.value().empty() && _spoutSelection.value() == 0) {
@@ -364,7 +366,7 @@ SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner
         _spoutName = _spoutSelection.option().description;
     });
     _spoutSelection.addOption(0, "");
-    owner.addProperty(_spoutSelection);
+    _subowner.addProperty(_spoutSelection);
 
     _updateSelection.onChange([this]() {
         const std::vector<std::string> receiverList = spoutReceiverList();
@@ -385,7 +387,8 @@ SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner
         _spoutSelection = idx;
 
     });
-    owner.addProperty(_updateSelection);
+    _subowner.addProperty(_updateSelection);
+    owner.addPropertySubOwner(_subowner);
 
     _updateSelection.trigger();
 }

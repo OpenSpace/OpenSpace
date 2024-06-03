@@ -22,16 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEVOLUMEYT___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEVOLUMEYT___H__
+
+#ifdef WIN32
 
 #include <openspace/rendering/renderable.h>
+#include <modules/base/rendering/renderableplane.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+
+#include <modules/spout/spoutwrapper.h>
 
 namespace ghoul::filesystem { class File; }
 
@@ -42,16 +47,16 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-    struct RenderData;
-    struct UpdateData;
+struct RenderData;
+struct UpdateData;
 
-    namespace documentation { struct Documentation; }
+namespace documentation { struct Documentation; }
 
-    struct LinePoint;
+struct LinePoint;
 
-class RenderablePlane : public Renderable {
+class RenderableVolumeYt : public Renderable {
 public:
-    RenderablePlane(const ghoul::Dictionary& dictionary);
+    RenderableVolumeYt(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -64,8 +69,10 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+
     virtual void bindTexture();
     virtual void unbindTexture();
+
     void createPlane();
 
     properties::OptionProperty _blendMode;
@@ -85,8 +92,17 @@ private:
 
     UniformCache(modelViewProjection, modelViewTransform, colorTexture, opacity,
         mirrorBackside, multiplyColor) _uniformCache;
+
+    // -------------------- yt ------------------
+
+    spout::SpoutReceiverPropertyProxy _spoutReceiver; // color texture
+
+    spout::SpoutReceiverPropertyProxy _spoutReceiver_depth; // depth
+    // -------------------- end ------------------
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#endif // WIN32
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEVOLUMEYT___H__

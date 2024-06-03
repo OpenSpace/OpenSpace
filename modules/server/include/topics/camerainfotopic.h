@@ -22,71 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#ifndef __OPENSPACE_MODULE_SERVER___CAMERAINFOTOPIC___H__
+#define __OPENSPACE_MODULE_SERVER___CAMERAINFOTOPIC___H__
 
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <modules/server/include/topics/topic.h>
+#include <chrono>
 
 namespace openspace {
 
-    struct RenderData;
-    struct UpdateData;
-
-    namespace documentation { struct Documentation; }
-
-    struct LinePoint;
-
-class RenderablePlane : public Renderable {
+class CameraInfoTopic : public Topic {
 public:
-    RenderablePlane(const ghoul::Dictionary& dictionary);
+    CameraInfoTopic();
+    ~CameraInfoTopic() override;
 
-    void initializeGL() override;
-    void deinitializeGL() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    virtual void bindTexture();
-    virtual void unbindTexture();
-    void createPlane();
-
-    properties::OptionProperty _blendMode;
-    properties::BoolProperty _billboard;
-    properties::BoolProperty _mirrorBackside;
-    properties::Vec2Property _size;
-    properties::BoolProperty _autoScale;
-    properties::Vec3Property _multiplyColor;
-
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
 private:
-    bool _planeIsDirty = false;
+    static constexpr int UnsetOnChangeHandle = -1;
 
-    UniformCache(modelViewProjection, modelViewTransform, colorTexture, opacity,
-        mirrorBackside, multiplyColor) _uniformCache;
+    void sendCameraData();
+
+    int _dataCallbackHandle = UnsetOnChangeHandle;
+    bool _isDone = false;
+    std::chrono::system_clock::time_point _lastUpdateTime;
+    glm::dvec3 _lastPosition = glm::dvec3(0);
+
+    std::chrono::milliseconds _cameraPositionUpdateTime = std::chrono::milliseconds(100);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#endif // __OPENSPACE_MODULE_SERVER___CAMERAINFOTOPIC___H__

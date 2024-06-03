@@ -61,6 +61,7 @@
 #include <modules/base/rendering/renderableplanetimevaryingimage.h>
 #include <modules/base/rendering/renderableprism.h>
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
+#include <modules/base/rendering/renderablevolumeyt.h> // yt
 #include <modules/base/rendering/screenspacedashboard.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
@@ -164,6 +165,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");
     fRenderable->registerClass<RenderableTrailTrajectory>("RenderableTrailTrajectory");
+    fRenderable->registerClass<RenderableVolumeYt>("RenderableVolumeYt"); // yt
 
     ghoul::TemplateFactory<Translation>* fTranslation =
         FactoryManager::ref().factory<Translation>();
@@ -250,6 +252,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableTimeVaryingSphere::Documentation(),
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
+        RenderableVolumeYt::Documentation(), // yt
 
         ScreenSpaceDashboard::Documentation(),
         ScreenSpaceFramebuffer::Documentation(),

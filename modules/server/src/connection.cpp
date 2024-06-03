@@ -28,6 +28,7 @@
 #include <modules/server/include/topics/bouncetopic.h>
 #include <modules/server/include/topics/camerapathtopic.h>
 #include <modules/server/include/topics/cameratopic.h>
+#include <modules/server/include/topics/camerainfotopic.h>
 #include <modules/server/include/topics/documentationtopic.h>
 #include <modules/server/include/topics/enginemodetopic.h>
 #include <modules/server/include/topics/eventtopic.h>
@@ -103,6 +104,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<CameraTopic>("camera");
     _topicFactory.registerClass<CameraPathTopic>("cameraPath");
     _topicFactory.registerClass<EventTopic>("event");
+    _topicFactory.registerClass<CameraInfoTopic>("cameraInfo");
 }
 
 void Connection::handleMessage(const std::string& message) {

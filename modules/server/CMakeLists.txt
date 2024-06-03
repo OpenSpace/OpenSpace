@@ -51,6 +51,7 @@ set(HEADER_FILES
   include/topics/topic.h
   include/topics/triggerpropertytopic.h
   include/topics/versiontopic.h
+  include/topics/camerainfotopic.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -80,6 +81,7 @@ set(SOURCE_FILES
   src/topics/topic.cpp
   src/topics/triggerpropertytopic.cpp
   src/topics/versiontopic.cpp
+  src/topics/camerainfotopic.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

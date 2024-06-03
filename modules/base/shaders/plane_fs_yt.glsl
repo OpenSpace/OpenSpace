@@ -22,71 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#include "fragment.glsl"
 
-#include <openspace/rendering/renderable.h>
+in vec4 vs_gPosition;
+in vec3 vs_gNormal;
+in float vs_screenSpaceDepth;
+in vec2 vs_st;
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
+uniform sampler2D colorTexture;
+uniform float opacity = 1.0;
+uniform bool mirrorBackside = true;
+uniform vec3 multiplyColor;
 
-namespace ghoul::filesystem { class File; }
+uniform sampler2D depthTexture;
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
-namespace openspace {
+Fragment getFragment() {
+  Fragment frag;
+  if (gl_FrontFacing) {
+    frag.color = texture(colorTexture, vs_st);
+  }
+  else {
+    if (mirrorBackside) {
+      frag.color = texture(colorTexture, vec2(1.0 - vs_st.s, vs_st.t));
+    }
+    else {
+      frag.color = texture(colorTexture, vs_st);
+    }
+  }
 
-    struct RenderData;
-    struct UpdateData;
+  frag.color.rgb *= multiplyColor;
 
-    namespace documentation { struct Documentation; }
+  frag.color.a *= opacity;
+  if (frag.color.a == 0.0) {
+    discard;
+  }
 
-    struct LinePoint;
+  frag.depth = texture(depthTexture, vs_st).r;
+  if (frag.depth == 0.0) {
+    discard;
+  }
+  frag.depth = frag.depth;
 
-class RenderablePlane : public Renderable {
-public:
-    RenderablePlane(const ghoul::Dictionary& dictionary);
+  //frag.color += texture(depthTexture, vs_st);
 
-    void initializeGL() override;
-    void deinitializeGL() override;
+  // G-Buffer
+  frag.gPosition = vs_gPosition;
+  frag.gNormal = vec4(vs_gNormal, 1.0);
 
-    bool isReady() const override;
-
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void update(const UpdateData& data) override;
-
-    static documentation::Documentation Documentation();
-
-protected:
-    virtual void bindTexture();
-    virtual void unbindTexture();
-    void createPlane();
-
-    properties::OptionProperty _blendMode;
-    properties::BoolProperty _billboard;
-    properties::BoolProperty _mirrorBackside;
-    properties::Vec2Property _size;
-    properties::BoolProperty _autoScale;
-    properties::Vec3Property _multiplyColor;
-
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
-
-private:
-    bool _planeIsDirty = false;
-
-    UniformCache(modelViewProjection, modelViewTransform, colorTexture, opacity,
-        mirrorBackside, multiplyColor) _uniformCache;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+  return frag;
+}

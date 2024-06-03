@@ -54,6 +54,7 @@ set(HEADER_FILES
   rendering/renderablenodearrow.h
   rendering/renderablenodeline.h
   rendering/renderableplane.h
+  rendering/renderablevolumeyt.h
   rendering/renderableplaneimagelocal.h
   rendering/renderableplaneimageonline.h
   rendering/renderableplanetimevaryingimage.h
@@ -116,6 +117,7 @@ set(SOURCE_FILES
   rendering/renderablenodearrow.cpp
   rendering/renderablenodeline.cpp
   rendering/renderableplane.cpp
+  rendering/renderablevolumeyt.cpp
   rendering/renderableplaneimagelocal.cpp
   rendering/renderableplaneimageonline.cpp
   rendering/renderableplanetimevaryingimage.cpp
