@@ -24,6 +24,21 @@
 
 namespace {
 
+[[codegen::luawrap]] void joinServer(std::string port, std::string address,
+                                     std::string password, std::string hostpassword = "",
+                                     std::string name = "Anonymous") {
+    using namespace openspace;
+    if (global::windowDelegate->isMaster()) {
+        ParallelPeer* peer = global::parallelPeer;
+        peer->setPort(std::move(port));
+        peer->setAddress(std::move(address));
+        peer->setPassword(std::move(password));
+        peer->setHostPassword(std::move(hostpassword));
+        peer->setName(std::move(name));
+        peer->connect();
+    }
+}
+
 // Connect to parallel.
 [[codegen::luawrap]] void connect() {
     using namespace openspace;
@@ -36,7 +51,7 @@ namespace {
 [[codegen::luawrap]] void disconnect() {
     using namespace openspace;
     if (global::windowDelegate->isMaster()) {
-        global::parallelPeer->connect();
+        global::parallelPeer->disconnect();
     }
 }
 
