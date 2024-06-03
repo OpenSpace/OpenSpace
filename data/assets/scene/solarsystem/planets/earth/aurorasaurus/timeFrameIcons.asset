@@ -1,0 +1,6373 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local timeFrameIcon0Green = {
+  Identifier = "timeFrameIcon0Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 68.62856686824738,
+      Longitude = -149.6406928826791,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 0 Green"
+  }
+}
+
+
+local timeFrameIcon1GreenBefore = {
+  Identifier = "timeFrameIcon1GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 08:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.17424483903669,
+      Longitude = -114.0970884964472,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 1 Green Before"
+  }
+}
+
+
+local timeFrameIcon1GreenAfter = {
+  Identifier = "timeFrameIcon1GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 10:45:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.17424483903669,
+      Longitude = -114.0970884964472,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 1 Green After"
+  }
+}
+
+
+local timeFrameIcon2GreenBefore = {
+  Identifier = "timeFrameIcon2GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 11:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.25047412523697,
+      Longitude = -118.9776715757917,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 2 Green Before"
+  }
+}
+
+
+local timeFrameIcon2GreenAfter = {
+  Identifier = "timeFrameIcon2GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 12:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.25047412523697,
+      Longitude = -118.9776715757917,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 2 Green After"
+  }
+}
+
+
+local timeFrameIcon3RedBefore = {
+  Identifier = "timeFrameIcon3RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 12:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.18127414870289,
+      Longitude = -114.08400014444,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 3 Red Before"
+  }
+}
+
+
+local timeFrameIcon3RedAfter = {
+  Identifier = "timeFrameIcon3RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 12:45:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.18127414870289,
+      Longitude = -114.08400014444,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 3 Red After"
+  }
+}
+
+
+local timeFrameIcon4Green = {
+  Identifier = "timeFrameIcon4Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.83670303150581,
+      Longitude = -122.6117641501842,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 4 Green"
+  }
+}
+
+
+local timeFrameIcon5Green = {
+  Identifier = "timeFrameIcon5Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.44097991364943,
+      Longitude = 10.60164307745448,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 5 Green"
+  }
+}
+
+
+local timeFrameIcon6Green = {
+  Identifier = "timeFrameIcon6Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.42946141231786,
+      Longitude = 10.5826714563997,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 6 Green"
+  }
+}
+
+
+local timeFrameIcon7Green = {
+  Identifier = "timeFrameIcon7Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.42825841879331,
+      Longitude = 10.5974980547678,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 7 Green"
+  }
+}
+
+
+local timeFrameIcon8Green = {
+  Identifier = "timeFrameIcon8Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.43861750548658,
+      Longitude = 10.61679432607028,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 8 Green"
+  }
+}
+
+
+local timeFrameIcon9Red = {
+  Identifier = "timeFrameIcon9Red",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.42766877062941,
+      Longitude = 10.57709350501523,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 9 Red"
+  }
+}
+
+
+local timeFrameIcon10White = {
+  Identifier = "timeFrameIcon10White",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.69589095663562,
+      Longitude = 13.07675053379478,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 10 White"
+  }
+}
+
+
+local timeFrameIcon11Red = {
+  Identifier = "timeFrameIcon11Red",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.44264996033456,
+      Longitude = 10.61780936847699,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 11 Red"
+  }
+}
+
+
+local timeFrameIcon12Red = {
+  Identifier = "timeFrameIcon12Red",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.43821592870997,
+      Longitude = 10.619357504993,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 12 Red"
+  }
+}
+
+
+local timeFrameIcon13WhiteBefore = {
+  Identifier = "timeFrameIcon13WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 19:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.43630934601013,
+      Longitude = 10.61969257275079,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 13 White Before"
+  }
+}
+
+
+local timeFrameIcon13WhiteAfter = {
+  Identifier = "timeFrameIcon13WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 21:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.43630934601013,
+      Longitude = 10.61969257275079,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 13 White After"
+  }
+}
+
+
+local timeFrameIcon14WhiteBefore = {
+  Identifier = "timeFrameIcon14WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 19:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 66.99927703075249,
+      Longitude = 29.01194485283084,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 14 White Before"
+  }
+}
+
+
+local timeFrameIcon14WhiteAfter = {
+  Identifier = "timeFrameIcon14WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 20:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 66.99927703075249,
+      Longitude = 29.01194485283084,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 14 White After"
+  }
+}
+
+
+local timeFrameIcon15GreenBefore = {
+  Identifier = "timeFrameIcon15GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 19:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 67.00211639763002,
+      Longitude = 28.95019133162543,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 15 Green Before"
+  }
+}
+
+
+local timeFrameIcon15GreenAfter = {
+  Identifier = "timeFrameIcon15GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 20:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 67.00211639763002,
+      Longitude = 28.95019133162543,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 15 Green After"
+  }
+}
+
+
+local timeFrameIcon16WhiteBefore = {
+  Identifier = "timeFrameIcon16WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 19:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 67.00699644282547,
+      Longitude = 28.96606044350843,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 16 White Before"
+  }
+}
+
+
+local timeFrameIcon16WhiteAfter = {
+  Identifier = "timeFrameIcon16WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 20:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 67.00699644282547,
+      Longitude = 28.96606044350843,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 16 White After"
+  }
+}
+
+
+local timeFrameIcon17WhiteBefore = {
+  Identifier = "timeFrameIcon17WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 20:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.42454101787873,
+      Longitude = 10.60698723521798,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 17 White Before"
+  }
+}
+
+
+local timeFrameIcon17WhiteAfter = {
+  Identifier = "timeFrameIcon17WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 21:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.42454101787873,
+      Longitude = 10.60698723521798,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 17 White After"
+  }
+}
+
+
+local timeFrameIcon18Red = {
+  Identifier = "timeFrameIcon18Red",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 63.21427278389017,
+      Longitude = 9.53475272089859,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 18 Red"
+  }
+}
+
+
+local timeFrameIcon19RedBefore = {
+  Identifier = "timeFrameIcon19RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 20:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.53412671110659,
+      Longitude = 15.14295436991555,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 19 Red Before"
+  }
+}
+
+
+local timeFrameIcon19RedAfter = {
+  Identifier = "timeFrameIcon19RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 21:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.53412671110659,
+      Longitude = 15.14295436991555,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 19 Red After"
+  }
+}
+
+
+local timeFrameIcon20GreenBefore = {
+  Identifier = "timeFrameIcon20GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.7621597317565,
+      Longitude = -1.355099354634592,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 20 Green Before"
+  }
+}
+
+
+local timeFrameIcon20GreenAfter = {
+  Identifier = "timeFrameIcon20GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 01:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.7621597317565,
+      Longitude = -1.355099354634592,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 20 Green After"
+  }
+}
+
+
+local timeFrameIcon21Red = {
+  Identifier = "timeFrameIcon21Red",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.61611645943331,
+      Longitude = -3.587396340797405,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 21 Red"
+  }
+}
+
+
+local timeFrameIcon22WhiteBefore = {
+  Identifier = "timeFrameIcon22WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 23 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.49715241348569,
+      Longitude = -1.827177725705794,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 22 White Before"
+  }
+}
+
+
+local timeFrameIcon22WhiteAfter = {
+  Identifier = "timeFrameIcon22WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 01:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.49715241348569,
+      Longitude = -1.827177725705794,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 22 White After"
+  }
+}
+
+
+local timeFrameIcon23White = {
+  Identifier = "timeFrameIcon23White",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.00287169849906,
+      Longitude = -4.155508557082888,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 23 White"
+  }
+}
+
+
+local timeFrameIcon24Green = {
+  Identifier = "timeFrameIcon24Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.61395788360653,
+      Longitude = -2.13133194515359,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 24 Green"
+  }
+}
+
+
+local timeFrameIcon25RedBefore = {
+  Identifier = "timeFrameIcon25RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.97867950024857,
+      Longitude = -97.03609436104955,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 25 Red Before"
+  }
+}
+
+
+local timeFrameIcon25RedAfter = {
+  Identifier = "timeFrameIcon25RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.97867950024857,
+      Longitude = -97.03609436104955,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 25 Red After"
+  }
+}
+
+
+local timeFrameIcon26WhiteBefore = {
+  Identifier = "timeFrameIcon26WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 00:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.6450511228421,
+      Longitude = -3.173188620335986,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 26 White Before"
+  }
+}
+
+
+local timeFrameIcon26WhiteAfter = {
+  Identifier = "timeFrameIcon26WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 01:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.6450511228421,
+      Longitude = -3.173188620335986,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 26 White After"
+  }
+}
+
+
+local timeFrameIcon27RedBefore = {
+  Identifier = "timeFrameIcon27RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 01:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.81538072557414,
+      Longitude = -59.00937742632249,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 27 Red Before"
+  }
+}
+
+
+local timeFrameIcon27RedAfter = {
+  Identifier = "timeFrameIcon27RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.81538072557414,
+      Longitude = -59.00937742632249,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 27 Red After"
+  }
+}
+
+
+local timeFrameIcon28Green = {
+  Identifier = "timeFrameIcon28Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.75072730867713,
+      Longitude = -95.9949914797235,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 28 Green"
+  }
+}
+
+
+local timeFrameIcon29RedBefore = {
+  Identifier = "timeFrameIcon29RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 01:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.23857069858006,
+      Longitude = -99.87114829462416,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 29 Red Before"
+  }
+}
+
+
+local timeFrameIcon29RedAfter = {
+  Identifier = "timeFrameIcon29RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.23857069858006,
+      Longitude = -99.87114829462416,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 29 Red After"
+  }
+}
+
+
+local timeFrameIcon30WhiteBefore = {
+  Identifier = "timeFrameIcon30WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 01:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.24304360164897,
+      Longitude = -99.85809595653281,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 30 White Before"
+  }
+}
+
+
+local timeFrameIcon30WhiteAfter = {
+  Identifier = "timeFrameIcon30WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.24304360164897,
+      Longitude = -99.85809595653281,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 30 White After"
+  }
+}
+
+
+local timeFrameIcon31WhiteBefore = {
+  Identifier = "timeFrameIcon31WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 48.37540820154537,
+      Longitude = -89.28183009160425,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 31 White Before"
+  }
+}
+
+
+local timeFrameIcon31WhiteAfter = {
+  Identifier = "timeFrameIcon31WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 48.37540820154537,
+      Longitude = -89.28183009160425,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 31 White After"
+  }
+}
+
+
+local timeFrameIcon32Green = {
+  Identifier = "timeFrameIcon32Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.98539614100866,
+      Longitude = -4.180251933624953,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 32 Green"
+  }
+}
+
+
+local timeFrameIcon33White = {
+  Identifier = "timeFrameIcon33White",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.7567054138009,
+      Longitude = -96.00757302584192,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 33 White"
+  }
+}
+
+
+local timeFrameIcon34White = {
+  Identifier = "timeFrameIcon34White",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.7553904637588,
+      Longitude = -95.98884056549856,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 34 White"
+  }
+}
+
+
+local timeFrameIcon35GreenBefore = {
+  Identifier = "timeFrameIcon35GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.64994157711501,
+      Longitude = -85.80489170906777,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 35 Green Before"
+  }
+}
+
+
+local timeFrameIcon35GreenAfter = {
+  Identifier = "timeFrameIcon35GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:45:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.64994157711501,
+      Longitude = -85.80489170906777,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 35 Green After"
+  }
+}
+
+
+local timeFrameIcon36GreenBefore = {
+  Identifier = "timeFrameIcon36GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.1318647833894,
+      Longitude = -93.4989195653101,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 36 Green Before"
+  }
+}
+
+
+local timeFrameIcon36GreenAfter = {
+  Identifier = "timeFrameIcon36GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.1318647833894,
+      Longitude = -93.4989195653101,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 36 Green After"
+  }
+}
+
+
+local timeFrameIcon37WhiteBefore = {
+  Identifier = "timeFrameIcon37WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.93116397013745,
+      Longitude = -96.99007434084054,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 37 White Before"
+  }
+}
+
+
+local timeFrameIcon37WhiteAfter = {
+  Identifier = "timeFrameIcon37WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.93116397013745,
+      Longitude = -96.99007434084054,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 37 White After"
+  }
+}
+
+
+local timeFrameIcon38WhiteBefore = {
+  Identifier = "timeFrameIcon38WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.67487374511078,
+      Longitude = -111.0448320627417,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 38 White Before"
+  }
+}
+
+
+local timeFrameIcon38WhiteAfter = {
+  Identifier = "timeFrameIcon38WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.67487374511078,
+      Longitude = -111.0448320627417,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 38 White After"
+  }
+}
+
+
+local timeFrameIcon39GreenBefore = {
+  Identifier = "timeFrameIcon39GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.67361638122271,
+      Longitude = -111.0525445602536,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 39 Green Before"
+  }
+}
+
+
+local timeFrameIcon39GreenAfter = {
+  Identifier = "timeFrameIcon39GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.67361638122271,
+      Longitude = -111.0525445602536,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 39 Green After"
+  }
+}
+
+
+local timeFrameIcon40RedBefore = {
+  Identifier = "timeFrameIcon40RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.67374802926359,
+      Longitude = -111.0359825509657,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 40 Red Before"
+  }
+}
+
+
+local timeFrameIcon40RedAfter = {
+  Identifier = "timeFrameIcon40RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.67374802926359,
+      Longitude = -111.0359825509657,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 40 Red After"
+  }
+}
+
+
+local timeFrameIcon41WhiteBefore = {
+  Identifier = "timeFrameIcon41WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.66313120248392,
+      Longitude = -111.0651374143007,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 41 White Before"
+  }
+}
+
+
+local timeFrameIcon41WhiteAfter = {
+  Identifier = "timeFrameIcon41WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.66313120248392,
+      Longitude = -111.0651374143007,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 41 White After"
+  }
+}
+
+
+local timeFrameIcon42GreenBefore = {
+  Identifier = "timeFrameIcon42GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.54302818337973,
+      Longitude = -79.67538477853711,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 42 Green Before"
+  }
+}
+
+
+local timeFrameIcon42GreenAfter = {
+  Identifier = "timeFrameIcon42GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.54302818337973,
+      Longitude = -79.67538477853711,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 42 Green After"
+  }
+}
+
+
+local timeFrameIcon43GreenBefore = {
+  Identifier = "timeFrameIcon43GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.47360107837007,
+      Longitude = -113.415314027536,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 43 Green Before"
+  }
+}
+
+
+local timeFrameIcon43GreenAfter = {
+  Identifier = "timeFrameIcon43GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 05:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.47360107837007,
+      Longitude = -113.415314027536,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 43 Green After"
+  }
+}
+
+
+local timeFrameIcon44WhiteBefore = {
+  Identifier = "timeFrameIcon44WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 49.97084963029995,
+      Longitude = -97.04469422378983,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 44 White Before"
+  }
+}
+
+
+local timeFrameIcon44WhiteAfter = {
+  Identifier = "timeFrameIcon44WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 49.97084963029995,
+      Longitude = -97.04469422378983,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 44 White After"
+  }
+}
+
+
+local timeFrameIcon45RedBefore = {
+  Identifier = "timeFrameIcon45RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.74968822724961,
+      Longitude = -98.81706503063864,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 45 Red Before"
+  }
+}
+
+
+local timeFrameIcon45RedAfter = {
+  Identifier = "timeFrameIcon45RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.74968822724961,
+      Longitude = -98.81706503063864,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 45 Red After"
+  }
+}
+
+
+local timeFrameIcon46GreenBefore = {
+  Identifier = "timeFrameIcon46GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.42742487321507,
+      Longitude = -104.623373285252,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 46 Green Before"
+  }
+}
+
+
+local timeFrameIcon46GreenAfter = {
+  Identifier = "timeFrameIcon46GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.42742487321507,
+      Longitude = -104.623373285252,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 46 Green After"
+  }
+}
+
+
+local timeFrameIcon47RedBefore = {
+  Identifier = "timeFrameIcon47RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.44877287141842,
+      Longitude = -105.9097033312045,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 47 Red Before"
+  }
+}
+
+
+local timeFrameIcon47RedAfter = {
+  Identifier = "timeFrameIcon47RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.44877287141842,
+      Longitude = -105.9097033312045,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 47 Red After"
+  }
+}
+
+
+local timeFrameIcon48WhiteBefore = {
+  Identifier = "timeFrameIcon48WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.60064537887497,
+      Longitude = -112.8713539312903,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 48 White Before"
+  }
+}
+
+
+local timeFrameIcon48WhiteAfter = {
+  Identifier = "timeFrameIcon48WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:45:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.60064537887497,
+      Longitude = -112.8713539312903,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 48 White After"
+  }
+}
+
+
+local timeFrameIcon49RedBefore = {
+  Identifier = "timeFrameIcon49RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.4538406609323,
+      Longitude = -113.4622768232493,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 49 Red Before"
+  }
+}
+
+
+local timeFrameIcon49RedAfter = {
+  Identifier = "timeFrameIcon49RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:45:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.4538406609323,
+      Longitude = -113.4622768232493,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 49 Red After"
+  }
+}
+
+
+local timeFrameIcon50RedBefore = {
+  Identifier = "timeFrameIcon50RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.60447844524601,
+      Longitude = 4.592428434880131,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 50 Red Before"
+  }
+}
+
+
+local timeFrameIcon50RedAfter = {
+  Identifier = "timeFrameIcon50RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.60447844524601,
+      Longitude = 4.592428434880131,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 50 Red After"
+  }
+}
+
+
+local timeFrameIcon51WhiteBefore = {
+  Identifier = "timeFrameIcon51WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 49.83282288967366,
+      Longitude = -99.97266570807585,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 51 White Before"
+  }
+}
+
+
+local timeFrameIcon51WhiteAfter = {
+  Identifier = "timeFrameIcon51WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 49.83282288967366,
+      Longitude = -99.97266570807585,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 51 White After"
+  }
+}
+
+
+local timeFrameIcon52White = {
+  Identifier = "timeFrameIcon52White",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.41859248242775,
+      Longitude = -93.21061497046188,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 52 White"
+  }
+}
+
+
+local timeFrameIcon53WhiteBefore = {
+  Identifier = "timeFrameIcon53WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.44721636814249,
+      Longitude = -105.9031833483362,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 53 White Before"
+  }
+}
+
+
+local timeFrameIcon53WhiteAfter = {
+  Identifier = "timeFrameIcon53WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.44721636814249,
+      Longitude = -105.9031833483362,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 53 White After"
+  }
+}
+
+
+local timeFrameIcon54GreenBefore = {
+  Identifier = "timeFrameIcon54GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 62.43769822833834,
+      Longitude = -114.4100606642888,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 54 Green Before"
+  }
+}
+
+
+local timeFrameIcon54GreenAfter = {
+  Identifier = "timeFrameIcon54GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:45:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 62.43769822833834,
+      Longitude = -114.4100606642888,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 54 Green After"
+  }
+}
+
+
+local timeFrameIcon55WhiteBefore = {
+  Identifier = "timeFrameIcon55WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.20592935698247,
+      Longitude = -93.69129997430461,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 55 White Before"
+  }
+}
+
+
+local timeFrameIcon55WhiteAfter = {
+  Identifier = "timeFrameIcon55WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.20592935698247,
+      Longitude = -93.69129997430461,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 55 White After"
+  }
+}
+
+
+local timeFrameIcon56WhiteBefore = {
+  Identifier = "timeFrameIcon56WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.60249235349595,
+      Longitude = -120.53139705136,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 56 White Before"
+  }
+}
+
+
+local timeFrameIcon56WhiteAfter = {
+  Identifier = "timeFrameIcon56WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.60249235349595,
+      Longitude = -120.53139705136,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 56 White After"
+  }
+}
+
+
+local timeFrameIcon57WhiteBefore = {
+  Identifier = "timeFrameIcon57WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.0352127867429,
+      Longitude = -114.0933505397978,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 57 White Before"
+  }
+}
+
+
+local timeFrameIcon57WhiteAfter = {
+  Identifier = "timeFrameIcon57WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.0352127867429,
+      Longitude = -114.0933505397978,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 57 White After"
+  }
+}
+
+
+local timeFrameIcon58GreenBefore = {
+  Identifier = "timeFrameIcon58GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.43185846173315,
+      Longitude = -105.8954909481702,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 58 Green Before"
+  }
+}
+
+
+local timeFrameIcon58GreenAfter = {
+  Identifier = "timeFrameIcon58GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.43185846173315,
+      Longitude = -105.8954909481702,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 58 Green After"
+  }
+}
+
+
+local timeFrameIcon59White = {
+  Identifier = "timeFrameIcon59White",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 67.81339329192392,
+      Longitude = 23.67961861393413,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 59 White"
+  }
+}
+
+
+local timeFrameIcon60RedBefore = {
+  Identifier = "timeFrameIcon60RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.5479197912121,
+      Longitude = -112.7642941532786,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 60 Red Before"
+  }
+}
+
+
+local timeFrameIcon60RedAfter = {
+  Identifier = "timeFrameIcon60RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.5479197912121,
+      Longitude = -112.7642941532786,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 60 Red After"
+  }
+}
+
+
+local timeFrameIcon61Green = {
+  Identifier = "timeFrameIcon61Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.01781450594495,
+      Longitude = -117.3349482904038,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 61 Green"
+  }
+}
+
+
+local timeFrameIcon62GreenBefore = {
+  Identifier = "timeFrameIcon62GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.15951575746151,
+      Longitude = -114.0985453744329,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 62 Green Before"
+  }
+}
+
+
+local timeFrameIcon62GreenAfter = {
+  Identifier = "timeFrameIcon62GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.15951575746151,
+      Longitude = -114.0985453744329,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 62 Green After"
+  }
+}
+
+
+local timeFrameIcon63WhiteBefore = {
+  Identifier = "timeFrameIcon63WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.64277283578415,
+      Longitude = -110.5392180431865,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 63 White Before"
+  }
+}
+
+
+local timeFrameIcon63WhiteAfter = {
+  Identifier = "timeFrameIcon63WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.64277283578415,
+      Longitude = -110.5392180431865,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 63 White After"
+  }
+}
+
+
+local timeFrameIcon64GreenBefore = {
+  Identifier = "timeFrameIcon64GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 43.82032146644918,
+      Longitude = -84.04195461007609,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 64 Green Before"
+  }
+}
+
+
+local timeFrameIcon64GreenAfter = {
+  Identifier = "timeFrameIcon64GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 43.82032146644918,
+      Longitude = -84.04195461007609,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 64 Green After"
+  }
+}
+
+
+local timeFrameIcon65GreenBefore = {
+  Identifier = "timeFrameIcon65GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.45378539036696,
+      Longitude = -105.9138548222827,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 65 Green Before"
+  }
+}
+
+
+local timeFrameIcon65GreenAfter = {
+  Identifier = "timeFrameIcon65GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.45378539036696,
+      Longitude = -105.9138548222827,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 65 Green After"
+  }
+}
+
+
+local timeFrameIcon66White = {
+  Identifier = "timeFrameIcon66White",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.64933979466025,
+      Longitude = -92.80403792867396,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 66 White"
+  }
+}
+
+
+local timeFrameIcon67Green = {
+  Identifier = "timeFrameIcon67Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.73846452559928,
+      Longitude = -79.8950897014673,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 67 Green"
+  }
+}
+
+
+local timeFrameIcon68WhiteBefore = {
+  Identifier = "timeFrameIcon68WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.24637904326474,
+      Longitude = -113.8290441269957,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 68 White Before"
+  }
+}
+
+
+local timeFrameIcon68WhiteAfter = {
+  Identifier = "timeFrameIcon68WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.24637904326474,
+      Longitude = -113.8290441269957,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 68 White After"
+  }
+}
+
+
+local timeFrameIcon69WhiteBefore = {
+  Identifier = "timeFrameIcon69WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 48.05626180558219,
+      Longitude = -118.7160363122904,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 69 White Before"
+  }
+}
+
+
+local timeFrameIcon69WhiteAfter = {
+  Identifier = "timeFrameIcon69WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 48.05626180558219,
+      Longitude = -118.7160363122904,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 69 White After"
+  }
+}
+
+
+local timeFrameIcon70GreenBefore = {
+  Identifier = "timeFrameIcon70GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.87413418627652,
+      Longitude = -110.6254511195391,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 70 Green Before"
+  }
+}
+
+
+local timeFrameIcon70GreenAfter = {
+  Identifier = "timeFrameIcon70GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.87413418627652,
+      Longitude = -110.6254511195391,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 70 Green After"
+  }
+}
+
+
+local timeFrameIcon71RedBefore = {
+  Identifier = "timeFrameIcon71RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 03:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.3125914303647,
+      Longitude = -114.3440721460154,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 71 Red Before"
+  }
+}
+
+
+local timeFrameIcon71RedAfter = {
+  Identifier = "timeFrameIcon71RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 05:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.3125914303647,
+      Longitude = -114.3440721460154,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 71 Red After"
+  }
+}
+
+
+local timeFrameIcon72WhiteBefore = {
+  Identifier = "timeFrameIcon72WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 04:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.50786608060285,
+      Longitude = -92.77303553176361,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 72 White Before"
+  }
+}
+
+
+local timeFrameIcon72WhiteAfter = {
+  Identifier = "timeFrameIcon72WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.50786608060285,
+      Longitude = -92.77303553176361,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 72 White After"
+  }
+}
+
+
+local timeFrameIcon73Green = {
+  Identifier = "timeFrameIcon73Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 48.05532600058352,
+      Longitude = -118.7179805956173,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 73 Green"
+  }
+}
+
+
+local timeFrameIcon74WhiteBefore = {
+  Identifier = "timeFrameIcon74WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 04:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.07327305140961,
+      Longitude = -122.8419024122795,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 74 White Before"
+  }
+}
+
+
+local timeFrameIcon74WhiteAfter = {
+  Identifier = "timeFrameIcon74WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 05:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.07327305140961,
+      Longitude = -122.8419024122795,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 74 White After"
+  }
+}
+
+
+local timeFrameIcon75GreenBefore = {
+  Identifier = "timeFrameIcon75GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 04:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.59909922321575,
+      Longitude = -122.9582859557591,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 75 Green Before"
+  }
+}
+
+
+local timeFrameIcon75GreenAfter = {
+  Identifier = "timeFrameIcon75GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 07:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.59909922321575,
+      Longitude = -122.9582859557591,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 75 Green After"
+  }
+}
+
+
+local timeFrameIcon76GreenBefore = {
+  Identifier = "timeFrameIcon76GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 04:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.98621381596821,
+      Longitude = -120.5797619885058,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 76 Green Before"
+  }
+}
+
+
+local timeFrameIcon76GreenAfter = {
+  Identifier = "timeFrameIcon76GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:45:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.98621381596821,
+      Longitude = -120.5797619885058,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 76 Green After"
+  }
+}
+
+
+local timeFrameIcon77RedBefore = {
+  Identifier = "timeFrameIcon77RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 04:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.9822871098513,
+      Longitude = -120.5529738793388,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 77 Red Before"
+  }
+}
+
+
+local timeFrameIcon77RedAfter = {
+  Identifier = "timeFrameIcon77RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.9822871098513,
+      Longitude = -120.5529738793388,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 77 Red After"
+  }
+}
+
+
+local timeFrameIcon78GreenBefore = {
+  Identifier = "timeFrameIcon78GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 05:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.93401925301276,
+      Longitude = -93.31471889023817,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 78 Green Before"
+  }
+}
+
+
+local timeFrameIcon78GreenAfter = {
+  Identifier = "timeFrameIcon78GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.93401925301276,
+      Longitude = -93.31471889023817,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 78 Green After"
+  }
+}
+
+
+local timeFrameIcon79GreenBefore = {
+  Identifier = "timeFrameIcon79GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 05:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.77373878361741,
+      Longitude = -112.983893747794,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 79 Green Before"
+  }
+}
+
+
+local timeFrameIcon79GreenAfter = {
+  Identifier = "timeFrameIcon79GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.77373878361741,
+      Longitude = -112.983893747794,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 79 Green After"
+  }
+}
+
+
+local timeFrameIcon80WhiteBefore = {
+  Identifier = "timeFrameIcon80WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 05:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.55925297166606,
+      Longitude = -112.7572633525697,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 80 White Before"
+  }
+}
+
+
+local timeFrameIcon80WhiteAfter = {
+  Identifier = "timeFrameIcon80WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 05:45:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.55925297166606,
+      Longitude = -112.7572633525697,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 80 White After"
+  }
+}
+
+
+local timeFrameIcon81WhiteBefore = {
+  Identifier = "timeFrameIcon81WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 05:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.3635086806182,
+      Longitude = -99.12560856411586,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 81 White Before"
+  }
+}
+
+
+local timeFrameIcon81WhiteAfter = {
+  Identifier = "timeFrameIcon81WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.3635086806182,
+      Longitude = -99.12560856411586,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 81 White After"
+  }
+}
+
+
+local timeFrameIcon82GreenBefore = {
+  Identifier = "timeFrameIcon82GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 06:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.86705392513035,
+      Longitude = -114.3168875657184,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 82 Green Before"
+  }
+}
+
+
+local timeFrameIcon82GreenAfter = {
+  Identifier = "timeFrameIcon82GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 07:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.86705392513035,
+      Longitude = -114.3168875657184,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 82 Green After"
+  }
+}
+
+
+local timeFrameIcon83WhiteBefore = {
+  Identifier = "timeFrameIcon83WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 06:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.83784118432889,
+      Longitude = -122.6195903362399,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 83 White Before"
+  }
+}
+
+
+local timeFrameIcon83WhiteAfter = {
+  Identifier = "timeFrameIcon83WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 07:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.83784118432889,
+      Longitude = -122.6195903362399,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 83 White After"
+  }
+}
+
+
+local timeFrameIcon84WhiteBefore = {
+  Identifier = "timeFrameIcon84WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 06:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.14280733747941,
+      Longitude = -106.7030433249255,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 84 White Before"
+  }
+}
+
+
+local timeFrameIcon84WhiteAfter = {
+  Identifier = "timeFrameIcon84WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.14280733747941,
+      Longitude = -106.7030433249255,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 84 White After"
+  }
+}
+
+
+local timeFrameIcon85WhiteBefore = {
+  Identifier = "timeFrameIcon85WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 06:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.53679297495217,
+      Longitude = -113.1746404929618,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 85 White Before"
+  }
+}
+
+
+local timeFrameIcon85WhiteAfter = {
+  Identifier = "timeFrameIcon85WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.53679297495217,
+      Longitude = -113.1746404929618,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 85 White After"
+  }
+}
+
+
+local timeFrameIcon86RedBefore = {
+  Identifier = "timeFrameIcon86RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 06:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.50220007161511,
+      Longitude = -106.0268075764574,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 86 Red Before"
+  }
+}
+
+
+local timeFrameIcon86RedAfter = {
+  Identifier = "timeFrameIcon86RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.50220007161511,
+      Longitude = -106.0268075764574,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 86 Red After"
+  }
+}
+
+
+local timeFrameIcon87WhiteBefore = {
+  Identifier = "timeFrameIcon87WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 06:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.02847443140622,
+      Longitude = -114.0304071011932,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 87 White Before"
+  }
+}
+
+
+local timeFrameIcon87WhiteAfter = {
+  Identifier = "timeFrameIcon87WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 07:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.02847443140622,
+      Longitude = -114.0304071011932,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 87 White After"
+  }
+}
+
+
+local timeFrameIcon88WhiteBefore = {
+  Identifier = "timeFrameIcon88WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 06:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.8401050232948,
+      Longitude = -76.24289420783576,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 88 White Before"
+  }
+}
+
+
+local timeFrameIcon88WhiteAfter = {
+  Identifier = "timeFrameIcon88WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.8401050232948,
+      Longitude = -76.24289420783576,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 88 White After"
+  }
+}
+
+
+local timeFrameIcon89RedBefore = {
+  Identifier = "timeFrameIcon89RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 06:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.50656411925601,
+      Longitude = -106.0186351269005,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 89 Red Before"
+  }
+}
+
+
+local timeFrameIcon89RedAfter = {
+  Identifier = "timeFrameIcon89RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.50656411925601,
+      Longitude = -106.0186351269005,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 89 Red After"
+  }
+}
+
+
+local timeFrameIcon90WhiteBefore = {
+  Identifier = "timeFrameIcon90WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 07:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.93244423101636,
+      Longitude = -120.011872174932,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 90 White Before"
+  }
+}
+
+
+local timeFrameIcon90WhiteAfter = {
+  Identifier = "timeFrameIcon90WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 07:45:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.93244423101636,
+      Longitude = -120.011872174932,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 90 White After"
+  }
+}
+
+
+local timeFrameIcon91GreenBefore = {
+  Identifier = "timeFrameIcon91GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 08:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.45246242882396,
+      Longitude = -105.8961737686767,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 91 Green Before"
+  }
+}
+
+
+local timeFrameIcon91GreenAfter = {
+  Identifier = "timeFrameIcon91GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 08:15:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.45246242882396,
+      Longitude = -105.8961737686767,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 91 Green After"
+  }
+}
+
+
+local timeFrameIcon92GreenBefore = {
+  Identifier = "timeFrameIcon92GreenBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 24 19:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 67.84588224822716,
+      Longitude = 20.22126584460841,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 92 Green Before"
+  }
+}
+
+
+local timeFrameIcon92GreenAfter = {
+  Identifier = "timeFrameIcon92GreenAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 22:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 67.84588224822716,
+      Longitude = 20.22126584460841,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 92 Green After"
+  }
+}
+
+
+local timeFrameIcon93White = {
+  Identifier = "timeFrameIcon93White",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 43.24000588670985,
+      Longitude = -77.60339948812836,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 93 White"
+  }
+}
+
+
+local timeFrameIcon94Red = {
+  Identifier = "timeFrameIcon94Red",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 41.52553984346153,
+      Longitude = -122.3885730584922,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 94 Red"
+  }
+}
+
+
+local timeFrameIcon95RedBefore = {
+  Identifier = "timeFrameIcon95RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 25 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.28381546916103,
+      Longitude = -111.4199159412149,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 95 Red Before"
+  }
+}
+
+
+local timeFrameIcon95RedAfter = {
+  Identifier = "timeFrameIcon95RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 25 03:45:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.28381546916103,
+      Longitude = -111.4199159412149,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 95 Red After"
+  }
+}
+
+
+local timeFrameIcon96WhiteBefore = {
+  Identifier = "timeFrameIcon96WhiteBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 25 05:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.63988241936977,
+      Longitude = -118.8706113022491,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 96 White Before"
+  }
+}
+
+
+local timeFrameIcon96WhiteAfter = {
+  Identifier = "timeFrameIcon96WhiteAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 25 05:30:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.63988241936977,
+      Longitude = -118.8706113022491,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 96 White After"
+  }
+}
+
+
+local timeFrameIcon97Green = {
+  Identifier = "timeFrameIcon97Green",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.52635437629075,
+      Longitude = -113.7308022121446,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/greenLocationV3.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 97 Green"
+  }
+}
+
+
+local timeFrameIcon98White = {
+  Identifier = "timeFrameIcon98White",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.27626447618768,
+      Longitude = -114.0460876968908,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/whiteLocation.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 98 White"
+  }
+}
+
+
+local timeFrameIcon99RedBefore = {
+  Identifier = "timeFrameIcon99RedBefore",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JAN 01 00:00:00",
+    End = "2023 Mar 26 00:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.82540964989192,
+      Longitude = -3.862912327236055,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 99 Red Before"
+  }
+}
+
+
+local timeFrameIcon99RedAfter = {
+  Identifier = "timeFrameIcon99RedAfter",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 26 02:00:00",
+    End = "2099 DEC 31 23:59:59"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.82540964989192,
+      Longitude = -3.862912327236055,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/TimeFrameIcon",
+    Name = "Time Frame Icon 99 Red After"
+  }
+}
+
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(timeFrameIcon0Green)
+  openspace.addSceneGraphNode(timeFrameIcon1GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon1GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon2GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon2GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon3RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon3RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon4Green)
+  openspace.addSceneGraphNode(timeFrameIcon5Green)
+  openspace.addSceneGraphNode(timeFrameIcon6Green)
+  openspace.addSceneGraphNode(timeFrameIcon7Green)
+  openspace.addSceneGraphNode(timeFrameIcon8Green)
+  openspace.addSceneGraphNode(timeFrameIcon9Red)
+  openspace.addSceneGraphNode(timeFrameIcon10White)
+  openspace.addSceneGraphNode(timeFrameIcon11Red)
+  openspace.addSceneGraphNode(timeFrameIcon12Red)
+  openspace.addSceneGraphNode(timeFrameIcon13WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon13WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon14WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon14WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon15GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon15GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon16WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon16WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon17WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon17WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon18Red)
+  openspace.addSceneGraphNode(timeFrameIcon19RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon19RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon20GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon20GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon21Red)
+  openspace.addSceneGraphNode(timeFrameIcon22WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon22WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon23White)
+  openspace.addSceneGraphNode(timeFrameIcon24Green)
+  openspace.addSceneGraphNode(timeFrameIcon25RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon25RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon26WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon26WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon27RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon27RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon28Green)
+  openspace.addSceneGraphNode(timeFrameIcon29RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon29RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon30WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon30WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon31WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon31WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon32Green)
+  openspace.addSceneGraphNode(timeFrameIcon33White)
+  openspace.addSceneGraphNode(timeFrameIcon34White)
+  openspace.addSceneGraphNode(timeFrameIcon35GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon35GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon36GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon36GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon37WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon37WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon38WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon38WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon39GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon39GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon40RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon40RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon41WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon41WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon42GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon42GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon43GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon43GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon44WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon44WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon45RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon45RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon46GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon46GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon47RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon47RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon48WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon48WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon49RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon49RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon50RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon50RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon51WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon51WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon52White)
+  openspace.addSceneGraphNode(timeFrameIcon53WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon53WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon54GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon54GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon55WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon55WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon56WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon56WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon57WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon57WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon58GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon58GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon59White)
+  openspace.addSceneGraphNode(timeFrameIcon60RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon60RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon61Green)
+  openspace.addSceneGraphNode(timeFrameIcon62GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon62GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon63WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon63WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon64GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon64GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon65GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon65GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon66White)
+  openspace.addSceneGraphNode(timeFrameIcon67Green)
+  openspace.addSceneGraphNode(timeFrameIcon68WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon68WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon69WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon69WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon70GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon70GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon71RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon71RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon72WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon72WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon73Green)
+  openspace.addSceneGraphNode(timeFrameIcon74WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon74WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon75GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon75GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon76GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon76GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon77RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon77RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon78GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon78GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon79GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon79GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon80WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon80WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon81WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon81WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon82GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon82GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon83WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon83WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon84WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon84WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon85WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon85WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon86RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon86RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon87WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon87WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon88WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon88WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon89RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon89RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon90WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon90WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon91GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon91GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon92GreenBefore)
+  openspace.addSceneGraphNode(timeFrameIcon92GreenAfter)
+  openspace.addSceneGraphNode(timeFrameIcon93White)
+  openspace.addSceneGraphNode(timeFrameIcon94Red)
+  openspace.addSceneGraphNode(timeFrameIcon95RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon95RedAfter)
+  openspace.addSceneGraphNode(timeFrameIcon96WhiteBefore)
+  openspace.addSceneGraphNode(timeFrameIcon96WhiteAfter)
+  openspace.addSceneGraphNode(timeFrameIcon97Green)
+  openspace.addSceneGraphNode(timeFrameIcon98White)
+  openspace.addSceneGraphNode(timeFrameIcon99RedBefore)
+  openspace.addSceneGraphNode(timeFrameIcon99RedAfter)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(timeFrameIcon0Green)
+  openspace.removeSceneGraphNode(timeFrameIcon1GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon1GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon2GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon2GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon3RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon3RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon4Green)
+  openspace.removeSceneGraphNode(timeFrameIcon5Green)
+  openspace.removeSceneGraphNode(timeFrameIcon6Green)
+  openspace.removeSceneGraphNode(timeFrameIcon7Green)
+  openspace.removeSceneGraphNode(timeFrameIcon8Green)
+  openspace.removeSceneGraphNode(timeFrameIcon9Red)
+  openspace.removeSceneGraphNode(timeFrameIcon10White)
+  openspace.removeSceneGraphNode(timeFrameIcon11Red)
+  openspace.removeSceneGraphNode(timeFrameIcon12Red)
+  openspace.removeSceneGraphNode(timeFrameIcon13WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon13WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon14WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon14WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon15GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon15GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon16WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon16WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon17WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon17WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon18Red)
+  openspace.removeSceneGraphNode(timeFrameIcon19RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon19RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon20GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon20GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon21Red)
+  openspace.removeSceneGraphNode(timeFrameIcon22WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon22WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon23White)
+  openspace.removeSceneGraphNode(timeFrameIcon24Green)
+  openspace.removeSceneGraphNode(timeFrameIcon25RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon25RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon26WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon26WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon27RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon27RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon28Green)
+  openspace.removeSceneGraphNode(timeFrameIcon29RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon29RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon30WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon30WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon31WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon31WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon32Green)
+  openspace.removeSceneGraphNode(timeFrameIcon33White)
+  openspace.removeSceneGraphNode(timeFrameIcon34White)
+  openspace.removeSceneGraphNode(timeFrameIcon35GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon35GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon36GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon36GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon37WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon37WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon38WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon38WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon39GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon39GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon40RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon40RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon41WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon41WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon42GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon42GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon43GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon43GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon44WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon44WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon45RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon45RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon46GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon46GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon47RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon47RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon48WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon48WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon49RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon49RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon50RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon50RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon51WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon51WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon52White)
+  openspace.removeSceneGraphNode(timeFrameIcon53WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon53WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon54GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon54GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon55WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon55WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon56WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon56WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon57WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon57WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon58GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon58GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon59White)
+  openspace.removeSceneGraphNode(timeFrameIcon60RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon60RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon61Green)
+  openspace.removeSceneGraphNode(timeFrameIcon62GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon62GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon63WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon63WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon64GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon64GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon65GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon65GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon66White)
+  openspace.removeSceneGraphNode(timeFrameIcon67Green)
+  openspace.removeSceneGraphNode(timeFrameIcon68WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon68WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon69WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon69WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon70GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon70GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon71RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon71RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon72WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon72WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon73Green)
+  openspace.removeSceneGraphNode(timeFrameIcon74WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon74WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon75GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon75GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon76GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon76GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon77RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon77RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon78GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon78GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon79GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon79GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon80WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon80WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon81WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon81WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon82GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon82GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon83WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon83WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon84WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon84WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon85WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon85WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon86RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon86RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon87WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon87WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon88WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon88WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon89RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon89RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon90WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon90WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon91GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon91GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon92GreenBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon92GreenAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon93White)
+  openspace.removeSceneGraphNode(timeFrameIcon94Red)
+  openspace.removeSceneGraphNode(timeFrameIcon95RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon95RedAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon96WhiteBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon96WhiteAfter)
+  openspace.removeSceneGraphNode(timeFrameIcon97Green)
+  openspace.removeSceneGraphNode(timeFrameIcon98White)
+  openspace.removeSceneGraphNode(timeFrameIcon99RedBefore)
+  openspace.removeSceneGraphNode(timeFrameIcon99RedAfter)
+end)
+
+asset.export(timeFrameIcon0Green)
+asset.export(timeFrameIcon1GreenBefore)
+asset.export(timeFrameIcon1GreenAfter)
+asset.export(timeFrameIcon2GreenBefore)
+asset.export(timeFrameIcon2GreenAfter)
+asset.export(timeFrameIcon3RedBefore)
+asset.export(timeFrameIcon3RedAfter)
+asset.export(timeFrameIcon4Green)
+asset.export(timeFrameIcon5Green)
+asset.export(timeFrameIcon6Green)
+asset.export(timeFrameIcon7Green)
+asset.export(timeFrameIcon8Green)
+asset.export(timeFrameIcon9Red)
+asset.export(timeFrameIcon10White)
+asset.export(timeFrameIcon11Red)
+asset.export(timeFrameIcon12Red)
+asset.export(timeFrameIcon13WhiteBefore)
+asset.export(timeFrameIcon13WhiteAfter)
+asset.export(timeFrameIcon14WhiteBefore)
+asset.export(timeFrameIcon14WhiteAfter)
+asset.export(timeFrameIcon15GreenBefore)
+asset.export(timeFrameIcon15GreenAfter)
+asset.export(timeFrameIcon16WhiteBefore)
+asset.export(timeFrameIcon16WhiteAfter)
+asset.export(timeFrameIcon17WhiteBefore)
+asset.export(timeFrameIcon17WhiteAfter)
+asset.export(timeFrameIcon18Red)
+asset.export(timeFrameIcon19RedBefore)
+asset.export(timeFrameIcon19RedAfter)
+asset.export(timeFrameIcon20GreenBefore)
+asset.export(timeFrameIcon20GreenAfter)
+asset.export(timeFrameIcon21Red)
+asset.export(timeFrameIcon22WhiteBefore)
+asset.export(timeFrameIcon22WhiteAfter)
+asset.export(timeFrameIcon23White)
+asset.export(timeFrameIcon24Green)
+asset.export(timeFrameIcon25RedBefore)
+asset.export(timeFrameIcon25RedAfter)
+asset.export(timeFrameIcon26WhiteBefore)
+asset.export(timeFrameIcon26WhiteAfter)
+asset.export(timeFrameIcon27RedBefore)
+asset.export(timeFrameIcon27RedAfter)
+asset.export(timeFrameIcon28Green)
+asset.export(timeFrameIcon29RedBefore)
+asset.export(timeFrameIcon29RedAfter)
+asset.export(timeFrameIcon30WhiteBefore)
+asset.export(timeFrameIcon30WhiteAfter)
+asset.export(timeFrameIcon31WhiteBefore)
+asset.export(timeFrameIcon31WhiteAfter)
+asset.export(timeFrameIcon32Green)
+asset.export(timeFrameIcon33White)
+asset.export(timeFrameIcon34White)
+asset.export(timeFrameIcon35GreenBefore)
+asset.export(timeFrameIcon35GreenAfter)
+asset.export(timeFrameIcon36GreenBefore)
+asset.export(timeFrameIcon36GreenAfter)
+asset.export(timeFrameIcon37WhiteBefore)
+asset.export(timeFrameIcon37WhiteAfter)
+asset.export(timeFrameIcon38WhiteBefore)
+asset.export(timeFrameIcon38WhiteAfter)
+asset.export(timeFrameIcon39GreenBefore)
+asset.export(timeFrameIcon39GreenAfter)
+asset.export(timeFrameIcon40RedBefore)
+asset.export(timeFrameIcon40RedAfter)
+asset.export(timeFrameIcon41WhiteBefore)
+asset.export(timeFrameIcon41WhiteAfter)
+asset.export(timeFrameIcon42GreenBefore)
+asset.export(timeFrameIcon42GreenAfter)
+asset.export(timeFrameIcon43GreenBefore)
+asset.export(timeFrameIcon43GreenAfter)
+asset.export(timeFrameIcon44WhiteBefore)
+asset.export(timeFrameIcon44WhiteAfter)
+asset.export(timeFrameIcon45RedBefore)
+asset.export(timeFrameIcon45RedAfter)
+asset.export(timeFrameIcon46GreenBefore)
+asset.export(timeFrameIcon46GreenAfter)
+asset.export(timeFrameIcon47RedBefore)
+asset.export(timeFrameIcon47RedAfter)
+asset.export(timeFrameIcon48WhiteBefore)
+asset.export(timeFrameIcon48WhiteAfter)
+asset.export(timeFrameIcon49RedBefore)
+asset.export(timeFrameIcon49RedAfter)
+asset.export(timeFrameIcon50RedBefore)
+asset.export(timeFrameIcon50RedAfter)
+asset.export(timeFrameIcon51WhiteBefore)
+asset.export(timeFrameIcon51WhiteAfter)
+asset.export(timeFrameIcon52White)
+asset.export(timeFrameIcon53WhiteBefore)
+asset.export(timeFrameIcon53WhiteAfter)
+asset.export(timeFrameIcon54GreenBefore)
+asset.export(timeFrameIcon54GreenAfter)
+asset.export(timeFrameIcon55WhiteBefore)
+asset.export(timeFrameIcon55WhiteAfter)
+asset.export(timeFrameIcon56WhiteBefore)
+asset.export(timeFrameIcon56WhiteAfter)
+asset.export(timeFrameIcon57WhiteBefore)
+asset.export(timeFrameIcon57WhiteAfter)
+asset.export(timeFrameIcon58GreenBefore)
+asset.export(timeFrameIcon58GreenAfter)
+asset.export(timeFrameIcon59White)
+asset.export(timeFrameIcon60RedBefore)
+asset.export(timeFrameIcon60RedAfter)
+asset.export(timeFrameIcon61Green)
+asset.export(timeFrameIcon62GreenBefore)
+asset.export(timeFrameIcon62GreenAfter)
+asset.export(timeFrameIcon63WhiteBefore)
+asset.export(timeFrameIcon63WhiteAfter)
+asset.export(timeFrameIcon64GreenBefore)
+asset.export(timeFrameIcon64GreenAfter)
+asset.export(timeFrameIcon65GreenBefore)
+asset.export(timeFrameIcon65GreenAfter)
+asset.export(timeFrameIcon66White)
+asset.export(timeFrameIcon67Green)
+asset.export(timeFrameIcon68WhiteBefore)
+asset.export(timeFrameIcon68WhiteAfter)
+asset.export(timeFrameIcon69WhiteBefore)
+asset.export(timeFrameIcon69WhiteAfter)
+asset.export(timeFrameIcon70GreenBefore)
+asset.export(timeFrameIcon70GreenAfter)
+asset.export(timeFrameIcon71RedBefore)
+asset.export(timeFrameIcon71RedAfter)
+asset.export(timeFrameIcon72WhiteBefore)
+asset.export(timeFrameIcon72WhiteAfter)
+asset.export(timeFrameIcon73Green)
+asset.export(timeFrameIcon74WhiteBefore)
+asset.export(timeFrameIcon74WhiteAfter)
+asset.export(timeFrameIcon75GreenBefore)
+asset.export(timeFrameIcon75GreenAfter)
+asset.export(timeFrameIcon76GreenBefore)
+asset.export(timeFrameIcon76GreenAfter)
+asset.export(timeFrameIcon77RedBefore)
+asset.export(timeFrameIcon77RedAfter)
+asset.export(timeFrameIcon78GreenBefore)
+asset.export(timeFrameIcon78GreenAfter)
+asset.export(timeFrameIcon79GreenBefore)
+asset.export(timeFrameIcon79GreenAfter)
+asset.export(timeFrameIcon80WhiteBefore)
+asset.export(timeFrameIcon80WhiteAfter)
+asset.export(timeFrameIcon81WhiteBefore)
+asset.export(timeFrameIcon81WhiteAfter)
+asset.export(timeFrameIcon82GreenBefore)
+asset.export(timeFrameIcon82GreenAfter)
+asset.export(timeFrameIcon83WhiteBefore)
+asset.export(timeFrameIcon83WhiteAfter)
+asset.export(timeFrameIcon84WhiteBefore)
+asset.export(timeFrameIcon84WhiteAfter)
+asset.export(timeFrameIcon85WhiteBefore)
+asset.export(timeFrameIcon85WhiteAfter)
+asset.export(timeFrameIcon86RedBefore)
+asset.export(timeFrameIcon86RedAfter)
+asset.export(timeFrameIcon87WhiteBefore)
+asset.export(timeFrameIcon87WhiteAfter)
+asset.export(timeFrameIcon88WhiteBefore)
+asset.export(timeFrameIcon88WhiteAfter)
+asset.export(timeFrameIcon89RedBefore)
+asset.export(timeFrameIcon89RedAfter)
+asset.export(timeFrameIcon90WhiteBefore)
+asset.export(timeFrameIcon90WhiteAfter)
+asset.export(timeFrameIcon91GreenBefore)
+asset.export(timeFrameIcon91GreenAfter)
+asset.export(timeFrameIcon92GreenBefore)
+asset.export(timeFrameIcon92GreenAfter)
+asset.export(timeFrameIcon93White)
+asset.export(timeFrameIcon94Red)
+asset.export(timeFrameIcon95RedBefore)
+asset.export(timeFrameIcon95RedAfter)
+asset.export(timeFrameIcon96WhiteBefore)
+asset.export(timeFrameIcon96WhiteAfter)
+asset.export(timeFrameIcon97Green)
+asset.export(timeFrameIcon98White)
+asset.export(timeFrameIcon99RedBefore)
+asset.export(timeFrameIcon99RedAfter)

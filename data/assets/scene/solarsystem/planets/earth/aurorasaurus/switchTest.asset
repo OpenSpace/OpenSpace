@@ -1,0 +1,58 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local imagePath = asset.resource("aurora_test_images/")
+
+local SwitchRenderable = {
+    Identifier = "SwitchRenderable",
+    Parent = earth.Earth.Identifier,
+    TimeFrame = {
+        Type = "TimeFrameInterval",
+        Start = "2023 JAN 01 00:00:00",
+        End = "2099 DEC 31 23:59:59"
+    },
+    Transform = {
+        Translation = {
+          Type = "GlobeTranslation",
+          Globe = earth.Earth.Identifier,
+          Latitude = 46.63988241936977,
+          Longitude = -118.8706113022491,
+          Altitude = 100000,
+          UseHeightmap = false
+        }
+    },
+    Renderable = {
+      Type = "RenderableSwitch",
+      Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = imagePath .. "red.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/redLocationV2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 2000000
+    },
+    GUI = {
+      Path = "/Aurorasaurus",
+      Name = "Switch Renderable"
+    }
+  }
+  asset.onInitialize(function()
+    openspace.addSceneGraphNode(SwitchRenderable)
+  end)
+
+  asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(SwitchRenderable)
+  end)
+
+  asset.export(SwitchRenderable)

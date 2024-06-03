@@ -1,0 +1,53 @@
+local Timeline = {
+    Name = "Aurorasaurus",
+    Image = "https://www.nasa.gov/wp-content/uploads/2023/03/solve-aurorasaurus.png",
+    Description = "Aurorasaurus is the first and only citizen science initiative that tracks auroras around the world via reports on our website and social media. All aurora-related tweets and reports are placed on the Aurorasaurus.org map. We then ask people to log in and verify the tweets or reports. Each verified report serves as a valuable data point for scientists to analyze and incorporate into space weather models.",
+    TimeRange = {
+      Start = "2023 Mar 21",
+      End = "2023 Mar 28"
+    },
+    Milestones = {
+      {
+        Name = "Partial Eclipse",
+        Date = "2023 Mar 23 10:36:11",
+        Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2098-10-24.gif"
+      },
+      {
+        Name = "Annular Eclipse",
+        Date = "2023 Mar 24 22:54:32",
+        Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2099-03-21.gif"
+      },
+      {
+        Name = "Total Eclipse",
+        Date = "2023 Mar 25 16:57:53",
+        Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2099-09-14.gif"
+      },
+      {
+        Name = "Annular Eclipse",
+        Date = "2023 Mar 26 22:28:11",
+        Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2100-03-10.gif"
+      },
+      {
+        Name = "Total Eclipse",
+        Date = "2023 Mar 27 08:49:20",
+        Image = "https://eclipse.gsfc.nasa.gov/5MCSEmap/2001-2100/2100-09-04.gif"
+      }
+    }
+  }
+
+  asset.onInitialize(function()
+    openspace.loadMission(Timeline)
+  end)
+
+  asset.onDeinitialize(function()
+    openspace.unloadMission(Timeline.Name)
+  end)
+
+  asset.meta = {
+    Name = "Aurorasaurus Timeline",
+    Version = "1.0",
+    Description = "A timeline that shows images of the auroras during the March 2023 storm",
+    Author = "OpenSpace Team",
+    URL = "http://openspaceproject.com",
+    License = "MIT license"
+  }

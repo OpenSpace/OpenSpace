@@ -1,0 +1,19 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+              "name": "Number 5 icon",
+              "sprite": "${USER_ASSETS}/aurorasaurus/icons/number5.png"
+          },
+        "geometry": {
+          "coordinates": [
+            17.545025,
+            58.611366
+          ],
+          "type": "Point"
+        }
+      }
+    ]
+  }

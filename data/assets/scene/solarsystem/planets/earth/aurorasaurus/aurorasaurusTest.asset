@@ -1,0 +1,2714 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local imagePath = asset.resource("C:/Users/alundkvi/Documents/work/data/AuroraData/AuroraImages/")
+
+
+local ActivateTimeFrameAuroraImages = {
+  Identifier = "os.Aurorasaurus.ActivateTimeFrameAuroraImages",
+  Name = "Activate TimeFrame Auroras",
+  Command = [[openspace.setPropertyValue("Scene.AuroraImage*.Renderable.Opacity", 1, 0.5)
+              openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.AuroraIcons.Enabled", false)]],
+  Documentation = "Activate TimeFrame Auroras",
+  GuiPath = "/AuroraImageTest",
+  IsLocal = false
+}
+
+local DeactivateTimeFrameAuroraImages = {
+  Identifier = "os.Aurorasaurus.DeactivateTimeFrameAuroraImages",
+  Name = "Deactivate TimeFrame Auroras",
+  Command = [[openspace.setPropertyValue("Scene.AuroraImage*.Renderable.Opacity", 0, 0.5)
+              openspace.setPropertyValueSingle("Scene.Earth.Renderable.GeoJson.AuroraIcons.Enabled", true)]],
+  Documentation = "Deactivate TimeFrame Auroras",
+  GuiPath = "/AuroraImageTest",
+  IsLocal = false
+}
+
+
+
+local AuroraImage101 = {
+  Identifier = "AuroraImage101",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 26 00:00:00",
+    End = "2023 Mar 26 02:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.82540964989192,
+      Longitude = -3.862912327236055,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "101.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 101"
+  }
+}
+
+
+local AuroraImage15 = {
+  Identifier = "AuroraImage15",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 19:45:00",
+    End = "2023 Mar 23 21:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.43630934601013,
+      Longitude = 10.61969257275079,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "15.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 15"
+  }
+}
+
+
+local AuroraImage16 = {
+  Identifier = "AuroraImage16",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 19:45:00",
+    End = "2023 Mar 23 20:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 66.99927703075249,
+      Longitude = 29.01194485283084,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "16.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 16"
+  }
+}
+
+
+local AuroraImage17 = {
+  Identifier = "AuroraImage17",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 19:45:00",
+    End = "2023 Mar 23 20:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 67.00211639763002,
+      Longitude = 28.95019133162543,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "17.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 17"
+  }
+}
+
+
+local AuroraImage18 = {
+  Identifier = "AuroraImage18",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 19:45:00",
+    End = "2023 Mar 23 20:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 67.00699644282547,
+      Longitude = 28.96606044350843,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "18.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 18"
+  }
+}
+
+
+local AuroraImage19 = {
+  Identifier = "AuroraImage19",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 20:00:00",
+    End = "2023 Mar 23 21:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.42454101787873,
+      Longitude = 10.60698723521798,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "19.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 19"
+  }
+}
+
+
+local AuroraImage21 = {
+  Identifier = "AuroraImage21",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 20:30:00",
+    End = "2023 Mar 23 21:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.53412671110659,
+      Longitude = 15.14295436991555,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "21.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 21"
+  }
+}
+
+
+local AuroraImage22 = {
+  Identifier = "AuroraImage22",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 23:00:00",
+    End = "2023 Mar 24 01:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.7621597317565,
+      Longitude = -1.355099354634592,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "22.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 22"
+  }
+}
+
+
+local AuroraImage24 = {
+  Identifier = "AuroraImage24",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 23:30:00",
+    End = "2023 Mar 24 01:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.49715241348569,
+      Longitude = -1.827177725705794,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "24.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 24"
+  }
+}
+
+
+local AuroraImage27 = {
+  Identifier = "AuroraImage27",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 00:30:00",
+    End = "2023 Mar 24 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.97867950024857,
+      Longitude = -97.03609436104955,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "27.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 27"
+  }
+}
+
+
+local AuroraImage28 = {
+  Identifier = "AuroraImage28",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 00:45:00",
+    End = "2023 Mar 24 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.6450511228421,
+      Longitude = -3.173188620335986,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "28.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 28"
+  }
+}
+
+
+local AuroraImage29 = {
+  Identifier = "AuroraImage29",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 01:15:00",
+    End = "2023 Mar 24 03:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.81538072557414,
+      Longitude = -59.00937742632249,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "29.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 29"
+  }
+}
+
+
+local AuroraImage3 = {
+  Identifier = "AuroraImage3",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 08:45:00",
+    End = "2023 Mar 23 10:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.17424483903669,
+      Longitude = -114.0970884964472,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "3.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 3"
+  }
+}
+
+
+local AuroraImage31 = {
+  Identifier = "AuroraImage31",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 01:30:00",
+    End = "2023 Mar 24 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.23857069858006,
+      Longitude = -99.87114829462416,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "31.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 31"
+  }
+}
+
+
+local AuroraImage32 = {
+  Identifier = "AuroraImage32",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 01:30:00",
+    End = "2023 Mar 24 03:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.24304360164897,
+      Longitude = -99.85809595653281,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "32.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 32"
+  }
+}
+
+
+local AuroraImage33 = {
+  Identifier = "AuroraImage33",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:00:00",
+    End = "2023 Mar 24 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 48.37540820154537,
+      Longitude = -89.28183009160425,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "33.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 33"
+  }
+}
+
+
+local AuroraImage37 = {
+  Identifier = "AuroraImage37",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:00:00",
+    End = "2023 Mar 24 03:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.64994157711501,
+      Longitude = -85.80489170906777,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "37.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 37"
+  }
+}
+
+
+local AuroraImage38 = {
+  Identifier = "AuroraImage38",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:00:00",
+    End = "2023 Mar 24 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.1318647833894,
+      Longitude = -93.4989195653101,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "38.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 38"
+  }
+}
+
+
+local AuroraImage39 = {
+  Identifier = "AuroraImage39",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:15:00",
+    End = "2023 Mar 24 03:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.93116397013745,
+      Longitude = -96.99007434084054,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "39.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 39"
+  }
+}
+
+
+local AuroraImage4 = {
+  Identifier = "AuroraImage4",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 11:30:00",
+    End = "2023 Mar 23 12:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.25047412523697,
+      Longitude = -118.9776715757917,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "4.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 4"
+  }
+}
+
+
+local AuroraImage40 = {
+  Identifier = "AuroraImage40",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:15:00",
+    End = "2023 Mar 24 03:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.67487374511078,
+      Longitude = -111.0448320627417,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "40.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 40"
+  }
+}
+
+
+local AuroraImage41 = {
+  Identifier = "AuroraImage41",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:15:00",
+    End = "2023 Mar 24 03:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.67361638122271,
+      Longitude = -111.0525445602536,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "41.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 41"
+  }
+}
+
+
+local AuroraImage42 = {
+  Identifier = "AuroraImage42",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:15:00",
+    End = "2023 Mar 24 03:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.67374802926359,
+      Longitude = -111.0359825509657,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "42.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 42"
+  }
+}
+
+
+local AuroraImage43 = {
+  Identifier = "AuroraImage43",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:15:00",
+    End = "2023 Mar 24 03:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.66313120248392,
+      Longitude = -111.0651374143007,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "43.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 43"
+  }
+}
+
+
+local AuroraImage44 = {
+  Identifier = "AuroraImage44",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:30:00",
+    End = "2023 Mar 24 03:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.54302818337973,
+      Longitude = -79.67538477853711,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "44.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 44"
+  }
+}
+
+
+local AuroraImage45 = {
+  Identifier = "AuroraImage45",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:30:00",
+    End = "2023 Mar 24 05:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.47360107837007,
+      Longitude = -113.415314027536,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "45.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 45"
+  }
+}
+
+
+local AuroraImage46 = {
+  Identifier = "AuroraImage46",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:30:00",
+    End = "2023 Mar 24 03:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 49.97084963029995,
+      Longitude = -97.04469422378983,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "46.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 46"
+  }
+}
+
+
+local AuroraImage47 = {
+  Identifier = "AuroraImage47",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:30:00",
+    End = "2023 Mar 24 04:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.74968822724961,
+      Longitude = -98.81706503063864,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "47.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 47"
+  }
+}
+
+
+local AuroraImage48 = {
+  Identifier = "AuroraImage48",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:30:00",
+    End = "2023 Mar 24 04:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.42742487321507,
+      Longitude = -104.623373285252,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "48.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 48"
+  }
+}
+
+
+local AuroraImage49 = {
+  Identifier = "AuroraImage49",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:30:00",
+    End = "2023 Mar 24 03:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.44877287141842,
+      Longitude = -105.9097033312045,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "49.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 49"
+  }
+}
+
+
+local AuroraImage5 = {
+  Identifier = "AuroraImage5",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 23 12:15:00",
+    End = "2023 Mar 23 12:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.18127414870289,
+      Longitude = -114.08400014444,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "5.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 5"
+  }
+}
+
+
+local AuroraImage50 = {
+  Identifier = "AuroraImage50",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:30:00",
+    End = "2023 Mar 24 03:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.60064537887497,
+      Longitude = -112.8713539312903,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "50.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 50"
+  }
+}
+
+
+local AuroraImage51 = {
+  Identifier = "AuroraImage51",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:45:00",
+    End = "2023 Mar 24 03:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.4538406609323,
+      Longitude = -113.4622768232493,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "51.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 51"
+  }
+}
+
+
+local AuroraImage52 = {
+  Identifier = "AuroraImage52",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:45:00",
+    End = "2023 Mar 24 04:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.60447844524601,
+      Longitude = 4.592428434880131,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "52.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 52"
+  }
+}
+
+
+local AuroraImage53 = {
+  Identifier = "AuroraImage53",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:45:00",
+    End = "2023 Mar 24 04:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 49.83282288967366,
+      Longitude = -99.97266570807585,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "53.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 53"
+  }
+}
+
+
+local AuroraImage55 = {
+  Identifier = "AuroraImage55",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:45:00",
+    End = "2023 Mar 24 03:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.44721636814249,
+      Longitude = -105.9031833483362,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "55.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 55"
+  }
+}
+
+
+local AuroraImage56 = {
+  Identifier = "AuroraImage56",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 02:45:00",
+    End = "2023 Mar 24 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 62.43769822833834,
+      Longitude = -114.4100606642888,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "56.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 56"
+  }
+}
+
+
+local AuroraImage57 = {
+  Identifier = "AuroraImage57",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:00:00",
+    End = "2023 Mar 24 03:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.20592935698247,
+      Longitude = -93.69129997430461,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "57.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 57"
+  }
+}
+
+
+local AuroraImage58 = {
+  Identifier = "AuroraImage58",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:00:00",
+    End = "2023 Mar 24 03:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.60249235349595,
+      Longitude = -120.53139705136,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "58.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 58"
+  }
+}
+
+
+local AuroraImage59 = {
+  Identifier = "AuroraImage59",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:00:00",
+    End = "2023 Mar 24 04:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.0352127867429,
+      Longitude = -114.0933505397978,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "59.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 59"
+  }
+}
+
+
+local AuroraImage60 = {
+  Identifier = "AuroraImage60",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:00:00",
+    End = "2023 Mar 24 03:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.43185846173315,
+      Longitude = -105.8954909481702,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "60.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 60"
+  }
+}
+
+
+local AuroraImage62 = {
+  Identifier = "AuroraImage62",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:15:00",
+    End = "2023 Mar 24 03:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.5479197912121,
+      Longitude = -112.7642941532786,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "62.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 62"
+  }
+}
+
+
+local AuroraImage64 = {
+  Identifier = "AuroraImage64",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:15:00",
+    End = "2023 Mar 24 03:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.15951575746151,
+      Longitude = -114.0985453744329,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "64.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 64"
+  }
+}
+
+
+local AuroraImage65 = {
+  Identifier = "AuroraImage65",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:15:00",
+    End = "2023 Mar 24 04:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.64277283578415,
+      Longitude = -110.5392180431865,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "65.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 65"
+  }
+}
+
+
+local AuroraImage66 = {
+  Identifier = "AuroraImage66",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:15:00",
+    End = "2023 Mar 24 04:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 43.82032146644918,
+      Longitude = -84.04195461007609,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "66.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 66"
+  }
+}
+
+
+local AuroraImage67 = {
+  Identifier = "AuroraImage67",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:15:00",
+    End = "2023 Mar 24 03:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.45378539036696,
+      Longitude = -105.9138548222827,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "67.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 67"
+  }
+}
+
+
+local AuroraImage70 = {
+  Identifier = "AuroraImage70",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:30:00",
+    End = "2023 Mar 24 06:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.24637904326474,
+      Longitude = -113.8290441269957,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "70.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 70"
+  }
+}
+
+
+local AuroraImage71 = {
+  Identifier = "AuroraImage71",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:45:00",
+    End = "2023 Mar 24 04:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 48.05626180558219,
+      Longitude = -118.7160363122904,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "71.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 71"
+  }
+}
+
+
+local AuroraImage72 = {
+  Identifier = "AuroraImage72",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:45:00",
+    End = "2023 Mar 24 04:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.87413418627652,
+      Longitude = -110.6254511195391,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "72.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 72"
+  }
+}
+
+
+local AuroraImage73 = {
+  Identifier = "AuroraImage73",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 03:45:00",
+    End = "2023 Mar 24 05:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.3125914303647,
+      Longitude = -114.3440721460154,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "73.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 73"
+  }
+}
+
+
+local AuroraImage74 = {
+  Identifier = "AuroraImage74",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:00:00",
+    End = "2023 Mar 24 06:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.50786608060285,
+      Longitude = -92.77303553176361,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "74.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 74"
+  }
+}
+
+
+local AuroraImage76 = {
+  Identifier = "AuroraImage76",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:30:00",
+    End = "2023 Mar 24 05:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.07327305140961,
+      Longitude = -122.8419024122795,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "76.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 76"
+  }
+}
+
+
+local AuroraImage77 = {
+  Identifier = "AuroraImage77",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:30:00",
+    End = "2023 Mar 24 07:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.59909922321575,
+      Longitude = -122.9582859557591,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "77.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 77"
+  }
+}
+
+
+local AuroraImage78 = {
+  Identifier = "AuroraImage78",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:30:00",
+    End = "2023 Mar 24 04:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.98621381596821,
+      Longitude = -120.5797619885058,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "78.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 78"
+  }
+}
+
+
+local AuroraImage79 = {
+  Identifier = "AuroraImage79",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 04:45:00",
+    End = "2023 Mar 24 06:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.9822871098513,
+      Longitude = -120.5529738793388,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "79.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 79"
+  }
+}
+
+
+local AuroraImage80 = {
+  Identifier = "AuroraImage80",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 05:00:00",
+    End = "2023 Mar 24 06:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.93401925301276,
+      Longitude = -93.31471889023817,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "80.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 80"
+  }
+}
+
+
+local AuroraImage81 = {
+  Identifier = "AuroraImage81",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 05:30:00",
+    End = "2023 Mar 24 06:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.77373878361741,
+      Longitude = -112.983893747794,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "81.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 81"
+  }
+}
+
+
+local AuroraImage82 = {
+  Identifier = "AuroraImage82",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 05:45:00",
+    End = "2023 Mar 24 05:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.55925297166606,
+      Longitude = -112.7572633525697,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "82.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 82"
+  }
+}
+
+
+local AuroraImage83 = {
+  Identifier = "AuroraImage83",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 05:45:00",
+    End = "2023 Mar 24 06:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.3635086806182,
+      Longitude = -99.12560856411586,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "83.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 83"
+  }
+}
+
+
+local AuroraImage84 = {
+  Identifier = "AuroraImage84",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:00:00",
+    End = "2023 Mar 24 07:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.86705392513035,
+      Longitude = -114.3168875657184,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "84.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 84"
+  }
+}
+
+
+local AuroraImage85 = {
+  Identifier = "AuroraImage85",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:00:00",
+    End = "2023 Mar 24 07:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.83784118432889,
+      Longitude = -122.6195903362399,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "85.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 85"
+  }
+}
+
+
+local AuroraImage86 = {
+  Identifier = "AuroraImage86",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:00:00",
+    End = "2023 Mar 24 06:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.14280733747941,
+      Longitude = -106.7030433249255,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "86.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 86"
+  }
+}
+
+
+local AuroraImage87 = {
+  Identifier = "AuroraImage87",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:00:00",
+    End = "2023 Mar 24 06:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.53679297495217,
+      Longitude = -113.1746404929618,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "87.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 87"
+  }
+}
+
+
+local AuroraImage88 = {
+  Identifier = "AuroraImage88",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:00:00",
+    End = "2023 Mar 24 06:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.50220007161511,
+      Longitude = -106.0268075764574,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "88.png",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 88"
+  }
+}
+
+
+local AuroraImage89 = {
+  Identifier = "AuroraImage89",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:15:00",
+    End = "2023 Mar 24 07:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.02847443140622,
+      Longitude = -114.0304071011932,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "89.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 89"
+  }
+}
+
+
+local AuroraImage90 = {
+  Identifier = "AuroraImage90",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:15:00",
+    End = "2023 Mar 24 06:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.8401050232948,
+      Longitude = -76.24289420783576,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "90.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 90"
+  }
+}
+
+
+local AuroraImage91 = {
+  Identifier = "AuroraImage91",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 06:15:00",
+    End = "2023 Mar 24 06:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.50656411925601,
+      Longitude = -106.0186351269005,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "91.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 91"
+  }
+}
+
+
+local AuroraImage92 = {
+  Identifier = "AuroraImage92",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 07:00:00",
+    End = "2023 Mar 24 07:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.93244423101636,
+      Longitude = -120.011872174932,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "92.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 92"
+  }
+}
+
+
+local AuroraImage93 = {
+  Identifier = "AuroraImage93",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 08:00:00",
+    End = "2023 Mar 24 08:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.45246242882396,
+      Longitude = -105.8961737686767,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "93.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 93"
+  }
+}
+
+
+local AuroraImage94 = {
+  Identifier = "AuroraImage94",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 24 19:00:00",
+    End = "2023 Mar 24 22:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 67.84588224822716,
+      Longitude = 20.22126584460841,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "94.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 94"
+  }
+}
+
+
+local AuroraImage97 = {
+  Identifier = "AuroraImage97",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 25 02:45:00",
+    End = "2023 Mar 25 03:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.28381546916103,
+      Longitude = -111.4199159412149,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "97.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 97"
+  }
+}
+
+
+local AuroraImage98 = {
+  Identifier = "AuroraImage98",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 Mar 25 05:00:00",
+    End = "2023 Mar 25 05:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.63988241936977,
+      Longitude = -118.8706113022491,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+    Origin = "Center",
+    Billboard = true,
+    Texture = imagePath .. "98.jpg",
+    Opacity = 1.0,
+    Enabled = true
+  },
+  GUI = {
+    Path = "/AuroraImage",
+    Name = "AuroraImage Image 98"
+  }
+}
+
+
+
+asset.onInitialize(function()
+
+  openspace.action.registerAction(DeactivateTimeFrameAuroraImages)
+  openspace.action.registerAction(ActivateTimeFrameAuroraImages)
+
+  openspace.addSceneGraphNode(AuroraImage101)
+  openspace.addSceneGraphNode(AuroraImage15)
+  openspace.addSceneGraphNode(AuroraImage16)
+  openspace.addSceneGraphNode(AuroraImage17)
+  openspace.addSceneGraphNode(AuroraImage18)
+  openspace.addSceneGraphNode(AuroraImage19)
+  openspace.addSceneGraphNode(AuroraImage21)
+  openspace.addSceneGraphNode(AuroraImage22)
+  openspace.addSceneGraphNode(AuroraImage24)
+  openspace.addSceneGraphNode(AuroraImage27)
+  openspace.addSceneGraphNode(AuroraImage28)
+  openspace.addSceneGraphNode(AuroraImage29)
+  openspace.addSceneGraphNode(AuroraImage3)
+  openspace.addSceneGraphNode(AuroraImage31)
+  openspace.addSceneGraphNode(AuroraImage32)
+  openspace.addSceneGraphNode(AuroraImage33)
+  openspace.addSceneGraphNode(AuroraImage37)
+  openspace.addSceneGraphNode(AuroraImage38)
+  openspace.addSceneGraphNode(AuroraImage39)
+  openspace.addSceneGraphNode(AuroraImage4)
+  openspace.addSceneGraphNode(AuroraImage40)
+  openspace.addSceneGraphNode(AuroraImage41)
+  openspace.addSceneGraphNode(AuroraImage42)
+  openspace.addSceneGraphNode(AuroraImage43)
+  openspace.addSceneGraphNode(AuroraImage44)
+  openspace.addSceneGraphNode(AuroraImage45)
+  openspace.addSceneGraphNode(AuroraImage46)
+  openspace.addSceneGraphNode(AuroraImage47)
+  openspace.addSceneGraphNode(AuroraImage48)
+  openspace.addSceneGraphNode(AuroraImage49)
+  openspace.addSceneGraphNode(AuroraImage5)
+  openspace.addSceneGraphNode(AuroraImage50)
+  openspace.addSceneGraphNode(AuroraImage51)
+  openspace.addSceneGraphNode(AuroraImage52)
+  openspace.addSceneGraphNode(AuroraImage53)
+  openspace.addSceneGraphNode(AuroraImage55)
+  openspace.addSceneGraphNode(AuroraImage56)
+  openspace.addSceneGraphNode(AuroraImage57)
+  openspace.addSceneGraphNode(AuroraImage58)
+  openspace.addSceneGraphNode(AuroraImage59)
+  openspace.addSceneGraphNode(AuroraImage60)
+  openspace.addSceneGraphNode(AuroraImage62)
+  openspace.addSceneGraphNode(AuroraImage64)
+  openspace.addSceneGraphNode(AuroraImage65)
+  openspace.addSceneGraphNode(AuroraImage66)
+  openspace.addSceneGraphNode(AuroraImage67)
+  openspace.addSceneGraphNode(AuroraImage70)
+  openspace.addSceneGraphNode(AuroraImage71)
+  openspace.addSceneGraphNode(AuroraImage72)
+  openspace.addSceneGraphNode(AuroraImage73)
+  openspace.addSceneGraphNode(AuroraImage74)
+  openspace.addSceneGraphNode(AuroraImage76)
+  openspace.addSceneGraphNode(AuroraImage77)
+  openspace.addSceneGraphNode(AuroraImage78)
+  openspace.addSceneGraphNode(AuroraImage79)
+  openspace.addSceneGraphNode(AuroraImage80)
+  openspace.addSceneGraphNode(AuroraImage81)
+  openspace.addSceneGraphNode(AuroraImage82)
+  openspace.addSceneGraphNode(AuroraImage83)
+  openspace.addSceneGraphNode(AuroraImage84)
+  openspace.addSceneGraphNode(AuroraImage85)
+  openspace.addSceneGraphNode(AuroraImage86)
+  openspace.addSceneGraphNode(AuroraImage87)
+  openspace.addSceneGraphNode(AuroraImage88)
+  openspace.addSceneGraphNode(AuroraImage89)
+  openspace.addSceneGraphNode(AuroraImage90)
+  openspace.addSceneGraphNode(AuroraImage91)
+  openspace.addSceneGraphNode(AuroraImage92)
+  openspace.addSceneGraphNode(AuroraImage93)
+  openspace.addSceneGraphNode(AuroraImage94)
+  openspace.addSceneGraphNode(AuroraImage97)
+  openspace.addSceneGraphNode(AuroraImage98)
+end)
+
+asset.onDeinitialize(function()
+
+  openspace.action.removeAction(DeactivateTimeFrameAuroraImages)
+  openspace.action.removeAction(ActivateTimeFrameAuroraImages)
+
+  openspace.removeSceneGraphNode(AuroraImage101)
+  openspace.removeSceneGraphNode(AuroraImage15)
+  openspace.removeSceneGraphNode(AuroraImage16)
+  openspace.removeSceneGraphNode(AuroraImage17)
+  openspace.removeSceneGraphNode(AuroraImage18)
+  openspace.removeSceneGraphNode(AuroraImage19)
+  openspace.removeSceneGraphNode(AuroraImage21)
+  openspace.removeSceneGraphNode(AuroraImage22)
+  openspace.removeSceneGraphNode(AuroraImage24)
+  openspace.removeSceneGraphNode(AuroraImage27)
+  openspace.removeSceneGraphNode(AuroraImage28)
+  openspace.removeSceneGraphNode(AuroraImage29)
+  openspace.removeSceneGraphNode(AuroraImage3)
+  openspace.removeSceneGraphNode(AuroraImage31)
+  openspace.removeSceneGraphNode(AuroraImage32)
+  openspace.removeSceneGraphNode(AuroraImage33)
+  openspace.removeSceneGraphNode(AuroraImage37)
+  openspace.removeSceneGraphNode(AuroraImage38)
+  openspace.removeSceneGraphNode(AuroraImage39)
+  openspace.removeSceneGraphNode(AuroraImage4)
+  openspace.removeSceneGraphNode(AuroraImage40)
+  openspace.removeSceneGraphNode(AuroraImage41)
+  openspace.removeSceneGraphNode(AuroraImage42)
+  openspace.removeSceneGraphNode(AuroraImage43)
+  openspace.removeSceneGraphNode(AuroraImage44)
+  openspace.removeSceneGraphNode(AuroraImage45)
+  openspace.removeSceneGraphNode(AuroraImage46)
+  openspace.removeSceneGraphNode(AuroraImage47)
+  openspace.removeSceneGraphNode(AuroraImage48)
+  openspace.removeSceneGraphNode(AuroraImage49)
+  openspace.removeSceneGraphNode(AuroraImage5)
+  openspace.removeSceneGraphNode(AuroraImage50)
+  openspace.removeSceneGraphNode(AuroraImage51)
+  openspace.removeSceneGraphNode(AuroraImage52)
+  openspace.removeSceneGraphNode(AuroraImage53)
+  openspace.removeSceneGraphNode(AuroraImage55)
+  openspace.removeSceneGraphNode(AuroraImage56)
+  openspace.removeSceneGraphNode(AuroraImage57)
+  openspace.removeSceneGraphNode(AuroraImage58)
+  openspace.removeSceneGraphNode(AuroraImage59)
+  openspace.removeSceneGraphNode(AuroraImage60)
+  openspace.removeSceneGraphNode(AuroraImage62)
+  openspace.removeSceneGraphNode(AuroraImage64)
+  openspace.removeSceneGraphNode(AuroraImage65)
+  openspace.removeSceneGraphNode(AuroraImage66)
+  openspace.removeSceneGraphNode(AuroraImage67)
+  openspace.removeSceneGraphNode(AuroraImage70)
+  openspace.removeSceneGraphNode(AuroraImage71)
+  openspace.removeSceneGraphNode(AuroraImage72)
+  openspace.removeSceneGraphNode(AuroraImage73)
+  openspace.removeSceneGraphNode(AuroraImage74)
+  openspace.removeSceneGraphNode(AuroraImage76)
+  openspace.removeSceneGraphNode(AuroraImage77)
+  openspace.removeSceneGraphNode(AuroraImage78)
+  openspace.removeSceneGraphNode(AuroraImage79)
+  openspace.removeSceneGraphNode(AuroraImage80)
+  openspace.removeSceneGraphNode(AuroraImage81)
+  openspace.removeSceneGraphNode(AuroraImage82)
+  openspace.removeSceneGraphNode(AuroraImage83)
+  openspace.removeSceneGraphNode(AuroraImage84)
+  openspace.removeSceneGraphNode(AuroraImage85)
+  openspace.removeSceneGraphNode(AuroraImage86)
+  openspace.removeSceneGraphNode(AuroraImage87)
+  openspace.removeSceneGraphNode(AuroraImage88)
+  openspace.removeSceneGraphNode(AuroraImage89)
+  openspace.removeSceneGraphNode(AuroraImage90)
+  openspace.removeSceneGraphNode(AuroraImage91)
+  openspace.removeSceneGraphNode(AuroraImage92)
+  openspace.removeSceneGraphNode(AuroraImage93)
+  openspace.removeSceneGraphNode(AuroraImage94)
+  openspace.removeSceneGraphNode(AuroraImage97)
+  openspace.removeSceneGraphNode(AuroraImage98)
+end)
+
+asset.export(AuroraImage101)
+asset.export(AuroraImage15)
+asset.export(AuroraImage16)
+asset.export(AuroraImage17)
+asset.export(AuroraImage18)
+asset.export(AuroraImage19)
+asset.export(AuroraImage21)
+asset.export(AuroraImage22)
+asset.export(AuroraImage24)
+asset.export(AuroraImage27)
+asset.export(AuroraImage28)
+asset.export(AuroraImage29)
+asset.export(AuroraImage3)
+asset.export(AuroraImage31)
+asset.export(AuroraImage32)
+asset.export(AuroraImage33)
+asset.export(AuroraImage37)
+asset.export(AuroraImage38)
+asset.export(AuroraImage39)
+asset.export(AuroraImage4)
+asset.export(AuroraImage40)
+asset.export(AuroraImage41)
+asset.export(AuroraImage42)
+asset.export(AuroraImage43)
+asset.export(AuroraImage44)
+asset.export(AuroraImage45)
+asset.export(AuroraImage46)
+asset.export(AuroraImage47)
+asset.export(AuroraImage48)
+asset.export(AuroraImage49)
+asset.export(AuroraImage5)
+asset.export(AuroraImage50)
+asset.export(AuroraImage51)
+asset.export(AuroraImage52)
+asset.export(AuroraImage53)
+asset.export(AuroraImage55)
+asset.export(AuroraImage56)
+asset.export(AuroraImage57)
+asset.export(AuroraImage58)
+asset.export(AuroraImage59)
+asset.export(AuroraImage60)
+asset.export(AuroraImage62)
+asset.export(AuroraImage64)
+asset.export(AuroraImage65)
+asset.export(AuroraImage66)
+asset.export(AuroraImage67)
+asset.export(AuroraImage70)
+asset.export(AuroraImage71)
+asset.export(AuroraImage72)
+asset.export(AuroraImage73)
+asset.export(AuroraImage74)
+asset.export(AuroraImage76)
+asset.export(AuroraImage77)
+asset.export(AuroraImage78)
+asset.export(AuroraImage79)
+asset.export(AuroraImage80)
+asset.export(AuroraImage81)
+asset.export(AuroraImage82)
+asset.export(AuroraImage83)
+asset.export(AuroraImage84)
+asset.export(AuroraImage85)
+asset.export(AuroraImage86)
+asset.export(AuroraImage87)
+asset.export(AuroraImage88)
+asset.export(AuroraImage89)
+asset.export(AuroraImage90)
+asset.export(AuroraImage91)
+asset.export(AuroraImage92)
+asset.export(AuroraImage93)
+asset.export(AuroraImage94)
+asset.export(AuroraImage97)
+asset.export(AuroraImage98)
+
+asset.export("DeactivateTimeFrameAuroraImages", function (interpolationDuration)
+  openspace.setPropertyValue("Scene.AuroraImage*.Renderable.Opacity", 0, interpolationDuration)
+end)
+
+asset.export("ActivateTimeFrameAuroraImages", function (interpolationDuration)
+  openspace.setPropertyValue("Scene.AuroraImage*.Renderable.Opacity", 1, interpolationDuration)
+end)
