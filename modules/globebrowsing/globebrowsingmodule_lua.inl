@@ -293,9 +293,9 @@ namespace {
  * \param fadeDuration An optional duration for the fading. If not included, the
  *                     property in Navigation Handler will be used
  */
-[[codegen::luawrap]] void goToGeo(std::string globe, double latitude, double longitude,
-                                  std::optional<double> altitude,
-                                  std::optional<double> fadeDuration)
+[[codegen::luawrap]] void jumpToGeo(std::string globe, double latitude, double longitude,
+                                    std::optional<double> altitude,
+                                    std::optional<double> fadeDuration)
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -324,6 +324,35 @@ namespace {
     else {
         global::navigationHandler->triggerFadeToTransition(script);
     }
+}
+
+/**
+ * Immediately move the camera to a geographic coordinate on a globe.
+ *
+ * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
+ *              If an empty string is provided, the current anchor node is used
+ * \param latitude The latitude of the target coordinate, in degrees
+ * \param longitude The longitude of the target coordinate, in degrees
+ * \param altitude An optional altitude, given in meters over the reference surface of
+ *                 the globe. If no altitude is provided, the altitude will be kept as
+ *                 the current distance to the reference surface of the specified globe.
+ */
+[[codegen::luawrap("goToGeo")]] void goToGeoDeprecated(std::string globe, double latitude,
+                                                       double longitude,
+                                                       std::optional<double> altitude)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'goToGeo' function is deprecated and should be replaced with 'jumpToGeo'"
+    );
+
+    return jumpToGeo(
+        std::move(globe),
+        latitude,
+        longitude,
+        altitude,
+        0
+    );
 }
 
 void flyToGeoInternal(std::string globe, double latitude,
