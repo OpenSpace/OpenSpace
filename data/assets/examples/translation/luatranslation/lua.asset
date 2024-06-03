@@ -1,0 +1,46 @@
+-- Basic
+-- This asset creates a SceneGraphNode that only displays coordinate axes. The coordinate
+-- axes are translated by a value determined by executing a Lua file that returns the
+-- translation parameters to be used as a table. In order to see the translation, we need
+-- to also have a node that does not move so that we can see the relative movement.
+--
+-- ```{literalinclude} example.lua
+-- :language: lua
+-- :caption: The script file that is used in this example
+-- ```
+
+local NodeFocus = {
+  Identifier = "LuaTranslation_Example_Focus",
+  GUI = {
+    Name = "Basic (Focus)",
+    Path = "/Examples/LuaTranslation"
+  }
+}
+
+local Node = {
+  Identifier = "LuaTranslation_Example",
+  Parent = NodeFocus.Identifier,
+  Transform = {
+    Translation = {
+      Type = "LuaTranslation",
+      Script = asset.resource("example.lua")
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/LuaTranslation"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(NodeFocus)
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(NodeFocus)
+end)
