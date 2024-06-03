@@ -278,13 +278,20 @@ namespace {
 }
 
 /**
- * Go to geographic coordinates of a globe. The first (optional) argument is the
- * identifier of a scene graph node that has a RenderableGlobe attached. If the name of
- * the globe is empty, the current anchor will be used. The second argument is latitude
- * and the third is longitude (degrees). North and East are expressed as positive angles,
- * while South and West are negative. The optional fourth argument is the altitude in
- * meters. If no altitude is provided, the altitude will be kept as the current distance
- * to the surface of the specified globe.
+ * Immediately move the camera to a geographic coordinate on a globe by first fading the
+ * rendering to black, jump to the specified coordinate, and then fade in.
+ *
+ * This is done by triggering another script that handles the logic.
+ *
+ * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
+ *              If an empty string is provided, the current anchor node is used
+ * \param latitude The latitude of the target coordinate, in degrees
+ * \param longitude The longitude of the target coordinate, in degrees
+ * \param altitude An optional altitude, given in meters over the reference surface of
+ *                 the globe. If no altitude is provided, the altitude will be kept as
+ *                 the current distance to the reference surface of the specified globe.
+ * \param fadeDuration An optional duration for the fading. If not included, the
+ *                     property in Navigation Handler will be used
  */
 [[codegen::luawrap]] void goToGeo(std::string globe, double latitude, double longitude,
                                   std::optional<double> altitude,
@@ -386,6 +393,29 @@ void flyToGeoInternal(std::string globe, double latitude,
     global::navigationHandler->pathNavigator().startPath();
 }
 
+/**
+ * Fly the camera to a geographic coordinate (latitude and longitude) on a globe, using
+ * the path navigation system.
+ *
+ * The distance to fly to can either be set to be the current distance of the camera to
+ * the target object, or the default distance from the path navigation system.
+ *
+ * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
+ *              If an empty string is provided, the current anchor node is used
+ * \param latitude The latitude of the target coordinate, in degrees
+ * \param longitude The longitude of the target coordinate, in degrees
+ * \param useCurrentDistance If true, use the current distance of the camera to the
+ *                           target globe when going to the specified position. If false,
+ *                           or not specified, set the distance based on the bounding
+ *                           sphere and the distance factor setting in Path Navigator
+ * \param duration An optional duration for the motion to take, in seconds. For example,
+ *                 a value of 5 means "fly to this position over a duration of 5 seconds"
+ * \param shouldUseUpVector If true, try to use the up-direction when computing the
+ *                          target position for the camera. For globes, this means that
+ *                          North should be up, in relation to the camera's view
+ *                          direction. Note that for this to take effect, rolling motions
+ *                          must be enabled in the Path Navigator settings.
+ */
 [[codegen::luawrap]] void flyToGeo2(std::string globe, double latitude, double longitude,
                                     std::optional<bool> useCurrentDistance,
                                     std::optional<double> duration,
@@ -404,15 +434,23 @@ void flyToGeoInternal(std::string globe, double latitude,
     flyToGeoInternal(globe, latitude, longitude, std::nullopt, duration, shouldUseUpVector);
 }
 
-/**
- * Fly the camera to geographic coordinates of a globe, using the path navigation system.
- * The first (optional) argument is the identifier of a scene graph node with a
- * RenderableGlobe. If the globe name is empty, the current anchor will be used. The
- * second and third argument is latitude and longitude (degrees). The fourth argument is
- * the altitude, in meters. The last two optional arguments are: a bool specifying whether
- * the up vector at the target position should be set to the globe's North vector, and a
- * duration for the motion, in seconds. Either of the two can be left out.
- */
+ /**
+  * Fly the camera to a geographic coordinate (latitude, longitude and altitude) on a globe,
+  * using the path navigation system.
+  *
+  * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
+  *              If an empty string is provided, the current anchor node is used
+  * \param latitude The latitude of the target coordinate, in degrees
+  * \param longitude The longitude of the target coordinate, in degrees
+  * \param altitude The altitude of the target coordinate, in meters
+  * \param duration An optional duration for the motion to take, in seconds. For example,
+  *                 a value of 5 means "fly to this position over a duration of 5 seconds"
+  * \param shouldUseUpVector If true, try to use the up-direction when computing the
+  *                          target position for the camera. For globes, this means that
+  *                          North should be up, in relation to the camera's view
+  *                          direction. Note that for this to take effect, rolling motions
+  *                          must be enabled in the Path Navigator settings.
+  */
 [[codegen::luawrap]] void flyToGeo(std::string globe, double latitude,
                                    double longitude, double altitude,
                                    std::optional<double> duration,
