@@ -224,11 +224,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
 
     _hasManualZIndex = p.zIndex.has_value();
     if (_hasManualZIndex) {
-        // We need to space the z indices apart a bit in order to make space for the
-        // automatically defined indices. A multiplier of two is enough as there all
-        // automatic indices will be sharing the same number
-        constexpr unsigned int ZIndexManualSpacing = 2;
-        _zIndex = *p.zIndex * ZIndexManualSpacing;
+        _zIndex = p.zIndex.value_or(_zIndex);
     }
     else {
         const std::vector<Layer*> siblings = _parent.layers();
