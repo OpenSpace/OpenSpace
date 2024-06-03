@@ -356,8 +356,7 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     goToChunk(
         globe,
         globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level)),
-        glm::vec2(0.5f, 0.5f),
-        true
+        glm::vec2(0.5f, 0.5f)
     );
 }
 
@@ -367,8 +366,7 @@ void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
     using namespace globebrowsing;
     goToGeodetic2(
         globe,
-        Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
-        true
+        Geodetic2{ glm::radians(latitude), glm::radians(longitude) }
     );
 }
 
@@ -381,8 +379,7 @@ void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
         {
             Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
             altitude
-        },
-        true
+        }
     );
 }
 
@@ -442,7 +439,7 @@ glm::dvec3 GlobeBrowsingModule::geoPosition() const {
 
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     const globebrowsing::TileIndex& ti,
-                                    const glm::vec2& uv, bool doResetCameraDirection)
+                                    const glm::vec2& uv)
 {
     using namespace globebrowsing;
 
@@ -476,12 +473,11 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
         cameraPositionModelSpace - posHandle.centerToReferenceSurface
     );
 
-    goToGeodetic3(globe, { pointPosition, altitude }, doResetCameraDirection);
+    goToGeodetic3(globe, { pointPosition, altitude });
 }
 
 void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& globe,
-                                        globebrowsing::Geodetic2 geo2,
-                                        bool doResetCameraDirection)
+                                        globebrowsing::Geodetic2 geo2)
 {
     using namespace globebrowsing;
 
@@ -506,11 +502,11 @@ void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& gl
                        posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
     const double altitude = glm::length(cameraPositionModelSpace - centerToActualSurface);
 
-    goToGeodetic3(globe, { geo2, altitude }, doResetCameraDirection);
+    goToGeodetic3(globe, { geo2, altitude });
 }
 
 void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
-                                        globebrowsing::Geodetic3 geo3, bool)
+                                        globebrowsing::Geodetic3 geo3)
 {
     using namespace globebrowsing;
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianPosition(geo3);

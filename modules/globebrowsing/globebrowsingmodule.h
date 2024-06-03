@@ -103,14 +103,13 @@ protected:
 
 private:
     void goToChunk(const globebrowsing::RenderableGlobe& globe,
-        const globebrowsing::TileIndex& ti, const glm::vec2& uv,
-        bool doResetCameraDirection);
+        const globebrowsing::TileIndex& ti, const glm::vec2& uv);
 
     void goToGeodetic2(const globebrowsing::RenderableGlobe& globe,
-        globebrowsing::Geodetic2 geo2, bool doResetCameraDirection);
+        globebrowsing::Geodetic2 geo2);
 
     void goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
-        globebrowsing::Geodetic3 geo3, bool doResetCameraDirection);
+        globebrowsing::Geodetic3 geo3);
 
     properties::UIntProperty _tileCacheSizeMB;
 
