@@ -665,6 +665,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::MoveLayer,
             codegen::lua::GoToChunk,
             codegen::lua::GoToGeo,
+            codegen::lua::FlyToGeo2,
             codegen::lua::FlyToGeo,
             codegen::lua::LocalPositionFromGeo,
             codegen::lua::LocalPositionFromGeoDeprecated,
