@@ -303,7 +303,7 @@ namespace {
     }
     else {
         script = std::format(
-            "openspace.globebrowsing.flyToGeo2('{}', {}, {}, 0)",
+            "openspace.globebrowsing.flyToGeo2('{}', {}, {}, true, 0)",
             globe, latitude, longitude
         );
     }
@@ -387,9 +387,20 @@ void flyToGeoInternal(std::string globe, double latitude,
 }
 
 [[codegen::luawrap]] void flyToGeo2(std::string globe, double latitude, double longitude,
+                                    std::optional<bool> useCurrentDistance,
                                     std::optional<double> duration,
                                     std::optional<bool> shouldUseUpVector)
 {
+    using namespace openspace;
+
+    std::optional<double> altitude;
+    if (useCurrentDistance.has_value() && *useCurrentDistance) {
+        altitude = std::nullopt;
+    }
+    else {
+        altitude = global::navigationHandler->pathNavigator().defaultArrivalHeight(globe);
+    }
+
     flyToGeoInternal(globe, latitude, longitude, std::nullopt, duration, shouldUseUpVector);
 }
 
