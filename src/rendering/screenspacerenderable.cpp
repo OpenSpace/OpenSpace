@@ -148,7 +148,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GammaOffsetInfo = {
         "GammaOffset",
-        "Gamma Correction",
+        "Gamma Correction Offset",
         "Sets the gamma correction of the texture that is applied in addition to the "
         "global gamma value.",
         openspace::properties::Property::Visibility::AdvancedUser
