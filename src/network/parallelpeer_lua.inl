@@ -25,7 +25,8 @@
 namespace {
 
 [[codegen::luawrap]] void joinServer(std::string port, std::string address,
-    std::string password, std::string hostpassword = "", std::string name = "Anonymous") {
+                                     std::string password, std::string hostpassword = "",
+                                     std::string name = "Anonymous") {
     using namespace openspace;
     if (global::windowDelegate->isMaster()) {
         ParallelPeer* peer = global::parallelPeer;
