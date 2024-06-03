@@ -25,6 +25,8 @@
 #include <modules/globebrowsing/src/layergroup.h>
 
 #include <modules/globebrowsing/src/layer.h>
+#include <modules/globebrowsing/src/layermanager.h>
+#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
@@ -216,6 +218,16 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     _subOwners.erase(oldPosOwner);
     auto newPosOwner = _subOwners.begin() + newPosition;
     _subOwners.insert(newPosOwner, owner);
+
+    // If we change the order of the layers, we need to inform the RenderableGlobe's
+    // shader as it might no longer be valid. This can happen if we change the order of
+    // two layers with different types and the uniforms between the two types are not
+    // compatible
+    LayerManager* manager = dynamic_cast<LayerManager*>(_owner);
+    ghoul_assert(manager, "Hierarchy error: Layer. Owner is not LayerManager");
+    RenderableGlobe* renderable = dynamic_cast<RenderableGlobe*>(manager->owner());
+    ghoul_assert(manager, "Hierarchy error: LayerManager. Owner is not RenderableGlobe");
+    renderable->invalidateShader();
 }
 
 std::vector<Layer*> LayerGroup::layers() const {
