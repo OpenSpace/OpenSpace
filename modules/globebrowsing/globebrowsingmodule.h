@@ -29,10 +29,10 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/util/openspacemodule.h>
-
 #include <ghoul/glm.h>
-#include <memory>
 #include <future>
+#include <memory>
+#include <optional>
 
 namespace openspace::globebrowsing {
     class RenderableGlobe;
@@ -61,9 +61,12 @@ public:
         double latitude, double longitude, double altitude);
 
     glm::vec3 cartesianCoordinatesFromGeo(const globebrowsing::RenderableGlobe& globe,
-        double latitude, double longitude, double altitude);
+        double latitude, double longitude, std::optional<double> altitude = std::nullopt);
 
     glm::dvec3 geoPosition() const;
+
+    double altitudeFromCamera(const globebrowsing::RenderableGlobe& globe,
+        bool useHeightMap = false) const;
 
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     scripting::LuaLibrary luaLibrary() const override;
