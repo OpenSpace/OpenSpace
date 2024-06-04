@@ -25,6 +25,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "vents_2016.png",
   Description = Description
 }

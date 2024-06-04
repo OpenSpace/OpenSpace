@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Cassini_ISS_Global_Mosaic_4km_NewYork",
   Name = "Cassini ISS Global Mosaic [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("cassini_iss_global_mosaic_4km_newyork.wms"),
   Description = [[This global digital map of Saturn's moon Titan was created using
     images taken by the Cassini spacecraft's Imaging Science Subsystem (ISS). The map

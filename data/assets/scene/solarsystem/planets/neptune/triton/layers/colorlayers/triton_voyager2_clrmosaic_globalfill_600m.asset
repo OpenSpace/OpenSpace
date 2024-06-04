@@ -14,6 +14,7 @@ local Layer = {
   Identifier = "Triton_Voyager2_ClrMosaic_GlobalFill_600m",
   Name = "Triton Voyager2 Mosaic [local]",
   Enabled = asset.enabled,
+  ZIndex = 5,
   FilePath = texturesPath .. "Triton_Voyager2_ClrMosaic_GlobalFill_600m.png",
   Description = [[Voyager 2 data was used to construct the best-ever global color map of Triton.
     This map has a resolution of 1,970 feet (600 meters per pixel [m]). Color was synthesized by

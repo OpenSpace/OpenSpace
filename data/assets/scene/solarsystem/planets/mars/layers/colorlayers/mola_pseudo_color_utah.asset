@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "MOLA_Pseudo_Color_Utah",
   Name = "MOLA Pseudo Color [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("mola_pseudo_color_utah.wms"),
   Description = [[This map is based on data from the Mars Orbiter Laser Altimeter (MOLA)
     (Smith, et al., 2001), an instrument on NASA's Mars Global Surveyor (MGS)

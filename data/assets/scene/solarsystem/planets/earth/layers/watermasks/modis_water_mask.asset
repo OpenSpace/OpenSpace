@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "MODIS_Water_Mask",
   Name = "MODIS Water Mask",
   Enabled = asset.enabled,
+  ZIndex = 20,
   FilePath = asset.resource("modis_water_mask.wms")
 }
 

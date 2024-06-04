@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Earth_at_Night_2012",
   Name = "Earth at Night 2012",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("earth_at_night_2012.wms"),
   Description = [[The lights of cities and villages trace the outlines of civilization
     in this global view]]

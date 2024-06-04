@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_LOLA_ClrSlope_NPole75N_120m_EQ = {
   Identifier = "LRO_LOLA_ClrSlope_NPole75N_120m_EQ",
   Name = [[LOLA Slope Northpole 120m, Colorized]],
+  ZIndex = 50,
   FilePath = asset.resource("LOLA_Slope_Northpole_120m/Colorized.vrt"),
   Description = [[This is a colorized map of the original north polar surface slope of the Moon at a resolution of 16 m/pix by 16 m/pix, based on altimetry data acquired by the LOLA instrument. The LOLA Laser 1 and 2 data through mission phase LRO_SM_17 are the source for this data set. The bi-directional slope was calculated from a plane fit to three successive laser shots requiring n=5 to 15 profile returns. Depending on orbital velocity, probability of detection, and spacecraft altitude, the slope baseline may vary from 30 to 120 meters.]]
 }

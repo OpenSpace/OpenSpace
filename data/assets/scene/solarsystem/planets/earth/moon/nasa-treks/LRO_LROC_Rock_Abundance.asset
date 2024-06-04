@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_NAC_RockAbnd_17S173E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_17S173E_150cmp",
   Name = [[LRO LROC Rock Abundance, Aitken Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Aitken_Crater.vrt"),
   Description = [[]]
 }
@@ -16,6 +17,7 @@ local treks_LRO_NAC_RockAbnd_17S173E_150cmp = {
 local treks_LRO_NAC_RockAbnd_13S358E_2mp = {
   Identifier = "LRO_NAC_RockAbnd_13S358E_2mp",
   Name = [[LRO LROC Rock Abundance, Alphonsus Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Alphonsus_Crater.vrt"),
   Description = [[]]
 }
@@ -23,6 +25,7 @@ local treks_LRO_NAC_RockAbnd_13S358E_2mp = {
 local treks_LRO_NAC_RockAbnd_73N350E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_73N350E_150cmp",
   Name = [[LRO LROC Rock Abundance, Anaxagoras Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Anaxagoras_Crater.vrt"),
   Description = [[]]
 }
@@ -30,6 +33,7 @@ local treks_LRO_NAC_RockAbnd_73N350E_150cmp = {
 local treks_LRO_NAC_RockAbnd_26N004E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_26N004E_150cmp",
   Name = [[LRO LROC Rock Abundance, Apollo 15]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Apollo_15.vrt"),
   Description = [[]]
 }
@@ -37,6 +41,7 @@ local treks_LRO_NAC_RockAbnd_26N004E_150cmp = {
 local treks_LRO_NAC_RockAbnd_09S015E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_09S015E_150cmp",
   Name = [[LRO LROC Rock Abundance, Apollo 16]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Apollo_16.vrt"),
   Description = [[]]
 }
@@ -44,6 +49,7 @@ local treks_LRO_NAC_RockAbnd_09S015E_150cmp = {
 local treks_LRO_NAC_RockAbnd_37S206E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_37S206E_150cmp",
   Name = [[LRO LROC Rock Abundance, Apollo Basin]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Apollo_Basin.vrt"),
   Description = [[]]
 }
@@ -51,6 +57,7 @@ local treks_LRO_NAC_RockAbnd_37S206E_150cmp = {
 local treks_LRO_NAC_RockAbnd_25N311E_2mp = {
   Identifier = "LRO_NAC_RockAbnd_25N311E_2mp",
   Name = [[LRO LROC Rock Abundance, Aristarchus 1]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Aristarchus_1.vrt"),
   Description = [[]]
 }
@@ -58,6 +65,7 @@ local treks_LRO_NAC_RockAbnd_25N311E_2mp = {
 local treks_LRO_NAC_RockAbnd_28N307E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_28N307E_150cmp",
   Name = [[LRO LROC Rock Abundance, Aristarchus 2]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Aristarchus_2.vrt"),
   Description = [[]]
 }
@@ -65,6 +73,7 @@ local treks_LRO_NAC_RockAbnd_28N307E_150cmp = {
 local treks_LRO_NAC_RockAbnd_19S070E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_19S070E_150cmp",
   Name = [[LRO LROC Rock Abundance, Balmer Basin]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Balmer_Basin.vrt"),
   Description = [[]]
 }
@@ -72,6 +81,7 @@ local treks_LRO_NAC_RockAbnd_19S070E_150cmp = {
 local treks_LRO_NAC_RockAbnd_20S337E_400cmp = {
   Identifier = "LRO_NAC_RockAbnd_20S337E_400cmp",
   Name = [[LRO LROC Rock Abundance, Bullialdus Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Bullialdus_Crater.vrt"),
   Description = [[]]
 }
@@ -79,6 +89,7 @@ local treks_LRO_NAC_RockAbnd_20S337E_400cmp = {
 local treks_LRO_NAC_RockAbnd_36N320E_2mp = {
   Identifier = "LRO_NAC_RockAbnd_36N320E_2mp",
   Name = [[LRO LROC Rock Abundance, Gruithuisen Domes]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Gruithuisen_Domes.vrt"),
   Description = [[]]
 }
@@ -86,6 +97,7 @@ local treks_LRO_NAC_RockAbnd_36N320E_2mp = {
 local treks_LRO_NAC_RockAbnd_00N234E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_00N234E_150cmp",
   Name = [[LRO LROC Rock Abundance, Hertzsprung]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Hertzsprung.vrt"),
   Description = [[]]
 }
@@ -93,6 +105,7 @@ local treks_LRO_NAC_RockAbnd_00N234E_150cmp = {
 local treks_LRO_NAC_RockAbnd_08N332E_2mp = {
   Identifier = "LRO_NAC_RockAbnd_08N332E_2mp",
   Name = [[LRO LROC Rock Abundance, Hortensius Domes]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Hortensius_Domes.vrt"),
   Description = [[]]
 }
@@ -100,6 +113,7 @@ local treks_LRO_NAC_RockAbnd_08N332E_2mp = {
 local treks_LRO_NAC_RockAbnd_06N120E_200cmp = {
   Identifier = "LRO_NAC_RockAbnd_06N120E_200cmp",
   Name = [[LRO LROC Rock Abundance, King Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/King_Crater.vrt"),
   Description = [[]]
 }
@@ -107,6 +121,7 @@ local treks_LRO_NAC_RockAbnd_06N120E_200cmp = {
 local treks_LRO_NAC_RockAbnd_32N292E_2mp = {
   Identifier = "LRO_NAC_RockAbnd_32N292E_2mp",
   Name = [[LRO LROC Rock Abundance, Lichtenberg Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Lichtenberg_Crater.vrt"),
   Description = [[]]
 }
@@ -114,6 +129,7 @@ local treks_LRO_NAC_RockAbnd_32N292E_2mp = {
 local treks_LRO_NAC_RockAbnd_10N058E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_10N058E_150cmp",
   Name = [[LRO LROC Rock Abundance, Mare Crisium]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Mare_Crisium.vrt"),
   Description = [[]]
 }
@@ -121,6 +137,7 @@ local treks_LRO_NAC_RockAbnd_10N058E_150cmp = {
 local treks_LRO_NAC_RockAbnd_16S041E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_16S041E_150cmp",
   Name = [[LRO LROC Rock Abundance, Montes Pyrenaeus]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Montes_Pyrenaeus.vrt"),
   Description = [[]]
 }
@@ -128,6 +145,7 @@ local treks_LRO_NAC_RockAbnd_16S041E_150cmp = {
 local treks_LRO_NAC_RockAbnd_26S265E_200cmp = {
   Identifier = "LRO_NAC_RockAbnd_26S265E_200cmp",
   Name = [[LRO LROC Rock Abundance, Orientale 1]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Orientale_1.vrt"),
   Description = [[]]
 }
@@ -135,6 +153,7 @@ local treks_LRO_NAC_RockAbnd_26S265E_200cmp = {
 local treks_LRO_NAC_RockAbnd_53N354E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_53N354E_150cmp",
   Name = [[LRO LROC Rock Abundance, Plato Ejecta]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Plato_Ejecta.vrt"),
   Description = [[]]
 }
@@ -142,6 +161,7 @@ local treks_LRO_NAC_RockAbnd_53N354E_150cmp = {
 local treks_LRO_NAC_RockAbnd_60S200E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_60S200E_150cmp",
   Name = [[LRO LROC Rock Abundance, South Pole-Aitken Basin Interior]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/South_Pole-Aitken_Basin_Interior.vrt"),
   Description = [[]]
 }
@@ -149,6 +169,7 @@ local treks_LRO_NAC_RockAbnd_60S200E_150cmp = {
 local treks_LRO_NAC_RockAbnd_02S167E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_02S167E_150cmp",
   Name = [[LRO LROC Rock Abundance, Stratton (Dewar) High Fe Anomaly]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Stratton_Dewar_High_Fe_Anomaly.vrt"),
   Description = [[]]
 }
@@ -156,6 +177,7 @@ local treks_LRO_NAC_RockAbnd_02S167E_150cmp = {
 local treks_LRO_NAC_RockAbnd_20N010E_2mp = {
   Identifier = "LRO_NAC_RockAbnd_20N010E_2mp",
   Name = [[LRO LROC Rock Abundance, Sulpicius Gallus]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Sulpicius_Gallus.vrt"),
   Description = [[]]
 }
@@ -163,6 +185,7 @@ local treks_LRO_NAC_RockAbnd_20N010E_2mp = {
 local treks_LRO_NAC_RockAbnd_43S349E_150cmp = {
   Identifier = "LRO_NAC_RockAbnd_43S349E_150cmp",
   Name = [[LRO LROC Rock Abundance, Tycho Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Abundance/Tycho_Crater.vrt"),
   Description = [[]]
 }

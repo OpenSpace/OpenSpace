@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Earth_at_Night_Temporal",
   Name = "Earth at Night (Temporal)",
   Enabled = asset.enabled,
+  ZIndex = 20,
   Type = "TemporalTileProvider",
   Mode = "Prototyped",
   Prototyped = {

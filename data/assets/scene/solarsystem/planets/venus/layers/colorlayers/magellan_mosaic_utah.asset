@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Magellan_Mosaic_Utah",
   Name = "Magellan Mosaic [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("magellan_mosaic_utah.vrt"),
   BlendMode = "Color",
   Settings = { Gamma = 2.0 },

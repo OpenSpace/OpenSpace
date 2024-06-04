@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Ma
 local treks_hrsc_dem_martian_east = {
   Identifier = "hrsc_dem_martian_east",
   Name = [[MEX HRSC, Martian Path Eastern Section DEM]],
+  ZIndex = 50,
   FilePath = asset.resource("MEX_HRSC/Martian_Path_Eastern_Section_DEM.vrt"),
   Description = [[This layer is a greyscale mosaic assembled using data from the High Resolution Stereo Camera aboard the European Space Agency's Mars Express orbiter. HRSC is being used to obtain color and stereo images that will map 100% of Mars' surface at resolution better than 30 m/pixel, and 50% of the surface at better than 15 m/pixel. Each of the nine CCD lines of HRSC, a linescan imager (pushbroom camera), contains 5184 pixels. The channels consist of red, green, blue, near-infrared, three stereo channels (backward, nadir, and forward) and two photometric channels. The digital elevation model used for this layer is a combination of data derived from the HRSC and the Mars Orbiter Laser Altimeter.]]
 }
@@ -16,6 +17,7 @@ local treks_hrsc_dem_martian_east = {
 local treks_MC11E11_HRDTMAR_DA5 = {
   Identifier = "MC11E11_HRDTMAR_DA5",
   Name = [[MEX HRSC, Martian Path MC11 Quad DEM]],
+  ZIndex = 50,
   FilePath = asset.resource("MEX_HRSC/Martian_Path_MC11_Quad_DEM.vrt"),
   Description = [[This layer is a greyscale mosaic assembled using data from the High Resolution Stereo Camera aboard the European Space Agency's Mars Express orbiter. HRSC is being used to obtain color and stereo images that will map 100% of Mars' surface at resolution better than 30 m/pixel, and 50% of the surface at better than 15 m/pixel. Each of the nine CCD lines of HRSC, a linescan imager (pushbroom camera), contains 5184 pixels. The channels consist of red, green, blue, near-infrared, three stereo channels (backward, nadir, and forward) and two photometric channels. The digital elevation model used for this layer is a combination of data derived from the HRSC and the Mars Orbiter Laser Altimeter.]]
 }

@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "MOC_WA_Color_Utah",
   Name = "MOC WA Color [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("moc_wa_color_utah.wms"),
   Settings = {
     Gamma = 1.6,

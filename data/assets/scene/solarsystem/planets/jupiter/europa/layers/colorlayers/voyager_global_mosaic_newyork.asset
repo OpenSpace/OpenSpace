@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Voyager_Global_Mosaic_NewYork",
   Name = "Voyager Global Mosaic [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("voyager_global_mosaic_newyork.wms"),
   BlendMode = "Color"
 }

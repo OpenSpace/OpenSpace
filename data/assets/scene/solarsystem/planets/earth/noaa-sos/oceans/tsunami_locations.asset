@@ -33,6 +33,7 @@ local syncedDirectory = asset.resource({
 local LayerBase = {
   Identifier = Identifier,
   Name = Name,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
@@ -40,6 +41,7 @@ local LayerBase = {
 local LayerGray = {
   Identifier = Identifier .. "-gray",
   Name = Name .. " (Gray)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "gray_earth_with_countries_4096.png",
   Description = Description
 }
@@ -47,6 +49,7 @@ local LayerGray = {
 local LayerNeutral = {
   Identifier = Identifier .. "-neutral",
   Name = Name .. " (Neutral)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "natural_earth_with_countries_4096.png",
   Description = Description
 }
@@ -54,6 +57,7 @@ local LayerNeutral = {
 local LayerEvents = {
   Identifier = Identifier .. "-events",
   Name = Name .. " (Events)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "tsunami_events.png",
   Description = Description
 }

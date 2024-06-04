@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_MDIS_Sweden",
   Name = "Messenger MDIS [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("messenger_mdis_sweden.wms"),
   Description = [[This May 2013 basemap is a combination of the following mosaics; (1)
   The 2013-05-10 version of the monochrome global mosaic, made from Applied Coherent

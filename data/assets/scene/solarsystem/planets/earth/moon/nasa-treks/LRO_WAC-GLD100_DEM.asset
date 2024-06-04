@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_WACGLD100_Gray_79S79N_256ppd = {
   Identifier = "LRO_WACGLD100_Gray_79S79N_256ppd",
   Name = [[LRO WAC-GLD100 DEM, Grayscale]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_WAC-GLD100_DEM/Grayscale.vrt"),
   Description = [[]]
 }

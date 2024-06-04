@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_Apollo15_PanCam_ClrShade_25N311E_5mp = {
   Identifier = "Apollo15_PanCam_ClrShade_25N311E_5mp",
   Name = [[Apollo 15 Pan Cam DEM, Aristarchus Plateau 1, ColorHillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("Apollo_15_Pan_Cam_DEM/Aristarchus_Plateau_1.vrt"),
   Description = [[]]
 }
@@ -16,6 +17,7 @@ local treks_Apollo15_PanCam_ClrShade_25N311E_5mp = {
 local treks_Apollo15_PanCam_ClrShade_28N307E_3mp = {
   Identifier = "Apollo15_PanCam_ClrShade_28N307E_3mp",
   Name = [[Apollo 15 Pan Cam DEM, Aristarchus Plateau 2, ColorHillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("Apollo_15_Pan_Cam_DEM/Aristarchus_Plateau_2.vrt"),
   Description = [[]]
 }
@@ -23,6 +25,7 @@ local treks_Apollo15_PanCam_ClrShade_28N307E_3mp = {
 local treks_Apollo15_PanCam_ClrShade_19S129E_5mp = {
   Identifier = "Apollo15_PanCam_ClrShade_19S129E_5mp",
   Name = [[Apollo 15 Pan Cam DEM, Tsiolkovskiy Crater, ColorHillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("Apollo_15_Pan_Cam_DEM/Tsiolkovskiy_Crater.vrt"),
   Description = [[]]
 }

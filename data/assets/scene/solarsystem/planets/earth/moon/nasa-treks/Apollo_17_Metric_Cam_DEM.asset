@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_Apollo17_MetricCam_ClrShade_Global_1024ppd = {
   Identifier = "Apollo17_MetricCam_ClrShade_Global_1024ppd",
   Name = [[Apollo 17 Metric Cam DEM, ColorHillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("Apollo_17_Metric_Cam_DEM/ColorHillshade.vrt"),
   Description = [[]]
 }
@@ -16,6 +17,7 @@ local treks_Apollo17_MetricCam_ClrShade_Global_1024ppd = {
 local treks_Apollo17_MetricCam_Gray_Global_1024ppd = {
   Identifier = "Apollo17_MetricCam_Gray_Global_1024ppd",
   Name = [[Apollo 17 Metric Cam DEM, Grayscale]],
+  ZIndex = 50,
   FilePath = asset.resource("Apollo_17_Metric_Cam_DEM/Grayscale.vrt"),
   Description = [[]]
 }

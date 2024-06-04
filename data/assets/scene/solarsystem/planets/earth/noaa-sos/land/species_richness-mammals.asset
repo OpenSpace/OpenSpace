@@ -26,6 +26,7 @@ local syncedDirectory = asset.resource({
 local Layer8192 = {
   Identifier = Identifier,
   Name = Name,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "8192.png",
   Description = Description
 }
@@ -33,6 +34,7 @@ local Layer8192 = {
 local LayerWithBackground = {
   Identifier = Identifier .. "-background",
   Name = Name .. " (w/ Background)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096-background.png",
   Description = Description
 }

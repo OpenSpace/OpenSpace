@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Global_Mosaic_100m_HPF_NewYork",
   Name = "Cassini Global Mosaic 100m HPF [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("global_mosaic_100m_hpf_newyork.wms"),
   Description = [[This mosaic represents the completion of a global control network of
     Enceladus containing Cassini Imaging Science Subsystem (ISS) images. A total of

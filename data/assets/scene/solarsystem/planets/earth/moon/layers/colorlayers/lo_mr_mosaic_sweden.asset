@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "LO_MR_Mosaic_Sweden",
   Name = "Moon Lunar Orbiter Digital Photographic Global Mosaic 59m v1 [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 20,
   FilePath = asset.resource("lo_mr_mosaic_sweden.wms"),
   Description = [[
     This Lunar Orbiter (LO) mosaic of the Moon was constructed using photographs acquired

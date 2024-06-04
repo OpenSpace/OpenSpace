@@ -31,6 +31,7 @@ local LayerBase = {
   Identifier = Identifier .. "-base",
   Name = Name .. " (Base)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "land.jpg",
   Description = Description
 }
@@ -39,6 +40,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 110,
   FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }

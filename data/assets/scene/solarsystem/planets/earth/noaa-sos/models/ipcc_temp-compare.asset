@@ -41,8 +41,9 @@ for i,v in ipairs(layersNames) do
   local layer = {
     Identifier = Identifier .. v,
     Name = Name,
-  Enabled = asset.enabled,
-  FilePath = syncedDirectory .. v .. ".png",
+    Enabled = asset.enabled,
+    ZIndex = 100,
+    FilePath = syncedDirectory .. v .. ".png",
     Description = Description
   }
 

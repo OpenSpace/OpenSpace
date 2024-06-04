@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Magellan_Mosaic_NewYork",
   Name = "Magellan Mosaic [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("magellan_mosaic_newyork.vrt"),
   BlendMode = "Color",
   Settings = { Gamma = 2.0 },

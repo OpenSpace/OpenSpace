@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_LOI_Utah",
   Name = "Messenger LOI [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("messenger_loi_utah.wms")
 }
 

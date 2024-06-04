@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "CTX_Mosaic_NewYork",
   Name = "CTX Mosaic [New York]",
   Enabled = asset.enabled,
+  ZIndex = 60,
   FilePath = asset.resource("ctx_mosaic_newyork.wms"),
   BlendMode = "Color"
 }

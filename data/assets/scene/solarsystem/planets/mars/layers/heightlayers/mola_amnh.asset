@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Mola_AMNH",
   Name = "Mola Elevation [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("mola_amnh.wms"),
   TilePixelSize = 360,
   Description = [[This digital elevation model (DEM) is based on data from the Mars

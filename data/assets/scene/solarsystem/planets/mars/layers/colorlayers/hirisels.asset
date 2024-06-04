@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "HiRISE-LS",
   Name = "HiRISE Local Set",
   Enabled = asset.enabled,
+  ZIndex = 70,
   FilePath = asset.resource("hirisels.vrt"),
   BlendMode = "Color",
   Description = [[HiRISE (High Resolution Imaging Science Experiment) is the most

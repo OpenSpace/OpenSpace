@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "MOC_WA_Color_LiU",
   Name = "MOC WA Color [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("moc_wa_color_sweden.wms"),
   Settings = {
     Gamma = 1.6,

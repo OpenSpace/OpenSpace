@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_WACGLD100_ClrShade_79S79N_256ppd = {
   Identifier = "LRO_WACGLD100_ClrShade_79S79N_256ppd",
   Name = [[LRO WAC GLD100 DEM, ColorHillShade]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_WAC_GLD100_DEM/ColorHillShade.vrt"),
   Description = [[]]
 }
@@ -16,6 +17,7 @@ local treks_LRO_WACGLD100_ClrShade_79S79N_256ppd = {
 local treks_LRO_WACGLD100_Shade_79S79N_256ppd = {
   Identifier = "LRO_WACGLD100_Shade_79S79N_256ppd",
   Name = [[LRO WAC GLD100 DEM, Hillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_WAC_GLD100_DEM/Hillshade.vrt"),
   Description = [[]]
 }

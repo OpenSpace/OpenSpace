@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "ESRI_World_Imagery",
   Name = "ESRI World Imagery",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("esri_world_imagery.wms"),
   Description = [[World Imagery provides one meter or better satellite and aerial
     imagery in many parts of the world and lower resolution satellite imagery

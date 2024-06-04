@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_HIW_Sweden",
   Name = "Messenger HIW [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("messenger_hiw_sweden.wms")
 }
 

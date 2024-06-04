@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_NAC_POLE_PSR_NORTH_STRETCH_EQ = {
   Identifier = "NAC_POLE_PSR_NORTH_STRETCH_EQ",
   Name = [[LRO NAC PSR Mosaic 20mpp, N Pole]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_NAC_PSR_Mosaic_20mpp/N_Pole.vrt"),
   Description = [[This is an uncontrolled mosaic generated from images taken by the Narrow Angle Camera (NAC) onboard the Lunar Reconnaissance Orbiter (LRO) for the North Pole region of the Moon. The NAC mosaics have been trimmed to the Permanently Shadowed Region (PSR) shapefile, providing visible NAC image coverage of the PSRs only. Acquisition of NAC PSR observations were optimized over several campaigns to maximize signal-to-noise ratio (SNR), resulting in a comprehensive dataset that is systematically reviewed and analyzed. Observations are acquired at a variety of pixel scales (2 to 20 m/px). The final PSR mosaics are assembled from re-sampled images to 20 m/px, and ordering of images is based on image quality and areal coverage of individual PSRs. A total of 550 NAC images were used to create a North Pole PSR mosaic at 20 m/px, 90&deg; to 80&deg; latitude, and -180&deg; to 180&deg; longitude. This mosaic has been merged with the existing LROC NAC North Pole RDR product to replace over-saturated illuminated polar areas.]]
 }
@@ -16,6 +17,7 @@ local treks_NAC_POLE_PSR_NORTH_STRETCH_EQ = {
 local treks_NAC_POLE_PSR_SOUTH_STRETCH_EQ = {
   Identifier = "NAC_POLE_PSR_SOUTH_STRETCH_EQ",
   Name = [[LRO NAC PSR Mosaic 20mpp, S Pole]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_NAC_PSR_Mosaic_20mpp/S_Pole.vrt"),
   Description = [[This is an uncontrolled mosaic generated from images taken by the Narrow Angle Camera (NAC) onboard the Lunar Reconnaissance Orbiter (LRO) for the South Pole region of the Moon. The NAC mosaics have been trimmed to the Permanently Shadowed Region (PSR) shapefile, providing visible NAC image coverage of the PSRs only. Acquisition of NAC PSR observations were optimized over several campaigns to maximize signal-to-noise ratio (SNR), resulting in a comprehensive dataset that is systematically reviewed and analyzed. Observations are acquired at a variety of pixel scales (2 to 20 m/px). The final PSR mosaics are assembled from re-sampled images to 20 m/px, and ordering of images is based on image quality and areal coverage of individual PSRs. A total of 550 NAC images were used to create a South Pole PSR mosaic at 20 m/px, 90&deg; to 80&deg; latitude, and -180&deg; to 180&deg; longitude. This mosaic has been merged with the existing LROC NAC South Pole RDR product to replace over-saturated illuminated polar areas.]]
 }

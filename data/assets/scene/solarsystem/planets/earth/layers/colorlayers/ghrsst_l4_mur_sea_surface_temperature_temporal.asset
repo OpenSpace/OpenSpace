@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "GHRSST_L4_MUR_Sea_Surface_Temperature_Temporal",
   Name = "GHRSST L4 MUR Sea Surface Temperature (Temporal)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   Type = "TemporalTileProvider",
   Mode = "Prototyped",
   Prototyped = {

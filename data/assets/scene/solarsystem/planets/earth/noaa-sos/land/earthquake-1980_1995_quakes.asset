@@ -34,6 +34,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "1024",
   Description = Description

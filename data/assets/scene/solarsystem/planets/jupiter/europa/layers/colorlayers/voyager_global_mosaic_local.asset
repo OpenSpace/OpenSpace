@@ -14,6 +14,7 @@ local Layer = {
   Identifier = "Voyager_Global_Mosaic_Local",
   Name = "Voyager Global Mosaic [Local]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = texturesPath .. "evgos.vrt",
   BlendMode = "Color"
 }

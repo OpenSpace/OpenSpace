@@ -6,6 +6,7 @@ local Layer = {
   Name = "Gebco [Sweden]",
   Identifier = "Gebco_Sweden",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("gebco_sweden.wms")
 }
 

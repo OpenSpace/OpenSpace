@@ -10,6 +10,7 @@ local treks_MSGR_Aksakov_Crater_Peak_Ring_Ortho_29m = {
   Identifier = "MSGR_Aksakov_Crater_Peak_Ring_Ortho_29m",
   Name = [[MSGR MDIS Mosaic, Aksakov Crater Peak Ring]],
   FilePath = asset.resource("MSGR_MDIS_Mosaic/Aksakov_Crater_Peak_Ring.vrt"),
+  ZIndex = 50,
   Description = [[This is a visible orthoimage for the Aksakov Crater Peak Ring region on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 29m/pixel.]]
 }
 
@@ -17,6 +18,7 @@ local treks_MSGR_near_Dali_Crater_Ortho_20m = {
   Identifier = "MSGR_near_Dali_Crater_Ortho_20m",
   Name = [[MSGR MDIS Mosaic, Crater near Dali Crater]],
   FilePath = asset.resource("MSGR_MDIS_Mosaic/Crater_near_Dali_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a visible orthoimage for the Crater Near Dali Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 20m/pixel.]]
 }
 
@@ -24,6 +26,7 @@ local treks_MSGR_near_Geddes_Crater_Ortho_33m = {
   Identifier = "MSGR_near_Geddes_Crater_Ortho_33m",
   Name = [[MSGR MDIS Mosaic, Crater near Geddes Crater]],
   FilePath = asset.resource("MSGR_MDIS_Mosaic/Crater_near_Geddes_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a visible orthoimage for the Crater Near Geddes Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 33m/pixel.]]
 }
 
@@ -31,6 +34,7 @@ local treks_MSGR_Degas_Crater_Ortho_30m = {
   Identifier = "MSGR_Degas_Crater_Ortho_30m",
   Name = [[MSGR MDIS Mosaic, Degas Crater]],
   FilePath = asset.resource("MSGR_MDIS_Mosaic/Degas_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a visible orthoimage for the Degas Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 30m/pixel.]]
 }
 
@@ -38,6 +42,7 @@ local treks_MSGR_Kertesz_Crater_Ortho_30m = {
   Identifier = "MSGR_Kertesz_Crater_Ortho_30m",
   Name = [[MSGR MDIS Mosaic, Kertesz Crater]],
   FilePath = asset.resource("MSGR_MDIS_Mosaic/Kertesz_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a visible orthoimage for the KerteszCrater region on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 30m/pixel.]]
 }
 
@@ -45,6 +50,7 @@ local treks_MSGR_nw_Degas_Crater_Ortho_26m = {
   Identifier = "MSGR_nw_Degas_Crater_Ortho_26m",
   Name = [[MSGR MDIS Mosaic, North-West of Degas Crater]],
   FilePath = asset.resource("MSGR_MDIS_Mosaic/North-West_of_Degas_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a visible orthoimage for the region northwest of Degas Crater on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 26m/pixel.]]
 }
 
@@ -52,6 +58,7 @@ local treks_MSGR_Praxiteles_Peak_Ring_Ortho_20m = {
   Identifier = "MSGR_Praxiteles_Peak_Ring_Ortho_20m",
   Name = [[MSGR MDIS Mosaic, Praxiteles Peak Ring]],
   FilePath = asset.resource("MSGR_MDIS_Mosaic/Praxiteles_Peak_Ring.vrt"),
+  ZIndex = 50,
   Description = [[This is a visible orthoimage for the Praxiteles Peak Ring region on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 20m/pixel.]]
 }
 
@@ -59,6 +66,7 @@ local treks_MSGR_Raditladi_Crater_Ortho_40m = {
   Identifier = "MSGR_Raditladi_Crater_Ortho_40m",
   Name = [[MSGR MDIS Mosaic, Raditladi Crater]],
   FilePath = asset.resource("MSGR_MDIS_Mosaic/Raditladi_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a visible orthoimage for the Raditladi Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 40m/pixel.]]
 }
 
@@ -66,6 +74,7 @@ local treks_MSGR_Sander_Crater_Ortho_22m = {
   Identifier = "MSGR_Sander_Crater_Ortho_22m",
   Name = [[MSGR MDIS Mosaic, Sander Crater]],
   FilePath = asset.resource("MSGR_MDIS_Mosaic/Sander_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a visible orthoimage for the Sander Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 22m/pixel.]]
 }
 
@@ -73,6 +82,7 @@ local treks_MSGR_Sholem_Aleichem_Crater_Wall_Ortho_8m = {
   Identifier = "MSGR_Sholem_Aleichem_Crater_Wall_Ortho_8m",
   Name = [[MSGR MDIS Mosaic, Sholem Aleichem Crater Wall]],
   FilePath = asset.resource("MSGR_MDIS_Mosaic/Sholem_Aleichem_Crater_Wall.vrt"),
+  ZIndex = 50,
   Description = [[This is a visible orthoimage for the Sholem Aleichem Crater Wall region on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 8m/pixel.]]
 }
 

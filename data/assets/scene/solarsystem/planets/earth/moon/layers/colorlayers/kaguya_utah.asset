@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Kaguya_Utah",
   Name = "Kaguya [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 20,
   FilePath = asset.resource("kaguya_utah.vrt"),
   Settings = {
     Gamma = 1.0,

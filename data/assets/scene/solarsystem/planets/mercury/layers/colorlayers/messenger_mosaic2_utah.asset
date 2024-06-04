@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_Mosaic2_Utah",
   Name = "Messenger Mosaic2 [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 20,
   FilePath = asset.resource("messenger_mosaic2_utah.wms")
 }
 

@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Apollo15Metric_NewYork",
   Name = "Apollo 15 Metric Cam [New York]",
   Enabled = asset.enabled,
+  ZIndex = 50,
   FilePath = asset.resource("apollo_15_metric_newyork.wms"),
   Description = [[
     The Apollo 15 Metric (Mapping) Camera obtained high-quality metric photographs, on

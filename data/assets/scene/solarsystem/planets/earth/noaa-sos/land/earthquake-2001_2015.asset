@@ -29,6 +29,7 @@ local syncedDirectory = asset.resource({
 local LayerAllquakes = {
   Identifier = Identifier .. "-allquakes",
   Name = Name .. " (All Quakes)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "All_Quakes_2001-2015_4k.jpg",
   Description = Description
 }
@@ -36,6 +37,7 @@ local LayerAllquakes = {
 local LayerQuakeBasemap = {
   Identifier = Identifier .. "-quake-basemap",
   Name = Name .. " (Quake Basemap)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "quake_basemap_4k.jpg",
   Description = Description
 }
@@ -43,6 +45,7 @@ local LayerQuakeBasemap = {
 local LayerTsunamiBasemap = {
   Identifier = Identifier .. "-tsunami-basemap",
   Name = Name .. " (Tsunami Basemap)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "Tsunami_basemap_4k.jpg",
   Description = Description
 }
@@ -50,6 +53,7 @@ local LayerTsunamiBasemap = {
 local LayerQuakesGte6p5 = {
   Identifier = Identifier .. "-gte6_5",
   Name = Name .. " (GTE 6.5)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "Quakes_gte6.5_2001-2015_4k.jpg",
   Description = Description
 }
@@ -57,6 +61,7 @@ local LayerQuakesGte6p5 = {
 local LayerQuakesGte8 = {
   Identifier = Identifier .. "-gte8",
   Name = Name .. " (GTE 8.0)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "Quakes_gte8_2001-2015_4k.jpg",
   Description = Description
 }

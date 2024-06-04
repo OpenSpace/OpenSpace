@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_LOLA_ClrShade_Global_128ppd_v04 = {
   Identifier = "LRO_LOLA_ClrShade_Global_128ppd_v04",
   Name = [[LRO LOLA DEM, ColorHillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LOLA_DEM/ColorHillshade.vrt"),
   Description = [[]]
 }
@@ -16,6 +17,7 @@ local treks_LRO_LOLA_ClrShade_Global_128ppd_v04 = {
 local treks_LRO_LOLA_ClrShade_Global_256ppd_v06 = {
   Identifier = "LRO_LOLA_ClrShade_Global_256ppd_v06",
   Name = [[LRO LOLA DEM, ColorHillshade v6]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LOLA_DEM/ColorHillshade_v6.vrt"),
   Description = [[]]
 }
@@ -23,6 +25,7 @@ local treks_LRO_LOLA_ClrShade_Global_256ppd_v06 = {
 local treks_LRO_LOLA_Coverage_Global_128ppd_v04 = {
   Identifier = "LRO_LOLA_Coverage_Global_128ppd_v04",
   Name = [[LRO LOLA DEM, Coverage]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LOLA_DEM/Coverage.vrt"),
   Description = [[]]
 }
@@ -30,6 +33,7 @@ local treks_LRO_LOLA_Coverage_Global_128ppd_v04 = {
 local treks_LRO_LOLA_Shade_Global_256ppd_v06 = {
   Identifier = "LRO_LOLA_Shade_Global_256ppd_v06",
   Name = [[LRO LOLA DEM, Hillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LOLA_DEM/Hillshade.vrt"),
   Description = [[]]
 }
@@ -37,6 +41,7 @@ local treks_LRO_LOLA_Shade_Global_256ppd_v06 = {
 local treks_LRO_LOLA_NoDataMask_Global_128ppd_v04 = {
   Identifier = "LRO_LOLA_NoDataMask_Global_128ppd_v04",
   Name = [[LRO LOLA DEM, No Data Mask]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LOLA_DEM/No_Data_Mask.vrt"),
   Description = [[]]
 }
@@ -44,6 +49,7 @@ local treks_LRO_LOLA_NoDataMask_Global_128ppd_v04 = {
 local treks_LRO_LOLA_ClrShade_NPole875_5mp_v04_EQ = {
   Identifier = "LRO_LOLA_ClrShade_NPole875_5mp_v04_EQ",
   Name = [[LRO LOLA DEM, N Pole, 87.5 deg, ColorHillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LOLA_DEM/N_Pole.vrt"),
   Description = [[This is version 4 of the LRO LOLA North Pole 87.5 deg DEM, ColorHillshade. This is a colorized shaded-relief of a original polar LOLA Digital Elevation Model (DEM). The DEM is a shape map (radius) of the Moon at a resolution 100 meters per pixel, based on altimetry data acquired through Spetember 2011 by the LOLA instrument. The ground tracks were interpolated using the Generic Mapping Tools programs "surface" and "grdblend". Map values are referred to a radius of 1737400 m.]]
 }
@@ -51,6 +57,7 @@ local treks_LRO_LOLA_ClrShade_NPole875_5mp_v04_EQ = {
 local treks_LRO_LOLA_ClrShade_SPole875_5mp_v04_EQ = {
   Identifier = "LRO_LOLA_ClrShade_SPole875_5mp_v04_EQ",
   Name = [[LRO LOLA DEM, S Pole, 87.5 deg, ColorHillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LOLA_DEM/S_Pole.vrt"),
   Description = [[This is version 4 of the LRO LOLA South Pole 87.5 deg DEM, ColorHillshade. This is a colorized shaded-relief of a original polar LOLA Digital Elevation Model (DEM). The DEM is a shape map (radius) of the Moon at a resolution 100 meters per pixel, based on altimetry data acquired through Spetember 2011 by the LOLA instrument. The ground tracks were interpolated using the Generic Mapping Tools programs "surface" and "grdblend". Map values are referred to a radius of 1737400 m.]]
 }

@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_SHADE_NewYork",
   Name = "Messenger SHADE [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("messenger_shade_newyork.wms"),
   Settings = {
     Gamma = 1.33,

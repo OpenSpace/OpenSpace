@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Lola_Shade_NewYork",
   Name = "Lola Shade [New York]",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = asset.resource("lola_shade_newyork.wms"),
   Description = [[This is a shaded-relief of a original polar digital elevation model
     (DEM) from the Lunar Orbiter Laser Altimeter (LOLA; Smith et al., 2010), an instrument

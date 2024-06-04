@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_BDR_Sweden",
   Name = "Messenger BDR [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("messenger_bdr_sweden.wms"),
   TilePixelSize = 360,
   Description = [[The Map Projected Basemap RDR (BDR) data set consists of a global
