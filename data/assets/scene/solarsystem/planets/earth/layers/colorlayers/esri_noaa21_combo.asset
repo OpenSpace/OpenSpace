@@ -3,28 +3,28 @@ local globe = asset.require("../../earth")
 
 
 local Layer = {
-  Identifier = "ESRI_VIIRS_Combo",
-  Name = "ESRI VIIRS Combo",
+  Identifier = "ESRI_NOAA21_Combo",
+  Name = "ESRI NOAA21 Combo",
   Enabled = asset.enabled,
-  ZIndex = 20,
+  ZIndex = 30,
   Type = "TileProviderByLevel",
   LevelTileProviders = {
     {
       MaxLevel = 4,
       TileProvider = {
-        Identifier = "Temporal_VIIRS_SNPP",
-        Name = "Temporal VIIRS SNPP",
+        Identifier = "Temporal_VIIRS_NOAA21",
+        Name = "Temporal VIIRS NOAA21",
         Type = "TemporalTileProvider",
         Mode = "Prototyped",
         Prototyped = {
           Time = {
-            Start = "2015-11-24",
-            End = "2024-05-27"
+            Start = "2024-04-19",
+            End = "Today"
           },
           TemporalResolution = "1d",
           TimeFormat = "YYYY-MM-DD",
           Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
-            "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+            "VIIRS_NOAA21_CorrectedReflectance_TrueColor",
             "250m",
             "jpg"
           )
@@ -43,8 +43,8 @@ local Layer = {
     }
   },
   PadTiles = false,
-  Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
-    Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]]
+  Description = [[Level based layer combining "NOAA20 SNPP (Temporal)" and ESRI World
+    Imagery. "NOAA20 SNPP (Temporal)" is faded out at tile level 4]]
 }
 
 
@@ -61,10 +61,10 @@ asset.export("layer", Layer)
 
 
 asset.meta = {
-  Name = "ESRI VIIRS Combo",
-  Version = "1.1",
-  Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
-  Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]],
+  Name = "ESRI NOAA20 VIIRS Combo",
+  Version = "1.0",
+  Description = [[Level based layer combining "NOAA20 SNPP (Temporal)" and ESRI World
+  Imagery. "NOAA20 SNPP (Temporal)" is faded out at tile level 4]],
   Author = "OpenSpace Tem",
   URL = "http://www.openspaceproject.com",
   License = "MIT License"
