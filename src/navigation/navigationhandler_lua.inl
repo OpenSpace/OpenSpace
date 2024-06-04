@@ -25,30 +25,39 @@
 namespace {
 
 /**
- * Load a navigation state from file. The file should be a lua file returning the
- * navigation state as a table formatted as a Navigation State, such as the output files
- * of saveNavigationState. If usetimeStamp is set to true and the provided navigation
- * state has a timestamp, time will be set as well.
+ * Set the camera position by loading a [NavigationState](#core_navigation_state) from
+ * file. The file should be in json format, such as the output files of
+ * `saveNavigationState`.
+ *
+ * \param filePath the path to the file, including the file name (and extension, if it is
+ *                 anything other than `.navstate`)
+ * \param useTimeStamp if true, and the provided NavigationState includes a timestamp,
+ *                     the time will be set as well.
  */
-[[codegen::luawrap]] void loadNavigationState(std::string cameraStateFilePath,
+[[codegen::luawrap]] void loadNavigationState(std::string filePath,
                                               bool useTimeStamp = false)
 {
-    if (cameraStateFilePath.empty()) {
+    if (filePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
     openspace::global::navigationHandler->loadNavigationState(
-        cameraStateFilePath,
+        filePath,
         useTimeStamp
     );
 }
 
 /**
- * Return the current navigation state as a Lua table. The optional argument is the scene
- * graph node to use as reference frame. By default, the reference frame will picked based
- * on whether the orbital navigator is currently following the anchor node rotation. If it
- * is, the anchor will be chosen as reference frame. If not, the reference frame will be
- * set to the scene graph root.
+ * Return the current [NavigationState](#core_navigation_state) as a Lua table.
+ *
+ * By default, the reference frame will be picked based on whether the orbital navigator is
+ * currently following the anchor node rotation. If it is, the anchor will be chosen as
+ * reference frame. If not, the reference frame will be set to the scene graph root.
+ *
+ * \param frame the identifier of an optional scene graph node to use as reference frame
+ *              for the NavigationState
+ *
+ * \return a Lua table representing the current NavigationState of the camera
  */
 [[codegen::luawrap]] ghoul::Dictionary getNavigationState(
                                                          std::optional<std::string> frame)
@@ -72,9 +81,13 @@ namespace {
     return state.dictionary();
 }
 
-// Set the navigation state. The first argument must be a valid Navigation State. If
-// useTimeStamp is set to true and the provided navigation state has a timestamp, time
-// will be set as well.
+/**
+ * Set the camera position from a provided [NavigationState](#core_navigation_state).
+ *
+ * \param navigationState a table describing the NavigationState to set
+ * \param useTimeStamp if true, and the provided NavigationState includes a timestamp,
+ *                     the time will be set as well
+ */
 [[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState,
                                              bool useTimeStamp = false)
 {
@@ -90,11 +103,17 @@ namespace {
 }
 
 /**
- * Save the current navigation state to a file with the path given by the first argument.
- * The optional second argument is the scene graph node to use as reference frame. By
- * default, the reference frame will picked based on whether the orbital navigator is
- * currently following the anchor node rotation. If it is, the anchor will be chosen as
+ * Save the current [NavigationState](#core_navigation_state) to a file with the path
+ * given by the first argument.
+ *
+ * By default, the reference frame will be picked based on whether the orbital navigator
+ * is currently following the anchor node rotation. If it is, the anchor will be chosen as
  * reference frame. If not, the reference frame will be set to the scene graph root.
+ *
+ * \param path the file path for where to save the NavigationState, including the file
+ *             name. If no extension is added, the file is saved as a `.navstate` file.
+ * \param frame the identifier of the scene graph node which coordinate system should be
+ *              used as a reference frame for the NavigationState.
  */
 [[codegen::luawrap]] void saveNavigationState(std::string path, std::string frame = "") {
     if (path.empty()) {
@@ -103,18 +122,25 @@ namespace {
     openspace::global::navigationHandler->saveNavigationState(path, frame);
 }
 
-// Reset the camera direction to point at the anchor node.
+/**
+ * Reset the camera direction to point at the anchor node.
+ */
 [[codegen::luawrap]] void retargetAnchor() {
     openspace::global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
 
-// Reset the camera direction to point at the aim node.
+/**
+ * Reset the camera direction to point at the aim node.
+ */
 [[codegen::luawrap]] void retargetAim() {
     openspace::global::navigationHandler->orbitalNavigator().startRetargetAim();
 }
 
-// Picks the next node from the interesting nodes out of the profile and selects that. If
-// the current anchor is not an interesting node, the first will be selected
+/**
+ * Picks the next node from the interesting nodes out of the profile and selects that.
+ * If the current anchor is not an interesting node, the first node in the list will be
+ * selected.
+ */
 [[codegen::luawrap]] void targetNextInterestingAnchor() {
     using namespace openspace;
     if (global::profile->markNodes.empty()) {
@@ -143,8 +169,11 @@ namespace {
     global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
 
-// Picks the previous node from the interesting nodes out of the profile and selects that.
-// If the current anchor is not an interesting node, the first will be selected
+/**
+ * Picks the previous node from the interesting nodes out of the profile and selects that.
+ * If the current anchor is not an interesting node, the first node in the list will be
+ * selected.
+ */
 [[codegen::luawrap]] void targetPreviousInterestingAnchor() {
     using namespace openspace;
     if (global::profile->markNodes.empty()) {
@@ -176,25 +205,20 @@ namespace {
 }
 
 /**
- * Finds the input joystick with the given 'name' and binds the axis identified by the
- * second argument to be used as the type identified by the third argument. If
- * 'isInverted' is 'true', the axis value is inverted. 'joystickType' is if the joystick
- * behaves more like a joystick or a trigger, where the first is the default. If
- * 'isSticky' is 'true', the value is calculated relative to the previous value. If
- * 'shouldFlip' is true, then the camera movement for the axis is reversed. If
- * 'sensitivity' is given then that value will affect the sensitivity of the axis together
- * with the global sensitivity.
+ * Bind an axis of a joystick to be used as a certain type, and optionally define
+ * detailed settings for the axis.
  *
  * \param joystickName the name for the joystick or game controller that should be bound
  * \param axis the axis of the joystick that should be bound
  * \param axisType the type of movement that the axis should be mapped to
- * \param shouldInvert if the joystick movement should be inverted or not
- * \param joystickType what type of joystick or axis this is. Either
- *                     <code>"JoystickLike"</code> or <code>"TriggerLike"</code>.
- * \param isSticky if true, the value is calculated relative to the previous value,
- *                 if false the the value is used as is.
+ * \param shouldInvert decides if the joystick axis movement should be inverted or not
+ * \param joystickType what type of joystick or axis this is. Decides if the joystick
+ *                     behaves more like a joystick or a trigger. Either `"JoystickLike"`
+ *                     or `"TriggerLike"`, where `"JoystickLike"` is default
+ * \param isSticky if true, the value is calculated relative to the previous value.
+ *                 If false, the value is used as is
  * \param shouldFlip reverses the movement of the camera that the joystick produces
- * \param sensitivity sensitivity for this axis
+ * \param sensitivity sensitivity for this axis, in addition to the global sensitivity
  */
 [[codegen::luawrap]] void bindJoystickAxis(std::string joystickName, int axis,
                                            std::string axisType,
@@ -219,21 +243,22 @@ namespace {
 }
 
 /**
- * Finds the input joystick with the given 'name' and binds the axis identified by the
- * second argument to be bound to the property identified by the third argument. 'min' and
- * 'max' is the minimum and the maximum allowed value for the given property and the axis
- * value is rescaled from [-1, 1] to [min, max], default is [0, 1]. If 'isInverted' is
- * 'true', the axis value is inverted. The last argument determines whether the property
- * change is going to be executed locally or remotely, where the latter is the default.
+ * Binds an axis of a joystick to a numerical property value in OpenSpace. This means that
+ * interacting with the joystick will change the property value, within a given min-max
+ * range.
+ *
+ * The axis value will be rescaled from [-1, 1] to the provided [min, max] range
+ * (default is [0, 1]).
  *
  * \param joystickName the name for the joystick or game controller that should be bound
  * \param axis the axis of the joystick that should be bound
- * \param propertyUri the property that this joystick axis should modify
+ * \param propertyUri the identifier (URI) of the property that this joystick axis should
+ *                    modify
  * \param min the minimum value that this axis can set for the property
  * \param max the maximum value that this axis can set for the property
  * \param shouldInvert if the joystick movement should be inverted or not
- * \param isRemote if true, the property change will also be executed on connected nodes
- *                 if false, the property change will only affect the master node
+ * \param isRemote if true, the property change will also be executed on connected nodes.
+ *                 If false, the property change will only affect the master node
  */
 [[codegen::luawrap]] void bindJoystickAxisProperty(std::string joystickName, int axis,
                                                    std::string propertyUri,
@@ -254,43 +279,90 @@ namespace {
     );
 }
 
+struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
+    // The current type of axis binding
+    std::string type;
+
+    // Whether the values are inverted
+    bool invert;
+
+    // The type of joystick that this axis represents on the controller - either
+    // `\"JoystickLike\"` or `\"TriggerLike\"`. A joystick is `\"TriggerLike\"` if it
+    // can only be pressed or pushed in one direction. A `\"JoystickLike\"` axis can
+    // be pushed in two directions; for example, left and right, or up and down.
+    std::string joystickType;
+
+    // Whether or not this axis is “sticky”. An axis is “sticky” if, when you let go of
+    // it, the values it represents in the software do not go back to the default.
+    bool isSticky;
+
+    // Whether the camera movement for the axis is reversed. In the case of a
+    // `\"JoystickLike\"` axis, this is the same as inverting the axis. However, in the
+    // case of a `\"TriggerLike\" axis, this can reverse the camera movement for the
+    // trigger.
+    bool flip;
+
+    // Sensitivity value for this axis
+    double sensitivity;
+
+    // The identifier (URI) of the property that is bound to this axes, if one is
+    std::optional<std::string> propertyUri;
+
+    // If a property is bound to this axis, this is the min value that can be set using
+    // the joystick input
+    std::optional<float> minValue;
+
+    // If a property is bound to this axis, this is the max value that can be set using
+    // the joystick input
+    std::optional<float> maxValue;
+
+    // If a property is bound to this axis, this says whether the property changes should
+    // be forwarded to other connected nodes or sessions (similarly to \"isLocal\" for
+    // actions)
+    std::optional<bool> isRemote;
+};
+
 /**
- * Finds the input joystick with the given 'name' and returns the joystick axis
- * information for the passed axis. The information that is returned is the current axis
- * binding as a string, whether the values are inverted as bool, the joystick type as a
- * string, whether the axis is sticky as bool, the sensitivity as number, the property uri
- * bound to the axis as string (empty is type is not Property), the min and max values for
- * the property as numbers and whether the property change will be executed remotly as
- * bool.
+ * Return all the information bound to a certain joystick axis.
+ *
+ * \param joystickName the name for the joystick or game controller with the axis for
+ *                     which to find the information
+ * \param axis the joystick axis for which to find the information
+ *
+ * \return an object with information about the joystick axis
  */
-[[codegen::luawrap]]
-std::tuple<
-    std::string, bool, std::string, bool, bool, double, std::string, float, float, bool
->
-joystickAxis(std::string joystickName, int axis)
-{
+[[codegen::luawrap]] ghoul::Dictionary joystickAxis(std::string joystickName, int axis) {
     using namespace openspace;
 
     interaction::JoystickCameraStates::AxisInformation info =
         global::navigationHandler->joystickAxisMapping(joystickName, axis);
 
-    return {
-        ghoul::to_string(info.type),
-        info.invert,
-        ghoul::to_string(info.joystickType),
-        info.isSticky,
-        info.flip,
-        info.sensitivity,
-        info.propertyUri,
-        info.minValue,
-        info.maxValue,
-        info.isRemote
-    };
+    ghoul::Dictionary dict;
+    dict.setValue("Type", ghoul::to_string(info.type));
+    dict.setValue("Inverted", static_cast<bool>(info.invert));
+    dict.setValue("JoystickType", ghoul::to_string(info.joystickType));
+    dict.setValue("Sticky", info.isSticky);
+    dict.setValue("Flip", static_cast<bool>(info.flip));
+    dict.setValue("Sensitivity", info.sensitivity);
+
+    bool isPropertyBound = !info.propertyUri.empty();
+    if (isPropertyBound) {
+        dict.setValue("PropertyUri", info.propertyUri);
+        dict.setValue("MinValue", static_cast<double>(info.minValue));
+        dict.setValue("MaxValue", static_cast<double>(info.maxValue));
+        dict.setValue("IsRemote", info.isRemote);
+    }
+
+    return dict;
 }
 
 /**
- * Finds the input joystick with the given 'name' and sets the deadzone for a particular
- * joystick axis, which means that any input less than this value is completely ignored.
+ * Set the deadzone value for a particular joystick axis, which means that any input less
+ * than this value is completely ignored.
+ *
+ * \param joystickName the name for the joystick or game controller
+ * \param axis the joystick axis for which to set the deadzone
+ * \param deadzone the new deadzone value
  */
 [[codegen::luawrap("setAxisDeadZone")]] void setJoystickAxisDeadZone(
                                                                  std::string joystickName,
@@ -303,6 +375,12 @@ joystickAxis(std::string joystickName, int axis)
 
 /**
  * Returns the deadzone for the desired axis of the provided joystick.
+ *
+ * \param joystickName the name for the joystick or game controller which information
+ *                     should be returned
+ * \param axis the joystick axis for which to get the deadzone value
+ *
+ * \return the deadzone value
  */
 [[codegen::luawrap("axisDeadzone")]] float joystickAxisDeadzone(std::string joystickName,
                                                                 int axis)
@@ -315,13 +393,20 @@ joystickAxis(std::string joystickName, int axis)
 }
 
 /**
- * Finds the input joystick with the given 'name' and binds a Lua script given by the
- * third argument to be executed when the joystick button identified by the second
- * argument is triggered. The fifth argument determines when the script should be
- * executed, this defaults to 'Press', which means that the script is run when the user
- * presses the button. The fourth arguemnt is the documentation of the script in the third
- * argument. The sixth argument determines whether the command is going to be executable
- * locally or remotely, where the latter is the default.
+ * Bind a Lua script to one of the buttons for a joystick.
+ *
+ * \param joystickName the name for the joystick or game controller
+ * \param button the button to which to bind the script
+ * \param command the script that should be executed on button trigger
+ * \param documentation the documentation for the provided script/command
+ * \param action the action for when the script should be executed. This defaults to
+ *               `"Press"`, which means that the script is run when the user presses the
+ *               button. Alternatives are `"Idle"` (if the button is unpressed and has
+ *               been unpressed since the last frame), `"Repeat"` (if the button has been
+ *               pressed since longer than the last frame), and `"Release"` (if the button was
+ *               released since the last frame)
+ * \param isRemote a value saying whether the command is going to be executable
+ *                 locally or remotely, where the latter is the default
  */
 [[codegen::luawrap]] void bindJoystickButton(std::string joystickName, int button,
                                              std::string command,
@@ -344,8 +429,11 @@ joystickAxis(std::string joystickName, int axis)
 }
 
 /**
- * Finds the input joystick with the given 'name' and removes all commands that are
- * currently bound to the button identified by the second argument.
+ * Remove all commands that are currently bound to a button of a joystick or game
+ * controller
+ *
+ * \param joystickName the name for the joystick or game controller
+ * \param button the button for which to clear the commands
  */
 [[codegen::luawrap]] void clearJoystickButton(std::string joystickName, int button) {
     openspace::global::navigationHandler->clearJoystickButtonCommand(
@@ -355,8 +443,13 @@ joystickAxis(std::string joystickName, int axis)
 }
 
 /**
- * Finds the input joystick with the given 'name' and returns the script that is currently
- * bound to be executed when the provided button is pressed.
+ * Get the Lua script that is currently bound to be executed when the provided button is
+ * pressed/triggered.
+ *
+ * \param joystickName the name for the joystick or game controller
+ * \param button the button for which to get the command
+ *
+ * \return the currently bound Lua script
  */
 [[codegen::luawrap]] std::string joystickButton(std::string joystickName, int button) {
     using namespace openspace;
@@ -374,43 +467,80 @@ joystickAxis(std::string joystickName, int axis)
     return cmd;
 }
 
-// Directly adds to the global rotation of the camera.
-[[codegen::luawrap]] void addGlobalRotation(double v1, double v2) {
+/**
+ * Directly add to the global rotation of the camera (around the focus node).
+ *
+ * \param xValue the value to add in the x-direction (a positive value rotates to the
+ *               right and a negative value to the left)
+ * \param yValue the value to add in the y-direction (a positive value rotates the focus
+ *               upwards and a negative value downwards)
+ */
+[[codegen::luawrap]] void addGlobalRotation(double xValue, double yValue) {
     using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRotation(
-        glm::dvec2(v1, v2)
+        glm::dvec2(xValue, yValue)
     );
 }
 
-// Directly adds to the local rotation of the camera.
-[[codegen::luawrap]] void addLocalRotation(double v1, double v2) {
+/**
+ * Directly adds to the local rotation of the camera (around the camera's current
+ * position).
+ *
+ * \param xValue the value to add in the x-direction (a positive value rotates to the
+ *               left and a negative value to the right)
+ * \param yValue the value to add in the y-direction (a positive value rotates the camera
+ *               upwards and a negative value downwards)
+ */
+[[codegen::luawrap]] void addLocalRotation(double xValue, double yValue) {
     using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRotation(
-        glm::dvec2(v1, v2)
+        glm::dvec2(xValue, yValue)
     );
 }
 
-// Directly adds to the truck movement of the camera.
-[[codegen::luawrap]] void addTruckMovement(double v1, double v2) {
+
+/**
+ * Directly adds to the truck movement of the camera. This is the movement along the line
+ * from the camera to the focus node.
+ *
+ * A positive value moves the camera closer to the focus, and a negative value moves the
+ * camera further away.
+ *
+ * \param value the value to add
+ */
+[[codegen::luawrap]] void addTruckMovement(double value) {
     using namespace openspace;
+    // @TODO: Note that the x value isn't actually used and the code in the navigation
+    // handlers for these should be cleaned up. The same goes for the roll funcitons below
     global::navigationHandler->orbitalNavigator().scriptStates().addTruckMovement(
-        glm::dvec2(v1, v2)
+        glm::dvec2(0.0, value)
     );
 }
 
-// Directly adds to the local roll of the camera.
-[[codegen::luawrap]] void addLocalRoll(double v1, double v2) {
+/**
+ * Directly adds to the local roll of the camera. This is the rotation around the camera's
+ * forward/view direction.
+ *
+ * \param value the value to add
+ */
+[[codegen::luawrap]] void addLocalRoll(double value) {
     using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRoll(
-        glm::dvec2(v1, v2)
+        glm::dvec2(value, 0.0)
     );
 }
 
-// Directly adds to the global roll of the camera.
-[[codegen::luawrap]] void addGlobalRoll(double v1, double v2) {
+/**
+ * Directly adds to the global roll of the camera. This is a rotation around the line
+ * between the focus node and the camera (not always the same as the camera view
+ * direction)
+ *
+ * \param value the value to add
+ */
+[[codegen::luawrap]] void addGlobalRoll(double value) {
     using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRoll(
-        glm::dvec2(v1, v2)
+        glm::dvec2(value, 0.0)
     );
 }
 
@@ -429,7 +559,9 @@ joystickAxis(std::string joystickName, int axis)
 }
 
 /**
- * Return the complete list of connected joysticks
+ * Return the complete list of connected joysticks.
+ *
+ * \return a list of joystick names
  */
 [[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
     using namespace openspace;
@@ -437,7 +569,9 @@ joystickAxis(std::string joystickName, int axis)
 }
 
 /**
- * Returns the distance in meters to the current focus node
+ * Return the distance to the current focus node.
+ *
+ * \return the distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocus() {
     using namespace openspace;
@@ -449,7 +583,9 @@ joystickAxis(std::string joystickName, int axis)
 }
 
 /**
- * Returns the distance in meters to the current focus node's bounding sphere
+ * Return the distance to the current focus node's bounding sphere.
+ *
+ * \return the distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocusBoundingSphere() {
     using namespace openspace;
@@ -463,7 +599,9 @@ joystickAxis(std::string joystickName, int axis)
 }
 
 /**
- * Returns the distance in meters to the current focus node's interaction sphere
+ * Return the distance to the current focus node's interaction sphere.
+ *
+ * \return the distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocusInteractionSphere() {
     using namespace openspace;

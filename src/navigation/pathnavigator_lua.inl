@@ -24,28 +24,40 @@
 
 namespace {
 
-// Returns true if a camera path is currently running, and false otherwise.
+/**
+ * Returns true if a camera path is currently running, and false otherwise.
+ *
+ * \return Whether a camera path is currently active, or not
+ */
 [[codegen::luawrap]] bool isFlying() {
     using namespace openspace;
     return global::openSpaceEngine->currentMode() == OpenSpaceEngine::Mode::CameraPath;
 }
 
-// Continue playing a paused camera path.
+/**
+ * Continue playing a paused camera path.
+ */
 [[codegen::luawrap]] void continuePath() {
     openspace::global::navigationHandler->pathNavigator().continuePath();
 }
 
-// Pause a playing camera path.
+/**
+ * Pause a playing camera path.
+ */
 [[codegen::luawrap]] void pausePath() {
     openspace::global::navigationHandler->pathNavigator().pausePath();
 }
 
-// Stops a path, if one is being played.
+/**
+ * Stops a path, if one is being played.
+ */
 [[codegen::luawrap]] void stopPath() {
     openspace::global::navigationHandler->pathNavigator().abortPath();
 }
 
-// Immediately skips to the end of the current camera path, if one is being played.
+/**
+ * Immediately skips to the end of the current camera path, if one is being played.
+ */
 [[codegen::luawrap]] void skipToEnd() {
     openspace::global::navigationHandler->pathNavigator().skipToEnd();
 }
@@ -156,9 +168,12 @@ namespace {
 }
 
 /**
- * Create a path to the navigation state described by the input table. The optional
- * double specifies the target duration of the motion, in seconds. Note that roll must be
- * included for the target up direction to be taken into account.
+ * Create a path to the navigation state described by the input table. Note that roll must be
+ * included for the target up direction in the navigation state to be taken into account.
+ *
+ * \param navigationState A [NavigationState](#core_navigation_state) to fly to
+ * \param duration An optional duration for the motion to take, in seconds. For example,
+ *                 a value of 5 means "fly to this position over a duration of 5 seconds"
  */
 [[codegen::luawrap]] void flyToNavigationState(ghoul::Dictionary navigationState,
                                                std::optional<double> duration)
@@ -196,8 +211,10 @@ namespace {
 }
 
 /**
- * Zoom linearly to the current focus node, using the default distance. The optional input
- * parameter specifies the duration for the motion, in seconds.
+ * Zoom linearly to the current focus node, using the default distance.
+ *
+ * \param duration An optional duration for the motion to take, in seconds. For example,
+ *                 a value of 5 means "zoom in over 5 seconds"
  */
 [[codegen::luawrap]] void zoomToFocus(std::optional<double> duration) {
     using namespace openspace;
@@ -227,9 +244,10 @@ namespace {
 }
 
 /**
- * Fly linearly to a specific distance in relation to the focus node. The distance is
- * given in meters above the bounding sphere of the current focus node. The optional input
- * parameter specifies the duration for the motion, in seconds.
+ * Fly linearly to a specific distance in relation to the focus node.
+ *
+ * \param distance The distance to fly to, in meters above the bounding sphere.
+ * \param duration An optional duration for the motion to take, in seconds.
  */
 [[codegen::luawrap]] void zoomToDistance(double distance, std::optional<double> duration)
 {
@@ -265,11 +283,14 @@ namespace {
 }
 
 /**
- * Fly linearly to a specific distance in relation to the focus node. The distance is
- * given as a multiple of the bounding sphere of the current focus node. That is, a value
- * of 1 will result in a position at a distance of one times the size of the bounding
- * sphere away from the object. The optional input parameter specifies the duration for
- * the motion, in seconds.
+ * Fly linearly to a specific distance in relation to the focus node, given as a relative
+ * value based on the size of the object rather than in meters.
+ *
+ * \param distance The distance to fly to, given as a multiple of the bounding sphere of
+ *                 the current focus node bounding sphere. A value of 1 will result in a
+ *                 position at a distance of one times the size of the bounding
+ *                 sphere away from the object.
+ * \param duration An optional duration for the motion, in seconds.
  */
 [[codegen::luawrap]] void zoomToDistanceRelative(double distance,
                                                  std::optional<double> duration)
@@ -292,7 +313,7 @@ namespace {
     insDict.setValue("Height", distance);
     insDict.setValue("PathType", std::string("Linear"));
 
-    if (duration.has_value()) {
+  if (duration.has_value()) {
         double d = *duration;
         if (d < 0.0) {
             throw ghoul::lua::LuaError("Duration must be a positive value");
@@ -311,7 +332,9 @@ namespace {
  * Fade rendering to black, jump to the specified node, and then fade in. This is done by
  * triggering another script that handles the logic.
  *
- * If no fade duration is specified, use the property from Navigation Handler
+ * \param navigationState A [NavigationState](#core_navigation_state) to jump to
+ * \param fadeDuration An optional duration for the fading. If not included, the
+ *                     property in Navigation Handler will be used
  */
 [[codegen::luawrap]] void jumpToNavigationState(ghoul::Dictionary navigationState,
                                                 std::optional<double> fadeDuration)
@@ -357,7 +380,9 @@ namespace {
  * Fade rendering to black, jump to the specified navigation state, and then fade in.
  * This is done by triggering another script that handles the logic.
  *
- * If no fade duration is specified, use the property from Navigation Handler
+ * \param nodeIdentifier The identifier of the scene graph node to jump to
+ * \param fadeDuration An optional duration for the fading. If not included, the
+ *                     property in Navigation Handler will be used
  */
 [[codegen::luawrap]] void jumpTo(std::string nodeIdentifier,
                                  std::optional<double> fadeDuration)
@@ -382,10 +407,15 @@ namespace {
     }
 }
 
-// Create a camera path as described by the lua table input argument.
-[[codegen::luawrap]] void createPath(ghoul::Dictionary path) {
+/**
+ * Create a camera path as described by the instruction in the input argument.
+ *
+ * \param pathInstruction A table representing a [PathInstruction](#core_path_instruction),
+ *                        that describes a camera path to be created
+ */
+[[codegen::luawrap]] void createPath(ghoul::Dictionary pathInstruction) {
     using namespace openspace;
-    global::navigationHandler->pathNavigator().createPath(path);
+    global::navigationHandler->pathNavigator().createPath(pathInstruction);
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
