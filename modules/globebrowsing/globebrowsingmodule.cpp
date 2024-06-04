@@ -356,8 +356,7 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
     goToChunk(
         globe,
         globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level)),
-        glm::vec2(0.5f, 0.5f),
-        true
+        glm::vec2(0.5f, 0.5f)
     );
 }
 
@@ -367,8 +366,7 @@ void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
     using namespace globebrowsing;
     goToGeodetic2(
         globe,
-        Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
-        true
+        Geodetic2{ glm::radians(latitude), glm::radians(longitude) }
     );
 }
 
@@ -381,20 +379,19 @@ void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
         {
             Geodetic2{ glm::radians(latitude), glm::radians(longitude) },
             altitude
-        },
-        true
+        }
     );
 }
 
 glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
                                               const globebrowsing::RenderableGlobe& globe,
-                                       double latitude, double longitude, double altitude)
+                                       double latitude, double longitude, std::optional<double> altitude)
 {
     using namespace globebrowsing;
 
     const Geodetic3 pos = {
         { .lat = glm::radians(latitude), .lon = glm::radians(longitude) },
-        altitude
+        altitude.value_or(altitudeFromCamera(globe))
     };
 
     return glm::vec3(globe.ellipsoid().cartesianPosition(pos));
@@ -440,9 +437,43 @@ glm::dvec3 GlobeBrowsingModule::geoPosition() const {
     return glm::dvec3(lat, lon, altitude);
 }
 
+double GlobeBrowsingModule::altitudeFromCamera(
+                                       const globebrowsing::RenderableGlobe& globe,
+                                       bool useHeightMap) const
+{
+    using namespace globebrowsing;
+
+    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
+    SceneGraphNode* sgn = dynamic_cast<SceneGraphNode*>(globe.owner());
+    if (!sgn) {
+        LERROR("Could not find scene graph node for globe");
+        return 0.0;
+    }
+
+    const glm::dmat4 inverseModelTransform = glm::inverse(sgn->modelTransform());
+
+    const glm::dvec3 cameraPositionModelSpace =
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
+
+    SurfacePositionHandle posHandle = globe.calculateSurfacePositionHandle(
+        cameraPositionModelSpace
+    );
+
+    if (useHeightMap) {
+        const glm::dvec3 centerToActualSurface = posHandle.centerToReferenceSurface +
+            posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+
+        return glm::length(cameraPositionModelSpace - centerToActualSurface);
+    }
+    else {
+        // Do not use height map => compute distance to reference surface
+        return glm::length(cameraPositionModelSpace - posHandle.centerToReferenceSurface);
+    }
+}
+
 void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
                                     const globebrowsing::TileIndex& ti,
-                                    const glm::vec2& uv, bool doResetCameraDirection)
+                                    const glm::vec2& uv)
 {
     using namespace globebrowsing;
 
@@ -456,61 +487,23 @@ void GlobeBrowsingModule::goToChunk(const globebrowsing::RenderableGlobe& globe,
         .lon = corner.lon + positionOnPatch.lon
     };
 
-    // Compute altitude
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
-    SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
-    if (!globeSceneGraphNode) {
-        LERROR("Cannot go to chunk. The renderable is not attached to scene graph node");
-        return;
-    }
-    const glm::dmat4 inverseModelTransform = glm::inverse(
-        globeSceneGraphNode->modelTransform()
-    );
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
-    const SurfacePositionHandle posHandle = globe.calculateSurfacePositionHandle(
-        cameraPositionModelSpace
-    );
+    const double altitude = altitudeFromCamera(globe);
 
-    const double altitude = glm::length(
-        cameraPositionModelSpace - posHandle.centerToReferenceSurface
-    );
-
-    goToGeodetic3(globe, { pointPosition, altitude }, doResetCameraDirection);
+    goToGeodetic3(globe, { pointPosition, altitude });
 }
 
 void GlobeBrowsingModule::goToGeodetic2(const globebrowsing::RenderableGlobe& globe,
-                                        globebrowsing::Geodetic2 geo2,
-                                        bool doResetCameraDirection)
+                                        globebrowsing::Geodetic2 geo2)
 {
     using namespace globebrowsing;
 
-    const glm::dvec3 cameraPosition = global::navigationHandler->camera()->positionVec3();
-    SceneGraphNode* globeSceneGraphNode = dynamic_cast<SceneGraphNode*>(globe.owner());
-    if (!globeSceneGraphNode) {
-        LERROR("Error when going to Geodetic2");
-        return;
-    }
+    const double altitude = altitudeFromCamera(globe);
 
-    const glm::dmat4 inverseModelTransform = glm::inverse(
-        globeSceneGraphNode->modelTransform()
-    );
-
-    const glm::dvec3 cameraPositionModelSpace =
-        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1.0));
-    const SurfacePositionHandle posHandle = globe.calculateSurfacePositionHandle(
-        cameraPositionModelSpace
-    );
-
-    const glm::dvec3 centerToActualSurface = posHandle.centerToReferenceSurface +
-                       posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
-    const double altitude = glm::length(cameraPositionModelSpace - centerToActualSurface);
-
-    goToGeodetic3(globe, { geo2, altitude }, doResetCameraDirection);
+    goToGeodetic3(globe, { geo2, altitude });
 }
 
 void GlobeBrowsingModule::goToGeodetic3(const globebrowsing::RenderableGlobe& globe,
-                                        globebrowsing::Geodetic3 geo3, bool)
+                                        globebrowsing::Geodetic3 geo3)
 {
     using namespace globebrowsing;
     const glm::dvec3 positionModelSpace = globe.ellipsoid().cartesianPosition(geo3);
@@ -671,9 +664,9 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::LayersDeprecated,
             codegen::lua::MoveLayer,
             codegen::lua::GoToChunk,
-            codegen::lua::GoToGeo,
-            // @TODO (2021-06-23, emmbr) Combine with the above function when the camera
-            // paths work really well close to surfaces
+            codegen::lua::JumpToGeo,
+            codegen::lua::GoToGeoDeprecated,
+            codegen::lua::FlyToGeo2,
             codegen::lua::FlyToGeo,
             codegen::lua::LocalPositionFromGeo,
             codegen::lua::LocalPositionFromGeoDeprecated,

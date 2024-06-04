@@ -81,6 +81,8 @@ public:
     double minValidBoundingSphere() const;
     double findValidBoundingSphere(const SceneGraphNode* node) const;
 
+    double defaultArrivalHeight(const std::string& sgnIdentifier) const;
+
     const std::vector<SceneGraphNode*>& relevantNodes();
 
     /**
