@@ -200,6 +200,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
     declare("ColorFile")
     declare("HeightFile")
     declare("Location")
+    declare("ZIndex")
 
     local dir = openspace.directoryForPath(file)
     local file_func, error = loadfile(file)
@@ -217,12 +218,14 @@ openspace.globebrowsing.parseInfoFile = function (file)
     local ColorFile = rawget(_G, "ColorFile")
     local HeightFile = rawget(_G, "HeightFile")
     local Location = rawget(_G, "Location")
+    local ZIndex = rawget(_G, "ZIndex")
 
     -- Now we can start
     local name = Name or Identifier
     local identifier = Identifier
+    local zIndex = ZIndex
 
-    if identifier == "" then
+    if identifier == nil then
         openspace.printError('Error loading file "' .. file .. '": No "Identifier" found')
         return nil
     end
@@ -234,7 +237,8 @@ openspace.globebrowsing.parseInfoFile = function (file)
             Name = name,
             Description = Description or "",
             FilePath = dir .. '/' .. ColorFile,
-            BlendMode = "Color"
+            BlendMode = "Color",
+            ZIndex = zIndex
         }
     end
 
@@ -245,7 +249,8 @@ openspace.globebrowsing.parseInfoFile = function (file)
             Name = name,
             Description = Description or "",
             FilePath = dir .. '/' .. HeightFile,
-            TilePixelSize = 65
+            TilePixelSize = 65,
+            ZIndex = zIndex
         }
     end
 
