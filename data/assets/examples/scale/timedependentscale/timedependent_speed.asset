@@ -17,8 +17,8 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "with Speed",
-    Path = "/Examples/TimeDependentScale"
+    Name = "TimeDependentScale - With Speed",
+    Path = "/Examples"
   }
 }
 

@@ -27,8 +27,8 @@ local Node = {
     ArrowHeadWidthFactor = 1.0
   },
   GUI = {
-    Name = "Custom Appearance (Colored & Inverted)",
-    Path = "/Examples/RenderableNodeArrow"
+    Name = "RenderableNodeArrow - Custom Appearance (Colored & Inverted)",
+    Path = "/Examples"
   }
 }
 

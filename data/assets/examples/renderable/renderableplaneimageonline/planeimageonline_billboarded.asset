@@ -12,8 +12,8 @@ local Node = {
     Billboarded = true
   },
   GUI = {
-    Name = "Billboarded",
-    Path = "/Examples/RenderablePlaneImageOnline"
+    Name = "RenderablePlaneImageOnline - Billboarded",
+    Path = "/Examples"
   }
 }
 

@@ -20,8 +20,8 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "Basic",
-    Path = "/Examples/LuaScale"
+    Name = "LuaScale - Basic",
+    Path = "/Examples"
   }
 }
 
