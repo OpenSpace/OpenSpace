@@ -2,7 +2,7 @@ local dataPath = asset.resource({
   Name = "Exoplanet Data Files",
   Type = "HttpSynchronization",
   Identifier = "exoplanets_data",
-  Version = 5
+  Version = 6
 })
 
 local colormaps = asset.resource({
@@ -33,10 +33,10 @@ asset.export("DataPath", dataPath)
 
 asset.meta = {
   Name = "Exoplanet Data",
-  Version = "5.0",
+  Version = "6.0",
   Description = [[The data that is used for the exoplanet systems. The data has been
     derived from the 'Planetary Systems Composite Data' dataset from the NASA Exoplanet
-    Archive]],
+    Archive.]],
   Author = "OpenSpace Team",
   URL = "https://exoplanetarchive.ipac.caltech.edu/docs/data.html",
   License = "MIT license"
