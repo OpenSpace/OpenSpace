@@ -399,9 +399,9 @@ struct EventLayerAdded : public Event {
     /**
      * Creates an instance of an EventLayerAdded event.
      *
-     * \param layer_ A pointer to the layer that was added
+     * \param uri_ A string with the uri of the layer that was added
      *
-     * \pre layer_ must not be nullptr
+     * \pre uri_ must be a valid uri
      */
     explicit EventLayerAdded(std::string_view uri_);
 
@@ -417,9 +417,9 @@ struct EventLayerRemoved : public Event {
     /**
      * Creates an instance of an EventLayerRemoved event.
      *
-     * \param layer_ A pointer to the layer that was removed
+     * \param uri_ The uri of the layer that was removed
      *
-     * \pre layer_ must not be nullptr
+     * \pre uri_ must be a valid uri
      */
     explicit EventLayerRemoved(std::string_view uri_);
 
