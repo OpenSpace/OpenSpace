@@ -166,7 +166,7 @@ bool ScreenSpaceBrowser::deinitializeGL() {
     return ScreenSpaceRenderable::deinitializeGL();
 }
 
-void ScreenSpaceBrowser::render(float blackoutFactor) {
+void ScreenSpaceBrowser::render(const RenderData& renderData) {
     if (!_renderHandler->isTextureReady()) {
         return;
     }
@@ -177,7 +177,7 @@ void ScreenSpaceBrowser::render(float blackoutFactor) {
         translationMatrix() *
         localRotationMatrix() *
         scaleMatrix();
-    draw(mat, blackoutFactor);
+    draw(mat, renderData);
 }
 
 void ScreenSpaceBrowser::update() {

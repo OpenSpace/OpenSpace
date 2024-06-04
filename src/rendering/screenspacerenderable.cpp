@@ -146,10 +146,11 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
-        "Gamma",
-        "Gamma Correction",
-        "Sets the gamma correction of the texture.",
+    constexpr openspace::properties::Property::PropertyInfo GammaOffsetInfo = {
+        "GammaOffset",
+        "Gamma Correction Offset",
+        "Sets the gamma correction of the texture that is applied in addition to the "
+        "global gamma value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -223,8 +224,8 @@ namespace {
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
 
-        // [[codegen::verbatim(GammaInfo.description)]]
-        std::optional<float> gamma;
+        // [[codegen::verbatim(GammaOffsetInfo.description)]]
+        std::optional<float> gammaOffset;
 
         // [[codegen::verbatim(UsePerspectiveProjectionInfo.description)]]
         std::optional<bool> usePerspectiveProjection;
@@ -317,7 +318,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _borderWidth(BorderWidthInfo, 0.f, 0.f, 1000.f)
     , _borderColor(BorderColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
-    , _gamma(GammaInfo, 1.f, 0.000001f, 10.f)
+    , _gammaOffset(GammaOffsetInfo, 0.f, -1.f, 10.f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _backgroundColor(
         BackgroundColorInfo,
@@ -345,7 +346,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_faceCamera);
     addProperty(_cartesianPosition);
     addProperty(_raePosition);
-    addProperty(_gamma);
+    addProperty(_gammaOffset);
 
     // Setting spherical/euclidean onchange handler
     _useRadiusAzimuthElevation.onChange([this]() {
@@ -379,7 +380,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
 
     _enabled = p.enabled.value_or(_enabled);
-    _gamma = p.gamma.value_or(_gamma);
+    _gammaOffset = p.gammaOffset.value_or(_gammaOffset);
 
     _useRadiusAzimuthElevation =
         p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
@@ -453,7 +454,7 @@ bool ScreenSpaceRenderable::deinitializeGL() {
     return true;
 }
 
-void ScreenSpaceRenderable::render(float blackoutFactor) {
+void ScreenSpaceRenderable::render(const RenderData& renderData) {
     ZoneScoped;
 
     const glm::mat4 mat =
@@ -461,7 +462,7 @@ void ScreenSpaceRenderable::render(float blackoutFactor) {
         translationMatrix() *
         localRotationMatrix() *
         scaleMatrix();
-    draw(mat, blackoutFactor);
+    draw(mat, renderData);
 }
 
 bool ScreenSpaceRenderable::isReady() const {
@@ -640,7 +641,9 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix() {
     return glm::translate(glm::mat4(1.f), translation);
 }
 
-void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform, float blackoutFactor) {
+void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
+                                 const RenderData& renderData)
+{
     glDisable(GL_CULL_FACE);
 
     _shader->activate();
@@ -654,10 +657,13 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform, float blackout
     _shader->setUniform(_uniformCache.opacity, opacity());
     _shader->setUniform(
         _uniformCache.blackoutFactor,
-        _renderDuringBlackout ? 1.f : blackoutFactor
+        _renderDuringBlackout ? 1.f : renderData.blackoutFactor
     );
+    _shader->setUniform(_uniformCache.hue, renderData.hue);
+    _shader->setUniform(_uniformCache.value, renderData.value);
+    _shader->setUniform(_uniformCache.saturation, renderData.saturation);
+    _shader->setUniform(_uniformCache.gamma, renderData.gamma + _gammaOffset);
     _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
-    _shader->setUniform(_uniformCache.gamma, _gamma);
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
     _shader->setUniform(_uniformCache.borderColor, _borderColor);
     _shader->setUniform(
