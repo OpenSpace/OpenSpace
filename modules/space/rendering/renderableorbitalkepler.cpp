@@ -123,8 +123,9 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
-        "Trail Fade Factor",
-        "Determines how fast the trail fades out.",
+        "Trail Fade",
+        "Determines how fast the trail fades out. A smaller number shows less of the "
+        "trail and a larger number shows more.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -255,14 +256,14 @@ RenderableOrbitalKepler::Appearance::Appearance()
     })
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , trailWidth(TrailWidthInfo, 2.f, 1.f, 20.f)
-    , pointSizeExponent(PointSizeExponentInfo, 1.0f, 0.f, 25.f)
+    , pointSizeExponent(PointSizeExponentInfo, 1.0f, 0.f, 11.f)
     , renderingModes(
         RenderingModeInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
     , trailFade(TrailFadeInfo, 20.f, 0.f, 30.f)
-    , enableMaxSize(EnableMaxSizeInfo, false)
-    , maxSize(MaxSizeInfo, 1.f, 0.f, 45.f)
+    , enableMaxSize(EnableMaxSizeInfo, true)
+    , maxSize(MaxSizeInfo, 5.f, 0.f, 45.f)
     , enableOutline(EnableOutlineInfo, true)
     , outlineColor(OutlineColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , outlineWidth(OutlineWidthInfo, 0.2f, 0.f, 1.f)
@@ -378,7 +379,8 @@ void RenderableOrbitalKepler::initializeGL() {
            return global::renderEngine->buildRenderProgram(
                "OrbitalKeplerTrails",
                absPath("${MODULE_SPACE}/shaders/debrisVizTrails_vs.glsl"),
-               absPath("${MODULE_SPACE}/shaders/debrisVizTrails_fs.glsl")
+               absPath("${MODULE_SPACE}/shaders/debrisVizTrails_fs.glsl"),
+               absPath("${MODULE_SPACE}/shaders/debrisVizTrails_gs.glsl")
            );
        }
    );
@@ -401,7 +403,10 @@ void RenderableOrbitalKepler::initializeGL() {
         _trailProgram->uniformLocation("modelViewTransform");
     _uniformTrailCache.projection =
         _trailProgram->uniformLocation("projectionTransform");
-    _uniformTrailCache.trailFade = _trailProgram->uniformLocation("trailFade");
+    _uniformTrailCache.colorFadeCutoffValue =
+        _trailProgram->uniformLocation("colorFadeCutoffValue");
+    _uniformTrailCache.trailFadeExponent =
+        _trailProgram->uniformLocation("trailFadeExponent");
     _uniformTrailCache.inGameTime = _trailProgram->uniformLocation("inGameTime");
     _uniformTrailCache.color = _trailProgram->uniformLocation("color");
     _uniformTrailCache.opacity = _trailProgram->uniformLocation("opacity");
@@ -562,7 +567,14 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         const float fade = pow(
             _appearance.trailFade.maxValue() - _appearance.trailFade, 2.f
         );
-        _trailProgram->setUniform(_uniformTrailCache.trailFade, fade);
+        _trailProgram->setUniform(_uniformTrailCache.trailFadeExponent, fade);
+
+        // 0.05 is the "alpha value" for which the trail should no longer be rendered.
+        // The value that's compared to 0.05 is calculated in the shader and depends
+        // on the distance from the head of the trail to the part that's being rendered.
+        // Value is passed as uniform due to it being used in both geometry and fragment
+        // shader.
+        _trailProgram->setUniform(_uniformTrailCache.colorFadeCutoffValue, 0.05f);
 
         glLineWidth(_appearance.trailWidth);
 

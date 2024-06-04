@@ -22,37 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#version __CONTEXT__
 
-in float projectionViewDepth;
-in vec4 viewSpace;
-in vec2 texCoord;
+layout(lines) in;
+flat in float currentRevolutionFraction[];
+flat in float vertexRevolutionFraction[];
+flat in vec4 viewSpacePositions[];
 
-uniform bool enableOutline;
-uniform vec3 outlineColor;
-uniform float outlineWeight;
-uniform vec3 color;
-uniform float opacity;
+layout(line_strip, max_vertices = 2) out;
+out float viewSpaceDepth;
+out float periodFraction;
+out float offsetPeriods;
+out vec4 viewSpacePosition;
 
-Fragment getFragment() {
-  Fragment frag;
-  
-  // Only draw circle instead of entire quad
-  vec2 st = (texCoord - vec2(0.5)) * 2.0;
-  if (length(st) > 1.0) {
-    discard;
+uniform float trailFadeExponent;
+uniform float colorFadeCutoffValue;
+
+void main() {
+  // cFrac is how far along the trail orbit the head of the trail is.
+  // v0Frac and v1Frac are how far the two vertices that creates the current line strip
+  // are along the trail orbit. The variables span between 0 and 1, where 0 is the
+  // beginning of the trail and 1 is the end of the trail (a full orbit).
+  float cFrac = currentRevolutionFraction[0];
+  float v0Frac = vertexRevolutionFraction[0];
+  float v1Frac = vertexRevolutionFraction[1];
+
+  // Distance between current revolution fraction and revolution fraction for
+  // vertex0 and vertex1
+  float vd0 = cFrac - v0Frac;
+  if (vd0 < 0.0) {
+    vd0 += 1.0;
   }
 
-  // Creates outline for circle
-  vec3 _color = color;
-  if (enableOutline && (length(st) > (1.0 - outlineWeight) && length(st) < 1.0)) {
-    _color = outlineColor;
+  float vd1 = cFrac - v1Frac;
+  if (vd1 < 0.0) {
+    vd1 += 1.0;
+  }
+  // ==========================
+
+  // Calculates if vertex0 is close enough to NOT be discarded in fragment shader
+  float invert = pow(1.0 - vd1, trailFadeExponent);  
+  float fade = clamp(invert, 0.0, 1.0);
+
+  // Only emit vertices for line segments where both vertices should be rendered
+  if ((fade > colorFadeCutoffValue) || (vd0 < vd1)) {
+    gl_Position = gl_in[0].gl_Position;
+    viewSpaceDepth = gl_Position.w;
+    periodFraction = cFrac;
+    offsetPeriods = v0Frac;
+    viewSpacePosition = viewSpacePositions[0];
+    EmitVertex();
+
+    gl_Position = gl_in[1].gl_Position;
+    viewSpaceDepth = gl_Position.w;
+    periodFraction = cFrac;
+    offsetPeriods = v1Frac;
+    viewSpacePosition = viewSpacePositions[1];
+    EmitVertex();
   }
 
-  frag.color = vec4(_color, opacity);
-  frag.depth = projectionViewDepth;
-  frag.gPosition = viewSpace;
-  frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
-  return frag;
+  EndPrimitive();
 }

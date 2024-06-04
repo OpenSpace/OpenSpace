@@ -112,7 +112,8 @@ private:
     RenderableOrbitalKepler::Appearance _appearance;
 
     // Line cache
-    UniformCache(modelView, projection, trailFade, inGameTime, color, opacity)
+    UniformCache(modelView, projection, trailFadeExponent, colorFadeCutoffValue,
+        inGameTime, color, opacity)
         _uniformTrailCache;
     
     // Point cache
@@ -126,4 +127,3 @@ private:
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___RENDERABLEORBITALKEPLER___H__
-
