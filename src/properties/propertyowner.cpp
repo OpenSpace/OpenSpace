@@ -111,6 +111,41 @@ Property* PropertyOwner::property(const std::string& uri) const {
     }
 }
 
+PropertyOwner* PropertyOwner::propertyOwner(const std::string& uri) const {
+    PropertyOwner* directChild = propertySubOwner(uri);
+    if (directChild) {
+        return directChild;
+    }
+
+    // If we do not own the searched PropertyOwner, it must consist of a concatenated
+    // name and we can delegate it to a subowner
+    const size_t ownerSeparator = uri.find(URISeparator);
+    if (ownerSeparator == std::string::npos) {
+        // if we do not own the PropertyOwner and there is no separator, it does not exist
+        return nullptr;
+    }
+    else {
+        const std::string parentName = uri.substr(0, ownerSeparator);
+        const std::string ownerName = uri.substr(ownerSeparator + 1);
+
+        PropertyOwner* owner = propertySubOwner(parentName);
+        return owner ? owner->propertyOwner(ownerName) : nullptr;
+    }
+}
+
+std::string PropertyOwner::uri() const {
+    std::string identifier = _identifier;
+    PropertyOwner* currentOwner = owner();
+    while (currentOwner) {
+        const std::string& ownerId = currentOwner->identifier();
+        if (!ownerId.empty()) {
+            identifier = std::format("{}.{}", ownerId, identifier);
+        }
+        currentOwner = currentOwner->owner();
+    }
+    return identifier;
+}
+
 bool PropertyOwner::hasProperty(const std::string& uri) const {
     return property(uri) != nullptr;
 }

@@ -45,12 +45,12 @@ namespace openspace::events {
 
 void log(int i, const EventSceneGraphNodeAdded& e) {
     ghoul_assert(e.type == EventSceneGraphNodeAdded::Type, "Wrong type");
-    LINFO(std::format("[{}] SceneGraphNodeAdded: {}", i, e.node));
+    LINFO(std::format("[{}] SceneGraphNodeAdded: {}", i, e.uri));
 }
 
 void log(int i, const EventSceneGraphNodeRemoved& e) {
     ghoul_assert(e.type == EventSceneGraphNodeRemoved::Type, "Wrong type");
-    LINFO(std::format("[{}] SceneGraphNodeRemoved: {}", i, e.node));
+    LINFO(std::format("[{}] SceneGraphNodeRemoved: {}", i, e.uri));
 }
 
 void log(int i, const EventParallelConnection& e) {
@@ -87,12 +87,12 @@ void log(int i, const EventApplicationShutdown& e) {
 
 void log(int i, const EventScreenSpaceRenderableAdded& e) {
     ghoul_assert(e.type == EventScreenSpaceRenderableAdded::Type, "Wrong type");
-    LINFO(std::format("[{}] ScreenSpaceRenderableAdded: {}", i, e.renderable));
+    LINFO(std::format("[{}] ScreenSpaceRenderableAdded: {}", i, e.uri));
 }
 
 void log(int i, const EventScreenSpaceRenderableRemoved& e) {
     ghoul_assert(e.type == EventScreenSpaceRenderableRemoved::Type, "Wrong type");
-    LINFO(std::format("[{}] ScreenSpaceRenderableRemoved: {}", i, e.renderable));
+    LINFO(std::format("[{}] ScreenSpaceRenderableRemoved: {}", i, e.uri));
 }
 
 void log(int i, const EventCameraFocusTransition& e) {
@@ -148,12 +148,12 @@ void log(int i, const EventFocusNodeChanged& e) {
 
 void log(int i, const EventLayerAdded& e) {
     ghoul_assert(e.type == EventLayerAdded::Type, "Wrong type");
-    LINFO(std::format("[{}] LayerAdded: {}", i, e.layer));
+    LINFO(std::format("[{}] LayerAdded: {}", i, e.uri));
 }
 
 void log(int i, const EventLayerRemoved& e) {
     ghoul_assert(e.type == EventLayerRemoved::Type, "Wrong type");
-    LINFO(std::format("[{}] LayerRemoved: {}", i, e.layer));
+    LINFO(std::format("[{}] LayerRemoved: {}", i, e.uri));
 }
 
 void log(int i, const EventSessionRecordingPlayback& e) {
@@ -335,14 +335,14 @@ ghoul::Dictionary toParameter(const Event& e) {
     switch (e.type) {
         case Event::Type::SceneGraphNodeAdded:
             d.setValue(
-                "Node",
-                std::string(static_cast<const EventSceneGraphNodeAdded&>(e).node)
+                "Uri",
+                std::string(static_cast<const EventSceneGraphNodeAdded&>(e).uri)
             );
             break;
         case Event::Type::SceneGraphNodeRemoved:
             d.setValue(
-                "Node",
-                std::string(static_cast<const EventSceneGraphNodeRemoved&>(e).node)
+                "Uri",
+                std::string(static_cast<const EventSceneGraphNodeRemoved&>(e).uri)
             );
             break;
         case Event::Type::ParallelConnection:
@@ -376,17 +376,17 @@ ghoul::Dictionary toParameter(const Event& e) {
             break;
         case Event::Type::ScreenSpaceRenderableAdded:
             d.setValue(
-                "Renderable",
+                "Uri",
                 std::string(
-                    static_cast<const EventScreenSpaceRenderableAdded&>(e).renderable
+                    static_cast<const EventScreenSpaceRenderableAdded&>(e).uri
                 )
             );
             break;
         case Event::Type::ScreenSpaceRenderableRemoved:
             d.setValue(
-                "Renderable",
+                "Uri",
                 std::string(
-                    static_cast<const EventScreenSpaceRenderableRemoved&>(e).renderable
+                    static_cast<const EventScreenSpaceRenderableRemoved&>(e).uri
                 )
             );
             break;
@@ -438,30 +438,14 @@ ghoul::Dictionary toParameter(const Event& e) {
             break;
         case Event::Type::LayerAdded:
             d.setValue(
-                "Globe",
-                std::string(static_cast<const EventLayerAdded&>(e).node)
-            );
-            d.setValue(
-                "Group",
-                std::string(static_cast<const EventLayerAdded&>(e).layerGroup)
-            );
-            d.setValue(
-                "Layer",
-                std::string(static_cast<const EventLayerAdded&>(e).layer)
+                "Uri",
+                std::string(static_cast<const EventLayerAdded&>(e).uri)
             );
             break;
         case Event::Type::LayerRemoved:
             d.setValue(
-                "Globe",
-                std::string(static_cast<const EventLayerRemoved&>(e).node)
-            );
-            d.setValue(
-                "Group",
-                std::string(static_cast<const EventLayerRemoved&>(e).layerGroup)
-            );
-            d.setValue(
-                "Layer",
-                std::string(static_cast<const EventLayerRemoved&>(e).layer)
+                "Uri",
+                std::string(static_cast<const EventLayerRemoved&>(e).uri)
             );
             break;
         case Event::Type::SessionRecordingPlayback:
@@ -624,12 +608,12 @@ void logAllEvents(const Event* e) {
 
 EventSceneGraphNodeAdded::EventSceneGraphNodeAdded(const SceneGraphNode* node_)
     : Event(Type)
-    , node(temporaryString(node_->identifier()))
+    , uri(temporaryString(node_->uri()))
 {}
 
 EventSceneGraphNodeRemoved::EventSceneGraphNodeRemoved(const SceneGraphNode* node_)
     : Event(Type)
-    , node(temporaryString(node_->identifier()))
+    , uri(temporaryString(node_->uri()))
 {}
 
 EventParallelConnection::EventParallelConnection(State state_)
@@ -649,13 +633,13 @@ EventApplicationShutdown::EventApplicationShutdown(State state_)
 EventScreenSpaceRenderableAdded::EventScreenSpaceRenderableAdded(
                                                  const ScreenSpaceRenderable* renderable_)
     : Event(Type)
-    , renderable(temporaryString(renderable_->identifier()))
+    , uri(temporaryString(renderable_->uri()))
 {}
 
 EventScreenSpaceRenderableRemoved::EventScreenSpaceRenderableRemoved(
                                                  const ScreenSpaceRenderable* renderable_)
     : Event(Type)
-    , renderable(temporaryString(renderable_->identifier()))
+    , uri(temporaryString(renderable_->uri()))
 {}
 
 EventCameraFocusTransition::EventCameraFocusTransition(const Camera* camera_,
@@ -700,20 +684,14 @@ EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,
     ghoul_assert(newNode_, "There must be a new node");
 }
 
-EventLayerAdded::EventLayerAdded(std::string_view node_, std::string_view layerGroup_,
-                                 std::string_view layer_)
+EventLayerAdded::EventLayerAdded(std::string_view uri_)
     : Event(Type)
-    , node(temporaryString(node_))
-    , layerGroup(temporaryString(layerGroup_))
-    , layer(temporaryString(layer_))
+    , uri(temporaryString(uri_))
 {}
 
-EventLayerRemoved::EventLayerRemoved(std::string_view node_, std::string_view layerGroup_,
-                                     std::string_view layer_)
+EventLayerRemoved::EventLayerRemoved(std::string_view uri_)
     : Event(Type)
-    , node(temporaryString(node_))
-    , layerGroup(temporaryString(layerGroup_))
-    , layer(temporaryString(layer_))
+    , uri(temporaryString(uri_))
 {}
 
 EventSessionRecordingPlayback::EventSessionRecordingPlayback(State state_)

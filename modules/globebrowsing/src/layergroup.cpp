@@ -168,20 +168,11 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     // initialize function. This means that the layerManager does not exists yet, and
     // we cannot find which SGN it belongs to... Want to avoid doing this check, so
     // this should be fixed (probably as part of a cleanup/rewite of the LayerManager)
-    if (!layerManager) {
-        global::eventEngine->publishEvent<events::EventLayerAdded>(
-            "", // we don't know this yet
-            layerGroup->identifier(),
-            ptr->identifier()
-        );
-    }
-    else {
+    if (layerManager) {
         properties::PropertyOwner* globe = layerManager->owner();
         properties::PropertyOwner* sceneGraphNode = globe->owner();
         global::eventEngine->publishEvent<events::EventLayerAdded>(
-            sceneGraphNode->identifier(),
-            layerGroup->identifier(),
-            ptr->identifier()
+            ptr->uri()
         );
     }
 
@@ -203,9 +194,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             properties::PropertyOwner* globe = layerManager->owner();
             properties::PropertyOwner* sceneGraphNode = globe->owner();
             global::eventEngine->publishEvent<events::EventLayerRemoved>(
-                sceneGraphNode->identifier(),
-                layerGroup->identifier(),
-                it->get()->identifier()
+                it->get()->uri()
             );
             // We need to keep the name of the layer since we only get it as a reference
             // and the name needs to survive the deletion

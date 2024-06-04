@@ -140,17 +140,40 @@ public:
 
     /**
      * Retrieves a Property identified by \p uri from this PropertyOwner. If \p uri does
-     * not contain a `.` the identifier must refer to a Property directly owned by this
-     * PropertyOwner. If the identifier contains one or more `.`, the first part of the
-     * name will be recursively extracted and used as a name for a sub-owner and only the
-     * last part of the identifier is referring to a Property owned by PropertyOwner named
-     * by the second-but-last name.
+     * not contain a `.`  it is an identifier and must refer to a Property directly owned
+     * by this PropertyOwner. If the identifier contains one or more `.`, the first part
+     * of the name will be recursively extracted and used as a name for a sub-owner and
+     * only the last part of the identifier is referring to a Property owned by a
+     * PropertyOwner named by the second-but-last name.
      *
-     * \param uri The identifier of the Property that should be extracted
+     * \param uri The uri or identifier of the Property that should be extracted
      * \return If the Property cannot be found, `nullptr` is returned, otherwise the
      *         pointer to the Property is returned
      */
     Property* property(const std::string& uri) const;
+
+    /**
+     * Retrieves a PropertyOwner identified by \p uri from this PropertyOwner. If \p uri 
+     * does not contain a `.` it is an identifier and must refer to a PropertyOwner
+     * directly owned by this PropertyOwner. If the uri contains one or more `.`, the
+     * first part of the name will be recursively extracted and used as a name for a sub-
+     * owner and only the last part of the uri is referring to a PropertyOwner owned by a 
+     * PropertyOwner named by the second-but-last name.
+     *
+     * \param uri The uri or identifier of the PropertyOwner that should be extracted
+     * \return If the PropertyOwner cannot be found, `nullptr` is returned, otherwise the
+     *         pointer to the PropertyOwner is returned
+     */
+    PropertyOwner* propertyOwner(const std::string& uri) const;
+
+    /**
+     * Returns a uri for this PropertyOwner. This is created by looking up all the owners
+     * of this PropertyOwner. The owner identifiers are separated by ".", which make up
+     * the uri of this PropertyOwner.
+     * 
+     * \return The uri of this PropertyOwner 
+     */
+    std::string uri() const;
 
     /**
      * This method checks if a Property with the provided \p uri exists in this
