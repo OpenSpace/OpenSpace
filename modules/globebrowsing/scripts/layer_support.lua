@@ -225,10 +225,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
     local identifier = Identifier
     local zIndex = ZIndex
 
-    if zIndex == "" then
-        zIndex = 999
-    end
-    if identifier == "" then
+    if identifier == nil then
         openspace.printError('Error loading file "' .. file .. '": No "Identifier" found')
         return nil
     end
