@@ -1,19 +1,20 @@
 asset.require("./static_server")
-
 local guiCustomization = asset.require("customization/gui")
 
--- Select which commit hashes to use for the frontend and backend
-local frontendHash = "b6712b202fa9cd36592b14caad8b68ca641949c0"
-local dataProvider = "data.openspaceproject.com/files/webgui"
 
-local frontend = asset.syncedResource({
+
+-- Select which commit hashes to use for the frontend and backend
+local frontendHash = "768c411e1430ad3ece3528a648ded7a862efb2d0"
+
+local frontend = asset.resource({
   Identifier = "WebGuiFrontend",
   Name = "Web Gui Frontend",
   Type = "UrlSynchronization",
-  Url = dataProvider .. "/frontend/" ..  frontendHash .. "/frontend.zip"
+  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
 })
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   -- Unzip the frontend bundle
   local dest = frontend .. "frontend"
   if not openspace.directoryExists(dest) then
@@ -26,12 +27,15 @@ asset.onInitialize(function ()
   -- and remove automatic restart on each property change,
   -- since frequent restarting seems to be unstable on mac.
 
-  local enabled = openspace.getPropertyValue("Modules.WebGui.ServerProcessEnabled")
+  local enabled = openspace.propertyValue("Modules.WebGui.ServerProcessEnabled")
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
 
-  local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
+  local directories = openspace.propertyValue("Modules.WebGui.Directories")
   directories[#directories + 1] = "frontend"
   directories[#directories + 1] = frontend .. "frontend"
+  -- Add user directory for webpanels
+  directories[#directories + 1] = "webpanels"
+  directories[#directories + 1] = openspace.absPath("${USER_WEBPANELS}")
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
@@ -39,7 +43,7 @@ asset.onInitialize(function ()
 
   -- The GUI contains date and simulation increment,
   -- so let's remove these from the dashboard.
-  if openspace.getPropertyValue("Modules.CefWebGui.Visible") then
+  if openspace.propertyValue("Modules.CefWebGui.Visible") then
     if openspace.hasProperty("Dashboard.Date.Enabled") then
       openspace.setPropertyValueSingle("Dashboard.Date.Enabled", false)
     end
@@ -49,10 +53,10 @@ asset.onInitialize(function ()
   end
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   -- Remove the frontend endpoint
-  local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
-  local newDirectories = {};
+  local directories = openspace.propertyValue("Modules.WebGui.Directories")
+  local newDirectories = {}
 
   -- @TODO(maci, 2019-08-23) see message below
   --openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "")
@@ -72,7 +76,7 @@ asset.onDeinitialize(function ()
 end)
 
 function setCefRoute(route)
-  local port = openspace.getPropertyValue("Modules.WebGui.Port")
+  local port = openspace.propertyValue("Modules.WebGui.Port")
   -- As a developer, you can manually serve the webgui from port 4690
   -- with the command `npm start` in the web gui repository
   if guiCustomization.webguiDevelopmentMode then
@@ -84,12 +88,13 @@ function setCefRoute(route)
   )
 end
 
-
 asset.export("setCefRoute", setCefRoute)
+
+
 
 asset.meta = {
   Name = "WebGUI",
-  Version = "0.1",
+  Version = "1.0",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

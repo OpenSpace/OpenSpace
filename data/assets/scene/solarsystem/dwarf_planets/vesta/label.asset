@@ -1,11 +1,13 @@
 local transforms = asset.require("./transforms")
 
+
+
 local Label = {
   Identifier = "VestaLabel",
   Parent = transforms.Position.Identifier,
   Renderable = {
-    Enabled = asset.enabled,
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Vesta",
     FontSize = 50.0,
     Size = 8.5,
@@ -25,6 +27,7 @@ local Label = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Label)
 end)
@@ -34,6 +37,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("Label", Label)
+
+
 
 asset.meta = {
   Name = "Vesta Label",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ namespace {
         "FilePath",
         "File Path",
         "The path of the GDAL file or the image file that is to be used in this tile "
-        "provider",
+        "provider.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -46,15 +46,14 @@ namespace {
         "This value is the preferred size (in pixels) for each tile. Choosing the right "
         "value is a tradeoff between more efficiency (larger images) and better quality "
         "(smaller images). The tile pixel size has to be smaller than the size of the "
-        "complete image if a single image is used",
-        // @VISIBILITY(3.33)
+        "complete image if a single image is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CompressionInfo = {
         "Compression",
         "Compression Algorithm",
-        "The compression algorithm to use for MRF cached tiles",
+        "The compression algorithm to use for MRF cached tiles.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -81,10 +80,6 @@ namespace {
 
         // [[codegen::verbatim(TilePixelSizeInfo.description)]]
         std::optional<int> tilePixelSize;
-
-        // Determines whether the tiles should have a padding zone around it, making the
-        // interpolation between tiles more pleasant
-        std::optional<bool> padTiles;
 
         // Determines if the tiles should be preprocessed before uploading to the GPU
         std::optional<bool> performPreProcessing;
@@ -134,7 +129,7 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     name = p.name.value_or("Name unspecified");
-    std::string _loggerCat = "DefaultTileProvider (" + name + ")";
+    const std::string _loggerCat = std::format("DefaultTileProvider ({})", name);
 
     // 1. Get required Keys
     _filePath = p.filePath;
@@ -143,11 +138,10 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
 
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
-    int pixelSize = p.tilePixelSize.value_or(0);
-    _padTiles = p.padTiles.value_or(_padTiles);
+    const int pixelSize = p.tilePixelSize.value_or(0);
 
     // Only preprocess height layers by default
-    _performPreProcessing = _layerGroupID == layers::Group::ID::HeightLayers;
+    _performPreProcessing = (_layerGroupID == layers::Group::ID::HeightLayers);
     _performPreProcessing = p.performPreProcessing.value_or(_performPreProcessing);
 
     // Get the name of the layergroup to which this layer belongs
@@ -158,17 +152,23 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
             return gi.id == id;
         }
     );
-    auto layerGroup = it != layers::Groups.end() ? it->name : std::to_string(static_cast<int>(_layerGroupID));
+
+    std::string layerGroup =
+        it != layers::Groups.end() ?
+        std::string(it->name) :
+        std::to_string(static_cast<int>(_layerGroupID));
 
     std::string identifier = p.identifier.value_or("unspecified");
     std::string enclosing = p.globeName.value_or("unspecified");
 
-    std::string path = fmt::format("{}/{}/{}/", enclosing, layerGroup, identifier);
+    std::string path = std::format("{}/{}/{}/", enclosing, layerGroup, identifier);
 
-    GlobeBrowsingModule& module = *global::moduleEngine->module<GlobeBrowsingModule>();
-    bool enabled = module.isMRFCachingEnabled();
+    const GlobeBrowsingModule& mod = *global::moduleEngine->module<GlobeBrowsingModule>();
+    bool enabled = mod.isMRFCachingEnabled();
     Compression compression =
-        _layerGroupID == layers::Group::ID::HeightLayers ? Compression::LERC : Compression::JPEG;
+        _layerGroupID == layers::Group::ID::HeightLayers ?
+        Compression::LERC :
+        Compression::JPEG;
     int quality = 75;
     int blockSize = 1024;
     if (p.cacheSettings.has_value()) {
@@ -181,30 +181,32 @@ DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary)
     }
 
     _cacheProperties.enabled = enabled;
-    _cacheProperties.path = path;
+    _cacheProperties.path = std::move(path);
     _cacheProperties.quality = quality;
     _cacheProperties.blockSize = blockSize;
     _cacheProperties.compression = codegen::toString(compression);
 
-    TileTextureInitData initData(
-        tileTextureInitData(_layerGroupID, _padTiles, pixelSize)
+    TileTextureInitData initData = TileTextureInitData(
+        tileTextureInitData(_layerGroupID, pixelSize)
     );
     _tilePixelSize = initData.dimensions.x;
-    initAsyncTileDataReader(initData, _cacheProperties);
+    initAsyncTileDataReader(std::move(initData), _cacheProperties);
 
     addProperty(_filePath);
     addProperty(_tilePixelSize);
 }
 
-void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties) {
+void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData,
+                                                  TileCacheProperties cacheProperties)
+{
     ZoneScoped;
 
     _asyncTextureDataProvider = std::make_unique<AsyncTileDataProvider>(
         name,
         std::make_unique<RawTileDataReader>(
             _filePath,
-            initData,
-            cacheProperties,
+            std::move(initData),
+            std::move(cacheProperties),
             RawTileDataReader::PerformPreprocessing(_performPreProcessing)
         )
     );
@@ -271,7 +273,7 @@ void DefaultTileProvider::update() {
 
     if (_asyncTextureDataProvider->shouldBeDeleted()) {
         initAsyncTileDataReader(
-            tileTextureInitData(_layerGroupID, _padTiles, _tilePixelSize),
+            tileTextureInitData(_layerGroupID, _tilePixelSize),
             _cacheProperties
         );
     }

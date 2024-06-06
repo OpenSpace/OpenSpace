@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ public:
     struct ParsingError : public ghoul::RuntimeError {
         enum class Severity { Info, Warning, Error };
 
-        explicit ParsingError(Severity severity, std::string msg);
+        explicit ParsingError(Severity severity_, std::string msg);
 
         Severity severity;
     };
@@ -101,9 +101,16 @@ public:
             Relative
         };
 
-        Type type;
+        Type type = Type::Relative;
         std::string value;
         bool startPaused = false;
+    };
+
+    struct CameraGoToNode {
+        static constexpr std::string_view Type = "goToNode";
+
+        std::string anchor;
+        std::optional<double> height;
     };
 
     struct CameraNavState {
@@ -122,15 +129,15 @@ public:
         static constexpr std::string_view Type = "goToGeo";
 
         std::string anchor;
-        double latitude;
-        double longitude;
+        double latitude = 0.0;
+        double longitude = 0.0;
         std::optional<double> altitude;
     };
 
-    using CameraType = std::variant<CameraNavState, CameraGoToGeo>;
+    using CameraType = std::variant<CameraGoToNode, CameraNavState, CameraGoToGeo>;
 
     Profile() = default;
-    explicit Profile(const std::string& content);
+    explicit Profile(const std::filesystem::path& path);
     std::string serialize() const;
 
     /**
@@ -140,14 +147,16 @@ public:
     void saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
         std::string currentTime, interaction::NavigationState navState);
 
-    /// Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
-    /// set to `true`
+    /**
+     * Adds a new asset and checks for duplicates unless the `ignoreUpdates` member is
+     * set to `true`.
+     */
     void addAsset(const std::string& path);
 
     /// Removes an asset unless the `ignoreUpdates` member is set to `true`
     void removeAsset(const std::string& path);
 
-    static constexpr Version CurrentVersion = Version{ 1, 2 };
+    static constexpr Version CurrentVersion = Version{ 1, 3 };
 
     Version version = CurrentVersion;
     std::vector<Module> modules;
@@ -167,6 +176,7 @@ public:
     /**
      * Returns the Lua library that contains all Lua functions available to provide
      * profile functionality.
+     *
      * \return The Lua library that contains all Lua functions available for profiles
      */
     static scripting::LuaLibrary luaLibrary();

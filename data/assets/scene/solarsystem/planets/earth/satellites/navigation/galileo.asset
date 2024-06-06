@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Galileo)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_galileo",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=galileo&FORMAT=kvn",
   Filename = "galileo.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
 
-local galileo = {
-  Identifier = "galileo",
+
+local GalileoSatellites = {
+  Identifier = "GalileoSatellites",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -18,7 +21,8 @@ local galileo = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
-    Fade = 1.5,
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
@@ -28,15 +32,16 @@ local galileo = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(galileo)
+  openspace.addSceneGraphNode(GalileoSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(galileo)
+  openspace.removeSceneGraphNode(GalileoSatellites)
 end)
 
-asset.export(galileo)
+asset.export(GalileoSatellites)
 
 
 

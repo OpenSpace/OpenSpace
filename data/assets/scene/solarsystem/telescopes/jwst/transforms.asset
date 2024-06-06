@@ -1,0 +1,123 @@
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local l2 = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local LaunchTime = "2021 DEC 25 12:20:00"
+local DetachTime = "2021 DEC 25 12:50:00"
+local L2orbitInsertionTime = "2022 JAN 25 00:00:00"
+
+local JWSTPosition = {
+  Identifier = "JWSTPosition",
+  Parent = earthTransforms.EarthIAU.Identifier,
+  Transform = {
+    Translation = {
+      Type = "TimelineTranslation",
+      ShouldInterpolate = false,
+      Keyframes = {
+        [LaunchTime] = {
+          Type = "SpiceTranslation",
+          Target = kernels.ID.JWST,
+          Observer = coreKernels.ID.Earth,
+          Frame = coreKernels.Frame.Earth
+        },
+        [DetachTime] = {
+          Type = "SpiceTranslation",
+          Target = kernels.ID.JWST,
+          Observer = coreKernels.ID.Earth,
+          Frame = coreKernels.Frame.Galactic
+        },
+        [L2orbitInsertionTime] = {
+          Type = "SpiceTranslation",
+          Target = kernels.ID.JWST,
+          Observer = l2.ID.L2,
+          Frame = coreKernels.Frame.Galactic
+        }
+      }
+    }
+  },
+  GUI = {
+    Name = "JWST Position",
+    Path = "/Solar System/Telescopes/JWST",
+    Hidden = true
+  }
+}
+
+local JWSTRotation = {
+  Identifier = "JWSTRotation",
+  Parent = JWSTPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "JWSTRotation",
+      XAxis = { 1, 0, 0 },
+      XAxisOrthogonal = true,
+      YAxisInvert = true,
+      YAxis = sunTransforms.SolarSystemBarycenter.Identifier
+    }
+  },
+  GUI = {
+    Name = "JWST Rotation",
+    Path = "/Solar System/Telescopes/JWST",
+    Hidden = true
+  }
+}
+
+
+-- Reparent the JWSTPosition node when the data changes
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTPosition)
+  openspace.addSceneGraphNode(JWSTRotation)
+
+  -- Set correct parent during run-time
+  openspace.scriptScheduler.loadScheduledScript(
+    DetachTime,
+    [[openspace.setParent("JWSTPosition", "EarthCenter")]],
+    [[openspace.setParent("JWSTPosition", "EarthIAU")]],
+    "",
+    1 -- Not default group, never clear this script
+  )
+  openspace.scriptScheduler.loadScheduledScript(
+    L2orbitInsertionTime,
+    [[openspace.setParent("JWSTPosition", "L2")]],
+    [[openspace.setParent("JWSTPosition", "EarthCenter")]],
+    "",
+    1 -- Not default group, never clear this script
+  )
+
+  -- Set correct parent at the start
+  local now = openspace.time.currentTime()
+  if now < openspace.time.convertTime(DetachTime) then
+    openspace.setParent("JWSTPosition", "EarthIAU")
+  elseif now > openspace.time.convertTime(L2orbitInsertionTime) then
+    openspace.setParent("JWSTPosition", "L2")
+  else
+    openspace.setParent("JWSTPosition", "EarthCenter")
+  end
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTRotation)
+  openspace.removeSceneGraphNode(JWSTPosition)
+  openspace.scriptScheduler.clear(1)
+end)
+
+asset.export(JWSTPosition)
+asset.export(JWSTRotation)
+
+
+
+asset.meta = {
+  Name = "James Webb Space Telescope Transforms",
+  Version = "1.0",
+  Description = [[
+    JWST transforms: JWST position relative to Earth and JWST rotation,
+    a fixed rotation so sunshield always points toward the Sun.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

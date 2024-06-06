@@ -1,0 +1,41 @@
+-- Custom Appearance (Colored & Inverted)
+-- This example shows an arrow pointing from one scene graph node in the direction of
+-- another. Here, it is created with the Solar System barycenter as start node and
+-- Earth as end node, but the arrow direction is inverted so that it points towards
+-- the Solar System barycenter. Some appearance related properties are also changed to
+-- customize the look of the arrow, but default values are used for its size.
+
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+local Node = {
+  Identifier = "RenderableNodeArrow_Example_Appearance",
+  -- Parent to the start node, so that when we focus on the arrow this is where we end up
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableNodeArrow",
+    StartNode = sunTransforms.SolarSystemBarycenter.Identifier,
+    EndNode = earth.Earth.Identifier,
+    -- Point to start node instead of end node
+    Invert = true,
+    -- Give the arrow a custom color (here a dark red)
+    Color = { 0.5, 0.0, 0.0 },
+    -- Set the arrow head size so that it takes up a quarter (25%) of the full length of
+    -- the arrow
+    ArrowHeadSize = 0.25,
+    -- Set the arrow head width. A value of 1 makes it as wide as the body of the arrow
+    ArrowHeadWidthFactor = 1.0
+  },
+  GUI = {
+    Name = "Custom Appearance (Colored & Inverted)",
+    Path = "/Examples/RenderableNodeArrow"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

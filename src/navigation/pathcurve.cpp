@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,9 +83,9 @@ void PathCurve::initializeParameterData() {
     _lengthSums.reserve(_nSegments + 1);
     _lengthSums.push_back(0.0);
     for (unsigned int i = 1; i <= _nSegments; i++) {
-        double u = _curveParameterSteps[i];
-        double uPrev = _curveParameterSteps[i - 1];
-        double length = arcLength(uPrev, u);
+        const double u = _curveParameterSteps[i];
+        const double uPrev = _curveParameterSteps[i - 1];
+        const double length = arcLength(uPrev, u);
         _lengthSums.push_back(_lengthSums[i - 1] + length);
     }
     _totalLength = _lengthSums.back();
@@ -100,13 +100,13 @@ void PathCurve::initializeParameterData() {
     _parameterSamples.reserve(Steps * _nSegments + 1);
 
     for (unsigned int i = 0; i < _nSegments; i++) {
-        double uStart = _curveParameterSteps[i];
-        double sStart = _lengthSums[i];
+        const double uStart = _curveParameterSteps[i];
+        const double sStart = _lengthSums[i];
         _parameterSamples.push_back({ uStart, sStart });
         // Intermediate sampels
-        for (int j = 1; j < Steps; ++j) {
-            double u = uStart + j * uStep;
-            double s = sStart + arcLength(uStart, u);
+        for (int j = 1; j < Steps; j++) {
+            const double u = uStart + j * uStep;
+            const double s = sStart + arcLength(uStart, u);
             // Identify samples that are indistinguishable due to precision limitations
             if (std::abs(s - _parameterSamples.back().s) < LengthEpsilon) {
                 throw InsufficientPrecisionError(
@@ -133,8 +133,12 @@ void PathCurve::initializeParameterData() {
 // Input s is a length value, in the range [0, _totalLength]
 // Returns curve parameter in range [0, _nSegments]
 double PathCurve::curveParameter(double s) const {
-    if (s <= 0.0) return 0.0;
-    if (s >= (_totalLength - LengthEpsilon)) return _curveParameterSteps.back();
+    if (s <= 0.0) {
+        return 0.0;
+    }
+    if (s >= (_totalLength - LengthEpsilon)) {
+        return _curveParameterSteps.back();
+    }
 
     unsigned int segmentIndex = 1;
     while (s > _lengthSums[segmentIndex]) {
@@ -158,8 +162,8 @@ double PathCurve::curveParameter(double s) const {
         return std::distance(samples.begin(), it);
     };
 
-    size_t startIndex = findIndexOfFirstEqualOrLarger_u(uMin);
-    size_t endIndex = findIndexOfFirstEqualOrLarger_u(uMax);
+    const size_t startIndex = findIndexOfFirstEqualOrLarger_u(uMin);
+    const size_t endIndex = findIndexOfFirstEqualOrLarger_u(uMax);
 
     // Use samples to find an initial guess for Newton's method
     // Find first sample with s larger than input s
@@ -185,8 +189,8 @@ double PathCurve::curveParameter(double s) const {
     double lower = uMin;
     double upper = uMax;
 
-    for (int i = 0; i < maxIterations; ++i) {
-        double F = arcLength(uMin, u) - segmentS;
+    for (int i = 0; i < maxIterations; i++) {
+        const double F = arcLength(uMin, u) - segmentS;
 
         // The error we tolerate, in meters. Note that distances are very large
         constexpr double tolerance = 0.5;
@@ -195,8 +199,8 @@ double PathCurve::curveParameter(double s) const {
         }
 
         // Generate a candidate for Newton's method
-        double dfdu = approximatedDerivative(u); // > 0
-        double uCandidate = u - F / dfdu;
+        const double dfdu = approximatedDerivative(u); // > 0
+        const double uCandidate = u - F / dfdu;
 
         // Update root-bounding interval and test candidate
         if (F > 0) {  // => candidate < u <= upper
@@ -248,15 +252,15 @@ glm::dvec3 PathCurve::interpolate(double u) const {
         return *(_points.end() - 2);
     }
 
-    std::vector<double>::const_iterator segmentEndIt =
+    const std::vector<double>::const_iterator segmentEndIt =
         std::lower_bound(_curveParameterSteps.begin(), _curveParameterSteps.end(), u);
 
     const int index =
         static_cast<int>((segmentEndIt - 1) - _curveParameterSteps.begin());
 
-    double segmentStart = _curveParameterSteps[index];
-    double segmentDuration = (_curveParameterSteps[index + 1] - segmentStart);
-    double uSegment = (u - segmentStart) / segmentDuration;
+    const double segmentStart = _curveParameterSteps[index];
+    const double segmentDuration = (_curveParameterSteps[index + 1] - segmentStart);
+    const double uSegment = (u - segmentStart) / segmentDuration;
 
     return ghoul::interpolateCatmullRom(
         uSegment,

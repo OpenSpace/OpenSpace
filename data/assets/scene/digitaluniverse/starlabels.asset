@@ -1,14 +1,15 @@
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Star Labels Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_starlabels_speck",
   Version = 2
 })
 
-local object = {
+
+local Object = {
   Identifier = "StarsLabels",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
     Labels = {
       Enabled = true,
@@ -18,7 +19,6 @@ local object = {
       MinMaxSize = { 6, 50 },
       Unit = "pc"
     },
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
     Unit = "pc"
   },
@@ -29,21 +29,22 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "Star Labels",
-  Version = "2.1",
+  Version = "3.0",
   Description = "Digital Universe asset for labels of the stars",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

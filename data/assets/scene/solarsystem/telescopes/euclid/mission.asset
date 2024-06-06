@@ -1,0 +1,89 @@
+local Mission = {
+  Name = "Euclid",
+  Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2013/01/euclid_logo/12493233-3-eng-GB/Euclid_logo_pillars.png",
+  Description = [[Euclid is designed to explore the evolution of the dark universe. It will make a 3D-map of the universe (with time as the third dimension) by observing billions of galaxies out to 10 billion light-years, across more than a third of the sky.
+
+  While dark energy accelerates the expansion of the universe and dark matter governs the growth of cosmic structures, scientists remain unsure about what dark energy and dark matter actually are.
+
+  By observing the universe evolving over the past 10 billion years, Euclid will reveal how it has expanded and how structure has formed over cosmic history - and from this, astronomers can infer the properties of dark energy, dark matter and gravity, to reveal more about their precise nature.]],
+  Milestones = {
+    {
+      Name = "Launch",
+      Date = "2023 JUL 01 15:12:00"
+    },
+    {
+      Name = "Start of Trajectory Information",
+      Date = "2023 JUL 01 15:53:08.239"
+    },
+    {
+      Name = "Quality Release Q1",
+      Date = "2024 DEC 01"
+    },
+    {
+      Name = "Data Release DR1",
+      Date = "2025 DEC 01"
+    },
+    {
+      Name = "Quality Release Q2",
+      Date = "2026 DEC 01"
+    },
+    {
+      Name = "Data Release DR2",
+      Date = "2027 DEC 01"
+    },
+    {
+      Name = "Quality Release Q3",
+      Date = "2028 DEC 01"
+    },
+    {
+      Name = "Quality Release Q4",
+      Date = "2029 DEC 01"
+    },
+    {
+      Name = "Data Release DR3",
+      Date = "2030 DEC 01"
+    }
+  },
+  Phases = {
+    {
+      Name = "Cruise phase",
+      TimeRange = { Start = "2023 JUL 01 15:12:00", End = "2023 AUG 01" },
+      Description = "Following a cruise of 30 days, Euclid will operate in a large halo orbit around the L2 point of the Sun-Earth system, which is located 1.5 million km from the Earth in the anti-Sun direction. The orbit will not suffer from any Earth eclipses and will have a radius of 1 million kilometers. An operational lifetime of 6 years is planned."
+    },
+    {
+      Name = "Commissioning & Performance Verification phase",
+      TimeRange = { Start = "2023 AUG 01", End = "2023 OCT 01" },
+      Description = "During commissioning a mission's instruments and subsystems are deployed, turned on, tested and calibrated. The Performance Verification will ensure that the science instruments are all rigorously tested and that the expected performances of the Euclid project are in line with the core science objectives."
+    },
+    {
+      Name = "Operational phase",
+      TimeRange = { Start = "2023 OCT 01", End = "2028 AUG 01" },
+      Description = [[Euclid was selected for implementation in June 2012 by ESA's Science Programme Committee. It's main scientific objectives are:
+
+        - To investigate whether Dark Energy is real, or whether the apparent acceleration of the Universe is caused by a breakdown of General Relativity on the largest scales, or a failure of our assumption that the universe is more or less uniform in density.
+        - If dark energy is real, to investigate whether it is a constant energy spread across space, which would make it the Cosmological Constant found in Einstein's General Relativity, or a new force of nature that evolves with the expansion of the Universe.
+        - To investigate the nature of Dark Matter, the mass of neutrino particles and whether there are other, so-far undetected fast moving particle species in the Universe.
+        - To investigate the conditions in the Universe after the Big Bang that seeded the large-scale structure of the universe that we observe today.]]
+    }
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.loadMission(Mission)
+end)
+
+asset.onDeinitialize(function()
+  openspace.unloadMission(Mission.Name)
+end)
+
+
+
+asset.meta = {
+  Name = "Euclid Mission",
+  Version = "1.0",
+  Description = "This asset contains the mission profile information for ESA's Euclid mission. The data in this file has been combined from multiple sources, including https://sci.esa.int/web/euclid, https://www.esa.int/Science_Exploration/Space_Science/Euclid_overview, https://www.euclid-ec.org/, https://sci.esa.int/web/euclid, https://indico.in2p3.fr/event/14206/contributions/17189/attachments/14299/17526/Euclid-MSauvage-LSSTFrance-MAR2017.pdf, and https://euclid.caltech.edu/page/data-release-timeline",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

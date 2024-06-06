@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Spire)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_spire",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=spire&FORMAT=kvn",
   Filename = "spire.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
 
-local satellites = {
-  Identifier = "spire",
+
+local SpireSatellites = {
+  Identifier = "SpireSatellites",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -18,7 +21,8 @@ local satellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
-    Fade = 1.5,
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
@@ -28,23 +32,23 @@ local satellites = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(SpireSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(SpireSatellites)
 end)
 
-asset.export(satellites)
+asset.export(SpireSatellites)
 
 
 
 asset.meta = {
   Name = "Satellites Weather - Spire",
   Version = "1.0",
-  Description = [[Satellites asset for Weather - Search & Rescue (SARSAT). Data from
-    Celestrak]],
+  Description = [[Satellites asset for the Spire constellation. Data from Celestrak]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
   License = "Celestrak"

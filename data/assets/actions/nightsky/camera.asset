@@ -1,31 +1,15 @@
-local level_horizon_yaw = {
-  Identifier = "os.nightsky.level_horizon_yaw",
-  Name = "Level Horizon Yaw",
-  Command = [[
-    local currentNavState = openspace.navigation.getNavigationState();
-    local newNavState = {};
-    newNavState["Pitch"] = currentNavState["Pitch"];
-    newNavState["Anchor"] = currentNavState["Anchor"];
-    newNavState["Yaw"] = 0.0;
-    newNavState["Position"] = currentNavState["Position"];
-    newNavState["Up"] = currentNavState["Up"];
-    openspace.navigation.setNavigationState(newNavState)
-  ]],
-  Documentation = "Levels the horizon horizontally.",
-  GuiPath = "/Night Sky/View",
-  IsLocal = false
-}
-local look_up = {
-  Identifier = "os.nightsky.look_up",
+local LookUp = {
+  Identifier = "os.nightsky.LookUp",
   Name = "Look up",
   Command = [[
-    local currentNavState = openspace.navigation.getNavigationState();
-    local newNavState = {};
-    newNavState["Pitch"] = math.pi;
-    newNavState["Anchor"] = currentNavState["Anchor"];
-    newNavState["Yaw"] = currentNavState["Yaw"];
-    newNavState["Position"] = currentNavState["Position"];
-    newNavState["Up"] = currentNavState["Up"];
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = currentNavState["Up"]
+    }
     openspace.navigation.setNavigationState(newNavState)
   ]],
   Documentation = "Sets the view to be looking at the zenith",
@@ -33,17 +17,37 @@ local look_up = {
   IsLocal = false
 }
 
-local level_horizon_pitch = {
-  Identifier = "os.nightsky.level_horizon_pitch",
+local LevelHorizonYaw = {
+  Identifier = "os.nightsky.LevelHorizonYaw",
+  Name = "Level Horizon Yaw",
+  Command = [[
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = currentNavState["Pitch"],
+      Anchor = currentNavState["Anchor"],
+      Yaw = 0.0,
+      Position = currentNavState["Position"],
+      Up = currentNavState["Up"]
+    }
+    openspace.navigation.setNavigationState(newNavState)
+  ]],
+  Documentation = "Levels the horizon horizontally.",
+  GuiPath = "/Night Sky/View",
+  IsLocal = false
+}
+
+local LevelHorizonPitch = {
+  Identifier = "os.nightsky.LevelHorizonPitch",
   Name = "Level Horizon Pitch",
   Command = [[
-    local currentNavState = openspace.navigation.getNavigationState();
-    local newNavState = {};
-    newNavState["Pitch"] = math.pi / 2.0;
-    newNavState["Anchor"] = currentNavState["Anchor"];
-    newNavState["Yaw"] = currentNavState["Yaw"];
-    newNavState["Position"] = currentNavState["Position"];
-    newNavState["Up"] = currentNavState["Up"];
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi / 2.0,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = currentNavState["Up"]
+    }
     openspace.navigation.setNavigationState(newNavState)
   ]],
   Documentation = "Levels the view to the horizon.",
@@ -51,17 +55,18 @@ local level_horizon_pitch = {
   IsLocal = false
 }
 
-local looking_north = {
-  Identifier = "os.nightsky.looking_north",
+local LookingNorth = {
+  Identifier = "os.nightsky.LookingNorth",
   Name = "Looking North",
   Command = [[
-    local currentNavState = openspace.navigation.getNavigationState();
-    local newNavState = {};
-    newNavState["Pitch"] = math.pi / 2.0;
-    newNavState["Anchor"] = currentNavState["Anchor"];
-    newNavState["Yaw"] = currentNavState["Yaw"];
-    newNavState["Position"] = currentNavState["Position"];
-    newNavState["Up"] = { 0.0, 0.0, 1.0 };
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi / 2.0,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = { 0.0, 0.0, 1.0 }
+    }
     openspace.navigation.setNavigationState(newNavState)
   ]],
   Documentation = "Sets the view for a horizon looking North.",
@@ -69,17 +74,18 @@ local looking_north = {
   IsLocal = false
 }
 
-local looking_south = {
-  Identifier = "os.nightsky.looking_south",
+local LookingSouth = {
+  Identifier = "os.nightsky.LookingSouth",
   Name = "Looking South",
   Command = [[
-    local currentNavState = openspace.navigation.getNavigationState();
-    local newNavState = {};
-    newNavState["Pitch"] = math.pi / 2.0;
-    newNavState["Anchor"] = currentNavState["Anchor"];
-    newNavState["Yaw"] = currentNavState["Yaw"];
-    newNavState["Position"] = currentNavState["Position"];
-    newNavState["Up"] = { 0.0, 0.0, -1.0 };
+    local currentNavState = openspace.navigation.getNavigationState()
+    local newNavState = {
+      Pitch = math.pi / 2.0,
+      Anchor = currentNavState["Anchor"],
+      Yaw = currentNavState["Yaw"],
+      Position = currentNavState["Position"],
+      Up = { 0.0, 0.0, -1.0 }
+    }
     openspace.navigation.setNavigationState(newNavState)
   ]],
   Documentation = "Sets the view for a horizon looking South.",
@@ -87,24 +93,25 @@ local looking_south = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(look_up)
-  openspace.action.registerAction(level_horizon_yaw)
-  openspace.action.registerAction(level_horizon_pitch)
-  openspace.action.registerAction(looking_north)
-  openspace.action.registerAction(looking_south)
+  openspace.action.registerAction(LookUp)
+  openspace.action.registerAction(LevelHorizonYaw)
+  openspace.action.registerAction(LevelHorizonPitch)
+  openspace.action.registerAction(LookingNorth)
+  openspace.action.registerAction(LookingSouth)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(looking_south)
-  openspace.action.removeAction(looking_north)
-  openspace.action.removeAction(level_horizon_pitch)
-  openspace.action.removeAction(level_horizon_yaw)
-  openspace.action.removeAction(look_up)
+  openspace.action.removeAction(LookingSouth)
+  openspace.action.removeAction(LookingNorth)
+  openspace.action.removeAction(LevelHorizonPitch)
+  openspace.action.removeAction(LevelHorizonYaw)
+  openspace.action.removeAction(LookUp)
 end)
 
-asset.export(look_up)
-asset.export(level_horizon_yaw)
-asset.export(level_horizon_pitch)
-asset.export(looking_north)
-asset.export(looking_south)
+asset.export("LookUp", LookUp.Identifier)
+asset.export("LevelHorizonYaw", LevelHorizonYaw.Identifier)
+asset.export("LevelHorizonPitch", LevelHorizonPitch.Identifier)
+asset.export("LookingNorth", LookingNorth.Identifier)
+asset.export("LookingSouth", LookingSouth.Identifier)

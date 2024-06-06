@@ -1,0 +1,36 @@
+-- Textured
+-- This example creates a point cloud using a texture to render each point.
+--
+-- Note that other color related settings, like color mapping, can still be applied.
+-- The color will then be multiplied with the texture color.
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_Textured",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    Texture = {
+      -- The path to the texture file. Here we use openspace.absPath so that we can use
+      -- the ${DATA} token to get the path to a texture in the "OpenSpace/data" folder,
+      -- but for a file at a relative location it would also work to use asset.resource,
+      -- like for the data file above
+      File = openspace.absPath("${DATA}/test3.jpg"),
+    },
+    -- Disable additive blending, so that points will be rendered with their actual color
+    -- and overlapping points will be sorted by depth. This works best when the points
+    -- have an opacity of 1
+    UseAdditiveBlending = false
+  },
+  GUI = {
+    Name = "Textured",
+    Path = "/Examples/RenderablePointCloud"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

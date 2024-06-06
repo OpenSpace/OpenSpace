@@ -1,13 +1,17 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Saturn Labels",
   Type = "HttpSynchronization",
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Titan = {
   Identifier = "Titan",
@@ -15,14 +19,13 @@ local Titan = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TITAN",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Titan,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_TITAN",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Titan,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -43,7 +46,7 @@ local Titan = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
   GUI = {
     Name = "Titan",
     Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
@@ -51,13 +54,12 @@ local Titan = {
   }
 }
 
-
 local TitanLabel = {
   Identifier = "TitanLabel",
   Parent = Titan.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Titan",
     FontSize = 70.0,
     Size = 6.2,
@@ -89,6 +91,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Titan)
+asset.export(TitanLabel)
 
 
 

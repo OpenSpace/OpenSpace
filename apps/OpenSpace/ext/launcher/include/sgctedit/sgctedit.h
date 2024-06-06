@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,9 +52,9 @@ public:
      *
      * \param parent The Qt QWidget parent object
      * \param userConfigPath A string containing the file path of the user config
-     *                       directory where all window configs are stored
+     *        directory where all window configs are stored
      */
-    SgctEdit(QWidget* parent, std::string userConfigPath);
+    SgctEdit(QWidget* parent, std::filesystem::path userConfigPath);
 
     /**
      * Constructor for SgctEdit class, the underlying class for the full window
@@ -64,27 +64,45 @@ public:
      *                imported window cluster configuration.
      * \param configName The name of the window configuration filename
      * \param configBasePath The path to the folder where default config files reside
-     * \param configsReadOnly vector list of window config names that are read-only and
-     *                         must not be overwritten
      * \param parent Pointer to parent Qt widget
      */
-    SgctEdit(sgct::config::Cluster& cluster, const std::string& configName,
-        std::string& configBasePath, const std::vector<std::string>& configsReadOnly,
-        QWidget* parent);
+    SgctEdit(sgct::config::Cluster& cluster, std::string configName,
+        std::filesystem::path& configBasePath, QWidget* parent);
 
     /**
-     * Returns the saved filename
+     * Returns the saved filename.
      *
-     * \return saved filename in std::string
+     * \return The saved filename in std::string
      */
     std::filesystem::path saveFilename() const;
 
     /**
      * Returns the generated Cluster object.
-     * 
+     *
      * \return The generated Cluster object
      */
     sgct::config::Cluster cluster() const;
+
+    /**
+     * Called when the number of windows that should be displayed changes.
+     *
+     * \param newCount The new number of windows included
+     */
+    void nWindowsDisplayedChanged(int newCount);
+
+    /**
+     * Called when the checkbox for GUI only on first window is clicked.
+     *
+     * \param checked `true` if GUI is selected for first window only.
+     */
+    void firstWindowGuiOptionClicked(bool checked);
+
+    /**
+     * Called when the QComboBox is selected and has a new value
+     *
+     * \param text The QString of the selected value
+     */
+    void firstWindowGraphicsSelectionChanged(const QString& text);
 
 private:
     std::vector<QRect> createMonitorInfoSet();
@@ -97,6 +115,8 @@ private:
     void generateConfigResizeWindowsAccordingToSelected(sgct::config::Node& node);
     void generateConfigIndividualWindowSettings(sgct::config::Node& node);
     void setupProjectionTypeInGui(sgct::config::Viewport& vPort, WindowControl* wCtrl);
+    void setupStateOfUiOnFirstWindow(size_t nWindows);
+    void deleteFromTags(sgct::config::Window& window);
 
     void save();
     void apply();
@@ -104,7 +124,7 @@ private:
     DisplayWindowUnion* _displayWidget = nullptr;
     SettingsWidget* _settingsWidget = nullptr;
     sgct::config::Cluster _cluster;
-    const std::string _userConfigPath;
+    const std::filesystem::path _userConfigPath;
     const std::array<QColor, 4> _colorsForWindows = {
         QColor(0x2B, 0x9E, 0xC3),
         QColor(0xFC, 0xAB, 0x10),
@@ -112,7 +132,6 @@ private:
         QColor(0xF8, 0x33, 0x3C)
     };
     std::string _configurationFilename;
-    const std::vector<std::string> _readOnlyConfigs;
 
     QBoxLayout* _layoutButtonBox = nullptr;
     QPushButton* _saveButton = nullptr;

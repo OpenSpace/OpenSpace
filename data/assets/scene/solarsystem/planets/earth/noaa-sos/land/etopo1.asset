@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "ETOPO1: Topography and Bathymetry"
@@ -15,22 +16,24 @@ modeling and Earth visualization]]
 local URL = "https://sos.noaa.gov/catalog/datasets/etopo1-topography-and-bathymetry/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
 
-local colorbar = {
+local Colorbar = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -41,18 +44,20 @@ local colorbar = {
   CartesianPosition = { 0.5, 0.0, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(colorbar)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Colorbar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(colorbar)
+  openspace.removeScreenSpaceRenderable(Colorbar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(colorbar)
+asset.export(Layer)
+asset.export(Colorbar)
+
 
 
 asset.meta = {

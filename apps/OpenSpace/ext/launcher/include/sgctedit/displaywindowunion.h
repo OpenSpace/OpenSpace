@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,27 +39,27 @@ Q_OBJECT
 public:
     /**
      * Constructor for DisplayWindowUnion class, which manages the overall control layout
-     * including monitorBox, multiple WindowControl columns, and additional controls
+     * including monitorBox, multiple WindowControl columns, and additional controls.
      *
-     * \param monitorSizeList A vector containing QRect objects containing pixel dims
-     *                        of each monitor
-     * \param nMaxWindows The maximum number of windows allowed (depends on the number
-     *                    of monitors in the system)
-     * \param winColors An array of QColor objects for window colors. The indexing of
-     *                  this array matches the window indexing used elsewhere in the
-     *                  class. This allows for a unique color for each window.
+     * \param monitorSizeList A vector containing QRect objects containing pixel dims of
+     *        each monitor
+     * \param nMaxWindows The maximum number of windows allowed (depends on the number of
+     *        monitors in the system)
+     * \param winColors An array of QColor objects for window colors. The indexing of this
+     *        array matches the window indexing used elsewhere in the class. This allows
+     *        for a unique color for each window
      * \param resetToDefault If set to true, all display and window settings will be
-     *                       initialized to their default values.
+     *        initialized to their default values
      * \param parent The parent to which this widget belongs
      */
     DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
         int nMaxWindows, const std::array<QColor, 4>& windowColors, bool resetToDefault,
         QWidget* parent = nullptr);
-    
+
     /**
      * Returns a vector of pointers to the WindowControl objects for all visible windows.
      *
-     * \return vector of pointers of WindowControl objects
+     * \return The vector of pointers of WindowControl objects
      */
     std::vector<WindowControl*> activeWindowControls() const;
 
@@ -67,7 +67,7 @@ public:
      * Returns a vector of pointers to the WindowControl objects for all windows, whether
      * they are visible or not.
      *
-     * \return vector of pointers of all WindowControl objects
+     * \return The vector of pointers of all WindowControl objects
      */
     std::vector<WindowControl*>& windowControls();
 
@@ -87,14 +87,14 @@ public:
      * Returns the number of windows that are displayed (there can be more window
      * objects than are currently displayed).
      *
-     * \return the number of displayed windows in the current configuration
+     * \return The number of displayed windows in the current configuration
      */
     unsigned int numWindowsDisplayed() const;
 
 signals:
     /**
-     * This signal is emitted when a windowhas changed.
-     * 
+     * This signal is emitted when a window has changed.
+     *
      * \param monitorIndex The 0-based index of the monitor to which the window belongs to
      * \param windowIndex The 0-based index of the window that was changed
      * \param newDimensions The pixel sizes of the window after the change
@@ -103,13 +103,13 @@ signals:
 
     /**
      * This signal is emitted when the total number of windows has changed.
-     * 
+     *
      * \param newCount The new total number of windows
      */
     void nWindowsChanged(int newCount);
 
 private:
-    void createWidgets(int nMaxWindows, std::vector<QRect> monitorResolutions,
+    void createWidgets(int nMaxWindows, const std::vector<QRect>& monitorResolutions,
         std::array<QColor, 4> windowColors, bool resetToDefault);
     void showWindows();
 

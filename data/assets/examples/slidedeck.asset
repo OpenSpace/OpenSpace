@@ -1,7 +1,8 @@
 local helper = asset.require("util/slide_deck_helper")
 local deck = nil
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   deck = helper.createDeck("example", {
     UseRadiusAzimuthElevation = true,
     RadiusAzimuthElevation = { 1.0, 0.0, 0.0 }, -- use for dome
@@ -38,7 +39,7 @@ asset.onInitialize(function ()
     GuiPath = "/Slides",
     IsLocal = false
   })
-  openspace.bindKey("KP_4", "slide_deck.prevslide");
+  openspace.bindKey("KP_4", "slide_deck.prevslide")
 
   openspace.action.registerAction({
     Identifier = "slide_deck.nextslide",

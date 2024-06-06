@@ -19,7 +19,7 @@ local Atmosphere = {
           -- Wavelengths are given in 10^-9m
           Wavelengths = { 680, 550, 440 },
           -- Reflection coefficients are given in km^-1
-          Scattering = { 19.918E-3, 13.57E-3, 5.75E-3 }
+          Scattering = { 0.019918, 0.01357, 0.00575 }
           -- In Rayleigh scattering, the coefficients of
           -- absorption and scattering are the same.
         },
@@ -30,9 +30,9 @@ local Atmosphere = {
       Mie = {
         Coefficients = {
           -- Reflection coefficients are given in km^-1
-          Scattering = { 53.61771e-3, 53.61771e-3, 53.61771e-3 },
+          Scattering = { 0.05361771, 0.05361771, 0.05361771 },
           -- Extinction coefficients are a fraction of the Scattering coefficients
-          Extinction = { 53.61771e-3/0.98979, 53.61771e-3/0.98979, 53.61771e-3/0.98979 }
+          Extinction = { 0.05361771 / 0.98979, 0.05361771 / 0.98979, 0.05361771 / 0.98979 }
         },
         -- Mie Height scale (atmosphere thickness for constant density) in Km
         H_M = 3.09526,
@@ -51,6 +51,7 @@ local Atmosphere = {
       Description = "Atmosphere of Mars"
     }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Atmosphere)

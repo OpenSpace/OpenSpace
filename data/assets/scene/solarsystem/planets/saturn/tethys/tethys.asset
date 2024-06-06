@@ -1,13 +1,17 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Saturn Labels",
   Type = "HttpSynchronization",
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Tethys = {
   Identifier = "Tethys",
@@ -15,14 +19,13 @@ local Tethys = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TETHYS",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Tethys,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_TETHYS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Tethys,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -49,13 +52,12 @@ local Tethys = {
   }
 }
 
-
 local TethysLabel = {
   Identifier = "TethysLabel",
   Parent = Tethys.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Tethys",
     FontSize = 70.0,
     Size = 6.0,
@@ -67,7 +69,7 @@ local TethysLabel = {
     FadeDistances = { 0.3, 10.0 },
     FadeWidths = { 0.15, 10.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels", "moon_major_saturn" },
   GUI = {
     Name = "Tethys Label",
     Path = "/Solar System/Planets/Saturn/Major Moons/Tethys",
@@ -87,6 +89,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Tethys)
+asset.export(TethysLabel)
 
 
 

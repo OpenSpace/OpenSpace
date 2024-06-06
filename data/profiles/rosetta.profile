@@ -1,4 +1,7 @@
 {
+  "additional_scripts": [
+    "openspace.scriptScheduler.loadScheduledScript(\"2014-07-03T09:00:00\", \"openspace.setPropertyValueSingle([[Scene.67P.Renderable.PerformShading]], false);\", \"openspace.setPropertyValueSingle([[Scene.67P.Renderable.PerformShading]], true)\"); openspace.scriptScheduler.loadScheduledScript(\"2015-09-23T00:00:00\", \"openspace.setPropertyValueSingle([[Scene.67P.Renderable.PerformShading]], true); openspace.setPropertyValueSingle([[Scene.67P.Renderable.ProjectionComponent.ClearAllProjections]], true);\", \"openspace.setPropertyValueSingle([[Scene.67P.Renderable.PerformShading]], false);\");"
+  ],
   "assets": [
     "base",
     "base_keybindings",
@@ -48,35 +51,35 @@
   ],
   "keybindings": [
     {
-      "action": "os.missions.rosetta.67p.focus",
+      "action": "os.rosetta.Focus67p",
       "key": "A"
     },
     {
-      "action": "os.missions.rosetta.focus",
+      "action": "os.rosetta.FocusRosetta",
       "key": "S"
     },
     {
-      "action": "os.missions.rosetta.setup.landerrelease",
+      "action": "os.rosetta.SetupLanderRelease",
       "key": "F6"
     },
     {
-      "action": "os.missions.rosetta.67p.clearimageprojections",
+      "action": "os.rosetta.ClearImageProjections",
       "key": "F8"
     },
     {
-      "action": "os.missions.rosetta.toggleouterplanetarytrails",
+      "action": "os.rosetta.ToggleOuterPlanetaryTrails",
       "key": "E"
     },
     {
-      "action": "os.missions.rosetta.toggleimageplane",
+      "action": "os.rosetta.ToggleImagePlane",
       "key": "I"
     },
     {
-      "action": "os.mission.rosetta.togglephilaetrail",
+      "action": "os.rosetta.TogglePhilaeTrail",
       "key": "O"
     },
     {
-      "action": "os.missions.rosetta.toggle67pprojection",
+      "action": "os.rosetta.Toggle67pProjection",
       "key": "P"
     }
   ],
@@ -91,7 +94,7 @@
     "license": "MIT License",
     "name": "Rosetta",
     "url": "https://www.openspaceproject.com",
-    "version": "1.1"
+    "version": "1.2"
   },
   "properties": [
     {
@@ -106,11 +109,12 @@
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "absolute",
     "value": "2014-08-01T03:05:00"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 2
   }
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,10 +60,12 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    // Checks the field of view of the instrument for the current \p time against all of
-    // the potential targets are returns the first name of the target that is in field of
-    // view, the previous target, or the closest target to the space craft. The second
-    // return value is whether the target is currently in the field of view
+    /**
+     * Checks the field of view of the instrument for the current \p time against all of
+     * the potential targets are returns the first name of the target that is in field of
+     * view, the previous target, or the closest target to the space craft. The second
+     * return value is whether the target is currently in the field of view.
+     */
     std::pair<std::string, bool> determineTarget(double time);
 
     void updateGPU();
@@ -79,9 +81,9 @@ private:
     properties::DoubleProperty _standOffDistance;
     properties::BoolProperty _alwaysDrawFov;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
-        targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,
-        squareColor, interpolation) _uniformCache;
+    UniformCache(modelViewProjectionTransform, colorStart, colorEnd,
+        activeColor, targetInFieldOfViewColor, intersectionStartColor,
+        intersectionEndColor, squareColor, interpolation) _uniformCache;
 
     bool _simplifyBounds = false;
 
@@ -129,13 +131,22 @@ private:
     RenderInformation _fieldOfViewBounds;
 
     struct {
-        properties::Vec3Property defaultStart; // Start color for uninteresting times
-        properties::Vec3Property defaultEnd; // End color for uninteresting times
-        properties::Vec3Property active; // Color use when a field-of-view is projecting
-        properties::Vec3Property targetInFieldOfView; // Color to use for target in fov
-        properties::Vec3Property intersectionStart; // Color at the start of intersection
-        properties::Vec3Property intersectionEnd; // Color at the end of intersection
-        properties::Vec3Property square; // Color for the orthogonal square
+        properties::PropertyOwner container;
+
+        /// Start color for uninteresting times
+        properties::Vec3Property defaultStart;
+        /// End color for uninteresting times
+        properties::Vec3Property defaultEnd;
+        /// Color use when a field-of-view is projecting
+        properties::Vec3Property active;
+        /// Color to use for target in fov
+        properties::Vec3Property targetInFieldOfView;
+        /// Color at the start of intersection
+        properties::Vec3Property intersectionStart;
+        /// Color at the end of intersection
+        properties::Vec3Property intersectionEnd;
+        /// Color for the orthogonal square
+        properties::Vec3Property square;
     } _colors;
 };
 

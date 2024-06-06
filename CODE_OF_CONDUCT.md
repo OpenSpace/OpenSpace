@@ -4,11 +4,11 @@ In the interest of fostering an open and welcoming environment, we as contributo
 ## Our Standards
 Examples of behavior that contributes to creating a positive environment include:
 
-  - Using welcoming and inclusive language
+  - Using welcoming and inclusive language. Politeness is expected at all times. Be kind and courteous.
   - Being respectful of differing viewpoints and experiences
   - Gracefully accepting constructive criticism
   - Focusing on what is best for the community
-  - Showing empathy towards other community members
+  - Showing empathy towards other community members and always assume positive intent from others.
 
 Examples of unacceptable behavior by participants include:
 

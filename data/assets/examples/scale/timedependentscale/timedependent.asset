@@ -1,0 +1,30 @@
+-- Basic
+-- This asset creates a SceneGraphNode that only displays coordinate axes, which grow at
+-- a speed of 1 m/s starting on January 1st, 2000 00:00:00. This means that on
+-- that date, the coordinate axes will disappear and, for example, on January 1st, 2000
+-- 12:00:00, the coordinate axes will be 43200 meters long.
+
+local Node = {
+  Identifier = "TimeDependentScale_Example",
+  Transform = {
+    Scale = {
+      Type = "TimeDependentScale",
+      ReferenceDate = "2000 JAN 01 00:00:00"
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "Basic",
+    Path = "/Examples/TimeDependentScale"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

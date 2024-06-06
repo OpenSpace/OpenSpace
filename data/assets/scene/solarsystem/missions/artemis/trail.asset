@@ -1,14 +1,9 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-asset.require("spice/base")
-local artemisSpiceId = "-1023"
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-local kernels = asset.syncedResource({
-  Name = "Artemis Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "artemis_1_kernels",
-  Version = 1
-})
+
 
 local ArtemisEarthTrail = {
   Identifier = "ArtemisEarthTrail",
@@ -17,10 +12,9 @@ local ArtemisEarthTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = artemisSpiceId,
-      Observer = "EARTH",
-      Frame = "GALACTIC",
-      Kernels = kernels .. "artemis.bsp"
+      Target = kernels.ID.Artemis,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.ID.Galactic
     },
     Color = { 0.2, 0.78, 0.635 },
     Fade = 7.0,
@@ -31,7 +25,7 @@ local ArtemisEarthTrail = {
   GUI = {
     Name = "Artemis-1 Earth Trail",
     Path = "/Solar System/Missions/Artemis/Trails",
-    Description = "Artemis-1 trail relative to Earth",
+    Description = "Artemis-1 trail relative to Earth"
   }
 }
 
@@ -42,10 +36,9 @@ local ArtemisMoonTrail= {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = artemisSpiceId,
-      Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels .. "artemis.bsp"
+      Target = kernels.ID.Artemis,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Color = { 0.78, 0.43, 0.20 },
     Fade = 7.0,
@@ -56,9 +49,10 @@ local ArtemisMoonTrail= {
   GUI = {
     Name = "Artemis-1 Moon Trail",
     Path = "/Solar System/Missions/Artemis/Trails",
-    Description = "Artemis-1 trail relative to the Moon",
+    Description = "Artemis-1 trail relative to the Moon"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ArtemisEarthTrail)
@@ -72,6 +66,8 @@ end)
 
 asset.export(ArtemisEarthTrail)
 asset.export(ArtemisMoonTrail)
+
+
 
 asset.meta = {
   Name = "Artemis-1 Trails",

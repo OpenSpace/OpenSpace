@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Topography and Bathymetry with Nighttime Lights"
@@ -19,7 +20,7 @@ Everest, the tallest point on earth at a height of 29,035 feet, almost 5.5 miles
 local URL = "https://sos.noaa.gov/catalog/datasets/topography-and-bathymetry-with-nighttime-lights/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -28,24 +29,28 @@ local syncedDirectory = asset.syncedResource({
   UnzipFilesDestination = "images"
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "images",
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
+asset.export(Layer)
+
 
 
 asset.meta = {

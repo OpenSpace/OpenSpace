@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ namespace {
 }
 
 /**
- * Removes an existing action from the list of possible actions.The action is identifies
+ * Removes an existing action from the list of possible actions. The action is identifies
  * either by the passed name, or if it is a table, the value behind the 'Identifier' key
  * is extract and used instead.
  */
@@ -64,7 +64,7 @@ namespace {
     }
     if (!global::actionManager->hasAction(identifier)) {
         throw ghoul::lua::LuaError(
-            fmt::format("Identifier '{}' for action not found", identifier)
+            std::format("Identifier '{}' for action not found", identifier)
         );
     }
 
@@ -105,7 +105,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     using namespace openspace;
 
     if (global::actionManager->hasAction(action.identifier)) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Identifier '{}' for action already registered", action.identifier
         ));
     }
@@ -117,7 +117,11 @@ struct [[codegen::Dictionary(Action)]] Action {
     a.documentation = action.documentation.value_or(a.documentation);
     a.guiPath = action.guiPath.value_or(a.guiPath);
     if (!a.guiPath.starts_with('/')) {
-        throw ghoul::RuntimeError("Action's GuiPath must start with /");
+        throw ghoul::RuntimeError(
+            std::format(
+                "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but "
+                "should be '/{}' ", a.name, a.guiPath, a.guiPath)
+        );
     }
     if (action.isLocal.has_value()) {
         a.isLocal = interaction::Action::IsLocal(*action.isLocal);
@@ -137,7 +141,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     }
     if (!global::actionManager->hasAction(identifier)) {
         throw ghoul::lua::LuaError(
-            fmt::format("Identifier '{}' for action not found", identifier)
+            std::format("Identifier '{}' for action not found", identifier)
         );
     }
 
@@ -185,10 +189,16 @@ struct [[codegen::Dictionary(Action)]] Action {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
     if (!global::actionManager->hasAction(id)) {
-        throw ghoul::lua::LuaError(fmt::format("Action '{}' not found", id));
+        throw ghoul::lua::LuaError(std::format("Action '{}' not found", id));
     }
 
-    global::actionManager->triggerAction(id, arg);
+    // No sync because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
+    global::actionManager->triggerAction(
+        id,
+        arg,
+        interaction::ActionManager::ShouldBeSynchronized::No
+    );
 }
 
 #include "actionmanager_lua_codegen.cpp"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -115,24 +115,24 @@ struct TileProvider : public properties::PropertyOwner {
     virtual void reset() = 0;
 
     /**
-     * \return The minimum level as defined by the `TileIndex` that this
-     *         TileProvider is capable of providing.
+     * \return The minimum level as defined by the `TileIndex` that this TileProvider is
+     *         capable of providing
      */
     virtual int minLevel() = 0;
 
     /**
-     * \return The maximum level as defined by `TileIndex` that this
-     *         TileProvider is able provide.
+     * \return The maximum level as defined by `TileIndex` that this TileProvider is able
+     *         to provide
      */
     virtual int maxLevel() = 0;
 
     /**
-     * \return the no data value for the dataset. Default is the minimum float value.
+     * \return The no data value for the dataset. Default is the minimum float value
      */
     virtual float noDataValueAsFloat() = 0;
 
 
-    virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0, 
+    virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0,
         int maxParents = 1337);
     ChunkTilePile chunkTilePile(TileIndex tileIndex, int pileSize);
 
@@ -141,9 +141,10 @@ struct TileProvider : public properties::PropertyOwner {
 
     uint16_t uniqueIdentifier = 0;
     bool isInitialized = false;
+
 protected:
-    ChunkTile traverseTree(TileIndex tileIndex, int parents, int maxParents, 
-        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent, 
+    ChunkTile traverseTree(TileIndex tileIndex, int parents, int maxParents,
+        const std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
         TileUvTransform& uvTransform);
 
 private:

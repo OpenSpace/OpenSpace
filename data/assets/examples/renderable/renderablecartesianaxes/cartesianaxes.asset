@@ -1,0 +1,28 @@
+-- Basic
+-- This asset creates a SceneGraphNode that only displays coordinate axes. The 
+-- parent is not set which defaults to placing the axes at the center the Sun.
+
+local Node = {
+  Identifier = "RenderableCartesianAxes_Example",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 30000000
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },    
+  GUI = {
+    Name = "Cartesian Axes Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 -- Circle shapes are not support
@@ -13,8 +14,8 @@ local SwiCh2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_SWI_CH2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiCH2,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_CH2",
@@ -48,8 +49,8 @@ local SwiFull = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_SWI_FULL",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiFull,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_FULL",
@@ -86,8 +87,8 @@ local SwiFullGCO500 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_SWI_FULL_GCO500",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.SwiFullGCO500,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_SWI_FULL_GCO500",
@@ -125,6 +126,7 @@ end)
 -- asset.export(SwiCh2)
 asset.export(SwiFull)
 -- asset.export(SwiFullGCO500)
+
 
 
 asset.meta = {

@@ -1,22 +1,26 @@
-local globeIdentifier = asset.require("../../mars").Mars.Identifier
+local globe = asset.require("../../mars")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "CTX_Mosaic_NewYork",
   Name = "CTX Mosaic [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("ctx_mosaic_newyork.wms"),
+  ZIndex = 60,
+  FilePath = asset.resource("ctx_mosaic_newyork.wms"),
   BlendMode = "Color"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

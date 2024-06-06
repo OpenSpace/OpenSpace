@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local MajisVisnir = {
@@ -12,8 +13,8 @@ local MajisVisnir = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_VISNIR",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisVisnir,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_VISNIR",
@@ -44,8 +45,8 @@ local MajisVisnirB2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_VISNIR_B2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisVisnirB2,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_VISNIR_B2",
@@ -72,8 +73,8 @@ local MajisVisnirB4 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_VISNIR_B4",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisVisnirB4,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_VISNIR_B4",
@@ -99,9 +100,9 @@ local MajisIr = {
     End = "2035 OCT 05 00:00:00.000"
   },
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "JUICE",
-    Frame = "JUICE_MAJIS_IR",
+    Type = "RenderableFov",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisIR,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_IR",
@@ -128,8 +129,8 @@ local MajisIrB2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_IR_B2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisIRB2,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_IR_B2",
@@ -156,8 +157,8 @@ local MajisIrB4 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_IR_B4",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisIRB4,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_IR_B4",
@@ -184,8 +185,8 @@ local Majis = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.Majis,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS",
@@ -239,6 +240,7 @@ end)
 -- asset.export(MajisIrB2)
 -- asset.export(MajisIrB4)
 asset.export(Majis)
+
 
 
 asset.meta = {

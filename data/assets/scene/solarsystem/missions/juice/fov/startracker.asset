@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local StarOh1 = {
@@ -12,8 +13,8 @@ local StarOh1 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_STR-OH1",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.StarTrackerOH1,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_STR-OH1",
@@ -41,8 +42,8 @@ local StarOh2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_STR-OH2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.StarTrackerOH2,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_STR-OH2",
@@ -70,8 +71,8 @@ local StarOh3 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_STR-OH3",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.StarTrackerOH3,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_STR-OH3",
@@ -105,6 +106,7 @@ end)
 asset.export(StarOh1)
 asset.export(StarOh2)
 asset.export(StarOh3)
+
 
 
 asset.meta = {

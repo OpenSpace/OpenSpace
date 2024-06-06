@@ -1,27 +1,33 @@
-local globeIdentifier = asset.require("../../jupiter").Jupiter.Identifier
+local globe = asset.require("../../jupiter")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Name = "Jupiter Textures",
   Type = "HttpSynchronization",
   Identifier = "jupiter_textures",
   Version = 2
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "jupiter_os.tif",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  ZIndex = 5,
+  CacheSettings = { Enabled = false }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Jupiter.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Jupiter.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

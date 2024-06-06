@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,12 +32,12 @@
 // Entry point function for all processes.
 int main(int argc, char* argv[]) {
   // Provide CEF with command-line arguments.
-  CefMainArgs main_args(argc, argv);
+  const CefMainArgs mainArgs(argc, argv);
 
-  CefRefPtr<openspace::WebBrowserApp> app(new openspace::WebBrowserApp);
+  const CefRefPtr<openspace::WebBrowserApp> app(new openspace::WebBrowserApp);
 
   // CEF applications have multiple sub-processes (render, GPU, etc) that share
   // the same executable. This function checks the command-line and, if this is
   // a sub-process, executes the appropriate logic.
-  return CefExecuteProcess(main_args, app.get(), nullptr);
+  return CefExecuteProcess(mainArgs, app.get(), nullptr);
 }

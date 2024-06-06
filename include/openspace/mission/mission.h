@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,6 +43,7 @@ struct Milestone {
     std::optional<std::string> description;
     std::optional<std::string> image;
     std::optional<std::string> link;
+    std::optional<std::vector<std::string>> actions;
 };
 
 /**
@@ -50,8 +51,8 @@ struct Milestone {
  * phases within phases. Designed for WORM usage (Write Once, Read Multiple), and,
  * therefore, has only accessors.
  *
- * Each MissionPhase is characterized by its MissionPhase::name, a TimeRange, an
- * optional MissionPhase::description, and optional subphases.
+ * Each MissionPhase is characterized by its MissionPhase::name, a TimeRange, an optional
+ * MissionPhase::description, and optional subphases.
  */
 class MissionPhase {
 public:
@@ -101,7 +102,7 @@ public:
     /**
      * Returns the associated link of this MissionPhase. If no link is associated, this
      * string will be empty.
-     * 
+     *
      * \return The associated link of the MissionPhase or the empty string
      */
     const std::string& link() const;
@@ -146,6 +147,7 @@ public:
     /**
      * Returns the Documentation that describes the ghoul::Dictionarty that this
      * MissionPhase can be constructed from.
+     *
      * \return The Documentation that describes the required structure for a Dictionary
      */
     static documentation::Documentation Documentation();
@@ -160,7 +162,7 @@ protected:
      * \param trace The list of MissionPhase%s that are active during the time \p time
      * \param maxDepth The maximum depth of levels that will be considered
      *
-     * \pre maxDepth must not be negative
+     * \pre \p maxDepth must not be negative
      */
     void phaseTrace(double time, Trace& trace, int maxDepth) const;
 
@@ -178,7 +180,7 @@ protected:
     std::string _link;
     /// Actions associated with the phase
     std::vector<std::string> _actions;
-    /// Important dates 
+    /// Important dates
     std::vector<Milestone> _milestones;
 };
 

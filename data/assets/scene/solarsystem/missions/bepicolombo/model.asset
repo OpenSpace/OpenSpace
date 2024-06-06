@@ -1,0 +1,84 @@
+local transform = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local modelFolder = asset.resource({
+  Name = "BepiColombo Model",
+  Type = "HttpSynchronization",
+  Identifier = "bepicolombo_models",
+  Version = 1
+})
+
+
+local BepiColombo = {
+  Identifier = "BepiColombo",
+  Parent = transform.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.MPO,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.MPO,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "BepiColombo",
+    Path = "/Solar System/Missions/BepiColombo"
+  }
+}
+
+local Model = {
+  Identifier = "BepiColomboModel",
+  Parent = BepiColombo.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, -0.275, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "bepi_mcs.fbx",
+    ModelScale = 0.00075, -- The number has been determined by eyeballing it
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    AmbientIntensity = 0.075
+  },
+  GUI = {
+    Name = "BepiColombo Model",
+    Path = "/Solar System/Missions/BepiColombo"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(BepiColombo)
+  openspace.addSceneGraphNode(Model)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Model)
+  openspace.removeSceneGraphNode(BepiColombo)
+end)
+
+asset.export(BepiColombo)
+
+
+
+asset.meta = {
+  Name = "BepiColombo Model",
+  Version = "1.0",
+  Description = "This asset contains the model of the BepiColombo spacecraft. The model is retrieved from https://s2e2.cosmos.esa.int/bitbucket/projects/SPICE_KERNELS/repos/bepicolombo",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

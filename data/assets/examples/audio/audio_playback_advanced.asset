@@ -1,0 +1,71 @@
+-- Lets first download a file that we can use for our examples. If you have files
+-- locally, you can skip this part.
+-- The song in the example comes from https://incompetech.com/ which is a fantastic
+-- webpage for very high quality royalty-free music
+openspace.downloadFile(
+  "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Sneaky%20Adventure.mp3",
+  openspace.absPath("${TEMPORARY}/SneakyAdventure.mp3"),
+  true
+)
+local soundName = "Advanced_Example_Sound_1"
+
+local panleft = {
+  Identifier = "os.examples.PanLeft",
+  Name = "Example Audio Pan Left",
+  Command = [[openspace.audio.set3dSourcePosition("Advanced_Example_Sound_1", { -1, 0, 0 })]],
+  GuiPath = "/Example/Audio"
+}
+
+local pancenter = {
+  Identifier = "os.examples.PanCenter",
+  Name = "Example Audio Pan Center",
+  Command = [[openspace.audio.set3dSourcePosition("Advanced_Example_Sound_1", { 0, 0, 0 })]],
+  GuiPath = "/Example/Audio"
+}
+
+local panright = {
+  Identifier = "os.examples.PanRight",
+  Name = "Example Audio Pan Right",
+  Command = [[openspace.audio.set3dSourcePosition("Advanced_Example_Sound_1", { 1, 0, 0 })]],
+  GuiPath = "/Example/Audio"
+}
+
+local lowvolume = {
+  Identifier = "os.examples.LowVolume",
+  Name = "Example Audio Volume Low",
+  Command = [[openspace.audio.setVolume("Advanced_Example_Sound_1", 0.15)]],
+  GuiPath = "/Example/Audio"
+}
+
+local fullvolume = {
+  Identifier = "os.examples.FullVolume",
+  Name = "Example Audio Volume Full",
+  Command = [[openspace.audio.setVolume("Advanced_Example_Sound_1", 1.0)]],
+  GuiPath = "/Example/Audio"
+}
+
+asset.onInitialize(function()
+  -- Start playing the song immediately in 3D. Place the audio straight in front of us
+  openspace.audio.playAudio3d(
+    openspace.absPath("${TEMPORARY}/SneakyAdventure.mp3"),
+    soundName,
+    { 0.0, 0.0, 0.0 }
+  )
+
+  openspace.action.registerAction(panleft)
+  openspace.action.registerAction(pancenter)
+  openspace.action.registerAction(panright)
+  openspace.action.registerAction(lowvolume)
+  openspace.action.registerAction(fullvolume)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(fullvolume)
+  openspace.action.removeAction(lowvolume)
+  openspace.action.removeAction(panright)
+  openspace.action.removeAction(pancenter)
+  openspace.action.removeAction(panleft)
+
+  -- When we remove this asset, we want to audio to stop playing no matter what
+  openspace.audio.stopAudio(soundName)
+end)

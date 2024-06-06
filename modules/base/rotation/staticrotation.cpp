@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,8 +32,7 @@ namespace {
         "Rotation",
         "Rotation",
         "This value is the used as a 3x3 rotation matrix that is applied to the scene "
-        "graph node that this transformation is attached to relative to its parent",
-        // @VISIBILITY(3.0)
+        "graph node that this transformation is attached to relative to its parent.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -42,7 +41,7 @@ namespace {
     // Inspired by: https://www.learnopencv.com/rotation-matrix-to-euler-angles/
     glm::dvec3 rotationMatrixToEulerAngles(glm::dmat4 mat) {
         const double sy = glm::sqrt(mat[0][0] * mat[0][0] + mat[0][1] * mat[0][1]);
-        bool singular = sy < 1e-6;
+        const bool singular = (sy < 1e-6);
 
         glm::dvec3 res;
         if (singular) {
@@ -95,7 +94,7 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary) : StaticRota
         _eulerRotation = std::get<glm::dvec3>(p.rotation);
     }
     else if (std::holds_alternative<glm::dvec4>(p.rotation)) {
-        glm::dvec4 data = std::get<glm::dvec4>(p.rotation);
+        const glm::dvec4 data = std::get<glm::dvec4>(p.rotation);
         _eulerRotation = rotationMatrixToEulerAngles(
             glm::mat3_cast(glm::dquat(data.w, data.x, data.y, data.z))
         );

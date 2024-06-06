@@ -43,5 +43,12 @@
       "eyeseparation": 0.065,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
-  ]
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "A single 1920x1080 fullscreen window with planar projection rendering. The display will automatically be set to 1920x1080, regardless of native resolution.",
+    "license": "MIT License",
+    "name": "Fullscreen 1080",
+    "version": "1.0"
+  }
 }

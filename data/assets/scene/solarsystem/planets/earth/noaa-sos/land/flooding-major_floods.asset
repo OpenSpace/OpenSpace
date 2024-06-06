@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Flood Events - 2000 - 2009"
@@ -16,41 +17,46 @@ vulnerable to the effects of flooding]]
 local URL = "https://sos.noaa.gov/catalog/datasets/flood-events-2000-2009/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
 
-local layer_floods = {
+local LayerFloods = {
   Identifier = Identifier .. "-floods",
   Name = Name .. " (Floods)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "flood_3600.png",
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_floods)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerFloods)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_floods)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerFloods)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(layer_floods)
+asset.export(Layer)
+asset.export(LayerFloods)
+
 
 
 asset.meta = {

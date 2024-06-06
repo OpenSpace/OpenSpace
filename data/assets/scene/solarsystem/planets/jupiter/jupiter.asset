@@ -1,6 +1,8 @@
-local transforms = asset.require("./transforms")
-asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+
+
 
 local Jupiter = {
   Identifier = "Jupiter",
@@ -8,13 +10,13 @@ local Jupiter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JUPITER",
-      Observer = "JUPITER BARYCENTER"
+      Target = coreKernels.ID.Jupiter,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_JUPITER",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Jupiter,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -24,7 +26,7 @@ local Jupiter = {
     Layers = {},
     ShadowGroup = {
       Sources = {
-        { Name = "Sun", Radius = 696.3E6 },
+        { Name = "Sun", Radius = 696300000 },
       },
       Casters = {
         { Name = "Ganymede", Radius = 2631000 },
@@ -44,8 +46,8 @@ local JupiterLabel = {
   Identifier = "JupiterLabel",
   Parent = Jupiter.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Jupiter",
     FontSize = 70.0,
     Size = 8.75,
@@ -63,6 +65,7 @@ local JupiterLabel = {
     Path = "/Solar System/Planets/Jupiter"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Jupiter)

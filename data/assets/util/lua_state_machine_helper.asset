@@ -4,7 +4,7 @@
 -- A state is given as a table with a Title string, and two functions: Play and Rewind
 -- (see example asset)
 
-local goToNextStateFunction = function (machine)
+local function goToNextStateFunction(machine)
   if (machine.currentStateIndex >= #machine.states) then
     machine.currentStateIndex = #machine.states
     return
@@ -29,7 +29,7 @@ local goToNextStateFunction = function (machine)
   machine.states[machine.currentStateIndex].Play()
 end
 
-local goToPreviousStateFunction = function (machine)
+local function goToPreviousStateFunction(machine)
   if (machine.currentStateIndex < 1) then
     machine.currentStateIndex = 0
     return
@@ -48,13 +48,13 @@ local goToPreviousStateFunction = function (machine)
   machine.currentStateIndex = machine.currentStateIndex - 1
 end
 
-local createStateMachine = function (states)
+local function createStateMachine(states)
   local machine = {
     states = states,
     currentStateIndex = 0
   }
-  machine.goToNextState = function () goToNextStateFunction(machine) end
-  machine.goToPreviousState = function () goToPreviousStateFunction(machine) end
+  machine.goToNextState = function() goToNextStateFunction(machine) end
+  machine.goToPreviousState = function() goToPreviousStateFunction(machine) end
   return machine
 end
 

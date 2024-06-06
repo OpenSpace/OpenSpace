@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,7 +85,7 @@ void DataProcessorKameleon::addDataValues(const std::string& path,
 
     const int numValues = static_cast<int>(_dimensions.x * _dimensions.y * _dimensions.z);
 
-    for (int i = 0; i < numOptions; ++i) {
+    for (int i = 0; i < numOptions; i++) {
         //0.5 to gather interesting values for the normalization/histograms.
         float* values = _kw->uniformSliceValues(
             options[i],

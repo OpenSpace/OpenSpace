@@ -1,30 +1,35 @@
-local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+local globe = asset.require("../../mercury")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Name = "Mercury Textures",
   Type = "HttpSynchronization",
   Identifier = "mercury_abundance_textures",
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Name = "Iron Abundance",
   Identifier = "fesimap_02122015",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = texturesPath .. "fesimap_02122015.png",
   BlendMode = "Multiply",
+  CacheSettings = { Enabled = false }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
-
+asset.export("layer", Layer)
 
 
 

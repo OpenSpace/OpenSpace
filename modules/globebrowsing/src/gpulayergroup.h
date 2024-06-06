@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ struct LayerGroup;
 struct TileIndex;
 
 /**
- * Manages a GPU representation of a `LayerGroup`
+ * Manages a GPU representation of a `LayerGroup`.
  */
 class GPULayerGroup {
 public:
@@ -64,8 +64,8 @@ public:
     void bind(ghoul::opengl::ProgramObject& programObject, const LayerGroup& layerGroup);
 
     /**
-    * Deactivates any `TextureUnit`s assigned by this object.
-    * This method should be called after the OpenGL draw call.
+    * Deactivates any `TextureUnit`s assigned by this object. This method should be called
+    * after the OpenGL draw call.
     */
     void deactivate();
 
@@ -78,8 +78,7 @@ private:
         std::vector<GPUChunkTile> gpuChunkTiles;
 
         UniformCache(opacity, gamma, multiplier, offset, valueBlending, chromaKeyColor,
-            chromaKeyTolerance, paddingStartOffset, paddingSizeDifference, color,
-            depthOffset, depthScale) uniformCache;
+            chromaKeyTolerance, color, depthOffset, depthScale) uniformCache;
 
         bool isHeightLayer = false;
     };

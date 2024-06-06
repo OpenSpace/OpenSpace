@@ -1,5 +1,5 @@
-local toggle_trail = {
-  Identifier = "event.artemis.toggle_trail",
+local ToggleTrail = {
+  Identifier = "os.artemis.ToggleTrail",
   Name = "Toggle Artemis trails (auto)",
   Command = [[
     local node
@@ -12,7 +12,6 @@ local toggle_trail = {
     if node ~= "ArtemisModel" then
       return
     end
-
 
     local earthTrail = "ArtemisEarthTrail"
     local moonTrail = "ArtemisMoonTrail"
@@ -28,40 +27,40 @@ local toggle_trail = {
       end
     else
       visibility = not (
-        openspace.getPropertyValue("Scene." .. earthTrail .. ".Renderable.Enabled") or
-        openspace.getPropertyValue("Scene." .. moonTrail .. ".Renderable.Enabled")
+        (openspace.propertyValue("Scene." .. earthTrail .. ".Renderable.Fade") == 1) or
+        (openspace.propertyValue("Scene." .. moonTrail .. ".Renderable.Fade") == 1)
       )
     end
 
-    openspace.setPropertyValueSingle(
-      "Scene." .. earthTrail .. ".Renderable.Enabled",
-      visibility
-    )
-    openspace.setPropertyValueSingle(
-      "Scene." .. moonTrail .. ".Renderable.Enabled",
-      visibility
-    )
-  ]],
+    if visibility then
+      openspace.fadeIn("Scene." .. earthTrail .. ".Renderable")
+      openspace.fadeIn("Scene." .. moonTrail .. ".Renderable")
+    else
+      openspace.fadeOut("Scene." .. earthTrail .. ".Renderable")
+      openspace.fadeOut("Scene." .. moonTrail .. ".Renderable")
+    end
+
+     ]],
   Documentation = [[Toggles the visibility of the Artemis trails with an
     approaching/exiting event. This action takes optional arguments to 1) determine which
     node is currently in focus and only hide Artemis trails if it is in focus (as the
     'Node') and 2) the transition direction (as 'Approaching' or 'Exiting')]],
   GuiPath = "/Artemis/Events",
-  IsLocal = true
+  IsLocal = false
 }
 
 
 asset.onInitialize(function()
-  openspace.action.registerAction(toggle_trail)
+  openspace.action.registerAction(ToggleTrail)
 
   openspace.event.registerEventAction(
     "CameraFocusTransition",
-    toggle_trail.Identifier,
+    ToggleTrail.Identifier,
     { Transition = "Exiting" }
   )
   openspace.event.registerEventAction(
     "CameraFocusTransition",
-    toggle_trail.Identifier,
+    ToggleTrail.Identifier,
     { Transition = "Approaching" }
   )
 end)
@@ -69,16 +68,16 @@ end)
 asset.onDeinitialize(function()
   openspace.event.unregisterEventAction(
     "CameraFocusTransition",
-    toggle_trail.Identifier,
+    ToggleTrail.Identifier,
     { Transition = "Exiting" }
   )
   openspace.event.unregisterEventAction(
     "CameraFocusTransition",
-    toggle_trail.Identifier,
+    ToggleTrail.Identifier,
     { Transition = "Approaching" }
   )
 
-  openspace.action.removeAction(toggle_trail)
+  openspace.action.removeAction(ToggleTrail)
 end)
 
-asset.export("artemis.toggle_trail", toggle_trail.Identifier)
+asset.export("ToggleTrail", ToggleTrail.Identifier)

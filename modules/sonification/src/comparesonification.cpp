@@ -28,7 +28,6 @@
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/fmt.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "CompareSonification";
@@ -206,25 +205,27 @@ void CompareSonification::planetSelectionChanged(
 
     if (prevChangedPlanet != "") {
         // Reset scale of previously compared planet
-        std::string script = fmt::format(
+        std::string script = std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
             prevChangedPlanet, 1
         );
         global::scriptEngine->queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 
     if (changedPlanet != 0) {
         // Scale up the planet to visually show which planets are being compared
-        std::string script = fmt::format(
+        std::string script = std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
             changedPlanet.getDescriptionByValue(changedPlanet.value()), _focusScale
         );
         global::scriptEngine->queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
 
         prevChangedPlanet = changedPlanet.getDescriptionByValue(changedPlanet.value());

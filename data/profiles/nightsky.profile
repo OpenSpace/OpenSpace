@@ -1,6 +1,6 @@
 {
   "additional_scripts": [
-    "openspace.action.triggerAction(\"os.nightsky.level_horizon_pitch\")"
+    "openspace.action.triggerAction(\"os.nightsky.LevelHorizonPitch\")"
   ],
   "assets": [
     "base",

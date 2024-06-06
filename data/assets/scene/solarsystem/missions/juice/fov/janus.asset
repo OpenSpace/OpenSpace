@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 local Janus = {
@@ -18,8 +19,8 @@ local Janus = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_JANUS",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.Janus,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_JANUS",
@@ -34,9 +35,9 @@ local Janus = {
     Name = "Janus FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
     Description = "The field-of-view for the JANUS instrument onboard Juice"
-
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Janus)
@@ -47,6 +48,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Janus)
+
 
 
 asset.meta = {

@@ -1,0 +1,60 @@
+local ReverseRate = {
+  Identifier = "os.time.reverseRate",
+  Name = "Reverse rate of time",
+  Command = [[
+openspace.time.setDeltaTime(-openspace.time.deltaTime())
+  ]],
+  Documentation = [[Reverse the rate of time]],
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = false
+}
+
+local SiderealDayIncrease = {
+  Identifier = "os.time.siderealDayIncrease",
+  Name = "Advance 1 sidereal day",
+  Command = [[
+openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(), 86164.0905));
+  ]],
+  Documentation = [[Advances time by a sidereal day (Instant)]],
+  GuiPath = "/Time",
+  IsLocal = false
+}
+
+local SiderealDayDecrease = {
+  Identifier = "os.time.siderealDayDecrease",
+  Name = "Decrement 1 sidereal day",
+  Command = [[
+openspace.time.setTime(openspace.time.advancedTime(openspace.time.currentTime(), -86164.0905));
+  ]],
+  Documentation = [[Decrements time by a sidereal day (Instant)]],
+  GuiPath = "/Time",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ReverseRate)
+  openspace.action.registerAction(SiderealDayIncrease)
+  openspace.action.registerAction(SiderealDayDecrease)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(SiderealDayDecrease)
+  openspace.action.removeAction(SiderealDayIncrease)
+  openspace.action.removeAction(ReverseRate)
+end)
+
+asset.export("ReverseRate", ReverseRate.Identifier)
+asset.export("SiderealDayIncrease", SiderealDayIncrease.Identifier)
+asset.export("SiderealDayDecrease", SiderealDayDecrease.Identifier)
+
+
+
+asset.meta = {
+  Name = "Actions - Time",
+  Version = "1.0",
+  Description = "Asset providing actions around time",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

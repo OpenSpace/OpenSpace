@@ -1,15 +1,18 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local sssb = asset.syncedResource({
+
+
+local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Encke-type Comet)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_encke-type_comet",
-  Version = 2
+  Version = 4
 })
 
-local object = {
+
+local Object = {
   Identifier = "sssb_encke-type_comet",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_encke-type_comet.csv",
@@ -17,7 +20,8 @@ local object = {
     Segments = 200,
     SegmentQuality = 2,
     Color = { 0.8, 0.34, 1.0 },
-    TrailFade = 23
+    TrailFade = 23,
+    PointSizeExponent = 10.0
   },
   GUI = {
     Name = "Encke-type Comets",
@@ -27,15 +31,16 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 

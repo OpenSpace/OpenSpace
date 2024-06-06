@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,8 +58,8 @@ public:
     ~TuioEar();
 
     /**
-    * Callback functions, listens to the TUIO server
-    */
+     * Callback functions, listens to the TUIO server.
+     */
     void addTuioObject(TUIO::TuioObject *tobj);
     void updateTuioObject(TUIO::TuioObject *tobj);
     void removeTuioObject(TUIO::TuioObject *tobj);
@@ -75,8 +75,8 @@ public:
     void refresh(TUIO::TuioTime frameTime);
 
     /**
-        * Lock-swap the containers of this listener
-        */
+     * Lock-swap the containers of this listener.
+     */
     std::vector<TouchInput> takeInput();
     std::vector<TouchInput> takeRemovals();
 

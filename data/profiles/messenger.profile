@@ -4,7 +4,7 @@
     "base_keybindings",
     "scene/solarsystem/missions/messenger/dashboard",
     "scene/solarsystem/missions/messenger/mercurymagnetosphere",
-    "scene/solarsystem/missions/messenger/messengerSC"
+    "scene/solarsystem/missions/messenger/messenger"
   ],
   "camera": {
     "altitude": 40000000.0,

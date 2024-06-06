@@ -1,10 +1,12 @@
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.setPropertyValueSingle("Modules.Exoplanets.Enabled", true)
   openspace.setPropertyValueSingle("Modules.Exoplanets.ShowComparisonCircle", false)
   openspace.setPropertyValueSingle("Modules.Exoplanets.ShowHabitableZone", true)
   openspace.setPropertyValueSingle("Modules.Exoplanets.UseOptimisticZone", true)
   openspace.setPropertyValueSingle("Modules.Exoplanets.HabitableZoneOpacity", 0.1)
 end)
+
+
 
 asset.meta = {
   Name = "Exoplanet Default Settings",

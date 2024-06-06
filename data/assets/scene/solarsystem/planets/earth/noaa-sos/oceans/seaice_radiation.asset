@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Sea Ice: Fraction and Solar Radiation Absorption"
@@ -12,39 +13,44 @@ which is more pronounced than anywhere else on the planet]]
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-ice-fraction-and-solar-radiation-absorption/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
   Version = 1
 })
 
-local layer_fraction = {
+
+local LayerFraction = {
   Identifier = Identifier,
   Name = Name,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "sea_ice_fraction.png",
   Description = Description
 }
 
-local layer_solar = {
+local LayerSolar = {
   Identifier = Identifier .. "-solar",
   Name = Name .. " (Solar)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "solar.png",
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_fraction)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_solar)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerFraction)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerSolar)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_fraction)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_solar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerSolar)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerFraction)
 end)
 
-asset.export(layer_fraction)
-asset.export(layer_solar)
+asset.export(LayerFraction)
+asset.export(LayerSolar)
+
 
 
 asset.meta = {

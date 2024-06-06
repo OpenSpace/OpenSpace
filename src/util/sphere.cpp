@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,9 +61,10 @@ Sphere::Sphere(glm::vec3 radius, int segments)
             // Spherical coordinates based on ISO standard.
             // https://en.wikipedia.org/wiki/Spherical_coordinate_system
 
-            const float x = radius[0] * sin(theta) * cos(phi);
-            const float y = radius[1] * sin(theta) * sin(phi);
-            const float z = radius[2] * cos(theta); // Z points towards pole (theta = 0)
+            // Z points towards pole (theta = 0)
+            const float x = radius[0] * std::sin(theta) * std::cos(phi);
+            const float y = radius[1] * std::sin(theta) * std::sin(phi);
+            const float z = radius[2] * std::cos(theta);
 
             _varray[nr].location[0] = x;
             _varray[nr].location[1] = y;
@@ -71,7 +72,7 @@ Sphere::Sphere(glm::vec3 radius, int segments)
             _varray[nr].location[3] = 0.0;
 
             glm::vec3 normal = glm::vec3(x, y, z);
-            if (!(x == 0.f && y == 0.f && z == 0.f)) {
+            if (x != 0.f || y != 0.f || z != 0.f) {
                 normal = glm::vec3(glm::normalize(glm::dvec3(normal)));
             }
 
@@ -90,8 +91,8 @@ Sphere::Sphere(glm::vec3 radius, int segments)
 
     nr = 0;
     // define indices for all triangles
-    for (int i = 1; i <= segments; ++i) {
-        for (int j = 0; j < segments; ++j) {
+    for (int i = 1; i <= segments; i++) {
+        for (int j = 0; j < segments; j++) {
             const int t = segments + 1;
             _iarray[nr] = t * (i - 1) + j + 0; //1
             ++nr;
@@ -197,8 +198,8 @@ bool Sphere::initialize() {
     return true;
 }
 
-void Sphere::render() {
-    glBindVertexArray(_vaoID);  // select first VAO
+void Sphere::render() const {
+    glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);

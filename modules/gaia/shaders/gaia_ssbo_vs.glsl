@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -130,8 +130,8 @@ void main() {
 
     // Check if we should filter this star by magnitude or color
     if ((abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
-        (abs(gMagThreshold.x - 20.0f) > EPS && in_brightness.x < gMagThreshold.x) ||
-        (abs(gMagThreshold.y - 20.0f) > EPS && in_brightness.x > gMagThreshold.y) ||
+        (abs(gMagThreshold.x - 20.0) > EPS && in_brightness.x < gMagThreshold.x) ||
+        (abs(gMagThreshold.y - 20.0) > EPS && in_brightness.x > gMagThreshold.y) ||
         (abs(bpRpThreshold.x - bpRpThreshold.y) < EPS && abs(bpRpThreshold.x - in_brightness.y) < EPS) ||
         (abs(bpRpThreshold.x) > EPS && in_brightness.y < bpRpThreshold.x) ||
         (abs(bpRpThreshold.y) > EPS && in_brightness.y > bpRpThreshold.y))
@@ -169,7 +169,7 @@ void main() {
 
   // Apply camera transforms
   dvec4 viewPosition = view * model * objectPosition;
-  vec4 sunPosition = vec4(view * model * dvec4(0.0f, 0.0f, 0.0f, 1.0f));
+  vec4 sunPosition = vec4(view * model * dvec4(0.0, 0.0, 0.0, 1.0));
 
   vs_starDistFromSun = safeLength(objectPosition);
   vs_cameraDistFromSun = safeLength(sunPosition);

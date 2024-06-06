@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOPLANE___H__
+#ifndef __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOPLANE___H__
+#define __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOPLANE___H__
 
 #include <modules/base/rendering/renderableplane.h>
 
@@ -45,8 +45,10 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+
 protected:
-    virtual void bindTexture() override;
+    void bindTexture() override;
 
 private:
     VideoPlayer _videoPlayer;
@@ -55,4 +57,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEVIDEOPLANE___H__
+#endif // __OPENSPACE_MODULE_VIDEO___RENDERABLEVIDEOPLANE___H__

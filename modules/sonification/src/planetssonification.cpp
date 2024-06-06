@@ -353,7 +353,7 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
 
 void PlanetsSonification::sendSettings(int planetIndex) {
     if (_planets.size() <= planetIndex) {
-        LWARNING(fmt::format("Planet list does not include index {}", planetIndex));
+        LWARNING(std::format("Planet list does not include index {}", planetIndex));
         return;
     }
 

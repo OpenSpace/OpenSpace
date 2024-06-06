@@ -1,15 +1,19 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
-local kernels = asset.require("./kernels").kernels
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-local models = asset.syncedResource({
+
+
+local models = asset.resource({
   Name = "Apollo Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_models",
   Version = 4
 })
 
-local apolloSpiceId = -908
+
+local ApolloSpiceId = -908
 
 local Apollo8Launch = {
   Identifier = "Apollo8Launch",
@@ -22,10 +26,9 @@ local Apollo8Launch = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
-      Observer = "EARTH",
-      Frame = "IAU_EARTH",
-      Kernels = kernels
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Earth
     }
   },
   GUI = {
@@ -45,7 +48,7 @@ local Apollo8LaunchModel = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -math.pi / 2}
+      Rotation = { 0.0, 0.0, -math.pi / 2 }
     }
   },
   Renderable = {
@@ -58,11 +61,12 @@ local Apollo8LaunchModel = {
     PerformShading = true
   },
   GUI = {
-    Hidden = true,
     Name = "Apollo 8 Launch Model",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Hidden = true
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo8Launch)

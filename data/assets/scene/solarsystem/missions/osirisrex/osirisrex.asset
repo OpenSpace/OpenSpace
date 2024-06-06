@@ -4,6 +4,6 @@ asset.require("./model")
 asset.require("./trail")
 asset.require("scene/solarsystem/sun/marker")
 
-asset.require('./script_schedule')
+asset.require("./script_schedule")
 asset.require("./actions")
-asset.require('./mission')
+asset.require("./mission")

@@ -313,6 +313,9 @@
         "minor": { "type": "integer" }
       },
       "required": [ "name", "major", "minor" ]
+    },
+    "meta": {
+      "$ref": "sgct.schema.json#/$defs/meta"
     }
   },
   "additionalProperties": false,

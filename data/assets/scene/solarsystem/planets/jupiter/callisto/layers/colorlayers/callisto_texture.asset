@@ -1,27 +1,32 @@
-local globeIdentifier = asset.require("../../callisto").Callisto.Identifier
+local globe = asset.require("../../callisto")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Name = "Callisto Textures",
   Type = "HttpSynchronization",
   Identifier = "callisto_textures",
   Version = 2
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "callisto_os.tif",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  ZIndex = 5
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Callisto.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Callisto.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
@@ -31,5 +36,5 @@ asset.meta = {
   Description = "Default texture for Callisto",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
-  License = "MIT license",
+  License = "MIT license"
 }

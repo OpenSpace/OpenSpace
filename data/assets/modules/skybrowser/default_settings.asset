@@ -1,8 +1,10 @@
-asset.onInitialize(function ()
+asset.onInitialize(function()
   openspace.setPropertyValueSingle("Modules.SkyBrowser.Enabled", true)
   openspace.setPropertyValueSingle("Modules.SkyBrowser.ShowTitleInGuiBrowser", false)
   -- More settings are available, but for now using the default values
 end)
+
+
 
 asset.meta = {
   Name = "SkyBrowser Module Default Settings",

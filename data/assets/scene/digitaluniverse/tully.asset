@@ -1,51 +1,63 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Tully Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_tully_textures",
   Version = 3
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Tully Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_tully_speck",
-  Version = 2
+  Version = 4
 })
 
-local tullyPoints = {
+
+local TransformMatrix = {
+  -0.7357425748,    0.67726129641,  0.0,           0.0,
+  -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+  0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+  0.0,              0.0,            0.0,           1.0
+}
+
+local TullyGalaxies = {
   Identifier = "TullyGalaxies",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = true,
     Labels = {
       File = speck .. "tully.label",
       Color = { 0.7, 0.7, 0.7 },
       Size = 19.36,
       MinMaxSize = { 8, 20 },
-      Unit = "Mpc"
+      Unit = "Mpc",
+      TransformationMatrix = TransformMatrix
     },
-    Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
-    ScaleFactor = 504.0,
     File = speck .. "tully.speck",
-    Texture = textures .. "point3A.png",
-    --ColorMap = speck .. "tully.cmap",
-    ColorMap = speck .. "lss.cmap",
-    --ColorOption = { "proximity" },
-    ColorOption = { "prox5Mpc" },
-    ColorRange = { { 1.0, 30.0 } },
-    Unit = "Mpc",
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
+    SkipFirstDataPoint = true,
+    Texture = {
+      File = textures .. "point3A.png"
     },
-    FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"
-    BillboardMinMaxSize = { 0.0, 7.0 }, -- in pixels
-    --CorrectionSizeEndDistance = 22.0,
-    --CorrectionSizeFactor = 10.45
-    EnablePixelSizeControl = true
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 },
+      ColorMapping = {
+        File = speck .. "lss.cmap",
+        ParameterOptions = {
+          { Key = "prox5Mpc", Range = { 1.0, 30.0 } }
+        }
+      }
+    },
+    Unit = "Mpc",
+    TransformationMatrix = TransformMatrix,
+    Fading = {
+      FadeInDistances = { 0.001, 1.0 } -- Fade in value in the same unit as "Unit"
+    },
+    SizeSettings = {
+      ScaleExponent = 21.9,
+      MaxSize = 0.3,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Tully Galaxies",
@@ -69,28 +81,33 @@ local tullyPoints = {
   }
 }
 
-local tullyImages = {
+local TullyGalaxiesImages = {
   Identifier = "TullyGalaxiesImages",
   Renderable = {
-    Type = "RenderablePlanesCloud",
-    Enabled = true,
-    Color = { 1.0, 1.0, 1.0 },
+    Type = "RenderablePointCloud",
     Opacity = 0.99,
-    ScaleFactor = 1.0,
     File = speck .. "tully.speck",
-    TexturePath = textures,
-    Luminosity = "diamkpc",
-    ScaleLuminosity = 0.001,
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
+    SkipFirstDataPoint = true,
+    Texture = {
+      Folder = textures
     },
+    TransformationMatrix = TransformMatrix,
+    -- Use fixed orientation, and rotate planes based on orientation information in
+    -- the dataset
+    OrientationRenderOption = "Fixed Rotation",
+    UseOrientationData = true,
     Unit = "Mpc",
-    -- Fade in value in the same unit as "Unit"
-    FadeInDistances = {0.0005, 0.003},
-    PlaneMinSize = 1.0
+    Fading = {
+      FadeInDistances = { 0.0005, 0.003 } -- Fade in value in the same unit as "Unit"
+    },
+    SizeSettings = {
+      SizeMapping = {
+        ParameterOptions = { "diamkpc" },
+        ScaleFactor = "Kiloparsec"
+      },
+      -- No exponential scaling, just use size mapping to set the correct size
+      ScaleExponent = 0.0
+    }
   },
   GUI = {
     Name = "Tully Galaxies Images",
@@ -108,24 +125,25 @@ local tullyImages = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(tullyPoints)
-  openspace.addSceneGraphNode(tullyImages)
+  openspace.addSceneGraphNode(TullyGalaxies)
+  openspace.addSceneGraphNode(TullyGalaxiesImages)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(tullyImages)
-  openspace.removeSceneGraphNode(tullyPoints)
+  openspace.removeSceneGraphNode(TullyGalaxiesImages)
+  openspace.removeSceneGraphNode(TullyGalaxies)
 end)
 
-asset.export(tullyPoints)
-asset.export(tullyImages)
+asset.export(TullyGalaxies)
+asset.export(TullyGalaxiesImages)
 
 
 
 asset.meta = {
   Name = "Tully Galaxies",
-  Version = "3.1",
+  Version = "5.0",
   Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
     images]],
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",

@@ -1,25 +1,25 @@
-local sun_transforms_asset = asset.require("scene/solarsystem/sun/transforms")
-asset.require("spice/base")
-local kernel = asset.require("./kernels").nep097
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
+
+
 
 local NeptuneBarycenter = {
   Identifier = "NeptuneBarycenter",
-  Parent = sun_transforms_asset.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "NEPTUNE BARYCENTER",
-      Observer = "SSB",
-      Kernels = kernel
+      Target = coreKernels.ID.NeptuneBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
     Name = "Neptune Barycenter",
     Path = "/Solar System/Planets/Neptune",
-    Hidden = true,
-    Description = "Neptune Barycenter position",
+    Hidden = true
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(NeptuneBarycenter)

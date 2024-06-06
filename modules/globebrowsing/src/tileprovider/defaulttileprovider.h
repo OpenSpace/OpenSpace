@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void initAsyncTileDataReader(TileTextureInitData initData, TileCacheProperties cacheProperties);
+    void initAsyncTileDataReader(TileTextureInitData initData,
+        TileCacheProperties cacheProperties);
 
     properties::StringProperty _filePath;
     properties::IntProperty _tilePixelSize;
@@ -56,7 +57,6 @@ private:
     std::unique_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
     layers::Group::ID _layerGroupID = layers::Group::ID::Unknown;
     bool _performPreProcessing = false;
-    bool _padTiles = true;
     TileCacheProperties _cacheProperties;
 };
 

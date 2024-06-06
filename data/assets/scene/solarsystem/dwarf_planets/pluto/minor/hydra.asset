@@ -1,5 +1,5 @@
 local transforms = asset.require("../transforms")
-local kernels = asset.require("../kernels").PlutoKernels
+local kernels = asset.require("../kernels")
 
 
 
@@ -9,18 +9,17 @@ local Hydra = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HYDRA",
-      Observer = "PLUTO BARYCENTER",
-      Kernels = kernels
+      Target = kernels.ID.Hydra,
+      Observer = kernels.ID.PlutoBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 0.53E5, 0.53E5, 0.53E5 },
+    Radii = { 53000, 53000, 53000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor" },
+  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "moon_minor_pluto" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto/Moons/Hydra"
   }
@@ -33,8 +32,8 @@ local HydraTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HYDRA",
-      Observer = "PLUTO BARYCENTER",
+      Target = kernels.ID.Hydra,
+      Observer = kernels.ID.PlutoBarycenter
     },
     Color = { 0.00, 0.62, 1.00 },
     Period = 38.20177,
@@ -44,7 +43,8 @@ local HydraTrail = {
     "moonTrail_solarSystem",
     "moonTrail_dwarf",
     "moonTrail_pluto",
-    "moonTrail_minor"
+    "moonTrail_minor",
+    "moonTrail_minor_pluto"
   },
   GUI = {
     Name = "Hydra Trail",
@@ -56,8 +56,8 @@ local HydraLabel = {
   Identifier = "HydraLabel",
   Parent = Hydra.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Hydra",
     FontSize = 70.0,
     Size = 6.0,
@@ -76,6 +76,7 @@ local HydraLabel = {
     Description = "Label for Pluto's moon Hydra"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Hydra)
@@ -97,8 +98,7 @@ asset.export(HydraTrail)
 asset.meta = {
   Name = "Hydra",
   Version = "1.0",
-  Description = [[Globe and trail for Pluto's moon Hydra. Data from NASA Spice (see base
-    spice asset)]],
+  Description = "Globe and trail for Pluto's moon Hydra",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

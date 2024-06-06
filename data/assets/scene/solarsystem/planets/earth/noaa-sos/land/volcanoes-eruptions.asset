@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Volcano Eruptions - through 2010"
@@ -18,22 +19,24 @@ rising to the surface. The volcanoes on Hawaii are the result of hotspots]]
 local URL = "https://sos.noaa.gov/catalog/datasets/volcano-eruptions-through-2010/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
   Version = 1
 })
 
-local layer_base = {
+
+local LayerBase = {
   Identifier = Identifier .. "-base",
   Name = Name .. " (Base)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "land.jpg",
   Description = Description
 }
 
-local layer = {
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -41,18 +44,20 @@ local layer = {
   Description = Description
 }
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer_base)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", LayerBase)
 end)
 
-asset.export(layer_base)
-asset.export(layer)
+asset.export(LayerBase)
+asset.export(Layer)
+
 
 
 asset.meta = {

@@ -2,14 +2,16 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
-local speck = asset.syncedResource({
+
+local speck = asset.resource({
   Name = "Grids Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_starorbits_speck",
   Version = 1
 })
 
-local sunOrbit = {
+
+local SunOrbit = {
   Identifier = "SunOrbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -17,7 +19,7 @@ local sunOrbit = {
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-Sun.speck",
-    MeshColor = {{ 1.0, 0.65, 0.0 }},
+    MeshColor = { { 1.0, 0.65, 0.0 } },
     --LabelFile = speck .. "1ld.label",
     -- TextColor = { 0.0, 0.2, 0.5 },
     -- TextMinMaxSize = { 0, 30 },
@@ -30,7 +32,7 @@ local sunOrbit = {
   }
 }
 
-local barnardsOrbit = {
+local BarnardsOrbit = {
   Identifier = "BarnardsOrbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -38,7 +40,7 @@ local barnardsOrbit = {
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-BarnardsStar.speck",
-    MeshColor = {{0.39, 0.58, 0.93}},
+    MeshColor = { { 0.39, 0.58, 0.93 } },
     --LabelFile = speck .. "1ld.label",
     -- TextColor = { 0.0, 0.2, 0.5 },
     -- TextSize = 10.3,
@@ -52,7 +54,7 @@ local barnardsOrbit = {
   }
 }
 
-local kapteynsOrbit = {
+local KapteynsOrbit = {
   Identifier = "KapteynsOrbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -60,7 +62,7 @@ local kapteynsOrbit = {
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-KapteynsStar.speck",
-    MeshColor = {{0.6, 0.6, 0.6}},
+    MeshColor = { { 0.6, 0.6, 0.6 } },
     --LabelFile = speck .. "1ld.label",
     -- TextColor = { 0.0, 0.2, 0.5 },
     -- TextSize = 10.3,
@@ -74,7 +76,7 @@ local kapteynsOrbit = {
   }
 }
 
-local lacaille9352Orbit = {
+local Lacaille9352Orbit = {
   Identifier = "Lacaille9352Orbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -82,7 +84,7 @@ local lacaille9352Orbit = {
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-Lacaille9352.speck",
-    MeshColor = {{0.58, 0.0, 0.83}},
+    MeshColor = { { 0.58, 0.0, 0.83 } },
     --LabelFile = speck .. "1ld.label",
     -- TextColor = { 0.0, 0.2, 0.5 },
     -- TextSize = 10.3,
@@ -96,7 +98,7 @@ local lacaille9352Orbit = {
   }
 }
 
-local lSR1826Orbit = {
+local LSR1826Orbit = {
   Identifier = "LSR1826Orbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -104,7 +106,7 @@ local lSR1826Orbit = {
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-LSR1826+3014.speck",
-    MeshColor = {{0.0, 0.39, 0.0}},
+    MeshColor = { { 0.0, 0.39, 0.0 } },
     --LabelFile = speck .. "1ld.label",
     -- TextColor = { 0.0, 0.2, 0.5 },
     -- TextSize = 10.3,
@@ -118,7 +120,7 @@ local lSR1826Orbit = {
   }
 }
 
-local lSRJ0822Orbit = {
+local LSRJ0822Orbit = {
   Identifier = "LSRJ0822Orbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -126,7 +128,7 @@ local lSRJ0822Orbit = {
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-LSRJ0822+1700.speck",
-    MeshColor = {{0.5, 1.0, 0.0}},
+    MeshColor = { { 0.5, 1.0, 0.0 } },
     --LabelFile = speck .. "1ld.label",
     -- TextColor = { 0.0, 0.2, 0.5 },
     -- TextSize = 10.3,
@@ -140,7 +142,7 @@ local lSRJ0822Orbit = {
   }
 }
 
-local pM_J13420Orbit = {
+local PM_J13420Orbit = {
   Identifier = "PM_J13420Orbit",
   --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
@@ -148,7 +150,7 @@ local pM_J13420Orbit = {
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-PM_J13420-3415.speck",
-    MeshColor = {{0.70, 0.13, 0.13}},
+    MeshColor = { { 0.70, 0.13, 0.13 } },
     --LabelFile = speck .. "1ld.label",
     -- TextColor = { 0.0, 0.2, 0.5 },
     -- TextSize = 10.3,
@@ -162,27 +164,34 @@ local pM_J13420Orbit = {
   }
 }
 
-local nodes = {
-  sunOrbit, barnardsOrbit, pM_J13420Orbit, lSRJ0822Orbit, lSR1826Orbit,
-  lacaille9352Orbit, kapteynsOrbit
-}
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.addSceneGraphNode(SunOrbit)
+  openspace.addSceneGraphNode(BarnardsOrbit)
+  openspace.addSceneGraphNode(KapteynsOrbit)
+  openspace.addSceneGraphNode(Lacaille9352Orbit)
+  openspace.addSceneGraphNode(LSR1826Orbit)
+  openspace.addSceneGraphNode(LSRJ0822Orbit)
+  openspace.addSceneGraphNode(PM_J13420Orbit)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
-  end
+  openspace.removeSceneGraphNode(PM_J13420Orbit)
+  openspace.removeSceneGraphNode(LSRJ0822Orbit)
+  openspace.removeSceneGraphNode(LSR1826Orbit)
+  openspace.removeSceneGraphNode(Lacaille9352Orbit)
+  openspace.removeSceneGraphNode(KapteynsOrbit)
+  openspace.removeSceneGraphNode(BarnardsOrbit)
+  openspace.removeSceneGraphNode(SunOrbit)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(SunOrbit)
+asset.export(BarnardsOrbit)
+asset.export(KapteynsOrbit)
+asset.export(Lacaille9352Orbit)
+asset.export(LSR1826Orbit)
+asset.export(LSRJ0822Orbit)
+asset.export(PM_J13420Orbit)
 
 
 

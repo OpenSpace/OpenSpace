@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,14 +29,11 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/string_cast.hpp>
@@ -51,49 +48,48 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
         "Billboard",
-        "Billboard mode",
-        "This value specifies whether the plane is a billboard, which means that it is "
-        "always facing the camera. If this is false, it can be oriented using other "
-        "transformations",
+        "Billboard Mode",
+        "Specifies whether the plane should be a billboard, which means that it is "
+        "always facing the camera. If it is not, it can be oriented using other "
+        "transformations.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
         "MirrorBackside",
-        "Mirror backside of image plane",
-        "If this value is set to false, the image plane will not be mirrored when "
-        "looking from the backside. This is usually desirable when the image shows "
-        "data at a specific location, but not if it is displaying text for example",
-        // @VISIBILITY(2.67)
+        "Mirror Backside of Image Plane",
+        "If false, the image plane will not be mirrored when viewed from the backside. "
+        "This is usually desirable when the image shows data at a specific location, but "
+        "not if it is displaying text for example.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
-        "Size (in meters)",
-        "This value specifies the size of the plane in meters",
+        "Size",
+        "The size of the plane in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AutoScaleInfo = {
         "AutoScale",
         "Auto Scale",
-        "When true, the plane will automatically adjust in size to match the aspect "
-        "ratio of the content. Otherwise it will remain in the given size."
+        "Decides whether the plane should automatically adjust in size to match the "
+        "aspect ratio of the content. Otherwise it will remain in the given size."
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane",
+        "Determines the blending mode that is applied to this plane.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
-        "If set, the plane's texture is multiplied with this color. Useful for applying "
-        "a color grayscale images",
+        "An RGB color to multiply with the plane's texture. Useful for applying "
+        "a color to grayscale images.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -106,6 +102,9 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::variant<float, glm::vec2> size;
+
+        // [[codegen::verbatim(AutoScaleInfo.description)]]
+        std::optional<bool> autoScale;
 
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
@@ -137,6 +136,11 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
 
+    _opacity.onChange([this]() {
+        if (_blendMode == static_cast<int>(BlendMode::Normal)) {
+            setRenderBinFromOpacity();
+        }
+    });
     addProperty(Fadeable::_opacity);
 
     if (std::holds_alternative<float>(p.size)) {
@@ -145,48 +149,42 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     else {
         _size = std::get<glm::vec2>(p.size);
     }
-
-    _billboard = p.billboard.value_or(_billboard);
-    _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
+    _size.setExponent(15.f);
+    _size.onChange([this]() { _planeIsDirty = true; });
+    addProperty(_size);
 
     _blendMode.addOptions({
         { static_cast<int>(BlendMode::Normal), "Normal" },
         { static_cast<int>(BlendMode::Additive), "Additive"}
     });
     _blendMode.onChange([this]() {
-        switch (_blendMode) {
-            case static_cast<int>(BlendMode::Normal):
+        const BlendMode m = static_cast<BlendMode>(_blendMode.value());
+        switch (m) {
+            case BlendMode::Normal:
                 setRenderBinFromOpacity();
                 break;
-            case static_cast<int>(BlendMode::Additive):
+            case BlendMode::Additive:
                 setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
-        }
-    });
-
-    _opacity.onChange([this]() {
-        if (_blendMode == static_cast<int>(BlendMode::Normal)) {
-            setRenderBinFromOpacity();
         }
     });
 
     if (p.blendMode.has_value()) {
         _blendMode = codegen::map<BlendMode>(*p.blendMode);
     }
+    addProperty(_blendMode);
+
+    _billboard = p.billboard.value_or(_billboard);
+    addProperty(_billboard);
+
+    _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
+    addProperty(_mirrorBackside);
+
+    _autoScale = p.autoScale.value_or(_autoScale);
+    addProperty(_autoScale);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
-
-    addProperty(_billboard);
-
-    _size.setExponent(15.f);
-    addProperty(_size);
-    _size.onChange([this](){ _planeIsDirty = true; });
-
-    addProperty(_autoScale);
-
     addProperty(_multiplyColor);
 
     setBoundingSphere(glm::compMax(_size.value()));
@@ -213,6 +211,8 @@ void RenderablePlane::initializeGL() {
             );
         }
     );
+
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderablePlane::deinitializeGL() {
@@ -237,21 +237,21 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     ZoneScoped;
 
     _shader->activate();
-    _shader->setUniform("opacity", opacity());
+    _shader->setUniform(_uniformCache.opacity, opacity());
 
-    _shader->setUniform("mirrorBackside", _mirrorBackside);
+    _shader->setUniform(_uniformCache.mirrorBackside, _mirrorBackside);
 
-    glm::dvec3 objectPositionWorld = glm::dvec3(
+    const glm::dvec3 objPosWorld = glm::dvec3(
         glm::translate(
             glm::dmat4(1.0),
             data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objectPositionWorld);
-    glm::dvec3 newRight = glm::normalize(
+    const glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - objPosWorld);
+    const glm::dvec3 newRight = glm::normalize(
         glm::cross(data.camera.lookUpVectorWorldSpace(), normal)
     );
-    glm::dvec3 newUp = glm::cross(normal, newRight);
+    const glm::dvec3 newUp = glm::cross(normal, newRight);
 
     glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
     cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
@@ -262,30 +262,25 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
         cameraOrientedRotation :
         glm::dmat4(data.modelTransform.rotation);
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        rotationTransform *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-        glm::dmat4(1.0);
-    const glm::dmat4 modelViewTransform =
-        data.camera.combinedViewMatrix() * modelTransform;
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data, { .rotation = rotationTransform });
 
-    _shader->setUniform("modelViewProjectionTransform",
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
-
-    _shader->setUniform("modelViewTransform",
-        glm::mat4(data.camera.combinedViewMatrix() * glm::dmat4(modelViewTransform)));
+    _shader->setUniform(
+        _uniformCache.modelViewProjection,
+        glm::mat4(modelViewProjectionTransform)
+    );
+    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     bindTexture();
     defer { unbindTexture(); };
 
-    _shader->setUniform("texture1", unit);
+    _shader->setUniform(_uniformCache.colorTexture, unit);
 
-    _shader->setUniform("multiplyColor", _multiplyColor);
+    _shader->setUniform(_uniformCache.multiplyColor, _multiplyColor);
 
-    bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
+    const bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -313,6 +308,7 @@ void RenderablePlane::update(const UpdateData&) {
 
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_planeIsDirty) {
@@ -323,19 +319,19 @@ void RenderablePlane::update(const UpdateData&) {
 void RenderablePlane::createPlane() {
     const GLfloat sizeX = _size.value().x;
     const GLfloat sizeY = _size.value().y;
-    const GLfloat vertexData[] = {
+    const std::array<GLfloat, 36> vertexData = {
         //   x       y    z    w    s    t
         -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
          sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
         -sizeX,  sizeY, 0.f, 0.f, 0.f, 1.f,
         -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
          sizeX, -sizeY, 0.f, 0.f, 1.f, 0.f,
-         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
+         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f
     };
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
 

@@ -1,30 +1,31 @@
-local enableDimming = {
-  Identifier = "os.nightsky.enable_dimming",
+local EnableDimming = {
+  Identifier = "os.nightsky.EnableDimming",
   Name = "Enable atmosphere dimming",
-  Command = "openspace.setPropertyValue('{daytime_hidden}.Renderable.DimInAtmosphere', true)",
+  Command = [[openspace.setPropertyValue("{daytime_hidden}.Renderable.DimInAtmosphere", true)]],
   Documentation = "Sets items like the stars and constellations to be hidden during the day",
   GuiPath = "/Night Sky/Daytime",
   IsLocal = false
 }
 
-local disableDimming = {
-  Identifier = "os.nightsky.disable_dimming",
+local DisableDimming = {
+  Identifier = "os.nightsky.DisableDimming",
   Name = "Disable atmosphere dimming",
-  Command = "openspace.setPropertyValue('{daytime_hidden}.Renderable.DimInAtmosphere', false)",
+  Command = [[openspace.setPropertyValue("{daytime_hidden}.Renderable.DimInAtmosphere", false)]],
   Documentation = "Sets items like the stars and constellations to be shown during the day",
   GuiPath = "/Night Sky/Daytime",
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(enableDimming)
-  openspace.action.registerAction(disableDimming)
+  openspace.action.registerAction(EnableDimming)
+  openspace.action.registerAction(DisableDimming)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(disableDimming)
-  openspace.action.removeAction(enableDimming)
+  openspace.action.removeAction(DisableDimming)
+  openspace.action.removeAction(EnableDimming)
 end)
 
-asset.export(enableDimming)
-asset.export(disableDimming)
+asset.export("EnableDimming", EnableDimming.Identifier)
+asset.export("EnableDimming", DisableDimming.Identifier)

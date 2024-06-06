@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Last 30 Days)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_tle-new",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=last-30-days&FORMAT=kvn",
   Filename = "tle-new.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
 
-local satellites = {
-  Identifier = "tle-new",
+
+local Last30DaysSatellites = {
+  Identifier = "Last30DaysSatellites",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -18,7 +21,8 @@ local satellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.65, 0.25, 0.45 },
-    Fade = 1.5,
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
@@ -29,15 +33,16 @@ local satellites = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(Last30DaysSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(Last30DaysSatellites)
 end)
 
-asset.export(satellites)
+asset.export(Last30DaysSatellites)
 
 
 

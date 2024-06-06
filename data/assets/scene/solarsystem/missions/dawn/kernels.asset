@@ -1,0 +1,89 @@
+local coreKernels = asset.require("spice/core")
+
+
+
+local dawn = asset.resource({
+  Name = "Dawn Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "dawn_kernels",
+  Version = 3
+})
+
+local vesta = asset.resource({
+  Name = "Vesta Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "vesta_kernels",
+  Version = 1
+})
+
+
+local DawnKernels = {
+  dawn .. "dawn_ref_070926-150201_070829.bsp",
+
+  -- IK
+  dawn .. "dawn_fc_v10.ti",
+
+  -- SPK
+  dawn .. "dawn_rec_070927_070930_081218_v1.bsp",
+  -- dawn .. "dawn_rec_110201_110328_110328_v1.bsp",
+  -- dawn .. "dawn_rec_110328_110419_110420_v1.bsp",
+  dawn .. "dawn_rec_110416_110802_110913_v1.bsp",
+  dawn .. "dawn_rec_110802_110831_110922_v1.bsp",
+  -- dawn .. "spk/dawn_rec_110831_110928_111221_v1.bsp",
+  -- dawn .. "dawn_rec_110928_111102_120615_v1.bsp",
+  -- dawn .. "dawn_rec_111102_111210_120618_v1.bsp",
+  -- dawn .. "dawn_rec_111211_120501_120620_v1.bsp",
+  dawn .. "dawn_rec_120724_120913_121213_v1.bsp",
+
+  -- FK
+  dawn .. "dawn_v12.tf",
+
+  dawn .. "dawn_203_sclkscet_00039.tsc",
+
+  dawn .. "dawn_sc_070927_070930.bc",
+  dawn .. "dawn_sc_110801_110807.bc",
+  dawn .. "dawn_sc_110808_110814.bc",
+  dawn .. "dawn_sc_120910_120916.bc",
+
+  -- dawn .. "dawn_sc_070927_070930.bc",
+  -- dawn .. "dawn_sc_110801_110807.bc",
+  -- dawn .. "dawn_sc_110808_110814.bc",
+  -- dawn .. "dawn_sc_120910_120916.bc",
+
+
+  -- Solar array rotation kernels
+  dawn .. "dawn_sa_070927_070930.bc",
+  -- dawn .. "dawn_sa_110801_110807.bc",
+  -- dawn .. "dawn_sa_110808_110814.bc",
+  -- dawn .. "dawn_sa_120910_120916.bc"
+}
+
+local VestaKernels = {
+  vesta .. "sb_vesta_071107.bsp"
+}
+
+local ID = {
+  Dawn = "DAWN",
+  Vesta = "VESTA"
+}
+
+local Frame = {
+  Dawn = "DAWN_SPACECRAFT",
+  DawnSolarArray1 = -203010,
+  DawnSolarArray2 = -203020,
+  Vesta = coreKernels.Frame.Vesta
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(DawnKernels)
+  openspace.spice.loadKernel(VestaKernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(VestaKernels)
+  openspace.spice.unloadKernel(DawnKernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)

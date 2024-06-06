@@ -1,32 +1,38 @@
-local globeIdentifier = asset.require("../../enceladus").Enceladus.Identifier
+local globe = asset.require("../../enceladus")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Name = "Enceladus textures",
   Type = "HttpSynchronization",
   Identifier = "enceladus_textures",
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "enceladus.jpg",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  ZIndex = 5,
+  CacheSettings = { Enabled = false }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Enceladus.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Enceladus.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
-  Name = "Enceladus Texutre",
+  Name = "Enceladus Texture",
   Version = "1.0",
   Description = "Default jpg texture for Enceladus",
   Author = "OpenSpace Team",

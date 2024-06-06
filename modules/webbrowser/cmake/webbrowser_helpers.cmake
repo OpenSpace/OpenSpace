@@ -160,7 +160,9 @@ function(run_cef_linux_config CEF_TARGET CEF_ROOT)
 endfunction ()
 
 function(set_modules_dependency_on_cef_libraries LIB_DEPENDENT)
-  target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_lib)
+  if (WIN32 OR OS_LINUX)
+    target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_lib)
+  endif ()
   target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_dll_wrapper)
 endfunction ()
 

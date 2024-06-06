@@ -1,0 +1,81 @@
+local transforms = asset.require("../model")
+local kernels = asset.require("../kernels")
+
+
+
+local MIXS_C = {
+  Identifier = "BepiColomboMPO_MIXS-C",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MIXS_C,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_MIXS-C",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO MIXS-C",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local MIXS_T = {
+  Identifier = "BepiColomboMPO_MIXS-T",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.MIXS_T,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_MIXS-T",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO MIXS-T",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MIXS_C)
+  openspace.addSceneGraphNode(MIXS_T)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MIXS_T)
+  openspace.removeSceneGraphNode(MIXS_C)
+end)
+
+
+
+asset.meta = {
+  Name = "MIXS",
+  Version = "1.0",
+  Description = [[
+    The MIXS instrument contains two parallel telescopes, designed to map the X-ray
+    emission from Mercury at two angular resolutions. The narrow-field telescope (MIXS-T)
+    uses a grazing incidence optic with a 1 degree field-of-view (FOV) and an imaging
+    detector with 64 x 64 pixels. The wide-field telescope (MIXS-C) uses a collimator to
+    define a FOV of ~10 degrees Full Width at Zero Maximum (FWZM). Its detector is
+    identical to MIXS-T, but as the collimator has no imaging capability, the pixels are
+    aggregated into a single output. The optical axes are aligned with the nadir-pointing
+    axis of the spacecraft.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,18 @@
+{
+  "profile": "default",
+  "commands": [
+    { "type": "time", "value": "2019-01-01T00:00:00.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Moon",
+        "pitch": 0.698796,
+        "position": [ -144087.5, -1669880, -735945.5 ],
+        "up": [ 0.664779, 0.252496, -0.703075 ],
+        "yaw": 0.0321787
+      }
+    },
+    { "type": "wait", "value": 120 },
+    { "type": "screenshot" }
+  ]
+}

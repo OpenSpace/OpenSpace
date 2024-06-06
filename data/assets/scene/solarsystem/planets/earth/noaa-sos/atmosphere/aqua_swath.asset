@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Polar Orbiting: Aqua Satellite and MODIS Swath"
@@ -18,7 +19,7 @@ about the same local time everyday. Aqua crosses the equator from south to north
 local URL = "https://sos.noaa.gov/catalog/datasets/polar-orbiting-aqua-satellite-and-modis-swath/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -27,24 +28,28 @@ local syncedDirectory = asset.syncedResource({
   UnzipFilesDestination = "images"
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "images",
   Description = Description
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
+asset.export(Layer)
+
 
 
 asset.meta = {

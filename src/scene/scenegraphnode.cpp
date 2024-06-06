@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,36 +47,35 @@ namespace {
         "ComputeScreenSpaceData",
         "Compute Screen Space Data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
-        "at regular intervals. If these values are set to 'false', they are not updated",
+        "at regular intervals. If these values are set to 'false', they are not updated.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
         "ScreenSpacePosition",
-        "The x,y position in screen space. Can be used for placing GUI elements",
+        "The x,y position in screen space. Can be used for placing GUI elements.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
         "ScreenVisibility",
-        "Determines if the node is currently visible on screen",
+        "Determines if the node is currently visible on screen.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
         "DistanceFromCamToNode",
-        "The distance from the camera to the node surface",
+        "The distance from the camera to the node surface.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
         "ScreenSizeRadius",
-        "The screen size of the radius of the node",
-        // @VISIBILITY(3.5)
+        "The screen size of the radius of the node.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -84,7 +83,7 @@ namespace {
         "VisibilityDistance",
         "VisibilityDistance",
         "The distace in world coordinates between node and camera at which the "
-        "screenspace object will become visible",
+        "screenspace object will become visible.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -95,7 +94,7 @@ namespace {
         "scene graph node renders must be contained within this sphere. This value is "
         "only used as an override to the bounding sphere calculated by the Renderable, "
         "if present. If this value is -1, the Renderable's computed bounding sphere is "
-        "used",
+        "used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -105,7 +104,27 @@ namespace {
         "The minimum radius that the camera is allowed to get close to this scene graph "
         "node. This value is only used as an override to the bounding sphere calculated "
         "by the Renderable, if present. If this value is -1, the Renderable's computed "
-        "interaction sphere is used",
+        "interaction sphere is used.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EvalBoundingSphereInfo = {
+        "EvaluatedBoundingSphere",
+        "Evaluated Bounding Sphere",
+        "This read-only property contains the evaluated value for the bounding sphere. "
+        "This is the actual value that is used internally within the software. If the "
+        "BoundingSphere property is set to -1, it is the computed value, otherwise it "
+        "matches the one set in the property.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EvalInteractionSphereInfo = {
+        "EvaluatedInteractionSphere",
+        "Evaluated Interaction Sphere",
+        "This read-only property contains the evaluated value for the interaction "
+        "sphere. This is the actual value that is used internally within the software. "
+        "If the InteractionSphere property is set to -1, it is the computed value, "
+        "otherwise it matches the one set in the property.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -113,8 +132,7 @@ namespace {
         "ApproachFactor",
         "Approach Factor",
         "This value is a multiplication factor for the interaction sphere that "
-        "determines when the camera is 'approaching' the scene graph node",
-        // @VISIBILITY(3.5)
+        "determines when the camera is 'approaching' the scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -122,8 +140,7 @@ namespace {
         "ReachFactor",
         "Reach Factor",
         "This value is a multiplication factor for the interaction sphere that "
-        "determines when the camera has 'reached' the scene graph node",
-        // @VISIBILITY(3.5)
+        "determines when the camera has 'reached' the scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -131,14 +148,14 @@ namespace {
         "GuiPath",
         "Gui Path",
         "This is the path for the scene graph node in the gui example: "
-        "/Solar System/Planets/Earth",
+        "/Solar System/Planets/Earth.",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
         "GuiName",
         "Gui Name",
-        "This is the name for the scene graph node in the gui. Example: Earth",
+        "This is the name for the scene graph node in the gui. Example: Earth.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -146,7 +163,7 @@ namespace {
         "GuiDescription",
         "Gui Description",
         "This is the description for the scene graph node to be shown in the gui. "
-        "Example: Earth is a special place",
+        "Example: Earth is a special place.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -154,7 +171,7 @@ namespace {
         "GuiHidden",
         "Gui Hidden",
         "This represents if the scene graph node should be shown in the gui. "
-        "Example: false",
+        "Example: false.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -162,8 +179,9 @@ namespace {
         "ShowDebugSphere",
         "Show Debug Sphere",
         "If enabled the bounding sphere of this scene graph node is rendered as a debug "
-        "method",
-        // @VISIBILITY(3.67)
+        "method. The interaction sphere is rendered in cyan and the bounding sphere in "
+        "purple. If only one is visible, this may be because the spheres have equal "
+        "size and are overlapping.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -308,6 +326,8 @@ int SceneGraphNode::nextIndex = 0;
 ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     SceneGraphNode* n = global::memoryManager->PersistentMemory.alloc<SceneGraphNode>();
@@ -320,22 +340,21 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     result->setIdentifier(p.identifier);
 
     if (p.gui.has_value()) {
+        ZoneScopedN("GUI");
+
         if (p.gui->name.has_value()) {
             result->setGuiName(*p.gui->name);
             result->_guiDisplayName = result->guiName();
         }
-        result->addProperty(result->_guiDisplayName);
 
         if (p.gui->description.has_value()) {
             result->setDescription(*p.gui->description);
             result->_guiDescription = result->description();
         }
-        result->addProperty(result->_guiDescription);
 
         if (p.gui->hidden.has_value()) {
             result->_guiHidden = *p.gui->hidden;
         }
-        result->addProperty(result->_guiHidden);
 
         if (p.gui->path.has_value()) {
             if (!p.gui->path->starts_with('/')) {
@@ -343,7 +362,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             }
             result->_guiPath = *p.gui->path;
         }
-        result->addProperty(result->_guiPath);
     }
 
     result->_boundingSphere = p.boundingSphere.value_or(result->_boundingSphere);
@@ -353,21 +371,14 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     result->_reachFactor = p.reachFactor.value_or(result->_reachFactor);
 
     if (p.transform.has_value()) {
+        ZoneScopedN("Transform");
+
         if (p.transform->translation.has_value()) {
             result->_transform.translation = Translation::createFromDictionary(
                 *p.transform->translation
             );
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.translation == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create ephemeris for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Successfully created ephemeris for '{}'", result->identifier()
             ));
         }
@@ -377,16 +388,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 *p.transform->rotation
             );
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.rotation == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create rotation for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Successfully created rotation for '{}'", result->identifier()
             ));
         }
@@ -394,16 +396,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (p.transform->scale.has_value()) {
             result->_transform.scale = Scale::createFromDictionary(*p.transform->scale);
 
-            // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-            // transitioned to throwing exceptions when the construction fails
-            if (result->_transform.scale == nullptr) {
-                LERROR(fmt::format(
-                    "Failed to create scale for SceneGraphNode '{}'",
-                    result->identifier()
-                ));
-                return nullptr;
-            }
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Successfully created scale for '{}'", result->identifier()
             ));
         }
@@ -414,18 +407,11 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
 
     if (p.timeFrame.has_value()) {
+        ZoneScopedN("TimeFrame");
+
         result->_timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
 
-        // @TODO(abock, 2021-03-05)  I don't think this is necessary anymore as we
-        // transitioned to throwing exceptions when the construction fails
-        if (result->_timeFrame == nullptr) {
-            LERROR(fmt::format(
-                "Failed to create time frame for SceneGraphNode '{}'",
-                result->identifier()
-            ));
-            return nullptr;
-        }
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "Successfully created time frame for '{}'", result->identifier()
         ));
         result->addPropertySubOwner(result->_timeFrame.get());
@@ -433,17 +419,21 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 
     // We initialize the renderable last as it probably has the most dependencies
     if (p.renderable.has_value()) {
+        ZoneScopedN("Renderable");
+
         result->_renderable = Renderable::createFromDictionary(*p.renderable);
         ghoul_assert(result->_renderable, "Failed to create Renderable");
         result->_renderable->_parent = result.get();
         result->addPropertySubOwner(result->_renderable.get());
-        LDEBUG(fmt::format(
-            "Successfully created renderable for '{}'", result->identifier()
-        ));
+        //LDEBUG(std::format(
+        //    "Successfully created renderable for '{}'", result->identifier()
+        //));
     }
 
     // Extracting the actions from the dictionary
     if (p.onApproach.has_value()) {
+        ZoneScopedN("OnApproach");
+
         if (std::holds_alternative<std::string>(*p.onApproach)) {
             result->_onApproachAction = { std::get<std::string>(*p.onApproach) };
         }
@@ -453,6 +443,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (p.onReach.has_value()) {
+        ZoneScopedN("OnReach");
+
         if (std::holds_alternative<std::string>(*p.onReach)) {
             result->_onReachAction = { std::get<std::string>(*p.onReach) };
         }
@@ -462,6 +454,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (p.onRecede.has_value()) {
+        ZoneScopedN("OnRecede");
+
         if (std::holds_alternative<std::string>(*p.onRecede)) {
             result->_onRecedeAction = { std::get<std::string>(*p.onRecede) };
         }
@@ -471,6 +465,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (p.onExit.has_value()) {
+        ZoneScopedN("OnExit");
+
         if (std::holds_alternative<std::string>(*p.onExit)) {
             result->_onExitAction = { std::get<std::string>(*p.onExit) };
         }
@@ -480,6 +476,8 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     }
 
     if (p.tag.has_value()) {
+        ZoneScopedN("Tag");
+
         if (std::holds_alternative<std::string>(*p.tag)) {
             result->addTag(std::get<std::string>(*p.tag));
         }
@@ -495,7 +493,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         }
     }
 
-    LDEBUG(fmt::format("Successfully created SceneGraphNode '{}'", result->identifier()));
+    LDEBUG(std::format("Successfully created SceneGraphNode '{}'", result->identifier()));
 
     result->_lastScreenSpaceUpdateTime = std::chrono::high_resolution_clock::now();
     result->_type = "SceneGraphNode";
@@ -526,7 +524,9 @@ SceneGraphNode::SceneGraphNode()
         )
     }
     , _boundingSphere(BoundingSphereInfo, -1.0, -1.0, 1e12)
+    , _evaluatedBoundingSphere(EvalBoundingSphereInfo)
     , _interactionSphere(InteractionSphereInfo, -1.0, -1.0, 1e12)
+    , _evaluatedInteractionSphere(EvalInteractionSphereInfo)
     , _approachFactor(ApproachFactorInfo, 5.0, 0.0, 1e4)
     , _reachFactor(ReachFactorInfo, 1.25, 0.0, 1e4)
     , _computeScreenSpaceValues(ComputeScreenSpaceInfo, false)
@@ -535,8 +535,8 @@ SceneGraphNode::SceneGraphNode()
     , _distFromCamToNode(DistanceFromCamToNodeInfo, -1.0)
     , _screenSizeRadius(ScreenSizeRadiusInfo, 0)
     , _visibilityDistance(VisibilityDistanceInfo, 6e10f)
-    , _showDebugSphere(ShowDebugSphereInfo, false)
     , _supportsDirectInteraction(SupportsDirectInteractionInfo, false)
+    , _showDebugSphere(ShowDebugSphereInfo, false)
 {
     addProperty(_computeScreenSpaceValues);
     addProperty(_screenSpacePosition);
@@ -546,6 +546,7 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_distFromCamToNode);
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);
+
     _boundingSphere.onChange([this]() {
         if (_boundingSphere >= 0.0) {
             _overrideBoundingSphere = _boundingSphere;
@@ -553,11 +554,15 @@ SceneGraphNode::SceneGraphNode()
         else {
             _overrideBoundingSphere = std::nullopt;
         }
+        _evaluatedBoundingSphere = boundingSphere();
     });
     // @TODO (2021-06-30, emmbr) Uncomment this when exponential sliders support
     // negative values
     //_boundingSphere.setExponent(10.f);
     addProperty(_boundingSphere);
+    _evaluatedBoundingSphere.setReadOnly(true);
+    addProperty(_evaluatedBoundingSphere);
+
     _interactionSphere.onChange([this]() {
         if (_interactionSphere >= 0.0) {
             _overrideInteractionSphere = _interactionSphere;
@@ -565,11 +570,14 @@ SceneGraphNode::SceneGraphNode()
         else {
             _overrideInteractionSphere = std::nullopt;
         }
+        _evaluatedInteractionSphere = interactionSphere();
     });
     // @TODO (2021-06-30, emmbr) Uncomment this when exponential sliders support
     // negative values
     //_interactionSphere.setExponent(10.f);
     addProperty(_interactionSphere);
+    _evaluatedInteractionSphere.setReadOnly(true);
+    addProperty(_evaluatedInteractionSphere);
 
     _reachFactor.setExponent(3.f);
     addProperty(_reachFactor);
@@ -580,6 +588,11 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_showDebugSphere);
 
     addProperty(_supportsDirectInteraction);
+
+    addProperty(_guiDisplayName);
+    addProperty(_guiDescription);
+    addProperty(_guiHidden);
+    addProperty(_guiPath);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -588,7 +601,7 @@ void SceneGraphNode::initialize() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    LDEBUG(fmt::format("Initializing: {}", identifier()));
+    LDEBUG(std::format("Initializing: {}", identifier()));
 
     if (_renderable) {
         _renderable->initialize();
@@ -605,14 +618,19 @@ void SceneGraphNode::initialize() {
     }
     _state = State::Initialized;
 
-    LDEBUG(fmt::format("Finished initializing: {}", identifier()));
+    // Want this computed after the renderable and transforms have been initialized
+    _evaluatedBoundingSphere = boundingSphere();
+    _evaluatedInteractionSphere = interactionSphere();
+
+    LDEBUG(std::format("Finished initializing: {}", identifier()));
 }
 
 void SceneGraphNode::initializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+    TracyGpuZone("initializeGL")
 
-    LDEBUG(fmt::format("Initializing GL: {}", identifier()));
+    LDEBUG(std::format("Initializing GL: {}", identifier()));
 
     if (_renderable) {
         _renderable->initializeGL();
@@ -638,14 +656,14 @@ void SceneGraphNode::initializeGL() {
 
     _state = State::GLInitialized;
 
-    LDEBUG(fmt::format("Finished initializating GL: {}", identifier()));
+    LDEBUG(std::format("Finished initializating GL: {}", identifier()));
 }
 
 void SceneGraphNode::deinitialize() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    LDEBUG(fmt::format("Deinitializing: {}", identifier()));
+    LDEBUG(std::format("Deinitializing: {}", identifier()));
 
     setScene(nullptr);
 
@@ -655,20 +673,20 @@ void SceneGraphNode::deinitialize() {
     clearChildren();
     _parent = nullptr;
 
-    LDEBUG(fmt::format("Finished deinitializing: {}", identifier()));
+    LDEBUG(std::format("Finished deinitializing: {}", identifier()));
 }
 
 void SceneGraphNode::deinitializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    LDEBUG(fmt::format("Deinitializing GL: {}", identifier()));
+    LDEBUG(std::format("Deinitializing GL: {}", identifier()));
 
     if (_renderable) {
         _renderable->deinitializeGL();
     }
 
-    LDEBUG(fmt::format("Finished deinitializing GL: {}", identifier()));
+    LDEBUG(std::format("Finished deinitializing GL: {}", identifier()));
 }
 
 void SceneGraphNode::traversePreOrder(const std::function<void(SceneGraphNode*)>& fn) {
@@ -689,8 +707,7 @@ void SceneGraphNode::update(const UpdateData& data) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
 
-    State s = _state;
-    if (s != State::Initialized && _state != State::GLInitialized) {
+    if (_state != State::Initialized && _state != State::GLInitialized) {
         return;
     }
     if (!isTimeFrameActive(data.time)) {
@@ -719,12 +736,13 @@ void SceneGraphNode::update(const UpdateData& data) {
     newUpdateData.modelTransform.rotation = _worldRotationCached;
     newUpdateData.modelTransform.scale = _worldScaleCached;
 
-    glm::dmat4 translation = glm::translate(
+    const glm::dmat4 translation = glm::translate(
         glm::dmat4(1.0),
         newUpdateData.modelTransform.translation
     );
-    glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
-    glm::dmat4 scaling = glm::scale(glm::dmat4(1.0), newUpdateData.modelTransform.scale);
+    const glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
+    const glm::dmat4 scaling =
+        glm::scale(glm::dmat4(1.0), newUpdateData.modelTransform.scale);
 
     _modelTransformCached = translation * rotation * scaling;
 
@@ -770,11 +788,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         _renderable->renderSecondary(newData, tasks);
     }
 
-    if (!_renderable->matchesRenderBinMask(data.renderBinMask)) {
-        return;
-    }
-
-    {
+    if (_renderable->matchesRenderBinMask(data.renderBinMask)) {
         TracyGpuZone("Render")
 
         _renderable->render(newData, tasks);
@@ -784,26 +798,31 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         }
     }
 
-    if (_showDebugSphere) {
+    const bool isInStickerBin =
+        data.renderBinMask & static_cast<int>(Renderable::RenderBin::Sticker);
+
+    if (_showDebugSphere && isInStickerBin) {
         if (const double bs = boundingSphere();  bs > 0.0) {
             renderDebugSphere(data.camera, bs, glm::vec4(0.5f, 0.15f, 0.5f, 0.75f));
         }
 
         if (const double is = interactionSphere();  is > 0.0) {
-            renderDebugSphere(data.camera, is, glm::vec4(0.15f, 0.35f, 0.85f, 0.75f));
+            renderDebugSphere(data.camera, is, glm::vec4(0.15f, 0.75f, 0.75f, 0.75f));
         }
     }
 }
 
-void SceneGraphNode::renderDebugSphere(const Camera& camera, double size, glm::vec4 color)
+void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
+                                       const glm::vec4& color)
 {
-    glm::dvec3 scaleVec = _worldScaleCached * size;
-    glm::dmat4 modelTransform =
+    const glm::dvec3 scaleVec = _worldScaleCached * size;
+    const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), _worldPositionCached) *
         glm::dmat4(_worldRotationCached) *
         glm::scale(glm::dmat4(1.0), scaleVec);
 
-    glm::mat4 modelViewProjection = camera.projectionMatrix() *
+
+    const glm::mat4 modelViewProjection = camera.projectionMatrix() *
         glm::mat4(camera.combinedViewMatrix() * modelTransform);
 
     _debugSphereProgram->activate();
@@ -812,20 +831,14 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size, glm::v
     _debugSphereProgram->setUniform("color", color);
 
     glEnable(GL_BLEND);
+    glEnable(GL_LINE_SMOOTH);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 
     glBindVertexArray(rendering::helper::vertexObjects.sphere.vao);
-    glDrawElements(
-        GL_TRIANGLES,
-        rendering::helper::vertexObjects.sphere.nElements,
-        GL_UNSIGNED_SHORT,
-        nullptr
-    );
 
     glLineWidth(2.0);
-    _debugSphereProgram->setUniform("color", glm::vec4(1.f, 1.f, 1.f, 1.f));
     glDrawElements(
         GL_LINES,
         rendering::helper::vertexObjects.sphere.nElements,
@@ -989,13 +1002,14 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
         return;
     }
 
-    glm::ivec2 res = global::windowDelegate->currentSubwindowSize();
+    const glm::ivec2 res = global::windowDelegate->currentSubwindowSize();
 
     // Get the radius of node
-    double nodeRadius = boundingSphere();
+    const double nodeRadius = boundingSphere();
 
     // Distance from the camera to the node
-    double distFromCamToNode = glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
+    const double distFromCamToNode =
+        glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
 
     // Fix to limit the update of properties
     if (distFromCamToNode >= _visibilityDistance) {
@@ -1106,6 +1120,10 @@ bool SceneGraphNode::hasGuiHintHidden() const {
     return _guiHidden;
 }
 
+void SceneGraphNode::setGuiHintHidden(bool value) {
+    _guiHidden = value;
+}
+
 glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
     // recursive up the hierarchy if there are parents available
     if (_parent) {
@@ -1189,6 +1207,7 @@ void SceneGraphNode::setScene(Scene* scene) {
 
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {
     std::vector<SceneGraphNode*> nodes;
+    nodes.reserve(_children.size());
     for (const ghoul::mm_unique_ptr<SceneGraphNode>& child : _children) {
         nodes.push_back(child.get());
     }

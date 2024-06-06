@@ -1,13 +1,17 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Terra)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_terra",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25994&FORMAT=kvn",
   Filename = "Terra.txt",
-  Override = true
+  SecondsUntilResync = 24 * 60 * 60
 })
+
 
 local Terra = {
   Identifier = "Terra",
@@ -22,8 +26,8 @@ local Terra = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "GALACTIC",
-      DestinationFrame = "J2000",
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
     }
   },
   Tag = { "earth_satellite", "Terra" },
@@ -32,7 +36,6 @@ local Terra = {
     Path = "/Solar System/Planets/Earth/Satellites/Terra"
   }
 }
-
 
 local TerraTrail = {
   Identifier = "Terra_trail",
@@ -63,8 +66,8 @@ local TerraLabel = {
   Identifier = "TerraLabel",
   Parent = Terra.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Terra",
     FontSize = 70.0,
     Size = 4.0,
@@ -83,6 +86,7 @@ local TerraLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   local t = openspace.space.readKeplerFile(omm .. "Terra.txt", "OMM")
   TerraTrail.Renderable.Period = t[1].Period / (60 * 60 * 24)
@@ -92,7 +96,7 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(TerraLabel)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TerraLabel)
   openspace.removeSceneGraphNode(TerraTrail)
   openspace.removeSceneGraphNode(Terra)
@@ -101,6 +105,7 @@ end)
 asset.export(Terra)
 asset.export(TerraTrail)
 asset.export(TerraLabel)
+
 
 
 asset.meta = {

@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Koppen-Geiger Climate Changes - 1901 - 2100"
@@ -13,7 +14,7 @@ climatologist Rudolf Geiger]]
 local URL = "https://sos.noaa.gov/catalog/datasets/koppen-geiger-climate-changes-1901-2100/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -21,16 +22,18 @@ local syncedDirectory = asset.syncedResource({
   UnzipFiles = true
 })
 
-local layer = {
+
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "4096",
   Description = Description
 }
 
-local legend = {
+local Legend = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
@@ -41,7 +44,7 @@ local legend = {
   CartesianPosition = { -0.75, -0.5, -2.0 }
 }
 
-local legend1 = {
+local Legend1 = {
   Identifier = Identifier .. "-1",
   Name = Name .. " (1)",
   Enabled = asset.enabled,
@@ -51,21 +54,23 @@ local legend1 = {
   CartesianPosition = { 0.75, -0.5, -2.0 }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(legend)
-  openspace.addScreenSpaceRenderable(legend1)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
+  openspace.addScreenSpaceRenderable(Legend1)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(legend)
-  openspace.removeScreenSpaceRenderable(legend1)
+  openspace.removeScreenSpaceRenderable(Legend1)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(layer)
-asset.export(legend)
-asset.export(legend1)
+asset.export(Layer)
+asset.export(Legend)
+asset.export(Legend1)
+
 
 
 asset.meta = {

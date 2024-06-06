@@ -1,0 +1,91 @@
+local kernels = asset.resource({
+  Name = "Saturn Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "saturn_kernels",
+  Version = 2
+})
+
+
+local ID = {
+  Aegir = "AEGIR",
+  Albiorix = "ALBIORIX",
+  Alvaldi = 665,
+  Angrboda = 655,
+  Bebhionn = "BEBHIONN",
+  Beli = 661,
+  Bergelmir = "BERGELMIR",
+  Bestla = "BESTLA",
+  Eggther = 659,
+  Erriapus = "ERRIAPUS",
+  Farbauti = "FARBAUTI",
+  Fenrir = "FENRIR",
+  Fornjot = "FORNJOT",
+  Geirrod = 666,
+  Gerd = 657,
+  Greip = "GREIP",
+  Gridr = 654,
+  Gunnlod = 662,
+  Hati = "HATI",
+  Hyrrokkin = "HYRROKKIN",
+  Ijiraq = "IJIRAQ",
+  Jarnsaxa = "JARNSAXA",
+  Kari = "KARI",
+  Kiviuq = "KIVIUQ",
+  Loge = "LOGE",
+  Mundilfari = "MUNDILFARI",
+  Narvi = "NARVI",
+  Paaliaq = "PAALIAQ",
+  S2004S7 = 65085,
+  S2004S12 = 65086,
+  S2004S13 = 65087,
+  S2004S17 = 65088,
+  S2004S21 = 65079,
+  S2004S24 = 65070,
+  S2004S26 = 658,
+  S2004S28 = 65077,
+  S2004S29 = 660,
+  S2004S31 = 65067,
+  S2004S34 = 664,
+  S2004S36 = 65081,
+  S2004S37 = 65082,
+  S2004S39 = 65084,
+  S2006S1 = 65089,
+  S2006S3 = 65090,
+  S2007S2 = 65091,
+  S2007S3 = 65092,
+  S2019S01 = 65093,
+  Siarnaq = "SIARNAQ",
+  Skadi = 627,
+  Skathi = "SKATHI",
+  Skoll = "SKOLL",
+  Skrymir = 656,
+  Suttungr = "SUTTUNGR",
+  Surtur = 648,
+  Tarqeq = "TARQEQ",
+  Tarvos = "TARVOS",
+  Thiazzi = 663,
+  Thrymr = "THRYMR",
+  Ymir = "YMIR",
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "sat452.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "sat452.bsp")
+end)
+
+asset.export("ID", ID)
+
+
+
+asset.meta = {
+  Name = "Saturn Spice Kernels",
+  Version = "1.0",
+  Description = "Generic SPICE kernels for Saturn",
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
+  License = "NASA"
+}

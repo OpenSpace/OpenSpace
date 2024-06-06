@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,24 +39,24 @@
 
 namespace openspace { struct Documentation; }
 
-namespace openspace {
+namespace openspace::globebrowsing {
 
-class VideoTileProvider : public globebrowsing::TileProvider {
+class VideoTileProvider : public TileProvider {
 public:
     VideoTileProvider(const ghoul::Dictionary& dictionary);
-    ~VideoTileProvider();
+    ~VideoTileProvider() override;
 
     void update() override final;
     void reset() override final;
     int minLevel() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
-    globebrowsing::ChunkTile chunkTile(globebrowsing::TileIndex tileIndex, int parents, 
-        int maxParents = 1337) override;
-    globebrowsing::Tile tile(const globebrowsing::TileIndex& tileIndex) override final;
-    globebrowsing::Tile::Status tileStatus(
-        const globebrowsing::TileIndex& tileIndex) override final;
-    globebrowsing::TileDepthTransform depthTransform() override final;
+    ChunkTile chunkTile(TileIndex tileIndex, int parents, int maxParents = 1337) override;
+    Tile tile(const TileIndex& tileIndex) override final;
+    Tile::Status tileStatus(const TileIndex& tileIndex) override final;
+    TileDepthTransform depthTransform() override final;
+
+    static documentation::Documentation Documentation();
 
 private:
     void internalInitialize() override final;
@@ -64,12 +64,12 @@ private:
 
     // Tile handling
     // Cache for rendering 1 frame
-    std::map<globebrowsing::TileIndex::TileHashKey, globebrowsing::Tile> _tileCache; 
+    std::map<TileIndex::TileHashKey, Tile> _tileCache;
     bool _tileIsReady = false;
 
     VideoPlayer _videoPlayer;
 };
 
-} // namespace openspace
+} // namespace openspace::globebrowsing
 
 #endif // __OPENSPACE_MODULE_VIDEO___VIDEOTILEPROVIDER___H__

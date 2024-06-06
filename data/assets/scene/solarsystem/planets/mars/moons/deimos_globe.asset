@@ -1,28 +1,22 @@
-local transforms = asset.require('../transforms')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-local kernels = asset.syncedResource({
-  Name = "Mars Spice Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "mars_kernels",
-  Version = 1
-})
 
 
 local DeimosGlobe = {
   Identifier = "Deimos_Globe",
   Parent = transforms.MarsBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_DEIMOS",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels .. "mar097.bsp"
-    },
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DEIMOS",
-      Observer = "MARS BARYCENTER",
-      Kernels = kernels .. "mar097.bsp"
+      Target = kernels.ID.Deimos,
+      Observer = coreKernels.ID.MarsBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Deimos,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -41,6 +35,7 @@ local DeimosGlobe = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(DeimosGlobe)
 end)
@@ -50,6 +45,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(DeimosGlobe)
+
 
 
 asset.meta = {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,7 @@ namespace {
         "IdleTime",
         "Idle Time",
         "Time in seconds that has passed from latest registered interaction until the "
-        "application goes idle",
-        // @VISIBILITY(3.5)
+        "application goes idle.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -42,8 +41,7 @@ namespace {
         "IsInActiveState",
         "Is State Active",
         "Keeps track whether the interaction session is in active state or not. False if "
-        "application is in idle state, true if it is in active state",
-        // @VISIBILITY(3.5)
+        "application is in idle state, true if it is in active state.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace

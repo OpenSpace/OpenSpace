@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
 #include <fstream>
 
 namespace openspace::volume {
@@ -79,22 +80,22 @@ glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
 
 template <typename VoxelType>
 std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool invertZ) {
-    glm::uvec3 dims = dimensions();
-    auto volume = std::make_unique<RawVolume<VoxelType>>(dims);
+    ZoneScoped;
 
-    std::ifstream file(_path, std::ios::binary);
-    char* buffer = reinterpret_cast<char*>(volume->data());
-
+    std::ifstream file = std::ifstream(_path, std::ios::binary);
     if (file.fail()) {
         throw ghoul::FileNotFoundError("Volume file not found");
     }
 
-    size_t length = static_cast<size_t>(dims.x) *
-                    static_cast<size_t>(dims.y) *
-                    static_cast<size_t>(dims.z) *
-                    sizeof(VoxelType);
+    glm::uvec3 dims = dimensions();
+    auto volume = std::make_unique<RawVolume<VoxelType>>(dims);
 
-    file.read(buffer, length);
+    char* buffer = reinterpret_cast<char*>(volume->data());
+    size_t length = glm::compMul(dims) * sizeof(VoxelType);
+    {
+        ZoneScopedN("read");
+        file.read(buffer, length);
+    }
 
     if (file.fail()) {
         throw ghoul::RuntimeError("Error reading volume file");
@@ -104,7 +105,7 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read(bool inve
         std::unique_ptr<RawVolume<VoxelType>> newVolume =
             std::make_unique<RawVolume<VoxelType>>(dims);
 
-        for (size_t i = 0; i < volume->nCells(); ++i) {
+        for (size_t i = 0; i < volume->nCells(); i++) {
             const glm::uvec3& coords = volume->indexToCoords(i);
             glm::uvec3 newcoords = glm::uvec3(coords.x, coords.y, dims.z - coords.z - 1);
 

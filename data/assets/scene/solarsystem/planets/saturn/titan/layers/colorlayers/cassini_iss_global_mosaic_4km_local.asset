@@ -1,16 +1,20 @@
-local globeIdentifier = asset.require("../../titan").Titan.Identifier
+local globe = asset.require("../../titan")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Type = "HttpSynchronization",
   Name = "Titan textures",
   Identifier = "titan_textures",
   Version = 2
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Cassini_ISS_Global_Mosaic_4km_Local",
   Name = "Cassini ISS Global Mosaic 4km",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = texturesPath .. "Titan_ISS_P19658_Mosaic_Global_4km_os.tif",
   Description = [[This global digital map of Saturn's moon Titan was created using
     images taken by the Cassini spacecraft's Imaging Science Subsystem (ISS). The map
@@ -22,15 +26,16 @@ local layer = {
     is created at some point in the future. (Description from URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Titan.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Titan.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

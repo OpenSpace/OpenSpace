@@ -1,0 +1,182 @@
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+local models = asset.resource({
+  Name = "Messenger Models",
+  Type = "HttpSynchronization",
+  Identifier = "messenger_model",
+  Version = 2
+})
+
+
+local RotationMatrix = {
+  1, 0,  0, 0,
+  0, 0, -1, 0,
+  0, 1,  0, 0,
+  0, 0,  0, 1
+}
+
+local Messenger = {
+  Identifier = "Messenger",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2011-03-01",
+    End = "2011-06-30"
+  },
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Messenger,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Messenger,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Path = "/Solar System/Missions/Messenger"
+  }
+}
+
+local MessengerProbeBlack = {
+  Identifier = "MessengerProbe_black",
+  Parent = Messenger.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "MessengerProbe_black.obj",
+    ModelTransform = RotationMatrix,
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  GUI = {
+    Name = "MessengerProbe Black",
+    Path = "/Solar System/Missions/Messenger"
+  }
+}
+
+local MessengerProbeFoil = {
+  Identifier = "MessengerProbe_foil",
+  Parent = Messenger.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "MessengerProbe_foil.obj",
+    ModelTransform = RotationMatrix,
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  GUI = {
+    Name = "MessengerProbe foil",
+    Path = "/Solar System/Missions/Messenger"
+  }
+}
+
+local MessengerProbeHeatShield = {
+  Identifier = "MessengerProbe_heatShield",
+  Parent = Messenger.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "MessengerProbe_heatShield.obj",
+    ModelTransform = RotationMatrix,
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  GUI = {
+    Name = "MessengerProbe Heat Shield",
+    Path = "/Solar System/Missions/Messenger"
+  }
+}
+
+local MessengerProbeMetal = {
+  Identifier = "MessengerProbe_Metal",
+  Parent = Messenger.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "MessengerProbe_metal.obj",
+    ModelTransform = RotationMatrix,
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  GUI = {
+    Name = "MessengerProbe Metal",
+    Path = "/Solar System/Missions/Messenger"
+  }
+}
+
+local MessengerProbePanels = {
+  Identifier = "MessengerProbe_panels",
+  Parent = Messenger.Identifier,
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "MessengerProbe_panels.obj",
+    ModelTransform = RotationMatrix,
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  GUI = {
+    Name = "MessengerProbe Panels",
+    Path = "/Solar System/Missions/Messenger"
+  }
+}
+
+local MessengerTrail = {
+  Identifier = "MessengerTrail",
+  Parent = mercuryTransforms.MercuryBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailTrajectory",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "MESSENGER",
+      Observer = "MERCURY BARYCENTER"
+    },
+    Color = { 0.288, 0.375, 0.934 },
+    EnableFade = false,
+    StartTime = "2011 MARCH 01 12:00:00",
+    EndTime = "2011 MAY 30 12:00:00",
+    SampleInterval = 360
+  },
+  GUI = {
+    Name = "Messenger Trail",
+    Path = "/Solar System/Missions/Messenger"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Messenger)
+  openspace.addSceneGraphNode(MessengerProbeBlack)
+  openspace.addSceneGraphNode(MessengerProbeFoil)
+  openspace.addSceneGraphNode(MessengerProbeHeatShield)
+  openspace.addSceneGraphNode(MessengerProbeMetal)
+  openspace.addSceneGraphNode(MessengerProbePanels)
+  openspace.addSceneGraphNode(MessengerTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MessengerTrail)
+  openspace.removeSceneGraphNode(MessengerProbePanels)
+  openspace.removeSceneGraphNode(MessengerProbeMetal)
+  openspace.removeSceneGraphNode(MessengerProbeHeatShield)
+  openspace.removeSceneGraphNode(MessengerProbeFoil)
+  openspace.removeSceneGraphNode(MessengerProbeBlack)
+  openspace.removeSceneGraphNode(Messenger)
+end)
+
+asset.export(Messenger)
+asset.export(MessengerProbeBlack)
+asset.export(MessengerProbeFoil)
+asset.export(MessengerProbeHeatShield)
+asset.export(MessengerProbeMetal)
+asset.export(MessengerProbePanels)
+asset.export(MessengerTrail)

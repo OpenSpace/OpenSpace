@@ -1,13 +1,17 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Saturn Labels",
   Type = "HttpSynchronization",
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Rhea = {
   Identifier = "Rhea",
@@ -15,14 +19,13 @@ local Rhea = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "RHEA",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Rhea,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_RHEA",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Rhea,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -51,13 +54,12 @@ local Rhea = {
   }
 }
 
-
 local RheaLabel = {
   Identifier = "RheaLabel",
   Parent = Rhea.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Rhea",
     FontSize = 70.0,
     Size = 6.0,
@@ -69,7 +71,7 @@ local RheaLabel = {
     FadeDistances = { 0.3, 10.0 },
     FadeWidths = { 0.15, 10.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels", "moon_major_saturn" },
   GUI = {
     Name = "Rhea Label",
     Path = "/Solar System/Planets/Saturn/Major Moons/Rhea",
@@ -89,6 +91,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Rhea)
+asset.export(RheaLabel)
 
 
 

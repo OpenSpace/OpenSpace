@@ -1,4 +1,4 @@
-local createFlipbook = function (assetPrefix, assetGlobe, count)
+function createFlipbook(assetPrefix, assetGlobe, count)
   return {
     AssetPrefix = assetPrefix,
     AssetGlobe = assetGlobe,
@@ -7,20 +7,20 @@ local createFlipbook = function (assetPrefix, assetGlobe, count)
   }
 end
 
-local nextFlipbookPage = function (flipbook)
+function nextFlipbookPage(flipbook)
   if (flipbook.CurrentFlipIndex >= 0) then
     local assetString = flipbook.AssetPrefix .. flipbook.CurrentFlipIndex
     openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetString .. ".Enabled", false)
   end
 
   if (flipbook.CurrentFlipIndex < flipbook.TotalCount - 1) then
-    flipbook.CurrentFlipIndex = flipbook.CurrentFlipIndex + 1;
+    flipbook.CurrentFlipIndex = flipbook.CurrentFlipIndex + 1
     local assetString = flipbook.AssetPrefix .. flipbook.CurrentFlipIndex
     openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetString .. ".Enabled", true)
   end
 end
 
-local previousFlipbookPage = function (flipbook)
+function previousFlipbookPage(flipbook)
   local localIndex = flipbook.CurrentFlipIndex
 
   if (localIndex == -1) then
@@ -29,7 +29,7 @@ local previousFlipbookPage = function (flipbook)
 
   local assetString = flipbook.AssetPrefix .. localIndex
   openspace.setPropertyValueSingle("Scene." .. flipbook.AssetGlobe .. ".Renderable.Layers.ColorLayers.".. assetString .. ".Enabled", false)
-  localIndex = localIndex - 1;
+  localIndex = localIndex - 1
 
   if (localIndex >= 0 ) then
     assetString = flipbook.AssetPrefix .. localIndex

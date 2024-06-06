@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,9 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/json.h>
 #include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/json_helper.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/invariants.h>
@@ -40,81 +38,12 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
-
-    void sortJson(nlohmann::json& json) {
-        std::sort(
-            json.begin(),
-            json.end(),
-            [](const nlohmann::json& lhs, const nlohmann::json& rhs) {
-                std::string lhsString = lhs["Name"];
-                std::string rhsString = rhs["Name"];
-                std::transform(
-                    lhsString.begin(),
-                    lhsString.end(),
-                    lhsString.begin(),
-                    [](unsigned char c) { return std::tolower(c); }
-                );
-                std::transform(
-                    rhsString.begin(),
-                    rhsString.end(),
-                    rhsString.begin(),
-                    [](unsigned char c) { return std::tolower(c); }
-                );
-
-                return rhsString > lhsString;
-            });
-    }
-
-    nlohmann::json createJson(openspace::properties::PropertyOwner* owner) {
-        ZoneScoped
-
-        using namespace openspace;
-        nlohmann::json json;
-        json["Name"] = owner->identifier();
-
-        json["Description"] = owner->description();
-        json["Properties"] = nlohmann::json::array();
-        json["PropertyOwners"] = nlohmann::json::array();
-        json["Type"] = owner->type();
-        json["Tags"] = owner->tags();
-
-        const std::vector<properties::Property*>& properties = owner->properties();
-        for (properties::Property* p : properties) {
-            nlohmann::json propertyJson;
-            propertyJson["Name"] = p->identifier();
-            propertyJson["Type"] = p->className();
-            propertyJson["URI"] = p->fullyQualifiedIdentifier();
-            propertyJson["Gui Name"] = p->guiName();
-            propertyJson["Description"] = p->description();
-
-            json["Properties"].push_back(propertyJson);
-        }
-        sortJson(json["Properties"]);
-
-        auto propertyOwners = owner->propertySubOwners();
-        for (properties::PropertyOwner* o : propertyOwners) {
-            nlohmann::json propertyOwner;
-            json["PropertyOwners"].push_back(createJson(o));
-        }
-        sortJson(json["PropertyOwners"]);
-
-        return json;
-    }
 } // namespace
 
 namespace openspace::properties {
 
 PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
-    : DocumentationGenerator(
-        "Property Owners",
-        "propertyOwners",
-        {
-            { "propertyOwnersTemplate","${WEB}/documentation/propertyowners.hbs" },
-            { "propertyTemplate","${WEB}/documentation/property.hbs" },
-            { "propertylistTemplate","${WEB}/documentation/propertylist.hbs" }
-        }
-    )
-    , _identifier(std::move(info.identifier))
+    : _identifier(std::move(info.identifier))
     , _guiName(std::move(info.guiName))
     , _description(std::move(info.description))
 {
@@ -182,6 +111,41 @@ Property* PropertyOwner::property(const std::string& uri) const {
     }
 }
 
+PropertyOwner* PropertyOwner::propertyOwner(const std::string& uri) const {
+    PropertyOwner* directChild = propertySubOwner(uri);
+    if (directChild) {
+        return directChild;
+    }
+
+    // If we do not own the searched PropertyOwner, it must consist of a concatenated
+    // name and we can delegate it to a subowner
+    const size_t ownerSeparator = uri.find(URISeparator);
+    if (ownerSeparator == std::string::npos) {
+        // if we do not own the PropertyOwner and there is no separator, it does not exist
+        return nullptr;
+    }
+    else {
+        const std::string parentName = uri.substr(0, ownerSeparator);
+        const std::string ownerName = uri.substr(ownerSeparator + 1);
+
+        PropertyOwner* owner = propertySubOwner(parentName);
+        return owner ? owner->propertyOwner(ownerName) : nullptr;
+    }
+}
+
+std::string PropertyOwner::uri() const {
+    std::string identifier = _identifier;
+    PropertyOwner* currentOwner = owner();
+    while (currentOwner) {
+        const std::string& ownerId = currentOwner->identifier();
+        if (!ownerId.empty()) {
+            identifier = std::format("{}.{}", ownerId, identifier);
+        }
+        currentOwner = currentOwner->owner();
+    }
+    return identifier;
+}
+
 bool PropertyOwner::hasProperty(const std::string& uri) const {
     return property(uri) != nullptr;
 }
@@ -234,6 +198,8 @@ std::string PropertyOwner::propertyGroupName(const std::string& groupID) const {
 }
 
 void PropertyOwner::addProperty(Property* prop) {
+    ZoneScoped;
+
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
 
     if (prop->identifier().empty()) {
@@ -249,7 +215,7 @@ void PropertyOwner::addProperty(Property* prop) {
 
     // If we found the property identifier, we need to bail out
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Property identifier '{}' already present in PropertyOwner '{}'",
             prop->identifier(),
             identifier()
@@ -260,7 +226,7 @@ void PropertyOwner::addProperty(Property* prop) {
         // Otherwise we still have to look if there is a PropertyOwner with the same name
         const bool hasOwner = hasPropertySubOwner(prop->identifier());
         if (hasOwner) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Property identifier '{}' already names a registered PropertyOwner",
                 prop->identifier()
             ));
@@ -278,6 +244,8 @@ void PropertyOwner::addProperty(Property& prop) {
 }
 
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* owner) {
+    ZoneScoped;
+
     ghoul_precondition(owner != nullptr, "owner must not be nullptr");
     ghoul_precondition(
         !owner->identifier().empty(),
@@ -295,7 +263,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
 
     // If we found the propertyowner's name, we need to bail out
     if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "PropertyOwner '{}' already present in PropertyOwner '{}'",
             owner->identifier(),
             identifier()
@@ -306,7 +274,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
         // We still need to check if the PropertyOwners name is used in a Property
         const bool hasProp = hasProperty(owner->identifier());
         if (hasProp) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "PropertyOwner '{}'s name already names a Property", owner->identifier()
             ));
             return;
@@ -338,7 +306,7 @@ void PropertyOwner::removeProperty(Property* prop) {
         _properties.erase(it);
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Property with identifier '{}' not found for removal", prop->identifier()
         ));
     }
@@ -365,7 +333,7 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
         _subOwners.erase(it);
     }
     else {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "PropertyOwner with name '{}' not found for removal", owner->identifier()
         ));
     }
@@ -416,33 +384,6 @@ void PropertyOwner::addTag(std::string tag) {
 
 void PropertyOwner::removeTag(const std::string& tag) {
     _tags.erase(std::remove(_tags.begin(), _tags.end(), tag), _tags.end());
-}
-
-std::string PropertyOwner::generateJson() const {
-    ZoneScoped;
-
-    nlohmann::json json;
-    std::vector<PropertyOwner*> subOwners = propertySubOwners();
-    for (PropertyOwner* owner : subOwners) {
-        json["Data"].push_back(createJson(owner));
-    }
-
-    return json.dump();
-}
-
-nlohmann::json PropertyOwner::generateJsonJson() const {
-    ZoneScoped
-
-    nlohmann::json json;
-    std::vector<PropertyOwner*> subOwners = propertySubOwners();
-    for (PropertyOwner* owner : subOwners) {
-        if (owner->identifier() != "Scene") {
-            json.push_back(createJson(owner));
-        }
-    }
-    sortJson(json);
-
-    return json;
 }
 
 } // namespace openspace::properties

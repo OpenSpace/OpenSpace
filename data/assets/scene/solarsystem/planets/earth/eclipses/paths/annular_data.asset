@@ -1,0 +1,8 @@
+local data = asset.resource({
+  Name = "Annular Eclipse Paths",
+  Type = "HttpSynchronization",
+  Identifier = "earth-eclipse-path-annular",
+  Version = 1
+})
+
+asset.export("path", data)

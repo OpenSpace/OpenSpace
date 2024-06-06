@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -139,7 +139,7 @@ Fragment getFragment() {
 
     vec3 viewDirection = normalize(vs_positionCameraSpace.xyz);
 
-    for (int i = 0; i < nLightSources; ++i) {
+    for (int i = 0; i < nLightSources; i++) {
       // Diffuse light
       vec3 lightDirection = lightDirectionsViewSpace[i];
       float diffuseFactor =  max(dot(normal, lightDirection), 0.0);

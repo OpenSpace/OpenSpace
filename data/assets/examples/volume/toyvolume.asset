@@ -1,6 +1,6 @@
--- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_TOYVOLUME enabled
-
 local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
 
 local ToyVolume = {
   Identifier = "RenderableToyVolume",
@@ -10,12 +10,13 @@ local ToyVolume = {
     Size = { 5, 5, 5 },
     ScalingExponent = 11,
     StepSize = 0.01,
-    Color = { 1, 0, 0 }
+    Color = { 1.0, 0.0, 0.0 }
   },
   GUI = {
     Path = "/Examples"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ToyVolume)

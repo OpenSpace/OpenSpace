@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,7 +60,7 @@ void GeoJsonManager::deinitializeGL() {
 }
 
 bool GeoJsonManager::isReady() const {
-    bool isReady = std::all_of(
+    const bool isReady = std::all_of(
         std::begin(_geoJsonObjects),
         std::end(_geoJsonObjects),
         [](const std::unique_ptr<GeoJsonComponent>& g) {
@@ -71,7 +71,7 @@ bool GeoJsonManager::isReady() const {
 }
 
 void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
-    ZoneScoped
+    ZoneScoped;
 
     try {
         // Parse dictionary
@@ -81,7 +81,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
             "GeoJsonComponent"
         );
 
-        std::string identifier = layerDict.value<std::string>("Identifier");
+        const std::string identifier = layerDict.value<std::string>("Identifier");
         if (hasPropertySubOwner(identifier)) {
             LERROR("GeoJson layer with identifier '" + identifier + "' already exists");
             return;
@@ -106,17 +106,14 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
 }
 
 void GeoJsonManager::deleteLayer(const std::string& layerIdentifier) {
-    ZoneScoped
+    ZoneScoped;
 
-    for (auto it = _geoJsonObjects.begin(); it != _geoJsonObjects.end(); ++it) {
+    for (auto it = _geoJsonObjects.begin(); it != _geoJsonObjects.end(); it++) {
         if (it->get()->identifier() == layerIdentifier) {
-            // we need to make a copy as the layerIdentifier is only a reference
-            // which will no longer be valid once it is deleted
-            std::string id = layerIdentifier;
+            LINFO("Deleting GeoJson layer: " + layerIdentifier);
             removePropertySubOwner(it->get());
             (*it)->deinitializeGL();
             _geoJsonObjects.erase(it);
-            LINFO("Deleted GeoJson layer " + id);
             return;
         }
     }
@@ -124,7 +121,7 @@ void GeoJsonManager::deleteLayer(const std::string& layerIdentifier) {
 }
 
 void GeoJsonManager::update() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<GeoJsonComponent>& obj : _geoJsonObjects) {
         if (obj->enabled()) {
@@ -134,7 +131,7 @@ void GeoJsonManager::update() {
 }
 
 void GeoJsonManager::render(const RenderData& data) {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<GeoJsonComponent>& obj : _geoJsonObjects) {
         if (obj->enabled()) {

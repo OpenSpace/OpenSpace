@@ -1,4 +1,8 @@
 {
+  "additional_scripts": [
+    "openspace.action.triggerAction('os.solarsystem.JupiterMinorMoonsOff')",
+    "openspace.action.triggerAction('os.solarsystem.SaturnMinorMoonsOff')"
+  ],
   "assets": [
     "base",
     "base_keybindings",
@@ -40,31 +44,31 @@
   ],
   "keybindings": [
     {
-      "action": "os.missions.voyager.v1.focus",
+      "action": "os.voyager.FocusVoyager1",
       "key": "V"
     },
     {
-      "action": "os.missions.voyager.v2.focus",
+      "action": "os.voyager.FocusVoyager2",
       "key": "SHIFT+V"
     },
     {
-      "action": "os.missions.voyager.setup.jupiterapproach",
+      "action": "os.voyager.SetupJupiterApproach",
       "key": "SHIFT+J"
     },
     {
-      "action": "os.missions.voyager.setup.saturnapproach",
+      "action": "os.voyager.SetupSaturnApproach",
       "key": "SHIFT+S"
     },
     {
-      "action": "os.missions.voyager.jupiter.focus",
+      "action": "os.voyager.JupiterFocus",
       "key": "J"
     },
     {
-      "action": "os.missions.voyager.saturn.focus",
+      "action": "os.voyager.SaturnFocus",
       "key": "S"
     },
     {
-      "action": "os.missions.voyager.toggleminormoontrails",
+      "action": "os.voyager.ToggleMinorMoonTrails",
       "key": "SHIFT+H"
     }
   ],

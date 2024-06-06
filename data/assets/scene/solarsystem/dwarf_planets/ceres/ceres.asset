@@ -1,12 +1,13 @@
 local transforms = asset.require("./transforms")
-asset.require("spice/base")
+
+
 
 local Ceres = {
   Identifier = "Ceres",
   Parent = transforms.CeresPosition.Identifier,
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 487.3E3, 487.3E3, 454.7E3 },
+    Radii = { 487300, 487300, 454700 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
@@ -20,8 +21,8 @@ local CeresLabel = {
   Identifier = "CeresLabel",
   Parent = Ceres.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Ceres",
     FontSize = 70.0,
     Size = 8.66,
@@ -50,6 +51,7 @@ end)
 
 asset.export(Ceres)
 asset.export(CeresLabel)
+
 
 
 asset.meta = {

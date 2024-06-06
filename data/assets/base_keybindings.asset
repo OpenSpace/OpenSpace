@@ -1,30 +1,37 @@
 asset.require("./base")
+local allTrailsAction = asset.require("actions/trails/toggle_all_trails").ToggleTrails
+local allTrailsInstantAction = asset.require("actions/trails/toggle_all_trails").ToggleTrailsInstant
 
-local trailAction = asset.require("actions/trails/toggle_trails_planets_moons").toggle_trails
 
-local toggle_planet_labels = {
-  Identifier = "os_default.toggle_planet_labels",
+
+local TogglePlanetLabels = {
+  Identifier = "os_default.TogglePlanetLabels",
   Name = "Toggle planet labels",
   Command = [[
-    local list = openspace.getProperty("{solarsystem_labels}.Renderable.Enabled");
-    for _,v in pairs(list) do openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v)) end
+    local list = openspace.property("{solarsystem_labels}.Renderable.Enabled")
+    for _,v in pairs(list) do
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
+    end
   ]],
   Documentation = "Turns on visibility for all solar system labels",
   GuiPath = "/Solar System",
-  IsLocal = false,
-  Key = "l"
+  IsLocal = false
 }
 
-asset.onInitialize(function ()
-  openspace.action.registerAction(toggle_planet_labels)
-  openspace.bindKey(toggle_planet_labels.Key, toggle_planet_labels.Identifier)
+asset.onInitialize(function()
+  openspace.action.registerAction(TogglePlanetLabels)
+  openspace.bindKey("L", TogglePlanetLabels.Identifier)
 
-  openspace.bindKey("h", trailAction.Identifier)
+  openspace.bindKey("T", allTrailsAction)
+  openspace.bindKey("SHIFT+T", allTrailsInstantAction)
 end)
 
-asset.onDeinitialize(function ()
-  openspace.clearKey("h")
+asset.onDeinitialize(function()
+  openspace.clearKey("SHIFT+T")
+  openspace.clearKey("T")
 
-  openspace.action.removeAction(toggle_planet_labels)
-  openspace.clearKey(toggle_planet_labels.Key)
+  openspace.action.removeAction(TogglePlanetLabels)
+  openspace.clearKey("L")
 end)
+
+asset.export("TogglePlanetLabels", TogglePlanetLabels.Identifier)

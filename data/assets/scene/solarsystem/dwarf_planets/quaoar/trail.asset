@@ -1,17 +1,19 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local translation = asset.require("./transforms").Translation
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
 
 local Trail = {
   Identifier = "QuaoarTrail",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = sunTransforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = asset.enabled,
+    Translation = transforms.Translation,
     Color = { 0.2, 0.8, 0.3 },
     Period = 104691.8599963541,
     Resolution = 10000,
-    Enabled = asset.enabled,
-    Fade = 1.24,
-    Translation = translation
+    Fade = 1.24
   },
   Tag = { "planetTrail_dwarf" },
   GUI = {
@@ -20,6 +22,7 @@ local Trail = {
     Description = "Trail of Quaoar"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Trail)
@@ -30,6 +33,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("Trail", Trail)
+
+
 
 asset.meta = {
   Name = "Quaoar Trail",

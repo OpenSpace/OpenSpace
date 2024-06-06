@@ -1,0 +1,74 @@
+local transform = asset.require("scene/solarsystem/planets/earth/transforms")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local modelFolder = asset.resource({
+  Name = "Euclid Model",
+  Type = "HttpSynchronization",
+  Identifier = "euclid_model",
+  Version = 1
+})
+
+
+local Euclid = {
+  Identifier = "Euclid",
+  Parent = transform.EarthBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2023 JUL 01 15:53:08.239",
+    End = "2031 OCT 13 00:37:22.437"
+  },
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Euclid,
+      Observer = coreKernels.ID.EarthBarycenter
+    },
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Euclid",
+      ZAxis = "Sun",
+      YAxis = { 0.0, 1.0, 0.0 },
+      YAxisOrthogonal = true
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = modelFolder .. "euclid.fbx",
+    ModelScale = 30.0,
+    LightSources = {
+      sun.LightSource
+    },
+    PerformShading = true,
+    AmbientIntensity = 0.075
+  },
+  GUI = {
+    Name = "Euclid",
+    Path = "/Solar System/Telescopes/Euclid"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Euclid)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Euclid)
+end)
+
+asset.export(Euclid)
+
+
+
+asset.meta = {
+  Name = "Euclid Model",
+  Version = "1.0",
+  Description = "This asset contains the model of ESA's Euclid spacecraft. The model is retrieved from https://scifleet.esa.int",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

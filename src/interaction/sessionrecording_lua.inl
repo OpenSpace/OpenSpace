@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,7 +71,8 @@ namespace {
  * stopped.
  */
 [[codegen::luawrap("startPlayback")]] void startPlaybackDefault(std::string file,
-                                                                bool loop = false)
+                                                                bool loop = false,
+                                                           bool shouldWaitForTiles = true)
 {
     using namespace openspace;
 
@@ -82,7 +83,8 @@ namespace {
         file,
         interaction::KeyframeTimeRef::Relative_recordedStart,
         true,
-        loop
+        loop,
+        shouldWaitForTiles
     );
 }
 
@@ -101,6 +103,7 @@ namespace {
     global::sessionRecording->startPlayback(
         file,
         interaction::KeyframeTimeRef::Relative_applicationStart,
+        false,
         false,
         false
     );
@@ -123,7 +126,8 @@ namespace {
         file,
         interaction::KeyframeTimeRef::Relative_recordedStart,
         false,
-        loop
+        loop,
+        false
     );
 }
 
@@ -141,6 +145,7 @@ namespace {
     global::sessionRecording->startPlayback(
         file,
         interaction::KeyframeTimeRef::Absolute_simTimeJ2000,
+        false,
         false,
         false
     );
@@ -195,6 +200,11 @@ namespace {
 // Returns true if session recording is currently playing back a recording.
 [[codegen::luawrap]] bool isPlayingBack() {
     return openspace::global::sessionRecording->isPlayingBack();
+}
+
+// Returns true if session recording is currently recording a recording.
+[[codegen::luawrap]] bool isRecording() {
+    return openspace::global::sessionRecording->isRecording();
 }
 
 #include "sessionrecording_lua_codegen.cpp"

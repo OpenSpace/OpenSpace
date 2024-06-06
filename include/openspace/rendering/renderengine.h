@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -92,9 +92,6 @@ public:
     void renderEndscreen();
     void postDraw();
 
-    float globalBlackOutFactor() const;
-    void setGlobalBlackOutFactor(float opacity);
-
     float hdrExposure() const;
     bool isHdrDisabled() const;
 
@@ -106,17 +103,18 @@ public:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::filesystem::path& vsPath,
-        std::filesystem::path fsPath, ghoul::Dictionary data = ghoul::Dictionary());
+        const std::filesystem::path& fsPath,
+        ghoul::Dictionary data = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::filesystem::path& vsPath,
-        std::filesystem::path fsPath, const std::filesystem::path& csPath,
+        const std::filesystem::path& fsPath, const std::filesystem::path& csPath,
         ghoul::Dictionary data = ghoul::Dictionary());
 
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
     /**
-     * Set the camera to use for rendering
+     * Set the camera to use for rendering.
      */
     void setCamera(Camera* camera);
 
@@ -133,17 +131,17 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
-     * Take a screenshot and store in the ${SCREENSHOTS} directory
+     * Take a screenshot and store in the ${SCREENSHOTS} directory.
      */
     void takeScreenshot();
 
     /**
-     * Resets the screenshot index to 0
+     * Resets the screenshot index to 0.
      */
     void resetScreenshotNumber();
 
     /**
-     * Get the filename of the latest screenshot
+     * Get the filename of the latest screenshot.
      */
     unsigned int latestScreenshotNumber() const;
 
@@ -167,7 +165,8 @@ private:
     void renderVersionInformation();
     void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
-    void renderDashboard();
+    void renderDashboard() const;
+    float combinedBlackoutFactor() const;
 
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
@@ -193,6 +192,7 @@ private:
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
+    properties::BoolProperty _applyBlackoutToMaster;
 
     properties::BoolProperty _enableFXAA;
 

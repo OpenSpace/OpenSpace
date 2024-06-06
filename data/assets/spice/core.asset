@@ -1,0 +1,191 @@
+local pck = asset.resource({
+  Name = "General PCK Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "general_pck",
+  Version = 1
+})
+
+local spk = asset.resource({
+  Name = "General SPK Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "general_spk",
+  Version = 2
+})
+
+
+-- The following IDs are defined in the de430 kernel provided by the `generic_spk` package
+local ID = {
+  Earth = "EARTH",
+  EarthBarycenter = "EARTH BARYCENTER",
+  Mars = "MARS",
+  MarsBarycenter = "MARS BARYCENTER",
+  Mercury = "MERCURY",
+  MercuryBarycenter = "MERCURY BARYCENTER",
+  Moon = "MOON",
+  Neptune = "NEPTUNE",
+  NeptuneBarycenter = "NEPTUNE BARYCENTER",
+  Jupiter = "JUPITER",
+  JupiterBarycenter = "JUPITER BARYCENTER",
+  Pluto = "PLUTO",
+  PlutoBarycenter = "PLUTO BARYCENTER",
+  Saturn = "SATURN",
+  SaturnBarycenter = "SATURN BARYCENTER",
+  SolarSystemBarycenter = "SOLAR SYSTEM BARYCENTER",
+  Sun = "SUN",
+  Uranus = "URANUS",
+  UranusBarycenter = "URANUS BARYCENTER",
+  Venus = "VENUS",
+  VenusBarycenter = "VENUS BARYCENTER",
+}
+
+-- The following frames are provided as built-in reference frames by SPICE itself. See
+-- https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/frames.html
+-- Appendix: "Built in" Inertial Reference Frames
+-- Appendix: "Built in" PCK-Based IAU Body-Fixed Reference Frames
+-- Appendix: High Precision Earth Fixed Frames
+-- for more information
+local Frame = {
+  J2000 = "J2000",
+  EclipJ2000 = "ECLIPJ2000",
+  Galactic = "GALACTIC",
+
+  Earth = "IAU_EARTH",
+  ITRF93 = "ITRF93",
+  EarthFixed = "EARTH_FIXED",
+  Mars = "IAU_MARS",
+  Mercury = "IAU_MERCURY",
+  Moon = "IAU_MOON",
+  Neptune = "IAU_NEPTUNE",
+  Jupiter = "IAU_JUPITER",
+  Pluto = "IAU_PLUTO",
+  Saturn = "IAU_SATURN",
+  Sun = "IAU_SUN",
+  Uranus = "IAU_URANUS",
+  Venus = "IAU_VENUS",
+
+  ["52Europa"] = "IAU_52_EUROPA",
+  Adrastea = "IAU_ADRASTEA",
+  Amalthea = "IAU_AMALTHEA",
+  Ananke = "IAU_ANANKE",
+  Ariel = "IAU_ARIEL",
+  Arrokoth = "IAU_ARROKOTH",
+  Atlas = "IAU_ATLAS",
+  Belinda = "IAU_BELINDA",
+  Bennu = "IAU_BENNU",
+  Bianca = "IAU_BIANCA",
+  Borrelly = "IAU_BORRELLY",
+  Callirrhoe = "IAU_CALLIRRHOE",
+  Callisto = "IAU_CALLISTO",
+  Calypso = "IAU_CALYPSO",
+  Carme = "IAU_CARME",
+  Ceres = "IAU_CERES",
+  Chaldene = "IAU_CHALDENE",
+  Charon = "IAU_CHARON",
+  Cordelia = "IAU_CORDELIA",
+  Cressida = "IAU_CRESSIDA",
+  Davida = "IAU_DAVIDA",
+  Deimos = "IAU_DEIMOS",
+  Desdemona = "IAU_DESDEMONA",
+  Despina = "IAU_DESPINA",
+  Didymos = "IAU_DIDYMOS",
+  Dimorphos = "IAU_DIMORPHOS",
+  Dione = "IAU_DIONE",
+  DonaldJohanson = "IAU_DONALDJOHANSON",
+  Elara = "IAU_ELARA",
+  Enceladus = "IAU_ENCELADUS",
+  Epimetheus = "IAU_EPIMETHEUS",
+  Erinome = "IAU_ERINOME",
+  Eros = "IAU_EROS",
+  Europa = "IAU_EUROPA",
+  Eurybates = "IAU_EURYBATES",
+  Galatea = "IAU_GALATEA",
+  Ganymede = "IAU_GANYMEDE",
+  Gaspra = "IAU_GASPRA",
+  Harpalyke = "IAU_HARPALYKE",
+  Helene = "IAU_HELENE",
+  Himalia = "IAU_HIMALIA",
+  Hydra = "IAU_HYDRA",
+  Hyperion = "IAU_HYPERION",
+  Iapetus = "IAU_IAPETUS",
+  Ida = "IAU_IDA",
+  Io = "IAU_IO",
+  Iocaste = "IAU_IOCASTE",
+  Isonoe = "IAU_ISONOE",
+  Itokawa = "IAU_ITOKAWA",
+  Janus = "IAU_JANUS",
+  Juliet = "IAU_JULIET",
+  Kalyke = "IAU_KALYKE",
+  Larissa = "IAU_LARISSA",
+  Leda = "IAU_LEDA",
+  Leucus = "IAU_LEUCUS",
+  Lutetia = "IAU_LUTETIA",
+  Lysithea = "IAU_LYSITHEA",
+  Magaclite = "IAU_MAGACLITE",
+  Menoetius = "IAU_MENOETIUS",
+  Metis = "IAU_METIS",
+  Mimas = "IAU_MIMAS",
+  Miranda = "IAU_MIRANDA",
+  Naiad = "IAU_NAIAD",
+  Nereid = "IAU_NEREID",
+  Nix = "IAU_NIX",
+  Oberon = "IAU_OBERON",
+  Ophelia = "IAU_OPHELIA",
+  Orus = "IAU_ORUS",
+  Pallas = "IAU_PALLAS",
+  Pan = "IAU_PAN",
+  Pandora = "IAU_PANDORA",
+  Pasiphae = "IAU_PASIPHAE",
+  Patroclus = "IAU_PATROCLUS",
+  Phobos = "IAU_PHOBOS",
+  Phoebe = "IAU_PHOEBE",
+  Polymele = "IAU_POLYMELE",
+  Portia = "IAU_PORTIA",
+  Praxidike = "IAU_PRAXIDIKE",
+  Prometheus = "IAU_PROMETHEUS",
+  Proteus = "IAU_PROTEUS",
+  Puck = "IAU_PUCK",
+  Queta = "IAU_QUETA",
+  Rhea = "IAU_RHEA",
+  Rosalind = "IAU_ROSALIND",
+  Ryugu = "IAU_RYUGU",
+  Sinope = "IAU_SINOPE",
+  Steins = "IAU_STEINS",
+  Taygete = "IAU_TAYGETE",
+  Telesto = "IAU_TELESTO",
+  Tempel1 = "IAU_TEMPEL_1",
+  Tethys = "IAU_TETHYS",
+  Thalassa = "IAU_THALASSA",
+  Thebe = "IAU_THEBE",
+  Themisto = "IAU_THEMISTO",
+  Titan = "IAU_TITAN",
+  Titania = "IAU_TITANIA",
+  Triton = "IAU_TRITON",
+  Umbriel = "IAU_UMBRIEL",
+  Vesta = "IAU_VESTA"
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(pck .. "pck00011.tpc")
+  openspace.spice.loadKernel(spk .. "de430.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(spk .. "de430.bsp")
+  openspace.spice.unloadKernel(pck .. "pck00011.tpc")
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)
+
+
+
+asset.meta = {
+  Name = "SPICE Base",
+  Version = "1.1",
+  Description = [[This asset contains the spice base kernels necessary for any space
+    application. Includes positions for Solar System bodies from 1850 to 2150]],
+  Author = "OpenSpace Team",
+  URL = "https://naif.jpl.nasa.gov/naif/data_generic.html",
+  License = "NASA"
+}

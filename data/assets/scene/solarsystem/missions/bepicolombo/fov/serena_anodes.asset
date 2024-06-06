@@ -1,0 +1,832 @@
+local transforms = asset.require("../model")
+local kernels = asset.require("../kernels")
+
+
+
+local SerenaElenaAN01 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN01",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN01,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_01",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN01",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN02 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN02",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN02,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_02",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN02",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN03 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN03",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN03,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_03",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN03",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN04 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN04",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN04,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_04",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN04",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN05 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN05",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN05,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_05",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN05",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN06 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN06",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN06,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_06",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN06",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN07 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN07",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN07,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_07",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN07",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN08 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN08",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN08,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_08",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN08",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN09 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN09",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN09,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_09",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN09",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN10 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN10",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN10,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_10",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN10",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN11 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN11",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN11,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_11",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN11",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN12 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN12",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN12,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_12",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN12",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN13 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN13",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN13,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_13",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN13",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN14 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN14",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN14,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_14",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN14",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN15 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN15",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN15,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_15",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN15",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN16 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN16",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN16,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_16",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN16",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN17 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN17",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN17,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_17",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN17",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN18 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN18",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN18,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_18",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN18",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN19 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN19",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN19,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_19",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN19",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN20 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN20",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN20,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_20",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN20",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN21 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN21",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN21,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_21",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN21",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN22 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN22",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN22,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_22",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN22",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN23 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN23",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN23,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_23",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN23",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN24 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN24",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN24,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_24",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN24",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN25 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN25",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN25,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_25",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN25",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN26 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN26",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN26,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_26",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN26",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN27 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN27",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN27,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_27",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN27",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN28 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN28",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN28,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_28",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN28",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN29 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN29",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN29,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_29",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN29",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN30 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN30",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN30,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_30",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN30",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN31 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN31",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN31,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_31",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN31",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+local SerenaElenaAN32 = {
+  Identifier = "BepiColomboMPO_SerenaElena_AN32",
+  Parent = transforms.BepiColombo.Identifier,
+  Renderable = {
+    Type = "RenderableFov",
+    Body = kernels.ID.MPO,
+    Frame = kernels.Frame.SerenaElenaAN32,
+    RGB = { 0.8, 0.7, 0.7 },
+    Instrument = {
+      Name = "MPO_SERENA_ELENA_AN_32",
+      Method = "RECTANGLE",
+      Aberration = "NONE"
+    },
+    AlwaysDrawFov = true,
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
+    FrameConversions = {}
+  },
+  GUI = {
+    Name = "MPO Serena Elena AN32",
+    Path = "/Solar System/Missions/BepiColombo/Instruments",
+  }
+}
+
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SerenaElenaAN01)
+  openspace.addSceneGraphNode(SerenaElenaAN02)
+  openspace.addSceneGraphNode(SerenaElenaAN03)
+  openspace.addSceneGraphNode(SerenaElenaAN04)
+  openspace.addSceneGraphNode(SerenaElenaAN05)
+  openspace.addSceneGraphNode(SerenaElenaAN06)
+  openspace.addSceneGraphNode(SerenaElenaAN07)
+  openspace.addSceneGraphNode(SerenaElenaAN08)
+  openspace.addSceneGraphNode(SerenaElenaAN09)
+  openspace.addSceneGraphNode(SerenaElenaAN10)
+  openspace.addSceneGraphNode(SerenaElenaAN11)
+  openspace.addSceneGraphNode(SerenaElenaAN12)
+  openspace.addSceneGraphNode(SerenaElenaAN13)
+  openspace.addSceneGraphNode(SerenaElenaAN14)
+  openspace.addSceneGraphNode(SerenaElenaAN15)
+  openspace.addSceneGraphNode(SerenaElenaAN16)
+  openspace.addSceneGraphNode(SerenaElenaAN17)
+  openspace.addSceneGraphNode(SerenaElenaAN18)
+  openspace.addSceneGraphNode(SerenaElenaAN19)
+  openspace.addSceneGraphNode(SerenaElenaAN20)
+  openspace.addSceneGraphNode(SerenaElenaAN21)
+  openspace.addSceneGraphNode(SerenaElenaAN22)
+  openspace.addSceneGraphNode(SerenaElenaAN23)
+  openspace.addSceneGraphNode(SerenaElenaAN24)
+  openspace.addSceneGraphNode(SerenaElenaAN25)
+  openspace.addSceneGraphNode(SerenaElenaAN26)
+  openspace.addSceneGraphNode(SerenaElenaAN27)
+  openspace.addSceneGraphNode(SerenaElenaAN28)
+  openspace.addSceneGraphNode(SerenaElenaAN29)
+  openspace.addSceneGraphNode(SerenaElenaAN30)
+  openspace.addSceneGraphNode(SerenaElenaAN31)
+  openspace.addSceneGraphNode(SerenaElenaAN32)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SerenaElenaAN32)
+  openspace.removeSceneGraphNode(SerenaElenaAN31)
+  openspace.removeSceneGraphNode(SerenaElenaAN30)
+  openspace.removeSceneGraphNode(SerenaElenaAN29)
+  openspace.removeSceneGraphNode(SerenaElenaAN28)
+  openspace.removeSceneGraphNode(SerenaElenaAN27)
+  openspace.removeSceneGraphNode(SerenaElenaAN26)
+  openspace.removeSceneGraphNode(SerenaElenaAN25)
+  openspace.removeSceneGraphNode(SerenaElenaAN24)
+  openspace.removeSceneGraphNode(SerenaElenaAN23)
+  openspace.removeSceneGraphNode(SerenaElenaAN22)
+  openspace.removeSceneGraphNode(SerenaElenaAN21)
+  openspace.removeSceneGraphNode(SerenaElenaAN20)
+  openspace.removeSceneGraphNode(SerenaElenaAN19)
+  openspace.removeSceneGraphNode(SerenaElenaAN18)
+  openspace.removeSceneGraphNode(SerenaElenaAN17)
+  openspace.removeSceneGraphNode(SerenaElenaAN16)
+  openspace.removeSceneGraphNode(SerenaElenaAN15)
+  openspace.removeSceneGraphNode(SerenaElenaAN14)
+  openspace.removeSceneGraphNode(SerenaElenaAN13)
+  openspace.removeSceneGraphNode(SerenaElenaAN12)
+  openspace.removeSceneGraphNode(SerenaElenaAN11)
+  openspace.removeSceneGraphNode(SerenaElenaAN10)
+  openspace.removeSceneGraphNode(SerenaElenaAN09)
+  openspace.removeSceneGraphNode(SerenaElenaAN08)
+  openspace.removeSceneGraphNode(SerenaElenaAN07)
+  openspace.removeSceneGraphNode(SerenaElenaAN06)
+  openspace.removeSceneGraphNode(SerenaElenaAN05)
+  openspace.removeSceneGraphNode(SerenaElenaAN04)
+  openspace.removeSceneGraphNode(SerenaElenaAN03)
+  openspace.removeSceneGraphNode(SerenaElenaAN02)
+  openspace.removeSceneGraphNode(SerenaElenaAN01)
+end)
+
+
+
+asset.meta = {
+  Name = "Serena Anodes",
+  Version = "1.0",
+  Description = [[
+    The Search for Exospheric Refilling and Emitted Natural Abundances (SERENA) is a
+    single instrument composed by 4 units devoted to the detection of neutral and ionized
+    particles in the Hermean environment. It addresses some of the main scientific
+    objectives of the BepiColombo mission: composition, origin and dynamics of Mercury's
+    exosphere and polar deposits; and structure and dynamics of Mercury's magnetosphere.
+    Each unit is able to operate individually and to achieve its specific scientific
+    objectives. In addition, the opportunity to operate sensors simultaneously greatly
+    improves the success of scientific objectives and allows for additional objectives.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

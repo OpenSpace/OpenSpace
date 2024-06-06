@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,10 @@
 #ifndef __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 #define __OPENSPACE_CORE___JOYSTICKINPUTSTATE___H__
 
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
-#include <ghoul/fmt.h>
 #include <array>
 #include <memory>
 #include <string>
@@ -37,7 +37,7 @@ namespace openspace::interaction {
 
 /**
  * Actions that any button of a joystick can have. Each button must be in one of these
- * states
+ * states.
  */
 enum class JoystickAction : uint8_t {
     /// Idle state if the button is unpressed and has been unpressed since last frame
@@ -81,7 +81,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
     static constexpr int MaxNumJoysticks = 16;
 
     /**
-     * This function return the number of axes the joystick with the given name has
+     * This function return the number of axes the joystick with the given name has.
      *
      * \param joystickName The name of the joystick to check how many axes it has,
      *        if empty the max number of axes for all joysticks are returned
@@ -90,7 +90,7 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
     int numAxes(const std::string& joystickName = "") const;
 
     /**
-     * This function return the number of buttons the joystick with the given name has
+     * This function return the number of buttons the joystick with the given name has.
      *
      * \param joystickName The name of the joystick to check how many buttons it has,
      *        if empty the max number of buttons for all joysticks are returned
@@ -150,7 +150,7 @@ constexpr openspace::interaction::JoystickAction from_string(std::string_view st
     if (string == "Repeat")  { return openspace::interaction::JoystickAction::Repeat; }
     if (string == "Release") { return openspace::interaction::JoystickAction::Release; }
 
-    throw RuntimeError(fmt::format("Unknown action '{}'", string));
+    throw RuntimeError(std::format("Unknown action '{}'", string));
 }
 
 } // namespace ghoul

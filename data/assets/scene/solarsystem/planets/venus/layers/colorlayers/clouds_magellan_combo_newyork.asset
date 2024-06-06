@@ -1,25 +1,29 @@
-local globeIdentifier = asset.require("../../venus").Venus.Identifier
+local globe = asset.require("../../venus")
 
 
-local texturesPath = asset.syncedResource({
+
+local texturesPath = asset.resource({
   Name = "Venus Textures",
   Type = "HttpSynchronization",
   Identifier = "venus_textures",
   Version = 2
 })
 
-local combo = {
+
+local Layer = {
   Identifier = "Clouds_Magellan_Combo_NewYork",
   Name = "Clouds Magellan Combo [New York]",
   Enabled = asset.enabled,
-  Type = "ByLevelTileLayer",
+  ZIndex = 20,
+  Type = "TileProviderByLevel",
   LevelTileProviders = {
     {
       MaxLevel = 4,
       TileProvider = {
         Identifier = "Clouds",
         Name = "Clouds",
-        FilePath = texturesPath .. "venus_clouds.jpg"
+        FilePath = texturesPath .. "venus_clouds.jpg",
+        CacheSettings = { Enabled = false }
       }
     },
     {
@@ -27,22 +31,21 @@ local combo = {
       TileProvider = {
         Identifier = "Magellan_Mosaic_NewYork",
         Name = "Magellan Mosaic [New York]",
-        FilePath = asset.localResource("magellan_mosaic_newyork.vrt"),
+        FilePath = asset.resource("magellan_mosaic_newyork.vrt"),
         BlendMode = "Color",
-        Settings = {
-          Gamma = 2.0
-        }
+        Settings = { Gamma = 2.0 }
       }
-    },
-  },
+    }
+  }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", combo)
+  openspace.globebrowsing.addLayer(globe.Venus.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", combo)
+  openspace.globebrowsing.deleteLayer(globe.Venus.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export(combo)
+asset.export(Layer)

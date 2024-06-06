@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,27 +47,27 @@ bool BoxGeometry::initialize() {
     const float y = _size.y * 0.5f;
     const float z = _size.z * 0.5f;
 
-    const GLfloat vertices[] = {
+    const std::array<GLfloat, 108> vertices = {
         -x, -y,  z, // blue corner
-        x,  y,  z,  // white corner
+         x,  y,  z,  // white corner
         -x,  y,  z, // cyan corner
         -x, -y,  z, // blue corner
-        x, -y,  z,  // magenta corner
-        x,  y,  z,  // white corner
+         x, -y,  z,  // magenta corner
+         x,  y,  z,  // white corner
 
         -x, -y, -z, // black corner
         -x,  y, -z, // green
-        x,  y, -z,  // yellow corner
+         x,  y, -z,  // yellow corner
         -x, -y, -z, // black
-        x,  y, -z, // yellow
-        x, -y, -z, // red
+         x,  y, -z, // yellow
+         x, -y, -z, // red
 
-        x, -y, -z, // red
-        x,  y,  z, // yellow
-        x, -y,  z, // magenta
-        x, -y, -z, // red
-        x,  y, -z, // yellow
-        x,  y,  z, // white
+         x, -y, -z, // red
+         x,  y,  z, // yellow
+         x, -y,  z, // magenta
+         x, -y, -z, // red
+         x,  y, -z, // yellow
+         x,  y,  z, // white
 
         -x, -y, -z, // black
         -x, -y,  z, // blue
@@ -76,19 +76,19 @@ bool BoxGeometry::initialize() {
         -x,  y,  z, // cyan
         -x,  y, -z, // green
 
-        x,  y,  z, // white
+         x,  y,  z, // white
         -x,  y, -z, // green
         -x,  y,  z, // cyan
         -x,  y, -z, // green
-        x,  y,  z, // white
-        x,  y, -z, // yellow
+         x,  y,  z, // white
+         x,  y, -z, // yellow
 
         -x, -y, -z, // black
-        x, -y,  z, // magenta
+         x, -y,  z, // magenta
         -x, -y,  z, // blue
         -x, -y, -z, // black
-        x, -y, -z, // red
-        x, -y,  z // magenta
+         x, -y, -z, // red
+         x, -y,  z // magenta
     };
 
     if (_vaoId == 0) {
@@ -97,18 +97,12 @@ bool BoxGeometry::initialize() {
 
     if (_vBufferId == 0) {
         glGenBuffers(1, &_vBufferId);
-
-        if (_vBufferId == 0) {
-            LERROR("Could not create vertex buffer");
-            return false;
-        }
     }
 
-    // First VAO setup
     glBindVertexArray(_vaoId);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, nullptr);
@@ -117,7 +111,7 @@ bool BoxGeometry::initialize() {
     return true;
 }
 
-void BoxGeometry::render() {
+void BoxGeometry::render() const {
     glBindVertexArray(_vaoId);  // select first VAO
     glDrawArrays(GL_TRIANGLES, 0, 6*6);
     glBindVertexArray(0);

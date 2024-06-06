@@ -1,17 +1,20 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "ESRI_NOAA20_Combo",
   Name = "ESRI NOAA20 Combo",
   Enabled = asset.enabled,
-  Type = "ByLevelTileLayer",
+  ZIndex = 30,
+  Type = "TileProviderByLevel",
   LevelTileProviders = {
     {
       MaxLevel = 4,
       TileProvider = {
         Identifier = "Temporal_VIIRS_NOAA20",
         Name = "Temporal VIIRS NOAA20",
-        Type = "TemporalTileLayer",
+        Type = "TemporalTileProvider",
         Mode = "Prototyped",
         Prototyped = {
           Time = {
@@ -34,25 +37,26 @@ local layer = {
       TileProvider = {
         Identifier = "ESRI_World_Imagery",
         Name = "ESRI World Imagery",
-        FilePath = asset.localResource("esri_world_imagery.wms"),
+        FilePath = asset.resource("esri_world_imagery.wms"),
         PadTiles = false
       }
-    },
+    }
   },
   PadTiles = false,
   Description = [[Level based layer combining "NOAA20 SNPP (Temporal)" and ESRI World
     Imagery. "NOAA20 SNPP (Temporal)" is faded out at tile level 4]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

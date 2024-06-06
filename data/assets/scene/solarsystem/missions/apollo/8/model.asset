@@ -1,15 +1,17 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
-local kernels = asset.require("./kernels").kernels
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-local models = asset.syncedResource({
+
+
+local models = asset.resource({
   Name = "Apollo Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_models",
   Version = 4
 })
 
-local apolloSpiceId = -908
 
 local Apollo8 = {
   Identifier = "Apollo8",
@@ -22,15 +24,14 @@ local Apollo8 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
-      Observer = "EARTH BARYCENTER",
-      Frame = "GALACTIC",
-      Kernels = kernels
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.EarthBarycenter,
+      Frame = coreKernels.Frame.Galactic
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "A8_EARTHRISE",
-      DestinationFrame = "GALACTIC",
+      SourceFrame = kernels.Frame.Apollo8Earthrise,
+      DestinationFrame = coreKernels.Frame.Galactic,
       TimeFrame = {
         -- The orientation of Apollo 8 is only available during the few minutes
         -- when the Earthrise picture was taken.
@@ -57,7 +58,7 @@ local Apollo8Model = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = {0.0, 0.0, -math.pi / 2}
+      Rotation = { 0.0, 0.0, -math.pi / 2 }
     }
   },
   Renderable = {
@@ -70,9 +71,9 @@ local Apollo8Model = {
     PerformShading = true
   },
   GUI = {
-    Hidden = true,
     Name = "Apollo 8 Model",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Hidden = true
   }
 }
 
@@ -91,6 +92,7 @@ local Apollo8Pivot = {
     Path = "/Solar System/Missions/Apollo/8"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo8)

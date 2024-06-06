@@ -28,7 +28,6 @@ add_executable(
   test_assetloader.cpp
   test_concurrentqueue.cpp
   test_distanceconversion.cpp
-  test_configuration.cpp
   test_documentation.cpp
   test_horizons.cpp
   test_iswamanager.cpp
@@ -39,6 +38,7 @@ add_executable(
   test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
+  test_settings.cpp
   test_sgctedit.cpp
   test_spicemanager.cpp
   test_timeconversion.cpp
@@ -62,6 +62,10 @@ target_include_directories(OpenSpaceTest
 
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
 target_link_libraries(OpenSpaceTest PUBLIC Catch2 openspace-core sgct)
+
+target_precompile_headers(OpenSpaceTest PRIVATE
+  <catch2/catch_test_macros.hpp>
+)
 
 foreach (library_name ${all_enabled_modules})
   get_target_property(library_type ${library_name} TYPE)

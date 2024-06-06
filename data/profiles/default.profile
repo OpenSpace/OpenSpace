@@ -37,15 +37,15 @@
   ],
   "keybindings": [
     {
-      "action": "os.solarsystem.earth.togglesatellitetrails",
+      "action": "os.solarsystem.ToggleSatelliteTrails",
       "key": "S"
     },
     {
-      "action": "os.solarsystem.earth.iss.focus",
+      "action": "os.solarsystem.FocusIss",
       "key": "I"
     },
     {
-      "action": "os.solarsystem.earth.focus",
+      "action": "os.solarsystem.FocusEarth",
       "key": "HOME"
     }
   ],

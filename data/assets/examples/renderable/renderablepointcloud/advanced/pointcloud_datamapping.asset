@@ -1,0 +1,53 @@
+-- Custom Data Mapping
+-- Example of a point cloud with a custom data mapping. The X, Y, and Z position are
+-- mapped to other columns in the dataset. The data mapping also includes some settings
+-- for missing data values and columns to exclude when loading the dataset.
+
+local colormaps = asset.require("util/default_colormaps")
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_DataMapping",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("../data/dummydata.csv"),
+    DataMapping = {
+      -- Using the DataMapping, we can specify the X, Y and Z values of the point
+      -- positions to be set by any value in the dataset, without changing the dataset
+      -- used for the rendering
+      X = "a",
+      Y = "b",
+      Z = "a",
+      -- It is also possible to specify a numeric value that corresponds to missing
+      -- values in the dataset. These will be interpreted as NaN values
+      MissingDataValue = 29,
+      -- And some column that we do not want to include in the loading. Here we can for
+      -- example skip the regular position columns
+      ExcludeColumns = { "x", "y", "z" }
+    },
+    -- Interpret values as Parsec rather than meter. The values in the a and b columns
+    -- are much smaller than the x, y and z
+    Unit = "pc",
+    -- To show the values corresponding to missing values, use a color map and show
+    -- missing data values in a specific color
+    Coloring = {
+      ColorMapping = {
+        File = colormaps.Uniform.Magma,
+        ShowMissingData = true,
+        NoDataColor = { 1.0, 0.0, 0.0, 1.0 }
+      }
+    }
+  },
+  GUI = {
+    Name = "Custom Data Mapping",
+    Path = "/Examples/RenderablePointCloud/Advanced"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

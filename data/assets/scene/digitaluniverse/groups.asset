@@ -1,14 +1,22 @@
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Galaxy Groups Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_groups_speck",
   Version = 1
 })
 
-local object = {
+
+local TransformMatrix = {
+  -0.7357425748,    0.67726129641,  0.0,           0.0,
+  -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+  0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+  0.0,              0.0,            0.0,           1.0
+}
+
+local Object = {
   Identifier = "NearbyGalaxyGroups",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
     Labels = {
       Enabled = true,
@@ -16,18 +24,12 @@ local object = {
       Color = { 0.1, 0.6, 0.2 },
       Size = 21.5,
       MinMaxSize = { 8, 20 },
-      Unit = "Mpc"
+      Unit = "Mpc",
+      TransformationMatrix = TransformMatrix
     },
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 0.65,
-    --ScaleFactor = 10.0,
     Unit = "Mpc",
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
-    }
+    TransformationMatrix = TransformMatrix
   },
   GUI = {
     Name = "Galaxy Group Labels",
@@ -39,21 +41,22 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "Galaxy Group Labels",
-  Version = "1.1",
+  Version = "2.0",
   Author = "Brian Abbott (AMNH)",
   Description = "Digital Universe asset for Galaxy Groups",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

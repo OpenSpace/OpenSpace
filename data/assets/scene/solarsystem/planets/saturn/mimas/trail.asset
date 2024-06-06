@@ -1,5 +1,6 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -10,21 +11,21 @@ local MimasTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MIMAS",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Mimas,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 23.0 / 24.0,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn" },
+  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn", "moonTrail_major_saturn" },
   GUI = {
     Name = "Mimas Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Mimas",
-    Description = "Trail of Saturn's moon Mimas as observed by Saturn",
+    Description = "Trail of Saturn's moon Mimas as observed by Saturn"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MimasTrail)
@@ -41,7 +42,7 @@ asset.export(MimasTrail)
 asset.meta = {
   Name = "Mimas Trail",
   Version = "1.1",
-  Description = "Main trail for Mimas. Data from NASA Spice (see base spice asset)",
+  Description = "Main trail for Mimas",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -1,11 +1,14 @@
-local globeIdentifier = asset.require("../../mars").Mars.Identifier
+local globe = asset.require("../../mars")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Mola_AMNH",
   Name = "Mola Elevation [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("mola_amnh.wms"),
-  TilePixelSize = 90,
+  ZIndex = 10,
+  FilePath = asset.resource("mola_amnh.wms"),
+  TilePixelSize = 360,
   Description = [[This digital elevation model (DEM) is based on data from the Mars
     Orbiter Laser Altimeter (MOLA; Smith et al., 2001), an instrument on NASA's Mars
     Global Surveyor (MGS) spacecraft (Albee et al., 2001). The MOLA DEM represents
@@ -22,15 +25,16 @@ local layer = {
     URL). Data Reference: (See URL)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "HeightLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mars.Identifier, "HeightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "HeightLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mars.Identifier, "HeightLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

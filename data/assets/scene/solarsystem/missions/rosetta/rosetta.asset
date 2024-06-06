@@ -1,74 +1,23 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./67p")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-local models = asset.syncedResource({
+
+
+local models = asset.resource({
   Name = "Rosetta Models",
   Type = "HttpSynchronization",
   Identifier = "rosetta_model",
   Version = 5
 })
 
-local kernels = asset.syncedResource({
-  Name = "Rosetta Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "rosetta_kernels",
-  Version = 1
-})
-
-local RosettaKernels = {
-  kernels .. "ROS_160718_STEP.TSC",
-  kernels .. "ros_triv.tsc",
-
-  kernels .. "CORB_DV_243_01___T19_00325.BSP",
-  kernels .. "CORB_DV_223_01___T19_00302.BSP",
-  kernels .. "CORB_DV_145_01___T19_00216.BSP",
-
-  kernels .. "LORB_DV_236_01___T19_00318.BSP",
-  kernels .. "LORB_DV_223_01___T19_00302.BSP",
-  kernels .. "LORB_DV_145_01___T19_00216.BSP",
-
-  kernels .. "RORB_DV_243_01___T19_00325.BSP",
-  kernels .. "RORB_DV_223_01___T19_00302.BSP",
-  kernels .. "RORB_DV_145_01___T19_00216.BSP",
-
-  kernels .. "ATNR_P040302093352_00127.BC",
-
-  kernels .. "ROS_STRUCT_V5.BSP",
-
-  kernels .. "ROS_NAVCAM_V01.TI",
-
-  kernels .. "ROS_CHURYUMOV_V01.TF",
-  kernels .. "ROS_V26.TF",
-
-  -- CK
-  -- Rosetta attitude
-  kernels .. "RATT_DV_243_01_01____00325.BC",
-  kernels .. "RATT_DV_223_01_01____00302.BC",
-  kernels .. "RATT_DV_145_01_01____00216.BC",
-
-  -- Comet attitude
-  kernels .. "CATT_DV_243_01_______00325.BC",
-  kernels .. "CATT_DV_223_01_______00302.BC",
-  kernels .. "CATT_DV_145_01_______00216.BC",
-
-  -- High gain antenna
-  kernels .. "ROS_HGA_2016_V0035.BC",
-  kernels .. "ROS_HGA_2015_V0053.BC",
-  kernels .. "ROS_HGA_2014_V0044.BC",
-
-  -- Solar arrays
-  kernels .. "ROS_SA_2016_V0034.BC",
-  kernels .. "ROS_SA_2015_V0042.BC",
-  kernels .. "ROS_SA_2014_V0047.BC",
-
-  kernels .. "ROS_CGS_RSOC_V03.TPC"
-}
-
 local RotationMatrix = {
-  0, 1, 0,
-  0, 0, 1,
-  1, 0, 0
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  1, 0, 0, 0,
+  0, 0, 0, 1
 }
 
 local RosettaPosition = {
@@ -77,14 +26,13 @@ local RosettaPosition = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ROSETTA",
-      Observer = "SSB",
-      Kernels = RosettaKernels
+      Target = kernels.ID.Rosetta,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "ROS_SPACECRAFT",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Rosetta,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -100,7 +48,7 @@ local Rosetta = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0.0, math.pi/2.0, 0.0 }
+      Rotation = { 0.0, math.pi / 2.0, 0.0 }
     }
   },
   Renderable = {
@@ -125,18 +73,17 @@ local Rosetta = {
 local PhilaePosition = {
   Identifier = "PhilaePosition",
   Parent = transforms.Barycenter.Identifier,
-  -- This should need a transform, but currently the model containes it instead
+  -- This should need a transform, but currently the model contains it instead
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PHILAE",
-      Observer = "CHURYUMOV-GERASIMENKO",
-      Kernels = RosettaKernels
+      Target = kernels.ID.Philae,
+      Observer = kernels.ID.ChurymovGerasimenko
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "ROS_SPACECRAFT",
-      DestinationFrame = "GALACTIC",
+      SourceFrame = kernels.Frame.Rosetta,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -152,7 +99,7 @@ local Philae = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { 0.0, math.pi/2.0, 0.0 }
+      Rotation = { 0.0, math.pi / 2.0, 0.0 }
     }
   },
   Renderable = {
@@ -186,13 +133,13 @@ local NavCamFov = {
   Identifier = "NAVCAM_FOV",
   Parent = NavCam.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "ROSETTA",
-    Frame = "ROS_NAVCAM-A",
-    RGB   = { 0.8, 0.7, 0.7 },
+    Type = "RenderableFov",
+    Body = kernels.ID.Rosetta,
+    Frame = kernels.Frame.NavCam,
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "ROS_NAVCAM-A",
-      Method     = "ELLIPSOID",
+      Name = kernels.Frame.NavCam,
+      Method = "ELLIPSOID",
       Aberration = "NONE"
     },
     PotentialTargets = { "CHURYUMOV-GERASIMENKO" },
@@ -211,10 +158,10 @@ local ImagePlane = {
   Parent = transforms.Comet67P.Identifier,
   Renderable = {
     Type = "RenderablePlaneProjection",
-    Frame = "67P/C-G_CK",
+    Frame = kernels.Frame.ChurymovGerasimenko,
     DefaultTarget = "CHURYUMOV-GERASIMENKO",
-    Spacecraft = "ROSETTA",
-    Instrument = "ROS_NAVCAM-A",
+    Spacecraft = kernels.ID.Rosetta,
+    Instrument = kernels.Frame.NavCam,
     Moving = false,
     Texture = models .. "defaultProj.png"
   },
@@ -231,8 +178,8 @@ local RosettaCometTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ROSETTA",
-      Observer = "CHURYUMOV-GERASIMENKO"
+      Target = kernels.ID.Rosetta,
+      Observer = kernels.ID.ChurymovGerasimenko
     },
     Color = { 0.288, 0.375, 0.934 },
     StartTime = "2014 AUG 01 12:00:00",
@@ -252,8 +199,8 @@ local PhilaeTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PHILAE",
-      Observer = "CHURYUMOV-GERASIMENKO"
+      Target = kernels.ID.Philae,
+      Observer = kernels.ID.ChurymovGerasimenko
     },
     Color = { 0.8, 0.5, 1.0 },
     StartTime = "2014 NOV 12 08:35:00",
@@ -266,90 +213,102 @@ local PhilaeTrail = {
   }
 }
 
-local nodes = {
-  RosettaPosition,
-  Rosetta,
-
-  PhilaePosition,
-  Philae,
-
-  NavCam,
-  NavCamFov,
-  ImagePlane,
-
-  RosettaCometTrail,
-  PhilaeTrail
-}
-
--- actions
-local focus_rosetta = {
-  Identifier = "os.missions.rosetta.focus",
+local FocusRosetta = {
+  Identifier = "os.rosetta.FocusRosetta",
   Name = "Focus on Rosetta",
   Command = [[
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Anchor', 'Rosetta');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.Aim', '');
-    openspace.setPropertyValue('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "Rosetta")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
   ]],
   Documentation = "Sets the focus of the camera on Rosetta",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
-local setup_lander_release_time = {
-  Identifier = "os.missions.rosetta.setup.landerrelease",
+local SetupLanderRelease = {
+  Identifier = "os.rosetta.SetupLanderRelease",
   Name = "Set lander release time",
   Command = [[
-    openspace.time.setTime('2014-11-12T08:20:00.00');
+    openspace.time.setTime("2014-11-12T08:20:00.00")
   ]],
   Documentation = "Jumps to the time when the Philae lander is released",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
-local toggle_image_plane = {
-  Identifier = "os.missions.rosetta.toggleimageplane",
+local ToggleImagePlane = {
+  Identifier = "os.rosetta.ToggleImagePlane",
   Name = "Toggle image plane",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.ImagePlaneRosetta.Renderable.Enabled', not openspace.getPropertyValue('Scene.ImagePlaneRosetta.Renderable.Enabled'));
+    openspace.setPropertyValueSingle(
+      "Scene.ImagePlaneRosetta.Renderable.Enabled",
+      not openspace.propertyValue("Scene.ImagePlaneRosetta.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the visibility of the free floating image plane",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
-local toggle_philae_trail = {
-  Identifier = "os.mission.rosetta.togglephilaetrail",
+local TogglePhilaeTrail = {
+  Identifier = "os.rosetta.TogglePhilaeTrail",
   Name = "Toggle Philae trail",
   Command = [[
-    openspace.setPropertyValueSingle('Scene.PhilaeTrail.Renderable.Enabled', not openspace.getPropertyValue('Scene.PhilaeTrail.Renderable.Enabled'));
+    openspace.setPropertyValueSingle(
+      "Scene.PhilaeTrail.Renderable.Enabled",
+      not openspace.propertyValue("Scene.PhilaeTrail.Renderable.Enabled")
+    )
   ]],
   Documentation = "Toggles the visibility of Philae's trail",
   GuiPath = "/Missions/Rosetta",
-  isLocal = false
+  IsLocal = false
 }
 
-asset.onInitialize(function ()
-  for _, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
 
-  openspace.action.registerAction(focus_rosetta)
-  openspace.action.registerAction(setup_lander_release_time)
-  openspace.action.registerAction(toggle_image_plane)
-  openspace.action.registerAction(toggle_philae_trail)
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RosettaPosition)
+  openspace.addSceneGraphNode(Rosetta)
+  openspace.addSceneGraphNode(PhilaePosition)
+  openspace.addSceneGraphNode(Philae)
+  openspace.addSceneGraphNode(NavCam)
+  openspace.addSceneGraphNode(NavCamFov)
+  openspace.addSceneGraphNode(ImagePlane)
+  openspace.addSceneGraphNode(RosettaCometTrail)
+  openspace.addSceneGraphNode(PhilaeTrail)
+
+  openspace.action.registerAction(FocusRosetta)
+  openspace.action.registerAction(SetupLanderRelease)
+  openspace.action.registerAction(ToggleImagePlane)
+  openspace.action.registerAction(TogglePhilaeTrail)
 end)
 
-asset.onDeinitialize(function ()
-  openspace.action.removeAction(toggle_philae_trail)
-  openspace.action.removeAction(toggle_image_plane)
-  openspace.action.removeAction(setup_lander_release_time)
-  openspace.action.removeAction(focus_rosetta)
+asset.onDeinitialize(function()
+  openspace.action.removeAction(TogglePhilaeTrail)
+  openspace.action.removeAction(ToggleImagePlane)
+  openspace.action.removeAction(SetupLanderRelease)
+  openspace.action.removeAction(FocusRosetta)
 
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+  openspace.removeSceneGraphNode(PhilaeTrail)
+  openspace.removeSceneGraphNode(RosettaCometTrail)
+  openspace.removeSceneGraphNode(ImagePlane)
+  openspace.removeSceneGraphNode(NavCamFov)
+  openspace.removeSceneGraphNode(NavCam)
+  openspace.removeSceneGraphNode(Philae)
+  openspace.removeSceneGraphNode(PhilaePosition)
+  openspace.removeSceneGraphNode(Rosetta)
+  openspace.removeSceneGraphNode(RosettaPosition)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node);
-end
+asset.export(RosettaPosition)
+asset.export(Rosetta)
+asset.export(PhilaePosition)
+asset.export(Philae)
+asset.export(NavCam)
+asset.export(NavCamFov)
+asset.export(ImagePlane)
+asset.export(RosettaCometTrail)
+asset.export("FocusRosetta", FocusRosetta.Identifier)
+asset.export("SetupLanderRelease", SetupLanderRelease.Identifier)
+asset.export("ToggleImagePlane", ToggleImagePlane.Identifier)
+asset.export("TogglePhilaeTrail", TogglePhilaeTrail.Identifier)

@@ -28,9 +28,9 @@ cmake_policy(VERSION 3.25)
 project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 19)
+set(OPENSPACE_VERSION_MINOR 20)
 set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "<dev>")
+set(OPENSPACE_VERSION_STRING "rc-2")
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
@@ -187,17 +187,6 @@ if (APPLE)
     "~/Qt/5.15.1/clang_64/lib/cmake"
     "~/Qt/6.2.3/macos/lib/cmake"
   )
-endif ()
-
-if (MSVC)
-  option(OPENSPACE_NVTOOLS_ENABLED "Include support for Nvidia Tools Extensions" OFF)
-  set(OPENSPACE_NVTOOLS_PATH "C:/Program Files/NVIDIA Corporation/NvToolsExt")
-  if (OPENSPACE_NVTOOLS_ENABLED)
-    begin_dependency("Nvidia Tools Extension")
-    target_compile_definitions(openspace-core PUBLIC "OPENSPACE_HAS_NVTOOLS")
-    target_include_directories(openspace-core PUBLIC "${OPENSPACE_NVTOOLS_PATH}/include")
-    end_dependency()
-  endif ()
 endif ()
 
 begin_header("Configuring Modules")

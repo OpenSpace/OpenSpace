@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -192,6 +192,13 @@ namespace {
 }
 
 /**
+ * Returns whether the simulation time is currently paused or is progressing.
+ */
+[[codegen::luawrap]] bool isPaused() {
+    return openspace::global::timeManager->isPaused();
+}
+
+/**
  * Sets the current simulation time to the specified value. If the parameter is a number,
  * the value is the number of seconds past the J2000 epoch. If it is a string, it has to
  * be a valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. Note: providing
@@ -291,15 +298,7 @@ namespace {
  * UTC timezone.
  */
 [[codegen::luawrap]] std::string currentWallTime() {
-    std::time_t t = std::time(nullptr);
-    std::tm* utcTime = std::gmtime(&t);
-
-    std::string time = fmt::format(
-        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
-        utcTime->tm_year + 1900, utcTime->tm_mon + 1, utcTime->tm_mday,
-        utcTime->tm_hour, utcTime->tm_min, utcTime->tm_sec
-    );
-    return time;
+    return openspace::Time::currentWallTime();
 }
 
 /**
@@ -323,77 +322,30 @@ namespace {
                                                    std::variant<std::string, double> base,
                                                  std::variant<std::string, double> change)
 {
-    using namespace openspace;
-
-    double j2000Seconds = -1.0;
-    bool usesISO = false;
+    std::string b;
     if (std::holds_alternative<std::string>(base)) {
-        j2000Seconds = Time::convertTime(std::get<std::string>(base));
-        usesISO = true;
+        b = std::get<std::string>(base);
     }
     else {
-        j2000Seconds = std::get<double>(base);
-        usesISO = false;
+        b = openspace::Time(std::get<double>(base)).ISO8601();
     }
 
-    double dt = 0.0;
-    if (std::holds_alternative<double>(change)) {
-        dt = std::get<double>(change);
-    }
-    else {
-        std::string modifier = std::get<std::string>(change);
-        if (modifier.empty()) {
-            throw ghoul::lua::LuaError("Modifier string must not be empty");
-        }
-        ghoul::trimWhitespace(modifier);
-        bool isNegative = false;
-        if (modifier[0] == '-') {
-            isNegative = true;
-            modifier = modifier.substr(1);
-        }
-
-        auto it = std::find_if(
-            modifier.begin(), modifier.end(),
-            [](unsigned char c) {
-                const bool digit = std::isdigit(c) != 0;
-                const bool isDot = c == '.';
-                return !digit && !isDot;
-            }
-        );
-
-        try {
-            double value = std::stod(std::string(modifier.begin(), it));
-            std::string uName = std::string(it, modifier.end());
-
-            TimeUnit unit = TimeUnit::Second;
-            if (uName == "s")       { unit = TimeUnit::Second; }
-            else if (uName == "m") { unit = TimeUnit::Minute; }
-            else if (uName == "h") { unit = TimeUnit::Hour; }
-            else if (uName == "d") { unit = TimeUnit::Day; }
-            else if (uName == "M") { unit = TimeUnit::Month; }
-            else if (uName == "y") { unit = TimeUnit::Year; }
-            else {
-                throw ghoul::lua::LuaError(fmt::format("Unknown unit '{}'", uName));
-            }
-
-            dt = convertTime(value, unit, TimeUnit::Second);
-            if (isNegative) {
-                dt *= -1.0;
-            }
-        }
-        catch (...) {
-            throw ghoul::lua::LuaError(fmt::format(
-                "Error parsing relative time offset '{}'", modifier
-            ));
-        }
-    }
-
-    if (usesISO) {
-        std::string_view ret = Time(j2000Seconds + dt).ISO8601();
-        return std::string(ret);
+    std::string c;
+    if (std::holds_alternative<std::string>(change)) {
+        c = std::get<std::string>(change);
     }
     else {
-        return j2000Seconds + dt;
+        double v = std::get<double>(change);
+        c = std::format("{}s", v);
+    }
+
+    std::string res = openspace::Time::advancedTime(std::move(b), std::move(c));
+
+    if (std::holds_alternative<std::string>(base)) {
+        return res;
+    }
+    else {
+        return openspace::Time::convertTime(res);
     }
 }
 

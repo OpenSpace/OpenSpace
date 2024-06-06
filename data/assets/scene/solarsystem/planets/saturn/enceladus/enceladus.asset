@@ -1,13 +1,17 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat441
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Saturn Labels",
   Type = "HttpSynchronization",
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Enceladus = {
   Identifier = "Enceladus",
@@ -15,14 +19,13 @@ local Enceladus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ENCELADUS",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Enceladus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_ENCELADUS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Enceladus,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -43,7 +46,7 @@ local Enceladus = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
   GUI = {
     Name = "Enceladus",
     Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus",
@@ -51,13 +54,12 @@ local Enceladus = {
   }
 }
 
-
 local EnceladusLabel = {
   Identifier = "EnceladusLabel",
   Parent = Enceladus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Enceladus",
     FontSize = 70.0,
     Size = 6.0,
@@ -89,6 +91,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Enceladus)
+asset.export(EnceladusLabel)
 
 
 

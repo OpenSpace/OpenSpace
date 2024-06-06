@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,6 +44,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/constexpr.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 
@@ -87,7 +88,8 @@ namespace {
         std::string idStr = std::to_string(id);
         openspace::global::scriptEngine->queueScript(
             "openspace.iswa.addScreenSpaceCygnet({CygnetId =" + idStr + "});",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 } // namespace
@@ -272,13 +274,13 @@ std::string IswaManager::iswaUrl(int id, double timestamp, const std::string& ty
     ss << SpiceManager::ref().dateFromEphemerisTime(timestamp);;
     std::string token;
 
-    std::getline(ss, token, ' ');
+    ghoul::getline(ss, token, ' ');
     url += token + "-";
-    std::getline(ss, token, ' ');
-    url = fmt::format("{}{}-", url, monthNumber(token));
-    std::getline(ss, token, 'T');
+    ghoul::getline(ss, token, ' ');
+    url = std::format("{}{}-", url, monthNumber(token));
+    ghoul::getline(ss, token, 'T');
     url += token + "%20";
-    std::getline(ss, token, '.');
+    ghoul::getline(ss, token, '.');
     url += token;
 
     return url;
@@ -411,7 +413,7 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
 
     std::filesystem::path ext = std::filesystem::path(absPath(info.path)).extension();
     if (ext == ".cdf") {
-        KameleonWrapper kw = KameleonWrapper(absPath(info.path).string());
+        KameleonWrapper kw = KameleonWrapper(absPath(info.path));
 
         std::string parent = kw.parent();
         std::string frame = kw.frame();
@@ -433,7 +435,7 @@ std::string IswaManager::parseKWToLuaTable(const CdfInfo& info, const std::strin
         }
         else {
             spatialScale = glm::vec4(1.f);
-            spatialScale.w = 1; //-log10(1.0f/max.x);
+            spatialScale.w = 1; //-log10(1.f/max.x);
             coordinateType = "Polar";
         }
 
@@ -546,7 +548,8 @@ void IswaManager::createPlane(MetadataFuture& data) {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
         global::scriptEngine->queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }
@@ -579,7 +582,8 @@ void IswaManager::createSphere(MetadataFuture& data) {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
         global::scriptEngine->queueScript(
             script,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }
@@ -612,21 +616,22 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     }
     else {
         LWARNING(
-            fmt::format("{} is not a cdf file or can't be found", absPath(info.path))
+            std::format("'{}' is not a CDF file or cannot be found", absPath(info.path))
         );
     }
 }
 
-void IswaManager::createFieldline(std::string name, std::string cdfPath,
+void IswaManager::createFieldline(std::string name, std::filesystem::path cdfPath,
                                   std::string seedPath)
 {
-    std::filesystem::path ext = std::filesystem::path(absPath(cdfPath)).extension();
+    std::filesystem::path ext = absPath(cdfPath).extension();
     if (std::filesystem::is_regular_file(absPath(cdfPath)) && ext == ".cdf") {
         std::string luaTable = "{"
             "Name = '" + name + "',"
@@ -635,7 +640,7 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
                 "Type = 'RenderableFieldlines',"
                 "VectorField = {"
                     "Type = 'VolumeKameleon',"
-                    "File = '" + cdfPath + "',"
+                    "File = '" + cdfPath.string() + "',"
                     "Model = 'BATSRUS',"
                     "Variables = {'bx', 'by', 'bz'}"
                 "},"
@@ -653,12 +658,13 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath,
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
             global::scriptEngine->queueScript(
                 script,
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     }
     else {
-        LWARNING(cdfPath + " is not a cdf file or can't be found");
+        LWARNING(std::format("{} is not a CDF file or cannot be found", cdfPath));
     }
 }
 
@@ -672,7 +678,7 @@ void IswaManager::fillCygnetInfo(std::string jsonString) {
 
         for (const std::string& list : lists) {
             nlohmann::json jsonList = j[list];
-            for (size_t i = 0; i < jsonList.size(); ++i) {
+            for (size_t i = 0; i < jsonList.size(); i++) {
                 nlohmann::json jCygnet = jsonList.at(i);
 
                 std::string name = jCygnet["cygnetDisplayTitle"];
@@ -704,7 +710,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
 
         if (jsonFile.is_open()) {
             nlohmann::json cdfGroups = nlohmann::json::parse(jsonFile);
-            for(size_t i = 0; i < cdfGroups.size(); ++i) {
+            for(size_t i = 0; i < cdfGroups.size(); i++) {
                 nlohmann::json cdfGroup = cdfGroups.at(i);
 
                 std::string groupName = cdfGroup["group"];
@@ -739,7 +745,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
         }
     }
     else {
-        LWARNING(fmt::format("{} is not a cdf file or can't be found", cdfFile));
+        LWARNING(std::format("'{}' is not a CDF file or cannot be found", cdfFile));
     }
 }
 

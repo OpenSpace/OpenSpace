@@ -1,16 +1,17 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local earthIdentifier = earth.Earth.Identifier
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 
-local sun = asset.require("scene/solarsystem/sun/sun")
 
-local data = asset.syncedResource({
+
+local data = asset.resource({
   Name = "GeoJSON Example Africa",
   Type = "UrlSynchronization",
   Identifier = "geojson_example_polygon_extruded_africa",
   Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_extruded_africa.geojson"
 })
 
-local Example_Polygon = {
+
+local ExamplePolygon = {
   Identifier = "Earth-Polygon-withLights",
   File = data .. "polygon_extruded_africa.geojson",
   HeightOffset = 20000.0,
@@ -27,15 +28,17 @@ local Example_Polygon = {
   Name = "Extruded and Shaded Polygon (lit by Sun)"
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addGeoJson(earthIdentifier, Example_Polygon)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExamplePolygon)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteGeoJson(earthIdentifier, Example_Polygon)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExamplePolygon)
 end)
 
-asset.export(Example_Polygon)
+asset.export(ExamplePolygon)
+
 
 
 asset.meta = {

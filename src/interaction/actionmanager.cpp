@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -80,29 +80,37 @@ std::vector<Action> ActionManager::actions() const {
 }
 
 void ActionManager::triggerAction(const std::string& identifier,
-                                  const ghoul::Dictionary& arguments) const
+                                  const ghoul::Dictionary& arguments,
+                           ActionManager::ShouldBeSynchronized shouldBeSynchronized) const
 {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
 
     if (!hasAction(identifier)) {
         LWARNINGC(
             "ActionManager",
-            fmt::format("Action '{}' not found in the list", identifier)
+            std::format("Action '{}' not found in the list", identifier)
         );
         return;
     }
 
     const Action& a = action(identifier);
-    if (arguments.isEmpty()) {
+    std::string script =
+        arguments.isEmpty() ?
+        a.command :
+        std::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
+
+    if (!shouldBeSynchronized || a.isLocal) {
         global::scriptEngine->queueScript(
-            a.command,
-            scripting::ScriptEngine::RemoteScripting(!a.isLocal)
+            std::move(script),
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
     else {
         global::scriptEngine->queueScript(
-            fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command),
-            scripting::ScriptEngine::RemoteScripting(!a.isLocal)
+            std::move(script),
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }

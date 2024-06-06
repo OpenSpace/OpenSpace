@@ -1,0 +1,69 @@
+-- Fading
+-- Example of a point cloud with distance-based fading.
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_Fading",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("../data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 0.0, 0.3, 1.0 }
+    },
+    Fading = {
+      -- Control at what distance the points fade in. The points will be invisible
+      -- when the camera is closer than the first value, and fully visible when the
+      -- camera is further away then the last value. In-between they will linearly
+      -- fade in or out
+      FadeInDistances = { 150000000.0, 350000000.0 }
+    }
+  },
+  GUI = {
+    Name = "Fading",
+    Path = "/Examples/RenderablePointCloud/Advanced",
+    Description = [[Example of a point cloud with distance-based fading (the points
+      are visible when the camera reaches a certain distance away from the origin)]]
+  }
+}
+
+local Node_Invert = {
+  Identifier = "RenderablePointCloud_Example_FadingInverted",
+  -- Rotate to not overlap with the other dataset
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, -0.5 * math.pi }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("../data/dummydata.csv"),
+    Coloring = {
+      FixedColor = { 1.0, 0.3, 0.0 }
+    },
+    Fading = {
+      -- Use the same fade distances, but invert the fading so that the points are
+      -- visible when the camera is closer to the origin that the first value, and
+      -- invisible when further away than the last value
+      FadeInDistances = { 150000000.0, 350000000.0 },
+      Invert = true
+    }
+  },
+  GUI = {
+    Name = "Fading (Inverted)",
+    Path = "/Examples/RenderablePointCloud/Advanced",
+    Description = [[Example of a point cloud with inverted distance-based fading
+      (the points are visible when the camera is close to the origin, and invisible
+      when further away)]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+  openspace.addSceneGraphNode(Node_Invert)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node_Invert)
+  openspace.removeSceneGraphNode(Node)
+end)

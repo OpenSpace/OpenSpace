@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,11 +67,11 @@ public:
      * for all RenderBins. However, it cannot be used at the same time as the Deferred
      * Caster Tasks. The size of the texture is the resolution of the viewport.
      *
-     * NOTE (malej 2023-FEB-21): The currently NOT used pingPongTexture might change
+     * NOTE (malej 2023-02-21): The currently NOT used pingPongTexture might change
      * depending on where in the render cycle you are. Especially after the Deferred
      * Caster Tasks.
      *
-     * \return identifier of the currently NOT used pingPongTexture
+     * \return The identifier of the currently NOT used pingPongTexture
      */
     GLuint additionalColorTexture1() const;
 
@@ -80,7 +80,7 @@ public:
      * However, it cannot be used at the same time as the Raycaster Tasks. The size of the
      * texture is the resolution of the viewport.
      *
-     * \return identifier of the exitColorTexture
+     * \return The identifier of the exitColorTexture
      */
     GLuint additionalColorTexture2() const;
 
@@ -89,7 +89,7 @@ public:
      * However, it cannot be used at the same time as the FXAA Task. The size of the
      * texture is the resolution of the viewport.
      *
-     * \return identifier of the fxaaTexture
+     * \return The identifier of the fxaaTexture
      */
     GLuint additionalColorTexture3() const;
 
@@ -98,7 +98,7 @@ public:
      * However, it cannot be used at the same time as the Raycaster Tasks. The size of the
      * texture is the resolution of the viewport.
      *
-     * \return identifier of the exitDepthTexture
+     * \return The identifier of the exitDepthTexture
      */
     GLuint additionalDepthTexture() const;
 
@@ -111,16 +111,17 @@ public:
      * the majority of rendering the scene and might be already in use. Use CAUTION when
      * using this function. The size of the texture is the resolution of the viewport.
      *
-     * \return identifier of the color texture of the G-buffer
+     * \return The identifier of the color texture of the G-buffer
      */
     GLuint gBufferColorTexture() const;
 
     /**
-     * Gives access to the position texture of the G-buffer. NOTE: This texture is used for
-     * the majority of rendering the scene and might be already in use. Use CAUTION when
-     * using this function. The size of the texture is the resolution of the viewport.
+     * Gives access to the position texture of the G-buffer. NOTE: This texture is used
+     * for the majority of rendering the scene and might be already in use. Use CAUTION
+     * when using this function. The size of the texture is the resolution of the
+     * viewport.
      *
-     * \return identifier of the position texture of the G-buffer
+     * \return The identifier of the position texture of the G-buffer
      */
     GLuint gBufferPositionTexture() const;
 
@@ -129,7 +130,7 @@ public:
      * the majority of rendering the scene and might be already in use. Use CAUTION when
      * using this function. The size of the texture is the resolution of the viewport.
      *
-     * \return identifier of the normal texture of the G-buffer
+     * \return The identifier of the normal texture of the G-buffer
      */
     GLuint gBufferNormalTexture() const;
 
@@ -138,7 +139,7 @@ public:
      * the majority of rendering the scene and might be already in use. Use CAUTION when
      * using this function. The size of the texture is the resolution of the viewport.
      *
-     * \return identifier of the depth texture of the G-buffer
+     * \return The identifier of the depth texture of the G-buffer
      */
     GLuint gBufferDepthTexture() const;
 
@@ -155,9 +156,7 @@ public:
     void setResolution(glm::ivec2 res);
     void setHDRExposure(float hdrExposure);
     void setGamma(float gamma);
-    void setHue(float hue);
-    void setValue(float value);
-    void setSaturation(float sat);
+    void setHueValueSaturation(float hue, float value, float saturation);
 
     void enableFXAA(bool enable);
     void setDisableHDR(bool disable);
@@ -170,8 +169,7 @@ public:
     void render(Scene* scene, Camera* camera, float blackoutFactor);
 
     /**
-     * Update render data
-     * Responsible for calling renderEngine::setRenderData
+     * Update render data. Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData();
 
@@ -193,7 +191,7 @@ private:
     void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
-    void updateDownscaleTextures();
+    void updateDownscaleTextures() const;
     void updateExitVolumeTextures();
     void writeDownscaledVolume(const glm::ivec4& viewport);
 

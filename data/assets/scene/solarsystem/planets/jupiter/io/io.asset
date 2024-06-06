@@ -1,30 +1,31 @@
-local transforms = asset.require("../transforms")
-asset.require("spice/base")
 asset.require("./trail")
-local kernel = asset.require("../kernels").jup365
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Jupiter Labels",
   Type = "HttpSynchronization",
   Identifier = "jupiter_labels",
   Version = 1
 })
 
+
 local Io = {
   Identifier = "Io",
   Parent = transforms.JupiterBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_IO",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernel
-    },
     Translation = {
       Type = "SpiceTranslation",
-      Target = "IO",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Io,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Io,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -45,19 +46,18 @@ local Io = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_major_jupiter" },
   GUI = {
     Path = "/Solar System/Planets/Jupiter/Major Moons/Io"
   }
 }
 
-
 local IoLabel = {
   Identifier = "IoLabel",
   Parent = Io.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Io",
     FontSize = 70.0,
     Size = 6.0,
@@ -89,6 +89,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Io)
+asset.export(IoLabel)
 
 
 

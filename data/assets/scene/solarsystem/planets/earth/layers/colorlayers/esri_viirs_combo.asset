@@ -1,22 +1,25 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "ESRI_VIIRS_Combo",
   Name = "ESRI VIIRS Combo",
   Enabled = asset.enabled,
-  Type = "ByLevelTileLayer",
+  ZIndex = 20,
+  Type = "TileProviderByLevel",
   LevelTileProviders = {
     {
       MaxLevel = 4,
       TileProvider = {
         Identifier = "Temporal_VIIRS_SNPP",
         Name = "Temporal VIIRS SNPP",
-        Type = "TemporalTileLayer",
+        Type = "TemporalTileProvider",
         Mode = "Prototyped",
         Prototyped = {
           Time = {
             Start = "2015-11-24",
-            End = "Today"
+            End = "2024-05-27"
           },
           TemporalResolution = "1d",
           TimeFormat = "YYYY-MM-DD",
@@ -34,25 +37,26 @@ local layer = {
       TileProvider = {
         Identifier = "ESRI_World_Imagery",
         Name = "ESRI World Imagery",
-        FilePath = asset.localResource("esri_world_imagery.wms"),
+        FilePath = asset.resource("esri_world_imagery.wms"),
         PadTiles = false
       }
-    },
+    }
   },
   PadTiles = false,
   Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
     Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 

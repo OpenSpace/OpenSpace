@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/util/collisionhelper.h>
+#include <ghoul/misc/stringhelper.h>
 
 namespace {
 
@@ -118,8 +119,8 @@ namespace {
  * Returns the list of layers for the scene graph node specified in the first parameter.
  * The second parameter specifies which layer type should be queried.
  */
-[[codegen::luawrap]] std::vector<std::string> getLayers(std::string globeIdentifier,
-                                                        std::string layer)
+[[codegen::luawrap]] std::vector<std::string> layers(std::string globeIdentifier,
+                                                     std::string layer)
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -151,6 +152,23 @@ namespace {
 }
 
 /**
+ * Returns the list of layers for the scene graph node specified in the first parameter.
+ * The second parameter specifies which layer type should be queried. Deprecated in favor
+ * of 'layers'.
+ */
+[[codegen::luawrap("getLayers")]] std::vector<std::string> layersDeprecated(
+                                                              std::string globeIdentifier,
+                                                                        std::string layer)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getLayers' function is deprecated and should be replaced with 'layers'"
+    );
+
+    return layers(std::move(globeIdentifier), std::move(layer));
+}
+
+/**
  * Rearranges the order of a single layer on a globe. The first parameter is the
  * identifier of the globe, the second parameter specifies the name of the layer group,
  * the third parameter is the original position of the layer that should be moved and the
@@ -173,7 +191,7 @@ namespace {
 
     SceneGraphNode* n = sceneGraphNode(globeIdentifier);
     if (!n) {
-        throw ghoul::lua::LuaError(fmt::format("Unknown globe: {}", globeIdentifier));
+        throw ghoul::lua::LuaError(std::format("Unknown globe '{}'", globeIdentifier));
     }
 
     RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(n->renderable());
@@ -183,7 +201,7 @@ namespace {
 
     layers::Group::ID group = ghoul::from_string<layers::Group::ID>(layerGroup);
     if (group == layers::Group::ID::Unknown) {
-        throw ghoul::lua::LuaError(fmt::format("Unknown layer group: {}", layerGroup));
+        throw ghoul::lua::LuaError(std::format("Unknown layer group '{}'", layerGroup));
     }
 
     LayerGroup& lg = globe->layerManager().layerGroup(group);
@@ -207,7 +225,7 @@ namespace {
             }
         );
         if (it == layers.cend()) {
-            throw ghoul::lua::LuaError(fmt::format(
+            throw ghoul::lua::LuaError(std::format(
                 "Could not find source layer '{}'", std::get<std::string>(source)
             ));
         }
@@ -227,7 +245,7 @@ namespace {
             }
         );
         if (it == layers.cend()) {
-            throw ghoul::lua::LuaError(fmt::format(
+            throw ghoul::lua::LuaError(std::format(
                 "Could not find destination layer '{}'", std::get<std::string>(source)
             ));
         }
@@ -260,81 +278,96 @@ namespace {
 }
 
 /**
- * Go to geographic coordinates of a globe. The first (optional) argument is the
- * identifier of a scene graph node that has a RenderableGlobe attached. If no globe is
- * passed in, the current anchor will be used. The second argument is latitude and the
- * third is longitude (degrees). North and East are expressed as positive angles, while
- * South and West are negative. The optional fourh argument is the altitude in meters. If
- * no altitude is provided, the altitude will be kept as the current distance to the
- * surface of the specified globe.
+ * Immediately move the camera to a geographic coordinate on a globe by first fading the
+ * rendering to black, jump to the specified coordinate, and then fade in.
+ *
+ * This is done by triggering another script that handles the logic.
+ *
+ * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
+ *              If an empty string is provided, the current anchor node is used
+ * \param latitude The latitude of the target coordinate, in degrees
+ * \param longitude The longitude of the target coordinate, in degrees
+ * \param altitude An optional altitude, given in meters over the reference surface of
+ *                 the globe. If no altitude is provided, the altitude will be kept as
+ *                 the current distance to the reference surface of the specified globe.
+ * \param fadeDuration An optional duration for the fading. If not included, the
+ *                     property in Navigation Handler will be used
  */
-[[codegen::luawrap]] void goToGeo(std::optional<std::string> globe, double latitude,
-                                  double longitude, std::optional<double> altitude)
+[[codegen::luawrap]] void jumpToGeo(std::string globe, double latitude, double longitude,
+                                    std::optional<double> altitude,
+                                    std::optional<double> fadeDuration)
 {
     using namespace openspace;
     using namespace globebrowsing;
 
-    const SceneGraphNode* n;
-    if (globe.has_value()) {
-        n = sceneGraphNode(*globe);
-        if (!n) {
-            throw ghoul::lua::LuaError("Unknown globe name: " + *globe);
-        }
-    }
-    else {
-        n = global::navigationHandler->orbitalNavigator().anchorNode();
-        if (!n) {
-            throw ghoul::lua::LuaError("No anchor node is set");
-        }
-    }
-
-    const RenderableGlobe* gl = dynamic_cast<const RenderableGlobe*>(n->renderable());
-    if (!gl) {
-        throw ghoul::lua::LuaError(
-            "Current anchor node is not a RenderableGlobe. Either change the anchor "
-            "to a globe, or specify a globe identifier as the first argument"
-        );
-    }
+    std::string script;
 
     if (altitude.has_value()) {
-        global::moduleEngine->module<GlobeBrowsingModule>()->goToGeo(
-            *gl,
-            latitude,
-            longitude,
-            *altitude
+        script = std::format(
+            "openspace.globebrowsing.flyToGeo('{}', {}, {}, {}, 0)",
+            globe, latitude, longitude, *altitude
         );
     }
     else {
-        global::moduleEngine->module<GlobeBrowsingModule>()->goToGeo(
-            *gl,
-            latitude,
-            longitude
+        script = std::format(
+            "openspace.globebrowsing.flyToGeo2('{}', {}, {}, true, 0)",
+            globe, latitude, longitude
         );
+    }
+
+    if (fadeDuration.has_value()) {
+        global::navigationHandler->triggerFadeToTransition(
+            std::move(script),
+            static_cast<float>(*fadeDuration)
+        );
+    }
+    else {
+        global::navigationHandler->triggerFadeToTransition(script);
     }
 }
 
 /**
- * Fly the camera to geographic coordinates of a globe, using the path navigation system.
- * The first (optional) argument is the identifier of a scene graph node with a
- * RenderableGlobe. If no globe is passed in, the current anchor will be used. The second
- * and third argument is latitude and longitude (degrees). The fourth argument is the
- * altitude, in meters. The last two optional arguments are: a bool specifying whether the
- * up vector at the target position should be set to the globe's North vector, and a
- * duration for the motion, in seconds. Either of the two can be left out.
+ * Immediately move the camera to a geographic coordinate on a globe.
+ *
+ * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
+ *              If an empty string is provided, the current anchor node is used
+ * \param latitude The latitude of the target coordinate, in degrees
+ * \param longitude The longitude of the target coordinate, in degrees
+ * \param altitude An optional altitude, given in meters over the reference surface of
+ *                 the globe. If no altitude is provided, the altitude will be kept as
+ *                 the current distance to the reference surface of the specified globe.
  */
-[[codegen::luawrap]] void flyToGeo(std::optional<std::string> globe, double latitude,
-                                   double longitude, double altitude,
-                                   std::optional<double> duration,
-                                   std::optional<bool> shouldUseUpVector)
+[[codegen::luawrap("goToGeo")]] void goToGeoDeprecated(std::string globe, double latitude,
+                                                       double longitude,
+                                                       std::optional<double> altitude)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'goToGeo' function is deprecated and should be replaced with 'jumpToGeo'"
+    );
+
+    return jumpToGeo(
+        std::move(globe),
+        latitude,
+        longitude,
+        altitude,
+        0
+    );
+}
+
+void flyToGeoInternal(std::string globe, double latitude,
+                      double longitude, std::optional<double> altitude,
+                      std::optional<double> duration,
+                      std::optional<bool> shouldUseUpVector)
 {
     using namespace openspace;
     using namespace globebrowsing;
 
     const SceneGraphNode* n;
-    if (globe.has_value()) {
-        n = sceneGraphNode(*globe);
+    if (!globe.empty()) {
+        n = sceneGraphNode(globe);
         if (!n) {
-            throw ghoul::lua::LuaError("Unknown globe name: " + *globe);
+            throw ghoul::lua::LuaError("Unknown globe name: " + globe);
         }
     }
     else {
@@ -346,7 +379,7 @@ namespace {
 
     const RenderableGlobe* gl = dynamic_cast<const RenderableGlobe*>(n->renderable());
     if (!gl) {
-        throw ghoul::lua::LuaError("Current anchor node is not a RenderableGlobe");
+        throw ghoul::lua::LuaError("The targetted node is not a RenderableGlobe");
     }
 
     auto module = global::moduleEngine->module<GlobeBrowsingModule>();
@@ -374,9 +407,8 @@ namespace {
     instruction.setValue("PathType", std::string("ZoomOutOverview"));
 
     if (duration.has_value()) {
-        constexpr double Epsilon = 1e-5;
-        if (*duration <= Epsilon) {
-            throw ghoul::lua::LuaError("Duration must be larger than zero");
+        if (*duration < 0) {
+            throw ghoul::lua::LuaError("Duration must be a positive value");
         }
         instruction.setValue("Duration", *duration);
     }
@@ -391,6 +423,72 @@ namespace {
 }
 
 /**
+ * Fly the camera to a geographic coordinate (latitude and longitude) on a globe, using
+ * the path navigation system.
+ *
+ * The distance to fly to can either be set to be the current distance of the camera to
+ * the target object, or the default distance from the path navigation system.
+ *
+ * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
+ *              If an empty string is provided, the current anchor node is used
+ * \param latitude The latitude of the target coordinate, in degrees
+ * \param longitude The longitude of the target coordinate, in degrees
+ * \param useCurrentDistance If true, use the current distance of the camera to the
+ *                           target globe when going to the specified position. If false,
+ *                           or not specified, set the distance based on the bounding
+ *                           sphere and the distance factor setting in Path Navigator
+ * \param duration An optional duration for the motion to take, in seconds. For example,
+ *                 a value of 5 means "fly to this position over a duration of 5 seconds"
+ * \param shouldUseUpVector If true, try to use the up-direction when computing the
+ *                          target position for the camera. For globes, this means that
+ *                          North should be up, in relation to the camera's view
+ *                          direction. Note that for this to take effect, rolling motions
+ *                          must be enabled in the Path Navigator settings.
+ */
+[[codegen::luawrap]] void flyToGeo2(std::string globe, double latitude, double longitude,
+                                    std::optional<bool> useCurrentDistance,
+                                    std::optional<double> duration,
+                                    std::optional<bool> shouldUseUpVector)
+{
+    using namespace openspace;
+
+    std::optional<double> altitude;
+    if (useCurrentDistance.has_value() && *useCurrentDistance) {
+        altitude = std::nullopt;
+    }
+    else {
+        altitude = global::navigationHandler->pathNavigator().defaultArrivalHeight(globe);
+    }
+
+    flyToGeoInternal(globe, latitude, longitude, std::nullopt, duration, shouldUseUpVector);
+}
+
+ /**
+  * Fly the camera to a geographic coordinate (latitude, longitude and altitude) on a globe,
+  * using the path navigation system.
+  *
+  * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
+  *              If an empty string is provided, the current anchor node is used
+  * \param latitude The latitude of the target coordinate, in degrees
+  * \param longitude The longitude of the target coordinate, in degrees
+  * \param altitude The altitude of the target coordinate, in meters
+  * \param duration An optional duration for the motion to take, in seconds. For example,
+  *                 a value of 5 means "fly to this position over a duration of 5 seconds"
+  * \param shouldUseUpVector If true, try to use the up-direction when computing the
+  *                          target position for the camera. For globes, this means that
+  *                          North should be up, in relation to the camera's view
+  *                          direction. Note that for this to take effect, rolling motions
+  *                          must be enabled in the Path Navigator settings.
+  */
+[[codegen::luawrap]] void flyToGeo(std::string globe, double latitude,
+                                   double longitude, double altitude,
+                                   std::optional<double> duration,
+                                   std::optional<bool> shouldUseUpVector)
+{
+    flyToGeoInternal(globe, latitude, longitude, altitude, duration, shouldUseUpVector);
+}
+
+/**
  * Returns a position in the local Cartesian coordinate system of the globe identified by
  * the first argument, that corresponds to the given geographic coordinates: latitude,
  * longitude and altitude (in degrees and meters). In the local coordinate system, the
@@ -398,8 +496,8 @@ namespace {
  */
 [[codegen::luawrap]]
 std::tuple<double, double, double>
-getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double longitude,
-                        double altitude)
+localPositionFromGeo(std::string globeIdentifier, double latitude, double longitude,
+                     double altitude)
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -419,12 +517,38 @@ getLocalPositionFromGeo(std::string globeIdentifier, double latitude, double lon
 }
 
 /**
+ * Returns a position in the local Cartesian coordinate system of the globe identified by
+ * the first argument, that corresponds to the given geographic coordinates: latitude,
+ * longitude and altitude (in degrees and meters). In the local coordinate system, the
+ * position (0,0,0) corresponds to the globe's center. Deprecated in favor of
+ * 'localPositionFromGeo'.
+ */
+[[codegen::luawrap("getLocalPositionFromGeo")]]
+std::tuple<double, double, double>
+localPositionFromGeoDeprecated(std::string globeIdentifier, double latitude,
+                               double longitude, double altitude)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getLocalPositionFromGeo' function is deprecated and should be replaced with "
+        "'localPositionFromGeo'"
+    );
+
+    return localPositionFromGeo(
+        std::move(globeIdentifier),
+        latitude,
+        longitude,
+        altitude
+    );
+}
+
+/**
  * Get geographic coordinates of the camera position in latitude, longitude, and altitude
  * (degrees and meters). If the optional bool paramater is specified, the camera
  * eye postion will be used instead
  */
-[[codegen::luawrap]] std::tuple<double, double, double>
-getGeoPositionForCamera(bool useEyePosition = false)
+[[codegen::luawrap]] std::tuple<double, double, double> geoPositionForCamera(
+                                                              bool useEyePosition = false)
 {
     using namespace openspace;
     using namespace globebrowsing;
@@ -478,6 +602,24 @@ getGeoPositionForCamera(bool useEyePosition = false)
 }
 
 /**
+ * Get geographic coordinates of the camera position in latitude, longitude, and altitude
+ * (degrees and meters). If the optional bool paramater is specified, the camera
+ * eye postion will be used instead. Deprecated in favor of 'geoPositionForCamera'.
+ */
+[[codegen::luawrap("getGeoPositionForCamera")]]
+std::tuple<double, double, double>
+geoPositionForCameraDeprecated(bool useEyePosition = false)
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getGeoPositionForCamera' function is deprecated and should be replaced with "
+        "'geoPositionForCamera'"
+    );
+
+    return geoPositionForCamera(useEyePosition);
+}
+
+/**
  * Loads and parses the WMS capabilities xml file from a remote server. The first argument
  * is the name of the capabilities that can be used to later refer to the set of
  * capabilities. The second argument is the globe for which this server is applicable. The
@@ -521,7 +663,7 @@ getGeoPositionForCamera(bool useEyePosition = false)
 
     std::vector<ghoul::Dictionary> res;
     res.reserve(cap.size());
-    for (size_t i = 0; i < cap.size(); ++i) {
+    for (size_t i = 0; i < cap.size(); i++) {
         ghoul::Dictionary c;
         c.setValue("Name", cap[i].name);
         c.setValue("URL", cap[i].url);
@@ -607,14 +749,17 @@ getGeoPositionForCamera(bool useEyePosition = false)
 
     std::filesystem::path path = absPath(filename);
     if (!std::filesystem::is_regular_file(path)) {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Could not find the provided file: '{}'", filename
+        throw ghoul::lua::LuaError(std::format(
+            "Could not find the provided file '{}'", filename
         ));
     }
 
-    if (path.extension() != ".geojson") {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Unexpected file type: '{}'. Expected '.geojson' file", filename
+    std::string extension = path.extension().string();
+    extension = ghoul::toLowerCase(extension);
+
+    if (extension != ".geojson" && extension != ".json") {
+        throw ghoul::lua::LuaError(std::format(
+            "Unexpected file type '{}'. Expected '.geojson' or '.json' file", filename
         ));
     }
 
@@ -637,7 +782,7 @@ getGeoPositionForCamera(bool useEyePosition = false)
 
     std::string identifier = makeIdentifier(name.value_or(path.stem().string()));
     d.setValue("Identifier", identifier);
-    d.setValue("File", path.string());
+    d.setValue("File", path);
     if (name.has_value()) {
         d.setValue("Name", *name);
     }

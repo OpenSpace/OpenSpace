@@ -1,5 +1,6 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("./transforms")
+
+
 
 local Planet = {
   Identifier = "GonggongGlobe",
@@ -7,13 +8,13 @@ local Planet = {
   Transform = {
     Rotation = {
       Type = "ConstantRotation",
-      RotationAxis = {0.0, 0.0, 1.0},
-      RotationRate = 1.0/(22.4*60.0*60.0)
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 1.0 / (22.4 * 60.0 * 60.0)
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 615.0E3, 615.0E3, 615.0E3 },
+    Radii = { 615000, 615000, 615000 },
     SegmentsPerPatch = 64,
     Layers = {}
   },
@@ -21,8 +22,9 @@ local Planet = {
     Name = "Gonggong",
     Path = "/Solar System/Dwarf Planets/Gonggong",
     Description = "Globe of Gonggong"
-  } 
+  }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Planet)
@@ -33,6 +35,8 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("Planet", Planet)
+
+
 
 asset.meta = {
   Name = "Gonggong Globe",

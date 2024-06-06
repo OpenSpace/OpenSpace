@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,8 +38,7 @@ namespace documentation { struct Documentation; }
 
 class LuaScale : public Scale {
 public:
-    LuaScale();
-    LuaScale(const ghoul::Dictionary& dictionary);
+    explicit LuaScale(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 

@@ -1,24 +1,29 @@
-local apollo8_setup_earthrise = {
-  Identifier = "os.missions.apollo8.setup.earthrise",
+local EarthRise = {
+  Identifier = "os.apollo8.SetupEarthrise",
   Name = "Set Earthrise time",
   Command = [[
-    openspace.time.setPause(true);
-    openspace.time.setDeltaTime(1);
-    openspace.time.setTime('1968 DEC 24 16:37:31');
-    openspace.navigation.setNavigationState({Anchor = 'Apollo8', Position = { 1.494592E1, 3.236777E1, -4.171296E1 }, ReferenceFrame = 'Root', Up = { 0.960608E0, -0.212013E0, 0.179675E0 }});
-    openspace.setPropertyValue('*Trail.Renderable.Enabled', false);
+    openspace.time.setPause(true)
+    openspace.time.setDeltaTime(1)
+    openspace.time.setTime("1968 DEC 24 16:37:31")
+    openspace.navigation.setNavigationState({
+      Anchor = "Apollo8",
+      Position = { 14.94592, 32.36777, -41.71296 },
+      ReferenceFrame = "Root",
+      Up = { 0.960608, -0.212013, 0.179675 }
+    })
+    openspace.setPropertyValue("*Trail.Renderable.Enabled", false)
   ]],
   Documentation = "Jump to right before the earthrise photo",
   GuiPath = "/Missions/Apollo/8",
   IsLocal = false
 }
 
-local apollo8_setup_launch = {
-  Identifier = "os.missions.apollo8.setup.launch",
+local Launch = {
+  Identifier = "os.apollo8.SetupLaunch",
   Name = "Set Apollo 8 launch time",
   Command = [[
-    openspace.time.setTime('1968-12-21T12:51:37.00');
-    openspace.setPropertyValueSingle('Scene.Apollo8LaunchTrail.Renderable.Enabled', true);
+    openspace.time.setTime("1968-12-21T12:51:37.00")
+    openspace.setPropertyValueSingle("Scene.Apollo8LaunchTrail.Renderable.Enabled", true)
   ]],
   Documentation = "Jump to time right before Apollo 8 liftoff, with its trail enabled",
   GuiPath = "/Missions/Apollo/8",
@@ -26,16 +31,20 @@ local apollo8_setup_launch = {
 }
 
 
-
 asset.onInitialize(function()
-  openspace.action.registerAction(apollo8_setup_earthrise)
-  openspace.action.registerAction(apollo8_setup_launch)
+  openspace.action.registerAction(EarthRise)
+  openspace.action.registerAction(Launch)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(apollo8_setup_launch)
-  openspace.action.removeAction(apollo8_setup_earthrise)
+  openspace.action.removeAction(Launch)
+  openspace.action.removeAction(EarthRise)
 end)
+
+asset.export("EarthRise", EarthRise.Identifier)
+asset.export("Launch", Launch.Identifier)
+
+
 
 asset.meta = {
   Name = "Apollo 8 Actions",

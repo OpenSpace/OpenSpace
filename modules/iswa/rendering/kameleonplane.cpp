@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -134,7 +134,7 @@ void KameleonPlane::initializeGL() {
     initializeTime();
     createGeometry();
 
-    readFieldlinePaths(absPath(_fieldlineIndexFile).string());
+    readFieldlinePaths(absPath(_fieldlineIndexFile));
 
     if (_group) {
         _dataProcessor = _group->dataProcessor();
@@ -292,7 +292,8 @@ void KameleonPlane::updateFieldlineSeeds() {
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
             global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
@@ -316,8 +317,8 @@ void KameleonPlane::updateFieldlineSeeds() {
     }
 }
 
-void KameleonPlane::readFieldlinePaths(const std::string& indexFile) {
-    LINFO(fmt::format("Reading seed points paths from file '{}'", indexFile));
+void KameleonPlane::readFieldlinePaths(const std::filesystem::path& indexFile) {
+    LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
     if (_group) {
         dynamic_cast<IswaKameleonGroup*>(_group)->setFieldlineInfo(
             indexFile,
@@ -329,7 +330,7 @@ void KameleonPlane::readFieldlinePaths(const std::string& indexFile) {
     // Read the index file from disk
     std::ifstream seedFile(indexFile);
     if (!seedFile.good()) {
-        LERROR(fmt::format("Could not open seed points file '{}'", indexFile));
+        LERROR(std::format("Could not open seed points file '{}'", indexFile));
     }
     else {
         try {
@@ -338,7 +339,7 @@ void KameleonPlane::readFieldlinePaths(const std::string& indexFile) {
             int i = 0;
             const std::string& fullName = identifier();
             std::string partName = fullName.substr(0,fullName.find_last_of("-"));
-            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
+            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); it++) {
                 _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     partName + "/" + it.key(),

@@ -1,8 +1,10 @@
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
+
+
 
 -- Datasets created using the script found at:
 -- https://github.com/OpenSpace/scripts/tree/master/juice-gphio-image-conversion
-local data = asset.syncedResource({
+local data = asset.resource({
   Type = "HttpSynchronization",
   Name = "Ganymede Plane Simulations",
   Identifier = "juice_ganymede_plane_cuts",
@@ -19,9 +21,9 @@ local xy_n = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-n.png",
-    Enabled = false
+    Texture = data .. "XY-n.png"
   },
   GUI = {
     Name = "Ganymede XY Plane N",
@@ -35,9 +37,9 @@ local xy_t = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-T.png",
-    Enabled = false
+    Texture = data .. "XY-T.png"
   },
   GUI = {
     Name = "Ganymede XY Plane T",
@@ -51,9 +53,9 @@ local xy_u = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-U.png",
-    Enabled = false
+    Texture = data .. "XY-U.png"
   },
   GUI = {
     Name = "Ganymede XY Plane U",
@@ -68,9 +70,9 @@ local xy_utot = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Utot.png",
-    Enabled = false
+    Texture = data .. "XY-Utot.png"
   },
   GUI = {
     Name = "Ganymede XY Plane U_tot",
@@ -85,9 +87,9 @@ local xy_ux = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Ux.png",
-    Enabled = false
+    Texture = data .. "XY-Ux.png"
   },
   GUI = {
     Name = "Ganymede XY Plane Ux",
@@ -102,9 +104,9 @@ local xy_uy = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Uy.png",
-    Enabled = false
+    Texture = data .. "XY-Uy.png"
   },
   GUI = {
     Name = "Ganymede XY Plane Uy",
@@ -119,9 +121,9 @@ local xy_uz = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Uz.png",
-    Enabled = false
+    Texture = data .. "XY-Uz.png"
   },
   GUI = {
     Name = "Ganymede XY Plane Uz",
@@ -137,14 +139,14 @@ local xz_n = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-n.png",
-    Enabled = false
+    Texture = data .. "XZ-n.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane N",
@@ -159,14 +161,14 @@ local xz_t = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-T.png",
-    Enabled = false
+    Texture = data .. "XZ-T.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane T",
@@ -181,14 +183,14 @@ local xz_u = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-U.png",
-    Enabled = false
+    Texture = data .. "XZ-U.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane U",
@@ -204,14 +206,14 @@ local xz_utot = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Utot.png",
-    Enabled = false
+    Texture = data .. "XZ-Utot.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane U_tot",
@@ -227,14 +229,14 @@ local xz_ux = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Ux.png",
-    Enabled = false
+    Texture = data .. "XZ-Ux.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane Ux",
@@ -250,14 +252,14 @@ local xz_uy = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Uy.png",
-    Enabled = false
+    Texture = data .. "XZ-Uy.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane Uy",
@@ -273,14 +275,14 @@ local xz_uz = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Uz.png",
-    Enabled = false
+    Texture = data .. "XZ-Uz.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane Uz",
@@ -341,6 +343,7 @@ asset.export(xz_utot)
 asset.export(xz_ux)
 asset.export(xz_uy)
 asset.export(xz_uz)
+
 
 
 asset.meta = {

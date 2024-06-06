@@ -1,0 +1,58 @@
+local data = asset.resource({
+  Name = "Messenger Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "messenger_spice",
+  Version = 2
+})
+
+
+local Kernels = {
+  data .. "messenger_2548.tsc",
+  data .. "msgr_v231.tf",
+
+  data .. "de405.bsp",
+  data .. "msgr_040803_150430_150430_od431sc_2.bsp",
+  data .. "msgr_antenna_v000.bsp",
+  data .. "msgr_de405_de423s.bsp",
+
+  data .. "msgr_epps_v100.ti",
+  data .. "msgr_grns_v110.ti",
+  data .. "msgr_mag_v021.ti",
+  data .. "msgr_mascs_v100.ti",
+  data .. "msgr_mdis_v160.ti",
+  data .. "msgr_mla_v010.ti",
+  data .. "msgr_rs_v111.ti",
+  data .. "msgr_xrs_v001.ti",
+
+  data .. "pck00008.tpc",
+  data .. "pck00008_msgr.tpc",
+  data .. "pck00009_msgr_v10.tpc",
+  data .. "pck00010_msgr_v10.tpc",
+  data .. "pck00010_msgr_v23.tpc",
+  data .. "pck00010.tpc",
+
+  data .. "msgr_1103_v02.bc",
+  data .. "msgr_1104_v02.bc",
+  data .. "msgr_1105_v02.bc",
+  data .. "msgr_1106_v02.bc"
+}
+
+local ID = {
+  Messenger = "MESSENGER"
+}
+
+local Frame = {
+  Messenger = "MSGR_SPACECRAFT"
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(Kernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(Kernels)
+end)
+
+asset.export("ID", ID)
+asset.export("Frame", Frame)

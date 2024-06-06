@@ -2,6 +2,8 @@ asset.require("./planet")
 asset.require("./trail")
 asset.require("./label", false)
 
+
+
 asset.meta = {
   Name = "Quaoar meta asset",
   Version = "1.0",

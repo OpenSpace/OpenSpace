@@ -63,5 +63,12 @@
       "eyeseparation": 0.06499999761581421,
       "pos": { "x": 0.0, "y": 0.0, "z": 0.0 }
     }
-  ]
+  ],
+  "meta": {
+    "author": "OpenSpace Team",
+    "description": "Two windows: Primary 1280x720 window with Spout output (name 'OpenSpace') planar projection rendering without menu or text overlays, and a secondary with menu and text overlays minus rendering.",
+    "license": "MIT License",
+    "name": "Planar Spout + GUI",
+    "version": "1.0"
+  }
 }

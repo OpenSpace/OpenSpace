@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,7 +51,6 @@ private:
     void convertToAscii();
     void convertToBinary();
     void determineFormatType();
-    std::string addFileSuffix(const std::string& filePath, const std::string& suffix);
     std::filesystem::path _inFilePath;
     std::filesystem::path _outFilePath;
     std::ifstream _iFile;
