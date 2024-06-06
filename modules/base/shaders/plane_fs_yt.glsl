@@ -62,7 +62,6 @@ Fragment getFragment() {
   if (frag.depth == 0.0) {
     discard;
   }
-  frag.depth = frag.depth;
 
   //frag.color += texture(depthTexture, vs_st);
 

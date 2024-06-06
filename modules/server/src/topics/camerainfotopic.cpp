@@ -91,15 +91,14 @@ void CameraInfoTopic::sendCameraData() {
     // Split the array to its primative values
     // Turn them into a float?
 
-    nlohmann::json jsonData = {
-        //{ "matrix_x", &camMat[0][1]},
-        { "matrix_row0", camMat[0][0]},
-        { "matrix_row1", camMat[1][0]},
-        { "matrix_row2", camMat[2][0]},
-        { "matrix_row3", camMat[3][0]}
+    nlohmann::json jsonData;
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            std::string key = "vmatrix_" + std::to_string(i) + std::to_string(j);
+            jsonData[key] = camMat[i][j];
+        }
+    }
 
-        
-    };
 
     _connection->sendJson(wrappedPayload(jsonData));
 }
