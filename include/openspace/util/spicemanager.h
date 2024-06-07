@@ -994,6 +994,55 @@ public:
         int numberOfTerminatorPoints);
 
     /**
+     * The structure retuned by the #lightTime method.
+     */
+    struct LightTimeResult {
+        /// Epoch of the signal at the target.
+        /// This is the time at which the signal would arrive at the target.
+        double epochAtTarget = 0.0;
+
+        /// Time between transmit and receipt of the signal.
+        /// This is the light travel time.
+        double elapsed = 0.0;
+    };
+
+    /**
+     * This method returns time of a signal recieved at a target from an \observer
+     * corrected for light travel time.
+     *
+     * \param observedTime Time at which the signal was received
+     * \param target The target who emited the signal
+     * \param observer The observer who received the signal
+     * \param direction The direction of travel ("->" or "<-")
+     *
+     * \return The LightTimeResult structure that contains information about the time
+     *
+     * \throw SpiceException If \p instrument does not name a valid NAIF object
+     * \post The returned structure has all its values initialized
+     *
+     * \see https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ltime_c.html
+     */
+    LightTimeResult lightTravelTime(double observedTime, int target, int observer, const std::string& direction) const;
+
+    /**
+    * This method returns time of a signal recieved at a target from an \observer
+    * corrected for light travel time.
+    *
+    * \param observedTime Time at which the signal was received
+    * \param target The target who emited the signal
+    * \param observer The observer who received the signal
+    * \param direction The direction of travel ("->" or "<-")
+    *
+    * \return The LightTimeResult structure that contains information about the time
+    *
+    * \throw SpiceException If \p instrument does not name a valid NAIF object
+    * \post The returned structure has all its values initialized
+    *
+    * \see https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ltime_c.html
+    */
+    LightTimeResult lightTravelTime(double observedTime, const std::string& target, const std::string& observer, const std::string& direction) const;
+
+    /**
      * Sets the SpiceManager's exception handling. If UseException::No is passed to this
      * function, all subsequent calls will not throw an error, but fail silently instead.
      * If set to UseException::Yes, a SpiceException is thrown whenever an error occurs.

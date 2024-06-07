@@ -1387,6 +1387,17 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
     return result;
 }
 
+SpiceManager::LightTimeResult SpiceManager::lightTravelTime(double observedTime, const std::string& target, const std::string& observer, const std::string& direction) const {
+    return lightTravelTime(observedTime, naifId(observer), naifId(target), direction);
+}
+
+SpiceManager::LightTimeResult SpiceManager::lightTravelTime(double observedTime, int target, int observer, const std::string& direction) const {
+
+    LightTimeResult res;
+    ltime_c(observedTime, observer, direction.c_str(), target, &res.epochAtTarget, &res.elapsed);
+    return res;
+}
+
 void SpiceManager::loadLeapSecondsSpiceKernel() {
     constexpr std::string_view Naif00012tlsSource = R"(
 KPL/LSK

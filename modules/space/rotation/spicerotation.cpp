@@ -29,9 +29,12 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/logging/logmanager.h>
 #include <optional>
 
 namespace {
+    constexpr std::string_view _loggerCat = "SpiceRotation";
+
     constexpr openspace::properties::Property::PropertyInfo SourceInfo = {
         "SourceFrame",
         "Source",
@@ -63,6 +66,32 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseLightTravelTimeInfo = {
+        "UseLightTravelTime",
+        "Use Light Travel Time",
+        "If set to true, the rotation will be updated based on light travel "
+        "time to the observer.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LightTravelTimeObserverInfo = {
+        "LightTravelTimeObserver",
+        "Light Travel Time Observer",
+        "This is the SPICE NAIF name for the body who observes the rotation."
+        "It can either be a fully qualified name (such as 'EARTH') or a NAIF integer id "
+        "code (such as '399'). Only used when UseLightTravelTime is true",
+        openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LightTravelTimeTargetInfo = {
+        "LightTravelTimeTarget",
+        "Light Travel Time Target",
+        "This is the SPICE NAIF name for the body who will be rotated."
+        "It can either be a fully qualified name (such as 'EARTH') or a NAIF integer id "
+        "code (such as '399'). Only used when UseLightTravelTime is true",
+        openspace::properties::Property::Visibility::Developer
+    };
+
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
         // [[codegen::verbatim(SourceInfo.description)]]
         std::string sourceFrame
@@ -80,6 +109,15 @@ namespace {
         // [[codegen::verbatim(FixedDateInfo.description)]]
         std::optional<std::string> fixedDate
             [[codegen::annotation("A time to lock the rotation to")]];
+
+        // [[codegen::verbatim(UseLightTravelTimeInfo.description)]]
+        std::optional<bool> useLightTravelTime;
+
+        // [[codegen::verbatim(LightTravelTimeObserverInfo.description)]]
+        std::optional<std::string> lightTravelTimeObserver;
+
+        // [[codegen::verbatim(LightTravelTimeTargetInfo.description)]]
+        std::optional<std::string> lightTravelTimeTarget;
     };
 #include "spicerotation_codegen.cpp"
 } // namespace
@@ -94,6 +132,9 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     : _sourceFrame(SourceInfo)
     , _destinationFrame(DestinationInfo)
     , _fixedDate(FixedDateInfo)
+    , _useLightTravelTime(UseLightTravelTimeInfo)
+    , _lightTravelTimeObserver(LightTravelTimeObserverInfo)
+    , _lightTravelTimeTarget(LightTravelTimeTargetInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -110,6 +151,24 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     });
     _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
+
+    _useLightTravelTime.onChange([this]() {
+        requireUpdate();
+    });
+    _useLightTravelTime = p.useLightTravelTime.value_or(_useLightTravelTime);
+    addProperty(_useLightTravelTime);
+
+    _lightTravelTimeObserver.onChange([this]() {
+        requireUpdate();
+    });
+    _lightTravelTimeObserver = p.lightTravelTimeObserver.value_or(_lightTravelTimeObserver);
+    addProperty(_lightTravelTimeObserver);
+
+    _lightTravelTimeTarget.onChange([this]() {
+        requireUpdate();
+    });
+    _lightTravelTimeTarget = p.lightTravelTimeObserver.value_or(_lightTravelTimeTarget);
+    addProperty(_lightTravelTimeTarget);
 
     if (dictionary.hasKey(TimeFrameInfo.identifier)) {
         const ghoul::Dictionary timeFrameDictionary =
@@ -136,11 +195,37 @@ glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {
     if (_fixedEphemerisTime.has_value()) {
         time = *_fixedEphemerisTime;
     }
-    return SpiceManager::ref().positionTransformMatrix(
-        _sourceFrame,
-        _destinationFrame,
-        time
-    );
+
+    if (_useLightTravelTime) {
+        if ((std::string(_lightTravelTimeTarget).length() < 1) || (std::string(_lightTravelTimeTarget).length() < 1)) {
+            LERROR("Observer and Target required for light travel time.");
+            return SpiceManager::ref().positionTransformMatrix(
+                _sourceFrame,
+                _destinationFrame,
+                time
+            );
+        }
+
+        SpiceManager::LightTimeResult lightTravelTime = SpiceManager::ref().lightTravelTime(
+            time,
+            _lightTravelTimeTarget,
+            _lightTravelTimeObserver,
+            "->");
+
+        return SpiceManager::ref().positionTransformMatrix(
+            _sourceFrame,
+            _destinationFrame,
+            time - lightTravelTime.elapsed,
+            time
+        );
+    }
+    else {
+        return SpiceManager::ref().positionTransformMatrix(
+            _sourceFrame,
+            _destinationFrame,
+            time
+        );
+    }
 }
 
 } // namespace openspace
