@@ -36,7 +36,6 @@ uniform vec3 multiplyColor;
 
 uniform sampler2D depthTexture;
 
-
 Fragment getFragment() {
   Fragment frag;
   if (gl_FrontFacing) {
@@ -59,9 +58,11 @@ Fragment getFragment() {
   }
 
   frag.depth = texture(depthTexture, vs_st).r;
-  if (frag.depth == 0.0) {
+  if (frag.depth == vs_screenSpaceDepth) {
     discard;
   }
+  
+  frag.depth = vs_screenSpaceDepth;
 
   //frag.color += texture(depthTexture, vs_st);
 
