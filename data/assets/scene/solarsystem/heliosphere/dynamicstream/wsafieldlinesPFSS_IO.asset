@@ -1,6 +1,6 @@
 local transforms = asset.require('../transforms_heliosphere')
 
-local transferFunctions = asset.localResource("transferfunctions")
+local transferFunctions = asset.resource("transferfunctions")
 local opennessColorTable = transferFunctions .. "/openness_spec.txt"
 
 

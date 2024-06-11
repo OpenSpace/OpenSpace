@@ -1,6 +1,6 @@
 local transforms = asset.require('../transforms_heliosphere')
 
-local transferFunctions = asset.localResource("transferfunctions")
+local transferFunctions = asset.resource("transferfunctions")
 local windSpeedPolarityColorTable = transferFunctions .. "/polarity_spec.txt"
 local currentSheetColorTable = transferFunctions .. "/currentsheet_spec.txt"
 

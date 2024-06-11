@@ -304,8 +304,13 @@ std::vector<File>::iterator DynamicFileSequenceDownloader::closestFileToNow(
         }
     }
     it += closest->availableIndex;
+    if(_forward){
+        it -= 1;
+    }
+    else {
+        it += 1;
+    }
     return it;
-    //return *closest;
 }
 
 void DynamicFileSequenceDownloader::putOnQueue() {
@@ -440,7 +445,6 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
 //     if same id for diffrent models: then include modelname in path
 //     else: Only rename after what new name for dynamic downloader is
 //
-// 4. Move class into a different module + rename class
 //
 // 5. recall data info every now and then to get new files
 //
@@ -452,6 +456,7 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
 // 10. deal with jsonResult["description"]
 //
 // Done items:
+// 4. Move class into a different module + rename class
 //
 // 7. optamize the closestFileToNow function
 //
