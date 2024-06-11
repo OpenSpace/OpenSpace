@@ -1,6 +1,6 @@
 -- Matrix
 -- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
--- coordinate axes are determined by a constant and unchanging static rotation that is
+-- the coordinate axes are determined by a constant and unchanging static rotation that is
 -- provided by a 3-by-3 rotation matrix in column-major order.
 
 local Node = {
