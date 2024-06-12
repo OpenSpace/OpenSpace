@@ -30,7 +30,7 @@ local TeslaRoadsterTrail = {
   },
   GUI = {
     Name = "Tesla Roadster Trail",
-    Path = "/Solar System/SSSB"
+    Path = "/Solar System/Small Bodies"
   }
 }
 
