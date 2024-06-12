@@ -460,7 +460,14 @@ void flyToGeoInternal(std::string globe, double latitude,
         altitude = global::navigationHandler->pathNavigator().defaultArrivalHeight(globe);
     }
 
-    flyToGeoInternal(globe, latitude, longitude, std::nullopt, duration, shouldUseUpVector);
+    flyToGeoInternal(
+        globe,
+        latitude,
+        longitude,
+        std::nullopt,
+        duration,
+        shouldUseUpVector
+    );
 }
 
  /**

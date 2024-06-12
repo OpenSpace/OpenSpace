@@ -72,9 +72,9 @@ namespace {
         "Colors",
         "Constellation Colors",
         "A list of colors to use for the constellations. A data file may include several "
-        "groups of constellations, where each group can have a distinct color. The index for "
-        "the color parameter for each constellation in the data file corresponds to the "
-        "order of the colors in this list.",
+        "groups of constellations, where each group can have a distinct color. The index "
+        "for the color parameter for each constellation in the data file corresponds to "
+        "the order of the colors in this list.",
         openspace::properties::Property::Visibility::User
     };
 

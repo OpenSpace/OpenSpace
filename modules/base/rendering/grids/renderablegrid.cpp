@@ -76,7 +76,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
         "Highlight Line Width",
-        "The width of the highlighted grid lines. The larger number, the thicker the lines.",
+        "The width of the highlighted grid lines. The larger number, the thicker the "
+        "lines.",
         openspace::properties::Property::Visibility::User
     };
 
