@@ -24,6 +24,8 @@
 
 #include <openspace/interaction/actionmanager.h>
 
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
@@ -49,6 +51,9 @@ void ActionManager::registerAction(Action action) {
     ghoul_assert(!hasAction(action.identifier), "Identifier already existed");
 
     const unsigned int hash = ghoul::hashCRC32(action.identifier);
+    global::eventEngine->publishEvent<events::EventActionAdded>(
+        action.identifier
+    );
     _actions[hash] = std::move(action);
 }
 
