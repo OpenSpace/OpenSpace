@@ -60,7 +60,7 @@ namespace {
     // Get the layer group
     layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroup);
     if (groupID == layers::Group::ID::Unknown) {
-        throw ghoul::lua::LuaError("Unknown layer group: " + layerGroupName);
+        throw ghoul::lua::LuaError("Unknown layer group: " + layerGroup);
     }
 
     // Add the name of the enclosing globe to layer dict, it is used to identify a cache
@@ -104,7 +104,7 @@ namespace {
     // Get the layer group
     layers::Group::ID groupID = ghoul::from_string<layers::Group::ID>(layerGroup);
     if (groupID == layers::Group::ID::Unknown) {
-        throw ghoul::lua::LuaError("Unknown layer group: " + layerGroupName);
+        throw ghoul::lua::LuaError("Unknown layer group: " + layerGroup);
     }
 
     std::string layerName;
