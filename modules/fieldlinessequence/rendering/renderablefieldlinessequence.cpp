@@ -219,9 +219,9 @@ namespace {
         std::optional<bool> maskingEnabled;
         // [[codegen::verbatim(MaskingQuantityInfo.description)]]
         std::optional<int> maskingQuantity;
-        // Rrange for which their corresponding quantity parameter value will be
+        // Ranges for which their corresponding quantity parameter value will be
         // masked by. Should be entered as {min value, max value}
-        std::optional<glm::vec2> maskingRange;
+        std::optional<std::vector<glm::vec2>> maskingRanges;
         // Ranges for which their corresponding parameters values will be
         // masked by. Should be entered as min value, max value
         std::optional<glm::vec2> maskingMinMaxRange;
@@ -510,16 +510,18 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         _selectedColorRange.setMinValue(glm::vec2(p.colorMinMaxRange->x));
         _selectedColorRange.setMaxValue(glm::vec2(p.colorMinMaxRange->y));
     }
-
     // To not change peoples masking settings i kept the parameter for the assets
     // to be "MaskingRanges", but a single vec2-value instead of a vector.
     // What is given from the asset, is stored as the selected range.
-    _selectedMaskingRange = p.maskingRange.value_or(_selectedMaskingRange);
+    _maskingRanges = p.maskingRanges.value_or(_maskingRanges);
+    if (!_maskingRanges.empty()) {
+        _selectedMaskingRange = _maskingRanges[_maskingQuantityTemp];
+    }
+
     if (p.maskingMinMaxRange.has_value()) {
         _selectedMaskingRange.setMinValue(glm::vec2(p.maskingMinMaxRange->x));
         _selectedMaskingRange.setMaxValue(glm::vec2(p.maskingMinMaxRange->y));
     }
-
 }
 
 void RenderableFieldlinesSequence::setupDynamicDownloading(
@@ -692,11 +694,6 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         // there are parameters in the data.
         // This would be the case where a better structure would be needed, because
         // it creates descrepancy which range belongs to which parameter
-        //else if (
-        //    _colorTableRanges.size() < _files[_activeIndex].state.nExtraQuantities())
-        //{
-        //
-        //}
         else {
             _selectedColorRange = _colorTableRanges[0];
         }
@@ -713,11 +710,6 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         _colorTableRanges[_colorQuantity] = _selectedColorRange;
     });
 
-    _maskingQuantity.onChange([this]() {
-        _shouldUpdateMaskingBuffer = true;
-        _havePrintedQuantityRange = false;
-    });
-
     _colorTablePath.onChange([this]() {
         std::filesystem::path newPath = absPath(_colorTablePath);
 
@@ -727,6 +719,17 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         else
         {
             LWARNING("Invalid path to transferfunction, please enter new path.");
+        }
+    });
+
+    _maskingQuantity.onChange([this]() {
+        _shouldUpdateMaskingBuffer = true;
+        _havePrintedQuantityRange = false;
+        if (_maskingRanges.size() > _maskingQuantity) {
+            _selectedMaskingRange= _maskingRanges[_maskingQuantity];
+        }
+        else {
+            _selectedMaskingRange = _maskingRanges[0];
         }
     });
 
@@ -961,6 +964,7 @@ void RenderableFieldlinesSequence::firstUpdate() {
     _firstLoad = false;
     _colorQuantity = _colorQuantityTemp;
     _maskingQuantity = _maskingQuantityTemp;
+
 
 
     std::filesystem::path newPath = absPath(_colorTablePath);

@@ -223,6 +223,7 @@ private:
     properties::BoolProperty _maskingEnabled;
     // Group to hold the masking properties
     properties::PropertyOwner _maskingGroup;
+    std::vector<glm::vec2> _maskingRanges;
     // Selected lower and upper range limits for masking
     properties::Vec2Property _selectedMaskingRange;
     // Index of the extra quantity to use for masking
