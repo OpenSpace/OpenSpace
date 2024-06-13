@@ -37,8 +37,10 @@ public:
     bool isDone() const override;
 
 private:
-    void sendData() const;
+    void sendData(nlohmann::json data) const;
     std::vector<nlohmann::json> shortcutsJson() const;
+    nlohmann::json shortcutJson(const std::string& identifier) const;
+    bool _isDone = true;
 };
 
 } // namespace openspace

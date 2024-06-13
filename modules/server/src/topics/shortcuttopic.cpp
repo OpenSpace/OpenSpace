@@ -35,7 +35,7 @@ using nlohmann::json;
 namespace openspace {
 
 bool ShortcutTopic::isDone() const {
-    return true;
+    return _isDone;
 }
 
 std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
@@ -101,23 +101,53 @@ std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
     return json;
 }
 
-void ShortcutTopic::sendData() const {
-    const nlohmann::json data = { {"shortcuts", shortcutsJson()} };
-    _connection->sendJson(wrappedPayload(data));
+nlohmann::json ShortcutTopic::shortcutJson(const std::string& identifier) const {
+    std::vector<nlohmann::json> json;
+    std::vector<interaction::Action> actions = global::actionManager->actions();
+
+    auto found = std::find_if(
+        actions.begin(),
+        actions.end(),
+        [&identifier](const interaction::Action& action) {
+            return action.identifier == identifier;
+    });
+
+    if (found == actions.end()) {
+        return json;
+    }
+    interaction::Action action = *found;
+
+    json.push_back({
+        { "identifier", action.identifier },
+        { "name", action.name },
+        { "script", action.command },
+        { "synchronization", static_cast<bool>(!action.isLocal) },
+        { "documentation", action.documentation },
+        { "guiPath", action.guiPath },
+    });
+    return json;
+}
+
+void ShortcutTopic::sendData(nlohmann::json data) const {
+    _connection->sendJson(wrappedPayload({ { "actions", data } }));
 }
 
 void ShortcutTopic::handleJson(const nlohmann::json& input) {
     const std::string& event = input.at("event").get<std::string>();
     if (event == "start_subscription") {
         // TODO: Subscribe to shortcuts and keybindings
-        // shortcutManager.subscribe(); ...
+        sendData(shortcutsJson());
+        _isDone = false;
     }
     else if (event == "stop_subscription") {
         // TODO: Unsubscribe to shortcuts and keybindings
-        // shortcutManager.unsubscribe(); ...
+        _isDone = true;
         return;
     }
-    sendData();
+    else if (event == "get_action") {
+        const std::string& identifier = input.at("identifier").get<std::string>();
+        sendData(shortcutJson(identifier));
+    }
 }
 
 } // namespace openspace
