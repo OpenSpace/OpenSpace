@@ -73,6 +73,8 @@ struct Event {
         FocusNodeChanged,
         LayerAdded,
         LayerRemoved,
+        ActionAdded,
+        ActionRemoved,
         SessionRecordingPlayback,
         PointSpacecraft,
         RenderableEnabled,
@@ -422,6 +424,42 @@ struct EventLayerRemoved : public Event {
      * \pre uri_ must be a valid uri
      */
     explicit EventLayerRemoved(std::string_view uri_);
+
+    const tstring uri;
+};
+
+/**
+ * This event is created when a layer is added to to a globe.
+ */
+struct EventActionAdded : public Event {
+    static constexpr Type Type = Event::Type::ActionAdded;
+
+    /**
+     * Creates an instance of an EventLayerAdded event.
+     *
+     * \param uri_ A string with the uri of the layer that was added
+     *
+     * \pre uri_ must be a valid uri
+     */
+    explicit EventActionAdded(std::string_view uri_);
+
+    const tstring uri;
+};
+
+/**
+ * This event is created when a layer is removed from a globe.
+ */
+struct EventActionRemoved : public Event {
+    static constexpr Type Type = Event::Type::ActionRemoved;
+
+    /**
+     * Creates an instance of an EventLayerRemoved event.
+     *
+     * \param uri_ The uri of the layer that was removed
+     *
+     * \pre uri_ must be a valid uri
+     */
+    explicit EventActionRemoved(std::string_view uri_);
 
     const tstring uri;
 };
