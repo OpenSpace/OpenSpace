@@ -10,8 +10,8 @@ local Node = {
     Unit = "Km"
   },
   GUI = {
-    Name = "Units",
-    Path = "/Examples/RenderablePointCloud"
+    Name = "RenderablePointCloud - Units",
+    Path = "/Examples"
   }
 }
 

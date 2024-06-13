@@ -1,5 +1,5 @@
 -- Basic
--- This asset creates a SceneGraphNode that only displays coordinate axes. The 
+-- This asset creates a SceneGraphNode that only displays coordinate axes. The
 -- parent is not set which defaults to placing the axes at the center the Sun.
 
 local Node = {
@@ -12,9 +12,9 @@ local Node = {
   },
   Renderable = {
     Type = "RenderableCartesianAxes"
-  },    
+  },
   GUI = {
-    Name = "Cartesian Axes Basic",
+    Name = "RenderableCartesianAxes - Basic",
     Path = "/Examples"
   }
 }

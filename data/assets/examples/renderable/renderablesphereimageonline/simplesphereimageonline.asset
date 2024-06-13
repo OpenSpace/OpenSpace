@@ -13,8 +13,8 @@ local Node = {
     Segments = 16
   },
   GUI = {
-    Name = "Basic",
-    Path = "/Examples/RenderableSphereImageOnline"
+    Name = "RenderableSphereImageOnline - Basic",
+    Path = "/Examples"
   }
 }
 

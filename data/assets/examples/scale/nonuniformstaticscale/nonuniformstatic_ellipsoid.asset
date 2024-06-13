@@ -15,8 +15,8 @@ local Node = {
     Type = "RenderableSphericalGrid"
   },
   GUI = {
-    Name = "Ellipsoid",
-    Path = "/Examples/NonUniformStaticScale"
+    Name = "NonUniformStaticScale - Ellipsoid",
+    Path = "/Examples"
   }
 }
 
