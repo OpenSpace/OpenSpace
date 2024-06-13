@@ -201,6 +201,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
     declare("HeightFile")
     declare("Location")
     declare("ZIndex")
+    declare("BlendMode")
 
     local dir = openspace.directoryForPath(file)
     local file_func, error = loadfile(file)
@@ -219,13 +220,19 @@ openspace.globebrowsing.parseInfoFile = function (file)
     local HeightFile = rawget(_G, "HeightFile")
     local Location = rawget(_G, "Location")
     local ZIndex = rawget(_G, "ZIndex")
+    local BlendMode = rawget(_G, "BlendMode")
 
     -- Now we can start
     local name = Name or Identifier
     local identifier = Identifier
     local zIndex = ZIndex
+    local blendMode = BlendMode
     if zIndex == "" then
         zIndex = nil
+    end
+    if blendMode == "" then
+        -- Color blending is the default for .info files if nothing else is specified
+        blendMode = "Color"
     end
 
     if identifier == "" then
@@ -240,7 +247,7 @@ openspace.globebrowsing.parseInfoFile = function (file)
             Name = name,
             Description = Description or "",
             FilePath = dir .. '/' .. ColorFile,
-            BlendMode = "Color",
+            BlendMode = blendMode,
             ZIndex = zIndex
         }
     end

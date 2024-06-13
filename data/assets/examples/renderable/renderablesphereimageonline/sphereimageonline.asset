@@ -1,20 +1,17 @@
 -- Basic
--- This example will show a sphere that is covered with an image which is retrieved from
+-- This example shows a sphere that is covered with an image which is retrieved from
 -- an online URL. The image will be stretched over the entire sphere as an equirectangular
--- projection
+-- projection.
 
 local Node = {
   Identifier = "RenderableSphereImageOnline_Example",
   Renderable = {
     Type = "RenderableSphereImageOnline",
-    URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg",
-
-    -- Parameters from the parent class `RenderableSphere`
-    Segments = 16
+    URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg"
   },
   GUI = {
-    Name = "Basic",
-    Path = "/Examples/RenderableSphereImageOnline"
+    Name = "RenderableSphereImageOnline - Basic",
+    Path = "/Examples"
   }
 }
 

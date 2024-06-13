@@ -26,8 +26,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Size from Data",
-    Path = "/Examples/RenderablePointCloud"
+    Name = "RenderablePointCloud - Size from Data",
+    Path = "/Examples"
   }
 }
 

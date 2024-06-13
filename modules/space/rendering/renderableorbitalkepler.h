@@ -115,7 +115,7 @@ private:
     UniformCache(modelView, projection, trailFadeExponent, colorFadeCutoffValue,
         inGameTime, color, opacity)
         _uniformTrailCache;
-    
+
     // Point cache
     UniformCache(modelTransform, viewTransform, projectionTransform,
         cameraPositionWorld, cameraUpWorld,  inGameTime, color,

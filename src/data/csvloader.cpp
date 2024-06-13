@@ -262,7 +262,7 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
     std::vector<Dataset::Texture> res;
 
     std::string line;
-    while (std::getline(file, line)) {
+    while (ghoul::getline(file, line)) {
         ghoul::trimWhitespace(line);
         currentLineNumber++;
 

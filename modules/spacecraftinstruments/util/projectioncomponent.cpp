@@ -212,8 +212,6 @@ void ProjectionComponent::initialize(const std::string& identifier,
         return;
     }
 
-    //std::variant<std::filesystem::path, std::vector<std::filesystem::path>> s = *p.sequence;
-
     std::vector<std::filesystem::path> sequenceSources;
     if (std::holds_alternative<std::filesystem::path>(*p.sequence)) {
         sequenceSources.push_back(absPath(std::get<std::filesystem::path>(*p.sequence)));

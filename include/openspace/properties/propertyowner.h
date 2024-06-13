@@ -153,11 +153,11 @@ public:
     Property* property(const std::string& uri) const;
 
     /**
-     * Retrieves a PropertyOwner identified by \p uri from this PropertyOwner. If \p uri 
+     * Retrieves a PropertyOwner identified by \p uri from this PropertyOwner. If \p uri
      * does not contain a `.` it is an identifier and must refer to a PropertyOwner
      * directly owned by this PropertyOwner. If the uri contains one or more `.`, the
      * first part of the name will be recursively extracted and used as a name for a sub-
-     * owner and only the last part of the uri is referring to a PropertyOwner owned by a 
+     * owner and only the last part of the uri is referring to a PropertyOwner owned by a
      * PropertyOwner named by the second-but-last name.
      *
      * \param uri The uri or identifier of the PropertyOwner that should be extracted
@@ -170,8 +170,8 @@ public:
      * Returns a uri for this PropertyOwner. This is created by looking up all the owners
      * of this PropertyOwner. The owner identifiers are separated by ".", which make up
      * the uri of this PropertyOwner.
-     * 
-     * \return The uri of this PropertyOwner 
+     *
+     * \return The uri of this PropertyOwner
      */
     std::string uri() const;
 

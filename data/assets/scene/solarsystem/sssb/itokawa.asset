@@ -37,7 +37,7 @@ local ItokawaTrail = {
   },
   GUI = {
     Name = "Itokawa Trail",
-    Path = "/Solar System/SSSB/Itokawa",
+    Path = "/Solar System/Small Bodies/Itokawa",
     Description = [[Trail of asteroid 25143 Itokawa from 1950 JAN 1 00:00:00
       to 2050 JAN 1 00:00:00. Data from JPL Horizons]]
   }
@@ -54,7 +54,7 @@ local ItokawaPosition = {
   },
   GUI = {
     Name = "Itokawa Position",
-    Path = "/Solar System/SSSB/Itokawa",
+    Path = "/Solar System/Small Bodies/Itokawa",
     Description = [[Position of asteroid 25143 Itokawa from 1950 JAN 1 00:00:00
       to 2050 JAN 1 00:00:00. Data from JPL Horizons]]
   }
@@ -74,7 +74,7 @@ local ItokawaModel = {
   },
   GUI = {
     Name = "Itokawa Model",
-    Path = "/Solar System/SSSB/Itokawa",
+    Path = "/Solar System/Small Bodies/Itokawa",
     Description = [[Model of asteroid 25143 Itokawa. 3D model from
       https://solarsystem.nasa.gov/resources/2377/asteroid-itokawa-3d-model]]
   }

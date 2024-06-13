@@ -196,7 +196,8 @@ namespace {
 
         using namespace openspace;
         nlohmann::json json;
-        json[NameKey] = !owner->guiName().empty() ? owner->guiName() : owner->identifier();
+        json[NameKey] =
+            !owner->guiName().empty() ? owner->guiName() : owner->identifier();
 
         json[DescriptionKey] = owner->description();
         json[PropertiesKeys] = nlohmann::json::array();
@@ -332,14 +333,16 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
     nlohmann::json json;
 
     if (global::profile->meta.has_value()) {
+        Profile::Meta meta = *global::profile->meta;
+
         nlohmann::json metaJson;
         metaJson[NameKey] = ProfileName;
-        metaJson[ProfileNameKey] = global::profile->meta->name.value_or(NoDataName);
-        metaJson[VersionKey] = global::profile->meta->version.value_or(NoDataName);
-        metaJson[DescriptionKey] = global::profile->meta->description.value_or(NoDataName);
-        metaJson[AuthorKey] = global::profile->meta->author.value_or(NoDataName);
-        metaJson[UrlKey] = global::profile->meta->url.value_or(NoDataName);
-        metaJson[LicenseKey] = global::profile->meta->license.value_or(NoDataName);
+        metaJson[ProfileNameKey] = meta.name.value_or(NoDataName);
+        metaJson[VersionKey] = meta.version.value_or(NoDataName);
+        metaJson[DescriptionKey] = meta.description.value_or(NoDataName);
+        metaJson[AuthorKey] = meta.author.value_or(NoDataName);
+        metaJson[UrlKey] = meta.url.value_or(NoDataName);
+        metaJson[LicenseKey] = meta.license.value_or(NoDataName);
         json.push_back(std::move(metaJson));
     }
 
@@ -361,8 +364,8 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
         assetJson[NameKey] = meta.has_value() ? meta->name : NoDataName;
         assetJson[VersionKey] = meta.has_value() ? meta->version : NoDataName;
         assetJson[DescriptionKey] = meta.has_value() ? meta->description : NoDataName;
-        assetJson[AuthorKey] = meta.has_value() ? meta->author : NoDataName; 
-        assetJson[UrlKey] = meta.has_value() ? meta->url : NoDataName; 
+        assetJson[AuthorKey] = meta.has_value() ? meta->author : NoDataName;
+        assetJson[UrlKey] = meta.has_value() ? meta->url : NoDataName;
         assetJson[LicenseKey] = licenseName;
         assetJson[PathKey] = asset->path().string();
         assetJson[IdKey] = asset->path().string();
@@ -483,7 +486,7 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
     return result;
 }
 
-nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {                 
+nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
     nlohmann::json json;
 
     std::vector<Documentation> docs = _documentations; // Copy the documentations

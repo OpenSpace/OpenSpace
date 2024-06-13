@@ -196,7 +196,7 @@ private:
     UniformCache(opacity, modelViewTransform, projectionTransform, color, useLineFade,
         lineLength, lineFadeAmount, vertexSortingMethod, idOffset, nVertices, stride,
         pointSize, renderPhase, useSplitRenderMode, floatingOffset, numberOfUniqueVertices
-    ) _uniformCache; 
+    ) _uniformCache;
 #else
     UniformCache(opacity, modelViewTransform, projectionTransform, color, useLineFade,
         lineLength, lineFadeAmount, vertexSortingMethod, idOffset, nVertices, stride,

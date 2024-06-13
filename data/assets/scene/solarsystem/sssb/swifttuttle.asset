@@ -30,7 +30,7 @@ local SwiftTuttleTrail = {
   },
   GUI = {
     Name = "Swift Tuttle Trail",
-    Path = "/Solar System/SSSB"
+    Path = "/Solar System/Small Bodies"
   }
 }
 
@@ -45,7 +45,7 @@ local SwiftTuttlePosition = {
   },
   GUI = {
     Name = "Swift Tuttle Position",
-    Path = "/Solar System/SSSB"
+    Path = "/Solar System/Small Bodies"
   }
 }
 

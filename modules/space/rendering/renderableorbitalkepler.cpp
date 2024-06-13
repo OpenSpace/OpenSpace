@@ -504,7 +504,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         );
         _pointProgram->setUniform(
             _uniformPointCache.cameraUpWorld,
-            data.camera.lookUpVectorWorldSpace()
+            static_cast<glm::vec3>(data.camera.lookUpVectorWorldSpace())
         );
         _pointProgram->setUniform(
             _uniformPointCache.inGameTime,
