@@ -102,10 +102,10 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
-        float size;
+        std::optional<float> size [[codegen::greater(0.f)]];
 
         // [[codegen::verbatim(SegmentsInfo.description)]]
-        int segments;
+        std::optional<int> segments [[codegen::greaterequal(4)]];
 
         enum class [[codegen::map(Orientation)]] Orientation {
             Outside,
@@ -140,7 +140,7 @@ documentation::Documentation RenderableSphere::Documentation() {
 RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _size(SizeInfo, 1.f, 0.f, 1e25f)
-    , _segments(SegmentsInfo, 8, 4, 1000)
+    , _segments(SegmentsInfo, 16, 4, 1000)
     , _orientation(OrientationInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _mirrorTexture(MirrorTextureInfo, false)
     , _disableFadeInDistance(DisableFadeInOutInfo, false)
@@ -151,7 +151,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 
     addProperty(Fadeable::_opacity);
 
-    _size = p.size;
+    _size = p.size.value_or(_size);
     _size.setExponent(15.f);
     _size.onChange([this]() {
         setBoundingSphere(_size);
@@ -159,7 +159,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     });
     addProperty(_size);
 
-    _segments = p.segments;
+    _segments = p.segments.value_or(_segments);
     _segments.onChange([this]() {
         _sphereIsDirty = true;
     });
