@@ -50,8 +50,8 @@ namespace {
 /**
  * Return the current [NavigationState](#core_navigation_state) as a Lua table.
  *
- * By default, the reference frame will be picked based on whether the orbital navigator is
- * currently following the anchor node rotation. If it is, the anchor will be chosen as
+ * By default, the reference frame will be picked based on whether the orbital navigator
+ * is currently following the anchor node rotation. If it is, the anchor will be chosen as
  * reference frame. If not, the reference frame will be set to the scene graph root.
  *
  * \param frame the identifier of an optional scene graph node to use as reference frame
@@ -403,8 +403,8 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  *               `"Press"`, which means that the script is run when the user presses the
  *               button. Alternatives are `"Idle"` (if the button is unpressed and has
  *               been unpressed since the last frame), `"Repeat"` (if the button has been
- *               pressed since longer than the last frame), and `"Release"` (if the button was
- *               released since the last frame)
+ *               pressed since longer than the last frame), and `"Release"` (if the button
+ *               was released since the last frame)
  * \param isRemote a value saying whether the command is going to be executable
  *                 locally or remotely, where the latter is the default
  */

@@ -34,7 +34,7 @@ uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
 uniform mat4 projectionTransform;
 uniform dvec3 cameraPositionWorld;
-uniform dvec3 cameraUpWorld;
+uniform vec3 cameraUpWorld;
 uniform float pointSizeExponent;
 uniform bool enableMaxSize;
 uniform float maxSize;
@@ -66,17 +66,13 @@ void main() {
     vec4 pos = v0Weighted + v1Weighted;
     // ==========================
 
-    // Cast to float based data types
-    mat4 modelTrans = mat4(modelTransform);
-    mat4 viewTrans = mat4(viewTransform);
-    vec3 camPosWorld = vec3(cameraPositionWorld);
-
     // Calculate current vertex position to world space
-    vec4 vertPosWorldSpace = modelTrans * pos;
+    dvec4 vertPosWorldSpace = modelTransform * pos;
 
     // Calculate new axis for plane
-    vec3 normal = vec3(normalize(camPosWorld - vertPosWorldSpace.xyz));
-    vec3 right = normalize(cross(vec3(cameraUpWorld), normal));
+    vec3 camPosToVertPos = vec3(cameraPositionWorld - vertPosWorldSpace.xyz);
+    vec3 normal = normalize(camPosToVertPos);
+    vec3 right = normalize(cross(cameraUpWorld, normal));
     vec3 up = normalize(cross(normal, right));
 
     // Calculate size of points
@@ -85,8 +81,8 @@ void main() {
     up *= initialSize;
 
     float opp = length(right);
-    float adj = length(camPosWorld - vertPosWorldSpace.xyz);
-    float angle = atan(float(opp/adj));
+    float adj = length(camPosToVertPos);
+    float angle = atan(opp/adj);
     float maxAngle = radians(maxSize * 0.5);
 
     // Controls the point size
@@ -97,37 +93,39 @@ void main() {
     }
 
     // Calculate and set corners of the new quad
-    vec4 p0World = vertPosWorldSpace + vec4(up-right, 0.0);
-    vec4 p1World = vertPosWorldSpace + vec4(-right-up,0.0);
-    vec4 p2World = vertPosWorldSpace + vec4(right+up, 0.0);
-    vec4 p3World = vertPosWorldSpace + vec4(right-up, 0.0);
-
-    mat4 ViewProjectionTransform = projectionTransform * viewTrans;
+    dvec4 p0World = vertPosWorldSpace + vec4(up-right, 0.0);
+    dvec4 p1World = vertPosWorldSpace + vec4(-right-up,0.0);
+    dvec4 p2World = vertPosWorldSpace + vec4(right+up, 0.0);
+    dvec4 p3World = vertPosWorldSpace + vec4(right-up, 0.0);
 
     // Set some additional out parameters
-    viewSpace = z_normalization(projectionTransform * viewTrans * modelTrans * pos);
+    viewSpace = z_normalization(
+      vec4(projectionTransform * viewTransform * modelTransform * pos)
+    );
     projectionViewDepth = viewSpace.w;
-
+    
+    dmat4 ViewProjectionTransform = projectionTransform * viewTransform;
+    
     // left-top
-    vec4 p0Screen = z_normalization(ViewProjectionTransform * p0World);
+    vec4 p0Screen = z_normalization(vec4(ViewProjectionTransform * p0World));
     gl_Position = p0Screen;
     texCoord = vec2(0.0, 0.0);
     EmitVertex();
 
     // left-bot
-    vec4 p1Screen = z_normalization(ViewProjectionTransform * p1World);
+    vec4 p1Screen = z_normalization(vec4(ViewProjectionTransform * p1World));
     gl_Position = p1Screen;
     texCoord = vec2(1.0, 0.0);
     EmitVertex();
 
     // right-top
-    vec4 p2Screen = z_normalization(ViewProjectionTransform * p2World);
+    vec4 p2Screen = z_normalization(vec4(ViewProjectionTransform * p2World));
     gl_Position = p2Screen;
     texCoord = vec2(0.0, 1.0);
     EmitVertex();
 
     // right-bot
-    vec4 p3Screen = z_normalization(ViewProjectionTransform * p3World);
+    vec4 p3Screen = z_normalization(vec4(ViewProjectionTransform * p3World));
     gl_Position = p3Screen;
     texCoord = vec2(1.0, 1.0);
     EmitVertex();

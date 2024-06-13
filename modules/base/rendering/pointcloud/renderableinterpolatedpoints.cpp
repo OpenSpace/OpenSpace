@@ -492,8 +492,8 @@ void RenderableInterpolatedPoints::initializeBufferData() {
         LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
-    const int attibutesPerPoint = nAttributesPerPoint();
-    const unsigned int bufferSize = attibutesPerPoint * _nDataPoints * sizeof(float);
+    const int attibsPerPoint = nAttributesPerPoint();
+    const unsigned int bufferSize = attibsPerPoint * _nDataPoints * sizeof(float);
 
     // Allocate the memory for the buffer (we will want to upload the data quite often)
     glBindVertexArray(_vao);
@@ -502,31 +502,31 @@ void RenderableInterpolatedPoints::initializeBufferData() {
 
     int offset = 0;
 
-    offset = bufferVertexAttribute("in_position0", 3, attibutesPerPoint, offset);
-    offset = bufferVertexAttribute("in_position1", 3, attibutesPerPoint, offset);
+    offset = bufferVertexAttribute("in_position0", 3, attibsPerPoint, offset);
+    offset = bufferVertexAttribute("in_position1", 3, attibsPerPoint, offset);
 
     if (useSplineInterpolation()) {
-        offset = bufferVertexAttribute("in_position_before", 3, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_position_after", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_position_before", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_position_after", 3, attibsPerPoint, offset);
     }
 
     if (hasColorData()) {
-        offset = bufferVertexAttribute("in_colorParameter0", 1, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_colorParameter1", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_colorParameter0", 1, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_colorParameter1", 1, attibsPerPoint, offset);
     }
 
     if (hasSizeData()) {
-        offset = bufferVertexAttribute("in_scalingParameter0", 1, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_scalingParameter1", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_scalingParameter0", 1, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_scalingParameter1", 1, attibsPerPoint, offset);
     }
 
     if (useOrientationData()) {
-        offset = bufferVertexAttribute("in_orientation0", 4, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_orientation1", 4, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientation0", 4, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientation1", 4, attibsPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {
-        offset = bufferVertexAttribute("in_textureLayer", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_textureLayer", 1, attibsPerPoint, offset);
     }
 
     glBindVertexArray(0);

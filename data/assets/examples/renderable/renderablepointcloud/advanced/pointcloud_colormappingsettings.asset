@@ -52,8 +52,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Advanced Color Mapping",
-    Path = "/Examples/RenderablePointCloud/Advanced",
+    Name = "RenderablePointCloud - Advanced Color Mapping",
+    Path = "/Examples/Advanced",
     Description = [[Example of a point cloud where the range is set explicitly and
       specific colors are used for values outside the range, as well as for missing
       data values.]]

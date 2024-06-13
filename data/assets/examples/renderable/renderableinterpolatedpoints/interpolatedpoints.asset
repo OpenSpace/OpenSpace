@@ -16,8 +16,8 @@ local Node = {
     NumberOfObjects = 10
   },
   GUI = {
-    Name = "Basic",
-    Path = "/Examples/RenderableInterpolatedPoints"
+    Name = "RenderableInterpolatedPoints - Basic",
+    Path = "/Examples"
   }
 }
 

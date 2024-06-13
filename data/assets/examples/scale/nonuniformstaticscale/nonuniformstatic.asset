@@ -18,8 +18,8 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "Basic",
-    Path = "/Examples/NonUniformStaticScale"
+    Name = "NonUniformStaticScale - Basic",
+    Path = "/Examples"
   }
 }
 

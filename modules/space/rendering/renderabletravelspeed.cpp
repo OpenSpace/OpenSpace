@@ -74,7 +74,8 @@ namespace {
         "Indicator Length",
         "The length of the speed indicator line, given in seconds. The length will be "
         "computed as the speed times this value. For example, a value of 1 will make it "
-        "as long as the distance it would travel over one second with the specified speed.",
+        "as long as the distance it would travel over one second with the specified "
+        "speed.",
         openspace::properties::Property::Visibility::User
     };
 

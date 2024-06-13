@@ -1,26 +1,21 @@
--- Basic
+-- Quaternion
 -- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
--- coordinate axes are determined by executing a Lua file that returns the rotation matrix
--- to be used.
---
--- ```{literalinclude} example.lua
--- :language: lua
--- :caption: The script file that is used in this example
--- ```
+-- the coordinate axes are determined by a constant and unchanging static rotation that is
+-- provided by a four-dimensional quaternion.
 
 local Node = {
-  Identifier = "LuaRotation_Example",
+  Identifier = "StaticRotation_Example_Quaternion",
   Transform = {
     Rotation = {
-      Type = "LuaRotation",
-      Script = asset.resource("example.lua")
+      Type = "StaticRotation",
+      Rotation = { 0.4873552, -0.4869268, -0.5127203, 0.5123526 }
     }
   },
   Renderable = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "LuaRotation - Basic",
+    Name = "StaticRotation - Quaternion",
     Path = "/Examples"
   }
 }

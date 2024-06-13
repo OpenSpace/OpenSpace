@@ -100,9 +100,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale Value",
-        "A scale factor for the plane that can be used to increase or decrease the visual "
-        "size. The default size is determined separately for each screen space renderable "
-        "type and may for example be affected by the size of an image being displayed.",
+        "A scale factor for the plane that can be used to increase or decrease the "
+        "visual size. The default size is determined separately for each screen space "
+        "renderable type and may for example be affected by the size of an image being "
+        "displayed.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 

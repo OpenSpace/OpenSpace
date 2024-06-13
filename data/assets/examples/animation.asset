@@ -34,8 +34,8 @@ local AnimationLoop = {
     }
   },
   GUI = {
-    Name = "Animated Model example (LoopFromStart)",
-    Path = "/Example",
+    Name = "Animated Model (LoopFromStart)",
+    Path = "/Examples",
     Description = "Simple animated box model with the animation mode 'LoopFromStart'"
   }
 }
@@ -61,8 +61,8 @@ local AnimationLoopInf = {
     }
   },
   GUI = {
-    Name = "Animated Model example (LoopInfinitely)",
-    Path = "/Example",
+    Name = "Animated Model (LoopInfinitely)",
+    Path = "/Examples",
     Description = "Simple animated box model with the animation mode 'LoopInfinitely'"
   }
 }
@@ -88,8 +88,8 @@ local AnimationOnce = {
     }
   },
   GUI = {
-    Name = "Animated Model example (Once)",
-    Path = "/Example",
+    Name = "Animated Model (Once)",
+    Path = "/Examples",
     Description = "Simple animated box model with the animation mode 'Once'"
   }
 }
@@ -115,8 +115,8 @@ local AnimationBounceInf = {
     }
   },
   GUI = {
-    Name = "Animated Model example (BounceInfinitely)",
-    Path = "/Example",
+    Name = "Animated Model (BounceInfinitely)",
+    Path = "/Examples",
     Description = "Simple animated box model with the animation mode 'BounceInfinitely'"
   }
 }
@@ -142,8 +142,8 @@ local AnimationBounce = {
     }
   },
   GUI = {
-    Name = "Animated Model example (BounceFromStart)",
-    Path = "/Example",
+    Name = "Animated Model (BounceFromStart)",
+    Path = "/Examples",
     Description = "Simple animated box model with the animation mode 'BounceFromStart'"
   }
 }

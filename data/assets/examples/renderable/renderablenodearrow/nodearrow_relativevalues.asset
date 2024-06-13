@@ -28,8 +28,8 @@ local Node = {
     Width = 900000.0
   },
   GUI = {
-    Name = "Relative Units",
-    Path = "/Examples/RenderableNodeArrow",
+    Name = "RenderableNodeArrow - Relative Units",
+    Path = "/Examples"
   }
 }
 
