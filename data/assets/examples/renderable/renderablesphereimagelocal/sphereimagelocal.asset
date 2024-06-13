@@ -1,5 +1,5 @@
 -- Basic
--- This example will show a sphere that is covered with an image which is retrieved from
+-- This example shows a sphere that is covered with an image which is retrieved from
 -- a local file path. The image will be stretched over the entire sphere as an
 -- equirectangular projection.
 
