@@ -35,7 +35,7 @@ using nlohmann::json;
 namespace openspace {
 
 bool ShortcutTopic::isDone() const {
-    return _isDone;
+    return true;
 }
 
 std::vector<nlohmann::json> ShortcutTopic::shortcutsJson() const {
@@ -134,17 +134,10 @@ void ShortcutTopic::sendData(nlohmann::json data) const {
 
 void ShortcutTopic::handleJson(const nlohmann::json& input) {
     const std::string& event = input.at("event").get<std::string>();
-    if (event == "start_subscription") {
-        // TODO: Subscribe to shortcuts and keybindings
+    if (event == "get_all_shortcuts") {
         sendData(shortcutsJson());
-        _isDone = false;
     }
-    else if (event == "stop_subscription") {
-        // TODO: Unsubscribe to shortcuts and keybindings
-        _isDone = true;
-        return;
-    }
-    else if (event == "get_action") {
+    else if (event == "get_shortcut") {
         const std::string& identifier = input.at("identifier").get<std::string>();
         sendData(shortcutJson(identifier));
     }
