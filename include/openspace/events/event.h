@@ -429,15 +429,15 @@ struct EventLayerRemoved : public Event {
 };
 
 /**
- * This event is created when a layer is added to to a globe.
+ * This event is created when an action is added.
  */
 struct EventActionAdded : public Event {
     static constexpr Type Type = Event::Type::ActionAdded;
 
     /**
-     * Creates an instance of an EventLayerAdded event.
+     * Creates an instance of an EventActionAdded event.
      *
-     * \param uri_ A string with the uri of the layer that was added
+     * \param uri_ A string with the uri of the action that was added
      *
      * \pre uri_ must be a valid uri
      */
@@ -447,15 +447,15 @@ struct EventActionAdded : public Event {
 };
 
 /**
- * This event is created when a layer is removed from a globe.
+ * This event is created when an action is removed.
  */
 struct EventActionRemoved : public Event {
     static constexpr Type Type = Event::Type::ActionRemoved;
 
     /**
-     * Creates an instance of an EventLayerRemoved event.
+     * Creates an instance of an EventActionRemoved event.
      *
-     * \param uri_ The uri of the layer that was removed
+     * \param uri_ The uri of the action that was removed
      *
      * \pre uri_ must be a valid uri
      */
