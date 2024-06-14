@@ -156,6 +156,16 @@ void log(int i, const EventLayerRemoved& e) {
     LINFO(std::format("[{}] LayerRemoved: {}", i, e.uri));
 }
 
+void log(int i, const EventActionAdded& e) {
+    ghoul_assert(e.type == EventActionAdded::Type, "Wrong type");
+    LINFO(std::format("[{}] ActionAdded: {}", i, e.uri));
+}
+
+void log(int i, const EventActionRemoved& e) {
+    ghoul_assert(e.type == EventActionRemoved::Type, "Wrong type");
+    LINFO(std::format("[{}] ActionRemoved: {}", i, e.uri));
+}
+
 void log(int i, const EventSessionRecordingPlayback& e) {
     ghoul_assert(e.type == EventSessionRecordingPlayback::Type, "Wrong type");
 
@@ -239,6 +249,8 @@ std::string_view toString(Event::Type type) {
         case Event::Type::FocusNodeChanged: return "FocusNodeChanged";
         case Event::Type::LayerAdded: return "LayerAdded";
         case Event::Type::LayerRemoved: return "LayerRemoved";
+        case Event::Type::ActionAdded: return "ActionAdded";
+        case Event::Type::ActionRemoved: return "ActionRemoved";
         case Event::Type::SessionRecordingPlayback: return "SessionRecordingPlayback";
         case Event::Type::PointSpacecraft: return "PointSpacecraft";
         case Event::Type::RenderableEnabled: return "RenderableEnabled";
@@ -298,6 +310,12 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "LayerRemoved") {
         return Event::Type::LayerRemoved;
+    }
+    else if (str == "ActionAdded") {
+        return Event::Type::ActionAdded;
+    }
+    else if (str == "ActionRemoved") {
+        return Event::Type::ActionRemoved;
     }
     else if (str == "SessionRecordingPlayback") {
         return Event::Type::SessionRecordingPlayback;
@@ -448,6 +466,18 @@ ghoul::Dictionary toParameter(const Event& e) {
                 std::string(static_cast<const EventLayerRemoved&>(e).uri)
             );
             break;
+        case Event::Type::ActionAdded:
+            d.setValue(
+                "Uri",
+                std::string(static_cast<const EventActionAdded&>(e).uri)
+            );
+            break;
+        case Event::Type::ActionRemoved:
+            d.setValue(
+                "Uri",
+                std::string(static_cast<const EventActionRemoved&>(e).uri)
+            );
+            break;
         case Event::Type::SessionRecordingPlayback:
             switch (static_cast<const EventSessionRecordingPlayback&>(e).state) {
                 case EventSessionRecordingPlayback::State::Started:
@@ -570,6 +600,12 @@ void logAllEvents(const Event* e) {
             case Event::Type::LayerRemoved:
                 log(i, *static_cast<const EventLayerRemoved*>(e));
                 break;
+            case Event::Type::ActionAdded:
+                log(i, *static_cast<const EventActionAdded*>(e));
+                break;
+            case Event::Type::ActionRemoved:
+                log(i, *static_cast<const EventActionRemoved*>(e));
+                break;
             case Event::Type::SessionRecordingPlayback:
                 log(i, *static_cast<const EventSessionRecordingPlayback*>(e));
                 break;
@@ -690,6 +726,16 @@ EventLayerAdded::EventLayerAdded(std::string_view uri_)
 {}
 
 EventLayerRemoved::EventLayerRemoved(std::string_view uri_)
+    : Event(Type)
+    , uri(temporaryString(uri_))
+{}
+
+EventActionAdded::EventActionAdded(std::string_view uri_)
+    : Event(Type)
+    , uri(temporaryString(uri_))
+{}
+
+EventActionRemoved::EventActionRemoved(std::string_view uri_)
     : Event(Type)
     , uri(temporaryString(uri_))
 {}
