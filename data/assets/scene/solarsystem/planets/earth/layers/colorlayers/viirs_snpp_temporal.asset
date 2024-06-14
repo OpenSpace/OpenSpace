@@ -12,7 +12,7 @@ local Layer = {
   Prototyped = {
     Time = {
       Start = "2015-11-24",
-      End = "2024-05-27"
+      End = "Today"
     },
     TemporalResolution = "1d",
     TimeFormat = "YYYY-MM-DD",
