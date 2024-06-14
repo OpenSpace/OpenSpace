@@ -187,7 +187,6 @@ private:
     // Uniform/transfer function/topology?
     properties::OptionProperty _colorMethod;
     // Index of the extra quantity to color lines by.
-    //TODO: Change to options instead of index
     properties::OptionProperty _colorQuantity;
     // Used to save property for later initialization, because firstUpdate needs to run
     // first, to populate _colorQuantity with options.

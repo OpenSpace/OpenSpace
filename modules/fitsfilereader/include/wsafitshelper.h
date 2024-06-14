@@ -15,17 +15,21 @@ namespace openspace {
 template<typename T>
 struct ImageData {
     std::valarray<T> contents;
-    long int width;
-    long int height;
+    int width;
+    int height;
 };
 
-std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(std::filesystem::path path);
-std::shared_ptr<ImageData<float>> callCorrectImageReader(const std::unique_ptr<CCfits::FITS>& file);
+std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
+                                                         const std::filesystem::path path,
+                                                         int layerIndex);
+std::shared_ptr<ImageData<float>> callCorrectImageReader(
+                                               const std::unique_ptr<CCfits::FITS>& file);
 template<typename T>
 std::shared_ptr<ImageData<T>> readImageInternal(CCfits::ExtHDU& image);
 template<typename T>
 std::shared_ptr<ImageData<T>> readImageInternal(CCfits::PHDU& image);
-float readHeaderValueFloat(const std::string key, const std::unique_ptr<CCfits::FITS>& file);
+float readHeaderValueFloat(
+                        const std::string key, const std::unique_ptr<CCfits::FITS>& file);
 
 
 } // namespace openspace

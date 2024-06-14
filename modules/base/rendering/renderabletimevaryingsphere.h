@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLETIMEVARYINGSPHERE___H__
 
 #include <modules/base/rendering/renderablesphere.h>
+
+#include <openspace/properties/optionproperty.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
 
 //namespace ghoul::opengl { class Texture; }
@@ -86,7 +88,7 @@ private:
         const std::optional<std::string>& infoURL,
         const std::optional<std::string>& dataURL);
     void updateDynamicDownloading(const double currentTime, const double deltaTime);
-
+    void definePropertyCallbackFunctions();
     // If there's just one state it should never disappear!
     double _sequenceEndTime = std::numeric_limits<double>::max();
     // Static Loading on default / if not specified
@@ -97,6 +99,7 @@ private:
     int _nOfFilesToQueue = 10;
     std::string _infoURL = "";
     std::string _dataURL = "";
+    properties::OptionProperty _fitsLayer;
     //  DynamicFileSequenceDownloader downloads and updates the renderable with
     //  data downloaded from the web.
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;

@@ -11,20 +11,29 @@ namespace openspace {
 
 
 std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
-                                                        const std::filesystem::path path)
+                                                         const std::filesystem::path path,
+                                                         int layerIndex)
 {
     std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
 
     // Convirt fits path with fits-file-reader functions
     const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(file);
-    LWARNING(std::format("width: '{}', and hight: '{}'", fitsValues->width, fitsValues->height));
-    // Magnetogram slice
-    // The numbers 64800, 16200 means, grab the fifth layer in the fits file, where the
-    // photospheric map is, in the wsa file
-    std::valarray<float> magnetogram = fitsValues->contents[std::slice(64800, 16200, 1)];
+    int layerSize = fitsValues->width * fitsValues->height;
+
+    int nLayers = fitsValues->contents.size() / layerSize;
+    if (layerIndex > nLayers -1) {
+        LERROR(std::format(
+            "Chosen layer in fits file is not supported. Index to high. ",
+            "First layer chosen instead"
+        ));
+        layerIndex = 0;
+    }
+    // The numbers 64800, 16200 means: grab the fifth layer in the fits file, where the
+    // magnetogram map is, in the wsa file
+    std::valarray<float> magnetogram =
+        fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
 
     // Calculate median:
-
     //std::valarray<float> sorted = magnetogram;
     //std::sort(std::begin(sorted), std::end(sorted));
     //float median;
@@ -104,8 +113,8 @@ std::shared_ptr<ImageData<T>> readImageInternal(ExtHDU& image) {
         image.read(contents);
         ImageData<T> im = {
             .contents = std::move(contents),
-            .width = image.axis(0),
-            .height = image.axis(1)
+            .width = static_cast<int>(image.axis(0)),
+            .height = static_cast<int>(image.axis(1))
         };
         return std::make_shared<ImageData<T>>(im);
     }
@@ -122,8 +131,8 @@ std::shared_ptr<ImageData<T>> readImageInternal(PHDU& image) {
         image.read(contents);
         ImageData<T> im = {
             .contents = std::move(contents),
-            .width = image.axis(0),
-            .height = image.axis(1)
+            .width = static_cast<int>(image.axis(0)),
+            .height = static_cast<int>(image.axis(1))
         };
         return std::make_shared<ImageData<T>>(im);
     }

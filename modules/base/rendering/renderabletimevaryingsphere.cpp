@@ -108,6 +108,12 @@ namespace {
         "be an equirectangular projection.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+    constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
+        "FitsLayer",
+        "Fits Layer",
+        "This value specifies which index in the fits file to extract and use as texture",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
@@ -129,6 +135,8 @@ namespace {
         std::optional<int> numberOfFilesToQueue;
         std::optional<std::string> infoURL;
         std::optional<std::string> dataURL;
+        // An index specifying which layer in the fits file to display
+        std::optional<int> fitsLayer;
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -143,6 +151,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
                                                       const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _textureSourcePath(TextureSourceInfo)
+    , _fitsLayer(FitsLayerInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -156,7 +165,12 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     if (_loadingType == LoadingType::DynamicDownloading) {
         setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.infoURL, p.dataURL);
     }
-
+    if (p.fitsLayer.has_value()) {
+        _fitsLayer = *p.fitsLayer;
+    }
+    else {
+        _fitsLayer = 0;
+    }
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
@@ -171,6 +185,7 @@ void RenderableTimeVaryingSphere::initializeGL() {
         computeSequenceEndTime();
         loadTexture();
     }
+    definePropertyCallbackFunctions();
 }
 
 void RenderableTimeVaryingSphere::setupDynamicDownloading(
@@ -208,7 +223,7 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     newFile.status = File::FileStatus::Loaded;
     //newFile.time = extractTriggerTimeFromISO8601FileName(path);
     newFile.time = extractTriggerTimeFromFitsFileName(path);
-    std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path);
+    std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path, _fitsLayer);
     t->uploadTexture();
     t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
     //t->purgeFromRAM();
@@ -388,6 +403,12 @@ void RenderableTimeVaryingSphere::loadTexture() {
     if (_activeTriggerTimeIndex != -1) {
         _texture = _files[_activeTriggerTimeIndex].texture.get();
     }
+}
+
+void RenderableTimeVaryingSphere::definePropertyCallbackFunctions() {
+    _fitsLayer.onChange([this]() {
+
+    });
 }
 
 } // namespace openspace
