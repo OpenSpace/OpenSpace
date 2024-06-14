@@ -63,6 +63,9 @@ void ActionManager::removeAction(const std::string& identifier) {
 
     const unsigned int hash = ghoul::hashCRC32(identifier);
     const auto it = _actions.find(hash);
+    global::eventEngine->publishEvent<events::EventActionRemoved>(
+        identifier
+    );
     _actions.erase(it);
 }
 
