@@ -129,7 +129,7 @@ nlohmann::json ShortcutTopic::shortcutJson(const std::string& identifier) const 
 }
 
 void ShortcutTopic::sendData(nlohmann::json data) const {
-    _connection->sendJson(wrappedPayload({ { "actions", data } }));
+    _connection->sendJson(wrappedPayload({ { "shortcuts", data } }));
 }
 
 void ShortcutTopic::handleJson(const nlohmann::json& input) {
