@@ -110,7 +110,8 @@ nlohmann::json ShortcutTopic::shortcutJson(const std::string& identifier) const 
         actions.end(),
         [&identifier](const interaction::Action& action) {
             return action.identifier == identifier;
-    });
+        }
+    );
 
     if (found == actions.end()) {
         return json;
