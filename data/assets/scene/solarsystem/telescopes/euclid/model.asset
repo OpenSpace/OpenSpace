@@ -30,7 +30,7 @@ local Euclid = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "Euclid",
-      ZAxis = "Sun",
+      ZAxis = sun.SunCenter.Identifier,
       YAxis = { 0.0, 1.0, 0.0 },
       YAxisOrthogonal = true
     }

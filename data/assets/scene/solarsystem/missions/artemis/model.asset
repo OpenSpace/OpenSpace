@@ -21,7 +21,7 @@ local ArtemisModel = {
       Attached = "ArtemisModel",
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
-      YAxis = "Sun",
+      YAxis = sun.SunCenter.Identifier,
       YAxisInvert = true
     }
   },
