@@ -40,6 +40,8 @@
 #include <functional>
 #include <chrono>
 
+using nlohmann::json;
+
 namespace {
     void aimTargetGalactic(std::string_view id, const glm::dvec3& direction) {
         const glm::dvec3 positionCelestial = glm::normalize(direction) *
@@ -163,7 +165,7 @@ std::vector<std::string> TargetBrowserPair::selectedImages() const {
     return _browser->selectedImages();
 }
 
-ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
+nlohmann::json TargetBrowserPair::dataAsDictionary() const {
     const glm::dvec2 spherical = targetDirectionEquatorial();
     const glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -176,39 +178,47 @@ ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
             module->wwtDataHandler().image(imageUrl)->identifier
         );
     }
+    glm::ivec3 color = borderColor();
+    std::vector<double> cartesianJson = { cartesian.x, cartesian.y, cartesian.z };
+    std::vector<int> colorJson= { color.r, color.g, color.b };
 
-    ghoul::Dictionary res;
-    res.setValue("id", browserId());
-    res.setValue("targetId", targetNodeId());
-    res.setValue("name", browserGuiName());
-    res.setValue("fov", static_cast<double>(verticalFov()));
-    res.setValue("ra", spherical.x);
-    res.setValue("dec", spherical.y);
-    res.setValue("roll", targetRoll());
-    res.setValue("color", borderColor());
-    res.setValue("cartesianDirection", cartesian);
-    res.setValue("ratio", static_cast<double>(_browser->browserRatio()));
-    res.setValue("isFacingCamera", isFacingCamera());
-    res.setValue("isUsingRae", isUsingRadiusAzimuthElevation());
-    res.setValue("selectedImages", selectedImagesIndices);
-    res.setValue("scale", static_cast<double>(_browser->scale()));
-    res.setValue("opacities", _browser->opacities());
-    res.setValue("borderRadius", _browser->borderRadius());
+    nlohmann::json result = {
+        { "id", browserId() },
+        { "targetId", targetNodeId() },
+        { "name", browserGuiName() },
+        { "fov", static_cast<double>(verticalFov()) },
+        { "ra", spherical.x },
+        { "dec", spherical.y },
+        { "roll", targetRoll() },
+        { "ratio", static_cast<double>(_browser->browserRatio()) },
+        { "isFacingCamera", isFacingCamera() },
+        { "isUsingRae", isUsingRadiusAzimuthElevation() },
+        { "selectedImages", selectedImagesIndices },
+        { "scale", static_cast<double>(_browser->scale()) },
+        { "opacities", _browser->opacities() },
+        { "borderRadius", _browser->borderRadius() },
+        { "cartesianDirection", cartesianJson },
+        { "color", colorJson }
+    };
 
     std::vector<std::pair<std::string, glm::dvec3>> copies = displayCopies();
     std::vector<std::pair<std::string, bool>> showCopies = _browser->showDisplayCopies();
-    ghoul::Dictionary copiesData;
+    nlohmann::json copiesData = nlohmann::json::object();
     for (size_t i = 0; i < copies.size(); i++) {
-        ghoul::Dictionary copy;
-        copy.setValue("position", copies[i].second);
-        copy.setValue("show", showCopies[i].second);
-        copy.setValue("idShowProperty", showCopies[i].first);
-        copiesData.setValue(copies[i].first, copy);
+        nlohmann::json position = {
+            copies[i].second.x, copies[i].second.y, copies[i].second.z
+        };
+        nlohmann::json copy = {
+            { "position", position },
+            { "show", showCopies[i].second },
+            { "idShowProperty", showCopies[i].first }
+        };
+        copiesData[copies[i].first] = copy;
     }
     // Set table for the current target
-    res.setValue("displayCopies", copiesData);
+    result["displayCopies"] = copiesData;
 
-    return res;
+    return result;
 }
 
 void TargetBrowserPair::selectImage(const ImageData& image) {

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___TARGETBROWSERPAIR___H__
 
 #include <modules/skybrowser/include/utility.h>
+#include <openspace/json.h>
 
 namespace ghoul { class Dictionary; }
 
@@ -91,7 +92,7 @@ public:
     ScreenSpaceSkyBrowser* browser() const;
     std::vector<std::string> selectedImages() const;
 
-    ghoul::Dictionary dataAsDictionary() const;
+    nlohmann::json dataAsDictionary() const;
 
     // WorldWide Telescope image handling
     void setImageOrder(const std::string& imageUrl, int order);

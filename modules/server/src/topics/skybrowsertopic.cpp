@@ -37,6 +37,8 @@
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
+    constexpr std::string_view ListOfImages = "get_list_of_images";
+    constexpr std::string_view ImageCollectionUrl = "get_wwt_image_collection_url";
 } // namespace
 
 using nlohmann::json;
@@ -93,38 +95,32 @@ void SkyBrowserTopic::sendBrowserData() {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    ghoul::Dictionary data;
 
     // Set general data
-    data.setValue("selectedBrowserId", module->selectedBrowserId());
-    data.setValue("cameraInSolarSystem", module->isCameraInSolarSystem());
+    nlohmann::json json = {
+        { "selectedBrowserId", module->selectedBrowserId() },
+        { "cameraInSolarSystem", module->isCameraInSolarSystem() }
+    };
 
     // Pass data for all the browsers and the corresponding targets
     if (module->isCameraInSolarSystem()) {
         const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
-        ghoul::Dictionary targets;
+        nlohmann::json targets;
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
-            const std::string id = pair->browserId();
-            const ghoul::Dictionary target = pair->dataAsDictionary();
-            targets.setValue(id, target);
+            targets[pair->browserId()] = pair->dataAsDictionary();
         }
-        data.setValue("browsers", targets);
+        json["browsers"] = targets;
     }
-
-    std::string jsonString = ghoul::formatJson(data);
 
     // Only send message if data actually changed
-    if (jsonString != _lastUpdateJsonString) {
-        const json jsonData = json::parse(jsonString.begin(), jsonString.end());
-        _connection->sendJson(wrappedPayload(jsonData));
+    nlohmann::json diff = nlohmann::json::diff(_lastUpdateJson, json);
+    if (!diff.empty()) {
+        nlohmann::json result = _lastUpdateJson.patch(diff);
+        _connection->sendJson(wrappedPayload({
+            { "type", "browser_data" },
+            { "data", diff }
+        }));
+        _lastUpdateJson = result;
     }
-
-    // @TODO (2022-04-28, emmbr) The message is still sent very often; every time the
-    // camera moves or the time is changes, because this changes the "roll" parameter
-    // of the browser. This is the update that occurs most often. Maybe it could be
-    // separated into it's own topic?
-
-    _lastUpdateJsonString = jsonString;
 }
-
 } // namespace openspace

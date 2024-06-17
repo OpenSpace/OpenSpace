@@ -46,7 +46,7 @@ private:
     int _targetDataCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;
     std::chrono::system_clock::time_point _lastUpdateTime;
-    std::string _lastUpdateJsonString;
+    nlohmann::json _lastUpdateJson = nlohmann::json::object();
 
     std::chrono::milliseconds _skyBrowserUpdateTime = std::chrono::milliseconds(100);
 };
