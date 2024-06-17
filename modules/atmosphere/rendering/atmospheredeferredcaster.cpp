@@ -594,6 +594,115 @@ void AtmosphereDeferredcaster::setHardShadows(bool enabled) {
     _hardShadowsEnabled = enabled;
 }
 
+float rayDistance(float r, float mu, float Rt, float Rg) {
+    const int INSCATTER_INTEGRAL_SAMPLES = 50;
+    const float M_PI = 3.141592657;
+    const float ATM_EPSILON = 1.0;
+    // The light ray starting at the observer in/on the atmosphere can have to possible end
+    // points: the top of the atmosphere or the planet ground. So the shortest path is the
+    // one we are looking for, otherwise we may be passing through the ground
+
+// cosine law
+    float atmRadiusEps2 = (Rt + ATM_EPSILON) * (Rt + ATM_EPSILON);
+    float mu2 = mu * mu;
+    float r2 = r * r;
+    float rayDistanceAtmosphere = -r * mu + std::sqrt(r2 * (mu2 - 1.0) + atmRadiusEps2);
+    float delta = r2 * (mu2 - 1.0) + Rg * Rg;
+
+    // Ray may be hitting ground
+    if (delta >= 0.0) {
+        float rayDistanceGround = -r * mu - sqrt(delta);
+        if (rayDistanceGround >= 0.0) {
+            return std::min(rayDistanceAtmosphere, rayDistanceGround);
+        }
+    }
+    return rayDistanceAtmosphere;
+}
+
+
+void computeTransmittance(std::vector<float>& img, float Rg, float Rt, float HR,
+    glm::vec3 betaRayleigh, float HO, glm::vec3 betaOzoneExtinction, float HM,
+    glm::vec3 betaMieExtinction, bool ozoneLayerEnabled, glm::ivec2 size) {
+
+    const int TransmittanceSteps = 500;
+
+    // Optical depth by integration, from ray starting at point vec(x), i.e, height r and
+    // angle mu (cosine of vec(v)) until top of atmosphere or planet's ground.
+    // r := height of starting point vect(x)
+    // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+    // H := Thickness of atmosphere if its density were uniform (used for Rayleigh and Mie)
+    auto opticalDepth = [&](float r, float mu, float H) -> float {
+        float r2 = r * r;
+        // Is ray below horizon? The transmittance table will have only the values for
+        // transmittance starting at r (x) until the light ray touches the atmosphere or the
+        // ground and only for view angles v between 0 and pi/2 + eps. That's because we can
+        // calculate the transmittance for angles bigger than pi/2 just inverting the ray
+        // direction and starting and ending points.
+
+        // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
+        float cosZenithHorizon = -sqrt(1.0 - ((Rg * Rg) / r2));
+        if (mu < cosZenithHorizon) {
+            return 1e9;
+        }
+
+        // Integrating using the Trapezoidal rule:
+        // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
+        float b_a = rayDistance(r, mu, Rt, Rg);
+        float deltaStep = b_a / static_cast<float>(TransmittanceSteps);
+        // cosine law
+        float y_i = std::exp(-(r - Rg) / H);
+
+        float accumulation = 0.0;
+        for (int i = 1; i <= TransmittanceSteps; i++) {
+            float x_i = static_cast<float>(i) * deltaStep;
+            // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
+            // In this case, a = r, b = x_i and cos(alpha) = cos(PI-zenithView) = mu
+            float y_ii = std::exp(-(std::sqrt(r2 + x_i * x_i + 2.0 * x_i * r * mu) - Rg) / H);
+            accumulation += (y_ii + y_i);
+            y_i = y_ii;
+        }
+        return accumulation * (b_a / (2.0 * TransmittanceSteps));
+    };
+
+    int k = 0;
+    for (int y = 0; y < size.y; y++) {
+        for (int x = 0; x < size.x; x++) {
+            // In the shader this x and y here are actually gl_FragCoord.x, gl_FragCoord
+            // assumes a lower-left origin and pixels centers are located at half-pixel
+            // enters, thus we had 0.5 to x, y
+            float u_mu = (x + 0.5f) / static_cast<float>(size.x);
+            float u_r = (y + 0.5f) / static_cast<float>(size.y);
+
+            // In the paper u_r^2 = (r^2-Rg^2)/(Rt^2-Rg^2)
+            // So, extracting r from u_r in the above equation:
+            float r = Rg + (u_r * u_r) * (Rt - Rg);
+
+            // In the paper the Bruneton suggest mu = dot(v,x)/||x|| with ||v|| = 1.0
+            // Later he proposes u_mu = (1-exp(-3mu-0.6))/(1-exp(-3.6))
+            // But the below one is better. See Collienne.
+            // One must remember that mu is defined from 0 to PI/2 + epsilon
+            float muSun = -0.15 + std::tan(1.5 * u_mu) / std::tan(1.5) * 1.15;
+
+             glm::vec3 ozoneContribution = glm::vec3(0.0f);
+             if (ozoneLayerEnabled) {
+                 ozoneContribution = betaOzoneExtinction * 0.0000006f * opticalDepth(r, muSun, HO);
+             }
+             glm::vec3 opDepth = ozoneContribution;
+             glm::vec3 opDepthBetaMie = betaMieExtinction * opticalDepth(r, muSun, HM);
+             glm::vec3 opDepthBetaRay = betaRayleigh * opticalDepth(r, muSun, HR);
+
+             //glm::vec3 color = glm::exp(-opDepth);
+             glm::vec3 color = (opDepth + opDepthBetaMie + opDepthBetaRay);
+             color = glm::exp(-color);
+
+             img[k] = color.r;
+             img[k + 1] = color.g;
+             img[k + 2] = color.b;
+             k += 3;
+        }
+    }
+
+}
 void AtmosphereDeferredcaster::calculateTransmittance() {
     ZoneScoped;
 
@@ -629,6 +738,51 @@ void AtmosphereDeferredcaster::calculateTransmittance() {
         saveTextureFile("transmittance_texture.ppm", _transmittanceTableSize);
     }
     program->deactivate();
+
+    if (_saveCalculationTextures) {
+
+        std::vector<float> img(
+            _transmittanceTableSize.x * _transmittanceTableSize.y * 3,
+            255.0f
+        );
+        glm::ivec2 size(_transmittanceTableSize);
+        computeTransmittance(img, _atmospherePlanetRadius, _atmosphereRadius, _rayleighHeightScale,
+            _rayleighScatteringCoeff, _ozoneHeightScale, _ozoneExtinctionCoeff, _mieHeightScale,
+            _mieExtinctionCoeff, _ozoneEnabled, _transmittanceTableSize);
+
+        const std::filesystem::path filename = "my_transmittance_test.ppm";
+        std::ofstream ppmFile(filename);
+        if (!ppmFile.is_open()) {
+            return;
+        }
+        ppmFile << "P3" << '\n' << size.x << " " << size.y
+            << '\n' << "255" << '\n';
+
+        _transmittanceTexture.width = _transmittanceTableSize.x;
+        _transmittanceTexture.height = _transmittanceTableSize.y;
+
+        //auto data = std::vector<unsigned int>(_transmittanceTableSize.x * _transmittanceTableSize.y * 3, 255);
+        int k = 0;
+        for (int x = 0; x < size.x; x++) {
+            for (int y = 0; y < size.y; y++) {
+                //unsigned int r = static_cast<unsigned int>(img[k] * 255);
+                //unsigned int g = static_cast<unsigned int>(img[k + 1] * 255);
+                //unsigned int b = static_cast<unsigned int>(img[k + 2] * 255);
+                float r = img[k];
+                float g = img[k + 1];
+                float b = img[k + 2];
+                //data[k] = r;
+                //data[k + 1] = g;
+                //data[k + 2] = b;
+                ppmFile << r << ' ' << g << ' ' << b << ' ';
+                k += 3;
+            }
+            ppmFile << '\n';
+        }
+        _transmittanceTexture.data = std::move(img);
+    }
+
+}
 }
 
 GLuint AtmosphereDeferredcaster::calculateDeltaE() {
