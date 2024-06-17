@@ -703,6 +703,7 @@ void computeTransmittance(std::vector<float>& img, float Rg, float Rt, float HR,
     }
 
 }
+
 void AtmosphereDeferredcaster::calculateTransmittance() {
     ZoneScoped;
 
@@ -783,6 +784,113 @@ void AtmosphereDeferredcaster::calculateTransmittance() {
     }
 
 }
+
+
+// biliniear interpolate a texture, clamps the texture coordinates to (0, size - 1)
+// Assumes x and y lookup coordinates are given as decimals (0,1)
+glm::vec3 texture(const CPUTexture& tex, float x, float y) {
+    auto getColor = [&tex](int i, int j) {
+        int index = (j * tex.width + i) * 3; // Each pixel has 3 values R,G,B
+        return glm::vec3(
+            static_cast<float>(tex.data[index]),
+            static_cast<float>(tex.data[index + 1]),
+            static_cast<float>(tex.data[index + 2]));
+    };
+
+    //auto getWrappedIndex = [](float v, int max) {
+    //    // v is within our texture, no need to wrap it
+    //    if (v > 0 && v < max) {
+    //        return static_cast<int>(v);
+    //    }
+
+    //    // max is 1 less than the width/height size, we add +1 to get the correct texel
+    //    // after casting eg., -0.2 should wrap to the last element
+    //    if (v < 0) {
+    //        const int size = max + 1;
+    //        float wrappedV = size - v;
+    //        return static_cast<int>(wrappedV);
+    //    }
+
+    //    else {
+
+    //    }
+    //};
+
+    // Scale lookup coordinates to match texture size
+    x *= tex.width - 1;
+    y *= tex.height - 1;
+
+    // Calc integer coordinates of the four sourrounding pixels
+    int x1 = std::clamp(static_cast<int>(x), 0, tex.width - 1);
+    int y1 = std::clamp(static_cast<int>(y), 0, tex.height - 1);
+    int x2 = std::clamp(x1 + 1, 0, tex.width - 1);
+    int y2 = std::clamp(y1 + 1, 0, tex.height - 1);
+
+    // Get fractional part of x and y
+    float fx = x - x1;
+    float fy = y - y1;
+
+    // Get colors of the four sourrounding pixels
+    glm::vec3 c11 = getColor(x1, y1);
+    glm::vec3 c12 = getColor(x1, y2);
+    glm::vec3 c21 = getColor(x2, y1);
+    glm::vec3 c22 = getColor(x2, y2);
+
+    // Interpolate the colors
+    glm::vec3 c1, c2, result;
+    c1 = glm::mix(c11, c21, fx);
+    c2 = glm::mix(c21, c22, fx);
+    result = glm::mix(c1, c2, fy);
+
+    return result;
+}
+
+// Function to access the transmittance texture. Given r and mu, returns the transmittance
+// of a ray starting at vec(x), height r, and direction vec(v), mu, and length until it
+// hits the ground or the top of atmosphere.
+// r := height of starting point vect(x)
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+glm::vec3 transmittance(const CPUTexture& tex, float r, float mu, float Rg, float Rt)
+{
+    // Given the position x (here the altitude r) and the view angle v
+    // (here the cosine(v)= mu), we map this
+    float u_r = std::sqrt((r - Rg) / (Rt - Rg));
+    // See Collienne to understand the mapping
+    float u_mu = std::atan((mu + 0.15) / 1.15 * tan(1.5)) / 1.5;
+    return texture(tex, u_mu, u_r);
+}
+
+void computeDeltaE(CPUTexture& img, const  CPUTexture& _transmittance,
+                   float Rg, float Rt) {
+
+    int k = 0;
+    for (int y = 0; y < img.height; y++) {
+        for (int x = 0; x < img.width; x++) {
+            // See Bruneton and Collienne to understand the mapping
+            // In the shader it was gl_FragCoord.x - 0.5 but since fragcoord assume
+            // center voxel and we already have left centered voxels we don't have to subtract
+            float muSun = -0.2 + x / (static_cast<float>(img.width) - 1.0) * 1.2;
+            float r = Rg + y / (static_cast<float>(img.height)) * (Rt - Rg);
+            //float r = Rg + y / (static_cast<float>(img.height)) * (Rt - Rg);
+
+            // We are calculating the Irradiance for L0, i.e., only the radiance coming from the Sun
+            // direction is accounted for:
+            // E[L0](x,s) = L0*dot(w,n) or 0 (if v!=s or the sun is occluded).
+            // Because we consider the planet as a perfect sphere and we are considering only single
+            // scattering here, the dot product dot(w,n) is equal to dot(s,n) that is equal to
+            // dot(s, r/||r||) = muSun.
+            glm::vec3 color = transmittance(_transmittance, r, muSun, Rg, Rt) * std::max(muSun, 0.0f);
+            //color = glm::vec3(color.r, 0, 0);
+            //img.data[k] = static_cast<unsigned int>(color.r * 255);
+            //img.data[k + 1] = static_cast<unsigned int>(color.g * 255);
+            //img.data[k + 2] = static_cast<unsigned int>(color.b * 255);
+            img.data[k] = color.r;
+            img.data[k + 1] = color.g;
+            img.data[k + 2] = color.b;
+            k += 3;
+        }
+    }
+
 }
 
 GLuint AtmosphereDeferredcaster::calculateDeltaE() {
@@ -811,6 +919,47 @@ GLuint AtmosphereDeferredcaster::calculateDeltaE() {
         saveTextureFile("deltaE_table_texture.ppm", _deltaETableSize);
     }
     program->deactivate();
+
+    if (_saveCalculationTextures) {
+        _irradianceTexture = CPUTexture{
+            .width = _deltaETableSize.x,
+            .height = _deltaETableSize.y,
+            .data = std::vector<float>(_deltaETableSize.x * _deltaETableSize.y * 3, 255.0f)
+        };
+
+        computeDeltaE(
+            _irradianceTexture,
+            _transmittanceTexture,
+            _atmospherePlanetRadius,
+            _atmosphereRadius
+        );
+
+        const std::filesystem::path filename = "my_deltaE_table_test.ppm";
+        std::ofstream ppmFile(filename);
+        if (!ppmFile.is_open()) {
+            return deltaE;
+        }
+        ppmFile << "P3" << '\n' << _irradianceTexture.width << " " << _irradianceTexture.height
+            << '\n' << "255" << '\n';
+
+        int k = 0;
+        for (int x = 0; x < _irradianceTexture.width; x++) {
+            for (int y = 0; y < _irradianceTexture.height; y++) {
+                float r = _irradianceTexture.data[k];
+                float g = _irradianceTexture.data[k + 1];
+                float b = _irradianceTexture.data[k + 2];
+
+                r = static_cast<unsigned int>(r * 255);
+                g = static_cast<unsigned int>(g * 255);
+                b = static_cast<unsigned int>(b * 255);
+
+                ppmFile << r << ' ' << g << ' ' << b << ' ';
+                k += 3;
+            }
+            ppmFile << '\n';
+        }
+    }
+
     return deltaE;
 }
 
