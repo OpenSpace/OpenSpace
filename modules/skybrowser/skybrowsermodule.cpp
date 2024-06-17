@@ -478,6 +478,40 @@ std::string SkyBrowserModule::wwtImageCollectionUrl() const {
     return _wwtImageCollectionUrl;
 }
 
+nlohmann::json SkyBrowserModule::imageList() {
+    // Send image list to GUI
+    // If no data has been loaded yet, download the data from the web
+    if (nLoadedImages() == 0) {
+        std::filesystem::path directory = absPath("${SYNC}/wwtimagedata/");
+        loadImages(_wwtImageCollectionUrl, directory);
+    }
+
+    // Create Lua table to send to the GUI
+    nlohmann::json list = nlohmann::json::array();
+    for (auto const& [id, img] : wwtDataHandler().images()) {
+        std::vector<double> vec = { img.equatorialCartesian.x, img.equatorialCartesian.y,
+            img.equatorialCartesian.z };
+        nlohmann::json image = {
+            { "name", img.name },
+            { "key", img.identifier },
+            { "thumbnail", img.thumbnailUrl },
+            { "url", img.imageUrl },
+            { "ra", img.equatorialSpherical.x },
+            { "dec", img.equatorialSpherical.y },
+            { "fov", img.fov },
+            { "hasCelestialCoords", img.hasCelestialCoords },
+            { "cartesianDirection", vec },
+            { "credits", img.credits },
+            { "collection", img.collection },
+            { "creditsUrl", img.creditsUrl },
+            { "identifier", img.identifier }
+        };
+        list.push_back(image);
+    }
+
+    return list;
+}
+
 void SkyBrowserModule::setSelectedBrowser(std::string_view id) {
     TargetBrowserPair* p = pair(id);
     if (p) {

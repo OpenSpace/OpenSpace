@@ -37,8 +37,6 @@
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
-    constexpr std::string_view ListOfImages = "get_list_of_images";
-    constexpr std::string_view ImageCollectionUrl = "get_wwt_image_collection_url";
 } // namespace
 
 using nlohmann::json;
@@ -73,22 +71,19 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
         _isDone = true;
         return;
     }
-
-    if (event != SubscribeEvent) {
-        _isDone = true;
+    if (event == SubscribeEvent) {
+        ServerModule* module = global::moduleEngine->module<ServerModule>();
+        _targetDataCallbackHandle = module->addPreSyncCallback(
+            [this]() {
+                const auto now = std::chrono::system_clock::now();
+                if (now - _lastUpdateTime > _skyBrowserUpdateTime) {
+                    sendBrowserData();
+                    _lastUpdateTime = std::chrono::system_clock::now();
+                }
+            }
+        );
         return;
     }
-
-    ServerModule* module = global::moduleEngine->module<ServerModule>();
-    _targetDataCallbackHandle = module->addPreSyncCallback(
-        [this]() {
-            const auto now = std::chrono::system_clock::now();
-            if (now - _lastUpdateTime > _skyBrowserUpdateTime) {
-                sendBrowserData();
-                _lastUpdateTime = std::chrono::system_clock::now();
-            }
-        }
-    );
 }
 
 void SkyBrowserTopic::sendBrowserData() {
@@ -99,7 +94,9 @@ void SkyBrowserTopic::sendBrowserData() {
     // Set general data
     nlohmann::json json = {
         { "selectedBrowserId", module->selectedBrowserId() },
-        { "cameraInSolarSystem", module->isCameraInSolarSystem() }
+        { "cameraInSolarSystem", module->isCameraInSolarSystem() },
+        { "url", module->wwtImageCollectionUrl() },
+        { "imageList", module->imageList()}
     };
 
     // Pass data for all the browsers and the corresponding targets
@@ -120,7 +117,7 @@ void SkyBrowserTopic::sendBrowserData() {
             { "type", "browser_data" },
             { "data", diff }
         }));
-        _lastUpdateJson = result;
+        _lastUpdateJson = result;   
     }
 }
 } // namespace openspace

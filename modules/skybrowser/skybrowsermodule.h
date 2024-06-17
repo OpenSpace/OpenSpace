@@ -68,6 +68,7 @@ public:
     double spaceCraftAnimationTime() const;
 
     std::string wwtImageCollectionUrl() const;
+    nlohmann::json imageList();
 
     bool isCameraInSolarSystem() const;
     bool isSelectedPairFacingCamera() const;
