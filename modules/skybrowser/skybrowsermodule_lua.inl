@@ -346,61 +346,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
 }
 
 /**
- * Returns a list of all the loaded AAS WorldWide Telescope images that have been loaded.
- * Each image has a name, thumbnail url, equatorial spherical coordinates RA and Dec,
- * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
- * credits url and the identifier of the image which is a unique number.
- */
-[[codegen::luawrap]] ghoul::Dictionary listOfImages() {
-    using namespace openspace;
-
-    // Send image list to GUI
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    std::string url = module->wwtImageCollectionUrl();
-    // If no data has been loaded yet, download the data from the web
-    if (module->nLoadedImages() == 0) {
-        std::filesystem::path directory = absPath("${SYNC}/wwtimagedata/");
-        module->loadImages(url, directory);
-    }
-
-    // Create Lua table to send to the GUI
-    ghoul::Dictionary list;
-    for (auto const& [id, img] : module->wwtDataHandler().images()) {
-        // Push ("Key", value)
-        ghoul::Dictionary image;
-        image.setValue("name", img.name);
-        image.setValue("thumbnail", img.thumbnailUrl);
-        image.setValue("url", img.imageUrl);
-        image.setValue("ra", img.equatorialSpherical.x);
-        image.setValue("dec", img.equatorialSpherical.y);
-        image.setValue("fov", static_cast<double>(img.fov));
-        image.setValue("cartesianDirection", img.equatorialCartesian);
-        image.setValue("hasCelestialCoords", img.hasCelestialCoords);
-        image.setValue("credits", img.credits);
-        image.setValue("collection", img.collection);
-        image.setValue("creditsUrl", img.creditsUrl);
-        image.setValue("identifier", img.identifier);
-
-        list.setValue(img.identifier, image);
-    }
-
-    return list;
-}
-
-/**
- * Deprecated in favor of 'listOfExoplanets'
- */
-[[codegen::luawrap("getListOfImages")]] ghoul::Dictionary listOfImagesDeprecated()
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getListOfImages' function is deprecated and should be replaced with "
-        "'listOfImages'"
-    );
-    return listOfImages();
-}
-
-/**
  * Returns a table of data regarding the current view and the sky browsers and targets.
  * returns a table of data regarding the current targets.
  */
