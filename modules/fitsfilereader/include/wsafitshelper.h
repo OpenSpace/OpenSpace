@@ -24,6 +24,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                          int layerIndex);
 std::shared_ptr<ImageData<float>> callCorrectImageReader(
                                                const std::unique_ptr<CCfits::FITS>& file);
+int nLayers(const std::filesystem::path path);
 template<typename T>
 std::shared_ptr<ImageData<T>> readImageInternal(CCfits::ExtHDU& image);
 template<typename T>

@@ -86,6 +86,16 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
     return std::move(texture);
 }
 
+int nLayers(const std::filesystem::path path) {
+    std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
+
+    // Convirt fits path with fits-file-reader functions
+    const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(file);
+    int layerSize = fitsValues->width * fitsValues->height;
+
+    return fitsValues->contents.size() / layerSize;
+}
+
 // It was easier to make this into a little function to return right away than store it
 // passed the if-statements
 std::shared_ptr<ImageData<float>> callCorrectImageReader(const std::unique_ptr<FITS>& file) {

@@ -35,6 +35,8 @@
 #include <ghoul/opengl/texture.h>
 #include <modules/fitsfilereader/include/wsafitshelper.h>
 
+#include <string>
+
 
 namespace {
     // Extract J2000 time from file names
@@ -185,6 +187,7 @@ void RenderableTimeVaryingSphere::initializeGL() {
         computeSequenceEndTime();
         loadTexture();
     }
+    addProperty(_fitsLayer);
     definePropertyCallbackFunctions();
 }
 
@@ -230,7 +233,14 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
 
     newFile.texture = std::move(t);
 
-        const std::vector<File>::const_iterator iter = std::upper_bound(
+    if (!_layerOptionsAdded) {
+        for (int i = 0; i < nLayers(path); ++i) {
+            _fitsLayer.addOption(i, std::to_string(i+1));
+        }
+        _layerOptionsAdded = true;
+    }
+
+    const std::vector<File>::const_iterator iter = std::upper_bound(
         _files.begin(), _files.end(),
         newFile.time,
         [](double timeRef, const File& fileRef) {
@@ -285,6 +295,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         std::string fileExtention = e.path().extension().string();
         if (fileExtention == ".fits") {
             readFileFromFits(e.path());
+            _isFitsFormat = true;
         }
         else {
             readFileFromImage(e.path());
@@ -379,6 +390,7 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
         std::string fileExtention = filePath.extension().string();
         if (fileExtention == ".fits") {
             readFileFromFits(filePath);
+            _isFitsFormat = true;
         }
         else {
             readFileFromImage(filePath);
@@ -407,7 +419,18 @@ void RenderableTimeVaryingSphere::loadTexture() {
 
 void RenderableTimeVaryingSphere::definePropertyCallbackFunctions() {
     _fitsLayer.onChange([this]() {
-
+        if (_loadingType == LoadingType::StaticLoading) {
+            extractMandatoryInfoFromSourceFolder();
+        }
+        else {
+            if (_isFitsFormat) {
+                for (auto file = _files.begin(); file != _files.end(); ++file) {
+                    file->texture = loadTextureFromFits(file->path, _fitsLayer);
+                    file->texture->uploadTexture();
+                    file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+                }
+            }
+        }
     });
 }
 

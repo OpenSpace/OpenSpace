@@ -89,6 +89,7 @@ private:
         const std::optional<std::string>& dataURL);
     void updateDynamicDownloading(const double currentTime, const double deltaTime);
     void definePropertyCallbackFunctions();
+
     // If there's just one state it should never disappear!
     double _sequenceEndTime = std::numeric_limits<double>::max();
     // Static Loading on default / if not specified
@@ -109,6 +110,8 @@ private:
 
     properties::StringProperty _textureSourcePath;
     bool _isFitsFormat = false;
+    bool _firstUpdate = true;
+    bool _layerOptionsAdded = false;
     ghoul::opengl::Texture* _texture = nullptr;
     bool _textureIsDirty = false;
 };
