@@ -55,6 +55,12 @@ struct ShadowRenderingStruct {
     bool isShadowing = false;
 };
 
+struct CPUTexture {
+    int width;
+    int height;
+    std::vector<float> data;
+};
+
 class AtmosphereDeferredcaster : public Deferredcaster {
 public:
     AtmosphereDeferredcaster(float textureScale,
@@ -129,6 +135,11 @@ private:
     GLuint _transmittanceTableTexture = 0;
     GLuint _irradianceTableTexture = 0;
     GLuint _inScatteringTableTexture = 0;
+
+
+    CPUTexture _transmittanceTexture;
+    CPUTexture _irradianceTexture;
+    CPUTexture _inScatteringTexture;
 
     // Atmosphere Data
     bool _ozoneEnabled = false;
