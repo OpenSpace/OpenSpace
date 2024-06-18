@@ -56,10 +56,19 @@ struct ShadowRenderingStruct {
 };
 
 struct CPUTexture {
-    int width;
-    int height;
+    CPUTexture() = default;
+    CPUTexture(int w, int h)
+        : width{ w }, height{ h } {
+        data = std::vector<float>(width * height * 3, 255.f);
+    }
+    CPUTexture(const glm::ivec2& size) : CPUTexture(size.x, size.y) {}
+
+    int width = 0;
+    int height = 0;
     std::vector<float> data;
 };
+
+using CPUTexture3D = std::vector<CPUTexture>;
 
 class AtmosphereDeferredcaster : public Deferredcaster {
 public:
@@ -138,7 +147,7 @@ private:
 
 
     CPUTexture _transmittanceTexture;
-    CPUTexture _irradianceTexture;
+    CPUTexture _deltaETexture;
     CPUTexture _inScatteringTexture;
 
     // Atmosphere Data
