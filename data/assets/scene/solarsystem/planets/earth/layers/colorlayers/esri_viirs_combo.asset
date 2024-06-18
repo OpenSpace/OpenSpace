@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "ESRI_VIIRS_Combo",
   Name = "ESRI VIIRS Combo",
   Enabled = asset.enabled,
+  ZIndex = 20,
   Type = "TileProviderByLevel",
   LevelTileProviders = {
     {
@@ -18,7 +19,7 @@ local Layer = {
         Prototyped = {
           Time = {
             Start = "2015-11-24",
-            End = "Today"
+            End = "2024-05-27"
           },
           TemporalResolution = "1d",
           TimeFormat = "YYYY-MM-DD",

@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "ESRI_NOAA20_Combo",
   Name = "ESRI NOAA20 Combo",
   Enabled = asset.enabled,
+  ZIndex = 30,
   Type = "TileProviderByLevel",
   LevelTileProviders = {
     {

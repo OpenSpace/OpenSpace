@@ -10,6 +10,7 @@ local treks_MSGR_Aksakov_Crater_Peak_Ring_Slope_100m = {
   Identifier = "MSGR_Aksakov_Crater_Peak_Ring_Slope_100m",
   Name = [[MSGR MDIS Slope, Aksakov Crater Peak Ring]],
   FilePath = asset.resource("MSGR_MDIS_Slope/Aksakov_Crater_Peak_Ring.vrt"),
+  ZIndex = 50,
   Description = [[This is a slope product of the digital elevation model (DEM) for the Aksakov Crater Peak Ring region on Mercury. This data product class of this data is observational and has been constructed to examine the topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. This DEM has been derived from Mercury Dual Imaging System (MDIS) data and has been generated at a resolution of 100m/pixel. The DEM has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. Vertical offsets in this DEM have been roughly corrected relative to the USGS's 665m Global DEM of Mercury. DEM elevation values are in meters and referred to a radius of 2440000m. Slope values are in degrees with a minimum value of 0 and a maximum value of 41.818.]]
 }
 
@@ -17,6 +18,7 @@ local treks_MSGR_near_Dali_Crater_Slope_60m = {
   Identifier = "MSGR_near_Dali_Crater_Slope_60m",
   Name = [[MSGR MDIS Slope, Crater near Dali Crater]],
   FilePath = asset.resource("MSGR_MDIS_Slope/Crater_near_Dali_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a slope product of the digital elevation model (DEM) for the Crater Near Dali Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. This DEM has been derived from Mercury Dual Imaging System (MDIS) data and has been generated at a resolution of 60m/pixel. The DEM has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. Vertical offsets in this DEM have been roughly corrected relative to the USGS's 665m Global DEM of Mercury. DEM elevation values are in meters and referred to a radius of 2440000m. Slope values are in degrees with a minimum value of 0 and a maximum value of 50.112.]]
 }
 
@@ -24,6 +26,7 @@ local treks_MSGR_near_Geddes_Crater_Slope_100m = {
   Identifier = "MSGR_near_Geddes_Crater_Slope_100m",
   Name = [[MSGR MDIS Slope, Crater near Geddes Crater]],
   FilePath = asset.resource("MSGR_MDIS_Slope/Crater_near_Geddes_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a slope product of the digital elevation model (DEM) for the Crater Near Geddes Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. This DEM has been derived from Mercury Dual Imaging System (MDIS) data and has been generated at a resolution of 100m/pixel. The DEM has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. Vertical offsets in this DEM have been roughly corrected relative to the USGS's 665m Global DEM of Mercury. DEM elevation values are in meters and referred to a radius of 2440000m. Slope values are in degrees with a minimum value of 0 and a maximum value of 42.451.]]
 }
 
@@ -31,6 +34,7 @@ local treks_MSGR_Degas_Crater_Slope_90m = {
   Identifier = "MSGR_Degas_Crater_Slope_90m",
   Name = [[MSGR MDIS Slope, Degas Crater]],
   FilePath = asset.resource("MSGR_MDIS_Slope/Degas_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a slope product of the digital elevation model (DEM) for the Degas Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. This DEM has been derived from Mercury Dual Imaging System (MDIS) data and has been generated at a resolution of 90m/pixel. The DEM has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. Vertical offsets in this DEM have been roughly corrected relative to the USGS's 665m Global DEM of Mercury. DEM elevation values are in meters and referred to a radius of 2440000m. Slope values are in degrees with a minimum value of 0 and a maximum value of 53.812.]]
 }
 
@@ -38,6 +42,7 @@ local treks_MSGR_Kertesz_Crater_Slope_100m = {
   Identifier = "MSGR_Kertesz_Crater_Slope_100m",
   Name = [[MSGR MDIS Slope, Kertesz Crater]],
   FilePath = asset.resource("MSGR_MDIS_Slope/Kertesz_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a slope product of the digital elevation model (DEM) for the Kertesz Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. This DEM has been derived from Mercury Dual Imaging System (MDIS) data and has been generated at a resolution of 100m/pixel. The DEM has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. Vertical offsets in this DEM have been roughly corrected relative to the USGS's 665m Global DEM of Mercury. DEM elevation values are in meters and referred to a radius of 2440000m. Slope values are in degrees with a minimum value of 0 and a maximum value of 51.033.]]
 }
 
@@ -45,6 +50,7 @@ local treks_MSGR_nw_Degas_Crater_Slope_80m = {
   Identifier = "MSGR_nw_Degas_Crater_Slope_80m",
   Name = [[MSGR MDIS Slope, North-West of Degas Crater]],
   FilePath = asset.resource("MSGR_MDIS_Slope/North-West_of_Degas_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a slope product of the digital elevation model (DEM) for the northwest region of Degas Crater on Mercury. This data product class of this data is observational and has been constructed to examine the topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. This DEM has been derived from Mercury Dual Imaging System (MDIS) data and has been generated at a resolution of 80m/pixel. The DEM has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. Vertical offsets in this DEM have been roughly corrected relative to the USGS's 665m Global DEM of Mercury. DEM elevation values are in meters and referred to a radius of 2440000m. Slope values are in degrees with a minimum value of 0 and a maximum value of 42.616.]]
 }
 
@@ -52,6 +58,7 @@ local treks_MSGR_Praxiteles_Peak_Ring_Slope_60m = {
   Identifier = "MSGR_Praxiteles_Peak_Ring_Slope_60m",
   Name = [[MSGR MDIS Slope, Praxiteles Peak Ring]],
   FilePath = asset.resource("MSGR_MDIS_Slope/Praxiteles_Peak_Ring.vrt"),
+  ZIndex = 50,
   Description = [[This is a colorized slope product of the digital elevation model (DEM) for the Praxiteles Peak Ring region on Mercury. This data product class of this data is observational and has been constructed to examine the topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. This DEM has been derived from Mercury Dual Imaging System (MDIS) data and has been generated at a resolution of 60m/pixel. The DEM has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. Vertical offsets in this DEM have been roughly corrected relative to the USGS's 665m Global DEM of Mercury. DEM elevation values are in meters and referred to a radius of 2440000m. Slope values are in degrees with a minimum value of 0 and a maximum value of 46.484.]]
 }
 
@@ -59,6 +66,7 @@ local treks_MSGR_Raditladi_Crater_Slope_120m = {
   Identifier = "MSGR_Raditladi_Crater_Slope_120m",
   Name = [[MSGR MDIS Slope, Raditladi Crater]],
   FilePath = asset.resource("MSGR_MDIS_Slope/Raditladi_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a slope product of the digital elevation model (DEM) for the Raditladi Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. This DEM has been derived from Mercury Dual Imaging System (MDIS) data and has been generated at a resolution of 120m/pixel. The DEM has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. Vertical offsets in this DEM have been roughly corrected relative to the USGS's 665m Global DEM of Mercury. DEM elevation values are in meters and referred to a radius of 2440000m. Slope values are in degrees with a minimum value of 0 and a maximum value of 39.538.]]
 }
 
@@ -66,6 +74,7 @@ local treks_MSGR_Sander_Crater_Slope_80m = {
   Identifier = "MSGR_Sander_Crater_Slope_80m",
   Name = [[MSGR MDIS Slope, Sander Crater]],
   FilePath = asset.resource("MSGR_MDIS_Slope/Sander_Crater.vrt"),
+  ZIndex = 50,
   Description = [[This is a slope product of the digital elevation model (DEM) for the Sander Crater region on Mercury. This data product class of this data is observational and has been constructed to examine the topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. This DEM has been derived from Mercury Dual Imaging System (MDIS) data and has been generated at a resolution of 80m/pixel. The DEM has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. Vertical offsets in this DEM have been roughly corrected relative to the USGS's 665m Global DEM of Mercury. DEM elevation values are in meters and referred to a radius of 2440000m. Slope values are in degrees with a minimum value of 0 and a maximum value of 41.517.]]
 }
 
@@ -73,6 +82,7 @@ local treks_MSGR_Sholem_Aleichem_Crater_Wall_Slope_25m = {
   Identifier = "MSGR_Sholem_Aleichem_Crater_Wall_Slope_25m",
   Name = [[MSGR MDIS Slope, Sholem Aleichem Crater Wall]],
   FilePath = asset.resource("MSGR_MDIS_Slope/Sholem_Aleichem_Crater_Wall.vrt"),
+  ZIndex = 50,
   Description = [[This is a colorized slope product of the digital elevation model (DEM) for the Sholem Aleichem Crater Wall region on Mercury. This data product class of this data is observational and has been constructed to examine the topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. This DEM has been derived from Mercury Dual Imaging System (MDIS) data and has been generated at a resolution of 25m/pixel. The DEM has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. Vertical offsets in this DEM have been roughly corrected relative to the USGS's 665m Global DEM of Mercury. DEM elevation values are in meters and referred to a radius of 2440000m. Slope values are in degrees with a minimum value of 0 and a maximum value of 40.746.]]
 }
 

@@ -788,7 +788,8 @@ scripting::LuaLibrary ParallelPeer::luaLibrary() {
             codegen::lua::Connect,
             codegen::lua::Disconnect,
             codegen::lua::RequestHostship,
-            codegen::lua::ResignHostship
+            codegen::lua::ResignHostship,
+            codegen::lua::JoinServer
         }
     };
 }

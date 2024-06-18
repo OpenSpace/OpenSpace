@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "UvvisHybrid_NewYork",
   Name = "Uvvis Hybrid [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("uvvishybrid_newyork.wms"),
   Settings = {
     Gamma = 0.52,

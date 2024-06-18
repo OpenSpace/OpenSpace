@@ -82,7 +82,7 @@ private:
     properties::IntProperty _timeStampSubsamplingFactor;
     /// Determines whether the full trail should be rendered or the future trail removed
     properties::BoolProperty _renderFullTrail;
-    /// Determines how many vertices around the object that will be 
+    /// Determines how many vertices around the object that will be
     /// replaced during full trail rendering
     properties::IntProperty _numberOfReplacementPoints;
 
@@ -114,7 +114,7 @@ private:
 
     /// Contains all timestamps corresponding to the positions in _vertexArray
     std::vector<double> _timeVector;
-    
+
     /// Keeps track of all double precision vertices of trails
     std::vector<TrailVBOLayout<double>> _dVertexArray;
 

@@ -30,7 +30,7 @@ local GaiaAbundanceApogee = {
     OtherData = "FeH",
     MagnitudeExponent = 7.25,
     SizeComposition = "Distance Modulus",
-    Halo = {
+    Glare = {
       Texture = textures .. "halo.png"
     },
     ColorRange = { { -0.8, 0.6 } },

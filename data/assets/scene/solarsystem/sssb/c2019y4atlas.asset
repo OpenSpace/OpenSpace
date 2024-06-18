@@ -33,7 +33,7 @@ local C2019Y4AtlasTrail = {
   },
   GUI = {
     Name = "C2019 Y4 Atlas Trail",
-    Path = "/Solar System/Comets"
+    Path = "/Solar System/Small Bodies"
   }
 }
 
@@ -48,7 +48,7 @@ local C2019Y4AtlasPosition = {
   },
   GUI = {
     Name = "C/2019 Y4 Atlas",
-    Path = "/Solar System/Comets",
+    Path = "/Solar System/Small Bodies",
     Description = "This is the position for C/2019 Y4 Atlas"
   }
 }

@@ -189,17 +189,14 @@ struct CameraKeyframe {
 
     void write(std::stringstream& out) const {
         // Add camera position
-        out << std::fixed << std::setprecision(7) << _position.x << ' '
-            << std::fixed << std::setprecision(7) << _position.y << ' '
-            << std::fixed << std::setprecision(7) << _position.z << ' ';
+        out << std::setprecision(std::numeric_limits<double>::max_digits10);
+        out << _position.x << ' ' << _position.y << ' ' << _position.z << ' ';
         // Add camera rotation
-        out << std::fixed << std::setprecision(7) << _rotation.x << ' '
-            << std::fixed << std::setprecision(7) << _rotation.y << ' '
-            << std::fixed << std::setprecision(7) << _rotation.z << ' '
-            << std::fixed << std::setprecision(7) << _rotation.w << ' ';
-        out << std::fixed
-            << std::setprecision(std::numeric_limits<double>::max_digits10)
-            << _scale << ' ';
+        out << _rotation.x << ' '
+            << _rotation.y << ' '
+            << _rotation.z << ' '
+            << _rotation.w << ' ';
+        out << std::scientific << _scale << ' ';
         if (_followNodeRotation) {
             out << "F ";
         }

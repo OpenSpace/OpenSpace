@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_Diviner_CF_Filled_Global_8ppd = {
   Identifier = "LRO_Diviner_CF_Filled_Global_8ppd",
   Name = [[LRO Diviner CF Mosaic, Filled]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_Diviner_CF_Mosaic/Filled.vrt"),
   Description = [[]]
 }

@@ -32,15 +32,15 @@ local Stars = {
   Renderable = {
     Type = "RenderableStars",
     File = speck .. "stars.speck",
-    Halo = {
-      Texture = textures .. "halo.png",
-      Multiplier = 0.65
-    },
-    Glare = {
+    Core = {
       Texture = textures .. "glare.png",
       Multiplier = 15.0,
       Gamma = 1.66,
       Scale = 0.18
+    },
+    Glare = {
+      Texture = textures .. "halo.png",
+      Multiplier = 0.65
     },
     MagnitudeExponent = 6.325,
     ColorMap = colormaps .. "colorbv.cmap",
@@ -71,16 +71,16 @@ local SunStar = {
   Renderable = {
     Type = "RenderableStars",
     File = sunspeck .. "sunstar.speck",
-    Halo = {
+    Core = {
+      Texture = textures .. "glare.png",
+      Multiplier = 1.0,
+      Scale = 0.1
+    },
+    Glare = {
       Texture = textures .. "halo.png",
       Multiplier = 0.55,
       Gamma = 1.1,
       Size = 0.95
-    },
-    Glare = {
-      Texture = textures .. "glare.png",
-      Multiplier = 1.0,
-      Scale = 0.1
     },
     MagnitudeExponent = 6.25,
     ColorMap = colormaps .. "colorbv.cmap",

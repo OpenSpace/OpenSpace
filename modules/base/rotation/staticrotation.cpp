@@ -57,9 +57,22 @@ namespace {
         return res;
     }
 
+    // A StaticRotation is using a fixed and constant rotation factor that does not change
+    // over time. The rotation value is provided as a property that can be changed at
+    // runtime, but it will not change automatically over time.
     struct [[codegen::Dictionary(StaticRotation)]] Parameters {
         // Stores the static rotation as a vector containing Euler angles, a quaternion
-        // or a rotation matrix
+        // representation, or a rotation matrix.
+        //
+        // For the Euler angles, the values have to be provided in radians. To convert
+        // degres to radians, you can use the `math.rad` function.
+        //
+        // For the Quaternion representation, the values have to be provided in the order
+        // (w, x, y, z).
+        //
+        // For the matrix form, the provided matrix will be converted into Euler angles,
+        // an operation which might fail if the matrix is not a true rotation matrix. The
+        // values are assumed to be in row-major order.
         std::variant<glm::dvec3, glm::dvec4, glm::dmat3x3> rotation;
     };
 #include "staticrotation_codegen.cpp"

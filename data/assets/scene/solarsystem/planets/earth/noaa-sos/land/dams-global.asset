@@ -25,6 +25,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Type = "ImageSequenceTileProvider",
+  ZIndex = 100,
   FolderPath = syncedDirectory .. "4096",
   Description = Description
 }

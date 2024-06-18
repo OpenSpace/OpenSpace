@@ -72,8 +72,6 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_blendMode);
-
     _sourceFolder = p.sourceFolder;
     if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
         LERROR(std::format(

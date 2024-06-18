@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "WAC_Utah",
   Name = "WAC [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("wac_utah.wms"),
   Settings = { Gamma = 0.84 },
   Description = [[Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera (WAC)

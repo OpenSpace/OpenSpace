@@ -42,7 +42,12 @@ local IssPosition = {
   Parent = transforms.EarthInertial.Identifier,
   BoundingSphere = 54.5, -- half the width
   Transform = {
-    Translation = {}, -- This translation is provided in the onInitialize
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "ISS.txt",
+      Format = "OMM"
+    }
   },
   Tag = { "earth_satellite", "ISS" },
   GUI = {
@@ -83,7 +88,12 @@ local IssTrail = {
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
-    Translation = {}, -- This translation is provided in the onInitialize
+    Translation = {
+      Type = "GPTranslation",
+      Observer = transforms.EarthInertial.Identifier,
+      File = omm .. "ISS.txt",
+      Format = "OMM"
+    },
     RenderBinMode = "PostDeferredTransparent",
     Color = { 0.9, 0.6715, 0.0 },
     Fade = 1.5,
@@ -144,8 +154,6 @@ asset.onInitialize(function()
   local translation, kernel = openspace.space.tleToSpiceTranslation(tle .. "ISS.txt")
   kernelFile = kernel -- Store the path for the deinitialize function
   openspace.spice.loadKernel(kernelFile)
-  IssPosition.Transform.Translation = translation;
-  IssTrail.Renderable.Translation = translation;
 
   openspace.spice.loadKernel(kernels .. "iss.tf")
 

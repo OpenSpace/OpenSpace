@@ -115,7 +115,7 @@ private:
         std::unique_ptr<ghoul::filesystem::File> file;
     };
 
-    TextureComponent _halo;
+    TextureComponent _core;
     TextureComponent _glare;
 
     struct {
@@ -133,9 +133,9 @@ private:
     UniformCache(
         modelMatrix, cameraViewProjectionMatrix, cameraUp, eyePosition, colorOption,
         magnitudeExponent, sizeComposition, lumCent, radiusCent, colorTexture, opacity,
-        otherDataTexture, otherDataRange, filterOutOfRange, fixedColor, haloTexture,
-        haloMultiplier, haloGamma, haloScale, hasGlare, glareTexture, glareMultiplier,
-        glareGamma, glareScale
+        otherDataTexture, otherDataRange, filterOutOfRange, fixedColor, glareTexture,
+        glareMultiplier, glareGamma, glareScale, hasCore, coreTexture, coreMultiplier,
+        coreGamma, coreScale
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;

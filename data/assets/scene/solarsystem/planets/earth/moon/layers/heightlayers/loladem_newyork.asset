@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "LolaDem_NewYork",
   Name = "Lola DEM [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("loladem_newyork.wms"),
   TilePixelSize = 360,
   Settings = { Multiplier = 0.5 },

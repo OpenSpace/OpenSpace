@@ -13,8 +13,8 @@ local RenderableNodeLineExample = {
     LineWidth = 2
   },
   GUI = {
-    Name = "RenderableNodeLine Example",
-    Path = "/Example",
+    Name = "RenderableNodeLine - Basic",
+    Path = "/Examples",
     Description = [[Draws a line between two nodes in the scene.]]
   }
 }

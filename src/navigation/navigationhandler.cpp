@@ -199,17 +199,24 @@ void NavigationHandler::triggerFadeToTransition(const std::string& transitionScr
 {
     const float duration = fadeDuration.value_or(_jumpToFadeDuration);
 
-    const std::string onArrivalScript = std::format(
-        "{} "
-        "openspace.setPropertyValueSingle("
-        "'RenderEngine.BlackoutFactor', 1, {}, 'QuadraticEaseIn'"
-        ")", transitionScript, duration
-    );
-    const std::string script = std::format(
-        "openspace.setPropertyValueSingle("
-        "'RenderEngine.BlackoutFactor', 0, {}, 'QuadraticEaseOut', [[{}]]"
-        ")", duration, onArrivalScript
-    );
+    std::string script;
+    if (duration < std::numeric_limits<float>::epsilon()) {
+        script = transitionScript;
+    }
+    else {
+        const std::string onArrivalScript = std::format(
+            "{} "
+            "openspace.setPropertyValueSingle("
+            "'RenderEngine.BlackoutFactor', 1, {}, 'QuadraticEaseIn'"
+            ")", transitionScript, duration
+        );
+        script = std::format(
+            "openspace.setPropertyValueSingle("
+            "'RenderEngine.BlackoutFactor', 0, {}, 'QuadraticEaseOut', [[{}]]"
+            ")", duration, onArrivalScript
+        );
+    }
+
     // No syncing, as this was called from a script that should have been synced already
     global::scriptEngine->queueScript(
         std::move(script),

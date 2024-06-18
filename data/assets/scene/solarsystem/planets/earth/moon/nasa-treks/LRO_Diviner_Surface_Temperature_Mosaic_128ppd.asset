@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_DIVINER_ClrRockFreeSurfaceTemp_Global_128ppd = {
   Identifier = "LRO_DIVINER_ClrRockFreeSurfaceTemp_Global_128ppd",
   Name = [[LRO Diviner Surface Temperature Mosaic 128ppd, Colorized]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_Diviner_Surface_Temperature_Mosaic_128ppd/Colorized.vrt"),
   Description = [[]]
 }

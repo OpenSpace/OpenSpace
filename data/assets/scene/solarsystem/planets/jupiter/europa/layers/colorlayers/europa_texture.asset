@@ -13,7 +13,8 @@ local texturesPath = asset.resource({
 local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "europa_os.tif",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  ZIndex = 5
 }
 
 

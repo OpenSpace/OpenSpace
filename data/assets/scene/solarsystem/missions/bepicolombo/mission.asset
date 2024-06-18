@@ -1,7 +1,7 @@
 local Mission = {
   Name = "BepiColombo",
   Image = "https://scifleet.esa.int/downloads/bepi_mcs/bepicolombo.png",
-  Description = [[BepiColombo is Europe's first mission to Mercury. It will launch in October 2018 on a journey to the smallest and least explored terrestrial planet in our Solar System. Arriving at Mercury in December 2025, it will endure temperatures in excess of 350°C and gather data during a 1 year nominal mission. The mission comprises two spacecraft: 1. Mercury Planetary Orbiter (MPO), 2. Mercury Magnetospheric Orbiter (MMO). BepiColombo is a joint mission between ESA and the Japan Aerospace Exploration Agency (JAXA), executed under ESA leadership.]],
+  Description = [[BepiColombo is Europe's first mission to Mercury. It launched in October 2018 on a journey to the smallest and least explored terrestrial planet in our Solar System. Arriving at Mercury in December 2025, it will endure temperatures in excess of 350°C and gather data during a 1 year nominal mission. The mission comprises two spacecraft: 1. Mercury Planetary Orbiter (MPO), 2. Mercury Magnetospheric Orbiter (MMO). BepiColombo is a joint mission between ESA and the Japan Aerospace Exploration Agency (JAXA), executed under ESA leadership.]],
   TimeRange = {
     Start = "2018 OCT 20 01:45:00",
     End = "2028 MAY 01 12:00:00" -- Preliminary time

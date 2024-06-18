@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Themis_IR_Night_Sweden",
   Name = "Themis IR Night [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 50,
   FilePath = asset.resource("themis_ir_night_sweden.vrt"),
   BlendMode = "Color",
   Description = [[This mosaic represents the Thermal Emission Imaging System (THEMIS)

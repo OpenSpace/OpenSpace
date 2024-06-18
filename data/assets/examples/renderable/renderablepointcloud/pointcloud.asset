@@ -12,8 +12,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Fixed Color and Size",
-    Path = "/Examples/RenderablePointCloud"
+    Name = "RenderablePointCloud - Fixed Color and Size",
+    Path = "/Examples"
   }
 }
 

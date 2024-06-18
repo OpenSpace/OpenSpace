@@ -29,6 +29,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
@@ -37,6 +38,7 @@ local LayerFloods = {
   Identifier = Identifier .. "-floods",
   Name = Name .. " (Floods)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "flood_3600.png",
   Description = Description
 }

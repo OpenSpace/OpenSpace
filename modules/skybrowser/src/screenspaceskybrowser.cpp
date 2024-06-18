@@ -320,7 +320,7 @@ bool ScreenSpaceSkyBrowser::deinitializeGL() {
     return true;
 }
 
-void ScreenSpaceSkyBrowser::render(float blackoutFactor) {
+void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
     WwtCommunicator::render();
 
     if (!_isHidden) {
@@ -329,7 +329,7 @@ void ScreenSpaceSkyBrowser::render(float blackoutFactor) {
             translationMatrix() *
             localRotationMatrix() *
             scaleMatrix();
-        draw(mat, blackoutFactor);
+        draw(mat, renderData);
     }
 
     // Render the display copies
@@ -353,7 +353,7 @@ void ScreenSpaceSkyBrowser::render(float blackoutFactor) {
                 glm::translate(glm::mat4(1.f), coordinates) *
                 localRotation *
                 scaleMatrix();
-            draw(mat, blackoutFactor);
+            draw(mat, renderData);
         }
     }
 }

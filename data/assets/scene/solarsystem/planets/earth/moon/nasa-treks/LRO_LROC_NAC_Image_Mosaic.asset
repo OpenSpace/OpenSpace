@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_NAC_AvgMosaic_NPole855_1mp_EQ = {
   Identifier = "LRO_NAC_AvgMosaic_NPole855_1mp_EQ",
   Name = [[LRO LROC NAC Image Mosaic, N Pole, Avg Merge]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_NAC_Image_Mosaic/N_Pole.vrt"),
   Description = [[This is a visible image mosaic generated using Lunar Reconnaissance Orbiter Camera (LROC) Narrow Angle Camera (NAC) images from the Lunar Reconnaissance Orbiter mission. The images were orthorectified using LRO's Lunar Orbiter Laser Altimeter (LOLA) polar 5 meter/pixel DEM. The mosaic is generated at half the resolution at which the individual LROC NAC images were gathered, which is approximately 0.5 meters/pixel. The mosaic was registered horizontally to the LOLA global DEM.]]
 }
@@ -16,6 +17,7 @@ local treks_LRO_NAC_AvgMosaic_NPole855_1mp_EQ = {
 local treks_LRO_NAC_AvgMosaic_SPole855_1mp_EQ = {
   Identifier = "LRO_NAC_AvgMosaic_SPole855_1mp_EQ",
   Name = [[LRO LROC NAC Image Mosaic, S Pole, Avg Merge]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_NAC_Image_Mosaic/S_Pole.vrt"),
   Description = [[This is a visible image mosaic generated using Lunar Reconnaissance Orbiter Camera (LROC) Narrow Angle Camera (NAC) images from the Lunar Reconnaissance Orbiter mission. The images were orthorectified using LRO's Lunar Orbiter Laser Altimeter (LOLA) polar 5 meter/pixel DEM. The mosaic is generated at half the resolution at which the individual LROC NAC images were gathered, which is approximately 0.5 meters/pixel. The mosaic was registered horizontally to the LOLA global DEM.]]
 }

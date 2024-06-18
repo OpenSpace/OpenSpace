@@ -8,6 +8,7 @@ asset.require("./mars/layers/base_layers")
 
 asset.require("./jupiter/default_layers")
 asset.require("./jupiter/callisto/default_layers")
+asset.require("./jupiter/europa/layers/local_layers")
 asset.require("./jupiter/ganymede/default_layers")
 asset.require("./jupiter/io/default_layers")
 

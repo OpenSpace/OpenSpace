@@ -14,6 +14,7 @@ local layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "iapetus.jpg",
   Enabled = asset.enabled,
+  ZIndex = 5,
   CacheSettings = { Enabled = false }
 }
 

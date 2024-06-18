@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "CTX_blended",
   Name = "CTX Blended",
   Enabled = asset.enabled,
+  ZIndex = 60,
   FilePath = asset.resource("ctx_blended.vrt"),
   BlendMode = "Color",
   Description = [[The Bruce Murray Laboratory for Planetary Visualization has completed a

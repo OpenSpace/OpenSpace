@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Ma
 local treks_msss_atlas_simp_clon = {
   Identifier = "msss_atlas_simp_clon",
   Name = [[MGS MOC Atlas, Global Color Mosaic]],
+  ZIndex = 50,
   FilePath = asset.resource("MGS_MOC_Atlas/Global_Color_Mosaic.vrt"),
   Description = [[This data was acquired using the Mars Orbiter Camera instrument aboard NASA's Mars Global Surveyor spacecraft (MGS). MGS was launched on November 7, 1996 and arrived at Mars on September 11, 1997. It maintained a circular polar orbit, completing an orbital revolution every 117.65 minutes at an average altitude of 378 km (235 mi). Until November 2, 2006, MGS characterized and mapped Mars' surface features, properties, topography, composition, and processes, as well as studied Mars' weather and atmospheric structure.
 

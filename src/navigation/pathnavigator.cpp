@@ -446,6 +446,17 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
     return result;
 }
 
+double PathNavigator::defaultArrivalHeight(const std::string& sgnIdentifier) const {
+    const SceneGraphNode* node = sceneGraphNode(sgnIdentifier);
+    if (!node) {
+        LERROR(std::format("Could not find scene graph node '{}'", sgnIdentifier));
+        return 0.0;
+    }
+
+    const double radius = findValidBoundingSphere(node);
+    return radius * arrivalDistanceFactor();
+}
+
 const std::vector<SceneGraphNode*>& PathNavigator::relevantNodes() {
     if (!_hasInitializedRelevantNodes) {
         findRelevantNodes();

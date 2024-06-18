@@ -14,6 +14,7 @@ local Layer = {
   Identifier = "Blue_Marble",
   Name = "Blue Marble",
   Enabled = asset.enabled,
+  ZIndex = 5,
   FilePath = texturesPath .. "earth_bluemarble.jpg",
   Description = "Earth image from Blue Marble Next Generation",
   CacheSettings = { Enabled = false }

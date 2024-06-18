@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_LrocKaguya_Shade_60N60S_512ppd = {
   Identifier = "LRO_LrocKaguya_Shade_60N60S_512ppd",
   Name = [[LOLA and TC Stereo DEM Merge 512ppd, Shade]],
+  ZIndex = 50,
   FilePath = asset.resource("LOLA_and_TC_Stereo_DEM_Merge_512ppd/Shade.vrt"),
   Description = [[]]
 }

@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_ldam_10 = {
   Identifier = "ldam_10",
   Name = [[LRO Laser Altimeter, Albedo Global]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_Laser_Altimeter/Albedo_Global.vrt"),
   Description = [[The Lunar Orbiter Laser Altimeter (LOLA) experiment on Lunar Reconnaissance Orbiter (LRO) is a laser altimeter that also measures the strength of the return pulse from the lunar surface. These data have been used to estimate the reflectance (albedo) of the lunar surface, including regions lacking direct solar illumination. A new calibration of these data was used to generate a 2016 albedo map that features lower uncertainties overall and more consistent results in the polar regions than the previous 2014 version. (Improved calibration of reflectance data from the LRO Lunar Orbiter Laser Altimeter (LOLA) and implications for space weathering; M. Lemelin, P.G. Lucey, G.A. Neumann, E.M. Mazarico, M.K. Barker, A. Kakazu, D. Trang, D.E. Smith, M.T. Zuber; Icarus, Volume 273, 15 July 2016, Pages 315-328)]]
 }

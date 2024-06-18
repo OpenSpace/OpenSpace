@@ -21,6 +21,7 @@ local syncedDirectory = asset.resource({
 local LayerBase = {
   Identifier = Identifier,
   Name = Name,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2048-base.png",
   Description = Description
 }
@@ -28,6 +29,7 @@ local LayerBase = {
 local LayerCombined = {
   Identifier = Identifier .. "-combined",
   Name = Name .. " (Combined)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2048-flat-combined.png",
   Description = Description
 }
@@ -35,6 +37,7 @@ local LayerCombined = {
 local LayerLatitude = {
   Identifier = Identifier .. "-latitude",
   Name = Name .. " (Latitude)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2048-layer-latitude.png",
   Description = Description
 }
@@ -42,6 +45,7 @@ local LayerLatitude = {
 local LayerLongitude = {
   Identifier = Identifier .. "-longitude",
   Name = Name .. " (Longitude)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2048-layer-longitude.png",
   Description = Description
 }

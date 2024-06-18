@@ -128,6 +128,7 @@ for i,v in ipairs(layers_names) do
     Identifier = Identifier .. "-" .. v,
     Name = Name .. " " .. v,
     Enabled = asset.enabled,
+    ZIndex = 100,
     FilePath = imagesDestination .. "/" .. v .. ".jpg",
     Description = Description
   }

@@ -14,6 +14,7 @@ local Layer = {
   Identifier = "5000_Years_Eclipses",
   Name = "5000 Years of Total Solar Eclipses",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = texturesPath .. "eclipse_freq_heatmap.tif",
   Description = [[
     This is a heatmap showing the density of solar eclipse paths over the Earth during the 5000-year period between 2000 BCE and 3000 CE. It uses the list of eclipses calculated by Fred Espenak and Jean Meeus and published in 2006 as the Five Millennium Canon of Solar Eclipses. The paths of the 3742 eclipses classified in the Canon as either "T" (total) or "H" (hybrid or total-annular) were drawn into a global map with a pixel resolution of 4 minutes (1/15 of a degree) of latitude and longitude. The pixels counted the eclipse paths as they were drawn, and each pixel location ended up experiencing anywhere from one to 35 eclipses.

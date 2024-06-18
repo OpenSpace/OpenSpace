@@ -29,6 +29,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "3600.png",
   Description = Description
 }
@@ -37,6 +38,7 @@ local LayerNight = {
   Identifier = Identifier .. "-night",
   Name = Name .. " (Night)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096_night.jpg",
   Description = Description
 }

@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Terrain_tileset",
   Name = "Terrain tileset",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("terrain_tileset.wms"),
   TilePixelSize = 129,
   Description = [[This globe layer presents elevation data at approximately 90m or 1km

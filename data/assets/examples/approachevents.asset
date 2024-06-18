@@ -48,8 +48,8 @@ local Model = {
   OnRecede = { "os.example.generic" },
   OnExit = { "os.example.generic" },
   GUI = {
-    Name = "Example Event Model",
-    Path = "/Example"
+    Name = "Event Model",
+    Path = "/Examples"
   }
 }
 

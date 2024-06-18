@@ -1,0 +1,29 @@
+-- Quaternion
+-- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
+-- the coordinate axes are determined by a constant and unchanging static rotation that is
+-- provided by a four-dimensional quaternion.
+
+local Node = {
+  Identifier = "StaticRotation_Example_Quaternion",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0.4873552, -0.4869268, -0.5127203, 0.5123526 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "StaticRotation - Quaternion",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -33,6 +33,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "sos_saras_big_quakes_20110316.png",
   Description = Description
 }

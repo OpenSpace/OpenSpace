@@ -30,6 +30,7 @@ local pipsDestination = syncedDirectory .. "pips"
 local LayerBase = {
   Identifier = Identifier,
   Name = Name,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "background.jpg",
   Description = Description
 }
@@ -37,6 +38,7 @@ local LayerBase = {
 local LayerStations = {
   Identifier = Identifier .. "-stations",
   Name = Name .. " (Stations)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "station_names.png",
   Description = Description
 }
@@ -45,6 +47,7 @@ local LayerImages = {
   Identifier = Identifier .. "-images",
   Name = Name .. " (Images)",
   Type = "ImageSequenceTileProvider",
+  ZIndex = 100,
   FolderPath = imagesDestination,
   Description = Description
 }

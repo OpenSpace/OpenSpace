@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "ClemUvvis_NewYork",
   Name = "Clem Uvvis [New York]",
   Enabled = asset.enabled,
+  ZIndex = 20,
   FilePath = asset.resource("clemuvvis_newyork.wms"),
   Settings = {
     Gamma = 1.14,

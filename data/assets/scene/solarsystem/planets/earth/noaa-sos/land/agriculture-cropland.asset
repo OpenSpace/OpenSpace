@@ -26,6 +26,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096.png",
   Description = Description
 }
@@ -34,6 +35,7 @@ local LayerCountries = {
   Identifier = Identifier .. "-countries",
   Name = Name .. " (w/ countries)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096_countries.png",
   Description = Description
 }

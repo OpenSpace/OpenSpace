@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Themis_IR_Day_NewYork",
   Name = "Themis IR Day [New York]",
   Enabled = asset.enabled,
+  ZIndex = 50,
   FilePath = asset.resource("themis_ir_day_newyork.wms"),
   BlendMode = "Color",
   Description = [[This mosaic represents the Thermal Emission Imaging System (THEMIS)

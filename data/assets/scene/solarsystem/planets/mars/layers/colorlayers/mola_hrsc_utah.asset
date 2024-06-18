@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "MOLA_HRSC_Utah",
   Name = "MOLA HRSC [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("mola_hrsc_utah.wms"),
   Description = [[This map layer is colorzied based elevation data from MOLA and HRSC.
     Compared to MOLA Psuedo Color, this layer has no terrain shading, which is

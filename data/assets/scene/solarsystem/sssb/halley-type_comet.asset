@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Halley-type Comet)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_halley-type_comet",
-  Version = 3
+  Version = 4
 })
 
 

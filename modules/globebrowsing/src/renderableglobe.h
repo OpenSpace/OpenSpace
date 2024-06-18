@@ -122,6 +122,9 @@ public:
 
     const glm::dmat4& modelTransform() const;
 
+    // Will cause the shaders to be recompiled
+    void invalidateShader();
+
     static documentation::Documentation Documentation();
 
 private:

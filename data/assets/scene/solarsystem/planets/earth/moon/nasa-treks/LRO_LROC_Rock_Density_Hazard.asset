@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_NAC_RockDenHaz_13S358E_2mp = {
   Identifier = "LRO_NAC_RockDenHaz_13S358E_2mp",
   Name = [[LRO LROC Rock Density Hazard, Alphonsus Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Alphonsus_Crater.vrt"),
   Description = [[]]
 }
@@ -16,6 +17,7 @@ local treks_LRO_NAC_RockDenHaz_13S358E_2mp = {
 local treks_LRO_NAC_RockDenHaz_73N350E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_73N350E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Anaxagoras Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Anaxagoras_Crater.vrt"),
   Description = [[]]
 }
@@ -23,6 +25,7 @@ local treks_LRO_NAC_RockDenHaz_73N350E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_26N004E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_26N004E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Apollo 15]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Apollo_15.vrt"),
   Description = [[]]
 }
@@ -30,6 +33,7 @@ local treks_LRO_NAC_RockDenHaz_26N004E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_09S015E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_09S015E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Apollo 16]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Apollo_16.vrt"),
   Description = [[]]
 }
@@ -37,6 +41,7 @@ local treks_LRO_NAC_RockDenHaz_09S015E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_37S206E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_37S206E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Apollo Basin]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Apollo_Basin.vrt"),
   Description = [[]]
 }
@@ -44,6 +49,7 @@ local treks_LRO_NAC_RockDenHaz_37S206E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_25N311E_2mp = {
   Identifier = "LRO_NAC_RockDenHaz_25N311E_2mp",
   Name = [[LRO LROC Rock Density Hazard, Aristarchus 1]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Aristarchus_1.vrt"),
   Description = [[]]
 }
@@ -51,6 +57,7 @@ local treks_LRO_NAC_RockDenHaz_25N311E_2mp = {
 local treks_LRO_NAC_RockDenHaz_28N307E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_28N307E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Aristarchus 2]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Aristarchus_2.vrt"),
   Description = [[]]
 }
@@ -58,6 +65,7 @@ local treks_LRO_NAC_RockDenHaz_28N307E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_19S070E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_19S070E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Balmer Basin]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Balmer_Basin.vrt"),
   Description = [[]]
 }
@@ -65,6 +73,7 @@ local treks_LRO_NAC_RockDenHaz_19S070E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_20S337E_400cmp = {
   Identifier = "LRO_NAC_RockDenHaz_20S337E_400cmp",
   Name = [[LRO LROC Rock Density Hazard, Bullialdus Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Bullialdus_Crater.vrt"),
   Description = [[]]
 }
@@ -72,6 +81,7 @@ local treks_LRO_NAC_RockDenHaz_20S337E_400cmp = {
 local treks_LRO_NAC_RockDenHaz_36N320E_2mp = {
   Identifier = "LRO_NAC_RockDenHaz_36N320E_2mp",
   Name = [[LRO LROC Rock Density Hazard, Gruithuisen Domes]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Gruithuisen_Domes.vrt"),
   Description = [[]]
 }
@@ -79,6 +89,7 @@ local treks_LRO_NAC_RockDenHaz_36N320E_2mp = {
 local treks_LRO_NAC_RockDenHaz_00N234E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_00N234E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Hertzsprung]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Hertzsprung.vrt"),
   Description = [[]]
 }
@@ -86,6 +97,7 @@ local treks_LRO_NAC_RockDenHaz_00N234E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_08N332E_2mp = {
   Identifier = "LRO_NAC_RockDenHaz_08N332E_2mp",
   Name = [[LRO LROC Rock Density Hazard, Hortensius Domes]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Hortensius_Domes.vrt"),
   Description = [[]]
 }
@@ -93,6 +105,7 @@ local treks_LRO_NAC_RockDenHaz_08N332E_2mp = {
 local treks_LRO_NAC_RockDenHaz_06N120E_200cmp = {
   Identifier = "LRO_NAC_RockDenHaz_06N120E_200cmp",
   Name = [[LRO LROC Rock Density Hazard, King Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/King_Crater.vrt"),
   Description = [[]]
 }
@@ -100,6 +113,7 @@ local treks_LRO_NAC_RockDenHaz_06N120E_200cmp = {
 local treks_LRO_NAC_RockDenHaz_32N292E_2mp = {
   Identifier = "LRO_NAC_RockDenHaz_32N292E_2mp",
   Name = [[LRO LROC Rock Density Hazard, Lichtenberg Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Lichtenberg_Crater.vrt"),
   Description = [[]]
 }
@@ -107,6 +121,7 @@ local treks_LRO_NAC_RockDenHaz_32N292E_2mp = {
 local treks_LRO_NAC_RockDenHaz_10N058E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_10N058E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Mare Crisium]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Mare_Crisium.vrt"),
   Description = [[]]
 }
@@ -114,6 +129,7 @@ local treks_LRO_NAC_RockDenHaz_10N058E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_16S041E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_16S041E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Montes Pyrenaeus]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Montes_Pyrenaeus.vrt"),
   Description = [[]]
 }
@@ -121,6 +137,7 @@ local treks_LRO_NAC_RockDenHaz_16S041E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_26S265E_200cmp = {
   Identifier = "LRO_NAC_RockDenHaz_26S265E_200cmp",
   Name = [[LRO LROC Rock Density Hazard, Orientale 1]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Orientale_1.vrt"),
   Description = [[]]
 }
@@ -128,6 +145,7 @@ local treks_LRO_NAC_RockDenHaz_26S265E_200cmp = {
 local treks_LRO_NAC_RockDenHaz_53N354E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_53N354E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Plato Ejecta]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Plato_Ejecta.vrt"),
   Description = [[]]
 }
@@ -135,6 +153,7 @@ local treks_LRO_NAC_RockDenHaz_53N354E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_60S200E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_60S200E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, South Pole-Aitken Basin Interior]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/South_Pole-Aitken_Basin_Interior.vrt"),
   Description = [[]]
 }
@@ -142,6 +161,7 @@ local treks_LRO_NAC_RockDenHaz_60S200E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_02S167E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_02S167E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Stratton (Dewar) High Fe Anomaly]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Stratton_Dewar_High_Fe_Anomaly.vrt"),
   Description = [[]]
 }
@@ -149,6 +169,7 @@ local treks_LRO_NAC_RockDenHaz_02S167E_150cmp = {
 local treks_LRO_NAC_RockDenHaz_20N010E_2mp = {
   Identifier = "LRO_NAC_RockDenHaz_20N010E_2mp",
   Name = [[LRO LROC Rock Density Hazard, Sulpicius Gallus]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Sulpicius_Gallus.vrt"),
   Description = [[]]
 }
@@ -156,6 +177,7 @@ local treks_LRO_NAC_RockDenHaz_20N010E_2mp = {
 local treks_LRO_NAC_RockDenHaz_43S349E_150cmp = {
   Identifier = "LRO_NAC_RockDenHaz_43S349E_150cmp",
   Name = [[LRO LROC Rock Density Hazard, Tycho Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Rock_Density_Hazard/Tycho_Crater.vrt"),
   Description = [[]]
 }

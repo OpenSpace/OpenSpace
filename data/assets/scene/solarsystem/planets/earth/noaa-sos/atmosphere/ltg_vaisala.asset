@@ -33,6 +33,7 @@ local Layer = {
   Name = Name,
   Enabled = asset.enabled,
   Type = "TemporalTileProvider",
+  ZIndex = 100,
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "2160",

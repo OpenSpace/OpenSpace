@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moo
 local treks_LRO_Diviner_ST_Avg_Clr_Global_32ppd = {
   Identifier = "LRO_Diviner_ST_Avg_Clr_Global_32ppd",
   Name = [[LRO Diviner Surface Temp Avg, Color]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_Diviner_Surface_Temp_Avg/Color.vrt"),
   Description = [[]]
 }

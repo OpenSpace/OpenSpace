@@ -15,8 +15,8 @@ local Node = {
     SpoutName = "WV_SPOUT"
   },
   GUI = {
-    Name = "Basic",
-    Path = "/Examples/RenderableSphereSpout"
+    Name = "RenderableSphereSpout - Basic",
+    Path = "/Examples"
   }
 }
 

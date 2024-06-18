@@ -27,6 +27,7 @@ local syncedDirectory = asset.resource({
 local LayerElninoSummer = {
   Identifier = Identifier .. "-elnino_summer",
   Name = Name .. " (El Nino, summer)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "elnino-summer-no-map-transparent-shapes.png",
   Description = Description
 }
@@ -34,6 +35,7 @@ local LayerElninoSummer = {
 local LayerElninoWinter = {
   Identifier = Identifier .. "-elnino_winter",
   Name = Name .. " (El Nino, winter)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "elnino-winter-no-map-transparent-shapes.png",
   Description = Description
 }
@@ -41,6 +43,7 @@ local LayerElninoWinter = {
 local LayerLaninaSummer = {
   Identifier = Identifier .. "-lanina_summer",
   Name = Name .. " (La Nina, summer)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "lanina-summer-no-map-transparent-shapes.png",
   Description = Description
 }
@@ -48,6 +51,7 @@ local LayerLaninaSummer = {
 local LayerLaninaWinter = {
   Identifier = Identifier .. "-lanina_winter",
   Name = Name .. " (La Nina, winter)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "lanina-winter-no-map-transparent-shapes.png",
   Description = Description
 }

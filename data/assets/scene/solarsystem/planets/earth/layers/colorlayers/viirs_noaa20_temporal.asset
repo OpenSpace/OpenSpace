@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "VIIRS_NOAA20_Temporal",
   Name = "VIIRS NOAA20 (Temporal)",
   Enabled = asset.enabled,
+  ZIndex = 30,
   Type = "TemporalTileProvider",
   Mode = "Prototyped",
   Prototyped = {

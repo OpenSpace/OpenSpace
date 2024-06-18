@@ -10,6 +10,7 @@ local treks_Mercury_Messenger_USGS_DEM_665m_v2_HillshadeColor = {
   Identifier = "Mercury_Messenger_USGS_DEM_665m_v2_HillshadeColor",
   Name = [[MSGR MDIS, ColorHillshade Global]],
   FilePath = asset.resource("MSGR_MDIS/ColorHillshade_Global.vrt"),
+  ZIndex = 50,
   Description = [[This is a colorized shaded-relief generated from the USGS Astrogeology Science Center's Mercury MESSENGER Global DEM 665m v2 data product providing global coverage of Mercury. This color hillshade was generated in ArcPro with the shaded-relief raster function. The resolution of the original DEM used to create this product is 64 pixels/degree (665 m/pixel). The control network used for registration contains tie points that are sample/line coordinates with geometric locations (derived from SPICE) that are automatically measured across the overlapping image areas. Elevation values are in meters and referred to a radius of 2439400m. The legend conveys the mapping colors to elevation values (meters).]]
 }
 
@@ -17,6 +18,7 @@ local treks_Mercury_Messenger_USGS_DEM_665m_v2_Hillshade = {
   Identifier = "Mercury_Messenger_USGS_DEM_665m_v2_Hillshade",
   Name = [[MSGR MDIS, Hillshade Global]],
   FilePath = asset.resource("MSGR_MDIS/Hillshade_Global.vrt"),
+  ZIndex = 50,
   Description = [[This is a shaded-relief generated from the USGS Astrogeology Science Center's Mercury MESSENGER Global DEM 665m v2 data product providing global coverage of Mercury. This shaded-relief data product was generated in ArcPro with the hillshade raster function. The resolution of the original DEM used to create this product is 64 pixels/degree (665 m/pixel). The control network used for registration contains tie points that are sample/line coordinates with geometric locations (derived from SPICE) that are automatically measured across the overlapping image areas. Elevation values are in meters and referred to a radius of 2439400m.]]
 }
 
@@ -24,6 +26,7 @@ local treks_Mercury_Messenger_USGS_DEM_665m_v2_SlopeColor = {
   Identifier = "Mercury_Messenger_USGS_DEM_665m_v2_SlopeColor",
   Name = [[MSGR MDIS, Slope Colorized Global]],
   FilePath = asset.resource("MSGR_MDIS/Slope_Colorized_Global.vrt"),
+  ZIndex = 50,
   Description = [[This is a colorized slope data product of the USGS Astrogeology Science Center's Mercury MESSENGER Global DEM 665m v2 data product providing global coverage of Mercury. This slope data product was generated in ArcMap with the slope spatial analysis tool. The resolution of this product is 64 pixels/degree (665 m/pixel). The control network used for registration contains tie points that are sample/line coordinates with geometric locations (derived from SPICE) that are automatically measured across the overlapping image areas. Slope values are in degrees and referred to a radius of 2439400m. Slope values range from a minimum value of 0 to a maximum value of 71.0409. The legend conveys the mapping colors to slope values (degrees).]]
 }
 

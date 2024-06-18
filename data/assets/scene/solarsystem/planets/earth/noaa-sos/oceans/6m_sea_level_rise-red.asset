@@ -32,6 +32,7 @@ local syncedDirectory = asset.resource({
 local Layer0m = {
   Identifier = Identifier .. "-0m",
   Name = Name .. " (0m)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "0m-new.png",
   Description = Description
 }
@@ -39,6 +40,7 @@ local Layer0m = {
 local Layer1m = {
   Identifier = Identifier .. "-1m",
   Name = Name .. " (1m)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "1m-new.png",
   Description = Description
 }
@@ -46,6 +48,7 @@ local Layer1m = {
 local Layer2m = {
   Identifier = Identifier .. "-2m",
   Name = Name .. " (2m)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2m-new.png",
   Description = Description
 }
@@ -53,6 +56,7 @@ local Layer2m = {
 local Layer3m = {
   Identifier = Identifier .. "-3m",
   Name = Name .. " (3m)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "3m-new.png",
   Description = Description
 }
@@ -60,6 +64,7 @@ local Layer3m = {
 local Layer4m = {
   Identifier = Identifier .. "-4m",
   Name = Name .. " (4m)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4m-new.png",
   Description = Description
 }
@@ -67,6 +72,7 @@ local Layer4m = {
 local Layer5m = {
   Identifier = Identifier .. "-5m",
   Name = Name .. " (5m)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "5m-new.png",
   Description = Description
 }
@@ -74,6 +80,7 @@ local Layer5m = {
 local Layer6m = {
   Identifier = Identifier .. "-6m",
   Name = Name .. " (6m)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "6m-new.png",
   Description = Description
 }

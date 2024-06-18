@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Potentially hazardous Asteroids)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_pha",
-  Version = 3
+  Version = 4
 })
 
 

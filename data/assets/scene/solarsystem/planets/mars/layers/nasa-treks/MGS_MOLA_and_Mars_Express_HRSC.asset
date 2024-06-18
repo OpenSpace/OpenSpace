@@ -9,6 +9,7 @@ local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Ma
 local treks_Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw = {
   Identifier = "Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw",
   Name = [[MGS MOLA and Mars Express HRSC, Color Hillshade Blend]],
+  ZIndex = 50,
   FilePath = asset.resource("MGS_MOLA_and_Mars_Express_HRSC/Color_Hillshade_Blend.vrt"),
   Description = [[This data product is a blend of digital terrain model (DTM) data derived from the Mars Orbiter Laser Altimeter (MOLA) instrument aboard NASA's Mars Global Surveyor spacecraft (MGS), and the High-Resolution Stereo Camera (HRSC) aboard the European Space Agency's Mars Express spacecraft.
 
@@ -22,6 +23,7 @@ R. Jaumann, et al. (2007), The high-resolution stereo camera (HRSC) experiment o
 local treks_Mars_MOLA_blend200ppx_HRSC_Shade_clon0dd_200mpp_lzw = {
   Identifier = "Mars_MOLA_blend200ppx_HRSC_Shade_clon0dd_200mpp_lzw",
   Name = [[MGS MOLA and Mars Express HRSC, Hillshade Blend]],
+  ZIndex = 50,
   FilePath = asset.resource("MGS_MOLA_and_Mars_Express_HRSC/Hillshade_Blend.vrt"),
   Description = [[This data product is a blend of digital terrain model (DTM) data derived from the Mars Orbiter Laser Altimeter (MOLA) instrument aboard NASA's Mars Global Surveyor spacecraft (MGS), and the High-Resolution Stereo Camera (HRSC) aboard the European Space Agency's Mars Express spacecraft.
 

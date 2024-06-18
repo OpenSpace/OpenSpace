@@ -185,7 +185,8 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 
             if (nNonEmptyTokens > 4) {
                 throw ghoul::RuntimeError(std::format(
-                    "Error loading speck file {}: Too many arguments for texture on line {}",
+                    "Error loading speck file {}: Too many arguments for texture on line "
+                    "{}",
                     path, currentLineNumber
                 ));
             }
