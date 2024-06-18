@@ -57,11 +57,12 @@ struct ShadowRenderingStruct {
 
 struct CPUTexture {
     CPUTexture() = default;
-    CPUTexture(int w, int h)
+    CPUTexture(int w, int h, float value = 255.f)
         : width{ w }, height{ h } {
-        data = std::vector<float>(width * height * 3, 255.f);
+        data = std::vector<float>(width * height * 3, value);
     }
-    CPUTexture(const glm::ivec2& size) : CPUTexture(size.x, size.y) {}
+    CPUTexture(const glm::ivec2& size, float value = 255.f)
+        : CPUTexture(size.x, size.y, value) {}
 
     int width = 0;
     int height = 0;
@@ -147,6 +148,7 @@ private:
 
 
     CPUTexture _transmittanceTexture;
+    CPUTexture _irradianceTexture;
     CPUTexture _deltaETexture;
     CPUTexture _inScatteringTexture;
 

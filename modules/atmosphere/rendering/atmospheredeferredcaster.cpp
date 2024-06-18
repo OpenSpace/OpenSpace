@@ -1328,6 +1328,13 @@ void AtmosphereDeferredcaster::calculateIrradiance() {
         saveTextureFile("irradiance_texture.ppm", _deltaETableSize);
     }
     program->deactivate();
+
+
+    if (_saveCalculationTextures) {
+        // Irradiance start at 0 ? (see pdf line 4 in 4.1)
+        _irradianceTexture = CPUTexture(_deltaETableSize, 0.f);
+        saveTextureFile("my_irradiance_texture_test.ppm", _irradianceTexture);
+    }
 }
 
 void AtmosphereDeferredcaster::calculateInscattering(GLuint deltaSRayleigh,
