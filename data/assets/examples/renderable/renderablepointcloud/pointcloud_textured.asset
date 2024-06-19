@@ -14,7 +14,7 @@ local Node = {
       -- the ${DATA} token to get the path to a texture in the "OpenSpace/data" folder,
       -- but for a file at a relative location it would also work to use asset.resource,
       -- like for the data file above
-      File = openspace.absPath("${DATA}/test3.jpg"),
+      File = openspace.absPath("${DATA}/test3.jpg")
     },
     -- Disable additive blending, so that points will be rendered with their actual color
     -- and overlapping points will be sorted by depth. This works best when the points
