@@ -16,7 +16,7 @@
           "name": "OpenSpace",
           "stereo": "none",
           "pos": { "x": 100, "y": 0 },
-          "size": { "x": 1920, "y": 1080 },
+          "size": { "x": 960, "y": 540 },
           "viewports": [
             {
               "tracked": true,
@@ -38,7 +38,7 @@
           "name": "OpenSpace",
           "stereo": "none",
           "pos": { "x": 100, "y": 300 },
-          "size": { "x": 1920, "y": 1080 },
+          "size": { "x": 960, "y": 540 },
           "draw2d": false,
           "viewports": [
             {
