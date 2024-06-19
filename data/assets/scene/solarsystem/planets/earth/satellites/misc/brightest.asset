@@ -49,7 +49,6 @@ asset.export(BrightestSatellites)
 
 asset.meta = {
   Name = "Satellites 100 Brightest",
-  Version = "1.0",
   Description = "Satellites asset for 100 Brightest. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

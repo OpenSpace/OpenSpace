@@ -47,7 +47,6 @@ asset.export(MolniyaSatellites)
 
 asset.meta = {
   Name = "Satellites Communications - Molniya",
-  Version = "1.0",
   Description = "Satellites asset for Communications - Molniya. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

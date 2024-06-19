@@ -49,8 +49,7 @@ asset.export("Mars_MOLA_blend200ppx_HRSC_Shade_clon0dd_200mpp_lzw", treks_Mars_M
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MGS_MOLA_and_Mars_Express_HRSC],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MGS_MOLA_and_Mars_Express_HRSC]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

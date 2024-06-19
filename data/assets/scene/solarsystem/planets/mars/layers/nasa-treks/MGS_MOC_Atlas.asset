@@ -28,8 +28,7 @@ asset.export("msss_atlas_simp_clon", treks_msss_atlas_simp_clon)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MGS_MOC_Atlas],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MGS_MOC_Atlas]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

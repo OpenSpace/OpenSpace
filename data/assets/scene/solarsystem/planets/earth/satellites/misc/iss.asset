@@ -187,7 +187,6 @@ asset.export(IssPosition)
 
 asset.meta = {
   Name = "ISS",
-  Version = "3.0",
   Description = [[Model and Trail for ISS. Model from NASA 3D models, trail from
     Celestrak.]],
   Author = "OpenSpace Team",

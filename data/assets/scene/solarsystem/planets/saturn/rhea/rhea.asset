@@ -97,7 +97,6 @@ asset.export(RheaLabel)
 
 asset.meta = {
   Name = "Rhea",
-  Version = "1.0",
   Description = "Rhea globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

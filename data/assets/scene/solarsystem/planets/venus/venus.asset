@@ -96,10 +96,9 @@ asset.export(VenusLabel)
 
 
 asset.meta = {
-    Name = "Venus",
-    Version = "1.1",
-    Description = "Venus globe with labels, and main planet label",
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Venus",
+  Description = "Venus globe with labels, and main planet label",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

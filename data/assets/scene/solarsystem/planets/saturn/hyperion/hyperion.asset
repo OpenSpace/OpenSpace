@@ -93,7 +93,6 @@ asset.export(HyperionLabel)
 
 asset.meta = {
   Name = "Hyperion",
-  Version = "1.1",
   Description = "Hyperion globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

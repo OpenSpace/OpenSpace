@@ -96,10 +96,9 @@ asset.export(EnceladusLabel)
 
 
 asset.meta = {
-    Name = "Enceladus",
-    Version = "1.1",
-    Description = "Enceladus globe with labels and map layers",
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Enceladus",
+  Description = "Enceladus globe with labels and map layers",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

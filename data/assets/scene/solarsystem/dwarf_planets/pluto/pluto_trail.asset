@@ -40,7 +40,6 @@ asset.export(PlutoTrailBarycentric)
 
 asset.meta = {
   Name = "Pluto Barycentric Trail",
-  Version = "1.0",
   Description = "Trail of Pluto as observed by its Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -33,7 +33,6 @@ asset.export("DataPath", dataPath)
 
 asset.meta = {
   Name = "Exoplanet Data",
-  Version = "6.0",
   Description = [[The data that is used for the exoplanet systems. The data has been
     derived from the 'Planetary Systems Composite Data' dataset from the NASA Exoplanet
     Archive.]],

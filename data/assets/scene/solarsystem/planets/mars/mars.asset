@@ -105,7 +105,6 @@ asset.export(MarsLabel)
 
 asset.meta = {
   Name = "Mars",
-  Version = "1.1",
   Description = "Mars globe, and main globe label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

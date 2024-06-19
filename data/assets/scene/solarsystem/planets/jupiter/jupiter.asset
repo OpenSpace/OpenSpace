@@ -84,7 +84,6 @@ asset.export(JupiterLabel)
 
 asset.meta = {
   Name = "Jupiter",
-  Version = "1.1",
   Description = "Jupiter globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

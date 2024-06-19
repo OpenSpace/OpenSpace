@@ -54,7 +54,6 @@ asset.export("Planet", Planet)
 
 asset.meta = {
   Name = "Haumea Model",
-  Version = "1.0",
   Description = [[Model of Haumea]],
   Author = "OpenSpace Team",
   URL = "https://solarsystem.nasa.gov/planets/dwarf-planets/haumea/in-depth/",

@@ -6,7 +6,6 @@ asset.require("./layers/newyork_layers", true)
 
 asset.meta = {
   Name = "Default Enceladus Layers",
-  Version = "1.1",
   Description = [[Default Enceladus layers are: Enceladus Texture,
     and Cassini Global Mosaic 100m HPF.
 

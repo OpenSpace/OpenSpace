@@ -6,7 +6,6 @@ asset.require("./layers/utah_layers", true)
 
 asset.meta = {
   Name = "Default Venus Layers",
-  Version = "1.2",
   Description = [[Default Venus layers are: Venus Texture, Magellan Mosaic,
     Clouds Magellan Combo, and Magellan Elevation (3D).
 

@@ -364,7 +364,6 @@ end)
 
 asset.meta = {
   Name = "SYMBIO-SYS",
-  Version = "1.0",
   Description = [[
     SIMBIO-SYS has been conceived to be integrated on the BepiColombo MPO pointing in the
     nadir direction in order to perform the remote sensing of the Mercury surface during

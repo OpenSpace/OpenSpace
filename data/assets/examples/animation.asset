@@ -176,7 +176,6 @@ asset.export(AnimationBounce)
 
 asset.meta = {
   Name = "Animation Example asset",
-  Version = "1.0",
   Description = "Simple animation example asset with an animated box model",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
@@ -187,7 +186,6 @@ asset.meta = {
 -- @TODO: At the moment, this overwrites the previous meta description. Probably needs a way to specify multiple meta's per file?
 asset.meta = {
   Name = "Animated Box Model",
-  Version = "1.0",
   Description = "Simple animated box model",
   Author = "Cesium, https://cesium.com/",
   URL = "https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/BoxAnimated",

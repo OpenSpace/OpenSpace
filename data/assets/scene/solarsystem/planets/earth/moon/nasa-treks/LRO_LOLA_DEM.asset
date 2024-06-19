@@ -92,8 +92,7 @@ asset.export("LRO_LOLA_ClrShade_SPole875_5mp_v04_EQ", treks_LRO_LOLA_ClrShade_SP
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_LOLA_DEM],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_LOLA_DEM]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

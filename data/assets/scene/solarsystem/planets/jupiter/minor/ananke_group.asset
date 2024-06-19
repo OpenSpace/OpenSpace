@@ -2033,7 +2033,6 @@ asset.export(S2003J12Label)
 
 asset.meta = {
   Name = "Jupiter Ananke Group Moons",
-  Version = "1.0",
   Description = [[Asset containing Jupiter's Ananke Group moons. Blank globes, SPICE
     trails, and labels are generated for each moon]],
   Author = "OpenSpace Team",

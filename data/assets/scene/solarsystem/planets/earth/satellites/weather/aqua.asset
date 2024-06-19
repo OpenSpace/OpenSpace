@@ -110,7 +110,6 @@ asset.export(AquaLabel)
 
 asset.meta = {
   Name = "Aqua",
-  Version = "1.0",
   Description = [[Trail for Aqua. trail from Celestrak. Can be used in conjuntion with
     Aqua Modis (Temporal) layer for Earth]],
   Author = "OpenSpace Team",

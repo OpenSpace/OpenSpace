@@ -417,7 +417,6 @@ asset.export(TarvosLabel)
 
 asset.meta = {
   Name = "Saturn Gallic Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Gallic Group moons: Albiorix,
     Bebhionn, Erriapus, and Tarvos. Blank globes and SPICE trails are generated for each
     moon]],

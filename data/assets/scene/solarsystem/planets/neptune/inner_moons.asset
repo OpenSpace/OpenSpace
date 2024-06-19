@@ -671,7 +671,6 @@ asset.export(ProteusLabel)
 
 asset.meta = {
   Name = "Neptune Inner Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Neptune' inner prograde moons:
     Naiad, Thalassa, Despina, Galatea, Larissa, S2004N1, and Proteus. Blank globes and
     SPICE trails are generated for each moon]],

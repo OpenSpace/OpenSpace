@@ -40,7 +40,6 @@ asset.export("Planet", Planet)
 
 asset.meta = {
   Name = "Gonggong Globe",
-  Version = "1.0",
   Description = [[Globe of Gonggong]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

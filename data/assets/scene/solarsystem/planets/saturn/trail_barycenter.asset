@@ -41,7 +41,6 @@ asset.export(SaturnBarycenterTrail)
 
 asset.meta = {
   Name = "Saturn Trail",
-  Version = "1.1",
   Description = "Trail of Saturn's Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

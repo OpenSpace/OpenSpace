@@ -89,7 +89,6 @@ end)
 
 asset.meta = {
   Name = "MERTIS",
-  Version = "1.0",
   Description = [[
     The Mercury Radiometer and Thermal Infrared Spectrometer (MERTIS) is an innovative
     instrument for studying the surface composition and mineralogy of planet Mercury.

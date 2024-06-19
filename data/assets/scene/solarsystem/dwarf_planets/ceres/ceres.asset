@@ -56,7 +56,6 @@ asset.export(CeresLabel)
 
 asset.meta = {
   Name = "Ceres",
-  Version = "1.0",
   Description = "Ceres globe, and main label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

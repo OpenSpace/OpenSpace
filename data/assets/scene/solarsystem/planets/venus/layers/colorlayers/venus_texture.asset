@@ -48,7 +48,6 @@ asset.export(Clouds)
 
 asset.meta = {
   Name = "Venus Texture",
-  Version = "2.0",
   Description = "This asset supplies a default texture for Venus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

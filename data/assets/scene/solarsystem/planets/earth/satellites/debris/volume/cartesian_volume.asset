@@ -48,7 +48,6 @@ asset.export(DebrisVolumeCartesian)
 
 asset.meta = {
   Name = "Satellites Debris - Volume Cartesian",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Volume Cartesian. Example asset",
   Author = "OpenSpace Team",
   URL = "",

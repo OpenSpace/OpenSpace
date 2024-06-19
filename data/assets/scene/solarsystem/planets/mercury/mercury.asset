@@ -94,7 +94,6 @@ asset.export(MercuryLabel)
 
 asset.meta = {
   Name = "Mercury",
-  Version = "1.1",
   Description = "Mercury globe with labels, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

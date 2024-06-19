@@ -26,8 +26,7 @@ asset.export("THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018", treks_THEMIS_Ni
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MO_THEMIS-IR_Night],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MO_THEMIS-IR_Night]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

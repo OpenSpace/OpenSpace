@@ -47,7 +47,6 @@ asset.export(RadarSatellites)
 
 asset.meta = {
   Name = "Satellites Radar Calibration",
-  Version = "1.0",
   Description = "Satellites asset for Radar Calibration. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

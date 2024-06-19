@@ -95,7 +95,6 @@ asset.export(TethysLabel)
 
 asset.meta = {
   Name = "Tethys",
-  Version = "1.0",
   Description = "Tethys globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

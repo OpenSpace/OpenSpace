@@ -37,8 +37,7 @@ asset.export("MC11E11_HRDTMAR_DA5", treks_MC11E11_HRDTMAR_DA5)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MEX_HRSC],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MEX_HRSC]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

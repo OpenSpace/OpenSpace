@@ -482,7 +482,6 @@ asset.export("UranusMajorMoonsOff", UranusMajorMoonsOff.Identifier)
 
 asset.meta = {
   Name = "Uranus Marjor Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Uranus' major moons: Miranda, Ariel,
     Umbriel, Titania, and Oberon. Blank globes and SPICE trails are generated for each
     moon]],

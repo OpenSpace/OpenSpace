@@ -27,7 +27,6 @@ asset.export("ToggleDwarfPlanetTrails", ToggleDwarfPlanetTrails.Identifier)
 
 asset.meta = {
   Name = "Actions - Toggle Dwarf Planet Trails",
-  Version = "1.0",
   Description = "Asset providing actions to toggle all dwarf planet trails on and off",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

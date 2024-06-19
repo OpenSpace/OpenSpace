@@ -278,7 +278,6 @@ asset.export(S2018J4Label)
 
 asset.meta = {
   Name = "Jupiter Carpo Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Carpo Group moons: Carpo.
     Blank globes and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",

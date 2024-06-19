@@ -36,7 +36,6 @@ asset.export("Layer", Layer)
 
 asset.meta = {
   Name = "Mercury Texture",
-  Version = "1.0",
   Description = "Default texture for Mercury",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

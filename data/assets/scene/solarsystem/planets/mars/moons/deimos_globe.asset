@@ -50,7 +50,6 @@ asset.export(DeimosGlobe)
 
 asset.meta = {
   Name = "Deimos Globe",
-  Version = "1.0",
   Description = "RenderableGlobe for Deimos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

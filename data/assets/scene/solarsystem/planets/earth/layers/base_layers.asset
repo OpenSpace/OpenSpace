@@ -28,7 +28,6 @@ asset.require("./watermasks/modis_water_mask", asset.enabled)
 
 asset.meta = {
   Name = "Base Earth Layers",
-  Version = "1.0",
   Description = [[Base Earth layers are: Blue Marble, ESRI VIIRS Combo, ESRI NOAA20 Combo,
     ESRI World Imagery, VIIRS SNPP (Temporal), Aqua Modis (Temporal),
     Terra Modis (Temporal), AMSR2 GCOM W1 Sea Ice Concentration (Temporal),

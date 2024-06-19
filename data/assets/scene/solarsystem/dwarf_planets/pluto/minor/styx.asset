@@ -98,7 +98,6 @@ asset.export(StyxLabel)
 
 asset.meta = {
   Name = "Styx",
-  Version = "1.0",
   Description = "Globe and trail for Pluto's moon Styx",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

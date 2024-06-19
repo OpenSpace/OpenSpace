@@ -66,7 +66,6 @@ asset.export(Euclid)
 
 asset.meta = {
   Name = "Euclid Model",
-  Version = "1.0",
   Description = "This asset contains the model of ESA's Euclid spacecraft. The model is retrieved from https://scifleet.esa.int",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -48,8 +48,7 @@ asset.export("Mercury_Messenger_USGS_DEM_665m_v2_SlopeColor", treks_Mercury_Mess
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mercury MSGR_MDIS],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mercury MSGR_MDIS]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mercury",
   License = "NASA/Treks",

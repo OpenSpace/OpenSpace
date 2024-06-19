@@ -97,7 +97,6 @@ asset.export(HydraTrail)
 
 asset.meta = {
   Name = "Hydra",
-  Version = "1.0",
   Description = "Globe and trail for Pluto's moon Hydra",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

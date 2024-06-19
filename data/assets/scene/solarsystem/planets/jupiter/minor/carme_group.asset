@@ -2842,7 +2842,6 @@ asset.export(S2003J10Label)
 
 asset.meta = {
   Name = "Jupiter Carme Group Moons",
-  Version = "1.0",
   Description = [[Asset containing Jupiter's Carme Group moons. Blank globes, SPICE
   trails, and labels are generated for each moon]],
   Author = "OpenSpace Team",

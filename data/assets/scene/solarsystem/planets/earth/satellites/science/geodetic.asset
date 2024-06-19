@@ -47,7 +47,6 @@ asset.export(GeodeticSatellites)
 
 asset.meta = {
   Name = "Satellites Science Geodect",
-  Version = "1.0",
   Description = "Satellites asset for Science Geodect. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

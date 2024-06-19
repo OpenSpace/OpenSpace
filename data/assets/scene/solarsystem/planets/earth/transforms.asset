@@ -96,7 +96,6 @@ asset.export(EarthIAU)
 
 asset.meta = {
   Name = "Earth Transforms",
-  Version = "1.1",
   Description = [[Earth transforms: Earth Barycenter, Earth Center, Earth Inertial, Earth
     IAU. A scene graph node is created for each transform]],
   Author = "OpenSpace Team",

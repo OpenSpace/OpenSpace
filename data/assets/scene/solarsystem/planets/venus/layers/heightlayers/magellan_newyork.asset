@@ -40,7 +40,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Venus Magellan DEM",
-  Version = "1.0",
   Description = [[Map layer for Venus containting Venus Magellan DEM from the USGS.
     Hosted on the OpenSpace servers in New York]],
   Author = "USGS",

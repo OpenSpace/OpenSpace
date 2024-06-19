@@ -924,7 +924,6 @@ asset.export(S2004S24Label)
 
 asset.meta = {
   Name = "Saturn Other Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Other Group moons: Aegaeon,
     Methone, Anthe, Pallene, Telesto, Calypso, Helene, Polydeuces. Blank globes and SPICE
     trails are generated for each moon]],

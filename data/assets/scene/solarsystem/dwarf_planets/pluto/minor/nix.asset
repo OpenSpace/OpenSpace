@@ -98,7 +98,6 @@ asset.export(NixLabel)
 
 asset.meta = {
   Name = "Nix",
-  Version = "1.0",
   Description = "Globe and trail for Pluto's moon Nix",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

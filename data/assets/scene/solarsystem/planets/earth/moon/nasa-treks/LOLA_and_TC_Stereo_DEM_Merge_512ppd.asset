@@ -26,8 +26,7 @@ asset.export("LRO_LrocKaguya_Shade_60N60S_512ppd", treks_LRO_LrocKaguya_Shade_60
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LOLA_and_TC_Stereo_DEM_Merge_512ppd],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LOLA_and_TC_Stereo_DEM_Merge_512ppd]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

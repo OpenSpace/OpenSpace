@@ -110,7 +110,6 @@ asset.export(TritonLabel)
 
 asset.meta = {
   Name = "Triton",
-  Version = "1.1",
   Description = [[Globe asset containing Neptune's moon Triton]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

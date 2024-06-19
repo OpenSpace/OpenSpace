@@ -41,7 +41,6 @@ asset.export("Planet", Planet)
 
 asset.meta = {
   Name = "Orcus Globe",
-  Version = "1.0",
   Description = [[Globe of Orcus]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

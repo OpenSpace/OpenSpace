@@ -98,7 +98,6 @@ asset.export(KerberosLabel)
 
 asset.meta = {
   Name = "Kerberos",
-  Version = "1.0",
   Description = "Globe and trail for Pluto's moon Kerberos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

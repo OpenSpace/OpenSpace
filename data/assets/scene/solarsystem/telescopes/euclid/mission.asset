@@ -81,7 +81,6 @@ end)
 
 asset.meta = {
   Name = "Euclid Mission",
-  Version = "1.0",
   Description = "This asset contains the mission profile information for ESA's Euclid mission. The data in this file has been combined from multiple sources, including https://sci.esa.int/web/euclid, https://www.esa.int/Science_Exploration/Space_Science/Euclid_overview, https://www.euclid-ec.org/, https://sci.esa.int/web/euclid, https://indico.in2p3.fr/event/14206/contributions/17189/attachments/14299/17526/Euclid-MSauvage-LSSTFrance-MAR2017.pdf, and https://euclid.caltech.edu/page/data-release-timeline",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

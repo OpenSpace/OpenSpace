@@ -86,7 +86,6 @@ asset.export(plane1lmin)
 
 asset.meta = {
   Name = "Earth Grid",
-  Version = "1.0",
   Description = [[Grids that are useful to show distances around Earth]],
   Author = "OpenSpace Team",
   License = "MIT license"

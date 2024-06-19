@@ -50,7 +50,6 @@ asset.export(Sphere)
 
 asset.meta = {
   Name = "Milky Way Galaxy Sphere",
-  Version = "2.1",
   Description = "All sky image of the Milky Way",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -37,7 +37,6 @@ asset.export(ExampleToronto)
 
 asset.meta = {
   Name = "GeoJson Example - Toronto neighborhoods",
-  Version = "1.0",
   Description = [[GeoJson example asset that shows the neighborhoods of the city Toronto,
     Canada, as polygons. Data source: https://handsondataviz.org/geojsonio.html]],
   Author = "OpenSpace Team",

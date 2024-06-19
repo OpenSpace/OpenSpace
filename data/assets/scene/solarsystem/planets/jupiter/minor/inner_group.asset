@@ -419,7 +419,6 @@ asset.export(ThebeLabel)
 
 asset.meta = {
   Name = "Jupiter Inner Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Inner Group moons: Metis,
     Adrastea, Amalthea, and Thebe. Blank globes and SPICE trails are generated for each
     moon]],

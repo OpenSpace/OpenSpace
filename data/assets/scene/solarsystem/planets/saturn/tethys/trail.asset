@@ -41,7 +41,6 @@ asset.export(TethysTrail)
 
 asset.meta = {
   Name = "Tethys Trail",
-  Version = "1.0",
   Description = "Main trail for Tethys",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

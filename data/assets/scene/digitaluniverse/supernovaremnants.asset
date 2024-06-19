@@ -63,7 +63,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Supernova Remnants",
-  Version = "3.0",
   Description = "Digital Universe asset for Supernova Remnants",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

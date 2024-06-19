@@ -76,7 +76,6 @@ asset.export(UranusLabel)
 
 asset.meta = {
   Name = "Uranus",
-  Version = "1.1",
   Description = "Uranus globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

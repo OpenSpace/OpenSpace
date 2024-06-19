@@ -47,7 +47,6 @@ asset.export(BeidouSatellites)
 
 asset.meta = {
   Name = "Satellites Navigation Beidou",
-  Version = "1.0",
   Description = "Satellites asset for Navigation Beidou. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

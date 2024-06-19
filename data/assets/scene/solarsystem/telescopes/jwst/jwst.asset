@@ -169,7 +169,6 @@ asset.export(JWSTLabel)
 
 asset.meta = {
   Name = "James Webb Space Telescope",
-  Version = "1.1",
   Description = [[
     James Webb Space Telescope animated model, safe viewing band, field of view and label.
   ]],

@@ -125,8 +125,7 @@ asset.export("MSGR_Sholem_Aleichem_Crater_Wall_Slope_25m", treks_MSGR_Sholem_Ale
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mercury MSGR_MDIS_Slope],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mercury MSGR_MDIS_Slope]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mercury",
   License = "NASA/Treks",

@@ -101,7 +101,6 @@ asset.export(ItokawaModel)
 
 asset.meta = {
   Name = "Itokawa Asteroid",
-  Version = "1.0",
   Description = [[Position, trail and model of asteroid 25143 Itokawa from
     1950 JAN 1 00:00:00 to 2050 JAN 1 00:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",

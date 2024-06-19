@@ -119,7 +119,6 @@ asset.export(DeepSkyObjectsImages)
 
 asset.meta = {
   Name = "Deep Sky Objects Images",
-  Version = "3.0",
   Description = "Digital Universe asset for Deep Sky Objects and their Images",
   Author = "Nate Greenstein, Matt Everhart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

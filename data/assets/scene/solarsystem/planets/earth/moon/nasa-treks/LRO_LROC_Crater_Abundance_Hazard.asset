@@ -268,8 +268,7 @@ asset.export("LRO_NAC_CratAbndHaz_43S349E_150cmp", treks_LRO_NAC_CratAbndHaz_43S
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_LROC_Crater_Abundance_Hazard],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_LROC_Crater_Abundance_Hazard]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

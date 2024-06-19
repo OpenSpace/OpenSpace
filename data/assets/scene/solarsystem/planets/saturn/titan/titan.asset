@@ -97,7 +97,6 @@ asset.export(TitanLabel)
 
 asset.meta = {
   Name = "Titan",
-  Version = "1.2",
   Description = "Titan globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

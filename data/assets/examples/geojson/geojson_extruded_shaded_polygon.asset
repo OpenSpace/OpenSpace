@@ -43,7 +43,6 @@ asset.export(ExamplePolygon)
 
 asset.meta = {
   Name = "GeoJson Example - Extruded and Shaded Polygon",
-  Version = "1.0",
   Description = [[GeoJson example asset demonstrating how to apply shading from light
     sources on polygons]],
   Author = "OpenSpace Team",

@@ -50,7 +50,6 @@ asset.export(PhobosGlobe)
 
 asset.meta = {
   Name = "Phobos Globe",
-  Version = "1.0",
   Description = "RenderableGlobe for Phobos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

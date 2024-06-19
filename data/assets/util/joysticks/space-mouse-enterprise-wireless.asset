@@ -66,7 +66,6 @@ end)
 
 asset.meta = {
   Name = "Joystick controller: SpaceMouse enterprise wireless",
-  Version = "1.0",
   Description = "Joystick controller configuration for SpaceMouse enterprise wireless",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

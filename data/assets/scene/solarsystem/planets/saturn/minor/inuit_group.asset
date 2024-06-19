@@ -821,7 +821,6 @@ asset.export(S2019S01Label)
 
 asset.meta = {
   Name = "Saturn Inuit Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Inuit Group moons: Kiviuq,
     Ijiraq, Paaliaq, Siarnaq and Tarqeq. Blank globes and SPICE trails are generated for
     each moon]],

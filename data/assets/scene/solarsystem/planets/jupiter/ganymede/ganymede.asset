@@ -95,7 +95,6 @@ asset.export(GanymedeLabel)
 
 asset.meta = {
   Name = "Ganymede",
-  Version = "1.1",
   Description = "Ganymede globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

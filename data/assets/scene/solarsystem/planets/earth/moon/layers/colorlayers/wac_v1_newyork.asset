@@ -35,7 +35,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "WAC [New York]",
-  Version = "1.2",
   Description = [[Wide Angle Color map of the Moon. This map is hosted on the OpenSpace
     server in New York]],
   Author = "USGS",

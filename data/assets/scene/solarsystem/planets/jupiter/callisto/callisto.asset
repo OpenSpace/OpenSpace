@@ -96,7 +96,6 @@ asset.export(CallistoLabel)
 
 asset.meta = {
   Name = "Callisto",
-  Version = "1.1",
   Description = "Callisto globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

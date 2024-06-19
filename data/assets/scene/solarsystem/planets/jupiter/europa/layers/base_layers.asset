@@ -4,7 +4,6 @@ asset.require("./colorlayers/europa_texture", false)
 
 asset.meta = {
   Name = "Base Europa Layers",
-  Version = "1.0",
   Description = "Base Europa layers are: Europa Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

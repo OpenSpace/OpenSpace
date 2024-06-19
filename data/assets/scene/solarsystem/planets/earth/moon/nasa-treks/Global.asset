@@ -230,8 +230,7 @@ asset.export("LRO_LOLA_Illumination_SPole65S_240m_EQ", treks_LRO_LOLA_Illuminati
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon Global],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon Global]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

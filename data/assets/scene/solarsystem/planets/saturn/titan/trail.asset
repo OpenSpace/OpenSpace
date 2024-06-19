@@ -41,7 +41,6 @@ asset.export(TitanTrail)
 
 asset.meta = {
   Name = "Titan Trail",
-  Version = "1.2",
   Description = "Main trail for Titan",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

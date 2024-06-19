@@ -42,7 +42,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Moon Lunar Orbiter Digital Photographic Global Mosaic [New York]",
-  Version = "1.0",
   Description = [[Moon Lunar Orbiter Digital Photographic Global Mosaic 59m v1. This
     map is hosted on the OpenSpace server in New York]],
   Author = "USGS",

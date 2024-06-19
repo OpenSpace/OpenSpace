@@ -245,7 +245,6 @@ asset.export(Majis)
 
 asset.meta = {
   Name = "Majis",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Moon and Jupiter Imaging Spectrometer (MAJIS) onboard
     Juice, which is going to take spectroscopic measurements of the Jovian moons and

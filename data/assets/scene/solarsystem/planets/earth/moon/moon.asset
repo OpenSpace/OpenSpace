@@ -137,7 +137,6 @@ asset.export("ToggleMoonShading", ToggleMoonShading.Identifier)
 
 asset.meta = {
   Name = "Moon",
-  Version = "1.2",
   Description = "Moon globe with labels and actions",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

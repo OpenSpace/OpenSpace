@@ -97,7 +97,6 @@ asset.export("ToggleVolume", ToggleVolume.Identifier)
 
 asset.meta = {
   Name = "Predictive Science Inc. Volume Rendering Bastille Day",
-  Version = "1.1",
   Description = "Volumetric rendering for the bastille day CME event",
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

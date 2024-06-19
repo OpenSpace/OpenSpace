@@ -97,7 +97,6 @@ asset.export(MimasLabel)
 
 asset.meta = {
   Name = "Mimas",
-  Version = "1.1",
   Description = "Mimas globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -94,7 +94,6 @@ asset.export(CharonLabel)
 
 asset.meta = {
   Name = "Charon",
-  Version = "1.0",
   Description = "Charon globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

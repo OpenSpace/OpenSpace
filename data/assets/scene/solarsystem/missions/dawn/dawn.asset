@@ -169,7 +169,6 @@ asset.export(DawnFramingCamera2)
 
 asset.meta = {
   Name = "Dawn",
-  Version = "2.0",
   Description = "Dawn spacecraft and trail",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

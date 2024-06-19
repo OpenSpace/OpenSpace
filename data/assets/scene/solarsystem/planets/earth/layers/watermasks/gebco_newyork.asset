@@ -25,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Gebco WaterMask Layer (New York)",
-  Version = "1.0",
   Description = "WaterMask layer for Earth globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

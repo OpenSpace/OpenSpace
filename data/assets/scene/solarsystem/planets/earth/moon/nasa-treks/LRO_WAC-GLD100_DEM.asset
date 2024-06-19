@@ -26,8 +26,7 @@ asset.export("LRO_WACGLD100_Gray_79S79N_256ppd", treks_LRO_WACGLD100_Gray_79S79N
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_WAC-GLD100_DEM],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_WAC-GLD100_DEM]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

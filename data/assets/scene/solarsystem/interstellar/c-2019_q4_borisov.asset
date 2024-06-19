@@ -72,7 +72,6 @@ asset.export(C2019Q4BorisovTrail)
 
 asset.meta = {
   Name = "C/2019 Q4 Borisov",
-  Version = "1.2",
   Description = [[This asset contains the trail and position of C-2019 Q4 Borisov from
     2015 JAN 01 00:00:00 to 2050 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",

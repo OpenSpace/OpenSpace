@@ -76,7 +76,6 @@ asset.export(NeptuneLabel)
 
 asset.meta = {
   Name = "Neptune",
-  Version = "1.1",
   Description = "Neptune globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

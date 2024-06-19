@@ -44,7 +44,6 @@ asset.export(SunGlare)
 
 asset.meta = {
   Name = "Sun Glare",
-  Version = "1.1",
   Description = "Image plane with sun glare effect",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -95,7 +95,6 @@ asset.export(IoLabel)
 
 asset.meta = {
   Name = "Io",
-  Version = "1.1",
   Description = "Io globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

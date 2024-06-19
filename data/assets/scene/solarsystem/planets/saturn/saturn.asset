@@ -105,7 +105,6 @@ asset.export(SaturnLabel)
 
 asset.meta = {
   Name = "Saturn",
-  Version = "1.1",
   Description = "Saturn globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

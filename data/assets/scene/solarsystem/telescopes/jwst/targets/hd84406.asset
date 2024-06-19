@@ -33,7 +33,6 @@ asset.export(HD84406Image)
 
 asset.meta = {
   Name = "HD 84406 Star Image",
-  Version = "1.0",
   Description = "Screenspace image of the HD 84406 Star",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

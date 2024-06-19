@@ -65,7 +65,6 @@ asset.export(Plane)
 
 asset.meta = {
   Name = "Corona 2017-08-21",
-  Version = "1.0",
   Description = "An SDO video of the Sun for the day 2017-08-21",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

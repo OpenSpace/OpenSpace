@@ -96,10 +96,9 @@ asset.export(IapetusLabel)
 
 
 asset.meta = {
-    Name = "Iapetus",
-    Version = "1.0",
-    Description = "Iapetus globe with labels",
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Iapetus",
+  Description = "Iapetus globe with labels",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

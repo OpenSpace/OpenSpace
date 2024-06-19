@@ -130,7 +130,6 @@ asset.export(SunStar)
 
 asset.meta = {
   Name = "Stars",
-  Version = "3.0",
   Description = "Digital Universe asset for the stars",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

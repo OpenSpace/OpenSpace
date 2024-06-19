@@ -47,7 +47,6 @@ asset.export(ScienceSatellites)
 
 asset.meta = {
   Name = "Satellites Science Space & Earth Science",
-  Version = "1.0",
   Description = "Satellites asset for Science Space & Earth Science. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
