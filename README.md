@@ -1,11 +1,3 @@
-# Streaming Thesis
-[User guide](http://internal.openspaceproject.com/theses/2022/theses-2022-streaming/user-guide)  
-[Good-to-know's](http://internal.openspaceproject.com/theses/2022/theses-2022-streaming/backlog)
-
-See [Projects](https://github.com/OpenSpace/OpenSpace/projects/35) for todos and bugs.
-
----
-
 ![OpenSpace Logo](/data/openspace-horiz-logo-crop.png)
 [OpenSpace](http://openspaceproject.com) is an open source, non-commercial, and freely available interactive data visualization software designed to visualize the entire known universe and portray our ongoing efforts to investigate the cosmos. Bringing the latest techniques from data visualization research to the general public, OpenSpace supports interactive presentation of dynamic data from observations, simulations, and space mission planning and operations. The software works on multiple operating systems (Windows, Linux, MacOS) with an extensible architecture capable of powering both personal computers and also high resolution tiled displays and planetarium domes. In addition, OpenSpace enables simultaneous connections across the globe creating opportunity for shared experiences among audiences worldwide. The target audience of the software reaches from the general public who wishes to explore our universe, enthusiasts interested in hacking the underlying components in OpenSpace to create unique experiences, informal science institutions wishing to create a low-cost, yet powerful exhibition piece, but also scientists desiring to visualize their datasets in a contextualized, powerful software.
 
