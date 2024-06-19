@@ -13,8 +13,8 @@ local Node = {
   Renderable = {
     Type = "RenderablePointCloud",
     File = asset.resource("data/dummydata.csv"),
-    -- Change the oreientation render option to face the camera position instead
-    -- of it's view direction
+    -- Change the orientation render option to face the camera position instead
+    -- of its view direction
     OrientationRenderOption = "Camera Position Normal",
     -- Add a texture so we can more easily see how the orientation is changed
     Texture = {
