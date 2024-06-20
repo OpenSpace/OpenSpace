@@ -28,7 +28,7 @@ local Node = {
   },
   GUI = {
     Name = "RenderablePointCloud - Multi-Textured",
-    Path = "/Examples/Advanced"
+    Path = "/Examples/RenderablePointCloud/Advanced"
   }
 }
 
