@@ -28,6 +28,7 @@
 #include <openspace/rendering/deferredcaster.h>
 
 #include <modules/atmosphere/rendering/renderableatmosphere.h>
+#include <modules/atmosphere/rendering/precomputetextures.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -54,22 +55,6 @@ struct ShadowRenderingStruct {
     glm::dvec3 casterPositionVec = glm::dvec3(0.0);
     bool isShadowing = false;
 };
-
-struct CPUTexture {
-    CPUTexture() = default;
-    CPUTexture(int w, int h, float value = 255.f)
-        : width{ w }, height{ h } {
-        data = std::vector<float>(width * height * 3, value);
-    }
-    CPUTexture(const glm::ivec2& size, float value = 255.f)
-        : CPUTexture(size.x, size.y, value) {}
-
-    int width = 0;
-    int height = 0;
-    std::vector<float> data;
-};
-
-using CPUTexture3D = std::vector<CPUTexture>;
 
 class AtmosphereDeferredcaster : public Deferredcaster {
 public:
@@ -147,10 +132,10 @@ private:
     GLuint _inScatteringTableTexture = 0;
 
 
-    CPUTexture _transmittanceTexture;
-    CPUTexture _irradianceTexture;
-    CPUTexture _deltaETexture;
-    CPUTexture _inScatteringTexture;
+    atmosphere::CPUTexture _transmittanceTexture;
+    atmosphere::CPUTexture _irradianceTexture;
+    atmosphere::CPUTexture _deltaETexture;
+    atmosphere::CPUTexture _inScatteringTexture;
 
     // Atmosphere Data
     bool _ozoneEnabled = false;

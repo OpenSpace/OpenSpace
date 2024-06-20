@@ -27,12 +27,14 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 set(HEADER_FILES
   rendering/atmospheredeferredcaster.h
   rendering/renderableatmosphere.h
+  rendering/precomputetextures.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   rendering/atmospheredeferredcaster.cpp
   rendering/renderableatmosphere.cpp
+  rendering/precomputetextures.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
