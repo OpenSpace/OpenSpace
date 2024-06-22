@@ -734,7 +734,8 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     }
 
     if (renderingEnabled && !delegate.isGuiWindow()) {
-        ZoneScopedN("Render Screenspace Renderable");
+        ZoneScopedN("Render ScreenSpace Renderable");
+        const ghoul::GLDebugGroup group("ScreenSpace Renderable");
 
         std::vector<ScreenSpaceRenderable*> ssrs;
         ssrs.reserve(global::screenSpaceRenderables->size());
