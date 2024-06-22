@@ -30,6 +30,7 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -193,6 +194,14 @@ bool ScriptEngine::runScript(const std::string& script, const ScriptCallback& ca
     }
     catch (const ghoul::lua::LuaExecutionException& e) {
         LERRORC(e.component, e.message);
+        if (callback) {
+            callback(ghoul::Dictionary());
+        }
+        return false;
+    }
+    catch (const documentation::SpecificationError& e) {
+        LERRORC(e.component, e.message);
+        documentation::logError(e, e.component);
         if (callback) {
             callback(ghoul::Dictionary());
         }
