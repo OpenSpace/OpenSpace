@@ -374,6 +374,20 @@ namespace {
     }
 }
 
+/**
+ * Returns the number of seconds between the provided start time and end time. If the end
+ * time is before the start time, the return value is negative. If the start time is equal
+ * to the end time, the return value is 0.
+ * Both start and end times must be valid ISO 8601 date strings.
+ */
+[[codegen::luawrap]] double duration(std::string start, std::string end) {
+    using namespace openspace;
+
+    const double tStart = Time::convertTime(start);
+    const double tEnd = Time::convertTime(end);
+    return tEnd - tStart;
+}
+
 #include "time_lua_codegen.cpp"
 
 } // namespace

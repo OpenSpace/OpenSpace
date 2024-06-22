@@ -223,6 +223,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             codegen::lua::CurrentApplicationTime,
             codegen::lua::AdvancedTime,
             codegen::lua::ConvertTime,
+            codegen::lua::Duration
         }
     };
 }
