@@ -12,7 +12,7 @@ local modelFolder = asset.resource({
 
 
 local Planet = {
-  Identifier = "HamueaModel",
+  Identifier = "HaumeaModel",
   Parent = transforms.Position.Identifier,
   Transform = {
     Rotation = {
