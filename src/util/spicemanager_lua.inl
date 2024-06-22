@@ -195,7 +195,7 @@ namespace {
 
     // erase carriage return characters
     for (std::string& line : lines) {
-        line.erase(std::remove(begin(line), end(line), '\r'));
+        line.erase(std::remove(begin(line), end(line), '\r'), end(line));
     }
 
     const size_t nElements = lines.size() / 3;
