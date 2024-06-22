@@ -30,8 +30,6 @@ local Saturn = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 60268000, 60268000, 54364000 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Rings = {
       -- Single Texture Values:
       --Texture = texturesPath .. "/saturn_rings.png",

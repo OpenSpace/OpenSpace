@@ -19,9 +19,7 @@ local Earth = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = EarthEllipsoid,
-    SegmentsPerPatch = 64,
     PerformShading = false,
-    Layers = {},
     ShadowGroup = {
       Sources = {
         { Name = "Sun", Radius = 696300000 },

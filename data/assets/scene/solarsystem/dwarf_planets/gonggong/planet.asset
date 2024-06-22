@@ -14,9 +14,7 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 615000, 615000, 615000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 615000, 615000, 615000 }
   },
   GUI = {
     Name = "Gonggong",

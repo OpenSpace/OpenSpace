@@ -14,9 +14,7 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 995000, 1060000, 1025000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 995000, 1060000, 1025000 }
   },
   GUI = {
     Name = "Sedna",

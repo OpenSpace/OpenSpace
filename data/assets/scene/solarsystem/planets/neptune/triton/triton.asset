@@ -28,9 +28,7 @@ local Triton = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2709000, 2706000, 2705000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2709000, 2706000, 2705000 }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_major_neptune" },
   GUI = {

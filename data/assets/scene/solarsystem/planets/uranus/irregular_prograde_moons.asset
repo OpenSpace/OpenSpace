@@ -16,9 +16,7 @@ local Margaret = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 20000, 20000, 20000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 20000, 20000, 20000 }
   },
   Tag = {
     "moon_solarSystem",

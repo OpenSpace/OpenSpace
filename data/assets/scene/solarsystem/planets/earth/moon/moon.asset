@@ -31,8 +31,6 @@ local Moon = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 1738140,
-    SegmentsPerPatch = 64,
-    Layers = {},
     ShadowGroup = {
       Sources = {
         { Name = sunAsset.Sun.Identifier, Radius = 696300000 },

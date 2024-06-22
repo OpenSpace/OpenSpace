@@ -15,9 +15,7 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 910000, 910000, 917000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 910000, 910000, 917000 }
   },
   GUI = {
     Name = "Orcus",

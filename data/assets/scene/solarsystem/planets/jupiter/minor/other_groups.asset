@@ -16,9 +16,7 @@ local Eupheme = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -105,9 +103,7 @@ local S2003J19 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -194,9 +190,7 @@ local Valetudo = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",

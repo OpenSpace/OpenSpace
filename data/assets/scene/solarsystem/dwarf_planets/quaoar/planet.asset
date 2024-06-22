@@ -15,9 +15,7 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1138000, 1138000, 1036000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1138000, 1138000, 1036000 }
   },
   GUI = {
     Name = "Quaoar",
