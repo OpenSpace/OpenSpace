@@ -388,6 +388,14 @@ namespace {
     return tEnd - tStart;
 }
 
+/**
+ * Returns the number of seconds in a Julian year, which is equal to 31557600.
+ */
+[[codegen::luawrap]] double secondsPerYear() {
+    // We could use a call to SPICE here, but the value is a constant anyway
+    return 31557600.0;
+}
+
 #include "time_lua_codegen.cpp"
 
 } // namespace
