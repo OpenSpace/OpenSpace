@@ -50,8 +50,6 @@
 #include <future>
 
 namespace {
-    constexpr std::string_view _loggerCat = "DocumentationEngine";
-
     // General keys
     constexpr const char* NameKey = "name";
     constexpr const char* IdentifierKey = "identifier";
@@ -68,12 +66,10 @@ namespace {
     constexpr const char* CommandKey = "command";
 
     // Factory
-    constexpr const char* FactoryTitle = "Asset Components";
     constexpr const char* MembersKey = "members";
     constexpr const char* OptionalKey = "optional";
     constexpr const char* ReferenceKey = "reference";
     constexpr const char* FoundKey = "found";
-    constexpr const char* RestrictionsKey = "restrictions";
     constexpr const char* ClassesKey = "classes";
 
     constexpr const char* OtherName = "Other";
@@ -90,7 +86,6 @@ namespace {
     constexpr const char* UriKey = "uri";
 
     // Scripting
-    constexpr const char* ScriptingTitle = "Scripting API";
     constexpr const char* DefaultValueKey = "defaultValue";
     constexpr const char* ArgumentsKey = "arguments";
     constexpr const char* ReturnTypeKey = "returnType";
@@ -116,7 +111,6 @@ namespace {
     constexpr const char* AuthorKey = "author";
     constexpr const char* UrlKey = "url";
     constexpr const char* LicenseKey = "license";
-    constexpr const char* NoLicenseKey = "noLicense";
     constexpr const char* IdentifiersKey = "identifiers";
     constexpr const char* PathKey = "path";
     constexpr const char* AssetKey = "assets";
