@@ -150,7 +150,7 @@ namespace {
                 auto it = std::find_if(
                     doc.begin(),
                     doc.end(),
-                    [rv](const Documentation& doc) { return doc.id == rv->identifier; }
+                    [rv](const Documentation& d) { return d.id == rv->identifier; }
                 );
 
                 if (it == doc.end()) {

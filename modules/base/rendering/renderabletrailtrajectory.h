@@ -92,8 +92,6 @@ private:
     /// Dirty flag to determine whether the stride information needs to be changed
     bool _subsamplingIsDirty = true;
 
-    std::array<TrailVBOLayout<float>, 2> _auxiliaryVboData = {};
-
     /// The conversion of the _startTime into the internal time format
     double _start = 0.0;
     /// The conversion of the _endTime into the internal time format

@@ -101,7 +101,7 @@ namespace {
     // selected speed.
     struct [[codegen::Dictionary(RenderableTravelSpeed)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
-        std::string target [[codegen::identifier()]];;
+        std::string target [[codegen::identifier()]];
 
         // [[codegen::verbatim(SpeedInfo.description)]]
         std::optional<double> travelSpeed [[codegen::greater(0.f)]];

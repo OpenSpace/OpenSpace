@@ -446,21 +446,21 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     )
     , _fixedColor(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
-    , _core{
+    , _core {
         properties::PropertyOwner(CoreOwnerInfo),
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
         properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
         properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
-    , _glare{
+    , _glare {
         properties::PropertyOwner(GlareOwnerInfo),
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
         properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
         properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
-    , _parameters{
+    , _parameters {
         properties::PropertyOwner(SizeCompositionInfo),
         properties::OptionProperty(
             SizeCompositionMethodInfo,
