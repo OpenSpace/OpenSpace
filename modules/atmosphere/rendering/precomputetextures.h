@@ -34,17 +34,23 @@ namespace openspace {
 namespace atmosphere {
 
 struct CPUTexture {
+    enum class Format {
+        RGB = 3,
+        RGBA = 4
+    };
+
     CPUTexture() = default;
-    CPUTexture(int w, int h, float value = 255.f)
-        : width{ w }, height{ h } {
-        data = std::vector<float>(width * height * 3, value);
+    CPUTexture(int w, int h, Format c, float value = 255.f)
+        : width{ w }, height{ h }, components{ static_cast<int>(c) } {
+        data = std::vector<float>(width * height * components, value);
     }
-    CPUTexture(const glm::ivec2& size, float value = 255.f)
-        : CPUTexture(size.x, size.y, value) {}
+    CPUTexture(const glm::ivec2& size, Format c, float value = 255.f)
+        : CPUTexture(size.x, size.y, c, value) {}
 
     int width = 0;
     int height = 0;
     std::vector<float> data;
+    int components = 0;
 };
 
 using CPUTexture3D = std::vector<CPUTexture>;
@@ -54,7 +60,8 @@ namespace common {
 
      // biliniear interpolate a texture, clamps the texture coordinates to(0, size - 1)
      // Assumes x and y lookup coordinates are given as decimals (0,1)
-    glm::vec3 texture(const CPUTexture& tex, float x, float y);
+    glm::vec4 texture(const CPUTexture& tex, float x, float y);
+    glm::vec4 texture(const CPUTexture3D& tex, const glm::vec3& pos);
 
     // Function to access the transmittance texture. Given r and mu, returns the
     // transmittance of a ray starting at vec(x), height r, and direction vec(v), mu, and
@@ -109,6 +116,10 @@ std::pair<CPUTexture3D, CPUTexture3D> calculateDeltaS(
     const glm::vec3& betaMiescattering, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU,
     bool ozoneLayerEnabled, float HO);
 
+CPUTexture3D calculateInscattering(const CPUTexture3D& deltaSRayleighTable,
+    const CPUTexture3D& deltaSMieTable, const glm::ivec3 textureSize, int SAMPLES_MU_S,
+    int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R);
+
 std::pair<float, glm::vec4> step3DTexture(float Rg, float Rt, int rSamples, int layer);
 
 std::pair<glm::vec3, glm::vec3> inscatter(float r, float mu, float muSun, float nu,
@@ -120,7 +131,7 @@ std::pair<glm::vec3, glm::vec3> integrand(float r, float mu, float muSun, float 
     float y, float Rg, float Rt, const CPUTexture& transmittanceTexture,
     bool ozoneLayerEnabled, float HO, float HM, float HR);
 
-} // namespace scattering
+} // namespace inscattering
 
 } // namespace atmosphere
 

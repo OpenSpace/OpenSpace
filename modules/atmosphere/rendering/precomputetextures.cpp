@@ -27,15 +27,18 @@ float rayDistance(float r, float mu, float Rt, float Rg) {
     return rayDistanceAtmosphere;
 }
 
-glm::vec3 texture(const CPUTexture& tex, float x, float y)
+glm::vec4 texture(const CPUTexture& tex, float x, float y)
 {
     auto getColor = [&tex](int i, int j) {
-        int index = (j * tex.width + i) * 3; // Each pixel has 3 values R,G,B
-        return glm::vec3(
-            static_cast<float>(tex.data[index]),
-            static_cast<float>(tex.data[index + 1]),
-            static_cast<float>(tex.data[index + 2]));
-        };
+        int index = (j * tex.width + i) * tex.components;
+        return glm::vec4(
+            tex.data[index],
+            tex.data[index + 1],
+            tex.data[index + 2],
+            static_cast<CPUTexture::Format>(tex.components) == CPUTexture::Format::RGB ?
+                1.f : tex.data[index + 3]
+        );
+    };
 
     //auto getWrappedIndex = [](float v, int max) {
     //    // v is within our texture, no need to wrap it
@@ -57,8 +60,8 @@ glm::vec3 texture(const CPUTexture& tex, float x, float y)
     //};
 
     // Scale lookup coordinates to match texture size
-    x *= tex.width - 1;
-    y *= tex.height - 1;
+    x = x * (tex.width - 1);
+    y = y * (tex.height - 1);
 
     // Calc integer coordinates of the four sourrounding pixels
     int x1 = std::clamp(static_cast<int>(x), 0, tex.width - 1);
@@ -71,16 +74,38 @@ glm::vec3 texture(const CPUTexture& tex, float x, float y)
     float fy = y - y1;
 
     // Get colors of the four sourrounding pixels
-    glm::vec3 c11 = getColor(x1, y1);
-    glm::vec3 c12 = getColor(x1, y2);
-    glm::vec3 c21 = getColor(x2, y1);
-    glm::vec3 c22 = getColor(x2, y2);
+    glm::vec4 c11 = getColor(x1, y1);
+    glm::vec4 c12 = getColor(x1, y2);
+    glm::vec4 c21 = getColor(x2, y1);
+    glm::vec4 c22 = getColor(x2, y2);
 
     // Interpolate the colors
-    glm::vec3 c1, c2, result;
+    glm::vec4 c1, c2, result;
     c1 = glm::mix(c11, c21, fx);
     c2 = glm::mix(c21, c22, fx);
     result = glm::mix(c1, c2, fy);
+
+    return result;
+}
+
+glm::vec4 texture(const CPUTexture3D& tex, const glm::vec3& pos)
+{
+    // Scale z lookup cordinate to match texture size, x and y are computed in the 2D func
+    float z = pos.z * (tex.size() - 1);
+
+    // Get integer coordinate of the two surrounding slices
+    int z1 = std::clamp(static_cast<int>(z), 0, static_cast<int>(tex.size()) - 1);
+    int z2 = std::clamp(z1 + 1, 0, static_cast<int>(tex.size()) - 1);
+
+    // Get fractional part of z
+    float fz = z - z1;
+
+    // Perform bilinear interpolation on the two slices
+    glm::vec4 c0 = texture(tex[z1], pos.x, pos.y);
+    glm::vec4 c1 = texture(tex[z2], pos.x, pos.y);
+
+    // Interpolate between the two slices along z
+    glm::vec4 result = glm::mix(c0, c1, fz);
 
     return result;
 }
@@ -258,7 +283,7 @@ void calculateTransmittance(CPUTexture& texture, float Rg, float Rt, float HR,
             texture.data[k] = color.r;
             texture.data[k + 1] = color.g;
             texture.data[k + 2] = color.b;
-            k += 3;
+            k += texture.components;
         }
     }
 }
@@ -269,13 +294,13 @@ namespace irradiance {
 CPUTexture calculateIrradiance(const glm::ivec2& tableSize)
 {
     // Irradiance start at 0 (?) (see pdf line 4 in 4.1)
-    return CPUTexture(tableSize, 0.f);
+    return CPUTexture(tableSize, CPUTexture::Format::RGB, 0.f);
 }
 
 CPUTexture calculateDeltaE(const glm::ivec2& deltaETableSize,
     const CPUTexture& transmittance, float Rg, float Rt)
 {
-    CPUTexture deltaETexture = CPUTexture(deltaETableSize);
+    CPUTexture deltaETexture = CPUTexture(deltaETableSize, CPUTexture::Format::RGB);
 
     int k = 0;
     for (int y = 0; y < deltaETexture.height; y++) {
@@ -301,11 +326,11 @@ CPUTexture calculateDeltaE(const glm::ivec2& deltaETableSize,
             deltaETexture.data[k] = color.r;
             deltaETexture.data[k + 1] = color.g;
             deltaETexture.data[k + 2] = color.b;
-            k += 3;
+            k += deltaETexture.components;
         }
     }
 
-    return CPUTexture();
+    return deltaETexture;
 }
 
 } // namespace irradiance
@@ -318,8 +343,12 @@ std::pair<CPUTexture3D, CPUTexture3D> calculateDeltaS(
     bool ozoneLayerEnabled, float HO)
 {
 
-    CPUTexture3D deltaSRayleigh(textureSize.z, { textureSize.x, textureSize.y });
-    CPUTexture3D deltaSmie(textureSize.z, { textureSize.x, textureSize.y });
+    CPUTexture3D deltaSRayleigh(textureSize.z,
+        CPUTexture{ textureSize.x, textureSize.y, CPUTexture::Format::RGB }
+    );
+    CPUTexture3D deltaSmie(textureSize.z,
+        CPUTexture{ textureSize.x, textureSize.y, CPUTexture::Format::RGB }
+    );
 
     for (int layer = 0; layer < textureSize.z; layer++) {
         std::pair<float, glm::vec4> v = step3DTexture(Rg, Rt, textureSize.z, layer);
@@ -364,15 +393,55 @@ std::pair<CPUTexture3D, CPUTexture3D> calculateDeltaS(
                 deltaSRayleigh[layer].data[k + 1] = S_R.g; // S_R.g;
                 deltaSRayleigh[layer].data[k + 2] = S_R.b; // S_R.b;
 
-                deltaSmie[layer].data[k] = mu;
+                deltaSmie[layer].data[k] = S_M.r;
                 deltaSmie[layer].data[k + 1] = S_M.g;
                 deltaSmie[layer].data[k + 2] = S_M.b;
 
-                k += 3;
+                k += deltaSRayleigh[0].components;
             }
         }
     }
     return std::make_pair(deltaSRayleigh, deltaSmie);
+}
+
+CPUTexture3D calculateInscattering(const CPUTexture3D& deltaSRayleighTexture,
+    const CPUTexture3D& deltaSMieTexture, const glm::ivec3 textureSize,
+    int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R)
+{
+
+    CPUTexture3D inScatteringTableTexture(textureSize.z,
+        CPUTexture{ textureSize.x, textureSize.y, CPUTexture::Format::RGBA }
+    );
+    for (int layer = 0; layer < textureSize.z; layer++) {
+        int k = 0;
+
+        for (int y = 0; y < textureSize.y; y++) {
+            for (int x = 0; x < textureSize.x; x++) {
+                // First we convert the window's fragment coordinate to texel coordinates
+                glm::vec3 rst = glm::vec3(x + 0.5f, y + 0.5f, layer + 0.5f) /
+                    glm::vec3(
+                        static_cast<float>(SAMPLES_MU_S * SAMPLES_NU),
+                        static_cast<float>(SAMPLES_MU),
+                        static_cast<float>(SAMPLES_R)
+                    );
+
+                glm::vec3 rayleighInscattering = common::texture(deltaSRayleighTexture, rst);
+                float mieInscattering = common::texture(deltaSMieTexture, rst).r;
+
+                // We are using only the red component of the Mie scattering. See the
+                // Precomputed Atmosphere Scattering paper for details about the angular
+                // precision
+                inScatteringTableTexture[layer].data[k] = rayleighInscattering.r;
+                inScatteringTableTexture[layer].data[k + 1] = rayleighInscattering.g;
+                inScatteringTableTexture[layer].data[k + 2] = rayleighInscattering.b;
+                inScatteringTableTexture[layer].data[k + 3] = mieInscattering;
+
+                k += inScatteringTableTexture[0].components;
+            }
+        }
+    }
+
+    return inScatteringTableTexture;
 }
 
 std::pair<float, glm::vec4> step3DTexture(float Rg, float Rt, int rSamples, int layer)
