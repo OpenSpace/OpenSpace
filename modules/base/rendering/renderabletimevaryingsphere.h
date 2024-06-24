@@ -78,6 +78,7 @@ protected:
 
 private:
     void loadTexture();
+    void showCorrectFileName();
     void extractMandatoryInfoFromSourceFolder();
     void readFileFromImage(std::filesystem::path path);
     void readFileFromFits(std::filesystem::path path);
@@ -101,6 +102,7 @@ private:
     std::string _infoURL = "";
     std::string _dataURL = "";
     properties::OptionProperty _fitsLayer;
+    int _fitsLayerTemp;
     //  DynamicFileSequenceDownloader downloads and updates the renderable with
     //  data downloaded from the web.
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;

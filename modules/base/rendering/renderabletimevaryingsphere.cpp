@@ -108,13 +108,13 @@ namespace {
         "This value specifies a directory of images that are loaded from disk and is "
         "used as a texture that is applied to this sphere. The images are expected to "
         "be an equirectangular projection.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
         "FitsLayer",
         "Fits Layer",
         "This value specifies which index in the fits file to extract and use as texture",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
@@ -168,10 +168,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
         setupDynamicDownloading(p.dataID, p.numberOfFilesToQueue, p.infoURL, p.dataURL);
     }
     if (p.fitsLayer.has_value()) {
-        _fitsLayer = *p.fitsLayer;
-    }
-    else {
-        _fitsLayer = 0;
+        _fitsLayerTemp = *p.fitsLayer;
     }
 }
 
@@ -187,7 +184,7 @@ void RenderableTimeVaryingSphere::initializeGL() {
         computeSequenceEndTime();
         loadTexture();
     }
-    addProperty(_fitsLayer);
+    addProperty(_textureSourcePath);
     definePropertyCallbackFunctions();
 }
 
@@ -221,6 +218,14 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
 }
 
 void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
+    if (!_layerOptionsAdded) {
+        for (int i = 0; i < nLayers(path); ++i) {
+            _fitsLayer.addOption(i, std::to_string(i+1));
+        }
+        _fitsLayer = _fitsLayerTemp;
+        _layerOptionsAdded = true;
+    }
+
     File newFile;
     newFile.path = path;
     newFile.status = File::FileStatus::Loaded;
@@ -232,13 +237,6 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     //t->purgeFromRAM();
 
     newFile.texture = std::move(t);
-
-    if (!_layerOptionsAdded) {
-        for (int i = 0; i < nLayers(path); ++i) {
-            _fitsLayer.addOption(i, std::to_string(i+1));
-        }
-        _layerOptionsAdded = true;
-    }
 
     const std::vector<File>::const_iterator iter = std::upper_bound(
         _files.begin(), _files.end(),
@@ -341,6 +339,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         {
             updateActiveTriggerTimeIndex(currentTime);
             loadTexture();
+            showCorrectFileName();
         } // else {we're still in same state as previous frame (no changes needed)}
     }
     else {
@@ -395,6 +394,11 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
         else {
             readFileFromImage(filePath);
         }
+        if (_firstUpdate && _isFitsFormat) {
+            addProperty(_fitsLayer);
+            _firstUpdate = false;
+        }
+
     }
     // if all files are moved into _sourceFiles then we can
     // empty the DynamicFileSequenceDownloader _downloadedFiles;
@@ -415,6 +419,10 @@ void RenderableTimeVaryingSphere::loadTexture() {
     if (_activeTriggerTimeIndex != -1) {
         _texture = _files[_activeTriggerTimeIndex].texture.get();
     }
+}
+
+void RenderableTimeVaryingSphere::showCorrectFileName() {
+    _textureSourcePath = _files[_activeTriggerTimeIndex].path.filename().string();
 }
 
 void RenderableTimeVaryingSphere::definePropertyCallbackFunctions() {

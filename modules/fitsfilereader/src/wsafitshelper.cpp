@@ -30,11 +30,11 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
     }
     // The numbers 64800, 16200 means: grab the fifth layer in the fits file, where the
     // magnetogram map is, in the wsa file
-    std::valarray<float> magnetogram =
+    std::valarray<float> layerValues =
         fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
 
     // Calculate median:
-    //std::valarray<float> sorted = magnetogram;
+    //std::valarray<float> sorted = layerValues;
     //std::sort(std::begin(sorted), std::end(sorted));
     //float median;
     //if (sorted.size() % 2 == 0)
@@ -42,12 +42,12 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
     //else
     //    median = sorted[sorted.size() / 2];
 
-    const float maxValue = 50.f;// magnetogram.max();
-    const float minValue = -50.f;// magnetogram.min();
+    const float maxValue = 50.f;// layerValues.max();
+    const float minValue = -50.f;// layerValues.min();
     std::vector<float> imageData;
-    //test.assign(std::begin(magnetogram), std::end(magnetogram));
+    //test.assign(std::begin(layerValues), std::end(layerValues));
     std::vector<glm::vec3> rgbLayers;
-    for (float mapValue : magnetogram) {
+    for (float mapValue : layerValues) {
 
         float normalizedValue = (mapValue - minValue) / (maxValue - minValue); // actual normalization
         normalizedValue = std::clamp(normalizedValue, 0.f, 1.f);
