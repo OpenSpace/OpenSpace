@@ -105,9 +105,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
         "Texture Source",
-        "This value specifies a directory of images that are loaded from disk and is "
-        "used as a texture that is applied to this sphere. The images are expected to "
-        "be an equirectangular projection.",
+        "This value specifies a directory or file names fomr where files loaded from "
+        "disk and are used as a texture that is applied to this sphere. Images are "
+        "expected to be an equirectangular projection.",
         openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
