@@ -125,17 +125,19 @@ namespace {
     constexpr const char* FiltersKey = "filters";
     constexpr const char* ActionsKey = "actions";
 
-    nlohmann::json documentationToJson(const openspace::documentation::Documentation& d) {
+    nlohmann::json documentationToJson(
+                             const openspace::documentation::Documentation& documentation)
+    {
         using namespace openspace::documentation;
 
         nlohmann::json json;
 
-        json[NameKey] = d.name;
-        json[IdentifierKey] = d.id;
-        json[DescriptionKey] = d.description;
+        json[NameKey] = documentation.name;
+        json[IdentifierKey] = documentation.id;
+        json[DescriptionKey] = documentation.description;
         json[MembersKey] = nlohmann::json::array();
 
-        for (const DocumentationEntry& p : d.entries) {
+        for (const DocumentationEntry& p : documentation.entries) {
             nlohmann::json entry;
             entry[NameKey] = p.key;
             entry[OptionalKey] = p.optional.value;
