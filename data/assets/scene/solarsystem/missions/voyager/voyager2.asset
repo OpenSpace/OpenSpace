@@ -99,7 +99,7 @@ local VoyagerTrailCruiseEarthJupiter = {
     StartTime = "1977-AUG-20 16:07:06.535",
     EndTime = "1979 JUL 06",
     -- 1 sample every 2d
-    SampleInterval = openspace.duration("1977-AUG-20 16:07:06.535", "1979 JUL 06") /
+    SampleInterval = openspace.time.duration("1977-AUG-20 16:07:06.535", "1979 JUL 06") /
                      openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
@@ -150,7 +150,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     StartTime = "1979 JUL 15",
     EndTime = "1981 AUG 23",
     -- 1 sample every 2d
-    SampleInterval = openspace.duration("1979 JUL 15", "1981 AUG 23") /
+    SampleInterval = openspace.time.duration("1979 JUL 15", "1981 AUG 23") /
                      openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
@@ -201,7 +201,7 @@ local VoyagerTrailCruiseSaturnUranus = {
     StartTime = "1981 AUG 30",
     EndTime = "1986 JAN 22",
     -- 1 sample every 2d
-    SampleInterval = openspace.duration("1981 AUG 30", "1986 JAN 22") /
+    SampleInterval = openspace.time.duration("1981 AUG 30", "1986 JAN 22") /
                      openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
@@ -252,7 +252,7 @@ local VoyagerTrailCruiseUranusNeptune = {
     StartTime = "1986 JAN 27",
     EndTime = "1989 AUG 24",
     -- 1 sample every 2d
-    SampleInterval = openspace.duration("1986 JAN 27", "1989 AUG 24") /
+    SampleInterval = openspace.time.duration("1986 JAN 27", "1989 AUG 24") /
                      openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
@@ -303,7 +303,7 @@ local VoyagerTrailCruiseNeptuneInf = {
     StartTime = "1989 AUG 26",
     EndTime = "2100 JAN 01",
     -- 1 sample every 2d
-    SampleInterval = openspace.duration("1989 AUG 26", "2100 JAN 01") /
+    SampleInterval = openspace.time.duration("1989 AUG 26", "2100 JAN 01") /
                      openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },

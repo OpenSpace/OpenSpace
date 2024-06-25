@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/timeconversion.h>
+
 namespace {
 
 /**
@@ -389,11 +391,19 @@ namespace {
 }
 
 /**
+ * Returns the number of seconds per day where a day in this case is exactly 24 hours.
+ * The total number of seconds is equal to 86400.
+ */
+[[codegen::luawrap]] int secondsPerDay() {
+    return openspace::SecondsPerDay;
+}
+
+/**
  * Returns the number of seconds in a Julian year, which is equal to 31557600.
  */
-[[codegen::luawrap]] double secondsPerYear() {
+[[codegen::luawrap]] int secondsPerYear() {
     // We could use a call to SPICE here, but the value is a constant anyway
-    return 31557600.0;
+    return openspace::SecondsPerYear;
 }
 
 #include "time_lua_codegen.cpp"

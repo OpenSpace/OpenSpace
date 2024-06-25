@@ -96,7 +96,7 @@ local VoyagerTrailCruiseEarthJupiter = {
     StartTime = "1977 SEP 05",
     EndTime = "1979 MAR 04",
     -- 1 sample every 2d
-    SampleInterval = openspace.duration("1977 SEP 05", "1979 MAR 04") /
+    SampleInterval = openspace.time.duration("1977 SEP 05", "1979 MAR 04") /
                      openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager1_trail" },
@@ -147,7 +147,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     StartTime = "1979 MAR 09",
     EndTime = "1980 NOV 11",
     -- 1 sample every 2d
-    SampleInterval = openspace.duration("1979 MAR 09", "1980 NOV 11") /
+    SampleInterval = openspace.time.duration("1979 MAR 09", "1980 NOV 11") /
                      openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager1_trail" },
@@ -198,7 +198,7 @@ local VoyagerTrailCruiseSaturnInf = {
     StartTime = "1980 NOV 16",
     EndTime = "2100 JAN 01",
     -- 1 sample every 2d
-    SampleInterval = openspace.duration("1980 NOV 16", "2100 JAN 01") /
+    SampleInterval = openspace.time.duration("1980 NOV 16", "2100 JAN 01") /
                      openspace.time.secondsPerYear() * 2
 
   },

@@ -224,6 +224,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             codegen::lua::AdvancedTime,
             codegen::lua::ConvertTime,
             codegen::lua::Duration,
+            codegen::lua::SecondsPerDay,
             codegen::lua::SecondsPerYear
         }
     };

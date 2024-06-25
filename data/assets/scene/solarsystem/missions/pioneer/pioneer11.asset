@@ -52,7 +52,7 @@ local Pioneer11Trail = {
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = StartTime,
-    EndTime = ,
+    EndTime = EndTime,
     EnableFade = false,
     -- 1 sample every 2d
     SampleInterval =
