@@ -66,7 +66,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "2dF Galaxies",
-  Version = "3.1",
   Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH), Eric Gawiser (Rutgers U)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

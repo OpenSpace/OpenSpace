@@ -127,7 +127,6 @@ asset.export(Planck)
 
 asset.meta = {
   Name = "Cosmic Microwave Background",
-  Version = "3.0",
   Description = [[All-sky images of the Cosmic Microwave Background Light. The CMB has
     been mapped by three main missions: COBE, WMAP, and Planck. The images are not true
     all-sky images because the light from our own galaxy has been subtracted out of them.

@@ -132,7 +132,6 @@ asset.export("ShowZodiacs", ShowZodiacs.Identifier)
 
 
 asset.meta = {
-  Version = "2.0",
   Description = Constellations.GUI.Description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

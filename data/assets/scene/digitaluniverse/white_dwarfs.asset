@@ -60,7 +60,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "White Dwarfs",
-  Version = "1.0",
   Description = Object.GUI.Description,
   Author = "Zack Reeves, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

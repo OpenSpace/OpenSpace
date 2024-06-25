@@ -135,7 +135,6 @@ asset.export(TullyGalaxiesImages)
 
 asset.meta = {
   Name = "Tully Galaxies",
-  Version = "5.1",
   Description = TullyGalaxies.GUI.Description,
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

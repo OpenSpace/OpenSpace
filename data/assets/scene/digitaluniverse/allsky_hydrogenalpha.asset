@@ -61,7 +61,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Milky Way All-Sky Hydrogen Alpha",
-  Version = "1.0",
   Description = Object.GUI.Description,
   Author = "Brian Abbott, Carter Emmart (AMNH), OpenSpace Team",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

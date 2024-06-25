@@ -72,7 +72,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Brown Dwarfs",
-  Version = "1.0",
   Author = "Brian Abbott, Zack Reeves, Jackie Faherty (AMNH)",
   Description = Object.GUI.Description,
   License = "AMNH Digital Universe",

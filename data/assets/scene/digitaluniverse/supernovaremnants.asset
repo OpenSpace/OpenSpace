@@ -67,7 +67,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Supernova Remnants",
-  Version = "4.0",
   Description = Object.GUI.Description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

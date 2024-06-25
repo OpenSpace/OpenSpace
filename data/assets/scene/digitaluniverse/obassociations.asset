@@ -74,7 +74,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "OB Associations",
-  Version = "3.1",
   Description = Object.GUI.Description,
   Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

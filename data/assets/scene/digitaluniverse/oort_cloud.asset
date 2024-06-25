@@ -65,7 +65,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Oort Cloud Sphere",
-  Version = "1.0",
   Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
