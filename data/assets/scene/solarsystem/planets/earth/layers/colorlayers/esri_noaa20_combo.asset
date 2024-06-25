@@ -62,7 +62,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "ESRI NOAA20 VIIRS Combo",
-  Version = "1.0",
   Description = [[Level based layer combining "NOAA20 SNPP (Temporal)" and ESRI World
   Imagery. "NOAA20 SNPP (Temporal)" is faded out at tile level 4]],
   Author = "OpenSpace Tem",

@@ -12,7 +12,6 @@ asset.export("image", image)
 
 asset.meta = {
   Name = "Ring Nebula",
-  Version = "1.0",
   Description = "Ring Nebula Image",
   Author = [[
     NASA, ESA, C.R. O'Dell (Vanderbilt University), and

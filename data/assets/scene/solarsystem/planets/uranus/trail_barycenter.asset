@@ -41,7 +41,6 @@ asset.export(UranusBarycenterTrail)
 
 asset.meta = {
   Name = "Uranus Trail",
-  Version = "1.1",
   Description = "Trail of Uranus' Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

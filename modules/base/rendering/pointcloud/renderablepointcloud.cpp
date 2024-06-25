@@ -731,9 +731,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             _textureMode = TextureInputMode::Single;
             _hasSpriteTexture = true;
             _texture.spriteTexturePath = absPath(*t.file).string();
-            _texture.spriteTexturePath.onChange(
-                [this]() { _spriteTextureIsDirty = true; }
-            );
         }
 
         _texture.enabled = t.enabled.value_or(_texture.enabled);
@@ -742,6 +739,10 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _texture.useAlphaChannel = t.useAlphaChannel.value_or(_texture.useAlphaChannel);
     }
 
+    _texture.spriteTexturePath.onChange([this]() {
+        _spriteTextureIsDirty = true;
+        _hasSpriteTexture = !_texture.spriteTexturePath.value().empty();
+    });
     _texture.allowCompression.onChange([this]() { _spriteTextureIsDirty = true; });
     _texture.useAlphaChannel.onChange([this]() { _spriteTextureIsDirty = true; });
 

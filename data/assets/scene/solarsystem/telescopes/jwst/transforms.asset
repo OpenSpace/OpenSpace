@@ -112,7 +112,6 @@ asset.export(JWSTRotation)
 
 asset.meta = {
   Name = "James Webb Space Telescope Transforms",
-  Version = "1.0",
   Description = [[
     JWST transforms: JWST position relative to Earth and JWST rotation,
     a fixed rotation so sunshield always points toward the Sun.

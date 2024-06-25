@@ -25,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Mars Size Reference",
-  Version = "1.0",
   Description = "This asset supplies a size reference layer for the Mars globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

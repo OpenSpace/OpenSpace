@@ -81,7 +81,6 @@ asset.export(HubbleTrail)
 
 asset.meta = {
   Name = "Hubble Space Telescope Trail",
-  Version = "1.0",
   Description = "Position and Trail for Hubble Space Telescope, trail from Celestrak",
   Author = "Dan Tell",
   URL = "www.calacademy.org",

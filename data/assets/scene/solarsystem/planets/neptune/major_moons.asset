@@ -82,7 +82,6 @@ asset.export("NeptuneMajorMoonsOff", NeptuneMajorMoonsOff.Identifier)
 
 asset.meta = {
   Name = "Neptune Major Moons",
-  Version = "1.0",
   Description = "Meta asset containing Neptune's major moons Triton and Nereid",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -17,9 +17,7 @@ local S2010J2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -106,9 +104,7 @@ local Thelxinoe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -195,9 +191,7 @@ local Euanthe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -284,9 +278,7 @@ local Iocaste = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -373,9 +365,7 @@ local S2003J16 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -462,9 +452,7 @@ local Praxidike = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -551,9 +539,7 @@ local Harpalyke = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -640,9 +626,7 @@ local Mneme = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -729,9 +713,7 @@ local Hermippe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -818,9 +800,7 @@ local Thyone = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -907,9 +887,7 @@ local Ananke = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 28000, 28000, 28000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 28000, 28000, 28000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -996,9 +974,7 @@ local S2021J1 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1085,9 +1061,7 @@ local S2021J2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1174,9 +1148,7 @@ local S2021J3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1263,9 +1235,7 @@ local S2022J3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1352,9 +1322,7 @@ local S2017J3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1441,9 +1409,7 @@ local S2017J7 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1530,9 +1496,7 @@ local S2017J9 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1619,9 +1583,7 @@ local S2003J2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1708,9 +1670,7 @@ local S2003J12 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2033,7 +1993,6 @@ asset.export(S2003J12Label)
 
 asset.meta = {
   Name = "Jupiter Ananke Group Moons",
-  Version = "1.0",
   Description = [[Asset containing Jupiter's Ananke Group moons. Blank globes, SPICE
     trails, and labels are generated for each moon]],
   Author = "OpenSpace Team",

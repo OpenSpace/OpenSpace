@@ -47,7 +47,6 @@ asset.export(WeatherSatellites)
 
 asset.meta = {
   Name = "Satellites Weather - Weather",
-  Version = "1.0",
   Description = "Satellites asset for Weather - Weather. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

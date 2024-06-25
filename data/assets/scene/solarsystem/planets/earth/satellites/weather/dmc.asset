@@ -47,7 +47,6 @@ asset.export(DisasterMonitoringConstellation)
 
 asset.meta = {
   Name = "Satellites Weather - Disaster Monitoring",
-  Version = "1.0",
   Description = "Satellites asset for Weather - Disaster Monitoring. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

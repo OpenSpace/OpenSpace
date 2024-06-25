@@ -7,7 +7,6 @@ asset.require("./layers/newyork_layers", false)
 
 asset.meta = {
   Name = "Default Mercury Layers",
-  Version = "1.1",
   Description = [[Default Mercury layers are: Aluminium Abundance, Calcium Abundance,
     Iron Abundance, Magnesium Abundance, Silicon Abundance, Messenger MDIS,
     Messenger Mosaic, Messenger Mosaic2, Messenger BDR, Messenger HIE, Messenger HIW,

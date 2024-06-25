@@ -47,7 +47,6 @@ asset.export(ExperimentalSatellites)
 
 asset.meta = {
   Name = "Satellites Communications - Experimental",
-  Version = "1.0",
   Description = "Satellites asset for Communications - Experimental. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

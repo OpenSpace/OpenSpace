@@ -369,7 +369,6 @@ asset.export(VoyagerTrailCruiseNeptuneInf)
 
 asset.meta = {
   Name = "Voyager 2 Model and Trails",
-  Version = "2.0",
   Description = [[
     Voyager 2 model and trails from 1977 AUG 20 16:07:06.535 to 2100 JAN 01. Model credit:
     NASA Visualization Technology Applications And Development (VTAD)

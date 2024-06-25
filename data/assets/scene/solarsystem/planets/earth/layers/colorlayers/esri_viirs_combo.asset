@@ -62,7 +62,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "ESRI VIIRS Combo",
-  Version = "1.1",
   Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
   Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]],
   Author = "OpenSpace Tem",

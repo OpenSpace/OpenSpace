@@ -47,7 +47,6 @@ asset.export(DebrisFengyun)
 
 asset.meta = {
   Name = "Satellites Debris - Fengyun Debris",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Fengyun Debris. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

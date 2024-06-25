@@ -60,7 +60,6 @@ asset.export(ExampleGlobeRotation)
 
 asset.meta = {
   Name = "GlobeRotation Example",
-  Version = "1.0",
   Description = [[An example that demonstrates how to load a 3D model from a geometry
     file, placing it on a planetary surface and rotate it to align with the surface
     normal using a "GlobeRotation" transform. Note that "GlobeTranslation" is needed to

@@ -48,8 +48,7 @@ asset.export("Apollo15_PanCam_Mosaic_19S129E_2mp", treks_Apollo15_PanCam_Mosaic_
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon Apollo_15_Pan_Cam_Image_Mosaic],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon Apollo_15_Pan_Cam_Image_Mosaic]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

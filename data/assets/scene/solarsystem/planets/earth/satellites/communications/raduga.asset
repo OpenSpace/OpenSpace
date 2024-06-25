@@ -47,7 +47,6 @@ asset.export(RadugaSatellites)
 
 asset.meta = {
   Name = "Satellites Communications - Raduga",
-  Version = "1.0",
   Description = "Satellites asset for Communications - Raduga. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

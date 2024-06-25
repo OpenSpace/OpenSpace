@@ -39,7 +39,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Mercury Magnesium Abundance",
-  Version = "1.0",
   Description = "Magnesium Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

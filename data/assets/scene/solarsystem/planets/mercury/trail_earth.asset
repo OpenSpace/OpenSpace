@@ -42,7 +42,6 @@ asset.export(MercuryTrailEarth)
 
 asset.meta = {
   Name = "Mercury Trail from Earth",
-  Version = "1.1",
   Description = [[Alternate trail of Mercury, as observed by the Earth rather then the
     Sun]],
   Author = "OpenSpace Team",

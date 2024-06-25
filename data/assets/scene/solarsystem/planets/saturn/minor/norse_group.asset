@@ -17,9 +17,7 @@ local Phoebe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 218800, 217000, 203600 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 218800, 217000, 203600 }
   },
   Tag = {
     "moon_solarSystem",
@@ -106,9 +104,7 @@ local Skathi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -195,9 +191,7 @@ local S2007S2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -284,9 +278,7 @@ local Skoll = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -373,9 +365,7 @@ local S2004S13 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -462,9 +452,7 @@ local Greip = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -551,9 +539,7 @@ local Hyrrokkin = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -640,9 +626,7 @@ local Jarnsaxa = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -729,9 +713,7 @@ local Mundilfari = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -818,9 +800,7 @@ local S2006S1 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -907,9 +887,7 @@ local S2004S17 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -996,9 +974,7 @@ local Bergelmir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1085,9 +1061,7 @@ local Narvi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1174,9 +1148,7 @@ local Suttungr = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1263,9 +1235,7 @@ local Hati = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1352,9 +1322,7 @@ local S2004S12 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1441,9 +1409,7 @@ local Farbauti = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1530,9 +1496,7 @@ local Thrymr = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1619,9 +1583,7 @@ local Aegir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1708,9 +1670,7 @@ local S2007S3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1797,9 +1757,7 @@ local Bestla = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1886,9 +1844,7 @@ local S2004S7 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1975,9 +1931,7 @@ local S2006S3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2064,9 +2018,7 @@ local Fenrir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2153,9 +2105,7 @@ local Surtur = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2242,9 +2192,7 @@ local Kari = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2331,9 +2279,7 @@ local Ymir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 18000, 18000, 18000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 18000, 18000, 18000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2420,9 +2366,7 @@ local Loge = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2509,9 +2453,7 @@ local Fornjot = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2598,9 +2540,7 @@ local Skadi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2687,9 +2627,7 @@ local Gridr = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2776,9 +2714,7 @@ local Angrboda = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2865,9 +2801,7 @@ local Skrymir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2954,9 +2888,7 @@ local Gerd = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3043,9 +2975,7 @@ local S2004S26 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3132,9 +3062,7 @@ local Eggther = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3221,9 +3149,7 @@ local Beli = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3310,9 +3236,7 @@ local Gunnlod = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3399,9 +3323,7 @@ local Thiazzi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3488,9 +3410,7 @@ local S2004S34 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3577,9 +3497,7 @@ local Alvaldi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3666,9 +3584,7 @@ local Geirrod = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3755,9 +3671,7 @@ local S2004S28 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3844,9 +3758,7 @@ local S2004S21 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3933,9 +3845,7 @@ local S2004S36 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -4022,9 +3932,7 @@ local S2004S37 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -4111,9 +4019,7 @@ local S2004S39 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -4761,7 +4667,6 @@ asset.export(S2004S39Label)
 
 asset.meta = {
   Name = "Saturn Norse Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Norse Group moons: Phoebe,
     Skathi, S2007S2, Skoll, S2004S13, Greip, Hyrrokkin, Jarnsaxa, Mundilfari, S2006S1,
     S2004S17, Bergelmir, Narvi, Suttungr, Hati, S2004S12, Farbauti, Thrymr, Aegir,

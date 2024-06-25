@@ -52,7 +52,6 @@ end)
 
 asset.meta = {
   Name = "Insight Actions",
-  Version = "1.0",
   Description = "Actions related to the Insight mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

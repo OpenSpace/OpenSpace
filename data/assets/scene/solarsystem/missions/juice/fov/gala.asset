@@ -49,7 +49,6 @@ asset.export(Gala)
 
 asset.meta = {
   Name = "GALA",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Ganymede Laser Altimeter (GALA) instrument onboard Juice,
     measuring a 2.5D heightfield of Ganymede and Europa. See

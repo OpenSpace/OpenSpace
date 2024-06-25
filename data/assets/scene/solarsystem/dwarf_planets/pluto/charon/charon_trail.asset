@@ -44,7 +44,6 @@ asset.export(CharonBarycentricTrail)
 
 asset.meta = {
   Name = "Charon Barycentric Trail",
-  Version = "1.0",
   Description = "Trail of Charon as observed by Pluto Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -39,7 +39,6 @@ asset.export(JupiterTrail)
 
 asset.meta = {
   Name = "Jupiter Trail",
-  Version = "1.1",
   Description = "Trail of Jupiter as observed by the Sun",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

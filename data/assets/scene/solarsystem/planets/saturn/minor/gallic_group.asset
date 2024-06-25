@@ -16,9 +16,7 @@ local Albiorix = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 32000, 32000, 32000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 32000, 32000, 32000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -105,9 +103,7 @@ local Bebhionn = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -194,9 +190,7 @@ local Erriapus = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 10000, 10000, 10000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 10000, 10000, 10000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -283,9 +277,7 @@ local Tarvos = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 15000, 15000, 15000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 15000, 15000, 15000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -417,7 +409,6 @@ asset.export(TarvosLabel)
 
 asset.meta = {
   Name = "Saturn Gallic Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Gallic Group moons: Albiorix,
     Bebhionn, Erriapus, and Tarvos. Blank globes and SPICE trails are generated for each
     moon]],

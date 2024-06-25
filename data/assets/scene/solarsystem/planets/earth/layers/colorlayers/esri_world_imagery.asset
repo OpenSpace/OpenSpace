@@ -35,7 +35,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "ESRI World Imagery",
-  Version = "1.1",
   Description = "Main web loaded map layer for Earth. This layer is hosted by ESRI",
   Author = "ESRI",
   URL = "https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9",

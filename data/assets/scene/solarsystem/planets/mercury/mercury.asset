@@ -31,8 +31,6 @@ local Mercury = {
     Type = "RenderableGlobe",
     Radii = 2439700,
     CameraMinHeight = 300,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "Mercury.labels",
@@ -94,7 +92,6 @@ asset.export(MercuryLabel)
 
 asset.meta = {
   Name = "Mercury",
-  Version = "1.1",
   Description = "Mercury globe with labels, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

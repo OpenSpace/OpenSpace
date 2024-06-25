@@ -9,7 +9,6 @@ asset.require("./globelocation")
 
 asset.meta = {
   Name = "Dashboard - Default Items",
-  Version = "1.0",
   Description = "This asset provides the default items for the dashboard",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

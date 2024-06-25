@@ -35,7 +35,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Blue Marble",
-  Version = "1.1",
   Description = [[Fallback layer for earth image if no internet is available. Contains
     Blue Marble Next Generation]],
   Author = "OpenSpace Team",

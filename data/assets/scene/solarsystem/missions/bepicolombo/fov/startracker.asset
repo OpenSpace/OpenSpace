@@ -90,7 +90,6 @@ end)
 
 asset.meta = {
   Name = "Star Tracker",
-  Version = "1.0",
   Description = [[
     From a functional point of view, the Autonomous Star Trackers can be seen as a video
     camera plus an image processing unit that, starting from an image of the sky, extracts

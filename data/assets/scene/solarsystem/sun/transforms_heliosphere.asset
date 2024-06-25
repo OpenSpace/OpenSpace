@@ -46,7 +46,6 @@ asset.export(HEEQ180ReferenceFrame)
 
 asset.meta = {
   Name = "Sun Transform, HEEQ180",
-  Version = "1.1",
   Description = "Sun transform: HEEQ180",
   Author = "CCMC",
   URL = "http://openspaceproject.com",

@@ -33,7 +33,6 @@ asset.export(M82Image)
 
 asset.meta = {
   Name = "M82 Galaxy Image",
-  Version = "1.0",
   Description = "Screenspace image of the M82 Galaxy",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

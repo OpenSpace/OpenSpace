@@ -1069,8 +1069,7 @@ asset.export("CTX_Slope_14S184E_24mp_B01_009886_1658_P21_009385_1658", treks_CTX
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars Mars_Reconnaissance_Orbiter_CTX],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars Mars_Reconnaissance_Orbiter_CTX]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

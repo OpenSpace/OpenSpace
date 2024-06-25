@@ -26,8 +26,7 @@ asset.export("LRO_LOLA_ClrSlope_NPole75N_120m_EQ", treks_LRO_LOLA_ClrSlope_NPole
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LOLA_Slope_Northpole_120m],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LOLA_Slope_Northpole_120m]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

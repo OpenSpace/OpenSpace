@@ -25,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger Mosaic [Sweden]",
-  Version = "1.0",
   Description = [[Mercury Messenger Mosaic layer for Mercury globe. This map is hosted on
     the OpenSpace server in Sweden]],
   Author = "USGS",

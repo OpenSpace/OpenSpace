@@ -33,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Mars HRSC MOLA Blended DEM Global 200m v2",
-  Version = "1.1",
   Description = "ESRI Hosted ars HRSC MOLA Blended DEM",
   Author = "esri_astro",
   URL = "https://www.arcgis.com/home/item.html?id=225adad86379474ebc3d51a74573c99b",

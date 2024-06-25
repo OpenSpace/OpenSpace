@@ -35,7 +35,6 @@ asset.export("Layer", Layer)
 
 asset.meta = {
   Name = "Moon Texture",
-  Version = "1.0",
   Description = "Offline lower resolution version of Moon WAC layer, available for offline use",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

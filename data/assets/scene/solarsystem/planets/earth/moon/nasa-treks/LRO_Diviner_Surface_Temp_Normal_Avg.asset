@@ -26,8 +26,7 @@ asset.export("LRO_Diviner_STN_Avg_Clr_Global_32ppd", treks_LRO_Diviner_STN_Avg_C
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_Diviner_Surface_Temp_Normal_Avg],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_Diviner_Surface_Temp_Normal_Avg]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

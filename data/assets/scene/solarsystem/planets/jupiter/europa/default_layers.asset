@@ -7,7 +7,6 @@ asset.require("./layers/newyork_layers", false)
 
 asset.meta = {
   Name = "Default Europa Layers",
-  Version = "1.2",
   Description = [[Default Europa layers are: Europa Texture & Voyager Global Mosaic.
 
 

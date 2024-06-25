@@ -33,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Jupiter Texutre",
-  Version = "2.0",
   Description = "Default texture for Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -35,7 +35,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger MDIS [Sweden]",
-  Version = "1.0",
   Description = [[Messenger MDIS layer for Mercury globe. This map is hosted on the
     OpenSpace server in Sweden]],
   Author = "USGS",

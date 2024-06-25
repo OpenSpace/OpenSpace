@@ -101,7 +101,6 @@ asset.export(Atmosphere)
 
 asset.meta = {
   Name = "Earth Atmosphere",
-  Version = "1.1",
   Description = "RenderableAtmosphere for Earth",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

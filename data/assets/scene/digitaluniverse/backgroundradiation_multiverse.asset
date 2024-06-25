@@ -146,7 +146,6 @@ asset.export(PlanckMultiverse4)
 
 asset.meta = {
   Name = "Multiverse Background Radiation",
-  Version = "2.1",
   Description = [[Non-physical representation of the location of hypothetical cosmic
     microwave background radiation images how they would be observed from other locations
     in the universe. <br> This is not a measured dataset]],

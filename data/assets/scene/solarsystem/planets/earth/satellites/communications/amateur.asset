@@ -47,7 +47,6 @@ asset.export(AmateurSatellites)
 
 asset.meta = {
   Name = "Satellites Communications - Amateur Radio",
-  Version = "1.0",
   Description = [[Satellites asset for Communications - Amateur Radio. Data from
     Celestrak]],
   Author = "OpenSpace Team",

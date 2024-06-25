@@ -80,7 +80,6 @@ end)
 
 asset.meta = {
   Name = "BepiColombo Mission",
-  Version = "1.0",
   Description = "This asset contains the mission profile information for the BepiColombo mission. The data in this file has been taken from https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

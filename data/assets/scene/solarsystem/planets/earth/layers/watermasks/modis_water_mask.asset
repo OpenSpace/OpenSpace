@@ -25,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "MODIS Water Mask",
-  Version = "1.0",
   Description = "MODIS Water Mask layer for Earth globe",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL = "https://earthdata.nasa.gov/eosdis/science-system-description/"..

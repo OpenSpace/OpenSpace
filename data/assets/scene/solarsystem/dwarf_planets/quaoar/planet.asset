@@ -15,9 +15,7 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1138000, 1138000, 1036000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1138000, 1138000, 1036000 }
   },
   GUI = {
     Name = "Quaoar",
@@ -41,7 +39,6 @@ asset.export("Planet", Planet)
 
 asset.meta = {
   Name = "Quaoar Globe",
-  Version = "1.0",
   Description = [[Globe of Quaoar]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

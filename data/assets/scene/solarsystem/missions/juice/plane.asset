@@ -348,7 +348,6 @@ asset.export(xz_uz)
 
 asset.meta = {
   Name = "Ganymede Cut Planes",
-  Version = "1.0",
   Description = [[
     Cutplane visualizations of Ganymede's magnetic field as prepared by Ronan Modolo.
   ]],

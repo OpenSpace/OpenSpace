@@ -84,7 +84,6 @@ asset.export("SaturnMinorMoonsOff", SaturnMinorMoonsOff.Identifier)
 
 asset.meta = {
   Name = "Saturn Minor Moons",
-  Version = "1.1",
   Description = [[Meta asset containing five moon groups: Gallic, Inuit, Norse, Shepherd
     moons and Other]],
   Author = "OpenSpace Team",

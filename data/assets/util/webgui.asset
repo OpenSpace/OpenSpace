@@ -94,7 +94,6 @@ asset.export("setCefRoute", setCefRoute)
 
 asset.meta = {
   Name = "WebGUI",
-  Version = "1.0",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

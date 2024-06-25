@@ -26,8 +26,7 @@ asset.export("LRO_LOLA_ClrSlope_Global_16ppd", treks_LRO_LOLA_ClrSlope_Global_16
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LOLA_Slope_16ppd],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LOLA_Slope_16ppd]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

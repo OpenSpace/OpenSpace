@@ -92,8 +92,7 @@ asset.export("h1394_0000_nd3", treks_h1394_0000_nd3)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars Mars_Express_HRSC],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars Mars_Express_HRSC]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

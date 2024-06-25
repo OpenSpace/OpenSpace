@@ -47,7 +47,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Main Asteroid Belt",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     Main Asteroid Belt group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

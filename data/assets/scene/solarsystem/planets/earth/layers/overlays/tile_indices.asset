@@ -24,7 +24,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Earth Tile Indices",
-  Version = "1.0",
   Description = "Tile index layer for Earth globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -47,7 +47,6 @@ asset.export(IridiumNextSatellites)
 
 asset.meta = {
   Name = "Satellites Communications - Iridium NEXT",
-  Version = "1.0",
   Description = "Satellites asset for Communications - Iridium NEXT. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

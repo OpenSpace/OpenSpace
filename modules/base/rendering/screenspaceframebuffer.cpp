@@ -183,7 +183,7 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
     _objectSize = glm::ivec2(resolution);
 
     _texture->uploadTexture();
-    _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     ghoul::opengl::FramebufferObject::deactivate();

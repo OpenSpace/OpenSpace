@@ -46,7 +46,6 @@ asset.export(GSMReferenceFrame)
 
 asset.meta = {
   Name = "Earth magnetosphere transforms",
-  Version = "1.1",
   Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric",
   Author = "CCMC",
   URL = "http://openspaceproject.com",

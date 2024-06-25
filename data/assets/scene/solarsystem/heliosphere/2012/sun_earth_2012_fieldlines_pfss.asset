@@ -100,7 +100,6 @@ asset.export("DarkSun", DarkSun.Identifier)
 
 asset.meta = {
   Name = "Fieldlines from PFSS model of 2012 event",
-  Version = "1.0",
   Description = "Magnetic fieldlines from PFSS model for a 2012 CME event",
   Author = "CCMC",
   URL = "",

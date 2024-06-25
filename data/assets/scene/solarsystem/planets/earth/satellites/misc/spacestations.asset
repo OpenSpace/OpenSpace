@@ -50,7 +50,6 @@ asset.export(SpaceStations)
 
 asset.meta = {
   Name = "Satellites SpaceStations",
-  Version = "1.0",
   Description = "Satellites asset for SpaceStations. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

@@ -43,7 +43,6 @@ asset.export(EarthMarker)
 
 asset.meta = {
   Name = "Earth marker",
-  Version = "1.1",
   Description = "Earth marker with name, sized for Solar System view",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

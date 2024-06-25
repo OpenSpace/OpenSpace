@@ -209,7 +209,6 @@ end)
 
 asset.meta = {
   Name = "Joystick controller: Microsoft X-Box 360 pad",
-  Version = "1.0",
   Description = "Joystick controller configuration for Microsoft X-Box 360 pad",
   Author = [[
     OpenSpace Team & Winston

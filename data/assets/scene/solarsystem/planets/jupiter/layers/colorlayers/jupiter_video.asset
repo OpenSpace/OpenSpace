@@ -34,7 +34,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Jupiter Video",
-  Version = "1.0",
   Description = "An video showing Jupiter.",
   Author = "NOAA",
   URL = "https://sos.noaa.gov/copyright/",

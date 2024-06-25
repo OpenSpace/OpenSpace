@@ -90,7 +90,6 @@ end)
 
 asset.meta = {
   Name = "Sixs",
-  Version = "1.0",
   Description = [[
     The scientific investigation performed by the Solar Intensity X-ray and particle
     Spectrometer (SIXS) is the determination of solar impact on the Hermean surface in the

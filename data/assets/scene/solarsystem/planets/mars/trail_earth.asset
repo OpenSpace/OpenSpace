@@ -41,7 +41,6 @@ asset.export(MarsTrailEarth)
 
 asset.meta = {
   Name = "Mars Trail from Earth",
-  Version = "1.1",
   Description = "Trail of Mars, parented to Earth with Earth as the SPICE observer",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

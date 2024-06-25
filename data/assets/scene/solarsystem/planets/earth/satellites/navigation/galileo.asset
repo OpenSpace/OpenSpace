@@ -47,7 +47,6 @@ asset.export(GalileoSatellites)
 
 asset.meta = {
   Name = "Satellites Navigation Galileo",
-  Version = "1.0",
   Description = "Satellites asset for Navigation Galileo. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

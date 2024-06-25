@@ -33,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Rhea Texutre",
-  Version = "1.0",
   Description = "Default jpg texture for Rhea",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

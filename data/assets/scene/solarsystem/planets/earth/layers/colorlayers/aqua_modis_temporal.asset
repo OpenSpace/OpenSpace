@@ -50,7 +50,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Aqua Modis (Temporal)",
-  Version = "1.1",
   Description = "GIBS hosted layer",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",

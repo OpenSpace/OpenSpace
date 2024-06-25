@@ -31,7 +31,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "World Elevation (3D)",
-  Version = "1.1",
   Description = "Main web loaded height layer for Earth. This layer is hosted by ESRI",
   Author = "ESRI",
   URL = "https://www.arcgis.com/home/item.html?id=1b48cd3b6276416784fe90a68c580a89",

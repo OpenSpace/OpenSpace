@@ -12,7 +12,6 @@ asset.export("image", image)
 
 asset.meta = {
   Name = "HH 212",
-  Version = "1.0",
   Description = "HH 212 Image",
   Author = "ESO/M. McCaughrean",
   URL = "https://www.eso.org/public/images/potw1541a/",

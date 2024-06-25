@@ -71,7 +71,6 @@ asset.export(C2019Y4AtlasTrail)
 
 asset.meta = {
   Name = "C/2019 Y4 Atlas",
-  Version = "1.2",
   Description = [[This asset contains the trail and position of C/2019 Y4 Atlas from
     1950 JAN 01 00:00:00 to 2100 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",

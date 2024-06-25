@@ -41,7 +41,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "VIIRS NOAA20 (Temporal)",
-  Version = "1.1",
   Description = "This layer has the best daily Earth Image",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL =

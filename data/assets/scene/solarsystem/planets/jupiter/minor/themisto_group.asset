@@ -16,9 +16,7 @@ local Themisto = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -114,7 +112,6 @@ asset.export(ThemistoLabel)
 
 asset.meta = {
   Name = "Jupiter Themisto Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Themisto Group moons:
     Themisto. Blank globes and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",

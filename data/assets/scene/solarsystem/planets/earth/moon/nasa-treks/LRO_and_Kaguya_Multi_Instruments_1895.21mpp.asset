@@ -70,8 +70,7 @@ asset.export("3He_Very_Likely_Layer", treks_3He_Very_Likely_Layer)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_and_Kaguya_Multi_Instruments_1895.21mpp],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_and_Kaguya_Multi_Instruments_1895.21mpp]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

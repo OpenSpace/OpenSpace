@@ -40,7 +40,6 @@ asset.export(IoTrail)
 
 asset.meta = {
   Name = "Io Trail",
-  Version = "1.1",
   Description = "Trail of Io as observed by the Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
