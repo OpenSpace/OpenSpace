@@ -1247,6 +1247,18 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
             deltaSMieTable
         );
 
+        if (_saveCalculationTextures) {
+            LDEBUG(std::format("Computing DeltaE texture  {}", scatteringOrder));
+            atmosphere::irradiance::calculateDeltaE(scatteringOrder, _deltaETexture,
+                deltaSRayleighTexture, deltaSMieTexture, _atmospherePlanetRadius,
+                _atmosphereRadius, _miePhaseConstant, _irradianceTableSize, _muSSamples,
+                _nuSamples, _muSamples, _rSamples);
+
+            saveTextureFile(std::format("my_deltaE_texture-scattering_order-{}_test.ppm",
+                    scatteringOrder), _deltaETexture);
+            LDEBUG(std::format("Finished Computing DeltaE texture  {}", scatteringOrder));
+        }
+
         // line 9 in algorithm 4.1
         calculateDeltaS(
             scatteringOrder,

@@ -381,6 +381,92 @@ CPUTexture calculateDeltaE(const glm::ivec2& deltaETableSize,
     return deltaETexture;
 }
 
+void calculateDeltaE(int scatteringOrder, CPUTexture& deltaETexture,
+    const CPUTexture3D& deltaSRTexture, const CPUTexture3D& deltaSMTexture, float Rg,
+    float Rt, float mieG, const glm::ivec2 SKY, int SAMPLES_MU_S, int SAMPLES_NU,
+    int SAMPLES_MU, int SAMPLES_R)
+{
+    const float M_PI = 3.141592657f;
+    const int IRRADIANCE_INTEGRAL_SAMPLES = 32;
+    // Spherical Coordinates Steps. phi in [0,2PI] and theta in [0, PI/2]
+    const float stepPhi = (2.0 * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
+    const float stepTheta = M_PI / (2.0 * float(IRRADIANCE_INTEGRAL_SAMPLES));
+
+    const bool firstIteration = scatteringOrder == 2;
+
+    int k = 0;
+    for (int y = 0; y < deltaETexture.height; y++) {
+        for (int x = 0; x < deltaETexture.width; x++) {
+            // See Bruneton and Collienne to understand the mapping.
+            float muSun = -0.2f + x / (static_cast<float>(SKY.x) - 1.0f) * 1.2f;
+            float r = Rg + y / (static_cast<float>(SKY.y) - 1.0f) * (Rt - Rg);
+
+            // We know that muSun = cos(sigma) = s.z/||s||
+            // But, ||s|| = 1, so s.z = muSun. Also,
+            // ||s|| = 1, so s.x = sin(sigma) = sqrt(1-muSun^2) and s.y = 0.0
+            glm::vec3 s = glm::vec3(
+                std::max(std::sqrt(1.0f - muSun * muSun), 0.0f),
+                0.0f,
+                muSun
+            );
+
+            // In order to solve the integral from equation (15) we use the trapezoidal rule:
+            // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
+            glm::vec3 irradianceE = glm::vec3(0.0f);
+            for (int iphi = 0; iphi < IRRADIANCE_INTEGRAL_SAMPLES; iphi++) {
+                float phi = (static_cast<float>(iphi) + 0.5f) * stepPhi;
+                for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES; itheta++) {
+                    float theta = (static_cast<float>(itheta) + 0.5f) * stepTheta;
+                    // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
+                    // rho = 1, we are integrating over a unit sphere
+                    float dw = stepTheta * stepPhi * std::sin(theta);
+                    // w = (cos(phi) * sin(theta) * rho, sin(phi) * sin(theta) * rho, cos(theta) * rho)
+                    glm::vec3 w = glm::vec3(
+                        std::cos(phi) * std::sin(theta),
+                        std::sin(phi) * std::sin(theta),
+                        std::cos(theta)
+                    );
+                    float nu = glm::dot(s, w);
+
+                    // The first iteration is different from the others as in the first iteration all
+                    // the light arriving is coming from the initial pre-computed single scattered
+                    // light. We stored these values in the deltaS textures (Ray and Mie), and in order
+                    // to avoid problems with the high angle dependency in the phase functions, we don't
+                    // include the phase functions on those tables (that's why we calculate them now)
+                    if (firstIteration == 1) {
+                        float phaseRay = common::rayleighPhaseFunction(nu);
+                        float phaseMie = common::miePhaseFunction(nu, mieG);
+                        glm::vec3 singleRay = glm::vec3(common::texture4D(deltaSRTexture,
+                            r, w.z, muSun, nu, Rg, SAMPLES_MU, Rt, SAMPLES_R,
+                            SAMPLES_MU_S, SAMPLES_NU)
+                        );
+                        glm::vec3 singleMie = glm::vec3(common::texture4D(deltaSMTexture,
+                            r, w.z, muSun, nu, Rg, SAMPLES_MU, Rt, SAMPLES_R,
+                            SAMPLES_MU_S, SAMPLES_NU)
+                        );
+                        // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
+                        irradianceE += (singleRay * phaseRay + singleMie * phaseMie) * w.z * dw;
+                    }
+                    else {
+                        // On line 10 of the algorithm, the texture table deltaE is updated, so when we
+                        // are not in the first iteration, we are getting the updated result of deltaE
+                        // (not the single irradiance light but the accumulated (higher order) irradiance
+                        // light. w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
+                        irradianceE += glm::vec3(common::texture4D(deltaSRTexture, r, w.z,
+                            muSun, nu, Rg, SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S,
+                            SAMPLES_NU)) * w.z * dw;
+                    }
+                }
+            }
+
+            deltaETexture.data[k] = irradianceE.r;
+            deltaETexture.data[k + 1] = irradianceE.g;
+            deltaETexture.data[k + 2] = irradianceE.b;
+            k += deltaETexture.components;
+        }
+    }
+}
+
 } // namespace irradiance
 
 namespace inscattering {
@@ -499,6 +585,9 @@ void calculateDeltaJ(int scatteringOrder, CPUTexture3D& deltaJ,
     const glm::vec3& betaRayleigh, float HM, const glm::vec3& betaMieScattering,
     float mieG, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R)
 {
+
+    const bool firstIteration = scatteringOrder == 2;
+
     for (int layer = 0; layer < SAMPLES_R; layer++) {
         auto [r, dhdH] = step3DTexture(Rg, Rt, SAMPLES_R, layer);
 
@@ -515,7 +604,6 @@ void calculateDeltaJ(int scatteringOrder, CPUTexture3D& deltaJ,
                 float nu = muMuSunNu.b;
                 // Calculate the the light inScattered in direction
                 // -vec(v) for the point at height r (vec(y) following Bruneton and Neyret's paper
-                bool firstIteration = scatteringOrder == 2;
                 glm::vec3 radianceJ = inscatter(r, mu, muSun, nu, Rt, Rg,
                     averageGroundReflectance, transmittanceTexture, mieG, firstIteration,
                     deltaETexture, deltaSRTexture, deltaSMTexture, SAMPLES_MU_S,
