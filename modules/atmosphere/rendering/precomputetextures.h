@@ -141,6 +141,10 @@ std::pair<CPUTexture3D, CPUTexture3D> calculateDeltaS(
     const glm::vec3& betaMiescattering, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU,
     bool ozoneLayerEnabled, float HO);
 
+void calculateDeltaS(int inscatteringOrder, CPUTexture3D& deltaSRayleighTexture,
+    const CPUTexture3D& deltaJTexture, const CPUTexture& transmittanceTexture, float Rg,
+    float Rt, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R);
+
 CPUTexture3D calculateInscattering(const CPUTexture3D& deltaSRayleighTable,
     const CPUTexture3D& deltaSMieTable, const glm::ivec3 textureSize, int SAMPLES_MU_S,
     int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R);

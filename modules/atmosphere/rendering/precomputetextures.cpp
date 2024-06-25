@@ -538,6 +538,77 @@ std::pair<CPUTexture3D, CPUTexture3D> calculateDeltaS(
     return std::make_pair(deltaSRayleigh, deltaSmie);
 }
 
+void calculateDeltaS(int inscatteringOrder, CPUTexture3D& deltaSRayleighTexture,
+    const CPUTexture3D& deltaJTexture, const CPUTexture& transmittanceTexture, float Rg,
+    float Rt, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R)
+{
+    const int INSCATTER_INTEGRAL_SAMPLES = 50;
+
+    // The integrand here is the f(y) of the trapezoidal rule:
+    auto integrand = [&transmittanceTexture, &deltaJTexture, Rg, Rt, SAMPLES_MU, SAMPLES_R,
+        SAMPLES_MU_S, SAMPLES_NU](float r, float mu, float muSun, float nu, float dist) ->
+        glm::vec3
+    {
+        // We can calculate r_i by the cosine law: r_i^2=dist^2 + r^2 - 2*r*dist*cos(PI-theta)
+        float r_i = std::sqrt(r * r + dist * dist + 2.0f * r * dist * mu);
+        // r_i can be found using the dot product:
+        // vec(y_i) dot vec(dist) = cos(theta_i) * ||vec(y_i)|| * ||vec(dist)||
+        // But vec(y_i) = vec(x) + vec(dist), also: vec(x) dot vec(dist) = cos(theta) = mu
+        // So, cos(theta_i) = mu_i = (r*dist**mu + dist*2)/(r_i*dist)
+        float mu_i = (r * mu + dist) / r_i;
+        // muSun_i can also be found by the dot product:
+        // cos(sigma_i) = muSun_i = (vec(s) dot vec(y_i))/(||vec(y_i)|| * ||vec(s)||)
+        // But vec(y_i) = vec(x) + vec(dist), and vec(x) dot vec(s) = muSun, cos(sigma_i + theta_i) = nu
+        float muSun_i = (r * muSun + dist * nu) / r_i;
+        // The irradiance attenuated from point r until y (y-x = dist)
+        return
+            common::transmittance(transmittanceTexture, r, mu, dist, Rg, Rt) *
+            glm::vec3(common::texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg,
+                SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU));
+    };
+
+    auto inscatter = [Rg, Rt, integrand](float r, float mu, float muSun, float nu) -> glm::vec3 {
+        glm::vec3 inScatteringRadiance = glm::vec3(0.f);
+        float dy = common::rayDistance(r, mu, Rt, Rg) / static_cast<float>(INSCATTER_INTEGRAL_SAMPLES);
+        glm::vec3 inScatteringRadiance_i = integrand(r, mu, muSun, nu, 0.0f);
+
+        // In order to solve the integral from equation (11) we use the trapezoidal rule:
+        // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
+        // where y_i+1 = y_j
+        for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; i++) {
+            float y_j = float(i) * dy;
+            glm::vec3 inScatteringRadiance_j = integrand(r, mu, muSun, nu, y_j);
+            inScatteringRadiance += (inScatteringRadiance_i + inScatteringRadiance_j) / 2.0f * dy;
+            inScatteringRadiance_i = inScatteringRadiance_j;
+        }
+        return inScatteringRadiance;
+    };
+
+
+    for (int layer = 0; layer < deltaSRayleighTexture.size(); layer++) {
+        int k = 0;
+        for (int y = 0; y < deltaSRayleighTexture[0].height; y++) {
+            for (int x = 0; x < deltaSRayleighTexture[0].width; x++) {
+                auto [r, dhdH] = step3DTexture(Rg, Rt, SAMPLES_R, layer);
+                glm::vec3 MuMuSunNu = common::unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg,
+                    Rt, SAMPLES_MU_S, SAMPLES_NU, x, y
+                );
+                float mu = MuMuSunNu.r;
+                float muSun = MuMuSunNu.g;
+                float nu = MuMuSunNu.b;
+
+                glm::vec3 result = inscatter(r, mu, muSun, nu);
+
+                deltaSRayleighTexture[layer].data[k] = result.r;
+                deltaSRayleighTexture[layer].data[k + 1] = result.g;
+                deltaSRayleighTexture[layer].data[k + 2] = result.b;
+
+                k += deltaSRayleighTexture[0].components;
+            }
+        }
+    }
+}
+
 CPUTexture3D calculateInscattering(const CPUTexture3D& deltaSRayleighTexture,
     const CPUTexture3D& deltaSMieTexture, const glm::ivec3 textureSize,
     int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R)

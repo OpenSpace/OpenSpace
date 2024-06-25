@@ -1011,8 +1011,9 @@ void AtmosphereDeferredcaster::calculateDeltaS(int scatteringOrder,
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
-            std::format("deltaS_texture-scattering_order-{}.ppm", scatteringOrder),
-            glm::ivec2(_textureSize)
+            std::format("my_deltaS_texture-scattering_order-{}_test.ppm", scatteringOrder),
+            glm::ivec2(_textureSize),
+            true
         );
     }
     program.deactivate();
@@ -1266,6 +1267,19 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
             deltaSRayleighTable,
             deltaJTable
         );
+
+        if (_saveCalculationTextures) {
+            LDEBUG(std::format("Computing DeltaS texture  {}", scatteringOrder));
+            atmosphere::inscattering::calculateDeltaS(scatteringOrder,
+                deltaSRayleighTexture, deltaJTexture, _transmittanceTexture,
+                _atmospherePlanetRadius, _atmosphereRadius, _muSSamples, _nuSamples,
+                _muSamples, _rSamples);
+            saveTextureFile(std::format("deltaS_texture-scattering_order-{}.ppm", scatteringOrder),
+                deltaSRayleighTexture[0],
+                true
+            );
+            LDEBUG(std::format("Finished Computing DeltaS texture  {}", scatteringOrder));
+        }
 
         glEnable(GL_BLEND);
         glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
