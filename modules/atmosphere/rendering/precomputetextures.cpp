@@ -202,6 +202,54 @@ glm::vec3 unmappingMuMuSunNu(float r, const glm::vec4& dhdH, int SAMPLES_MU, flo
     return glm::vec3{ mu, muSun, nu };
 }
 
+float rayleighPhaseFunction(float mu)
+{
+    // return (3.0 / (16.0 * M_PI)) * (1.0 + mu * mu);
+    return 0.0596831036f * (1.0f + mu * mu);;
+}
+
+float miePhaseFunction(float mu, float mieG)
+{
+    float mieG2 = mieG * mieG;
+    return 0.1193662072f * (1.0f - mieG2) *
+        std::pow(1.0f + mieG2 - 2.0f * mieG * mu, -1.5f) * (1.0f + mu * mu) / (2.0f + mieG2);
+}
+
+glm::vec4 texture4D(const CPUTexture3D& table, float r, float mu, float muSun, float nu,
+    float Rg, int samplesMu, float Rt, int samplesR, int samplesMuS, int samplesNu)
+{
+    float r2 = r * r;
+    float Rg2 = Rg * Rg;
+    float Rt2 = Rt * Rt;
+    float rho = std::sqrt(r2 - Rg2);
+    float rmu = r * mu;
+    float delta = rmu * rmu - r2 + Rg2;
+
+    glm::vec4 cst = rmu < 0.f && delta > 0.f ?
+        glm::vec4(1.f, 0.f, 0.f, 0.5f - 0.5f / static_cast<float>(samplesMu)) :
+        glm::vec4(-1.f, Rt2 - Rg2, std::sqrt(Rt2 - Rg2), 0.5f + 0.5f /
+            static_cast<float>(samplesMu));
+
+    float u_r = 0.5f / static_cast<float>(samplesR) + rho / std::sqrt(Rt2 - Rg2) *
+        (1.f - 1.f / static_cast<float>(samplesR));
+    float u_mu = cst.w + (rmu * cst.x + std::sqrt(delta + cst.y)) /
+        (rho + cst.z) * (0.5f - 1.f / samplesMu);
+    float u_mu_s = 0.5f / float(samplesMuS) +
+        (std::atan(std::max(muSun, -0.1975f) * std::tan(1.386f)) *
+            0.9090909090909090f + 0.74f) *
+        0.5f * (1.f - 1.f / static_cast<float>(samplesMuS));
+    float t = (nu + 1.f) / 2.f * (static_cast<float>(samplesNu) - 1.f);
+    float u_nu = std::floor(t);
+    t = t - u_nu;
+
+    glm::vec4 v1 = texture(table,
+        glm::vec3((u_nu + u_mu_s) / static_cast<float>(samplesNu), u_mu, u_r));
+    glm::vec4 v2 = texture(table,
+        glm::vec3((u_nu + u_mu_s + 1.0) / float(samplesNu), u_mu, u_r));
+
+    return glm::mix(v1, v2, t);
+}
+
 } // namespace common
 
 namespace transmittance {
@@ -444,6 +492,48 @@ CPUTexture3D calculateInscattering(const CPUTexture3D& deltaSRayleighTexture,
     return inScatteringTableTexture;
 }
 
+void calculateDeltaJ(int scatteringOrder, CPUTexture3D& deltaJ,
+    const CPUTexture& deltaETexture, const CPUTexture3D& deltaSRTexture,
+    const CPUTexture3D& deltaSMTexture, const CPUTexture& transmittanceTexture,
+    float Rg, float Rt, float averageGroundReflectance, float HR,
+    const glm::vec3& betaRayleigh, float HM, const glm::vec3& betaMieScattering,
+    float mieG, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R)
+{
+    for (int layer = 0; layer < SAMPLES_R; layer++) {
+        auto [r, dhdH] = step3DTexture(Rg, Rt, SAMPLES_R, layer);
+
+        int k = 0;
+        for (int y = 0; y < deltaJ[0].height; y++) {
+            for (int x = 0; x < deltaJ[0].width; x++) {
+                // InScattering Radiance to be calculated at different points in the ray
+                // path. Unmapping the variables from texture texels coordinates to
+                // mapped coordinates
+                glm::vec3 muMuSunNu = common::unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg,
+                    Rt, SAMPLES_MU_S, SAMPLES_NU, x, y);
+                float mu = muMuSunNu.r;
+                float muSun = muMuSunNu.g;
+                float nu = muMuSunNu.b;
+                // Calculate the the light inScattered in direction
+                // -vec(v) for the point at height r (vec(y) following Bruneton and Neyret's paper
+                bool firstIteration = scatteringOrder == 2;
+                glm::vec3 radianceJ = inscatter(r, mu, muSun, nu, Rt, Rg,
+                    averageGroundReflectance, transmittanceTexture, mieG, firstIteration,
+                    deltaETexture, deltaSRTexture, deltaSMTexture, SAMPLES_MU_S,
+                    SAMPLES_NU, SAMPLES_MU, SAMPLES_R, betaRayleigh, betaMieScattering,
+                    HR, HM);
+
+                deltaJ[layer].data[k] = radianceJ.r;
+                deltaJ[layer].data[k + 1] = radianceJ.g;
+                deltaJ[layer].data[k + 2] = radianceJ.b;
+
+                k += deltaJ[0].components;
+            }
+        }
+    }
+}
+
+
+
 std::pair<float, glm::vec4> step3DTexture(float Rg, float Rt, int rSamples, int layer)
 {
     float atmospherePlanetRadius = Rg;
@@ -511,6 +601,188 @@ std::pair<glm::vec3, glm::vec3> inscatter(float r, float mu, float muSun, float 
     return std::make_pair(S_R, S_M);
 }
 
+glm::vec3 inscatter(float r, float mu, float muSun, float nu, float Rt, float Rg,
+    float averageGroundReflectance, const CPUTexture& transmittanceTexture, float mieG,
+    bool firstIteration, const CPUTexture& deltaETexture,
+    const CPUTexture3D& deltaSRTexture, const CPUTexture3D& deltaSMTexture,
+    int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R,
+    const glm::vec3& betaRayleigh, const glm::vec3& betaMieScattering, float HR, float HM)
+{
+    const float M_PI = 3.141592657;
+    const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
+    // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI]
+    const float stepPhi = (2.0 * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+    const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+
+    // Be sure to not get a cosine or height out of bounds
+    r = glm::clamp(r, Rg, Rt);
+    mu = glm::clamp(mu, -1.0f, 1.0f);
+    muSun = glm::clamp(muSun, -1.0f, 1.0f);
+
+    //  s sigma | theta v
+    //   \      |      /
+    //    \     |     /
+    //     \    |    /
+    //      \   |   /   theta + signam = ni
+    //       \  |  /    cos(theta) = mu
+    //        \ | /     cos(sigma) = muSun
+    //         \|/      cos(ni)    = nu
+    float mu2 = mu * mu;
+    float muSun2 = muSun * muSun;
+    float sinThetaSinSigma = std::sqrt(1.0f - mu2) * std::sqrt(1.0f - muSun2);
+    // cos(sigma + theta) = cos(theta)cos(sigma)-sin(theta)sin(sigma)
+    // cos(ni) = nu = mu * muSun - sqrt(1.0 - mu*mu)*sqrt(1.0 - muSun*muSun)
+    // sin(theta) = sqrt(1.0 - mu*mu)
+    // Now we make sure the angle between vec(s) and vec(v) is in the right range:
+    nu = glm::clamp(nu, muSun * mu - sinThetaSinSigma, muSun * mu + sinThetaSinSigma);
+
+    // Lets calculate the consine of the angle to the horizon:
+    // theta is the angle between vec(v) and x
+    // cos(PI-theta) = d/r
+    // -cos(theta) = sqrt(r*r-Rg*Rg)/r
+    float Rg2 = Rg * Rg;
+    float r2 = r * r;
+    float cosHorizon = -sqrt(r2 - Rg2) / r;
+
+    // Now we get vec(v) and vec(s) from mu, muSun and nu:
+    // Assuming:
+    //              z |theta
+    //                |\ vec(v) ||vec(v)|| = 1
+    //                | \
+    //                |__\_____x
+    // sin(PI-theta) = x/||v|| => x = sin(theta) =? x = sqrt(1-mu*mu)
+    // cos(PI-theta) = z/||v|| => z = cos(theta) = mu
+    // v.y = 0 because ||v|| = 1
+    glm::vec3 v = glm::vec3(sqrt(1.0f - mu2), 0.0f, mu);
+
+    // To obtain vec(s), we use the following properties:
+    // ||vec(s)|| = 1, ||vec(v)|| = 1
+    // vec(s) dot vec(v) = cos(ni) = nu
+    // Following the same idea for vec(v), we now that s.z = cos(sigma) = muSun
+    // So, from vec(s) dot vec(v) = cos(ni) = nu we have,
+    // s.x*v.x +s.y*v.y + s.z*v.z = nu
+    // s.x = (nu - s.z*v.z)/v.x = (nu - mu*muSun)/v.x
+    float sx = (v.x == 0.0f) ? 0.0f : (nu - muSun * mu) / v.x;
+    // Also, ||vec(s)|| = 1, so:
+    // 1 = sqrt(s.x*s.x + s.y*s.y + s.z*s.z)
+    // s.y = sqrt(1 - s.x*s.x - s.z*s.z) = sqrt(1 - s.x*s.x - muSun*muSun)
+    glm::vec3 s = glm::vec3(sx, std::sqrt(std::max(0.0f, 1.0f - sx * sx - muSun2)), muSun);
+
+
+    // In order to integrate over 4PI, we scan the sphere using the spherical coordinates
+    // previously defined
+    glm::vec3 radianceJAcc = glm::vec3(0.0);
+    for (int theta_i = 0; theta_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; theta_i++) {
+        float theta = (theta_i + 0.5f) * stepTheta;
+        float cosineTheta = std::cos(theta);
+        float cosineTheta2 = cosineTheta * cosineTheta;
+        float distanceToGround = 0.0f;
+        float groundReflectance = 0.0f;
+        glm::vec3 groundTransmittance = glm::vec3(0.0f);
+
+        // If the ray w can see the ground we must compute the transmittance
+        // effect from the starting point x to the ground point in direction -vec(v):
+        if (cosineTheta < cosHorizon) { // ray hits ground
+            // AverageGroundReflectance e [0,1]
+            groundReflectance = averageGroundReflectance / M_PI;
+            // From cosine law: Rg*Rg = r*r + distanceToGround*distanceToGround - 2*r*distanceToGround*cos(PI-theta)
+            distanceToGround = -r * cosineTheta - std::sqrt(r2 * (cosineTheta2 - 1.0) + Rg2);
+            //               |
+            //               | theta
+            //               |
+            //               |\ distGround
+            //            r  | \  alpha
+            //               |  \/
+            //               |  /
+            //               | / Rg
+            //               |/
+            // So cos(alpha) = ((vec(x)+vec(dg)) dot -vec(distG))/(||(vec(x)+vec(distG))|| * ||vec(distG)||)
+            //    cos(alpha) = (-r*distG*cos(theta) - distG*distG)/(Rg*distG)
+            //      muGround = -(r*cos(theta) + distG)/Rg
+            float muGround = -(r * cosineTheta + distanceToGround) / Rg;
+            // We can use the same triangle in calculate the distanceToGround to calculate
+            // the cosine of the angle between the ground touching point at height Rg and
+            // the zenith angle
+            // float muGround = (r2 - distanceToGround*distanceToGround - Rg2)/(2*distanceToGround*Rg);
+            // Access the Transmittance LUT in order to calculate the transmittance from
+            // the ground point Rg, thorugh the atmosphere, at a distance: distanceToGround
+            groundTransmittance = common::transmittance(transmittanceTexture, Rg,
+                muGround, distanceToGround, Rg, Rt);
+        }
+
+        for (int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++phi_i) {
+            float phi = (float(phi_i) + 0.5) * stepPhi;
+            // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
+            // rho = 1, we are integrating over a unit sphere
+            float dw = stepTheta * stepPhi * std::sin(theta);
+            // w = (rho*sin(theta)*cos(phi), rho*sin(theta)*sin(phi), rho*cos(theta))
+            float sinPhi = std::sin(phi);
+            float sinTheta = std::sin(theta);
+            float cosPhi = std::cos(phi);
+            glm::vec3 w = glm::vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosineTheta);
+
+            // We calculate the Rayleigh and Mie phase function for the new scattering
+            // angle:
+            // cos(angle between vec(v) and vec(w)), ||v|| = ||w|| = 1
+            float nuWV = dot(v, w);
+            float phaseRayleighWV = common::rayleighPhaseFunction(nuWV);
+            float phaseMieWV = common::miePhaseFunction(nuWV, mieG);
+
+            glm::vec3 groundNormal = (glm::vec3(0.f, 0.f, r) + distanceToGround * w) / Rg;
+            glm::vec3 groundIrradiance = irradianceLUT(deltaETexture,
+                glm::dot(groundNormal, s),
+                Rg, Rg, Rt
+            );
+
+            // We finally calculate the radiance from the reflected ray from ground
+            // (0.0 if not reflected)
+            glm::vec3 radianceJ1 = groundTransmittance * groundReflectance * groundIrradiance;
+
+            // We calculate the Rayleigh and Mie phase function for the new scattering
+            // angle:
+            // cos(angle between vec(s) and vec(w)), ||s|| = ||w|| = 1
+            float nuSW = glm::dot(s, w);
+            // The first iteration is different from the others. In the first iteration
+            // all the light InScattered is coming from the initial pre-computed single
+            // InScattered light. We stored these values in the deltaS textures
+            // (Ray and Mie), and in order to avoid problems with the high angle
+            // dependency in the phase functions, we don't include the phase functions on
+            // those tables (that's why we calculate them now).
+            if (firstIteration) {
+                float phaseRaySW = common::rayleighPhaseFunction(nuSW);
+                float phaseMieSW = common::miePhaseFunction(nuSW, mieG);
+                // We can now access the values for the single InScattering in the
+                // textures deltaS textures.
+                glm::vec3 singleRay = glm::vec3(common::texture4D(deltaSRTexture, r, w.z,
+                    muSun, nuSW, Rg, SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU));
+                glm::vec3 singleMie = glm::vec3(common::texture4D(deltaSMTexture, r, w.z,
+                    muSun, nuSW, Rg, SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU));
+
+                // Initial InScattering including the phase functions
+                radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;
+            }
+            else {
+                // On line 9 of the algorithm, the texture table deltaSR is updated, so
+                // when we are not in the first iteration, we are getting the updated
+                // result of deltaSR (not the single inscattered light but the accumulated
+                // (higher order) inscattered light.
+                // w.z is the cosine(theta) = mu for vec(w)
+                radianceJ1 += glm::vec3(common::texture4D(deltaSRTexture, r, w.z, muSun,
+                    nuSW, Rg, SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU));
+            }
+
+            // Finally, we add the atmospheric scale height (See: Radiation Transfer on
+            // the atmosphere and Ocean from Thomas and Stamnes, pg 9-10.
+            radianceJAcc += radianceJ1 * (
+                    betaRayleigh * std::exp(-(r - Rg) / HR) * phaseRayleighWV +
+                    betaMieScattering * std::exp(-(r - Rg) / HM) * phaseMieWV
+                ) * dw;
+        }
+    }
+
+    return radianceJAcc;
+}
+
 std::pair<glm::vec3, glm::vec3> integrand(float r, float mu, float muSun, float nu,
     float y, float Rg, float Rt, const CPUTexture& transmittanceTexture,
     bool ozoneLayerEnabled, float HO, float HM, float HR)
@@ -555,6 +827,14 @@ std::pair<glm::vec3, glm::vec3> integrand(float r, float mu, float muSun, float 
         // The L0 (sun radiance) is added in real-time.
     }
     return std::make_pair(S_R, S_M);
+}
+
+glm::vec3 irradianceLUT(const CPUTexture& lut, float muSun, float r, float Rg, float Rt)
+{
+    // See Bruneton paper and Coliene to understand the mapping
+    float u_muSun = (muSun + 0.2f) / 1.2f;
+    float u_r = (r - Rg) / (Rt - Rg);
+    return glm::vec3(common::texture(lut, u_muSun, u_r));
 }
 
 } // namespace scattering

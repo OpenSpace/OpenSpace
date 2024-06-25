@@ -1202,7 +1202,13 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     }
 
     const GLuint deltaJTable = createTexture(_textureSize, "DeltaJ", 3);
-
+    atmosphere::CPUTexture3D deltaJTexture(_textureSize.z,
+        atmosphere::CPUTexture{
+            _textureSize.x,
+            _textureSize.y,
+            atmosphere::CPUTexture::Format::RGB
+        }
+    );
     // loop in line 6 in algorithm 4.1
     for (int scatteringOrder = 2; scatteringOrder <= 4; ++scatteringOrder) {
         // line 7 in algorithm 4.1
@@ -1214,6 +1220,23 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
             deltaSRayleighTable,
             deltaSMieTable
         );
+
+        if (_saveCalculationTextures) {
+            LDEBUG(std::format("Computing DeltaJ texture  {}", scatteringOrder));
+            atmosphere::inscattering::calculateDeltaJ(scatteringOrder, deltaJTexture,
+                _deltaETexture, deltaSRayleighTexture, deltaSMieTexture,
+                _transmittanceTexture, _atmospherePlanetRadius, _atmosphereRadius,
+                _averageGroundReflectance, _rayleighHeightScale, _rayleighScatteringCoeff,
+                _mieHeightScale, _mieScatteringCoeff, _miePhaseConstant, _muSSamples,
+                _nuSamples, _muSamples, _rSamples);
+
+            saveTextureFile(
+                std::format("my_deltaJ_texture-scattering_order-{}_test.ppm", scatteringOrder),
+                deltaJTexture[0]
+            );
+            LDEBUG(std::format("Finished Computing DeltaJ texture  {}", scatteringOrder));
+
+        }
 
         // line 8 in algorithm 4.1
         calculateDeltaE(
