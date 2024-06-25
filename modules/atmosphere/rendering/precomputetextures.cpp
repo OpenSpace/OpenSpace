@@ -467,6 +467,26 @@ void calculateDeltaE(int scatteringOrder, CPUTexture& deltaETexture,
     }
 }
 
+void calculateIrradiance(int scatteringOrder, CPUTexture& irradianceTexture,
+    const CPUTexture& deltaETexture)
+{
+    int k = 0;
+    for (int y = 0; y < irradianceTexture.height; y++) {
+        for (int x = 0; x < irradianceTexture.width; x++) {
+
+            glm::vec2 uv = glm::vec2((x + 0.5f) / static_cast<float>(deltaETexture.width),
+                (y + 0.5f) / static_cast<float>(deltaETexture.height));
+
+            glm::vec4 color = common::texture(deltaETexture, uv.x, uv.y);
+
+            irradianceTexture.data[k] += color.r;
+            irradianceTexture.data[k + 1] += color.g;
+            irradianceTexture.data[k + 2] += color.b;
+            k += irradianceTexture.components;
+        }
+    }
+}
+
 } // namespace irradiance
 
 namespace inscattering {

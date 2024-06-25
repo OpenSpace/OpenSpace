@@ -1292,6 +1292,17 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
             deltaETable
         );
 
+        if (_saveCalculationTextures) {
+            atmosphere::irradiance::calculateIrradiance(scatteringOrder,
+                _irradianceTexture, _deltaETexture
+            );
+
+            saveTextureFile(
+                std::format("my_irradianceTable_order-{}_test.ppm", scatteringOrder),
+                _irradianceTexture
+            );
+        }
+
         // line 11 in algorithm 4.1
         calculateInscattering(
             scatteringOrder,

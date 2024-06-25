@@ -132,6 +132,9 @@ void calculateDeltaE(int scatteringOrder, CPUTexture& deltaETexture,
     float Rt, float mieG, const glm::ivec2 SKY, int SAMPLES_MU_S, int SAMPLES_NU,
     int SAMPLES_MU, int SAMPLES_R);
 
+void calculateIrradiance(int scatteringOrder, CPUTexture& irradianceTexture,
+    const CPUTexture& deltaETexture);
+
 } // namespace irradiance
 
 namespace inscattering {
