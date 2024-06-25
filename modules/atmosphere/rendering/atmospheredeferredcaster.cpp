@@ -1193,13 +1193,13 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
 
     if (_saveCalculationTextures) {
         // TODO: get deltaaSrayleigh deltasmie references
-        atmosphere::CPUTexture3D inScatteringTexture =
+        _inScatteringTexture =
             atmosphere::inscattering::calculateInscattering(deltaSRayleighTexture,
                 deltaSMieTexture, _textureSize, _muSSamples, _nuSamples, _muSamples,
                 _rSamples
         );
 
-        saveTextureFile("my_S_texture_test.ppm", inScatteringTexture[0]);
+        saveTextureFile("my_S_texture_test.ppm", _inScatteringTexture[0]);
     }
 
     const GLuint deltaJTable = createTexture(_textureSize, "DeltaJ", 3);
@@ -1223,6 +1223,12 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
         );
 
         if (_saveCalculationTextures) {
+            int a = 2;
+            int b = 4;
+            glm::vec2 s = glm::vec2(1+ 0.5f, 3 + 0.5f) / glm::vec2(a, b);
+            LDEBUG(std::format("sx {}, sy{}", s.x, s.y));
+
+
             LDEBUG(std::format("Computing DeltaJ texture  {}", scatteringOrder));
             atmosphere::inscattering::calculateDeltaJ(scatteringOrder, deltaJTexture,
                 _deltaETexture, deltaSRayleighTexture, deltaSMieTexture,
@@ -1309,6 +1315,17 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
             *deltaSSupTermsProgram,
             deltaSRayleighTable
         );
+
+        if (_saveCalculationTextures) {
+            atmosphere::inscattering::calculateInscattering(scatteringOrder,
+                _inScatteringTexture, deltaSRayleighTexture, _muSSamples, _nuSamples,
+                _muSamples, _rSamples);
+
+            saveTextureFile(
+                std::format("my-inscatteringTable_order-{}_test.ppm", scatteringOrder),
+                _inScatteringTexture[0], true
+            );
+        }
 
         glDisable(GL_BLEND);
     }

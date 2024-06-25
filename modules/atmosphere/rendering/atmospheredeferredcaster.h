@@ -135,7 +135,7 @@ private:
     atmosphere::CPUTexture _transmittanceTexture;
     atmosphere::CPUTexture _irradianceTexture;
     atmosphere::CPUTexture _deltaETexture;
-    atmosphere::CPUTexture _inScatteringTexture;
+    atmosphere::CPUTexture3D _inScatteringTexture;
 
     // Atmosphere Data
     bool _ozoneEnabled = false;

@@ -474,8 +474,11 @@ void calculateIrradiance(int scatteringOrder, CPUTexture& irradianceTexture,
     for (int y = 0; y < irradianceTexture.height; y++) {
         for (int x = 0; x < irradianceTexture.width; x++) {
 
-            glm::vec2 uv = glm::vec2((x + 0.5f) / static_cast<float>(deltaETexture.width),
-                (y + 0.5f) / static_cast<float>(deltaETexture.height));
+            //glm::vec2 uv = glm::vec2((x + 0.5f) / static_cast<float>(deltaETexture.width),
+            //    (y + 0.5f) / static_cast<float>(deltaETexture.height));
+
+            glm::vec2 uv = glm::vec2(x + 0.5f, y + 0.5f) /
+                glm::vec2(deltaETexture.width, deltaETexture.height);
 
             glm::vec4 color = common::texture(deltaETexture, uv.x, uv.y);
 
@@ -667,6 +670,42 @@ CPUTexture3D calculateInscattering(const CPUTexture3D& deltaSRayleighTexture,
     }
 
     return inScatteringTableTexture;
+}
+
+void calculateInscattering(int scatteringOrder, CPUTexture3D& inscatteringTexture,
+    const CPUTexture3D& deltaSTexture, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU,
+    int SAMPLES_R)
+{
+    for (int layer = 0; layer < SAMPLES_R; layer++) {
+
+        int k = 0;
+        for (int y = 0; y < inscatteringTexture[0].height; y++) {
+            for (int x = 0; x < inscatteringTexture[0].width; x++) {
+                float nu = -1.f +
+                    std::floor(static_cast<float>(x) / static_cast<float>(SAMPLES_MU_S)) /
+                    (static_cast<float>(SAMPLES_NU) - 1.0f) * 2.0f;
+
+                glm::vec3 uvw = glm::vec3(x + 0.5f, y + 0.5f, layer + 0.5f) /
+                    glm::vec3(
+                        static_cast<float>(SAMPLES_MU_S * SAMPLES_NU),
+                        static_cast<float>(SAMPLES_MU),
+                        static_cast<float>(SAMPLES_R)
+                );
+
+                // See Bruneton and Neyret paper, "Angular Precision" paragraph to understanding why we
+                // are dividing the S[L*] by the Rayleigh phase function.
+                glm::vec3 color = glm::vec3(common::texture(deltaSTexture, uvw)) /
+                    common::rayleighPhaseFunction(nu);
+                float rph = common::rayleighPhaseFunction(nu);
+                glm::vec4 c = common::texture(deltaSTexture, uvw);
+
+                inscatteringTexture[layer].data[k] += c.r;
+                inscatteringTexture[layer].data[k + 1] += 0;// uvw.g;
+                inscatteringTexture[layer].data[k + 2] += 0; // uvw.b;
+                k += inscatteringTexture[0].components;
+            }
+        }
+    }
 }
 
 void calculateDeltaJ(int scatteringOrder, CPUTexture3D& deltaJ,

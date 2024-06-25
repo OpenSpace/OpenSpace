@@ -152,6 +152,10 @@ CPUTexture3D calculateInscattering(const CPUTexture3D& deltaSRayleighTable,
     const CPUTexture3D& deltaSMieTable, const glm::ivec3 textureSize, int SAMPLES_MU_S,
     int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R);
 
+void calculateInscattering(int scatteringOrder, CPUTexture3D& inscatteringTexture,
+    const CPUTexture3D& deltaSTexture, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU,
+    int SAMPLES_R);
+
 void calculateDeltaJ(int scatteringOrder, CPUTexture3D& deltaJ,
     const CPUTexture& deltaETexture, const CPUTexture3D& deltaSRTexture,
     const CPUTexture3D& deltaSMTexture, const CPUTexture& transmittanceTexture, float Rg,
