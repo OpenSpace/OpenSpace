@@ -175,6 +175,23 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
+    constexpr openspace::properties::Property::PropertyInfo GuiOrderInfo = {
+        "GuiOrderNumber",
+        "Gui Order Number",
+        "This is an optional numerical value that will affect the sorting of this scene "
+        "graph node in relation ot its neighbors in the user interface. Nodes with the "
+        "same value will be sorted alphabetically.",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseGuiOrderInfo = {
+        "UseGuiOrder",
+        "UseGuiOrder",
+        "If true, use the 'GuiOrderNumber' to place this scene graph nodes in a sorted "
+        "way in relation to its neighbors in the GUI",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowDebugSphereInfo = {
         "ShowDebugSphere",
         "Show Debug Sphere",
@@ -309,6 +326,15 @@ namespace {
             // scene graph node. This is most useful to trim collective lists of nodes and
             // not display, for example, barycenters
             std::optional<bool> hidden;
+
+            // If this value is specified, the scene graph node will be ordered in
+            // relation to its neighbors in the GUI based on this value, so that nodes
+            // with a higher value appear later in the list. Scene graph noeds with the
+            // same value will be sorted alphabetically.
+            //
+            // The nodes without a given value will be placed at the top at the list and
+            // sorted alphabetically.
+            std::optional<double> orderNumber;
         };
         // Additional information that is passed to GUI applications. These are all hints
         // and do not have any impact on the actual function of the scene graph node
@@ -361,6 +387,11 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 throw ghoul::RuntimeError("GuiPath must start with /");
             }
             result->_guiPath = *p.gui->path;
+        }
+
+        result->_useGuiOrder = p.gui->orderNumber.has_value();
+        if (p.gui->orderNumber.has_value()) {
+            result->_guiOrderNumber = *p.gui->orderNumber;
         }
     }
 
@@ -512,6 +543,8 @@ SceneGraphNode::SceneGraphNode()
     , _guiPath(GuiPathInfo, "/")
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
+    , _guiOrderNumber(GuiOrderInfo, 0.f)
+    , _useGuiOrder(UseGuiOrderInfo, false)
     , _transform {
         ghoul::mm_unique_ptr<Translation>(
             global::memoryManager->PersistentMemory.alloc<StaticTranslation>()
@@ -593,6 +626,8 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_guiDescription);
     addProperty(_guiHidden);
     addProperty(_guiPath);
+    addProperty(_guiOrderNumber);
+    addProperty(_useGuiOrder);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -1114,6 +1149,14 @@ glm::dvec3 SceneGraphNode::worldScale() const {
 
 std::string SceneGraphNode::guiPath() const {
     return _guiPath;
+}
+
+float SceneGraphNode::guiOrderNumber() const {
+    return _guiOrderNumber;
+}
+
+bool SceneGraphNode::useGuiOrder() const {
+    return _useGuiOrder;
 }
 
 bool SceneGraphNode::hasGuiHintHidden() const {

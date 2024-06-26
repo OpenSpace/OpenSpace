@@ -146,6 +146,8 @@ public:
     Renderable* renderable();
 
     std::string guiPath() const;
+    float guiOrderNumber() const;
+    bool useGuiOrder() const;
     bool hasGuiHintHidden() const;
     void setGuiHintHidden(bool value);
 
@@ -170,15 +172,17 @@ private:
     std::vector<std::string> _onRecedeAction;
     std::vector<std::string> _onExitAction;
 
+    ghoul::mm_unique_ptr<Renderable> _renderable;
+
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
     properties::BoolProperty _guiHidden;
 
-    ghoul::mm_unique_ptr<Renderable> _renderable;
-
     properties::StringProperty _guiPath;
     properties::StringProperty _guiDisplayName;
     properties::StringProperty _guiDescription;
+    properties::FloatProperty _guiOrderNumber;
+    properties::BoolProperty _useGuiOrder;
 
     // Transformation defined by translation, rotation and scale
     struct {
