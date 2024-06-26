@@ -125,7 +125,7 @@ void GuiGIBSComponent::render() {
         std::string layerScript = std::format(
             "{{"
             "    Identifier = '{}',"
-            "    Type = 'TemporalTileLayer',"
+            "    Type = 'TemporalTileProvider',"
             "    Enabled = true,"
             "    Mode = 'Prototyped',"
             "    Prototyped = {{"

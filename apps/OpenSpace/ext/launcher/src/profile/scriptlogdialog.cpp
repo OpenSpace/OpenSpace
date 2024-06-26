@@ -39,8 +39,9 @@
 #include <QFile>
 #include <QPushButton>
 #include <QTextStream>
+#include <QTimer>
 
-ScriptlogDialog::ScriptlogDialog(QWidget* parent, std::string filter)
+ScriptLogDialog::ScriptLogDialog(QWidget* parent, std::string filter)
     : QDialog(parent)
     , _scriptLogFile(openspace::global::configuration->scriptLog)
     , _fixedFilter(std::move(filter))
@@ -51,7 +52,7 @@ ScriptlogDialog::ScriptlogDialog(QWidget* parent, std::string filter)
     loadScriptFile();
 }
 
-void ScriptlogDialog::createWidgets() {
+void ScriptLogDialog::createWidgets() {
     //         Column 0              Column 1
     //  *-------------------------*------------*
     //  | Title                                |
@@ -95,12 +96,12 @@ void ScriptlogDialog::createWidgets() {
 
     _filter = new QLineEdit;
     _filter->setPlaceholderText("Filter the list of scripts");
-    connect(_filter, &QLineEdit::textEdited, this, &ScriptlogDialog::updateScriptList);
+    connect(_filter, &QLineEdit::textEdited, this, &ScriptLogDialog::updateScriptList);
     layout->addWidget(_filter, 1, 0);
 
     _reloadFile = new QPushButton("Reload");
     _reloadFile->setToolTip("Reload the script log file");
-    connect(_reloadFile, &QPushButton::clicked, this, &ScriptlogDialog::loadScriptFile);
+    connect(_reloadFile, &QPushButton::clicked, this, &ScriptLogDialog::loadScriptFile);
     layout->addWidget(_reloadFile, 1, 1);
 
     _scriptlogList = new QListWidget;
@@ -113,17 +114,17 @@ void ScriptlogDialog::createWidgets() {
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(
             buttons, &QDialogButtonBox::accepted,
-            this, &ScriptlogDialog::saveChosenScripts
+            this, &ScriptLogDialog::saveChosenScripts
         );
         connect(
             buttons, &QDialogButtonBox::rejected,
-            this, &ScriptlogDialog::reject
+            this, &ScriptLogDialog::reject
         );
         layout->addWidget(buttons, 3, 0, 1, 2);
     }
 }
 
-void ScriptlogDialog::loadScriptFile() {
+void ScriptLogDialog::loadScriptFile() {
     _scripts.clear();
 
     const std::filesystem::path log = absPath(_scriptLogFile);
@@ -140,9 +141,14 @@ void ScriptlogDialog::loadScriptFile() {
         }
     }
     updateScriptList();
+
+    // It's not possible to call the `scrollToBottom` function directly as it only will
+    // scroll to the middle of the list. By doing it this way, we correctly end up at the
+    // bottom of the list
+    QTimer::singleShot(0, _scriptlogList, &QListWidget::scrollToBottom);
 }
 
-void ScriptlogDialog::updateScriptList() {
+void ScriptLogDialog::updateScriptList() {
     const std::string filter = _filter->text().toStdString();
     QListWidgetItem* curr = _scriptlogList->currentItem();
     std::string selection;
@@ -164,7 +170,7 @@ void ScriptlogDialog::updateScriptList() {
     }
 }
 
-void ScriptlogDialog::saveChosenScripts() {
+void ScriptLogDialog::saveChosenScripts() {
     std::vector<std::string> chosenScripts;
     QList<QListWidgetItem*> itemList = _scriptlogList->selectedItems();
 

@@ -50,7 +50,6 @@ asset.export(HomeLabel)
 
 asset.meta = {
   Name = "Home Label",
-  Version = "2.0",
   Description = "Label for the Milky Way titled 'Home', sided for the galactic level",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

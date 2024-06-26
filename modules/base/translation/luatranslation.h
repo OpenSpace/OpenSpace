@@ -39,8 +39,7 @@ namespace documentation { struct Documentation; }
 
 class LuaTranslation : public Translation {
 public:
-    LuaTranslation();
-    LuaTranslation(const ghoul::Dictionary& dictionary);
+    explicit LuaTranslation(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;
 

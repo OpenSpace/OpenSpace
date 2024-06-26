@@ -81,13 +81,12 @@ private:
      */
     void selectionPropertyHasChanged() override;
 
+    properties::StringProperty _speckFile;
     properties::BoolProperty _drawElements;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, opacity,
         color) _uniformCache;
-
-    properties::StringProperty _speckFile;
 
     DistanceUnit _constellationUnit = DistanceUnit::Parsec;
 

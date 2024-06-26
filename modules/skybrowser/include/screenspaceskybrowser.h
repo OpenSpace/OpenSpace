@@ -43,7 +43,7 @@ public:
     bool initializeGL() override;
     bool deinitializeGL() override;
     glm::mat4 scaleMatrix() override;
-    void render(float blackoutFactor) override;
+    void render(const RenderData& renderData) override;
     void update() override;
 
     float opacity() const noexcept override;

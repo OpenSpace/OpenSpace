@@ -21,9 +21,7 @@ local Uranus = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 25559000, 25559000, 24973000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 25559000, 25559000, 24973000 }
   },
   Tag = { "planet_solarSystem", "planet_giants" },
   GUI = {
@@ -76,7 +74,6 @@ asset.export(UranusLabel)
 
 asset.meta = {
   Name = "Uranus",
-  Version = "1.1",
   Description = "Uranus globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

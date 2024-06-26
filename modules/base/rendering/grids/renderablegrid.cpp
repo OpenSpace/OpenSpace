@@ -39,22 +39,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered.",
+        "The color of the grid lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
         "Highlight Color",
-        "This value determines the color of the highlighted lines in the grid.",
+        "The color of the highlighted lines in the grid.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value specifies the number of segments that are used to render the "
-        "grid in each direction.",
+        "The number of segments to split the grid into, in each direction (x and y).",
         openspace::properties::Property::Visibility::User
     };
 
@@ -70,21 +69,22 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the grid.",
+        "The width of the grid lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
         "Highlight Line Width",
-        "This value specifies the line width of the highlighted lines in the grid.",
+        "The width of the highlighted grid lines. The larger number, the thicker the "
+        "lines.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid Size",
-        "This value species the size of each dimensions of the grid.",
+        "The size of the grid (in the x and y direction), given in meters.",
         openspace::properties::Property::Visibility::User
     };
 

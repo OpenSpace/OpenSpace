@@ -115,7 +115,6 @@ asset.export(BoxGrid)
 
 asset.meta = {
   Name = "Example Grids",
-  Version = "1.0",
   Description = [[Examples of different types of rendered grids.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

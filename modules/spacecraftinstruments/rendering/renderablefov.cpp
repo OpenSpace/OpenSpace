@@ -44,88 +44,83 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value determines width of the lines connecting the instrument to the "
-        "corners of the field of view.",
+        "The width of the lines that connect the instrument to the corners of the field "
+        "of view.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
         "StandOffDistance",
         "Standoff Distance Factor",
-        "This value determines the standoff distance factor which influences the "
-        "distance of the plane to the focus object. If this value is '1', the field of "
-        "view will be rendered exactly on the surface of, for example, a planet. With a "
-        "value of smaller than 1, the field of view will hover of ther surface, thus "
-        "making it more visible.",
+        "A standoff distance factor which influences the distance of the plane to the "
+        "focus object. If the value is 1, the field of view will be rendered exactly on "
+        "the surface of, for example, a planet. With a value of smaller than 1, the "
+        "field of view will hover of the surface, thus making it more visible.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlwaysDrawFovInfo = {
         "AlwaysDrawFov",
         "Always Draw FOV",
-        "If this value is enabled, the field of view will always be drawn, regardless of "
-        "whether image information has been loaded or not.",
+        "If enabled, the field of view will always be drawn, regardless of whether image "
+        "information is currently available or not.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
-        "Colors.DefaultStart",
-        "Start of default color",
-        "This value determines the color of the field of view frustum close to the "
-        "instrument. The final colors are interpolated between this value and the end "
-        "color.",
+        "DefaultStart",
+        "Default Start",
+        "The color that is used for the field of view frustum close to the instrument. "
+        "The final colors are interpolated between this value and the end color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DefaultEndColorInfo = {
-        "Colors.DefaultEnd",
-        "End of default color",
-        "This value determines the color of the field of view frustum close to the "
-        "target. The final colors are interpolated between this value and the start "
-        "color.",
+    constexpr openspace::properties::Property::PropertyInfo ColorDefaultEndInfo = {
+        "DefaultEnd",
+        "Default End",
+        "The color that is used for the field of view frustum close to the target. The "
+        "final colors are interpolated between this value and the start color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ActiveColorInfo = {
-        "Colors.Active",
-        "Active Color",
-        "This value determines the color that is used when the instrument's field of "
-        "view is active.",
+    constexpr openspace::properties::Property::PropertyInfo ColorActiveInfo = {
+        "Active",
+        "Active",
+        "The color that is used when the instrument's field of view is active.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TargetInFovInfo = {
-        "Colors.TargetInFieldOfView",
-        "Target in field-of-view Color",
-        "This value determines the color that is used if the target is inside the field "
-        "of view of the instrument but the instrument is not yet active.",
+    constexpr openspace::properties::Property::PropertyInfo ColorTargetInFovInfo = {
+        "TargetInFieldOfView",
+        "Target in Field of View",
+        "The color that is used if the target is inside the field of view of the "
+        "instrument but the instrument is not yet active.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IntersectionStartInfo = {
-        "Colors.IntersectionStart",
-        "Start of the intersection",
-        "This value determines the color that is used close to the instrument if one of "
-        "the field of view corners is intersecting the target object. The final color is "
-        "retrieved by interpolating between this color and the intersection end color.",
+    constexpr openspace::properties::Property::PropertyInfo ColorIntersectionStartInfo = {
+        "IntersectionStart",
+        "Intersection Start",
+        "The color that is used close to the instrument if one of the field of view "
+        "corners are intersecting the target object. The final color is an "
+        "interpolation of this color and the intersection end color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IntersectionEndInfo = {
-        "Colors.IntersectionEnd",
-        "End of the intersection",
-        "This value determines the color that is used close to the target if one of the "
-        "field of view corners is intersecting the target object. The final color is "
-        "retrieved by interpolating between this color and the intersection begin color.",
+    constexpr openspace::properties::Property::PropertyInfo ColorIntersectionEndInfo = {
+        "IntersectionEnd",
+        "Intersection End",
+        "The color that is used close to the target if one of the field of view corners "
+        "is intersecting the target object. The final color is an interpolation of this "
+        "color and the intersection begin color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SquareColorInfo = {
-        "Colors.Square",
+        "Square",
         "Orthogonal Square",
-        "This value determines the color that is used for the field of view square in "
-        "the case that there is no intersection and that the instrument is not currently "
-        "active.",
+        "The color that is used for the field of view square when there is no "
+        "intersection and that the instrument is not currently active.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -150,34 +145,33 @@ namespace {
     // Needs support for std::map first for the frameConversions
     struct [[codegen::Dictionary(RenderableFov)]] Parameters {
         // The SPICE name of the source body for which the field of view should be
-        // rendered
+        // rendered.
         std::string body;
 
         // The SPICE name of the source body's frame in which the field of view should be
-        // rendered
+        // rendered.
         std::string frame;
 
         struct Instrument {
-            // The SPICE name of the instrument that is rendered
+            // The SPICE name of the instrument that is rendered.
             std::string name;
 
             // The aberration correction that is used for this field of view. The default
-            // is 'NONE'
+            // is 'NONE'.
             std::optional<std::string> aberration [[codegen::inlist("NONE",
                 "LT", "LT+S", "CN", "CN+S", "XLT", "XLT+S", "XCN", "XCN+S")]];
         };
-        // A table describing the instrument whose field of view should be rendered
+        // A table describing the instrument whose field of view should be rendered.
         Instrument instrument;
 
-        // If this value is set to 'true', the field of view specified here will always be
-        // rendered, regardless of whether image information is currently available or not
+        // [[codegen::verbatim(AlwaysDrawFovInfo.description)]]
         std::optional<bool> alwaysDrawFov;
 
         // A list of potential targets (specified as SPICE names) that the field of view
-        // should be tested against
+        // should be tested against.
         std::vector<std::string> potentialTargets;
 
-        // A list of frame conversions that should be registered with the SpiceManager
+        // A list of frame conversions that should be registered with the SpiceManager.
         std::optional<std::map<std::string, std::string>> frameConversions;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
@@ -186,10 +180,9 @@ namespace {
         // [[codegen::verbatim(StandoffDistanceInfo.description)]]
         std::optional<float> standOffDistance;
 
-        // If this value is set to 'true' the field-of-views bounds values will be
-        // simplified on load. Bound vectors will be removed if they are the strict linear
-        // interpolation between the two neighboring vectors. This value is disabled on
-        // default
+        // If true, the field of view's bounds values will be simplified on load. Bound
+        // vectors will be removed if they are the strict linear interpolation between the
+        // two neighboring vectors. This value is disabled by default.
         std::optional<bool> simplifyBounds;
     };
 #include "renderablefov_codegen.cpp"
@@ -207,18 +200,24 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
     , _alwaysDrawFov(AlwaysDrawFovInfo, false)
     , _colors({
+        properties::PropertyOwner({"Colors", "Colors"}),
         { DefaultStartColorInfo, glm::vec3(0.4f), glm::vec3(0.f), glm::vec3(1.f) },
-        { DefaultEndColorInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) },
-        { ActiveColorInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f) },
-        { TargetInFovInfo, glm::vec3(0.f, 0.5f, 0.7f), glm::vec3(0.f), glm::vec3(1.f) },
+        { ColorDefaultEndInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) },
+        { ColorActiveInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f) },
         {
-            IntersectionStartInfo,
+            ColorTargetInFovInfo,
+            glm::vec3(0.f, 0.5f, 0.7f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        },
+        {
+            ColorIntersectionStartInfo,
             glm::vec3(1.f, 0.89f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
         },
         {
-            IntersectionEndInfo,
+            ColorIntersectionEndInfo,
             glm::vec3(1.f, 0.29f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
@@ -259,13 +258,31 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
     _simplifyBounds = p.simplifyBounds.value_or(_simplifyBounds);
 
-    addProperty(_colors.defaultStart);
-    addProperty(_colors.defaultEnd);
-    addProperty(_colors.active);
-    addProperty(_colors.targetInFieldOfView);
-    addProperty(_colors.intersectionStart);
-    addProperty(_colors.intersectionEnd);
-    addProperty(_colors.square);
+    _colors.defaultStart.setViewOption(properties::Property::ViewOptions::Color, true);
+    _colors.defaultEnd.setViewOption(properties::Property::ViewOptions::Color, true);
+    _colors.active.setViewOption(properties::Property::ViewOptions::Color, true);
+    _colors.targetInFieldOfView.setViewOption(
+        properties::Property::ViewOptions::Color,
+        true
+    );
+    _colors.intersectionStart.setViewOption(
+        properties::Property::ViewOptions::Color,
+        true
+    );
+    _colors.intersectionEnd.setViewOption(properties::Property::ViewOptions::Color, true);
+    _colors.square.setViewOption(
+        properties::Property::ViewOptions::Color,
+        true
+    );
+    _colors.container.addProperty(_colors.defaultStart);
+    _colors.container.addProperty(_colors.defaultEnd);
+    _colors.container.addProperty(_colors.active);
+    _colors.container.addProperty(_colors.targetInFieldOfView);
+    _colors.container.addProperty(_colors.intersectionStart);
+    _colors.container.addProperty(_colors.intersectionEnd);
+    _colors.container.addProperty(_colors.square);
+
+    addPropertySubOwner(_colors.container);
 }
 
 void RenderableFov::initializeGL() {

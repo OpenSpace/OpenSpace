@@ -55,45 +55,43 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step Size",
-        "Specifies how often to sample on the raycaster. Lower step -> higher "
-        "resolution.",
+        "Specifies how often to sample during raycasting. Lower step size leads to "
+        "higher resolution.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid Type",
-        "Spherical or Cartesian grid.",
+        "The grid type to use for the volume.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
         "SecondsBefore",
         "Seconds before",
-        "Specifies the number of seconds to show the first timestep before its "
-        "actual time. The default value is 0.",
+        "The number of seconds to show the first timestep before its actual time.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
         "SecondsAfter",
         "Seconds after",
-        "Specifies the number of seconds to show the the last timestep after its "
-        "actual time.",
+        "The number of seconds to show the the last timestep after its actual time.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
         "SourceDirectory",
         "Source Directory",
-        "Specifies the path to load timesteps from.",
+        "A directory from where to load the data files for the different time steps.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer Function Path",
-        "Specifies the transfer function file path.",
+        "The path to the transfer function file.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -107,14 +105,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
         "JumpToTimestep",
         "Jump to timestep",
-        "Lets you scrub through the sequence's time steps.",
+        "Setting this value lets you scrub through the sequence's time steps.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrightnessInfo = {
         "Brightness",
         "Brightness",
-        "The volume renderer's general brightness.",
+        "A value that affects the general brightness of the volume rendering.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -134,10 +132,10 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
         // [[codegen::verbatim(SourceDirectoryInfo.description)]]
-        std::string sourceDirectory;
+        std::filesystem::path sourceDirectory [[codegen::directory()]];
 
         // [[codegen::verbatim(TransferFunctionInfo.description)]]
-        std::string transferFunction;
+        std::filesystem::path transferFunction;
 
         // [[codegen::verbatim(SecondsBeforeInfo.description)]]
         std::optional<float> secondsBefore;
@@ -145,7 +143,7 @@ namespace {
         // [[codegen::verbatim(SecondsAfterInfo.description)]]
         float secondsAfter;
 
-        // Specifies if you want to invert the volume data at it z-axis.
+        // If true, the volume data will be inverted at its z-axis.
         std::optional<bool> invertDataAtZ;
 
         // [[codegen::verbatim(BrightnessInfo.description)]]
@@ -155,7 +153,7 @@ namespace {
         std::optional<float> stepSize;
 
         // [[codegen::verbatim(GridTypeInfo.description)]]
-        std::optional<std::string> gridType;
+        std::optional<std::string> gridType [[codegen::inlist("Spherical", "Cartesian")]];
 
         // @TODO Missing documentation
         std::optional<ghoul::Dictionary> clipPlanes;
@@ -197,8 +195,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _invertDataAtZ = p.invertDataAtZ.value_or(_invertDataAtZ);
 
     _gridType.addOptions({
-        { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid" },
-        { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid" }
+        { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian" },
+        { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical" }
     });
     _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
 

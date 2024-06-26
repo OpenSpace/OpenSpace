@@ -159,7 +159,6 @@ asset.export(Pioneer11)
 
 asset.meta = {
   Name = "Pioneer and Voyager Trails",
-  Version = "1.1",
   Description = [[Pioneer 10, Pioneer 11, Voyager 1 and Voyager 2 trails. Driven by JPL
     Horizons data for better performance then spice but lower resolution. Data is from
     shortly after mission launches until January 1st, 2030]],

@@ -36,7 +36,6 @@ asset.export(EarthMoonShadow)
 
 asset.meta = {
   Name = "Eclipse Shadow",
-  Version = "1.0",
   Description = "The penumbral and umbral shadow eclipses for the Earth-Moon system",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

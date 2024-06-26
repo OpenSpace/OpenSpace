@@ -184,7 +184,6 @@ void createExoplanetSystem(const std::string& starName,
     const std::string starGlobeRenderableString = "Renderable = {"
         "Type = 'RenderableGlobe',"
         "Radii = " + std::to_string(radiusInMeter) + ","
-        "SegmentsPerPatch = 64,"
         "PerformShading = false,"
         "Layers = {"
             "ColorLayers = { " + colorLayers + "}"
@@ -294,7 +293,6 @@ void createExoplanetSystem(const std::string& starName,
                 "Type = 'RenderableGlobe',"
                 "Enabled = " + enabled + ","
                 "Radii = " + std::to_string(planetRadius) + "," // in meters
-                "SegmentsPerPatch = 64,"
                 "PerformShading = true,"
                 "Layers = {},"
                 "LightSourceNode = '" + starIdentifier + "'"

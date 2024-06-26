@@ -3,7 +3,6 @@ asset.require("./layers/colorlayers/jupiter_texture", true)
 
 asset.meta = {
   Name = "Default Jupiter Layers",
-  Version = "1.0",
   Description = "Default Jupiter layers are: Jupiter Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

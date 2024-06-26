@@ -36,9 +36,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
-        "Sets the URL of the texture that is displayed on this sphere. If "
-        "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. This image is expected to be an equirectangular projection.",
+        "A URL to an image to use as a texture for this sphere. The image is expected "
+        "to be an equirectangular projection.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -64,6 +63,9 @@ namespace {
         );
     }
 
+    // A RenderableSphereImageOnline can be used to show an image from an online source
+    // (as a URL) on a sphere in the OpenSpace scene. The image should be provided in an
+    // equirectangular projection, if it is a map that is draped over the sphere.
     struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];

@@ -197,7 +197,6 @@ asset.export(PM_J13420Orbit)
 
 asset.meta = {
   Name = "Star Orbits",
-  Version = "1.1",
   Description = [[Select Star Orbital paths that delineate their trajectory around the
     Milky Way over 1 billion years into the future. Included: Sun, Barnards, Kapteyns,
     Lacaille 9352, LSR1826+3014, LSRJ0822+1700, PM_J13420-3415. <br><br> Data

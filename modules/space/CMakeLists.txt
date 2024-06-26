@@ -76,6 +76,7 @@ set(SHADER_FILES
   shaders/debrisVizPoints_gs.glsl
   shaders/debrisVizPoints_vs.glsl
   shaders/debrisVizTrails_fs.glsl
+  shaders/debrisVizTrails_gs.glsl
   shaders/debrisVizTrails_vs.glsl
   shaders/fluxnodes_fs.glsl
   shaders/fluxnodes_vs.glsl

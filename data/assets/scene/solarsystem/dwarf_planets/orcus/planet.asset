@@ -15,9 +15,7 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 910000, 910000, 917000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 910000, 910000, 917000 }
   },
   GUI = {
     Name = "Orcus",
@@ -41,7 +39,6 @@ asset.export("Planet", Planet)
 
 asset.meta = {
   Name = "Orcus Globe",
-  Version = "1.0",
   Description = [[Globe of Orcus]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

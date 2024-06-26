@@ -6,7 +6,6 @@ asset.require("./watermasks/gebco_utah", false)
 
 asset.meta = {
   Name = "Default Earth Layers (Utah)",
-  Version = "1.0",
   Description = [[Default Earth layers are: Blue Marble,
     ESRI VIIRS Combo, ESRI NOAA20 Combo, ESRI World Imagery, VIIRS SNPP (Temporal),
     Aqua Modis (Temporal), Terra Modis (Temporal),

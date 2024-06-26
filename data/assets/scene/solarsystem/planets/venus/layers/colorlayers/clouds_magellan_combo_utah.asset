@@ -14,6 +14,7 @@ local Layer = {
   Identifier = "Clouds_Magellan_Combo_Utah",
   Name = "Clouds Magellan Combo [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 20,
   Type = "TileProviderByLevel",
   LevelTileProviders = {
     {

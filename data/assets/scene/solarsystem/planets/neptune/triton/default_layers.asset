@@ -3,7 +3,6 @@ asset.require("./layers/colorlayers/triton_voyager2_clrmosaic_globalfill_600m", 
 
 asset.meta = {
   Name = "Default Triton Layers",
-  Version = "1.0",
   Description = "Default Triton layers are: Voyager2 Mosaic",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

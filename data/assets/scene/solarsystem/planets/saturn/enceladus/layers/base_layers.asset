@@ -4,7 +4,6 @@ asset.require("./colorlayers/enceladus_texture", false)
 
 asset.meta = {
   Name = "Base Enceladus Layers",
-  Version = "1.0",
   Description = "Base Enceladus layers are: Enceladus Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

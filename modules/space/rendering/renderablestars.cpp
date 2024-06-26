@@ -54,9 +54,8 @@ namespace {
         "modelMatrix", "cameraViewProjectionMatrix", "cameraUp", "eyePosition",
         "colorOption", "magnitudeExponent", "sizeComposition", "lumCent", "radiusCent",
         "colorTexture", "opacity", "otherDataTexture", "otherDataRange",
-        "filterOutOfRange", "fixedColor", "haloTexture", "haloMultiplier", "haloGamma",
-        "haloScale", "hasGlare", "glareTexture", "glareMultiplier", "glareGamma",
-        "glareScale"
+        "filterOutOfRange", "fixedColor", "glareTexture", "glareMultiplier", "glareGamma",
+        "glareScale", "hasCore", "coreTexture", "coreMultiplier", "coreGamma", "coreScale"
     };
 
     enum SizeComposition {
@@ -105,8 +104,8 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
         "SpeckFile",
-        "Speck File",
-        "The speck file that is loaded to get the data for rendering these stars.",
+        "SPECK File",
+        "The path to the SPECK file containing the data for rendering these stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -121,7 +120,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingBvInfo = {
         "MappingBV",
         "Mapping (bv-color)",
-        "The name of the variable in the speck file that is used as the b-v color "
+        "The name of the variable in the SPECK file that is used as the b-v color "
         "variable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -129,7 +128,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingLuminanceInfo = {
         "MappingLuminance",
         "Mapping (luminance)",
-        "The name of the variable in the speck file that is used as the luminance "
+        "The name of the variable in the SPECK file that is used as the luminance "
         "variable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -137,7 +136,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingAbsMagnitudeInfo = {
         "MappingAbsMagnitude",
         "Mapping (absolute magnitude)",
-        "The name of the variable in the speck file that is used as the absolute "
+        "The name of the variable in the SPECK file that is used as the absolute "
         "magnitude variable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -145,7 +144,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingVxInfo = {
         "MappingVx",
         "Mapping (vx)",
-        "The name of the variable in the speck file that is used as the star velocity "
+        "The name of the variable in the SPECK file that is used as the star velocity "
         "along the x-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -153,7 +152,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingVyInfo = {
         "MappingVy",
         "Mapping (vy)",
-        "The name of the variable in the speck file that is used as the star velocity "
+        "The name of the variable in the SPECK file that is used as the star velocity "
         "along the y-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -161,7 +160,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingVzInfo = {
         "MappingVz",
         "Mapping (vz)",
-        "The name of the variable in the speck file that is used as the star velocity "
+        "The name of the variable in the SPECK file that is used as the star velocity "
         "along the z-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -169,7 +168,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MappingSpeedInfo = {
         "MappingSpeed",
         "Mapping (speed)",
-        "The name of the variable in the speck file that is used as the speed.",
+        "The name of the variable in the SPECK file that is used as the speed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -184,7 +183,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OtherDataOptionInfo = {
         "OtherData",
         "Other Data Column",
-        "The index of the speck file data column that is used as the color input.",
+        "The index of the SPECK file data column that is used as the color input.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -218,16 +217,16 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo HaloOwnerInfo = {
-        "Halo",
-        "Halo",
-        "Settings for the halo portion of the star."
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo CoreOwnerInfo = {
+        "Core",
+        "Core",
+        "Settings for the central core portion of the star."
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo GlareOwnerInfo = {
         "Glare",
         "Glare",
-        "Settings for the central glare portion of the star."
+        "Settings for the glare portion of the star."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -317,8 +316,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
-        // The path to the SPECK file containing information about the stars being
-        // rendered
+        // [[codegen::verbatim(SpeckFileInfo.description)]]
         std::filesystem::path speckFile [[codegen::key("File")]];
 
         // [[codegen::verbatim(ColorTextureInfo.description)]]
@@ -343,12 +341,12 @@ namespace {
         // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
 
-        // This value specifies a value that is always filtered out of the value ranges on
-        // loading. This can be used to trim the dataset's automatic value range
+        // Specifies a value that is always filtered out of the value ranges on load.
+        // This can be used to trim the dataset's automatic value range.
         std::optional<float> staticFilter;
 
-        // This is the value that is used to replace statically filtered values. Setting
-        // this value only makes sense if 'StaticFilter' is 'true', as well
+        // A value that is used to replace statically filtered values. Setting this value
+        // only makes sense if `StaticFilter` is set as well.
         std::optional<float> staticFilterReplacement;
 
         struct Texture {
@@ -365,11 +363,11 @@ namespace {
             std::optional<float> scale;
         };
 
-        // [[codegen::verbatim(HaloOwnerInfo.description)]]
-        Texture halo;
-
         // [[codegen::verbatim(GlareOwnerInfo.description)]]
-        std::optional<Texture> glare;
+        Texture glare;
+
+        // [[codegen::verbatim(CoreOwnerInfo.description)]]
+        std::optional<Texture> core;
 
         // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
         std::optional<float> magnitudeExponent;
@@ -401,8 +399,8 @@ namespace {
             // [[codegen::verbatim(MappingSpeedInfo.description)]]
             std::optional<std::string> speed;
         };
-        // The mappings between data values and the variable names specified in the speck
-        // file
+        // The mappings between data values and the variable names specified in the SPECK
+        // file.
         DataMapping dataMapping;
 
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]
@@ -448,8 +446,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     )
     , _fixedColor(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
-    , _halo{
-        properties::PropertyOwner(HaloOwnerInfo),
+    , _core{
+        properties::PropertyOwner(CoreOwnerInfo),
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
         properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
@@ -590,35 +588,33 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     auto markTextureAsDirty = [this]() {_pointSpreadFunctionTextureIsDirty = true; };
 
-    _halo.texturePath = absPath(p.halo.texture).string();
-    _halo.texturePath.onChange(markTextureAsDirty);
-    _halo.file = std::make_unique<ghoul::filesystem::File>(_halo.texturePath.value());
-    _halo.file->setCallback(markTextureAsDirty);
-    _halo.container.addProperty(_halo.texturePath);
-    _halo.multiplier = p.halo.multiplier.value_or(_halo.multiplier);
-    _halo.container.addProperty(_halo.multiplier);
-    _halo.gamma = p.halo.gamma.value_or(_halo.gamma);
-    _halo.container.addProperty(_halo.gamma);
-    _halo.scale = p.halo.scale.value_or(_halo.scale);
-    _halo.container.addProperty(_halo.scale);
-    addPropertySubOwner(_halo.container);
-
-    if (p.glare.has_value()) {
-        _glare.texturePath = absPath(p.glare->texture).string();
-        _glare.file =
-            std::make_unique<ghoul::filesystem::File>(_glare.texturePath.value());
-        _glare.file->setCallback(markTextureAsDirty);
-        _glare.multiplier = p.glare->multiplier.value_or(_glare.multiplier);
-        _glare.gamma = p.glare->gamma.value_or(_glare.gamma);
-        _glare.scale = p.glare->scale.value_or(_glare.scale);
+    if (p.core.has_value()) {
+        _core.texturePath = absPath(p.core->texture).string();
+        _core.file = std::make_unique<ghoul::filesystem::File>(_core.texturePath.value());
+        _core.file->setCallback(markTextureAsDirty);
+        _core.multiplier = p.core->multiplier.value_or(_core.multiplier);
+        _core.gamma = p.core->gamma.value_or(_core.gamma);
+        _core.scale = p.core->scale.value_or(_core.scale);
     }
+    _core.texturePath.onChange(markTextureAsDirty);
+    _core.container.addProperty(_core.texturePath);
+    _core.container.addProperty(_core.multiplier);
+    _core.container.addProperty(_core.gamma);
+    _core.container.addProperty(_core.scale);
+    addPropertySubOwner(_core.container);
+
+    _glare.texturePath = absPath(p.glare.texture).string();
     _glare.texturePath.onChange(markTextureAsDirty);
+    _glare.file = std::make_unique<ghoul::filesystem::File>(_glare.texturePath.value());
+    _glare.file->setCallback(markTextureAsDirty);
     _glare.container.addProperty(_glare.texturePath);
+    _glare.multiplier = p.glare.multiplier.value_or(_glare.multiplier);
     _glare.container.addProperty(_glare.multiplier);
+    _glare.gamma = p.glare.gamma.value_or(_glare.gamma);
     _glare.container.addProperty(_glare.gamma);
+    _glare.scale = p.glare.scale.value_or(_glare.scale);
     _glare.container.addProperty(_glare.scale);
     addPropertySubOwner(_glare.container);
-
 
     _magnitudeExponent = p.magnitudeExponent.value_or(_magnitudeExponent);
     addProperty(_magnitudeExponent);
@@ -656,7 +652,7 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableStars::isReady() const {
-    return _program && _halo.texture;
+    return _program && _glare.texture;
 }
 
 void RenderableStars::initializeGL() {
@@ -740,7 +736,7 @@ void RenderableStars::loadPSFTexture() {
         component.file->setCallback(markPsfTextureAsDirty);
     };
 
-    loadTexture(_halo);
+    loadTexture(_core);
     loadTexture(_glare);
 
     _pointSpreadFunctionTextureIsDirty = false;
@@ -799,24 +795,24 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.opacity, opacity());
     }
 
-    ghoul::opengl::TextureUnit haloUnit;
-    haloUnit.activate();
-    _halo.texture->bind();
-    _program->setUniform(_uniformCache.haloTexture, haloUnit);
-    _program->setUniform(_uniformCache.haloMultiplier, _halo.multiplier);
-    _program->setUniform(_uniformCache.haloGamma, _halo.gamma);
-    _program->setUniform(_uniformCache.haloScale, _halo.scale);
-
     ghoul::opengl::TextureUnit glareUnit;
-    if (_glare.texture) {
-        glareUnit.activate();
-        _glare.texture->bind();
-        _program->setUniform(_uniformCache.glareTexture, glareUnit);
-        _program->setUniform(_uniformCache.glareMultiplier, _glare.multiplier);
-        _program->setUniform(_uniformCache.glareGamma, _glare.gamma);
-        _program->setUniform(_uniformCache.glareScale, _glare.scale);
+    glareUnit.activate();
+    _glare.texture->bind();
+    _program->setUniform(_uniformCache.glareTexture, glareUnit);
+    _program->setUniform(_uniformCache.glareMultiplier, _glare.multiplier);
+    _program->setUniform(_uniformCache.glareGamma, _glare.gamma);
+    _program->setUniform(_uniformCache.glareScale, _glare.scale);
+
+    ghoul::opengl::TextureUnit coreUnit;
+    if (_core.texture) {
+        coreUnit.activate();
+        _core.texture->bind();
+        _program->setUniform(_uniformCache.coreTexture, coreUnit);
+        _program->setUniform(_uniformCache.coreMultiplier, _core.multiplier);
+        _program->setUniform(_uniformCache.coreGamma, _core.gamma);
+        _program->setUniform(_uniformCache.coreScale, _core.scale);
     }
-    _program->setUniform(_uniformCache.hasGlare, _glare.texture != nullptr);
+    _program->setUniform(_uniformCache.hasCore, _core.texture != nullptr);
 
     ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {

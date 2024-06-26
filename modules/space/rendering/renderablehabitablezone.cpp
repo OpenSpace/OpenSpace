@@ -48,16 +48,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EffectiveTemperatureInfo = {
         "EffectiveTemperature",
         "Effective Temperature",
-        "The effective temperature of the corresponding star, in Kelvin. "
-        "Used to compute the width and size of the disc.",
+        "The effective temperature of the corresponding star, in Kelvin. Used to compute "
+        "the width and size of the disc.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LuminosityInfo = {
         "Luminosity",
         "Luminosity",
-        "The luminosity of the corresponding star, in units of solar luminosities. "
-        "Used to compute the width and size of the disc.",
+        "The luminosity of the corresponding star, in units of solar luminosities. Used "
+        "to compute the width and size of the disc.",
         openspace::properties::Property::Visibility::User
     };
 

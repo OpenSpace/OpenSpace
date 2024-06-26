@@ -47,7 +47,6 @@ asset.export(TravelSpeedIndicator)
 
 asset.meta = {
   Name = "Light travel from sun to earth",
-  Version = "1.0",
   Description = "Speed of light indicator from sun to earth",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "",

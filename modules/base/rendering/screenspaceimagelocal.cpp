@@ -46,10 +46,12 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `ScreenSpaceRenderable` can be used to display an image from a local file on
+    // disk.
+    //
+    // To load an image from a web URL, see
+    // [ScreenSpaceImageOnline](#base_screenspace_image_online).
     struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
-        // Specifies the GUI name of the ScreenspaceImage
-        std::optional<std::string> name;
-
         // [[codegen::verbatim(TexturePathInfo.description)]]
         std::optional<std::string> texturePath;
     };
@@ -68,8 +70,6 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // @TODO (abock, 2021-02-02) Should this be the name variable? The identifier wasn't
-    // declared in the documentation
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);

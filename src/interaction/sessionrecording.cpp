@@ -81,7 +81,7 @@ namespace {
         "Ignore Recorded Scale",
         "If this value is enabled, the scale value from a recording is ignored and the "
         "computed values are used instead.",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddModelMatrixinAsciiInfo = {

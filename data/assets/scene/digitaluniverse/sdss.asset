@@ -79,7 +79,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Sloan Digital Sky Survey",
-  Version = "3.0",
   Description = "Digital Universe asset for The Sloan Digital Sky Survey (SDSS)",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

@@ -36,19 +36,18 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this sphere. This image is expected to be an equirectangular "
-        "projection.",
+        "The path to an image on disk to use as a texture for this sphere. The image is "
+        "expected to be an equirectangular projection.",
         openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::string texture;
+        std::filesystem::path texture;
 
-        // If this value is set to 'true', the image for this sphere will not be loaded at
-        // startup but rather when the image is shown for the first time. Additionally, if
-        // the sphere is disabled, the image will automatically be unloaded
+        // If true, the image for this sphere will not be loaded at startup but rather
+        // when the image is shown for the first time. Additionally, if the sphere is
+        // disabled, the image will automatically be unloaded.
         std::optional<bool> lazyLoading;
     };
 #include "renderablesphereimagelocal_codegen.cpp"
@@ -70,11 +69,13 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _texturePath = p.texture;
+    _texturePath = p.texture.string();
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
     _texturePath.onChange([this]() {
         loadTexture();
     });
     addProperty(_texturePath);
+    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 
 bool RenderableSphereImageLocal::isReady() const {

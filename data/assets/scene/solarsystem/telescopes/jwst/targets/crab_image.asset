@@ -12,7 +12,6 @@ asset.export("image", image)
 
 asset.meta = {
   Name = "Crab Nebula",
-  Version = "1.0",
   Description = "Crab Nebula Image",
   Author = [[
     NASA, ESA and Allison Loll/Jeff Hester (Arizona State University).

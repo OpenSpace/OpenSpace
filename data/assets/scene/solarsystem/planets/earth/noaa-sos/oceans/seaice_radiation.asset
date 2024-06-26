@@ -24,6 +24,7 @@ local syncedDirectory = asset.resource({
 local LayerFraction = {
   Identifier = Identifier,
   Name = Name,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "sea_ice_fraction.png",
   Description = Description
 }
@@ -31,6 +32,7 @@ local LayerFraction = {
 local LayerSolar = {
   Identifier = Identifier .. "-solar",
   Name = Name .. " (Solar)",
+  ZIndex = 100,
   FilePath = syncedDirectory .. "solar.png",
   Description = Description
 }
@@ -53,7 +55,6 @@ asset.export(LayerSolar)
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

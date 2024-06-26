@@ -41,7 +41,6 @@ asset.export(VenusBarycenterTrail)
 
 asset.meta = {
   Name = "Venus Trail",
-  Version = "1.1",
   Description = "Barycenter Trail of Venus as observed by the Sun",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

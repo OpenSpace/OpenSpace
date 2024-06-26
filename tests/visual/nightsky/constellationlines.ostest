@@ -1,12 +1,15 @@
-[
-    { "type": "pause",
-      "value": "true"},
-    { "type": "time",
-      "value": "2023-03-03T20:00:00.00"},
-    { "type": "script",
-      "value": "openspace.fadeIn('Scene.Constellations.Renderable')"},
-    { "type": "wait",
-      "value": "30"},
-    { "type": "screenshot",
-      "value": "constellationlines"}
-]
+{
+  "profile": "nightsky",
+  "commands": [
+    { "type": "time", "value": "2023-03-03T20:00:00.00" },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Constellations.Renderable.Enabled",
+        "value": true
+      }
+    },
+    { "type": "wait", "value": 30 },
+    { "type": "screenshot" }
+  ]
+}

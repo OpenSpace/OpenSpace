@@ -40,7 +40,6 @@ asset.export(EuropaTrail)
 
 asset.meta = {
   Name = "Europa Trail",
-  Version = "1.1",
   Description = "Trail of Europa as observed by the Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

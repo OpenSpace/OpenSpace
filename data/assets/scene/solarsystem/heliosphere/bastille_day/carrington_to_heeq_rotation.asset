@@ -19,7 +19,6 @@ asset.export("CarringtonLongitudeToHEEQ180Rotation", CarringtonLongitudeToHEEQ18
 
 asset.meta = {
   Name = "Carrington Longitude To HEEQ180 Rotation",
-  Version = "1.0",
   Description = "Contains a rotation for HEEQ180 to be used by another file",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

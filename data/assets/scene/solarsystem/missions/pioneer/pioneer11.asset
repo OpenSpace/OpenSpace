@@ -84,7 +84,6 @@ asset.export(Pioneer11Trail)
 
 asset.meta = {
   Name = "Pioneer 11",
-  Version = "1.0",
   Description = [[Pioneer 11 Model and Trail. Driven by SPICE data for high accuracy from
     April 6th, 1973 to January 2nd, 1990]],
   Author = "OpenSpace Team",

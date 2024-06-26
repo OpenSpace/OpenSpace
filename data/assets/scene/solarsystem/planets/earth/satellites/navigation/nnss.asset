@@ -48,7 +48,6 @@ asset.export(NavyNavigationSatellites)
 
 asset.meta = {
   Name = "Satellites Navigation Navy Navigation Satellite System",
-  Version = "1.0",
   Description = [[Satellites asset for Navigation Navy Navigation Satellite System. Data
     from Celestrak]],
   Author = "OpenSpace Team",

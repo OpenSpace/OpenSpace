@@ -505,6 +505,22 @@ void FixedRotation::update(const UpdateData& data) {
         _zAxis.type == Axis::Type::Object
     );
 
+    // @TODO (2024-06-15, abock) None of the following four checks should be necessary
+    //       as the nodes are retrieved whenever the property value is changed, but we
+    //       had an initialization issue and this was the fastest way to fix the bug
+    if (!_attachedNode) {
+        _attachedNode = sceneGraphNode(_attachedObject);
+    }
+    if (_xAxis.type == Axis::Type::Object && !_xAxis.node) {
+        _xAxis.node = sceneGraphNode(_xAxis.object);
+    }
+    if (_yAxis.type == Axis::Type::Object && !_yAxis.node) {
+        _yAxis.node = sceneGraphNode(_yAxis.object);
+    }
+    if (_zAxis.type == Axis::Type::Object && !_zAxis.node) {
+        _zAxis.node = sceneGraphNode(_zAxis.object);
+    }
+
     if (_attachedNode || anyAxisIsObjectType) {
         requireUpdate();
     }

@@ -18,7 +18,6 @@ end)
 
 asset.meta = {
   Name = "Touch Module Default Settings",
-  Version = "1.0",
   Description = "Some default settings related to the touch module",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

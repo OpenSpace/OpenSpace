@@ -56,8 +56,8 @@ public:
     void initialize();
 
     /**
-     * Create the labels from an already loaded dataset. That dataset should have a comment
-     * per point to be used for the labels.
+     * Create the labels from an already loaded dataset. That dataset should have a
+     * comment per point to be used for the labels.
      *
      * This function should be called before the labels are initialized
      *

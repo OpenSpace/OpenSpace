@@ -32,7 +32,7 @@ flat in float ge_speed;
 flat in float gs_screenSpaceDepth;
 
 uniform sampler1D colorTexture;
-uniform sampler2D haloTexture;
+uniform sampler2D glareTexture;
 uniform float opacity;
 uniform vec3 fixedColor;
 uniform int colorOption;
@@ -40,15 +40,15 @@ uniform sampler1D otherDataTexture;
 uniform vec2 otherDataRange;
 uniform bool filterOutOfRange;
 
-uniform float haloMultiplier;
-uniform float haloGamma;
-uniform float haloScale;
-
-uniform bool hasGlare;
-uniform sampler2D glareTexture;
 uniform float glareMultiplier;
 uniform float glareGamma;
 uniform float glareScale;
+
+uniform bool hasCore;
+uniform sampler2D coreTexture;
+uniform float coreMultiplier;
+uniform float coreGamma;
+uniform float coreScale;
 
 // keep in sync with renderablestars.h:ColorOption enum
 const int ColorOptionColor = 0;
@@ -61,6 +61,7 @@ const int ColorOptionFixedColor = 4;
 vec4 bv2rgb(float bv) {
   // BV is [-0.4,2.0]
   float t = (bv + 0.4) / (2.0 + 0.4);
+  t = clamp(t, 0.0, 1.0);
   return texture(colorTexture, t);
 }
 
@@ -105,16 +106,16 @@ Fragment getFragment() {
 
   vec2 shiftedCoords = (texCoords - 0.5) * 2;
 
-  vec2 scaledCoordsHalo = shiftedCoords / haloScale;
-  vec2 unshiftedCoordsHalo = (scaledCoordsHalo + 1.0) / 2.0;
-  float haloValue = texture(haloTexture, unshiftedCoordsHalo).a;
-  float alpha = pow(haloValue, haloGamma) * haloMultiplier;
-  if (hasGlare) {
-    vec2 scaledCoordsGlare = shiftedCoords / glareScale;
-    vec2 unshiftedCoordsGlare = (scaledCoordsGlare + 1.0) / 2.0;
-    float glareValue = texture(glareTexture, unshiftedCoordsGlare).a;
-    float glare = pow(glareValue, glareGamma) * glareMultiplier;
-    alpha += glare;
+  vec2 scaledCoordsGlare = shiftedCoords / glareScale;
+  vec2 unshiftedCoordsGlare = (scaledCoordsGlare + 1.0) / 2.0;
+  float glareValue = texture(glareTexture, unshiftedCoordsGlare).a;
+  float alpha = pow(glareValue, glareGamma) * glareMultiplier;
+  if (hasCore) {
+    vec2 scaledCoordsCore = shiftedCoords / coreScale;
+    vec2 unshiftedCoordsCore = (scaledCoordsCore + 1.0) / 2.0;
+    float coreValue = texture(coreTexture, unshiftedCoordsCore).a;
+    float core = pow(coreValue, coreGamma) * coreMultiplier;
+    alpha += core;
   }
 
   vec4 fullColor = vec4(color.rgb, alpha * opacity);

@@ -47,7 +47,6 @@ asset.export(GorizontSatellites)
 
 asset.meta = {
   Name = "Satellites Communications - Gorizont",
-  Version = "1.0",
   Description = "Satellites asset for Communications - Gorizont. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

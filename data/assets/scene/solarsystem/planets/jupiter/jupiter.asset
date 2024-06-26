@@ -22,8 +22,6 @@ local Jupiter = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 71492000.0, 71492000.0, 66854000.0 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     ShadowGroup = {
       Sources = {
         { Name = "Sun", Radius = 696300000 },
@@ -84,7 +82,6 @@ asset.export(JupiterLabel)
 
 asset.meta = {
   Name = "Jupiter",
-  Version = "1.1",
   Description = "Jupiter globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

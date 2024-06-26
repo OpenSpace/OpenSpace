@@ -54,7 +54,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Voids",
-  Version = "3.0",
   Author = "Brian Abbott (AMNH)",
   Description = "Digital Universe asset for Cosmic voids",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

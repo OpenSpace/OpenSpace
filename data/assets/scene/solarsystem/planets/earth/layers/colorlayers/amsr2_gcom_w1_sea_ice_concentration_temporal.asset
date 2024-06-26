@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "AMSR2_GCOM_W1_Sea_Ice_Concentration_Temporal",
   Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   Type = "TemporalTileProvider",
   Mode = "Prototyped",
   Prototyped = {
@@ -44,7 +45,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
-  Version = "1.1",
   Description = "GIBS hosted layer",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",

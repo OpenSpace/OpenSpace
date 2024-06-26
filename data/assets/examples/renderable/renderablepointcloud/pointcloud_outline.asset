@@ -10,14 +10,14 @@ local Node = {
     Coloring = {
       EnableOutline = true,
       OutlineColor = { 0.2, 0.2, 1.0 },
-      OutlineWeight = 0.1
+      OutlineWidth = 0.1
     },
     -- It might be desired to disable additive blending when using an outline
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "Outlined",
-    Path = "/Examples/RenderablePointCloud"
+    Name = "RenderablePointCloud - Outlined",
+    Path = "/Examples"
   }
 }
 

@@ -53,7 +53,6 @@ end
 
 asset.meta = {
   Name = "Spheres Example",
-  Version = "1.0",
   Description = [[Example showing how to render textured spheres in 3D space. Some
     coding logic is used to generate 9 spheres with different size and position.]],
   Author = "OpenSpace Team",

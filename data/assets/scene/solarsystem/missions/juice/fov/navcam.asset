@@ -47,7 +47,6 @@ asset.export(NavCam)
 
 asset.meta = {
   Name = "NavCam",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the navigational camera (NavCam) onboard Juice, which is used
     to measure the location of Juice. See

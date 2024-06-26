@@ -261,11 +261,19 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::filesystem::path filePa
     }
 
     const std::filesystem::path fileExtension = filePath.extension();
-    if (fileExtension == ".bc" || fileExtension == ".BC") {
+    if (fileExtension == ".bc" ||
+        fileExtension == ".BC" ||
+        fileExtension == ".ck" ||
+        fileExtension == ".CK")
+    {
         findCkCoverage(filePath); // binary ck kernel
     }
-    else if (fileExtension == ".bsp" || fileExtension == ".BSP") {
-        findSpkCoverage(filePath); // binary spk kernel
+    else if (fileExtension == ".bsp" ||
+            fileExtension == ".BSP" ||
+            fileExtension == ".spk" ||
+            fileExtension == ".SPK")
+        {
+            findSpkCoverage(filePath); // spk kernel
     }
 
     const KernelHandle kernelId = ++_lastAssignedKernel;

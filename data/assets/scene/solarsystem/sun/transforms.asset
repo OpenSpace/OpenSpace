@@ -113,7 +113,6 @@ asset.export("LightSource", LightSource)
 
 asset.meta = {
   Name = "Sun Transforms",
-  Version = "1.1",
   Description = "Sun transforms: Solar System Barycenter, SUN IAU and SUN J2000",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

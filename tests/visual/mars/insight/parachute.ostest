@@ -1,0 +1,26 @@
+{
+  "profile": "mars",
+  "commands": [
+    { "type": "time", "value": "2018-11-26T19:44:00.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Insight",
+        "pitch": -0.101682,
+        "position": [ -4.087723, -4.039124, -8.183899 ],
+        "up": [ 0.827895, 0.213243, -0.518765 ],
+        "yaw": -0.398734
+      }
+    },
+    { "type": "action", "value": "os.FadeDownTrails" },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.InsightTrail.Renderable.Enabled",
+        "value": false
+      }
+    },
+    { "type": "wait", "value": 30 },
+    { "type": "screenshot" }
+  ]
+}

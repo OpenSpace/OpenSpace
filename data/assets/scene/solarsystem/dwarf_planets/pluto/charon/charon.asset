@@ -30,8 +30,6 @@ local Charon = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 6.035E5, 6.035E5, 6.035E5 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "charon.labels",
@@ -94,7 +92,6 @@ asset.export(CharonLabel)
 
 asset.meta = {
   Name = "Charon",
-  Version = "1.0",
   Description = "Charon globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

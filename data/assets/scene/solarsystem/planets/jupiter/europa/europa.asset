@@ -31,8 +31,6 @@ local Europa = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 1560800,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "europa.labels",
@@ -95,7 +93,6 @@ asset.export(EuropaLabel)
 
 asset.meta = {
   Name = "Europa",
-  Version = "1.1",
   Description = "Europa globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

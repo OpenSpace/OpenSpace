@@ -189,7 +189,7 @@ protected:
         std::unique_ptr<ColorMappingComponent> colorMapping;
         properties::BoolProperty enableOutline;
         properties::Vec3Property outlineColor;
-        properties::FloatProperty outlineWeight;
+        properties::FloatProperty outlineWidth;
         properties::OptionProperty outlineStyle;
         properties::BoolProperty applyCmapToOutline;
     };

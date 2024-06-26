@@ -41,7 +41,6 @@ asset.export(MarsBarycenterTrail)
 
 asset.meta = {
   Name = "Mars Trail",
-  Version = "1.1",
   Description = "Barycenter Mars trail from SPICE",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

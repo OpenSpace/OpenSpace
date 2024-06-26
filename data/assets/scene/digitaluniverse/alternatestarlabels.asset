@@ -50,7 +50,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Stars Labels - Alternate",
-  Version = "2.0",
   Description = "Digital Universe asset for alternate start labels",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

@@ -80,7 +80,6 @@ asset.export("HideLegend", HideLegend.Identifier)
 
 asset.meta = {
   Name = "Predictive Science Inc. Flux nodes legend for Bastille Days",
-  Version = "1.1",
   Description = [[Screen space renderable image legend of flux nodes for the bastille day
     CME event]],
   Author = "Christian Adamsson, Emilie Ho",

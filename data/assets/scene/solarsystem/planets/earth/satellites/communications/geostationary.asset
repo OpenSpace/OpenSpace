@@ -49,7 +49,6 @@ asset.export(GeoStationarySatellites)
 
 asset.meta = {
   Name = "Satellites Communications - Geostationary",
-  Version = "1.0",
   Description = [[Satellites asset for Communications - Geostationary. Data from
     Celestrak]],
   Author = "OpenSpace Team",

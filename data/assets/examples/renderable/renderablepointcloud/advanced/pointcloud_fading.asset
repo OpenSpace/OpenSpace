@@ -18,8 +18,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Fading",
-    Path = "/Examples/RenderablePointCloud/Advanced",
+    Name = "RenderablePointCloud - Fading",
+    Path = "/Examples/Advanced",
     Description = [[Example of a point cloud with distance-based fading (the points
       are visible when the camera reaches a certain distance away from the origin)]]
   }

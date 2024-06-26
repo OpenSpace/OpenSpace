@@ -9,8 +9,6 @@ local Sun = {
     Type = "RenderableGlobe",
     Enabled = false,
     Radii = { 695700000, 695700000, 695700000 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     LightSource = {
       Identifier = "Camera",
       Type = "CameraLightSource",
@@ -69,7 +67,6 @@ asset.export(SunLabel)
 
 asset.meta = {
   Name = "Sun",
-  Version = "1.1",
   Description = "The Sun and label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

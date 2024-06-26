@@ -35,7 +35,6 @@ asset.export(ExampleHoles)
 
 asset.meta = {
   Name = "GeoJson Example - Polygon with holes",
-  Version = "1.0",
   Description = [[GeoJson example asset with polygon that has holes in it]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

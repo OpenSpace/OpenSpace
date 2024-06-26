@@ -71,7 +71,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Pulsars",
-  Version = "3.0",
   Description = "Digital Universe asset for Pulsars",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

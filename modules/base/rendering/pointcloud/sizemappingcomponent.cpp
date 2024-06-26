@@ -71,7 +71,7 @@ namespace {
         std::optional<bool> enabled;
 
         // A list specifying all parameters that may be used for size mapping, i.e.
-        // scaling the points based on the provided data columns
+        // scaling the points based on the provided data columns.
         std::optional<std::vector<std::string>> parameterOptions;
 
         // [[codegen::verbatim(OptionInfo.description)]]
@@ -98,7 +98,7 @@ namespace {
             Gigalightyear
         };
 
-        // The scale to use for the size values in the dataset, given as either a string
+        // The scale used for the size values in the dataset, given as either a string
         // representing a specific unit or a value to multiply all the datapoints with
         // to convert the value to meter. The resulting value will be applied as a
         // multiplicative factor. For example, if the size data is given in is in

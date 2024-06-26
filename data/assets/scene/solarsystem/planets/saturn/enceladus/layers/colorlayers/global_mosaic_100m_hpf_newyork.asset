@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Global_Mosaic_100m_HPF_NewYork",
   Name = "Cassini Global Mosaic 100m HPF [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("global_mosaic_100m_hpf_newyork.wms"),
   Description = [[This mosaic represents the completion of a global control network of
     Enceladus containing Cassini Imaging Science Subsystem (ISS) images. A total of
@@ -30,7 +31,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Cassini Global Mosaic 100m HPF [New York]",
-  Version = "1.0",
   Description = [[Cassini Global mosaic for Enceladus. This map is hosted on the OpenSpace
     server in New York]],
   Author = "USGS",

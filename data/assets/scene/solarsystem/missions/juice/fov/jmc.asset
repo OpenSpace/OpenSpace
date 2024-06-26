@@ -79,7 +79,6 @@ asset.export(JMC2)
 
 asset.meta = {
   Name = "JMC",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Juice Monitoring Cameras (JMC) onboard Juice, which
     provide status information about the deployment of various Juice systems, like the

@@ -30,7 +30,7 @@ local SwiftTuttleTrail = {
   },
   GUI = {
     Name = "Swift Tuttle Trail",
-    Path = "/Solar System/SSSB"
+    Path = "/Solar System/Small Bodies"
   }
 }
 
@@ -45,7 +45,7 @@ local SwiftTuttlePosition = {
   },
   GUI = {
     Name = "Swift Tuttle Position",
-    Path = "/Solar System/SSSB"
+    Path = "/Solar System/Small Bodies"
   }
 }
 
@@ -67,7 +67,6 @@ asset.export(SwiftTuttleTrail)
 
 asset.meta = {
   Name = "Swift Tuttle",
-  Version = "1.2",
   Description = [[Position and Trail of Swift Tuttle from 1879 JUN 27 to 2050 JAN 01. Data
     from JPL Horizons]],
   Author = "OpenSpace Team",

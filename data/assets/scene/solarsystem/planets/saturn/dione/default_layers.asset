@@ -4,7 +4,6 @@ asset.require("./layers/colorlayers/dione_texture", true)
 
 asset.meta = {
   Name = "Default Dione Layers",
-  Version = "1.0",
   Description = "Default Dione layers are: Dione Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

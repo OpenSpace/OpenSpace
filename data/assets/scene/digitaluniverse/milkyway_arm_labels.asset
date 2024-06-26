@@ -64,7 +64,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Milky Way Arms Labels",
-  Version = "2.0",
   Description = "Image with arm labels for the Milky Way galaxy",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

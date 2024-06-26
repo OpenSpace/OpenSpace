@@ -28,6 +28,7 @@
 #include <modules/webbrowser/include/cefhost.h>
 #include <modules/webbrowser/include/eventhandler.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
@@ -222,6 +223,12 @@ void WebBrowserModule::detachEventHandler() {
 
 bool WebBrowserModule::isEnabled() const {
     return _enabled;
+}
+
+std::vector<documentation::Documentation> WebBrowserModule::documentations() const {
+    return {
+        ScreenSpaceBrowser::Documentation()
+    };
 }
 
 /// Logic for the webbrowser performance hotfix, described in globalscallbacks.h

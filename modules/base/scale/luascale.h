@@ -38,8 +38,7 @@ namespace documentation { struct Documentation; }
 
 class LuaScale : public Scale {
 public:
-    LuaScale();
-    LuaScale(const ghoul::Dictionary& dictionary);
+    explicit LuaScale(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 

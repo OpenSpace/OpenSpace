@@ -11,7 +11,6 @@ asset.require("./heightlayers/messenger_dem_utah", asset.enabled)
 
 asset.meta = {
   Name = "Base Mercury Layers",
-  Version = "1.0",
   Description = [[Base Mercury layers are: Aluminium Abundance, Calcium Abundance,
     Iron Abundance, Magnesium Abundance, Silicon Abundance, and Messenger DEM (3D).
   ]],

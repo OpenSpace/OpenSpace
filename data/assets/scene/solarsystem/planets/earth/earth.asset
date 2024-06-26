@@ -19,9 +19,7 @@ local Earth = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = EarthEllipsoid,
-    SegmentsPerPatch = 64,
     PerformShading = false,
-    Layers = {},
     ShadowGroup = {
       Sources = {
         { Name = "Sun", Radius = 696300000 },
@@ -127,7 +125,6 @@ asset.export(EarthLabel)
 
 asset.meta = {
   Name = "Earth",
-  Version = "1.1",
   Description = "Earth is a special planet with special needs",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

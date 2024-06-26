@@ -47,7 +47,6 @@ asset.export(SatelliteBasedAugmentationSatellites)
 
 asset.meta = {
   Name = "Satellites Navigation Satellite Based Augmentation System",
-  Version = "1.0",
   Description = [[Satellites asset for Navigation Satellite Based Augmentation System.
     Data from Celestrak]],
   Author = "OpenSpace Team",

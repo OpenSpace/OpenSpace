@@ -87,7 +87,6 @@ asset.export("ToggleMinorMoonTrails", ToggleMinorMoonTrails.Identifier)
 
 asset.meta = {
   Name = "Voyager Actions",
-  Version = "1.0",
   Description = "Actions related to the Voyager 1 and 2 missions",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

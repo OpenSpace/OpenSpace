@@ -197,7 +197,7 @@ Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
         const PathNavigator& navigator = global::navigationHandler->pathNavigator();
 
         const double radius = navigator.findValidBoundingSphere(targetNode);
-        const double defaultHeight = radius * navigator.arrivalDistanceFactor();
+        const double defaultHeight = navigator.defaultArrivalHeight(spec.identifier);
         const double height = spec.height.value_or(defaultHeight);
         const double distanceFromNodeCenter = radius + height;
 

@@ -96,7 +96,6 @@ asset.export(HUDFPosition)
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field Image and Line",
-  Version = "1.0",
   Description = [[
     Screenspace image of the Hubble Ultra Deep Field and a line from the
     James Webb Space Telescope to the Hubble Ultra Deep Field position.

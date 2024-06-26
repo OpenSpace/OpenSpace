@@ -41,7 +41,6 @@ asset.export(MercuryBarycenterTrail)
 
 asset.meta = {
   Name = "Mercury Trail",
-  Version = "1.1",
   Description = "Trail for Mercury's Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

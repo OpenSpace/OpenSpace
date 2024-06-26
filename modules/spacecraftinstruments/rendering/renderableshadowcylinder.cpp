@@ -35,75 +35,73 @@
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
-        "AmountOfPoints",
+        "NumberOfPoints",
         "Points",
-        "This value determines the number of control points that is used to construct "
-        "the shadow geometry. The higher this number, the more detailed the shadow is, "
-        "but it will have a negative impact on the performance.",
+        "The number of control points used for constructing the shadow geometry. The "
+        "higher this number, the more detailed the shadow is, but it will have a "
+        "negative impact on the performance.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
         "Shadow Length",
-        "This value determines the length of the shadow that is cast by the target "
-        "object. The total distance of the shadow is equal to the distance from the "
-        "target to the Sun multiplied with this value.",
+        "A factor that controls the length of the shadow that is cast by the target "
+        "object. The total length of the shadow is equal to the distance from the "
+        "target to the light source multiplied with this value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow Color",
-        "This value determines the color that is used for the shadow cylinder.",
+        "The color used for the shadow cylinder.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
         "Terminator Type",
-        "This value determines the type of the terminator that is used to calculate the "
-        "shadow eclipse.",
+        "Determines the type of terminator to use for calculating the shadow eclipse.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light Source",
-        "This value determines the SPICE name of the object that is used as the "
-        "illuminator for computing the shadow cylinder.",
+        "The SPICE name of the object that is used as the illuminator for computing the "
+        "shadow cylinder.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
-        "This value specifies the SPICE name of the object that is the observer of the "
-        "shadow cylinder.",
+        "The SPICE name of the object that is the observer.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BodyInfo = {
         "Body",
         "Target Body",
-        "This value is the SPICE name of target body that is used as the shadow caster "
-        "for the shadow cylinder.",
+        "The SPICE name of target body that is used as the shadow caster.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BodyFrameInfo = {
         "BodyFrame",
         "Body Frame",
-        "This value is the SPICE name of the reference frame in which the shadow "
-        "cylinder is expressed.",
+        "The SPICE name of the reference frame in which the shadow cylinder is "
+        "expressed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AberrationInfo = {
         "Aberration",
         "Aberration",
-        "This value determines the aberration method that is used to compute the shadow "
-        "cylinder.",
+        "The aberration method that is used for computing the shadow cylinder. The "
+        "options are \"NONE\", \"LT\" (Light Time), \"LT + S\" (Light Time Stellar), "
+        "\"CN\" (Converged Newtonian), and \"CN + S\" (Converged Newtonian Stellar).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -185,11 +183,19 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         static_cast<int>(codegen::map<SpiceManager::TerminatorType>(p.terminatorType));
     addProperty(_terminatorType);
 
-
     _lightSource = p.lightSource;
     _observer = p.observer;
     _body = p.body;
     _bodyFrame = p.bodyFrame;
+
+    _lightSource.setReadOnly(true);
+    addProperty(_lightSource);
+    _observer.setReadOnly(true);
+    addProperty(_observer);
+    _body.setReadOnly(true);
+    addProperty(_body);
+    _bodyFrame.setReadOnly(true);
+    addProperty(_bodyFrame);
 
     using T = SpiceManager::AberrationCorrection::Type;
     _aberration.addOptions({
@@ -198,12 +204,13 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
         { static_cast<int>(T::ConvergedNewtonianStellar), "Converged Newtonian Stellar" },
         { static_cast<int>(T::LightTime), "Light Time" },
         { static_cast<int>(T::LightTimeStellar), "Light Time Stellar" },
-
     });
     const SpiceManager::AberrationCorrection abbcorr = SpiceManager::AberrationCorrection(
         p.aberration
     );
     _aberration = static_cast<int>(abbcorr.type);
+    _aberration.setReadOnly(true);
+    addProperty(_aberration);
 }
 
 void RenderableShadowCylinder::initializeGL() {

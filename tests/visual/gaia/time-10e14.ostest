@@ -1,0 +1,25 @@
+{
+  "profile": "gaia",
+  "commands": [
+    { "type": "time", "value": 100000000000000 },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "GaiaStars",
+        "pitch": -0.0205159,
+        "position": [ 2.272225E19, -1.940065E19, 1.124299E17 ],
+        "up": [ 0.261695, 0.301186, -0.916953 ],
+        "yaw": -0.0104809
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.GaiaStars.Renderable.LuminosityMultiplier",
+        "value": 100.0
+      }
+    },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

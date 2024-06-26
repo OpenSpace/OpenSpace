@@ -381,13 +381,11 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         const glm::dvec3 sunPosWorld = node ? node->worldPosition() : glm::dvec3(0.0);
 
         glm::dvec3 sunPosObj;
-        // Sun following camera position
         if (_sunFollowingCameraEnabled) {
-            sunPosObj = invModelMatrix * glm::dvec4(data.camera.eyePositionVec3(), 1.0);
+            sunPosObj = camPosObjCoords;
         }
         else {
-            sunPosObj = invModelMatrix *
-                glm::dvec4((sunPosWorld - data.modelTransform.translation) * 1000.0, 1.0);
+            sunPosObj = invModelMatrix * glm::dvec4(sunPosWorld, 1.0);
         }
 
         // Sun Position in Object Space

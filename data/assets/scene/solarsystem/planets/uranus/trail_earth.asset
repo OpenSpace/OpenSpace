@@ -41,7 +41,6 @@ asset.export(UranusTrailEarth)
 
 asset.meta = {
   Name = "Uranus Trail from Earth",
-  Version = "1.1",
   Description = "Alternate trail of Uranus, as observed by the Earth rather then the Sun",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

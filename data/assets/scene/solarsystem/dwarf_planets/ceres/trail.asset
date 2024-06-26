@@ -40,7 +40,6 @@ asset.export(CeresTrail)
 
 asset.meta = {
   Name = "Ceres Trail",
-  Version = "1.0",
   Description = "Trail of Ceres as observed by the Sun. Data from NASA Spice",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -16,9 +16,7 @@ local Francisco = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 22000, 22000, 22000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 22000, 22000, 22000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -98,9 +96,7 @@ local Caliban = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 72000, 72000, 72000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 72000, 72000, 72000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -180,9 +176,7 @@ local Stephano = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 32000, 32000, 32000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 32000, 32000, 32000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -262,9 +256,7 @@ local Trinculo = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 18000, 18000, 18000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 18000, 18000, 18000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -344,9 +336,7 @@ local Sycorax = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 165000, 165000, 165000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 165000, 165000, 165000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -426,9 +416,7 @@ local Prospero = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 50000, 50000, 50000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 50000, 50000, 50000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -508,9 +496,7 @@ local Setebos = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 48000, 48000, 48000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 48000, 48000, 48000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -590,9 +576,7 @@ local Ferdinand = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 20000, 20000, 20000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 20000, 20000, 20000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -764,7 +748,6 @@ asset.export(FerdinandLabel)
 
 asset.meta = {
   Name = "Uranus Irregular Retrograde Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Uranus' irregular retrograde moons:
     Francisco, Caliban, Stephano, Trinculo, Sycorax, Prospero, Setebos and Ferdinand.
     Blank globes and SPICE trails are generated for each moon]],

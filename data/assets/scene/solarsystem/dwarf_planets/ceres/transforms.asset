@@ -41,7 +41,6 @@ asset.export(CeresPosition)
 
 asset.meta = {
   Name = "Ceres Transforms",
-  Version = "1.0",
   Description = "Ceres transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

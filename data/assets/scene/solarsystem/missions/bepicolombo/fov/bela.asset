@@ -89,7 +89,6 @@ end)
 
 asset.meta = {
   Name = "BELA",
-  Version = "1.0",
   Description = [[
     BELA for the first time will return a digitized laser reflection signal (only in a
     dedicated instrument mode in order to keep the overall data volume moderate). This

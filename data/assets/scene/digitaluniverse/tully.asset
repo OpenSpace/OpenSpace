@@ -143,7 +143,6 @@ asset.export(TullyGalaxiesImages)
 
 asset.meta = {
   Name = "Tully Galaxies",
-  Version = "5.0",
   Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
     images]],
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",

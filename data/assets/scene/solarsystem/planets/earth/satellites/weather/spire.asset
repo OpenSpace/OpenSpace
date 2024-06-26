@@ -47,7 +47,6 @@ asset.export(SpireSatellites)
 
 asset.meta = {
   Name = "Satellites Weather - Spire",
-  Version = "1.0",
   Description = [[Satellites asset for the Spire constellation. Data from Celestrak]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

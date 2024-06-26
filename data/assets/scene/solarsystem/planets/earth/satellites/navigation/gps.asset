@@ -48,7 +48,6 @@ asset.export(GpsSatellites)
 
 asset.meta = {
   Name = "Satellites Navigation GPS",
-  Version = "1.0",
   Description = "Satellites asset for Navigation GPS. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",
