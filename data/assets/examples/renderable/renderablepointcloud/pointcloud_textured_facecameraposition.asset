@@ -9,7 +9,7 @@
 -- See Textured example for more details.
 
 local Node = {
-  Identifier = "RenderablePointCloud_Example",
+  Identifier = "RenderablePointCloud_Example_FaceCameraPosition",
   Renderable = {
     Type = "RenderablePointCloud",
     File = asset.resource("data/dummydata.csv"),
