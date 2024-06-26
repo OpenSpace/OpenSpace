@@ -394,11 +394,19 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
         else {
             readFileFromImage(filePath);
         }
-        if (_firstUpdate && _isFitsFormat) {
-            addProperty(_fitsLayer);
+    }
+    if (_firstUpdate) {
+        const bool isInInterval = _files.size() > 0 &&
+            currentTime >= _files[0].time &&
+            currentTime < _sequenceEndTime;
+        if (isInInterval && _activeTriggerTimeIndex == 0) {
             _firstUpdate = false;
+            loadTexture();
+            showCorrectFileName();
+            if (_isFitsFormat) {
+                addProperty(_fitsLayer);
+            }
         }
-
     }
     // if all files are moved into _sourceFiles then we can
     // empty the DynamicFileSequenceDownloader _downloadedFiles;
