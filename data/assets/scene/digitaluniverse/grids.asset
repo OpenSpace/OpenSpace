@@ -107,7 +107,8 @@ local EquatorialSphere = {
   GUI = {
     Name = "Equatorial Coordinates",
     Path = "/Night Sky/Coordinate Systems/Equatorial",
-    Description = [[An 80-light-year sphere representing equatorial coordinates (right ascension and declination).]]
+    Description = [[An 80-light-year sphere representing equatorial coordinates (right
+      ascension and declination).]]
   }
 }
 
@@ -133,7 +134,8 @@ local EquatorialSphereLabels = {
   GUI = {
     Name = "Equatorial Coordinates Labels",
     Path = "/Night Sky/Coordinate Systems/Equatorial",
-    Description = [[Labels on a sphere representing right ascension in hours and declination in degrees.]]
+    Description = [[Labels on a sphere representing right ascension in hours and
+      declination in degrees.]]
   }
 }
 
@@ -160,7 +162,8 @@ local EclipticSphere = {
   GUI = {
     Name = "Ecliptic Coordinates",
     Path = "/Night Sky/Coordinate Systems/Ecliptic",
-    Description = [[A 100-light-year sphere representing ecliptic coordinates (ecliptic longitude and latitude).]]
+    Description = [[A 100-light-year sphere representing ecliptic coordinates (ecliptic
+      longitude and latitude).]]
   }
 }
 
@@ -186,7 +189,8 @@ local EclipticSphereLabels = {
   GUI = {
     Name = "Ecliptic Coordinates Labels",
     Path = "/Night Sky/Coordinate Systems/Ecliptic",
-    Description = [[Labels on a sphere representing ecliptic longitude and latitude in degrees.]]
+    Description = [[Labels on a sphere representing ecliptic longitude and latitude in
+      degrees.]]
   }
 }
 
@@ -209,7 +213,8 @@ local GalacticSphere = {
   GUI = {
     Name = "Galactic Coordinates",
     Path = "/Night Sky/Coordinate Systems/Galactic",
-    Description = [[A 1000-light-year sphere representing galactic coordinates (galactic longitude and latitude).]]
+    Description = [[A 1000-light-year sphere representing galactic coordinates (galactic
+      longitude and latitude).]]
   }
 }
 
@@ -233,7 +238,8 @@ local GalacticSphereLabels = {
   GUI = {
     Name = "Galactic Coordinates Labels",
     Path = "/Night Sky/Coordinate Systems/Galactic",
-    Description = [[Labels on a sphere representing galactic longitude and latitude in degrees.]]
+    Description = [[Labels on a sphere representing galactic longitude and latitude in
+      degrees.]]
   }
 }
 

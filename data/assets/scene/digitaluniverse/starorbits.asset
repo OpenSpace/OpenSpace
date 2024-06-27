@@ -24,7 +24,8 @@ local SunOrbit = {
   GUI = {
     Name = "Sun Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Projected orbit of the Sun around the Milky Way over the next 1 billion years."
+    Description = [[Projected orbit of the Sun around the Milky Way over the next 1
+      billion years.]]
   }
 }
 
@@ -41,7 +42,8 @@ local BarnardsOrbit = {
   GUI = {
     Name = "Barnards Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Projected orbit of Barnard's Star around the Milky Way over the next 1 billion years."
+    Description = [[Projected orbit of Barnard's Star around the Milky Way over the next
+      1 billion years.]]
   }
 }
 
@@ -58,7 +60,8 @@ local KapteynsOrbit = {
   GUI = {
     Name = "Kapteyns Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Projected orbit of Kapteyn's Star around the Milky Way over the next 1 billion years."
+    Description = [[Projected orbit of Kapteyn's Star around the Milky Way over the next
+      1 billion years.]]
   }
 }
 
@@ -75,7 +78,8 @@ local Lacaille9352Orbit = {
   GUI = {
     Name = "Lacaille 9352 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Projected orbit of Lacaille9352 around the Milky Way over the next 1 billion years."
+    Description = [[Projected orbit of Lacaille9352 around the Milky Way over the next
+      1 billion years.]]
   }
 }
 
@@ -92,7 +96,8 @@ local LSR1826Orbit = {
   GUI = {
     Name = "LSR1826+3014 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Projected orbit of LSR1826+3014 around the Milky Way over the next 1 billion years."
+    Description = [[Projected orbit of LSR1826+3014 around the Milky Way over the next 1
+      billion years.]]
   }
 }
 
@@ -109,7 +114,8 @@ local LSRJ0822Orbit = {
   GUI = {
     Name = "LSRJ0822+1700 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Projected orbit of LSRJ0822+1700 around the Milky Way over the next 1 billion years."
+    Description = [[Projected orbit of LSRJ0822+1700 around the Milky Way over the next 1
+      billion years.]]
   }
 }
 
@@ -126,7 +132,8 @@ local PM_J13420Orbit = {
   GUI = {
     Name = "PM_J13420-3415 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Projected orbit of PM_J13420-3415 around the Milky Way over the next 1 billion years."
+    Description = [[Projected orbit of PM_J13420-3415 around the Milky Way over the next
+      1 billion years.]]
   }
 }
 
