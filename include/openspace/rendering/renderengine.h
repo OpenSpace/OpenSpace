@@ -187,6 +187,7 @@ private:
     properties::IntListProperty _screenshotWindowIds;
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _showStatistics;
+    properties::FloatProperty _statisticsScale;
     properties::BoolProperty _screenshotUseDate;
     properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;
