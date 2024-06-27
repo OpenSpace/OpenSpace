@@ -146,9 +146,9 @@ namespace {
         for (int x = 0; x < texture.width; x++) {
             for (int y = 0; y < texture.height; y++) {
 
-                float r = texture.data[k];
-                float g = texture.data[k + 1];
-                float b = texture.data[k + 2];
+                double r = texture.data[k];
+                double g = texture.data[k + 1];
+                double b = texture.data[k + 2];
 
                 if (writeFloats) {
                     ppmFile << r << ' ' << g << ' ' << b << ' ';

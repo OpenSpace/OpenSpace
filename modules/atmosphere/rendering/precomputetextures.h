@@ -40,36 +40,36 @@ struct CPUTexture {
     };
 
     CPUTexture() = default;
-    CPUTexture(int w, int h, Format c, float value = 255.f)
+    CPUTexture(int w, int h, Format c, double value = 255.0)
         : width{ w }, height{ h }, components{ static_cast<int>(c) } {
-        data = std::vector<float>(width * height * components, value);
+        data = std::vector<double>(width * height * components, value);
     }
-    CPUTexture(const glm::ivec2& size, Format c, float value = 255.f)
+    CPUTexture(const glm::ivec2& size, Format c, double value = 255.0)
         : CPUTexture(size.x, size.y, c, value) {}
 
     int width = 0;
     int height = 0;
-    std::vector<float> data;
+    std::vector<double> data;
     int components = 0;
 };
 
 using CPUTexture3D = std::vector<CPUTexture>;
 
 namespace common {
-    float rayDistance(float r, float mu, float Rt, float Rg);
+    double rayDistance(double r, double mu, double Rt, double Rg);
 
      // biliniear interpolate a texture, clamps the texture coordinates to(0, size - 1)
      // Assumes x and y lookup coordinates are given as decimals (0,1)
-    glm::vec4 texture(const CPUTexture& tex, float x, float y);
-    glm::vec4 texture(const CPUTexture3D& tex, const glm::vec3& pos);
+    glm::dvec4 texture(const CPUTexture& tex, double x, double y);
+    glm::dvec4 texture(const CPUTexture3D& tex, const glm::dvec3& pos);
 
     // Function to access the transmittance texture. Given r and mu, returns the
     // transmittance of a ray starting at vec(x), height r, and direction vec(v), mu, and
     // length until it hits the ground or the top of atmosphere.
     // r := height of starting point vect(x)
     // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-    glm::vec3 transmittance(const atmosphere::CPUTexture& tex, float r, float mu,
-        float Rg, float Rt
+    glm::dvec3 transmittance(const atmosphere::CPUTexture& tex, double r, double mu,
+        double Rg, double Rt
     );
 
     // Given a position r and direction mu, calculates de transmittance along the ray with
@@ -77,8 +77,8 @@ namespace common {
     // T(a,b) = TableT(a,v)/TableT(b, v)
     // r := height of starting point vect(x)
     // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-    glm::vec3 transmittance(const atmosphere::CPUTexture& tex, float r, float mu, float d,
-        float Rg, float Rt);
+    glm::dvec3 transmittance(const atmosphere::CPUTexture& tex, double r, double mu, double d,
+        double Rg, double Rt);
 
     // Given the windows's fragment coordinates, for a defined view port, gives back the
     // interpolated r e [Rg, Rt] and mu, muSun amd nu e [-1, 1]
@@ -88,17 +88,17 @@ namespace common {
     // nu := cosone of the angle between vec(s) and vec(v)
     // dhdH := it is a vec4. dhdH.x stores the dminT := Rt - r, dhdH.y stores the dH value
     //         (see paper), dhdH.z stores dminG := r - Rg and dhdH.w stores dh (see paper)
-    glm::vec3 unmappingMuMuSunNu(float r, const glm::vec4& dhdH, int SAMPLES_MU, float Rg,
-        float Rt, int SAMPLES_MU_S, int SAMPLES_NU, int x, int y);
+    glm::dvec3 unmappingMuMuSunNu(double r, const glm::dvec4& dhdH, int SAMPLES_MU, double Rg,
+        double Rt, int SAMPLES_MU_S, int SAMPLES_NU, int x, int y);
 
     // Calculates Rayleigh phase function given the scattering cosine angle mu
     // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
-    float rayleighPhaseFunction(float mu);
+    double rayleighPhaseFunction(double mu);
 
     // Calculates Mie phase function given the scattering cosine angle mu
     // mu   := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v)) / r
     // mieG := mie phase function value
-    float miePhaseFunction(float mu, float mieG);
+    double miePhaseFunction(double mu, double mieG);
 
     // Given the height rm view-zenith angle (cosine) mu, sun-zenith angle (cosine) muSun
     // and the angle (cosine) between the vec(s) and vec(v), nu, we access the 3D
@@ -107,17 +107,17 @@ namespace common {
     // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
     // muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
     // nu := cosine of the angle between vec(s) and vec(v)
-    glm::vec4 texture4D(const CPUTexture3D& table, float r, float mu, float muSun,
-        float nu, float Rg, int samplesMu, float Rt, int samplesR, int samplesMuS,
+    glm::dvec4 texture4D(const CPUTexture3D& table, double r, double mu, double muSun,
+        double nu, double Rg, int samplesMu, double Rt, int samplesR, int samplesMuS,
         int samplesNu);
 
 } // namespace common
 
 namespace transmittance {
 
-void calculateTransmittance(CPUTexture& texture, float Rg, float Rt, float HR,
-    const glm::vec3 betaRayleigh, float HO, const glm::vec3& betaOzoneExtinction,
-    float HM, const glm::vec3& betaMieExtinction, bool ozoneLayerEnabled);
+void calculateTransmittance(CPUTexture& texture, double Rg, double Rt, double HR,
+    const glm::dvec3 betaRayleigh, double HO, const glm::dvec3& betaOzoneExtinction,
+    double HM, const glm::dvec3& betaMieExtinction, bool ozoneLayerEnabled);
 
 } // namespace transmittance
 
@@ -125,11 +125,11 @@ namespace irradiance {
 CPUTexture calculateIrradiance(const glm::ivec2& _tableSize);
 
 CPUTexture calculateDeltaE(const glm::ivec2& deltaETableSize,
-    const CPUTexture& transmittance, float Rg, float Rt);
+    const CPUTexture& transmittance, double Rg, double Rt);
 
 void calculateDeltaE(int scatteringOrder, CPUTexture& deltaETexture,
-    const CPUTexture3D& deltaSRTexture, const CPUTexture3D& deltaSMTexture, float Rg,
-    float Rt, float mieG, const glm::ivec2 SKY, int SAMPLES_MU_S, int SAMPLES_NU,
+    const CPUTexture3D& deltaSRTexture, const CPUTexture3D& deltaSMTexture, double Rg,
+    double Rt, double mieG, const glm::ivec2 SKY, int SAMPLES_MU_S, int SAMPLES_NU,
     int SAMPLES_MU, int SAMPLES_R);
 
 void calculateIrradiance(int scatteringOrder, CPUTexture& irradianceTexture,
@@ -139,14 +139,14 @@ void calculateIrradiance(int scatteringOrder, CPUTexture& irradianceTexture,
 
 namespace inscattering {
 std::pair<CPUTexture3D, CPUTexture3D> calculateDeltaS(
-    const glm::ivec3& textureSize, const CPUTexture& transmittanceTexture, float Rg,
-    float Rt, float HR, const glm::vec3& betaRayleigh, float HM,
-    const glm::vec3& betaMiescattering, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU,
-    bool ozoneLayerEnabled, float HO);
+    const glm::ivec3& textureSize, const CPUTexture& transmittanceTexture, double Rg,
+    double Rt, double HR, const glm::dvec3& betaRayleigh, double HM,
+    const glm::dvec3& betaMiescattering, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU,
+    bool ozoneLayerEnabled, double HO);
 
 void calculateDeltaS(int inscatteringOrder, CPUTexture3D& deltaSRayleighTexture,
-    const CPUTexture3D& deltaJTexture, const CPUTexture& transmittanceTexture, float Rg,
-    float Rt, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R);
+    const CPUTexture3D& deltaJTexture, const CPUTexture& transmittanceTexture, double Rg,
+    double Rt, int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R);
 
 CPUTexture3D calculateInscattering(const CPUTexture3D& deltaSRayleighTable,
     const CPUTexture3D& deltaSMieTable, const glm::ivec3 textureSize, int SAMPLES_MU_S,
@@ -158,28 +158,28 @@ void calculateInscattering(int scatteringOrder, CPUTexture3D& inscatteringTextur
 
 void calculateDeltaJ(int scatteringOrder, CPUTexture3D& deltaJ,
     const CPUTexture& deltaETexture, const CPUTexture3D& deltaSRTexture,
-    const CPUTexture3D& deltaSMTexture, const CPUTexture& transmittanceTexture, float Rg,
-    float RT, float averageGroundReflectance, float HR, const glm::vec3& betaRayleigh,
-    float HM, const glm::vec3& betaMieScattering, float mieG, int SAMPLES_MU_S,
+    const CPUTexture3D& deltaSMTexture, const CPUTexture& transmittanceTexture, double Rg,
+    double RT, double averageGroundReflectance, double HR, const glm::dvec3& betaRayleigh,
+    double HM, const glm::dvec3& betaMieScattering, double mieG, int SAMPLES_MU_S,
     int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R);
 
-std::pair<float, glm::vec4> step3DTexture(float Rg, float Rt, int rSamples, int layer);
+std::pair<double, glm::dvec4> step3DTexture(double Rg, double Rt, int rSamples, int layer);
 
-std::pair<glm::vec3, glm::vec3> inscatter(float r, float mu, float muSun, float nu,
-    float Rt, float Rg, const CPUTexture& transmittanceTexture, bool ozoneLayerEnabled,
-    float HO, float HM, float HR, const glm::vec3& betaRayleigh,
-    const glm::vec3& betaMieScattering);
+std::pair<glm::dvec3, glm::dvec3> inscatter(double r, double mu, double muSun, double nu,
+    double Rt, double Rg, const CPUTexture& transmittanceTexture, bool ozoneLayerEnabled,
+    double HO, double HM, double HR, const glm::dvec3& betaRayleigh,
+    const glm::dvec3& betaMieScattering);
 
-glm::vec3 inscatter(float r, float mu, float muSun, float nu, float Rt, float Rg,
-    float averageGroundReflectance, const CPUTexture& transmittanceTexture, float mieG,
+glm::dvec3 inscatter(double r, double mu, double muSun, double nu, double Rt, double Rg,
+    double averageGroundReflectance, const CPUTexture& transmittanceTexture, double mieG,
     bool firstIteration, const CPUTexture& deltaETexture,
     const CPUTexture3D& deltaSRTexture, const CPUTexture3D& deltaSMTexture,
     int SAMPLES_MU_S, int SAMPLES_NU, int SAMPLES_MU, int SAMPLES_R,
-    const glm::vec3& betaRayleigh, const glm::vec3& betaMieScattering, float HR, float HM);
+    const glm::dvec3& betaRayleigh, const glm::dvec3& betaMieScattering, double HR, double HM);
 
-std::pair<glm::vec3, glm::vec3> integrand(float r, float mu, float muSun, float nu,
-    float y, float Rg, float Rt, const CPUTexture& transmittanceTexture,
-    bool ozoneLayerEnabled, float HO, float HM, float HR);
+std::pair<glm::dvec3, glm::dvec3> integrand(double r, double mu, double muSun, double nu,
+    double y, double Rg, double Rt, const CPUTexture& transmittanceTexture,
+    bool ozoneLayerEnabled, double HO, double HM, double HR);
 
 
 // Given the irradiance texture table, the cosine of zenith sun vector and the height of
@@ -188,7 +188,7 @@ std::pair<glm::vec3, glm::vec3> integrand(float r, float mu, float muSun, float 
 // lut   := OpenGL texture2D sampler (the irradiance texture deltaE)
 // muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
 // r     := height of starting point vect(x)
-glm::vec3 irradianceLUT(const CPUTexture& lut, float muSun, float r, float Rg, float Rt);
+glm::dvec3 irradianceLUT(const CPUTexture& lut, double muSun, double r, double Rg, double Rt);
 
 } // namespace inscattering
 
