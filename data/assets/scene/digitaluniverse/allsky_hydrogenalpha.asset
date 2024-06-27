@@ -23,8 +23,7 @@ local Object = {
     Texture = textures .. "mwHalpha-f.png",
     Orientation = "Inside",
     MirrorTexture = true,
-    FadeOutThreshold = 0.025,
-    Background = true
+    FadeOutThreshold = 0.025
   },
   GUI = {
     Name = "Hydrogen Alpha",

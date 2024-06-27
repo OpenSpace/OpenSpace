@@ -23,7 +23,6 @@ local Object = {
     Orientation = "Inside",
     MirrorTexture = true,
     FadeOutThreshold = 0.0015,
-    Background = true,
     DimInAtmosphere = true
   },
   Tag = { "daytime_hidden" },
