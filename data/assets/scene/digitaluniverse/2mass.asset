@@ -44,7 +44,7 @@ local Object = {
     Name = "2MASS Galaxies",
     Path = "/Universe/Nearby Surveys",
     Description = [[The Two Micron All-Sky Survey (2MASS) is an infrared survey of the
-      sky published in 2003. Taken from two telescopes in Arizona and Chile, it offers a
+      sky published in 2003. Taken from two telescopes in Arizona and Chile, it offers an
       all-sky view of galaxies beyond the Milky Way. Because it is infrared, the light
       detected is mostly from cool stars within the galaxies, which comprises the majority
       of mass in a galaxy. Colors: Orange galaxies show dense regions of galaxies, aqua
