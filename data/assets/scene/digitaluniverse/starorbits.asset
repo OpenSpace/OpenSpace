@@ -13,16 +13,12 @@ local speck = asset.resource({
 
 local SunOrbit = {
   Identifier = "SunOrbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-Sun.speck",
     MeshColor = { { 1.0, 0.65, 0.0 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -34,17 +30,12 @@ local SunOrbit = {
 
 local BarnardsOrbit = {
   Identifier = "BarnardsOrbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-BarnardsStar.speck",
     MeshColor = { { 0.39, 0.58, 0.93 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -56,17 +47,12 @@ local BarnardsOrbit = {
 
 local KapteynsOrbit = {
   Identifier = "KapteynsOrbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-KapteynsStar.speck",
     MeshColor = { { 0.6, 0.6, 0.6 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -78,17 +64,12 @@ local KapteynsOrbit = {
 
 local Lacaille9352Orbit = {
   Identifier = "Lacaille9352Orbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-Lacaille9352.speck",
     MeshColor = { { 0.58, 0.0, 0.83 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -100,17 +81,12 @@ local Lacaille9352Orbit = {
 
 local LSR1826Orbit = {
   Identifier = "LSR1826Orbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-LSR1826+3014.speck",
     MeshColor = { { 0.0, 0.39, 0.0 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -122,17 +98,12 @@ local LSR1826Orbit = {
 
 local LSRJ0822Orbit = {
   Identifier = "LSRJ0822Orbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-LSRJ0822+1700.speck",
     MeshColor = { { 0.5, 1.0, 0.0 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
@@ -144,17 +115,12 @@ local LSRJ0822Orbit = {
 
 local PM_J13420Orbit = {
   Identifier = "PM_J13420Orbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-PM_J13420-3415.speck",
     MeshColor = { { 0.70, 0.13, 0.13 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
