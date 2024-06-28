@@ -48,6 +48,7 @@ documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
     return {
         "ScreenSpaceFramebuffer",
         "base_screenspace_framebuffer",
+        "",
         {}
     };
 }

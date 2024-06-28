@@ -61,7 +61,7 @@ namespace geojson::propertykeys {
     constexpr std::string_view TessellationMaxDistance = "tessellationDistance";
 
     constexpr std::string_view AltitudeMode = "altitudeMode";
-    constexpr std::string_view AltitudeModeClamp = "clampToGround";
+    //constexpr std::string_view AltitudeModeClamp = "clampToGround";
     constexpr std::string_view AltitudeModeAbsolute = "absolute";
     constexpr std::string_view AltitudeModeRelative = "relativeToGround";
 
