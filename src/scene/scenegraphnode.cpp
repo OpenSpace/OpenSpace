@@ -332,8 +332,8 @@ namespace {
             // with a higher value appear later in the list. Scene graph noeds with the
             // same value will be sorted alphabetically.
             //
-            // The nodes without a given value will be placed at the top at the list and
-            // sorted alphabetically.
+            // The nodes without a given value will be placed at the bottom of the list
+            // and sorted alphabetically.
             std::optional<double> orderNumber;
         };
         // Additional information that is passed to GUI applications. These are all hints
