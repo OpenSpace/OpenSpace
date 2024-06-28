@@ -39,8 +39,8 @@ local DensityVolume = {
     TransferFunction = asset.resource("transferfunctions/mas-mhd-r-squared.txt"),
     SourceDirectory = densityDirectory,
     GridType = "Spherical",
-    SecondsBefore = 24 * 60 * 60,
-    SecondsAfter = 24 * 60 * 60,
+    SecondsBefore = openspace.time.secondsPerDay(),
+    SecondsAfter = openspace.time.secondsPerDay(),
     Dimensions = { 100, 100, 128 },
     InvertDataAtZ = true
   },

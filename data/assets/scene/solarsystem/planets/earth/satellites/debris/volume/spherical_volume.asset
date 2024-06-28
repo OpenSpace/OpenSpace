@@ -24,8 +24,8 @@ local DebrisVolumeSpherical = {
     MinValue = 0,
     MaxValue = 1,
     GridType = "Spherical",
-    SecondsBefore = 50 * 365 * 24 * 60 * 60,
-    SecondsAfter = 50 * 365 * 24 * 60 * 60
+    SecondsBefore = 50 * openspace.time.secondsPerYear(),
+    SecondsAfter = 50 * openspace.time.secondsPerYear()
   },
   GUI = {
     Name = "DebrisVolume - Spherical",

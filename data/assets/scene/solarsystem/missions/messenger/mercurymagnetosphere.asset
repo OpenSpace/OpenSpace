@@ -42,8 +42,8 @@ local Magnetosphere = {
     StepSize = 0.003,
     Dimensions = { 64, 64, 64 },
     GridType = "Cartesian",
-    SecondsBefore = 24 * 60 * 60 * 365 * 100,
-    SecondsAfter = 24 * 60 * 60 * 365 * 100
+    SecondsBefore = 100 * openspace.time.secondsPerYear(),
+    SecondsAfter = 100 * openspace.time.secondsPerYear()
   },
   GUI = {
     Name = "Mercury Magnetosphere",

@@ -98,8 +98,9 @@ local VoyagerTrailCruiseEarthJupiter = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977-AUG-20 16:07:06.535",
     EndTime = "1979 JUL 06",
-    -- 669 is the number of days between the Start and End time
-    SampleInterval = 669 * 2
+    -- 1 sample every 2d
+    SampleInterval = openspace.time.duration("1977-AUG-20 16:07:06.535", "1979 JUL 06") /
+                     openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -148,8 +149,9 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1979 JUL 15",
     EndTime = "1981 AUG 23",
-    -- 770 is the number of days between the Start and End time
-    SampleInterval = 770 * 2
+    -- 1 sample every 2d
+    SampleInterval = openspace.time.duration("1979 JUL 15", "1981 AUG 23") /
+                     openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -198,8 +200,9 @@ local VoyagerTrailCruiseSaturnUranus = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1981 AUG 30",
     EndTime = "1986 JAN 22",
-    -- 1971 is the number of days between the Start and End time
-    SampleInterval = 1971 * 2
+    -- 1 sample every 2d
+    SampleInterval = openspace.time.duration("1981 AUG 30", "1986 JAN 22") /
+                     openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -248,8 +251,9 @@ local VoyagerTrailCruiseUranusNeptune = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1986 JAN 27",
     EndTime = "1989 AUG 24",
-    -- 1305 is the number of days between the Start and End time
-    SampleInterval = 1305 * 2
+    -- 1 sample every 2d
+    SampleInterval = openspace.time.duration("1986 JAN 27", "1989 AUG 24") /
+                     openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -298,8 +302,9 @@ local VoyagerTrailCruiseNeptuneInf = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1989 AUG 26",
     EndTime = "2100 JAN 01",
-    -- 40306 is the number of days between the Start and End time
-    SampleInterval = 40306 * 2
+    -- 1 sample every 2d
+    SampleInterval = openspace.time.duration("1989 AUG 26", "2100 JAN 01") /
+                     openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {

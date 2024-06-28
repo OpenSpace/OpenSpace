@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_iridium-33-debris",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=iridium-33-debris&FORMAT=kvn",
   Filename = "iridium-33-debris.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
