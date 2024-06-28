@@ -1,0 +1,67 @@
+local textures = asset.resource({
+  Name = "Multiwavelength Milky Way Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_multiwavelength_milkyway_textures",
+  Version = 1
+})
+
+
+local Object = {
+  Identifier = "AllSky_HAlpha",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.pi }
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphereImageLocal",
+    Enabled = false,
+    Size = 9.2E21,
+    Segments = 40,
+    Opacity = 0.4,
+    Texture = textures .. "mwHalpha-f.png",
+    Orientation = "Inside",
+    MirrorTexture = true,
+    FadeOutThreshold = 0.025
+  },
+  GUI = {
+    Name = "Hydrogen Alpha",
+    Path = "/Milky Way/All Sky Images",
+    Description = [[Hydrogen-alpha is a term that describes light from the ground state of
+      the hydrogen atom. When an electron in an atom moves from one energy level to a
+      higher one, we say the atom is excited. When the electron moves back down to the
+      lower energy level, light is released at a wavelength commensurate with the energy
+      between the two levels. For the H-alpha line, this energy difference translates to a
+      wavelength in the extreme red end of the visible spectrum. This survey of the sky is
+      a snapshot of light from this wavelength.
+
+      One distinctive element of the sky at this wavelength is the presence of large,
+      spherical bubbles surrounding hot stars. Many nebulae and star-forming regions are
+      visible, including the Great Nebula of Orion. We also see that galaxies emit H-alpha
+      light, including the Andromeda Galaxy and the faint M33, the large face-on spiral in
+      Triangulum, and the Large and Small Magellanic Clouds (LMC and SMC) in the southern
+      sky. Census: 1 all-sky image.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Milky Way All-Sky Hydrogen Alpha",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Carter Emmart (AMNH), OpenSpace Team",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

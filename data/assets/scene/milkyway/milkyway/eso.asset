@@ -22,8 +22,7 @@ local Object = {
     Texture = textures .. "eso0932a_blend.png",
     Orientation = "Inside",
     MirrorTexture = true,
-    FadeOutThreshold = 0.01,
-    Background = true
+    FadeOutThreshold = 0.01
   },
   GUI = {
     Name = "Milky Way (ESO)",

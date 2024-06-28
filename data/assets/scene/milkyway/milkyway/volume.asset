@@ -45,7 +45,7 @@ local MilkyWayVolume = {
     }
   },
   GUI = {
-    Path = "/Milky Way",
+    Path = "/Milky Way/Galaxy",
     Name = "Milky Way Volume",
     Description = "Volumetric rendering of Milky Way galaxy based on simulation from NAOJ"
   }

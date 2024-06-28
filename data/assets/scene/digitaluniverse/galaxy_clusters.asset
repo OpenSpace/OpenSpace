@@ -1,8 +1,8 @@
 local speck = asset.resource({
-  Name = "Galaxy Groups Speck Files",
+  Name = "Clusters Speck Files",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_groups_speck",
-  Version = 1
+  Identifier = "digitaluniverse_clusters_speck",
+  Version = 2
 })
 
 
@@ -14,16 +14,16 @@ local TransformMatrix = {
 }
 
 local Object = {
-  Identifier = "NearbyGalaxyGroups",
+  Identifier = "GalaxyClusterLabels",
   Renderable = {
     Type = "RenderablePointCloud",
     Enabled = false,
     Labels = {
       Enabled = true,
-      File = speck .. "groups.label",
-      Color = { 0.1, 0.6, 0.2 },
-      Size = 21.5,
-      MinMaxSize = { 8, 20 },
+      File = speck .. "galclust.label",
+      Color = { 0.9, 0.5, 0.22 },
+      Size = 22,
+      MinMaxSize = { 8, 15 },
       Unit = "Mpc",
       TransformationMatrix = TransformMatrix
     },
@@ -32,12 +32,11 @@ local Object = {
     TransformationMatrix = TransformMatrix
   },
   GUI = {
-    Name = "Galaxy Group Labels",
-    Path = "/Universe/Galaxies",
-    Description = [[Census: 62 galaxy group labels. DU Version 1.2. <br> The Galaxy
-    Groups data are a set of labels that mark the nearby galaxy groups. The Milky Way
-    is in the Local Group, and we are surrounded by many other groups.(Description
-    from URL) <br><br> Data Reference: Brian Abbott (AMNH)]]
+    Name = "Galaxy Cluster Labels",
+    Path = "/Universe/Nearby Surveys",
+    Description = [[The galaxy clusters dataset is a series of labels that mark where the
+      large clusters of galaxies are in the nearby universe. These labels must be used in
+      conjunction with the Tully galaxy group. Census: 15 galaxy cluster labels.]]
   }
 }
 
@@ -55,9 +54,9 @@ asset.export(Object)
 
 
 asset.meta = {
-  Name = "Galaxy Group Labels",
+  Name = "Galaxy Clusters Labels",
+  Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
-  Description = "Digital Universe asset for Galaxy Groups",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

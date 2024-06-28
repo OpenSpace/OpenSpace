@@ -1,0 +1,59 @@
+local textures = asset.resource({
+  Name = "Milky Way All Sky Textures",
+  Type = "HttpSynchronization",
+  Identifier = "milkyway_textures",
+  Version = 2
+})
+
+
+local Object = {
+  Identifier = "AllSky_Visible",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.pi }
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphereImageLocal",
+    Size = 9.2E21,
+    Segments = 40,
+    Opacity = 0.25,
+    Texture = textures .. "DarkUniverse_mellinger_4k.jpg",
+    Orientation = "Inside",
+    MirrorTexture = true,
+    FadeOutThreshold = 0.0015,
+    DimInAtmosphere = true
+  },
+  Tag = { "daytime_hidden" },
+  GUI = {
+    Name = "Visible Milky Way",
+    Path = "/Milky Way/All Sky Images",
+    Description = [[An all-sky image of the night sky as our eye sees it (in the visible
+      spectrum), with the stars removed. You will see the brightest part of the Galaxy if
+      you look toward Galactic center toward the constellations Scorpius and Sagittarius.
+      This bright haze is the light from millions of stars; the dark lanes are foreground
+      dust clouds, obscuring our view of the stars behind them. Census: 1 all-sky image.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Milky Way All-Sky Visible Light",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Carter Emmart (AMNH), OpenSpace Team",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}
