@@ -260,6 +260,13 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
         HttpFileDownload* dl = file->download.get();
 
         if (dl->hasSucceeded()) {
+            std::ifstream tempFile(file->URL);
+            std::streampos size = tempFile.tellg();
+            if (size == 0){
+                LERROR(std::format("File '{}' was 0kb, removing", dl->destination()));
+                _filesCurrentlyDownloading.erase(currentIt);
+            }
+            std::filesystem::path path = dl->destination();
             //_downloadedFiles.push_back(std::move(*currentIt));
             //std::vector<std::filesystem::path> downloadedFiles;
             _downloadedFiles.push_back(dl->destination());
@@ -269,8 +276,10 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
             --i;
         }
         else if (dl->hasFailed()) {
-            ghoul_assert(!dl->hasFailed(), "downloading of file failed");
-            LERROR("TODO, make better handling if file download fails");
+            LERROR(std::format("File '{}' failed to download. Removing file", file->URL));
+            currentIt = _filesCurrentlyDownloading.erase(currentIt);
+            // if one is removed, i is reduced, else we'd skip one in the list
+            --i;
         }
         // The file is not finnished downloading, move on to next
         else {

@@ -232,7 +232,7 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     //newFile.time = extractTriggerTimeFromISO8601FileName(path);
     newFile.time = extractTriggerTimeFromFitsFileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path, _fitsLayer);
-    t->uploadTexture();
+    //t->uploadTexture();
     t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
     //t->purgeFromRAM();
 
@@ -369,7 +369,7 @@ void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTim
     if (iter != _files.end()) {
         if (iter != _files.begin()) {
             const ptrdiff_t idx = std::distance(_files.begin(), iter);
-            _activeTriggerTimeIndex = static_cast<int>(idx - 1);
+            _activeTriggerTimeIndex = static_cast<int>(idx); // TODO -1 here maybe?
         }
         else {
             _activeTriggerTimeIndex = 0;
@@ -445,6 +445,7 @@ void RenderableTimeVaryingSphere::definePropertyCallbackFunctions() {
                     file->texture->uploadTexture();
                     file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
                 }
+                loadTexture();
             }
         }
     });

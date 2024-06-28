@@ -80,9 +80,9 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         GL_FLOAT
     );
     texture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
-    texture->uploadTexture();
     // Tell it to use the single color channel as grayscale
     convertTextureFormat(*texture, ghoul::opengl::Texture::Format::RGB);
+    texture->uploadTexture();
     return std::move(texture);
 }
 
@@ -100,14 +100,14 @@ int nLayers(const std::filesystem::path path) {
 // passed the if-statements
 std::shared_ptr<ImageData<float>> callCorrectImageReader(const std::unique_ptr<FITS>& file) {
     try {
-        bool isPrimaryHDU = file->extension().empty();
-        isPrimaryHDU = true;
-        if (isPrimaryHDU) {
+//        bool isPrimaryHDU = file->extension().empty();
+//        isPrimaryHDU = true;
+//        if (isPrimaryHDU) {
             return readImageInternal<float>(file->pHDU());
-        }
-        else {
-            return readImageInternal<float>(file->currentExtension());
-        }
+//        }
+//        else {
+//            return readImageInternal<float>(file->currentExtension());
+//        }
     }
     catch (const FitsException& e) {
         LERROR("Could not read FITS image from table. " + e.message());
@@ -116,26 +116,26 @@ std::shared_ptr<ImageData<float>> callCorrectImageReader(const std::unique_ptr<F
 
 // This is pretty annoying, the read method is not derived from the HDU class
 // in CCfits - need to explicitly cast to the sub classes to access read
-template<typename T>
-std::shared_ptr<ImageData<T>> readImageInternal(ExtHDU& image) {
-    try {
-        std::valarray<T> contents;
-        image.read(contents);
-        ImageData<T> im = {
-            .contents = std::move(contents),
-            .width = static_cast<int>(image.axis(0)),
-            .height = static_cast<int>(image.axis(1))
-        };
-        return std::make_shared<ImageData<T>>(im);
-    }
-    catch (const FitsException& e) {
-        LERROR("Could not read FITS image EXTHDU. " + e.message());
-    }
-    return nullptr;
-}
+//template<typename T>
+//std::shared_ptr<ImageData<T>> readImageInternal(ExtHDU& image) {
+//    try {
+//        std::valarray<T> contents;
+//        image.read(contents);
+//        ImageData<T> im = {
+//            .contents = std::move(contents),
+//            .width = static_cast<int>(image.axis(0)),
+//            .height = static_cast<int>(image.axis(1))
+//        };
+//        return std::make_shared<ImageData<T>>(im);
+//    }
+//    catch (const FitsException& e) {
+//        LERROR("Could not read FITS image EXTHDU. " + e.message());
+//    }
+//    return nullptr;
+//}
 
-template<typename T>
-std::shared_ptr<ImageData<T>> readImageInternal(PHDU& image) {
+template<typename T, typename U>
+std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
     try {
         std::valarray<T> contents;
         image.read(contents);
@@ -147,7 +147,8 @@ std::shared_ptr<ImageData<T>> readImageInternal(PHDU& image) {
         return std::make_shared<ImageData<T>>(im);
     }
     catch (const FitsException& e) {
-        LERROR("Could not read FITS image PHDU. " + e.message());
+        LERROR("Could not read FITS layer");
+        //LERROR(std::format("Could not read FITS layer of '{}'. '{}'", GetType(U), e.message()));
     }
     return nullptr;
 }

@@ -915,7 +915,7 @@ int RenderableFieldlinesSequence::updateActiveIndex(const double nowTime) {
         index = 0;
     }
     else if (iter != _files.end()) {
-        index = static_cast<int>(std::distance(_files.cbegin(), iter)) -1;
+        index = static_cast<int>(std::distance(_files.cbegin(), iter));// TODO -1 here maybe?
     }
     else {
         index = static_cast<int>(_files.size()) - 1;
