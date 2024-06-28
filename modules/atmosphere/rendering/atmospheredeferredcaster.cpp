@@ -96,8 +96,8 @@ namespace {
             glReadPixels(0, 0, size.x, size.y, GL_RGB, GL_FLOAT, px.data());
 
             int k = 0;
-            for (int i = 0; i < size.x; i++) {
                 for (int j = 0; j < size.y; j++) {
+            for (int i = 0; i < size.x; i++) {
                     // decimal
                     ppmFile << px[k] << ' ' << px[k + 1] << ' ' << px[k + 2] << ' ';
                     k += 3;
@@ -115,8 +115,8 @@ namespace {
             glReadPixels(0, 0, size.x, size.y, GL_RGB, GL_UNSIGNED_BYTE, px.data());
 
             int k = 0;
-            for (int i = 0; i < size.x; i++) {
                 for (int j = 0; j < size.y; j++) {
+            for (int i = 0; i < size.x; i++) {
                     // decimal
                     //ppmFile << static_cast<float>(px[k]) << ' '
                     //    << static_cast<float>(px[k + 1]) << ' '
@@ -143,8 +143,8 @@ namespace {
             << '\n' << "255" << '\n';
 
         int k = 0;
-        for (int x = 0; x < texture.width; x++) {
             for (int y = 0; y < texture.height; y++) {
+        for (int x = 0; x < texture.width; x++) {
 
                 double r = texture.data[k];
                 double g = texture.data[k + 1];
