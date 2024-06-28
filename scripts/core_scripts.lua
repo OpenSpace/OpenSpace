@@ -20,13 +20,6 @@ openspace.documentation = {
         "features properties list"
     },
     {
-        Name = "setDefaultGuiSorting",
-        Arguments = {},
-        Documentation = "This function sets the default GUI sorting for the space " ..
-        "environment to increasing size, from solar system, through Milky Way, " ..
-        "Universe and finishing with other elements"
-    },
-    {
         Name = "setDefaultDashboard",
         Arguments = {},
         Documentation = "This function sets the default values for the dashboard " ..
@@ -126,15 +119,6 @@ openspace.removeInterestingNodes = function(nodes)
             openspace.removeTag(n, "GUI.Interesting")
         end
     end
-end
-
-openspace.setDefaultGuiSorting = function()
-    openspace.setPropertyValueSingle(
-        'Modules.ImGUI.Scene.Ordering',
-        {
-            "Solar System", "Milky Way", "Universe", "Other"
-        }
-    )
 end
 
 openspace.rebindKey = function(oldKey, newKey)
