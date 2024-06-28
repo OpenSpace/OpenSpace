@@ -57,6 +57,7 @@ namespace interaction {
     class ActionManager;
     class InteractionMonitor;
     class KeybindingManager;
+    class KeyframeRecording;
     class NavigationHandler;
     class SessionRecording;
 } // namespace interaction
@@ -93,6 +94,7 @@ inline interaction::InteractionMonitor* interactionMonitor;
 inline interaction::JoystickInputStates* joystickInputStates;
 inline interaction::WebsocketInputStates* websocketInputStates;
 inline interaction::KeybindingManager* keybindingManager;
+inline interaction::KeyframeRecording* keyframeRecording;
 inline interaction::NavigationHandler* navigationHandler;
 inline interaction::SessionRecording* sessionRecording;
 inline properties::PropertyOwner* rootPropertyOwner;
