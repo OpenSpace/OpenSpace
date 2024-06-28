@@ -72,6 +72,14 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo UseLightTravelTimeInfo = {
+        "UseLightTravelTime",
+        "Use Light Travel Time",
+        "If set to true, the postion will be updated based on light travel "
+        "time to the observer.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(SpiceTranslation)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
         std::variant<std::string, int> target;
@@ -84,6 +92,9 @@ namespace {
 
         std::optional<std::string> fixedDate
             [[codegen::annotation("A date to lock the position to")]];
+
+        // [[codegen::verbatim(UseLightTravelTimeInfo.description)]]
+        std::optional<bool> useLightTravelTime;
     };
 #include "spicetranslation_codegen.cpp"
 } // namespace
@@ -99,6 +110,7 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     , _observer(ObserverInfo)
     , _frame(FrameInfo, "GALACTIC")
     , _fixedDate(FixedDateInfo)
+    , _useLightTravelTime(UseLightTravelTimeInfo)
     , _cachedFrame("GALACTIC")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -135,6 +147,13 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
 
+    _useLightTravelTime.onChange([this]() {
+        requireUpdate();
+        notifyObservers();
+    });
+    _useLightTravelTime = p.useLightTravelTime.value_or(_useLightTravelTime);
+    addProperty(_useLightTravelTime);
+
     if (std::holds_alternative<std::string>(p.target)) {
         _target = std::get<std::string>(p.target);
     }
@@ -159,11 +178,20 @@ glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {
     if (_fixedEphemerisTime.has_value()) {
         time = *_fixedEphemerisTime;
     }
+
+    SpiceManager::AberrationCorrection corr = {};
+    if (_useLightTravelTime) {
+        corr = {
+            SpiceManager::AberrationCorrection::Type::LightTime,
+            SpiceManager::AberrationCorrection::Direction::Reception
+        };
+    }
+
     return SpiceManager::ref().targetPosition(
         _cachedTarget,
         _cachedObserver,
         _cachedFrame,
-        {},
+        corr,
         time,
         lightTime
     ) * 1000.0;

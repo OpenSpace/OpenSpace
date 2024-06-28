@@ -48,6 +48,9 @@ private:
     properties::StringProperty _sourceFrame;
     properties::StringProperty _destinationFrame;
     properties::StringProperty _fixedDate;
+    properties::BoolProperty _useLightTravelTime;
+    properties::StringProperty _lightTravelTimeObserver;
+    properties::StringProperty _lightTravelTimeTarget;
 
     ghoul::mm_unique_ptr<TimeFrame> _timeFrame;
     std::optional<double> _fixedEphemerisTime;
