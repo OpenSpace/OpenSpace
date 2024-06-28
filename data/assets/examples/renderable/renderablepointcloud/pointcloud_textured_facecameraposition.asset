@@ -1,0 +1,37 @@
+-- Orientation - Face Camera Position
+-- This example creates a point cloud where the planes that make up the points are
+-- oriented to face the camera position, rather than the view direction (which is
+-- default). This means that the point will be layed out in a spherical way around the
+-- camera, which works better for spherical displays compared to the default
+-- orientation.
+--
+-- A texture is added so that we can more easily see how the orientation is altered.
+-- See Textured example for more details.
+
+local Node = {
+  Identifier = "RenderablePointCloud_Example_FaceCameraPosition",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = asset.resource("data/dummydata.csv"),
+    -- Change the orientation render option to face the camera position instead
+    -- of its view direction
+    OrientationRenderOption = "Camera Position Normal",
+    -- Add a texture so we can more easily see how the orientation is changed
+    Texture = {
+      File = openspace.absPath("${DATA}/test3.jpg")
+    },
+    UseAdditiveBlending = false
+  },
+  GUI = {
+    Name = "RenderablePointCloud - Face Camera Position",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
