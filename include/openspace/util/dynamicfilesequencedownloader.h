@@ -139,6 +139,8 @@ public:
     const std::vector<std::filesystem::path>& downloadedFiles();
     void checkForFinishedDownloads();
     void clearDownloaded();
+    std::filesystem::path destinationDirectory();
+    bool filesCurrentlyDownloading();
 
 private:
 

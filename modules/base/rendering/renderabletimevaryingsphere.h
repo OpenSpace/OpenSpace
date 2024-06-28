@@ -103,6 +103,10 @@ private:
     std::string _dataURL = "";
     properties::OptionProperty _fitsLayer;
     int _fitsLayerTemp;
+    // An option to keep or delete the downloads from dynamic downloader on shutdown
+    // Deletes on default
+    properties::BoolProperty _deleteDownloadsOnShutdown;
+    bool _isLoadingStateFromDisk = false;
     //  DynamicFileSequenceDownloader downloads and updates the renderable with
     //  data downloaded from the web.
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;

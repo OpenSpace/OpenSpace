@@ -478,8 +478,16 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
 
 
 }
+
+std::filesystem::path DynamicFileSequenceDownloader::destinationDirectory() {
+    return _syncDir;
+}
+
 void DynamicFileSequenceDownloader::clearDownloaded() {
     _downloadedFiles.clear();
+}
+bool DynamicFileSequenceDownloader::filesCurrentlyDownloading() {
+    return _filesCurrentlyDownloading.size() != 0;
 }
 
 //reference or no reference? return path to where they are instead?

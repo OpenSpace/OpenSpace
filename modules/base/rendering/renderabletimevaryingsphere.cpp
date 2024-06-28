@@ -39,6 +39,8 @@
 
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
+
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
     double extractTriggerTimeFromISO8601FileName(const std::filesystem::path& filePath) {
@@ -116,6 +118,13 @@ namespace {
         "This value specifies which index in the fits file to extract and use as texture",
         openspace::properties::Property::Visibility::User
     };
+    constexpr openspace::properties::Property::PropertyInfo DeleteDownloadsOnShutdown = {
+        "DeleteDownloadsOnShutdown",
+        "Delete Downloads On Shutdown",
+        "This is an option for if dynamically downloaded should be saved between runs "
+        "or not. Deletes on default",
+        openspace::properties::Property::Visibility::Developer
+    };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
@@ -139,6 +148,7 @@ namespace {
         std::optional<std::string> dataURL;
         // An index specifying which layer in the fits file to display
         std::optional<int> fitsLayer;
+        std::optional<bool> deleteDownloadsOnShutdown;
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -154,6 +164,7 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     : RenderableSphere(dictionary)
     , _textureSourcePath(TextureSourceInfo)
     , _fitsLayer(FitsLayerInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _deleteDownloadsOnShutdown(DeleteDownloadsOnShutdown, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -170,6 +181,8 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     if (p.fitsLayer.has_value()) {
         _fitsLayerTemp = *p.fitsLayer;
     }
+    _deleteDownloadsOnShutdown =
+        p.deleteDownloadsOnShutdown.value_or(_deleteDownloadsOnShutdown);
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
@@ -213,7 +226,22 @@ void RenderableTimeVaryingSphere::setupDynamicDownloading(
 void RenderableTimeVaryingSphere::deinitializeGL() {
     _texture = nullptr;
     _files.clear();
-
+    // Stall main thread until thread that's loading states is done
+    bool printedWarning = false;
+    while (_dynamicFileDownloader->filesCurrentlyDownloading()) {
+        if (!printedWarning) {
+            LWARNING("Currently downloading file, exiting might take longer than usual");
+            printedWarning = true;
+        }
+        _dynamicFileDownloader->checkForFinishedDownloads();
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+    if (_deleteDownloadsOnShutdown && _loadingType == LoadingType::DynamicDownloading) {
+        std::filesystem::path syncDir = _dynamicFileDownloader->destinationDirectory();
+        for (auto& file : std::filesystem::directory_iterator(syncDir)) {
+            std::filesystem::remove(file);
+        }
+    }
     RenderableSphere::deinitializeGL();
 }
 
