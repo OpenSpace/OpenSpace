@@ -154,6 +154,10 @@ namespace {
                     ppmFile << r << ' ' << g << ' ' << b << ' ';
                 }
                 else {
+                    r = std::min(r, 1.0);
+                    g = std::min(g, 1.0);
+                    b = std::min(b, 1.0);
+
                     ppmFile
                         << static_cast<unsigned int>(r * 255) << ' '
                         << static_cast<unsigned int>(g * 255) << ' '
