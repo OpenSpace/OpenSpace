@@ -424,6 +424,9 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
         }
     }
     if (_firstUpdate) {
+        if (_isFitsFormat && _layerOptionsAdded && !hasProperty(&_fitsLayer)) {
+            addProperty(_fitsLayer);
+        }
         const bool isInInterval = _files.size() > 0 &&
             currentTime >= _files[0].time &&
             currentTime < _sequenceEndTime;
@@ -431,9 +434,6 @@ void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentT
             _firstUpdate = false;
             loadTexture();
             showCorrectFileName();
-            if (_isFitsFormat) {
-                addProperty(_fitsLayer);
-            }
         }
     }
     // if all files are moved into _sourceFiles then we can
