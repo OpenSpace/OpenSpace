@@ -32,11 +32,7 @@ local Object = {
     },
     Coloring = {
       ColorMapping = {
-        File = ColorMap .. "hudf.cmap",
-        ParameterOptions = {
-          { Key = "proximity", Range = { 1.0, 25.0 } },
-          { Key = "redshift", Range = { 0.0, 0.075 } }
-        }
+        File = ColorMap .. "hudf.cmap"
       }
     },
     Unit = "Mpc",
