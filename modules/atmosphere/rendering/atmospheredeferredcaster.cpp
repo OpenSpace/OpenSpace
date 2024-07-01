@@ -275,7 +275,7 @@ namespace {
             size.y,
             size.z,
             0,
-            GL_RGB,
+            (components == 3) ? GL_RGB : GL_RGBA,
             GL_FLOAT,
             nullptr
         );
@@ -571,18 +571,21 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         program.setUniform(_uniformCache.hardShadows, _hardShadowsEnabled);
     }
     _transmittanceTableTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
+    glBindTexture(GL_TEXTURE_2D, _saveCalculationTextures ?
+        _transmittanceTexture.glTex : _transmittanceTableTexture);
     program.setUniform(
         _uniformCache.transmittanceTexture,
         _transmittanceTableTextureUnit
     );
 
     _irradianceTableTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
+    glBindTexture(GL_TEXTURE_2D, _saveCalculationTextures ?
+        _irradianceTexture.glTex : _irradianceTableTexture);
     program.setUniform(_uniformCache.irradianceTexture, _irradianceTableTextureUnit);
 
     _inScatteringTableTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
+    glBindTexture(GL_TEXTURE_3D,  _saveCalculationTextures ?
+        _inScatteringTexture[0].glTex : _inScatteringTableTexture);
     program.setUniform(_uniformCache.inscatterTexture, _inScatteringTableTextureUnit);
 }
 
@@ -1325,6 +1328,64 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
         }
 
         glDisable(GL_BLEND);
+    }
+
+    if (_saveCalculationTextures) {
+        _transmittanceTexture.createGPUTexture("Transmittance");
+        _irradianceTexture.createGPUTexture("Irradiance");
+         Create the 3D texture
+        GLuint t = 0;
+        glGenTextures(1, &t);
+        glBindTexture(GL_TEXTURE_3D, t);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glTexImage3D(
+            GL_TEXTURE_3D,
+            0,
+            (_inScatteringTexture[0].components == 3) ? GL_RGB32F : GL_RGBA32F,
+            _inScatteringTexture[0].width,
+            _inScatteringTexture[0].height,
+            static_cast<GLsizei>(_inScatteringTexture.size()),
+            0,
+            (_inScatteringTexture[0].components == 3) ? GL_RGB : GL_RGBA,
+            GL_FLOAT,
+            nullptr
+            );
+
+        for (size_t i = 0; i < _inScatteringTexture.size(); i++) {
+            atmosphere::CPUTexture& slice = _inScatteringTexture[i];
+
+            // TODO: find better way without having to copy all data and cast it to floats
+            // before uploading to GPU, e.g., reinterpret cast or something?
+            std::vector<float> newdata(slice.width * slice.height * slice.components, 0.f);
+            int k = 0;
+            for (double d : slice.data) {
+                newdata[k++] = static_cast<float>(d);
+            }
+
+            glTexSubImage3D(
+                GL_TEXTURE_3D,
+                0,
+                0,
+                0,
+                static_cast<GLint>(i),
+                slice.width,
+                slice.height,
+                1,
+                (slice.components == 3) ? GL_RGB : GL_RGBA,
+                GL_FLOAT,
+                newdata.data()
+            );
+            std::string_view name = "InScattering";
+            if (glbinding::Binding::ObjectLabel.isResolved()) {
+                glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
+            }
+            slice.glTex = t;
+        }
     }
 
     // Restores OpenGL blending state

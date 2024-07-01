@@ -47,13 +47,51 @@ struct CPUTexture {
     CPUTexture(const glm::ivec2& size, Format c, double value = 255.0)
         : CPUTexture(size.x, size.y, c, value) {}
 
+    void createGPUTexture(std::string_view name) {
+        // TODO: find better way without having to copy all data and cast it to floats
+        // before uploading to GPU, e.g., reinterpret cast or something?
+        std::vector<float> newdata(width * height * components, 0.f);
+        int k = 0;
+        for (double d : data) {
+            newdata[k++] = static_cast<float>(d);
+        }
+        GLuint t = 0;
+        glGenTextures(1, &t);
+        glBindTexture(GL_TEXTURE_2D, t);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            (components == 3) ? GL_RGB32F : GL_RGBA32F,
+            width,
+            height,
+            0,
+            (components == 3) ? GL_RGB : GL_RGBA,
+            GL_FLOAT,
+            newdata.data()
+        );
+
+        if (glbinding::Binding::ObjectLabel.isResolved()) {
+            glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
+        }
+        glTex = t;
+    }
+
+
     int width = 0;
     int height = 0;
     std::vector<double> data;
     int components = 0;
+    GLuint glTex = 0;
 };
 
 using CPUTexture3D = std::vector<CPUTexture>;
+
+double safeSqrt(double x);
 
 namespace common {
     double rayDistance(double r, double mu, double Rt, double Rg);

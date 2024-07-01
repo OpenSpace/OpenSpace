@@ -723,6 +723,7 @@ void calculateInscattering(int scatteringOrder, CPUTexture3D& inscatteringTextur
                 inscatteringTexture[layer].data[k] += color.r;
                 inscatteringTexture[layer].data[k + 1] += color.g;
                 inscatteringTexture[layer].data[k + 2] += color.b;
+                inscatteringTexture[layer].data[k + 3] = 0.0;
                 k += inscatteringTexture[0].components;
             }
         }
