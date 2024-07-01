@@ -694,7 +694,7 @@ void AtmosphereDeferredcaster::calculateTransmittance() {
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
     glDrawArrays(GL_TRIANGLES, 0, 6);
     if (_saveCalculationTextures) {
-        saveTextureFile("transmittance_texture.ppm", _transmittanceTableSize);
+        saveTextureFile("transmittance_texture.ppm", _transmittanceTableSize, false);
     }
     program->deactivate();
 
@@ -709,7 +709,7 @@ void AtmosphereDeferredcaster::calculateTransmittance() {
             _rayleighScatteringCoeff, _ozoneHeightScale, _ozoneExtinctionCoeff,
             _mieHeightScale, _mieExtinctionCoeff, _ozoneEnabled);
 
-        saveTextureFile("my_transmittance_test.ppm", _transmittanceTexture);
+        saveTextureFile("my_transmittance_test.ppm", _transmittanceTexture, false);
     }
 }
 
@@ -736,7 +736,7 @@ GLuint AtmosphereDeferredcaster::calculateDeltaE() {
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     if (_saveCalculationTextures) {
-        saveTextureFile("deltaE_table_texture.ppm", _deltaETableSize);
+        saveTextureFile("deltaE_table_texture.ppm", _deltaETableSize, false);
     }
     program->deactivate();
 
@@ -744,7 +744,7 @@ GLuint AtmosphereDeferredcaster::calculateDeltaE() {
         _deltaETexture = atmosphere::irradiance::calculateDeltaE(_deltaETableSize,
             _transmittanceTexture, _atmospherePlanetRadius, _atmosphereRadius);
 
-        saveTextureFile("my_deltaE_table_test.ppm", _deltaETexture);
+        saveTextureFile("my_deltaE_table_test.ppm", _deltaETexture, false);
     }
 
     return deltaE;
@@ -790,10 +790,10 @@ std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
     if (_saveCalculationTextures) {
-        saveTextureFile("deltaS_rayleigh_texture.ppm", glm::ivec2(_textureSize));
+        saveTextureFile("deltaS_rayleigh_texture.ppm", glm::ivec2(_textureSize), false);
         saveTextureFile<GL_COLOR_ATTACHMENT1>(
             "deltaS_mie_texture.ppm",
-            glm::ivec2(_textureSize)
+            glm::ivec2(_textureSize), false
         );
     }
 
@@ -827,14 +827,14 @@ void AtmosphereDeferredcaster::calculateIrradiance() {
     glClear(GL_COLOR_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     if (_saveCalculationTextures) {
-        saveTextureFile("irradiance_texture.ppm", _deltaETableSize);
+        saveTextureFile("irradiance_texture.ppm", _deltaETableSize, false);
     }
     program->deactivate();
 
     if (_saveCalculationTextures) {
         _irradianceTexture =
             atmosphere::irradiance::calculateIrradiance(_deltaETableSize);
-        saveTextureFile("my_irradiance_texture_test.ppm", _irradianceTexture);
+        saveTextureFile("my_irradiance_texture_test.ppm", _irradianceTexture, false);
     }
 }
 
@@ -879,7 +879,7 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint deltaSRayleigh,
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
     if (_saveCalculationTextures) {
-        saveTextureFile("S_texture.ppm", glm::ivec2(_textureSize));
+        saveTextureFile("S_texture.ppm", glm::ivec2(_textureSize), false);
     }
     program->deactivate();
 }
@@ -936,7 +936,7 @@ void AtmosphereDeferredcaster::calculateDeltaJ(int scatteringOrder,
     if (_saveCalculationTextures) {
         saveTextureFile(
             std::format("deltaJ_texture-scattering_order-{}.ppm", scatteringOrder),
-            glm::ivec2(_textureSize)
+            glm::ivec2(_textureSize), false
         );
     }
     program.deactivate();
@@ -976,7 +976,7 @@ void AtmosphereDeferredcaster::calculateDeltaE(int scatteringOrder,
     if (_saveCalculationTextures) {
         saveTextureFile(
             std::format("deltaE_texture-scattering_order-{}.ppm", scatteringOrder),
-            _deltaETableSize
+            _deltaETableSize, false
         );
     }
     program.deactivate();
@@ -1015,9 +1015,8 @@ void AtmosphereDeferredcaster::calculateDeltaS(int scatteringOrder,
     }
     if (_saveCalculationTextures) {
         saveTextureFile(
-            std::format("my_deltaS_texture-scattering_order-{}_test.ppm", scatteringOrder),
-            glm::ivec2(_textureSize),
-            true
+            std::format("deltaS_texture-scattering_order-{}.ppm", scatteringOrder),
+            glm::ivec2(_textureSize), false
         );
     }
     program.deactivate();
@@ -1048,7 +1047,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(int scatteringOrder,
     if (_saveCalculationTextures) {
         saveTextureFile(
             std::format("irradianceTable_order-{}.ppm", scatteringOrder),
-            _deltaETableSize
+            _deltaETableSize, false
         );
     }
     program.deactivate();
@@ -1085,7 +1084,7 @@ void AtmosphereDeferredcaster::calculateInscattering(int scatteringOrder,
     if (_saveCalculationTextures) {
         saveTextureFile(
             std::format("inscatteringTable_order-{}.ppm", scatteringOrder),
-            glm::ivec2(_textureSize)
+            glm::ivec2(_textureSize), false
         );
     }
     program.deactivate();
@@ -1183,8 +1182,8 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
             _ozoneEnabled, _ozoneHeightScale
         );
 
-        saveTextureFile("my_deltaS_rayleigh_texture_test.ppm", deltaSRayleigh[0]);
-        saveTextureFile("my_deltaS_mie_texture_test.ppm", deltaSMie[0]);
+        saveTextureFile("my_deltaS_rayleigh_texture_test.ppm", deltaSRayleigh[0], false);
+        saveTextureFile("my_deltaS_mie_texture_test.ppm", deltaSMie[0], false);
 
         deltaSRayleighTexture = std::move(deltaSRayleigh);
         deltaSMieTexture = std::move(deltaSMie);
@@ -1201,12 +1200,13 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
             atmosphere::inscattering::calculateInscattering(deltaSRayleighTexture,
                 deltaSMieTexture, _textureSize, _muSSamples, _nuSamples, _muSamples,
                 _rSamples
-        );
+            );
 
-        saveTextureFile("my_S_texture_test.ppm", _inScatteringTexture[0]);
+        saveTextureFile("my_S_texture_test.ppm", _inScatteringTexture[0], false);
     }
 
     const GLuint deltaJTable = createTexture(_textureSize, "DeltaJ", 3);
+
     atmosphere::CPUTexture3D deltaJTexture(_textureSize.z,
         atmosphere::CPUTexture{
             _textureSize.x,
@@ -1227,12 +1227,6 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
         );
 
         if (_saveCalculationTextures) {
-            int a = 2;
-            int b = 4;
-            glm::vec2 s = glm::vec2(1+ 0.5f, 3 + 0.5f) / glm::vec2(a, b);
-            LDEBUG(std::format("sx {}, sy{}", s.x, s.y));
-
-
             LDEBUG(std::format("Computing DeltaJ texture  {}", scatteringOrder));
             atmosphere::inscattering::calculateDeltaJ(scatteringOrder, deltaJTexture,
                 _deltaETexture, deltaSRayleighTexture, deltaSMieTexture,
@@ -1243,7 +1237,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
 
             saveTextureFile(
                 std::format("my_deltaJ_texture-scattering_order-{}_test.ppm", scatteringOrder),
-                deltaJTexture[0]
+                deltaJTexture[0], false
             );
             LDEBUG(std::format("Finished Computing DeltaJ texture  {}", scatteringOrder));
 
@@ -1266,7 +1260,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
                 _nuSamples, _muSamples, _rSamples);
 
             saveTextureFile(std::format("my_deltaE_texture-scattering_order-{}_test.ppm",
-                    scatteringOrder), _deltaETexture);
+                scatteringOrder), _deltaETexture, false);
             LDEBUG(std::format("Finished Computing DeltaE texture  {}", scatteringOrder));
         }
 
@@ -1284,9 +1278,8 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
                 deltaSRayleighTexture, deltaJTexture, _transmittanceTexture,
                 _atmospherePlanetRadius, _atmosphereRadius, _muSSamples, _nuSamples,
                 _muSamples, _rSamples);
-            saveTextureFile(std::format("deltaS_texture-scattering_order-{}.ppm", scatteringOrder),
-                deltaSRayleighTexture[0],
-                true
+            saveTextureFile(std::format("my_deltaS_texture-scattering_order-{}_test.ppm", scatteringOrder),
+                deltaSRayleighTexture[0], false
             );
             LDEBUG(std::format("Finished Computing DeltaS texture  {}", scatteringOrder));
         }
@@ -1309,7 +1302,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
 
             saveTextureFile(
                 std::format("my_irradianceTable_order-{}_test.ppm", scatteringOrder),
-                _irradianceTexture
+                _irradianceTexture, false
             );
         }
 
@@ -1327,7 +1320,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
 
             saveTextureFile(
                 std::format("my-inscatteringTable_order-{}_test.ppm", scatteringOrder),
-                _inScatteringTexture[0], true
+                _inScatteringTexture[0], false
             );
         }
 
