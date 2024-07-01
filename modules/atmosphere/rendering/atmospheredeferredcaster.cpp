@@ -1333,7 +1333,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     if (_saveCalculationTextures) {
         _transmittanceTexture.createGPUTexture("Transmittance");
         _irradianceTexture.createGPUTexture("Irradiance");
-         Create the 3D texture
+        // Create the 3D texture
         GLuint t = 0;
         glGenTextures(1, &t);
         glBindTexture(GL_TEXTURE_3D, t);
