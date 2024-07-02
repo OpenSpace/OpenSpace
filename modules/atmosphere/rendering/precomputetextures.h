@@ -94,6 +94,15 @@ using CPUTexture3D = std::vector<CPUTexture>;
 double safeSqrt(double x);
 
 namespace common {
+    // In the following shaders r (altitude) is the length of vector/position x in the
+    // atmosphere (or on the top of it when considering an observer in space), where the light
+    // is coming from the opposite direction of the view direction, here the vector v or
+    // viewDirection. Rg is the planet radius and Rt the atmosphere radius.
+
+    // Calculate the distance of the ray starting at x (height r) until the planet's ground
+    // or top of atmosphere
+    // r := || vec(x) || e [0, Rt]
+    // mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
     double rayDistance(double r, double mu, double Rt, double Rg);
 
      // biliniear interpolate a texture, clamps the texture coordinates to(0, size - 1)

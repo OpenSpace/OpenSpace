@@ -143,8 +143,8 @@ namespace {
             << '\n' << "255" << '\n';
 
         int k = 0;
-            for (int y = 0; y < texture.height; y++) {
-        for (int x = 0; x < texture.width; x++) {
+        for (int y = 0; y < texture.height; y++) {
+            for (int x = 0; x < texture.width; x++) {
 
                 double r = texture.data[k];
                 double g = texture.data[k + 1];

@@ -10,7 +10,7 @@ namespace atmosphere {
 namespace common {
 double rayDistance(double r, double mu, double Rt, double Rg) {
     const double ATM_EPSILON = 1.0;
-    // The light ray starting at the observer in/on the atmosphere can have to possible end
+    // The light ray starting at the observer in/on the atmosphere can have two possible end
     // points: the top of the atmosphere or the planet ground. So the shortest path is the
     // one we are looking for, otherwise we may be passing through the ground
 
@@ -43,25 +43,6 @@ glm::dvec4 texture(const CPUTexture& tex, double x, double y)
                 1.0 : tex.data[index + 3]
         );
     };
-
-    //auto getWrappedIndex = [](double v, int max) {
-    //    // v is within our texture, no need to wrap it
-    //    if (v > 0 && v < max) {
-    //        return static_cast<int>(v);
-    //    }
-
-    //    // max is 1 less than the width/height size, we add +1 to get the correct texel
-    //    // after casting eg., -0.2 should wrap to the last element
-    //    if (v < 0) {
-    //        const int size = max + 1;
-    //        double wrappedV = size - v;
-    //        return static_cast<int>(wrappedV);
-    //    }
-
-    //    else {
-
-    //    }
-    //};
 
     // Scale lookup coordinates to match texture size
     x = x * (tex.width - 1);
