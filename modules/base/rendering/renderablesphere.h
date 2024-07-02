@@ -68,8 +68,8 @@ protected:
     properties::FloatProperty _fadeInThreshold;
     properties::FloatProperty _fadeOutThreshold;
 
-private:
     ghoul::opengl::ProgramObject* _shader = nullptr;
+private:
 
     std::unique_ptr<Sphere> _sphere;
     bool _sphereIsDirty = false;

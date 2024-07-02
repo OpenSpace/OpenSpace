@@ -33,6 +33,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <modules/fitsfilereader/include/wsafitshelper.h>
 
 #include <string>
@@ -149,6 +150,7 @@ namespace {
         // An index specifying which layer in the fits file to display
         std::optional<int> fitsLayer;
         std::optional<bool> deleteDownloadsOnShutdown;
+        std::optional<std::filesystem::path> ColorMap;
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -183,6 +185,10 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     }
     _deleteDownloadsOnShutdown =
         p.deleteDownloadsOnShutdown.value_or(_deleteDownloadsOnShutdown);
+    if (p.ColorMap.has_value()) {
+        _transferFunctionPath = p.ColorMap.value_or(_transferFunctionPath);
+        _isUsingColorMap = true;
+    }
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
@@ -199,6 +205,11 @@ void RenderableTimeVaryingSphere::initializeGL() {
     }
     addProperty(_textureSourcePath);
     definePropertyCallbackFunctions();
+    if (_isUsingColorMap) {
+        _transferFunction = std::make_unique<TransferFunction>(
+            absPath(_transferFunctionPath).string()
+        );
+    }
 }
 
 void RenderableTimeVaryingSphere::setupDynamicDownloading(
@@ -260,9 +271,7 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     //newFile.time = extractTriggerTimeFromISO8601FileName(path);
     newFile.time = extractTriggerTimeFromFitsFileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path, _fitsLayer);
-    //t->uploadTexture();
     t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-    //t->purgeFromRAM();
 
     newFile.texture = std::move(t);
 
@@ -375,6 +384,18 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         _activeTriggerTimeIndex = 0;
     }
 }
+
+void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& rendererTask) {
+    if (_isUsingColorMap) {
+        _shader->activate();
+        ghoul::opengl::TextureUnit textureUnit;
+        textureUnit.activate();
+        _transferFunction->bind();
+        _shader->setUniform("colorTexture", textureUnit);
+    }
+    RenderableSphere::render(data, rendererTask);
+}
+
 
 void RenderableTimeVaryingSphere::bindTexture() {
     if (_texture) {

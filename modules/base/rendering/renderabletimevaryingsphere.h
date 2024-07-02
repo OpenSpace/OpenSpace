@@ -28,6 +28,7 @@
 #include <modules/base/rendering/renderablesphere.h>
 
 #include <openspace/properties/optionproperty.h>
+#include <openspace/rendering/transferfunction.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
 
 //namespace ghoul::opengl { class Texture; }
@@ -57,6 +58,7 @@ public:
     bool isReady() const override;
 
     void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     static documentation::Documentation Documentation();
     struct File {
@@ -120,6 +122,10 @@ private:
     bool _layerOptionsAdded = false;
     ghoul::opengl::Texture* _texture = nullptr;
     bool _textureIsDirty = false;
+    bool _isUsingColorMap = false;
+    std::filesystem::path _transferFunctionPath;
+    std::unique_ptr<TransferFunction> _transferFunction;
+
 };
 
 } // namespace openspace
