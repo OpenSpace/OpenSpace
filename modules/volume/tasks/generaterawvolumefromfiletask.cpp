@@ -27,6 +27,7 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
+#include <openspace/data/csvloader.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
@@ -34,19 +35,16 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
-#include <ghoul/misc/defer.h>
 #include <filesystem>
 #include <fstream>
 
 namespace {
+    constexpr std::string_view _loggerCat = "GenerateRawVolumeFromFileTask";
+
     struct [[codegen::Dictionary(GenerateRawVolumeFromFileTask)]] Parameters {
-        // The Lua function used to compute the cell values
-        std::string valueFunction [[codegen::annotation("A Lua expression that returns a "
-            "function taking three numbers as arguments (x, y, z) and returning a "
-            "number")]];
+        // The volume file to import data from in csv format
+        std::string dataInputPath [[codegen::annotation("A valid filepath")]];
 
         // The raw volume file to export data to
         std::string rawVolumeOutput [[codegen::annotation("A valid filepath")]];
@@ -54,17 +52,15 @@ namespace {
         // The lua dictionary file to export metadata to
         std::string dictionaryOutput [[codegen::annotation("A valid filepath")]];
 
+        // The data column value to use for the volume transfer function, must be one
+        // of the names in the CSV header
+        std::string dataValue;
+
         // The timestamp that is written to the metadata of this volume
         std::string time;
 
         // A vector representing the number of cells in each dimension
         glm::ivec3 dimensions;
-
-        // A vector representing the lower bound of the domain
-        glm::dvec3 lowerDomainBound;
-
-        // A vector representing the upper bound of the domain
-        glm::dvec3 upperDomainBound;
     };
 #include "generaterawvolumefromfiletask_codegen.cpp"
 } // namespace
@@ -78,91 +74,92 @@ documentation::Documentation GenerateRawVolumeFromFileTask::Documentation() {
 GenerateRawVolumeFromFileTask::GenerateRawVolumeFromFileTask(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    _inputFilePath = absPath(p.dataInputPath);
     _rawVolumeOutputPath = absPath(p.rawVolumeOutput);
     _dictionaryOutputPath = absPath(p.dictionaryOutput);
+    _dataValue = p.dataValue;
     _dimensions = p.dimensions;
     _time = p.time;
-    _valueFunctionLua = p.valueFunction;
-    _lowerDomainBound = p.lowerDomainBound;
-    _upperDomainBound = p.upperDomainBound;
+    _lowerDomainBound = glm::vec3(std::numeric_limits<float>::max());
+    _upperDomainBound = glm::vec3(std::numeric_limits<float>::lowest());
 }
 
 std::string GenerateRawVolumeFromFileTask::description() {
     return std::format(
-        "Generate a raw volume with dimenstions: ({}, {}, {}). For each cell, set the "
-        "value by evaluating the lua function: `{}`, with three arguments (x, y, z) "
-        "ranging from ({}, {}, {}) to ({}, {}, {}). Write raw volume data into '{}' and "
-        "dictionary with metadata to '{}'",
-        _dimensions.x, _dimensions.y, _dimensions.z, _valueFunctionLua,
-        _lowerDomainBound.x, _lowerDomainBound.y, _lowerDomainBound.z,
-        _upperDomainBound.x, _upperDomainBound.y, _upperDomainBound.z,
+        "Generate a raw volume with dimenstions: ({}, {}, {})."
+        "Write raw volume data into '{}' and dictionary with metadata to '{}'",
+        _dimensions.x, _dimensions.y, _dimensions.z,
         _rawVolumeOutputPath, _dictionaryOutputPath
     );
 }
 
 void GenerateRawVolumeFromFileTask::perform(const Task::ProgressCallback& progressCallback) {
-    // Spice kernel is required for time conversions.
-    // Todo: Make this dependency less hard coded.
-    SpiceManager::KernelHandle kernel = SpiceManager::ref().loadKernel(
-        absPath("${DATA}/assets/spice/naif0012.tls")
-    );
 
-    defer {
-        SpiceManager::ref().unloadKernel(kernel);
-    };
+    dataloader::Dataset data = dataloader::csv::loadCsvFile(_inputFilePath);
+    progressCallback(0.3f);
+
+    if(data.isEmpty()) {
+        LERROR(std::format("Error loading CSV data in file '{}'", _inputFilePath.string()));
+    }
+
+    // Get min/max x, y, z position - ie. domain bounds of the volume
+    for (const dataloader::Dataset::Entry& p : data.entries)
+    {
+        _lowerDomainBound = glm::vec3{
+            std::min(_lowerDomainBound.x, p.position.x),
+            std::min(_lowerDomainBound.y, p.position.y),
+            std::min(_lowerDomainBound.z, p.position.z)
+        };
+        _upperDomainBound = glm::vec3{
+            std::max(_upperDomainBound.x, p.position.x),
+            std::max(_upperDomainBound.y, p.position.y),
+            std::max(_upperDomainBound.z, p.position.z)
+        };
+    }
+    progressCallback(0.4f);
 
     volume::RawVolume<float> rawVolume(_dimensions);
-    progressCallback(0.1f);
-
-    ghoul::lua::LuaState state;
-    ghoul::lua::runScript(state, _valueFunctionLua);
-
-#if (defined(NDEBUG) || defined(DEBUG))
-    ghoul::lua::verifyStackSize(state, 1);
-#endif
-
-    int functionReference = luaL_ref(state, LUA_REGISTRYINDEX);
-
-#if (defined(NDEBUG) || defined(DEBUG))
-    ghoul::lua::verifyStackSize(state, 0);
-#endif
-
-    glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
-
 
     float minVal = std::numeric_limits<float>::max();
-    float maxVal = std::numeric_limits<float>::min();
+    float maxVal = std::numeric_limits<float>::lowest();
 
-    rawVolume.forEachVoxel([&](const glm::uvec3& cell, float) {
-        const glm::vec3 coord = _lowerDomainBound +
-            glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
-
-#if (defined(NDEBUG) || defined(DEBUG))
-        ghoul::lua::verifyStackSize(state, 0);
-#endif
-        lua_rawgeti(state, LUA_REGISTRYINDEX, functionReference);
-
-        lua_pushnumber(state, coord.x);
-        lua_pushnumber(state, coord.y);
-        lua_pushnumber(state, coord.z);
-
-#if (defined(NDEBUG) || defined(DEBUG))
-        ghoul::lua::verifyStackSize(state, 4);
-#endif
-
-        if (lua_pcall(state, 3, 1, 0) != LUA_OK) {
-            return;
-        }
-
-        const float value = static_cast<float>(luaL_checknumber(state, 1));
-        lua_pop(state, 1);
-        rawVolume.set(cell, value);
-
-        minVal = std::min(minVal, value);
-        maxVal = std::max(maxVal, value);
+    auto dataIndex = std::find_if(data.variables.begin(), data.variables.end(),
+        [this](const dataloader::Dataset::Variable& var) {
+            return var.name == _dataValue;
     });
 
-    luaL_unref(state, LUA_REGISTRYINDEX, functionReference);
+    if (dataIndex == data.variables.end()) {
+        LERROR("Could not find specified variable '{}' in dataset", _dataValue);
+        return;
+    }
+    progressCallback(0.5f);
+
+    // Write data into volume data structure
+    int k = 0;
+    for (auto& entry : data.entries) {
+        // Get the closest i, j , k voxel that should contain this data
+        glm::vec3 normalizedPos{ (entry.position - _lowerDomainBound) /
+            (_upperDomainBound - _lowerDomainBound) };
+
+
+        glm::uvec3 cell{
+            glm::min(
+                static_cast<glm::uvec3>(glm::floor(
+                    normalizedPos * static_cast<glm::vec3>(_dimensions)
+                )),
+                _dimensions - 1u
+            )
+        };
+
+        const float value = entry.data[dataIndex->index];
+        minVal = std::min(minVal, value);
+        maxVal = std::max(maxVal, value);
+
+        size_t index = rawVolume.coordsToIndex(cell);
+        rawVolume.set(index, value);
+        k++;
+    }
+    progressCallback(0.75f);
 
     const std::filesystem::path directory = _rawVolumeOutputPath.parent_path();
     if (!std::filesystem::is_directory(directory)) {
@@ -171,7 +168,6 @@ void GenerateRawVolumeFromFileTask::perform(const Task::ProgressCallback& progre
 
     volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
     writer.write(rawVolume);
-
     progressCallback(0.9f);
 
     RawVolumeMetadata metadata;

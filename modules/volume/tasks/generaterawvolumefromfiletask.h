@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
-#define __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMEFROMFILETASK___H__
+#define __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMEFROMFILETASK___H__
 
 #include <openspace/util/task.h>
 
@@ -41,17 +41,18 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    std::filesystem::path _inputFilePath;
     std::filesystem::path _rawVolumeOutputPath;
     std::filesystem::path  _dictionaryOutputPath;
     std::string _time;
+    std::string _dataValue;
 
     glm::uvec3 _dimensions = glm::uvec3(0);
     glm::vec3 _lowerDomainBound = glm::vec3(0.f);
     glm::vec3 _upperDomainBound = glm::vec3(0.f);
 
-    std::string _valueFunctionLua;
 };
 
 } // namespace openspace::volume
 
-#endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMETASK___H__
+#endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMEFROMFILETASK___H__
