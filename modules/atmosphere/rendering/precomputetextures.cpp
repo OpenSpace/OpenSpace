@@ -1,5 +1,7 @@
 #include "precomputetextures.h"
 
+#pragma optimize("", off)
+
 namespace openspace {
 namespace atmosphere {
 
@@ -49,20 +51,24 @@ glm::dvec4 texture(const CPUTexture& tex, double x, double y)
     y = y * (tex.height - 1);
 
     // Calc integer coordinates of the four sourrounding pixels
-    int x1 = std::clamp(static_cast<int>(x), 0, tex.width - 1);
-    int y1 = std::clamp(static_cast<int>(y), 0, tex.height - 1);
-    int x2 = std::clamp(x1 + 1, 0, tex.width - 1);
-    int y2 = std::clamp(y1 + 1, 0, tex.height - 1);
+    const int x1 = std::clamp(static_cast<int>(x), 0, tex.width - 1);
+    const int y1 = std::clamp(static_cast<int>(y), 0, tex.height - 1);
 
     // Get fractional part of x and y
-    double fx = x - x1;
-    double fy = y - y1;
+    const double fx = x - x1;
+    const double fy = y - y1;
+    // Get the neighboring texel depending on where in the texel we are sampling
+    const int xOffset = fx >= 0.5 ? 1 : -1;
+    const int yOffset = fy >= 0.5 ? 1 : -1;
+
+    const int x2 = std::clamp(x1 + xOffset, 0, tex.width - 1);
+    const int y2 = std::clamp(y1 + yOffset, 0, tex.height - 1);
 
     // Get colors of the four sourrounding pixels
-    glm::dvec4 c11 = getColor(x1, y1);
-    glm::dvec4 c12 = getColor(x1, y2);
-    glm::dvec4 c21 = getColor(x2, y1);
-    glm::dvec4 c22 = getColor(x2, y2);
+    const glm::dvec4 c11 = getColor(x1, y1);
+    const glm::dvec4 c12 = getColor(x1, y2);
+    const glm::dvec4 c21 = getColor(x2, y1);
+    const glm::dvec4 c22 = getColor(x2, y2);
 
     // Interpolate the colors
     glm::dvec4 c1, c2, result;
@@ -80,10 +86,13 @@ glm::dvec4 texture(const CPUTexture3D& tex, const glm::dvec3& pos)
 
     // Get integer coordinate of the two surrounding slices
     int z1 = std::clamp(static_cast<int>(z), 0, static_cast<int>(tex.size()) - 1);
-    int z2 = std::clamp(z1 + 1, 0, static_cast<int>(tex.size()) - 1);
 
     // Get fractional part of z
     double fz = z - z1;
+
+    const int zOffset = fz >= 0.5 ? 1 : -1;
+
+    int z2 = std::clamp(z1 + zOffset, 0, static_cast<int>(tex.size()) - 1);
 
     // Perform bilinear interpolation on the two slices
     glm::dvec4 c0 = texture(tex[z1], pos.x, pos.y);
