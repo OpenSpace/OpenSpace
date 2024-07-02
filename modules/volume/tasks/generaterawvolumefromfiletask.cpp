@@ -129,7 +129,7 @@ void GenerateRawVolumeFromFileTask::perform(const Task::ProgressCallback& progre
     });
 
     if (dataIndex == data.variables.end()) {
-        LERROR("Could not find specified variable '{}' in dataset", _dataValue);
+        LERROR(std::format("Could not find specified variable '{}' in dataset", _dataValue));
         return;
     }
     progressCallback(0.5f);
