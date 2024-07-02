@@ -248,7 +248,13 @@ public:
      *
      * \return A list of all unique tags that are used in the currently loaded scene.
      */
-    std::vector<std::string> allTags();
+    std::vector<std::string> allTags() const;
+
+    // TODO: documentation
+    void setGuiGroupOrdering(const std::string& guiPath,
+        const std::vector<std::string>& list);
+    ghoul::Dictionary guiGroupsOrdering() const;
+
 
 private:
     /**
@@ -333,6 +339,8 @@ private:
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
 
     ghoul::MemoryPool<4096> _memoryPool;
+
+    std::unordered_map<std::string, std::vector<std::string>> _guiGroupOrdering;
 };
 
 // Convert the input string to a format that is valid as an identifier

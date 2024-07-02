@@ -1234,6 +1234,22 @@ enum class [[codegen::enum]] CustomPropertyType {
     return openspace::makeIdentifier(input);
 }
 
+/**
+ * @TODO
+ */
+[[codegen::luawrap]] void setGuiGroupOrdering(std::string guiPath,
+                                              std::vector<std::string> list)
+{
+    return openspace::global::renderEngine->scene()->setGuiGroupOrdering(guiPath, list);
+}
+
+/**
+ * @TODO
+ */
+[[codegen::luawrap]] ghoul::Dictionary guiGroupsOrdering() {
+    return openspace::global::renderEngine->scene()->guiGroupsOrdering();
+}
+
 } // namespace
 
 #include "scene_lua_codegen.cpp"

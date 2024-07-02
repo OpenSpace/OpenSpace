@@ -30,6 +30,14 @@ asset.require("./neptune/neptune")
 asset.require("./neptune/major_moons")
 
 
+asset.onInitialize(function()
+  openspace.setGuiGroupOrdering(
+    "/Solar System/Planets",
+    {"Mercury", "Venus", "Earth", "Mars", "Jupiter","Saturn", "Uranus", "Neptune"}
+  )
+end)
+
+
 
 asset.meta = {
   Name = "Planets",
