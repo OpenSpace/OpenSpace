@@ -25,7 +25,8 @@
 namespace {
 
 [[codegen::luawrap]] void joinServer(std::string port, std::string address,
-                                     std::string password, std::string hostpassword = "",
+                                     std::string serverName, std::string password,
+                                     std::string hostpassword = "",
                                      std::string name = "Anonymous") {
     using namespace openspace;
     if (global::windowDelegate->isMaster()) {
@@ -34,6 +35,7 @@ namespace {
         peer->setAddress(std::move(address));
         peer->setPassword(std::move(password));
         peer->setHostPassword(std::move(hostpassword));
+        peer->setServerName(std::move(serverName));
         peer->setName(std::move(name));
         peer->connect();
     }
