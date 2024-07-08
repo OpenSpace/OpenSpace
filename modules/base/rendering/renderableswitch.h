@@ -70,12 +70,13 @@ public:
 
 protected:
     properties::BoolProperty _autoScale;
-    std::unique_ptr<RenderablePlaneImageLocal> _renderable1;
-    std::unique_ptr<RenderablePlaneImageLocal> _renderable2;
+    std::unique_ptr<Renderable> _renderable1;
+    std::unique_ptr<Renderable> _renderable2;
 
 private:
-    
     float _distanceThreshold;
+
+    std::unique_ptr<Renderable> createRenderable(const ghoul::Dictionary& config);
 };
 
 } // namespace openspace

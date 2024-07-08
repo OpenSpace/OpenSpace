@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/renderableswitch.h>
+#include <modules/base/rendering/RenderablePlaneImageOnline.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/logging/logmanager.h>
@@ -61,43 +62,80 @@ RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _renderable1 = std::make_unique<RenderablePlaneImageLocal>(p.Renderable1);
-    _renderable2 = std::make_unique<RenderablePlaneImageLocal>(p.Renderable2);
+    // Instantiate renderable1 based on type specified in p.Renderable1
+    _renderable1 = createRenderable(p.Renderable1);
+
+    // Instantiate renderable2 based on type specified in p.Renderable2
+    _renderable2 = createRenderable(p.Renderable2);
+
     _distanceThreshold = p.DistanceThreshold;
 
     addProperty(_autoScale);
 }
 
 void RenderableSwitch::initializeGL() {
-    _renderable1->initializeGL();
-    _renderable2->initializeGL();
+    if (_renderable1) {
+        _renderable1->initializeGL();
+    }
+    if (_renderable2) {
+        _renderable2->initializeGL();
+    }
 }
 
 void RenderableSwitch::deinitializeGL() {
-    _renderable1->deinitializeGL();
-    _renderable2->deinitializeGL();
+    if (_renderable1) {
+        _renderable1->deinitializeGL();
+    }
+    if (_renderable2) {
+        _renderable2->deinitializeGL();
+    }
 }
 
 bool RenderableSwitch::isReady() const {
-    return _renderable1->isReady() && _renderable2->isReady();
+    return (_renderable1 && _renderable1->isReady()) &&
+        (_renderable2 && _renderable2->isReady());
 }
 
 void RenderableSwitch::update(const UpdateData& data) {
-    _renderable1->update(data);
-    _renderable2->update(data);
+    if (_renderable1) {
+        _renderable1->update(data);
+    }
+    if (_renderable2) {
+        _renderable2->update(data);
+    }
 }
 
 void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
     if (_enabled) {
         glm::dvec3 cameraPosition = data.camera.positionVec3();
         glm::dvec3 modelPosition = data.modelTransform.translation;
-        //std::cout << "Distance: " << glm::distance(cameraPosition, modelPosition) << std::endl;
+
         if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {
-            _renderable1->render(data, tasks);
+            if (_renderable1) {
+                _renderable1->render(data, tasks);
+            }
         }
         else {
-            _renderable2->render(data, tasks);
+            if (_renderable2) {
+                _renderable2->render(data, tasks);
+            }
         }
     }
 }
+
+std::unique_ptr<Renderable> RenderableSwitch::createRenderable(const ghoul::Dictionary& config) {
+    std::string type = config.value<std::string>("Type");
+
+    if (type == "RenderablePlaneImageLocal") {
+        return std::make_unique<RenderablePlaneImageLocal>(config);
+    }
+    else if (type == "RenderablePlaneImageOnline")
+    {
+        return std::make_unique<RenderablePlaneImageOnline>(config);
+    }
+    // More renderable types here
+
+    return nullptr; // Throw an exception if type is not recognized?
+}
+
 } // namespace openspace
