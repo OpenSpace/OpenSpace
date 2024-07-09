@@ -44,20 +44,20 @@ namespace {
 
     struct [[codegen::Dictionary(GenerateRawVolumeFromFileTask)]] Parameters {
         // The volume file to import data from in csv format
-        std::string dataInputPath [[codegen::annotation("A valid filepath")]];
+        std::string dataInputPath;
 
         // The raw volume file to export data to
-        std::string rawVolumeOutput [[codegen::annotation("A valid filepath")]];
+        std::string rawVolumeOutput;
 
         // The lua dictionary file to export metadata to
-        std::string dictionaryOutput [[codegen::annotation("A valid filepath")]];
+        std::string dictionaryOutput;
 
         // The data column value to use for the volume transfer function, must be one
         // of the names in the CSV header
-        std::string dataValue;
+        std::string dataValue [[codegen::notempty()]];
 
         // The timestamp that is written to the metadata of this volume
-        std::string time;
+        std::string time [[codegen::notempty()]];
 
         // A vector representing the number of cells in each dimension
         glm::ivec3 dimensions;
@@ -86,7 +86,7 @@ GenerateRawVolumeFromFileTask::GenerateRawVolumeFromFileTask(const ghoul::Dictio
 
 std::string GenerateRawVolumeFromFileTask::description() {
     return std::format(
-        "Generate a raw volume with dimenstions: ({}, {}, {})."
+        "Generate a raw volume with dimensions: ({}, {}, {}). "
         "Write raw volume data into '{}' and dictionary with metadata to '{}'",
         _dimensions.x, _dimensions.y, _dimensions.z,
         _rawVolumeOutputPath, _dictionaryOutputPath
@@ -98,23 +98,26 @@ void GenerateRawVolumeFromFileTask::perform(const Task::ProgressCallback& progre
     dataloader::Dataset data = dataloader::csv::loadCsvFile(_inputFilePath);
     progressCallback(0.3f);
 
-    if(data.isEmpty()) {
-        LERROR(std::format("Error loading CSV data in file '{}'", _inputFilePath.string()));
+    if (data.isEmpty()) {
+        LERROR(std::format(
+            "Error loading CSV data in file '{}'", _inputFilePath.string()
+        ));
+        return;
     }
 
     // Get min/max x, y, z position - ie. domain bounds of the volume
     for (const dataloader::Dataset::Entry& p : data.entries)
     {
-        _lowerDomainBound = glm::vec3{
+        _lowerDomainBound = glm::vec3(
             std::min(_lowerDomainBound.x, p.position.x),
             std::min(_lowerDomainBound.y, p.position.y),
             std::min(_lowerDomainBound.z, p.position.z)
-        };
-        _upperDomainBound = glm::vec3{
+        );
+        _upperDomainBound = glm::vec3(
             std::max(_upperDomainBound.x, p.position.x),
             std::max(_upperDomainBound.y, p.position.y),
             std::max(_upperDomainBound.z, p.position.z)
-        };
+        );
     }
     progressCallback(0.4f);
 
@@ -123,13 +126,18 @@ void GenerateRawVolumeFromFileTask::perform(const Task::ProgressCallback& progre
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::lowest();
 
-    auto dataIndex = std::find_if(data.variables.begin(), data.variables.end(),
+    auto dataIndex = std::find_if(
+        data.variables.begin(),
+        data.variables.end(),
         [this](const dataloader::Dataset::Variable& var) {
             return var.name == _dataValue;
-    });
+        }
+    );
 
     if (dataIndex == data.variables.end()) {
-        LERROR(std::format("Could not find specified variable '{}' in dataset", _dataValue));
+        LERROR(std::format(
+            "Could not find specified variable '{}' in dataset", _dataValue
+        ));
         return;
     }
     progressCallback(0.5f);
@@ -140,7 +148,6 @@ void GenerateRawVolumeFromFileTask::perform(const Task::ProgressCallback& progre
         // Get the closest i, j , k voxel that should contain this data
         glm::vec3 normalizedPos{ (entry.position - _lowerDomainBound) /
             (_upperDomainBound - _lowerDomainBound) };
-
 
         glm::uvec3 cell{
             glm::min(

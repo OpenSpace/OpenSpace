@@ -43,14 +43,13 @@ public:
 private:
     std::filesystem::path _inputFilePath;
     std::filesystem::path _rawVolumeOutputPath;
-    std::filesystem::path  _dictionaryOutputPath;
+    std::filesystem::path _dictionaryOutputPath;
     std::string _time;
     std::string _dataValue;
 
     glm::uvec3 _dimensions = glm::uvec3(0);
     glm::vec3 _lowerDomainBound = glm::vec3(0.f);
     glm::vec3 _upperDomainBound = glm::vec3(0.f);
-
 };
 
 } // namespace openspace::volume
