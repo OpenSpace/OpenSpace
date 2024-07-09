@@ -110,9 +110,9 @@ Fragment getFragment() {
     diffuseAlbedo.rgb *= vs_color;
 
     // Make sure to not go beyond color range
-    diffuseAlbedo.r = min(1.0, diffuseAlbedo.r);
-    diffuseAlbedo.g = min(1.0, diffuseAlbedo.g);
-    diffuseAlbedo.b = min(1.0, diffuseAlbedo.b);
+    diffuseAlbedo.r = clamp(diffuseAlbedo.r, 0.0, 1.0);
+    diffuseAlbedo.g = clamp(diffuseAlbedo.g, 0.0, 1.0);
+    diffuseAlbedo.b = clamp(diffuseAlbedo.b, 0.0, 1.0);
   }
 
   if (performShading) {
