@@ -150,7 +150,7 @@ namespace {
         // An index specifying which layer in the fits file to display
         std::optional<int> fitsLayer;
         std::optional<bool> deleteDownloadsOnShutdown;
-        std::optional<std::filesystem::path> ColorMap;
+        std::optional<std::filesystem::path> colorMap;
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -185,8 +185,8 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     }
     _deleteDownloadsOnShutdown =
         p.deleteDownloadsOnShutdown.value_or(_deleteDownloadsOnShutdown);
-    if (p.ColorMap.has_value()) {
-        _transferFunctionPath = p.ColorMap.value_or(_transferFunctionPath);
+    if (p.colorMap.has_value()) {
+        _transferFunctionPath = p.colorMap.value_or(_transferFunctionPath);
         _isUsingColorMap = true;
     }
 }
@@ -283,6 +283,7 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
         }
     );
     _files.insert(iter, std::move(newFile));
+    computeSequenceEndTime();
 }
 
 void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) {
@@ -308,6 +309,7 @@ void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) 
         }
     );
     _files.insert(iter, std::move(newFile));
+    computeSequenceEndTime();
 }
 
 void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
@@ -385,7 +387,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     }
 }
 
-void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& rendererTask) {
+void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& task) {
     if (_isUsingColorMap) {
         _shader->activate();
         ghoul::opengl::TextureUnit textureUnit;
@@ -393,9 +395,8 @@ void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& 
         _transferFunction->bind();
         _shader->setUniform("colorTexture", textureUnit);
     }
-    RenderableSphere::render(data, rendererTask);
+    RenderableSphere::render(data, task);
 }
-
 
 void RenderableTimeVaryingSphere::bindTexture() {
     if (_texture) {

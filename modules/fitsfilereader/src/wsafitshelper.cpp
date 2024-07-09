@@ -57,21 +57,6 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         imageData.emplace_back(normalizedValue);
     }
 
-    // Potentially shifting the image goes here
-    // Longitude leading edge of map header value
-    // //todo do I need this?
-    //const int long0 = static_cast<int>(readHeaderValueFloat("CARRLONG", file));
-    //const int resolutionFactor = 360 / fitsValues->width;
-    //const int shift = (360 - long0) / resolutionFactor;
-    //for (int i = 0; i < fitsValues->height; ++i) {
-    //    std::rotate(
-    //        rgbLayers.begin() + (i * 180),
-    //        rgbLayers.begin() + (i * 180) + shift,
-    //        rgbLayers.begin() + (i * 180) + 179);
-    //}
-
-
-
     // Create texture from imagedata
     auto texture = std::make_unique<ghoul::opengl::Texture>(
         imageData.data(),
