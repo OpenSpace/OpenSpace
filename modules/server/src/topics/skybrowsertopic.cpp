@@ -40,6 +40,7 @@ namespace {
     constexpr std::string_view SendImageCollection = "send_image_collection";
     constexpr std::string_view MoveHoverCircle = "move_hover_circle";
     constexpr std::string_view DisableHoverCircle = "disable_hover_circle";
+    constexpr std::string_view FineTuneTarget = "fine_tune_target";
 } // namespace
 
 using nlohmann::json;
@@ -91,6 +92,17 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
     }
     if (event == DisableHoverCircle) {
         global::moduleEngine->module<SkyBrowserModule>()->disableHoverCircle(false);
+    }
+    if (event == FineTuneTarget) {
+        const std::string identifier = json.at("identifier").get<std::string>();
+        std::vector vec = json.at("translation").get<std::vector<float>>();
+        glm::vec2 translation = glm::vec2(vec[0], vec[1]);
+
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        TargetBrowserPair* pair = module->pair(identifier);
+        if (pair) {
+            pair->fineTuneTarget(translation);
+        }
     }
     if (event == SubscribeEvent) {
         ServerModule* module = global::moduleEngine->module<ServerModule>();
