@@ -560,8 +560,6 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::StartSetup,
             codegen::lua::InitializeBrowser,
             codegen::lua::SendOutIdsToBrowsers,
-            codegen::lua::ListOfImages,
-            codegen::lua::ListOfImagesDeprecated,
             codegen::lua::SetHoverCircle,
             codegen::lua::MoveCircleToHoverImage,
             codegen::lua::DisableHoverCircle,

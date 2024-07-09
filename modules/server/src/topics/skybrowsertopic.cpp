@@ -37,6 +37,7 @@
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
+    constexpr std::string_view SendImageCollection = "send_image_collection";
 } // namespace
 
 using nlohmann::json;
@@ -71,6 +72,17 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
         _isDone = true;
         return;
     }
+    if (event == SendImageCollection) {
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        nlohmann::json data = json::object({
+            { "url", module->wwtImageCollectionUrl() },
+            { "imageList", module->imageList() }
+        });
+        nlohmann::json json = json::object({
+            { "type", "image_collection" }, { "data", data }
+        });
+        _connection->sendJson(wrappedPayload(json));
+    }
     if (event == SubscribeEvent) {
         ServerModule* module = global::moduleEngine->module<ServerModule>();
         _targetDataCallbackHandle = module->addPreSyncCallback(
@@ -94,9 +106,7 @@ void SkyBrowserTopic::sendBrowserData() {
     // Set general data
     nlohmann::json json = {
         { "selectedBrowserId", module->selectedBrowserId() },
-        { "cameraInSolarSystem", module->isCameraInSolarSystem() },
-        { "url", module->wwtImageCollectionUrl() },
-        { "imageList", module->imageList()}
+        { "cameraInSolarSystem", module->isCameraInSolarSystem() }
     };
 
     // Pass data for all the browsers and the corresponding targets
