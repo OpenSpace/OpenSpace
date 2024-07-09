@@ -41,6 +41,7 @@ namespace {
     constexpr std::string_view MoveHoverCircle = "move_hover_circle";
     constexpr std::string_view DisableHoverCircle = "disable_hover_circle";
     constexpr std::string_view FineTuneTarget = "fine_tune_target";
+    constexpr std::string_view StartFineTuningTarget = "start_fine_tuning_target";
 } // namespace
 
 using nlohmann::json;
@@ -92,6 +93,14 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
     }
     if (event == DisableHoverCircle) {
         global::moduleEngine->module<SkyBrowserModule>()->disableHoverCircle(false);
+    }
+    if (event == StartFineTuningTarget) {
+        const std::string identifier = json.at("identifier").get<std::string>();
+        SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
+        TargetBrowserPair* pair = module->pair(identifier);
+        if (pair) {
+            pair->startFinetuningTarget();
+        }
     }
     if (event == FineTuneTarget) {
         const std::string identifier = json.at("identifier").get<std::string>();

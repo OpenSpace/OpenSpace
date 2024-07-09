@@ -772,36 +772,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
 }
 
 /**
- * Starts the fine-tuning of the target rendered copy to it.
- */
-[[codegen::luawrap]] void startFinetuningTarget(std::string identifier) {
-    using namespace openspace;
-
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    if (pair) {
-        pair->startFinetuningTarget();
-    }
-}
-
-/**
- * Finetunes the target depending on a mouse drag. rendered copy to it. First argument
- * is the identifier of the sky browser, second is the start position of the drag
- * and third is the end position of the drag.
- */
-[[codegen::luawrap]] void finetuneTargetPosition(std::string identifier,
-                                                 glm::dvec2 translation)
-{
-    using namespace openspace;
-
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    if (pair) {
-        pair->fineTuneTarget(translation);
-    }
-}
-
-/**
  * Sets the image collection as loaded in the sky browser. Takes an identifier to the sky
  * browser.
  */
