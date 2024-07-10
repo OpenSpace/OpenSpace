@@ -215,7 +215,7 @@ namespace {
         // [[codegen::verbatim(CoordinateOffsetInfo.description)]]
         std::optional<glm::vec2> coordinateOffset;
 
-        // Specifies the time frame for when this node should be active
+        // Specifies the time frame for when this geoJson should be active
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
 
