@@ -583,8 +583,6 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::AddDisplayCopy,
             codegen::lua::SetBrowserRatio,
             codegen::lua::RemoveDisplayCopy,
-            codegen::lua::StartFinetuningTarget,
-            codegen::lua::FinetuneTargetPosition,
             codegen::lua::ScrollOverBrowser,
             codegen::lua::LoadingImageCollectionComplete,
             codegen::lua::ShowAllTargetsAndBrowsers,
