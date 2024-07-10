@@ -533,7 +533,7 @@ void GeoJsonComponent::render(const RenderData& data) {
     }
 
     // @TODO (2023-03-17, emmbr): Once the light source for the globe can be configured,
-    // this code should use the same light source as the globeF
+    // this code should use the same light source as the globe
     _lightsourceRenderData.updateBasedOnLightSources(data, _lightSources);
 
     // Change GL state:
