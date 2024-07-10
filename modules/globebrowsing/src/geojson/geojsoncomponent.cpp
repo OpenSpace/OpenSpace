@@ -33,6 +33,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/timeframe.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
@@ -214,6 +215,10 @@ namespace {
         // [[codegen::verbatim(CoordinateOffsetInfo.description)]]
         std::optional<glm::vec2> coordinateOffset;
 
+        // Specifies the time frame for when this node should be active
+        std::optional<ghoul::Dictionary> timeFrame
+            [[codegen::reference("core_time_frame")]];
+
         enum class
         [[codegen::map(openspace::globebrowsing::GlobeGeometryFeature::PointRenderMode)]]
         PointRenderMode
@@ -307,6 +312,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     , _preventUpdatesFromHeightMap(PreventHeightUpdateInfo, false)
     , _forceUpdateHeightData(ForceUpdateHeightDataInfo)
     , _globeNode(globe)
+    , _timeFrame(nullptr)
     , _centerLatLong(
         CentroidCoordinateInfo,
         glm::vec2(0.f),
@@ -331,6 +337,12 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     _geoJsonFile = p.file.string();
     _geoJsonFile.setReadOnly(true);
     addProperty(_geoJsonFile);
+
+    if (p.timeFrame.has_value()) {
+        ghoul::mm_unique_ptr<openspace::TimeFrame> mmTimeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
+        _timeFrame.reset(mmTimeFrame.release());
+        addPropertySubOwner(_timeFrame.get());
+    }
 
     _ignoreHeightsFromFile = p.ignoreHeights.value_or(_ignoreHeightsFromFile);
 
@@ -451,6 +463,12 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
 GeoJsonComponent::~GeoJsonComponent() {}
 
+bool GeoJsonComponent::isTimeFrameActive(const Time& time) const
+{
+    return !_timeFrame || _timeFrame->isActive(time);
+}
+
+
 bool GeoJsonComponent::enabled() const {
     return _enabled;
 }
@@ -510,8 +528,12 @@ void GeoJsonComponent::render(const RenderData& data) {
         return;
     }
 
+    if (!isTimeFrameActive(data.time)) {
+        return;
+    }
+
     // @TODO (2023-03-17, emmbr): Once the light source for the globe can be configured,
-    // this code should use the same light source as the globe
+    // this code should use the same light source as the globeF
     _lightsourceRenderData.updateBasedOnLightSources(data, _lightSources);
 
     // Change GL state:
@@ -562,8 +584,12 @@ void GeoJsonComponent::render(const RenderData& data) {
     global::renderEngine->openglStateCache().resetLineState();
 }
 
-void GeoJsonComponent::update() {
+void GeoJsonComponent::update(const UpdateData& data) {
     if (!_enabled || !isVisible()) {
+        return;
+    }
+
+    if (!isTimeFrameActive(data.time)) {
         return;
     }
 

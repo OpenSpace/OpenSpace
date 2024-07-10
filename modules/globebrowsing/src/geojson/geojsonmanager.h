@@ -34,7 +34,10 @@
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace { struct RenderData; }
+namespace openspace {
+    struct RenderData;
+    struct UpdateData;
+}
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {
@@ -57,7 +60,7 @@ public:
     //void addGeoJsonLayer(const std::string& filePath); // TODO: just add from file
     void deleteLayer(const std::string& layerIdentifier);
 
-    void update();
+    void update(const UpdateData& data);
     void render(const RenderData& data);
 
     //void onChange(std::function<void(Layer* l)> callback);

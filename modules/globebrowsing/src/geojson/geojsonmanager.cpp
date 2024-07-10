@@ -121,12 +121,12 @@ void GeoJsonManager::deleteLayer(const std::string& layerIdentifier) {
     LERROR("Could not find GeoJson layer " + layerIdentifier);
 }
 
-void GeoJsonManager::update() {
+void GeoJsonManager::update(const UpdateData& data) {
     ZoneScoped;
 
     for (std::unique_ptr<GeoJsonComponent>& obj : _geoJsonObjects) {
         if (obj->enabled()) {
-            obj->update();
+            obj->update(data);
         }
     }
 }

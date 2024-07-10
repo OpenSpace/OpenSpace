@@ -1002,7 +1002,7 @@ void RenderableGlobe::update(const UpdateData& data) {
     //                           // LayerManager hasn't updated yet :o
     _layerManagerDirty = true;
 
-    _geoJsonManager.update();
+    _geoJsonManager.update(data);
 }
 
 bool RenderableGlobe::renderedWithDesiredData() const {

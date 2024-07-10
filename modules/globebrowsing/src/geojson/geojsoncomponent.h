@@ -44,10 +44,14 @@
 #include <ghoul/glm.h>
 #include <optional>
 #include <vector>
+#include <memory>
 
 namespace openspace {
     struct RenderData;
+    struct UpdateData;
     class LightSource;
+    class TimeFrame;
+    class Time;
     namespace documentation { struct Documentation; }
     namespace rendering::helper { struct VertexXYZNormal; }
 } // namespace::openspace
@@ -68,6 +72,8 @@ public:
     GeoJsonComponent(const ghoul::Dictionary& dictionary, RenderableGlobe& globe);
     virtual ~GeoJsonComponent() override;
 
+    bool isTimeFrameActive(const Time& time) const;
+
     void initialize();
     void initializeGL();
     void deinitializeGL();
@@ -76,7 +82,7 @@ public:
     bool enabled() const;
 
     void render(const RenderData& data);
-    void update();
+    void update(const UpdateData& data);
 
     static documentation::Documentation Documentation();
 
@@ -136,6 +142,8 @@ private:
     properties::TriggerProperty _forceUpdateHeightData;
 
     RenderableGlobe& _globeNode;
+
+    std::unique_ptr<openspace::TimeFrame> _timeFrame;
 
     bool _ignoreHeightsFromFile = false;
 
