@@ -41,26 +41,24 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableCrawlingLine)]] Parameters {
-        // Denotes the SPICE name of the source of the renderable crawling line, for
-        // example, the spacecraft
+        // The SPICE name of the source of the crawling line. For example, the spacecraft.
         std::string source;
 
-        // Denotes the SPICE name of the target of the crawling line
+        // The SPICE name of the target of the crawling line.
         std::string target;
 
-        // Denotes the SPICE name of the instrument that is used to render the crawling
-        // line
+        // The SPICE name of the instrument that is used to render the crawling line.
         std::string instrument;
 
         struct Color {
-            // The color at the start of the line
+            // The color at the start of the line.
             glm::vec4 start [[codegen::color()]];
 
-            // The color at the end of the line
+            // The color at the end of the line.
             glm::vec4 end [[codegen::color()]];
         };
-        // Specifies the colors that are used for the crawling line. One value determines
-        // the starting color of the line, the second value is the color at the end
+        // The colors used for the crawling line, given as one color at the start of
+        // the line and one at the end.
         Color color;
     };
 #include "renderablecrawlingline_codegen.cpp"

@@ -38,7 +38,6 @@ asset.export("Trail", Trail)
 
 asset.meta = {
   Name = "Gonggong Trail",
-  Version = "1.0",
   Description = [[Trail of Gonggong]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

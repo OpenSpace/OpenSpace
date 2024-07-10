@@ -422,6 +422,7 @@ void OpenSpaceEngine::initialize() {
     }
 
     // Load the profile
+    LINFO(std::format("Loading profile '{}'", profile));
     *global::profile = Profile(profile);
 
     // Set up asset loader
@@ -1604,12 +1605,19 @@ void setCameraFromProfile(const Profile& p) {
                 // dependency in this core code. Eventually, goToGeo will be incorporated
                 // in the OpenSpace core and this code will change.
                 checkNodeExists(geo.anchor);
-                std::string geoScript = std::format("openspace.globebrowsing.goToGeo"
-                    "([[{}]], {}, {}", geo.anchor, geo.latitude, geo.longitude);
+                std::string geoScript;
                 if (geo.altitude.has_value()) {
-                    geoScript += std::format(", {}", geo.altitude.value());
+                    geoScript = std::format(
+                        "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {}, 0)",
+                        geo.anchor, geo.latitude, geo.longitude, *geo.altitude
+                    );
                 }
-                geoScript += ")";
+                else {
+                    geoScript = std::format(
+                        "openspace.globebrowsing.flyToGeo2([[{}]], {}, {}, false, 0)",
+                        geo.anchor, geo.latitude, geo.longitude
+                    );
+                }
                 global::scriptEngine->queueScript(
                     geoScript,
                     scripting::ScriptEngine::ShouldBeSynchronized::Yes,

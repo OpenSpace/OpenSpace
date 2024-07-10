@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "MOC_WA_Color_Utah",
   Name = "MOC WA Color [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("moc_wa_color_utah.wms"),
   Settings = {
     Gamma = 1.6,
@@ -32,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "MOC WA Color [Utah]",
-  Version = "1.1",
   Description = [[Main color map layer for Mars. This map is hosted on the OpenSpace
     server in Utah]],
   Author = "OpenSpace Team",

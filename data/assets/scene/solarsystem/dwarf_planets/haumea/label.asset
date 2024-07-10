@@ -42,7 +42,6 @@ asset.export("Label", Label)
 
 asset.meta = {
   Name = "Haumea Label",
-  Version = "1.0",
   Description = [[Label of Haumea]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

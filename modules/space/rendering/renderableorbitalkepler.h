@@ -75,7 +75,7 @@ private:
         /// Specifies the color of the point outline
         properties::Vec3Property outlineColor;
         /// Specifies how much if the point should be covered by the outline
-        properties::FloatProperty outlineWeight;
+        properties::FloatProperty outlineWidth;
     };
 
     void updateBuffers();
@@ -112,9 +112,10 @@ private:
     RenderableOrbitalKepler::Appearance _appearance;
 
     // Line cache
-    UniformCache(modelView, projection, trailFade, inGameTime, color, opacity)
+    UniformCache(modelView, projection, trailFadeExponent, colorFadeCutoffValue,
+        inGameTime, color, opacity)
         _uniformTrailCache;
-    
+
     // Point cache
     UniformCache(modelTransform, viewTransform, projectionTransform,
         cameraPositionWorld, cameraUpWorld,  inGameTime, color,
@@ -126,4 +127,3 @@ private:
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___RENDERABLEORBITALKEPLER___H__
-

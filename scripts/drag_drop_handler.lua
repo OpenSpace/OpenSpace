@@ -47,30 +47,28 @@ local is_geojson_file = function(extension)
   return extension == ".geojson"
 end
 
-local ReloadUIScript = [[ if openspace.hasProperty('Modules.CefWebGui.Reload') then openspace.setPropertyValue('Modules.CefWebGui.Reload', nil) end ]]
-
 if is_image_file(extension) then
   return [[
   openspace.addScreenSpaceRenderable({
     Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
     Type = "ScreenSpaceImageLocal",
     TexturePath = "]] .. filename .. [["
-  });]] .. ReloadUIScript
+  });]] 
 elseif is_video_file(extension) then
   return [[
     openspace.addScreenSpaceRenderable({
       Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
       Type = "ScreenSpaceVideo",
       Video = "]] .. filename .. [["
-    });]] .. ReloadUIScript
+    });]] 
 elseif is_asset_file(extension) then
   return [[
     if openspace.asset.isLoaded("]] .. filename .. [[") ~= true then
       openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
     end
-    openspace.asset.add("]] .. filename .. '");' .. ReloadUIScript
+    openspace.asset.add("]] .. filename .. '");' 
 elseif is_recording_file(extension) then
   return 'openspace.sessionRecording.startPlayback("' .. filename .. '")'
 elseif is_geojson_file(extension) then
-  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. filename .. '")'  .. ReloadUIScript
+  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. filename .. '")'  
 end

@@ -88,6 +88,13 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `ScreenSpaceRenderable` is used to display a screen space window showing the
+    // integrated World Wide Telescope view. The view will be dynamically updated when
+    // interacting with the view or with images in the SkyBrowser panel.
+    //
+    // A `ScreenSpaceSkyBrowser` should not be created from a `.asset` file, but is rather
+    // created from interacting with the SkyBrowser user interface panel. If created in
+    // an asset, it requires some extra scripting to work with the SkyBrowser feature.
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;
@@ -313,7 +320,7 @@ bool ScreenSpaceSkyBrowser::deinitializeGL() {
     return true;
 }
 
-void ScreenSpaceSkyBrowser::render(float blackoutFactor) {
+void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
     WwtCommunicator::render();
 
     if (!_isHidden) {
@@ -322,7 +329,7 @@ void ScreenSpaceSkyBrowser::render(float blackoutFactor) {
             translationMatrix() *
             localRotationMatrix() *
             scaleMatrix();
-        draw(mat, blackoutFactor);
+        draw(mat, renderData);
     }
 
     // Render the display copies
@@ -346,7 +353,7 @@ void ScreenSpaceSkyBrowser::render(float blackoutFactor) {
                 glm::translate(glm::mat4(1.f), coordinates) *
                 localRotation *
                 scaleMatrix();
-            draw(mat, blackoutFactor);
+            draw(mat, renderData);
         }
     }
 }

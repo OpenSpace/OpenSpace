@@ -41,8 +41,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square.",
+        "A path to an image file to use as a texture for the plane.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -50,9 +49,9 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
-        // If this value is set to 'true', the image for this plane will not be loaded at
+        // If this value is set to true, the image for this plane will not be loaded at
         // startup but rather when image is shown for the first time. Additionally, if the
-        // plane is hidden, the image will automatically be unloaded
+        // plane is hidden, the image will automatically be unloaded.
         std::optional<bool> lazyLoading;
     };
 #include "renderableplaneimagelocal_codegen.cpp"
@@ -72,8 +71,6 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
     , _texturePath(TextureInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    addProperty(_blendMode);
 
     _texturePath = absPath(p.texture).string();
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());

@@ -72,7 +72,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "6dF Galaxies",
-  Version = "3.0",
   Description = "Digital Universe asset for The Six-degree Field (6dF) Galaxy Survey",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

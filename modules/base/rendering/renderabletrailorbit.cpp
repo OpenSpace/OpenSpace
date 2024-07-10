@@ -107,31 +107,12 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
-       "RenderableType",
-       "RenderableType",
-       "This value specifies if the orbit should be rendered in the Background,"
-       "Opaque, Transparent, or Overlay rendering step. Default is Transparent.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
         // [[codegen::verbatim(PeriodInfo.description)]]
         double period;
 
         // [[codegen::verbatim(ResolutionInfo.description)]]
         int resolution;
-
-        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderableType {
-            Background,
-            Opaque,
-            PreDeferredTransparent,
-            PostDeferredTransparent,
-            Overlay
-        };
-
-        // [[codegen::verbatim(RenderableTypeInfo.description)]]
-        std::optional<RenderableType> renderableType;
     };
 #include "renderabletrailorbit_codegen.cpp"
 } // namespace
@@ -167,13 +148,6 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
 
     // We store the vertices with (excluding the wrapping) decending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
-
-    if (p.renderableType.has_value()) {
-        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderableType));
-    }
-    else {
-        setRenderBin(Renderable::RenderBin::Overlay);
-    }
 }
 
 void RenderableTrailOrbit::initializeGL() {

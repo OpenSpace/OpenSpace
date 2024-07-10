@@ -43,7 +43,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
         "Value",
         "Value",
-        "The value to use for interpolation. The max value is set from the number of "
+        "The value used for interpolation. The max value is set from the number of "
         "steps in the dataset, so a step of one corresponds to one step in the dataset "
         "and values in-between will be determined using interpolation.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -136,7 +136,7 @@ namespace {
     // the used texture will be decided based on the first N set of points.
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
         // The number of objects to read from the dataset. Every N:th datapoint will
-        // be interpreted as the same point, but at a different step in the interpolation
+        // be interpreted as the same point, but at a different step in the interpolation.
         int numberOfObjects [[codegen::greaterequal(1)]];
 
         struct Interpolation {
@@ -149,7 +149,7 @@ namespace {
             // [[codegen::verbatim(UseSplineInfo.description)]]
             std::optional<bool> useSplineInterpolation;
         };
-        // Initial settings for the interpolation
+        // Initial settings for the interpolation.
         std::optional<Interpolation> interpolation;
     };
 
@@ -492,8 +492,8 @@ void RenderableInterpolatedPoints::initializeBufferData() {
         LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
-    const int attibutesPerPoint = nAttributesPerPoint();
-    const unsigned int bufferSize = attibutesPerPoint * _nDataPoints * sizeof(float);
+    const int attibsPerPoint = nAttributesPerPoint();
+    const unsigned int bufferSize = attibsPerPoint * _nDataPoints * sizeof(float);
 
     // Allocate the memory for the buffer (we will want to upload the data quite often)
     glBindVertexArray(_vao);
@@ -502,31 +502,31 @@ void RenderableInterpolatedPoints::initializeBufferData() {
 
     int offset = 0;
 
-    offset = bufferVertexAttribute("in_position0", 3, attibutesPerPoint, offset);
-    offset = bufferVertexAttribute("in_position1", 3, attibutesPerPoint, offset);
+    offset = bufferVertexAttribute("in_position0", 3, attibsPerPoint, offset);
+    offset = bufferVertexAttribute("in_position1", 3, attibsPerPoint, offset);
 
     if (useSplineInterpolation()) {
-        offset = bufferVertexAttribute("in_position_before", 3, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_position_after", 3, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_position_before", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_position_after", 3, attibsPerPoint, offset);
     }
 
     if (hasColorData()) {
-        offset = bufferVertexAttribute("in_colorParameter0", 1, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_colorParameter1", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_colorParameter0", 1, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_colorParameter1", 1, attibsPerPoint, offset);
     }
 
     if (hasSizeData()) {
-        offset = bufferVertexAttribute("in_scalingParameter0", 1, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_scalingParameter1", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_scalingParameter0", 1, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_scalingParameter1", 1, attibsPerPoint, offset);
     }
 
     if (useOrientationData()) {
-        offset = bufferVertexAttribute("in_orientation0", 4, attibutesPerPoint, offset);
-        offset = bufferVertexAttribute("in_orientation1", 4, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientation0", 4, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientation1", 4, attibsPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {
-        offset = bufferVertexAttribute("in_textureLayer", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_textureLayer", 1, attibsPerPoint, offset);
     }
 
     glBindVertexArray(0);

@@ -31,8 +31,6 @@ local Mimas = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 207000, 197000, 191000 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "mimas.labels",
@@ -97,7 +95,6 @@ asset.export(MimasLabel)
 
 asset.meta = {
   Name = "Mimas",
-  Version = "1.1",
   Description = "Mimas globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

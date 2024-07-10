@@ -1,7 +1,7 @@
 openspace.space.documentation = {
   {
     Name = "tleToSpiceTranslation",
-    Arguments = { tlePath = "String" },
+    Arguments = {{ "tlePath", "String" }},
     Return = "{ Translation, SpiceKernel }",
     Documentation = [[
         Takes the provided TLE file, converts it into a SPICE kernel and returns a

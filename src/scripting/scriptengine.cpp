@@ -30,6 +30,7 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -47,7 +48,7 @@ namespace {
 
     struct [[codegen::Dictionary(Documentation)]] Parameters {
         std::string name;
-        std::map<std::string, std::string> arguments;
+        std::vector<std::vector<std::string>> arguments;
         std::optional<std::string> returnValue [[codegen::key("Return")]];
         std::optional<std::string> documentation;
     };
@@ -193,6 +194,14 @@ bool ScriptEngine::runScript(const std::string& script, const ScriptCallback& ca
     }
     catch (const ghoul::lua::LuaExecutionException& e) {
         LERRORC(e.component, e.message);
+        if (callback) {
+            callback(ghoul::Dictionary());
+        }
+        return false;
+    }
+    catch (const documentation::SpecificationError& e) {
+        LERRORC(e.component, e.message);
+        documentation::logError(e, e.component);
         if (callback) {
             callback(ghoul::Dictionary());
         }
@@ -347,11 +356,11 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 
                 LuaLibrary::Function func;
                 func.name = p.name;
-                for (const std::pair<const std::string, std::string>& pair : p.arguments)
+                for (const std::vector<std::string>& pair : p.arguments)
                 {
                     LuaLibrary::Function::Argument arg;
-                    arg.name = pair.first;
-                    arg.type = pair.second;
+                    arg.name = pair[0];
+                    arg.type = pair[1];
                     func.arguments.push_back(arg);
                 }
                 func.returnType = p.returnValue.value_or(func.returnType);
@@ -646,6 +655,7 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::FileExists,
             codegen::lua::ReadFile,
             codegen::lua::DirectoryExists,
+            codegen::lua::CreateDirectory,
             codegen::lua::WalkDirectory,
             codegen::lua::WalkDirectoryFiles,
             codegen::lua::WalkDirectoryFolders,

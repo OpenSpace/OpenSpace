@@ -13,35 +13,35 @@ local panleft = {
   Identifier = "os.examples.PanLeft",
   Name = "Example Audio Pan Left",
   Command = [[openspace.audio.set3dSourcePosition("Advanced_Example_Sound_1", { -1, 0, 0 })]],
-  GuiPath = "/Example/Audio"
+  GuiPath = "/Examples/Audio"
 }
 
 local pancenter = {
   Identifier = "os.examples.PanCenter",
   Name = "Example Audio Pan Center",
   Command = [[openspace.audio.set3dSourcePosition("Advanced_Example_Sound_1", { 0, 0, 0 })]],
-  GuiPath = "/Example/Audio"
+  GuiPath = "/Examples/Audio"
 }
 
 local panright = {
   Identifier = "os.examples.PanRight",
   Name = "Example Audio Pan Right",
   Command = [[openspace.audio.set3dSourcePosition("Advanced_Example_Sound_1", { 1, 0, 0 })]],
-  GuiPath = "/Example/Audio"
+  GuiPath = "/Examples/Audio"
 }
 
 local lowvolume = {
   Identifier = "os.examples.LowVolume",
   Name = "Example Audio Volume Low",
   Command = [[openspace.audio.setVolume("Advanced_Example_Sound_1", 0.15)]],
-  GuiPath = "/Example/Audio"
+  GuiPath = "/Examples/Audio"
 }
 
 local fullvolume = {
   Identifier = "os.examples.FullVolume",
   Name = "Example Audio Volume Full",
   Command = [[openspace.audio.setVolume("Advanced_Example_Sound_1", 1.0)]],
-  GuiPath = "/Example/Audio"
+  GuiPath = "/Examples/Audio"
 }
 
 asset.onInitialize(function()

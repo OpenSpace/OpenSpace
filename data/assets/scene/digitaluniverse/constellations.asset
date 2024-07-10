@@ -164,7 +164,6 @@ asset.export("ShowZodiacs", ShowZodiacs.Identifier)
 
 asset.meta = {
   Name = "Constellations",
-  Version = "1.3",
   Description = "Digital Universe asset for constellation lines",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

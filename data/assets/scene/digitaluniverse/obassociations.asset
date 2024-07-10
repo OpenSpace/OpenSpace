@@ -78,7 +78,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "OB Associations",
-  Version = "3.0",
   Description = "Digital Universe asset for OB Associations",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

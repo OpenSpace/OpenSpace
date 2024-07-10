@@ -12,7 +12,6 @@ asset.export("image", image)
 
 asset.meta = {
   Name = "Trifid Nebula",
-  Version = "1.0",
   Description = "Trifid Nebula Image",
   Author = "ESO/Gábor Tóth",
   URL = "https://www.eso.org/public/images/eso1504g/",

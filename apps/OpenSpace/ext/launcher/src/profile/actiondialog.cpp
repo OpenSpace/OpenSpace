@@ -224,7 +224,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
     _actionWidgets.isLocal->setEnabled(false);
     layout->addWidget(_actionWidgets.isLocal, 5, 2, 1, 2);
 
-    _actionWidgets.chooseScripts = new QPushButton("Choose Scripts");
+    _actionWidgets.chooseScripts = new QPushButton("Add from ScriptLog");
     _actionWidgets.chooseScripts->setToolTip(
         "Press this button to choose scripts for your action from the logs/scriptlog.txt"
     );
@@ -671,9 +671,9 @@ void ActionDialog::actionRejected() {
 }
 
 void ActionDialog::chooseScripts() {
-    ScriptlogDialog d(this);
+    ScriptLogDialog d(this);
     connect(
-        &d, &ScriptlogDialog::scriptsSelected,
+        &d, &ScriptLogDialog::scriptsSelected,
         this, &ActionDialog::appendScriptsToTextfield
     );
     d.exec();

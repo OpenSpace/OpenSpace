@@ -48,48 +48,48 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BillboardInfo = {
         "Billboard",
-        "Billboard mode",
-        "This value specifies whether the plane is a billboard, which means that it is "
-        "always facing the camera. If this is false, it can be oriented using other "
+        "Billboard Mode",
+        "Specifies whether the plane should be a billboard, which means that it is "
+        "always facing the camera. If it is not, it can be oriented using other "
         "transformations.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
         "MirrorBackside",
-        "Mirror backside of image plane",
-        "If this value is set to false, the image plane will not be mirrored when "
-        "looking from the backside. This is usually desirable when the image shows "
-        "data at a specific location, but not if it is displaying text for example.",
+        "Mirror Backside of Image Plane",
+        "If false, the image plane will not be mirrored when viewed from the backside. "
+        "This is usually desirable when the image shows data at a specific location, but "
+        "not if it is displaying text for example.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
-        "Size (in meters)",
-        "This value specifies the size of the plane in meters.",
+        "Size",
+        "The size of the plane in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AutoScaleInfo = {
         "AutoScale",
         "Auto Scale",
-        "When true, the plane will automatically adjust in size to match the aspect "
-        "ratio of the content. Otherwise it will remain in the given size."
+        "Decides whether the plane should automatically adjust in size to match the "
+        "aspect ratio of the content. Otherwise it will remain in the given size."
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to this plane.",
+        "Determines the blending mode that is applied to this plane.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
-        "If set, the plane's texture is multiplied with this color. Useful for applying "
-        "a color grayscale images.",
+        "An RGB color to multiply with the plane's texture. Useful for applying "
+        "a color to grayscale images.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -102,6 +102,9 @@ namespace {
 
         // [[codegen::verbatim(SizeInfo.description)]]
         std::variant<float, glm::vec2> size;
+
+        // [[codegen::verbatim(AutoScaleInfo.description)]]
+        std::optional<bool> autoScale;
 
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
@@ -133,6 +136,11 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
 
+    _opacity.onChange([this]() {
+        if (_blendMode == static_cast<int>(BlendMode::Normal)) {
+            setRenderBinFromOpacity();
+        }
+    });
     addProperty(Fadeable::_opacity);
 
     if (std::holds_alternative<float>(p.size)) {
@@ -141,9 +149,9 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     else {
         _size = std::get<glm::vec2>(p.size);
     }
-
-    _billboard = p.billboard.value_or(_billboard);
-    _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
+    _size.setExponent(15.f);
+    _size.onChange([this]() { _planeIsDirty = true; });
+    addProperty(_size);
 
     _blendMode.addOptions({
         { static_cast<int>(BlendMode::Normal), "Normal" },
@@ -161,27 +169,22 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         }
     });
 
-    _opacity.onChange([this]() {
-        if (_blendMode == static_cast<int>(BlendMode::Normal)) {
-            setRenderBinFromOpacity();
-        }
-    });
-
     if (p.blendMode.has_value()) {
         _blendMode = codegen::map<BlendMode>(*p.blendMode);
     }
+    addProperty(_blendMode);
+
+    _billboard = p.billboard.value_or(_billboard);
+    addProperty(_billboard);
+
+    _mirrorBackside = p.mirrorBackside.value_or(_mirrorBackside);
+    addProperty(_mirrorBackside);
+
+    _autoScale = p.autoScale.value_or(_autoScale);
+    addProperty(_autoScale);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
-
-    addProperty(_billboard);
-
-    _size.setExponent(15.f);
-    addProperty(_size);
-    _size.onChange([this](){ _planeIsDirty = true; });
-
-    addProperty(_autoScale);
-
     addProperty(_multiplyColor);
 
     setBoundingSphere(glm::compMax(_size.value()));

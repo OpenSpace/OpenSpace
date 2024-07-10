@@ -15,9 +15,7 @@ local Hydra = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 53000, 53000, 53000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 53000, 53000, 53000 }
   },
   Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "moon_minor_pluto" },
   GUI = {
@@ -97,7 +95,6 @@ asset.export(HydraTrail)
 
 asset.meta = {
   Name = "Hydra",
-  Version = "1.0",
   Description = "Globe and trail for Pluto's moon Hydra",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

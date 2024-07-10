@@ -81,8 +81,8 @@ namespace {
         "EnableFade",
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is "
-        "'true', the 'Fade' parameter determines the speed of fading. If this value is "
-        "'false', the entire trail is rendered at full opacity and color.",
+        "true, the 'Fade' parameter determines the speed of fading. If this value is "
+        "false, the entire trail is rendered at full opacity and color.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -91,7 +91,7 @@ namespace {
         "Line Length",
         "The extent of the rendered trail. A value of 0 will result in no trail and a "
         "value of 1 will result in a trail that covers the entire extent. The setting "
-        "only applies if 'EnableFade' is 'true'. If it is 'false', this setting has "
+        "only applies if 'EnableFade' is true. If it is false, this setting has "
         "no effect.",
         openspace::properties::Property::Visibility::User
     };
@@ -106,42 +106,39 @@ namespace {
         "will fade until completely transparent at the end of the trail. A value of 1 "
         "will result in a trail that starts fading immediately, becoming fully "
         "transparent by the end of the trail. This setting only applies if the "
-        "'EnableFade' value is 'true'. If it is 'false', this setting has no effect.",
+        "'EnableFade' value is true. If it is false, this setting has no effect.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored.",
+        "Specifies the line width of the trail lines, if the selected rendering method "
+        "includes lines. If the rendering mode is Points, this value is ignored.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point Size",
-        "This value specifies the base size of the points along the line if the selected "
-        "rendering method includes points. If the rendering mode is set the Lines, this "
-        "value is ignored. If a subsampling of the values is performed, the subsampled "
-        "values are half this size.",
+        "Specifies the base size of the points along the line, if the selected rendering "
+        "method includes points. If the rendering mode is Lines, this value is ignored. "
+        "If a subsampling of the values is performed, the subsampled values are half "
+        "this size.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering Mode",
-        "Determines how the trail should be rendered. If 'Lines' is "
-        "selected, only the line part is visible, if 'Points' is selected, only the "
-        "corresponding points (and subpoints) are shown. 'Lines+Points' shows both "
-        "parts.",
+        "Determines how the trail should be rendered. If 'Lines' is selected, only the "
+        "line part is visible, if 'Points' is selected, only the corresponding points "
+        "(and subpoints) are shown. 'Lines+Points' shows both parts.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
-        // This object is used to compute locations along the path. Any Translation
-        // object can be used here
+        // A translation used to compute locations along the path.
         ghoul::Dictionary translation
             [[codegen::reference("core_transform_translation")]];
 
@@ -189,14 +186,14 @@ RenderableTrail::Appearance::Appearance()
     })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
-    , lineLength(LineLengthInfo, 1.f, 0.f, 1.f)
-    , lineFadeAmount(LineFadeAmountInfo, 1.f, 0.f, 1.f)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
           RenderingModeInfo,
           properties::OptionProperty::DisplayType::Dropdown
     )
+    , lineLength(LineLengthInfo, 1.f, 0.f, 1.f)
+    , lineFadeAmount(LineFadeAmountInfo, 1.f, 0.f, 1.f)
 {
     renderingModes.addOptions({
         { RenderingModeLines, "Lines" },
@@ -480,7 +477,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
     //    global::renderEngine->openglStateCache().resetDepthState();
     //    return;
     //}
-    
+
     if (_useSplitRenderMode) {
         // Splits the trail up into three parts for more accurate rendering
         // of renderableTrailTrajectory trails
@@ -496,7 +493,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _useSplitRenderMode,
             _numberOfUniqueVertices
         );
-        
+
         const int floatingOffset = std::max(0, _primaryRenderInformation.count - 1);
         internalRender(
             renderLines,
@@ -524,7 +521,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             _numberOfUniqueVertices,
             offset
         );
-        
+
     }
     else {
         // Render the primary batch of vertices
@@ -553,9 +550,9 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
             );
         }
     }
-    
 
-    
+
+
 
     if (renderPoints) {
         glDisable(GL_PROGRAM_POINT_SIZE);

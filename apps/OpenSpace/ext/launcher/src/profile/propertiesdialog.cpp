@@ -376,9 +376,9 @@ void PropertiesDialog::keyPressEvent(QKeyEvent* evt) {
 }
 
 void PropertiesDialog::selectLineFromScriptLog() {
-    ScriptlogDialog d(this, "openspace.setPropertyValue");
+    ScriptLogDialog d = ScriptLogDialog(this, "openspace.setPropertyValue");
     connect(
-        &d, &ScriptlogDialog::scriptsSelected,
+        &d, &ScriptLogDialog::scriptsSelected,
         [this](const std::vector<std::string>& scripts) {
             for (const std::string& script : scripts) {
                 listItemAdded();

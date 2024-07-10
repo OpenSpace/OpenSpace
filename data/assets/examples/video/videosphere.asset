@@ -31,7 +31,6 @@ asset.export(Sphere)
 
 asset.meta = {
   Name = "Video Player on Sphere Example",
-  Version = "1.0",
   Description = "An example asset that shows how to include a video on a sphere.",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",

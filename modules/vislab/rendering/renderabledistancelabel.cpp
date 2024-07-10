@@ -40,16 +40,20 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NodeLineInfo = {
         "NodeLine",
         "Node Line",
-        "Property to track a nodeline. When tracking the label text will be updating the "
-        "distance from the nodeline start and end.",
+        "The identifier of a scene graph node with a RenderableNodeLine that this label "
+        "should track. The label text will be updating based on the distance from the "
+        "node line's start and end.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    // @TODO (2024-04-26, emmbr) The unit and custom unit descriptor are confusing and
+    // should be reimplemented. Why are we using an int value for the unit??
 
     constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
         "DistanceUnit",
         "Distance Unit",
-        "Property to define the unit in which the distance should be displayed. "
-        "Defaults to 'km' if not specified.",
+        "The unit in which the distance value should be displayed. Defaults to 'km' if "
+        "not specified.",
         openspace::properties::Property::Visibility::User
     };
 

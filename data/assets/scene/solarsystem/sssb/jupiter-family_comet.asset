@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Jupiter Family Comet)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_jupiter-family_comet",
-  Version = 3
+  Version = 4
 })
 
 
@@ -46,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Jupiter Family Comets",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     Jupiter-family group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

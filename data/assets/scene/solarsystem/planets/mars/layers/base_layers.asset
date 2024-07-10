@@ -13,7 +13,6 @@ asset.require("./overlays/size_reference", false)
 
 asset.meta = {
   Name = "Base Mars Layers",
-  Version = "1.0",
   Description = [[Base Mars layers are: Mars texture, CTX Blended, HiRISE,
     HiRISE Local Set, MDEM200M (3D), HiRISE Local Set DEM (3D), Tile Indicies,
     and Size Reference.

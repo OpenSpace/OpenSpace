@@ -72,7 +72,6 @@ end)
 
 asset.meta = {
   Name = "Joystick controller: SpaceMouse compact (wired)",
-  Version = "1.0",
   Description = "Joystick controller configuration for SpaceMouse compact (wired)",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

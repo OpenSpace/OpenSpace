@@ -103,10 +103,26 @@ namespace {
     return contents;
 }
 
-// Checks whether the provided file exists.
+// Checks whether the provided directory exists.
 [[codegen::luawrap]] bool directoryExists(std::filesystem::path file) {
     const bool e = std::filesystem::is_directory(absPath(std::move(file)));
     return e;
+}
+
+/**
+ * Creates a directory at the provided path, returns true if directory was newly created
+ * and false otherwise. If `recursive` flag is set to true, it will automatically create
+ * any missing parent folder as well
+ */
+[[codegen::luawrap]] bool createDirectory(std::filesystem::path path,
+    bool recursive = false)
+{
+    if (recursive) {
+        return std::filesystem::create_directories(std::move(path));
+    }
+    else {
+        return std::filesystem::create_directory(std::move(path));
+    }
 }
 
 std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,

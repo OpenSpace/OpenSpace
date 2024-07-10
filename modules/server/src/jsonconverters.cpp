@@ -58,7 +58,8 @@ void to_json(json& j, const PropertyOwner& p) {
         { "description", p.description() },
         { "properties", p.properties() },
         { "subowners", p.propertySubOwners() },
-        { "tag", p.tags() }
+        { "tag", p.tags() },
+        { "uri", p.uri() }
     };
 }
 

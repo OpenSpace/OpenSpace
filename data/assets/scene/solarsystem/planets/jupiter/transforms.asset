@@ -35,7 +35,6 @@ asset.export(JupiterBarycenter)
 
 asset.meta = {
   Name = "Jupiter Transforms",
-  Version = "1.1",
   Description = "Jupiter Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

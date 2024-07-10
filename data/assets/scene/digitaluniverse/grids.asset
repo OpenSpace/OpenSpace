@@ -696,7 +696,6 @@ asset.export(Plane20Gly)
 
 asset.meta = {
   Name = "Grids",
-  Version = "3.0",
   Description = [[Various grids for showing size reference. Included: 10,000 light year
     grid, 10 light year grid, 20 billion light year grid, 10 million light year grid,
     100 light year grid, 100 million light year grid, Ecliptic Coordinate Sphere

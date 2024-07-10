@@ -42,7 +42,6 @@ asset.export("Label", Label)
 
 asset.meta = {
   Name = "Sedna Label",
-  Version = "1.0",
   Description = [[Label of Sedna]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

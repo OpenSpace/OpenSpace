@@ -38,7 +38,6 @@ asset.export("Trail", Trail)
 
 asset.meta = {
   Name = "Orcus Trail",
-  Version = "1.0",
   Description = [[Trail of Orcus]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

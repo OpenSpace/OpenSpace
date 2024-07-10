@@ -1,0 +1,24 @@
+-- Basic
+-- This example shows a sphere that is covered with an image which is retrieved from
+-- a local file path. The image will be stretched over the entire sphere as an
+-- equirectangular projection.
+
+local Node = {
+  Identifier = "RenderableSphereImageLocal_Example",
+  Renderable = {
+    Type = "RenderableSphereImageLocal",
+    Texture = openspace.absPath("${DATA}/test2.jpg")
+  },
+  GUI = {
+    Name = "RenderableSphereImageLocal - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

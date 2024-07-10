@@ -139,7 +139,6 @@ asset.export(HAlpha)
 
 asset.meta = {
   Name = "Background Radiation",
-  Version = "2.1",
   Description = [[Various AllSky images for the Milky Way and observable Universe.
     Included: Wilkinson Microwave Anisotropy Probe (WMAP), Cosmic Background Explorer,
     Planck, and H Alpha <br><br> Data Reference: Planck/ESA and the Planck

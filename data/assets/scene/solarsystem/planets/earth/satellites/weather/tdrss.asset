@@ -47,7 +47,6 @@ asset.export(TrackingDataRelaySatellites)
 
 asset.meta = {
   Name = "Satellites Weather - Tracking and Data Relay Satellite System (TDRSS)",
-  Version = "1.0",
   Description = [[Satellites asset for Weather - Tracking and Data Relay Satellite
     System (TDRSS). Data from Celestrak]],
   Author = "OpenSpace Team",

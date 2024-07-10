@@ -42,14 +42,16 @@ namespace {
         "This value is the path to the Lua script that will be executed to compute the "
         "translation for this transformation. The script needs to define a function "
         "'translation' that takes the current simulation time in seconds past the J2000 "
-        "epoch as the first argument, the current wall time as milliseconds past the "
-        "J2000 epoch as the second argument and computes the translation.",
+        "epoch as the first argument, the simulation time in seconds past the J2000 "
+        "epoch of the last frame as the second argument, and the current wall time as "
+        "milliseconds past the J2000 epoch the third argument and computes the three "
+        "translation values returned as a table.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(LuaTranslation)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
-        std::string script;
+        std::filesystem::path script;
     };
 #include "luatranslation_codegen.cpp"
 } // namespace
@@ -60,25 +62,26 @@ documentation::Documentation LuaTranslation::Documentation() {
     return codegen::doc<Parameters>("base_transform_translation_lua");
 }
 
-LuaTranslation::LuaTranslation()
+LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary)
     : _luaScriptFile(ScriptInfo)
-    , _state(ghoul::lua::LuaState::IncludeStandardLibrary::No)
+    , _state(
+        ghoul::lua::LuaState::IncludeStandardLibrary::Yes,
+        ghoul::lua::LuaState::StrictState::No
+    )
 {
-    addProperty(_luaScriptFile);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _luaScriptFile.onChange([this]() {
         requireUpdate();
         _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
         _fileHandle->setCallback([this]() {
-             requireUpdate();
-             notifyObservers();
-         });
+            requireUpdate();
+            notifyObservers();
+        });
     });
-}
+    addProperty(_luaScriptFile);
 
-LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary) : LuaTranslation() {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    _luaScriptFile = absPath(p.script).string();
+    _luaScriptFile = p.script.string();
 }
 
 glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
@@ -110,7 +113,7 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
     // Execute the scaling function
-    const int success = lua_pcall(_state, 2, 3, 0);
+    const int success = lua_pcall(_state, 3, 1, 0);
     if (success != 0) {
         LERRORC(
             "LuaTranslation",
@@ -118,11 +121,8 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
         );
     }
 
-    glm::vec3 values;
-    for (int i = 1; i <= 3; i++) {
-        values[i - 1] = ghoul::lua::value<double>(_state, i);
-    }
-    return values;
+    const glm::dvec3 translation = ghoul::lua::value<glm::dvec3>(_state);
+    return translation;
 }
 
 } // namespace openspace

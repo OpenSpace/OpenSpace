@@ -155,7 +155,7 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
         const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
         const float interpolatedInvScaleExp = static_cast<float>(
             prevInvScaleExp * (1.0 - t) + nextInvScaleExp * t
-            );
+        );
         camera->setScaling(1.f / glm::exp(interpolatedInvScaleExp));
     }
 

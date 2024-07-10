@@ -47,7 +47,6 @@ asset.export(UVS)
 
 asset.meta = {
   Name = "UVS",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Ultraviolet Spectograph (UVS), which is measuring the
     composition, chemistry, structure, and variability of Europa's atmopshere. See

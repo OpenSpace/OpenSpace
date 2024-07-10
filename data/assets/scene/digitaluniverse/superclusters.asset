@@ -66,7 +66,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Galaxy Superclusters",
-  Version = "3.0",
   Description = "Digital Universe asset for Galaxy Superclusters",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_MDIS_NewYork",
   Name = "Messenger MDIS [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("messenger_mdis_newyork.wms"),
   Description = [[This May 2013 basemap is a combination of the following mosaics; (1)
   The 2013-05-10 version of the monochrome global mosaic, made from Applied Coherent
@@ -34,7 +35,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger MDIS [New York]",
-  Version = "1.0",
   Description = [[Messenger MDIS layer for Mercury globe. This map is hosted on the
     OpenSpace server in New York]],
   Author = "USGS",

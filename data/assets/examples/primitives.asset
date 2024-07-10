@@ -61,7 +61,6 @@ asset.export(Ellipse)
 
 asset.meta = {
   Name = "Primitives Example",
-  Version = "1.0",
   Description = [[Examples of different simple rendered primitives, such as circles
     and ellipses.]],
   Author = "OpenSpace Team",

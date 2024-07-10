@@ -14,6 +14,7 @@ local Layer = {
   Identifier = "Voyager_Global_Mosaic_Local",
   Name = "Voyager Global Mosaic [Local]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = texturesPath .. "evgos.vrt",
   BlendMode = "Color"
 }
@@ -32,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Voyager Global Mosaic",
-  Version = "1.1",
   Description = [[Europa Voyager - Galileo SSI Global Mosaic 500m v2. This global map
     base of Europa utilizes the best image quality and moderate resolution coverage
     supplied by the Galileo SSI (Solid-State Imaging) instrument and Voyager 1 and 2.

@@ -27,7 +27,6 @@ asset.export("ToggleOuterPlanetaryTrails", ToggleOuterPlanetaryTrails.Identifier
 
 asset.meta = {
   Name = "Rosetta actions",
-  Version = "1.0",
   Description = "Actions related to the Rosetta mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -45,91 +45,85 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
-        "AmountOfPoints",
+        "NumberOfPoints",
         "Points",
-        "This value determines the number of control points that is used to construct "
-        "the shadow geometry. The higher this number, the more detailed the shadow is, "
-        "but it will have a negative impact on the performance. Also note that rendering "
-        "errors will occur if this value is even.",
+        "The number of control points used for constructing the shadow geometry. The "
+        "higher this number, the more detailed the shadow is. However, it will have a "
+        "negative impact on the performance. Also note that rendering errors will occur "
+        "if this value is an even number.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
         "Shadow Length",
-        "This value determines the length of the shadow that is cast by the target "
-        "object. The total distance of the shadow is equal to the distance from the "
-        "target to the Sun multiplied with this value.",
+        "A factor that controls the length of the rendered shadow cone. The total length "
+        "will be the distance from the shadower to the shadowee multiplied by this "
+        "value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowUmbralShadowInfo = {
         "ShowUmbralShadow",
         "Show Umbral Shadow",
-        "If this is enabled, the umbral portioon of the shadow is shown.",
+        "Decides whether the umbral portion of the shadow should be shown.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UmbralShadowColorInfo = {
         "UmbralShadowColor",
         "Umbral Shadow Color",
-        "This value determines the color that is used for the shadow cylinder of the "
-        "umbral shadow.",
+        "The color for the shadow cylinder that represents the umbral shadow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowPenumbralShadowInfo = {
         "ShowPenumbralShadow",
         "Show Penumbral Shadow",
-        "If this is enabled, the penumbral portioon of the shadow is shown.",
+        "Decides whether the penumbral portion of the shadow should be shown.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PenumbralShadowColorInfo = {
         "PenumbralShadowColor",
         "Penumbral Shadow Color",
-        "This value determines the color that is used for the shadow cylinder of the "
-        "penumbral shadow.",
+        "The color for the shadow cylinder that represents the penumbral shadow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light Source",
-        "This value determines the SPICE name of the object that is used as the "
-        "illuminator for computing the shadow cylinder.",
+        "The SPICE name of the object that is used as the illuminator when computing the "
+        "shadow cylinder.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceFrameInfo = {
         "LightSourceFrame",
         "Light Source Frame",
-        "This value is the SPICE name of the body-fixed reference frame for the light "
-        "source.",
+        "The SPICE name of the body-fixed reference frame for the light source.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowerInfo = {
         "Shadower",
         "Shadower",
-        "This value specifies the SPICE name of the object that is casting the shadow on "
-        "the shadowee.",
+        "The SPICE name of the object that is casting the shadow on the shadowee.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowerFrameInfo = {
         "ShadowerFrame",
         "Shadower Frame",
-        "This value is the SPICE name of the body-fixed reference frame for the "
-        "shadower.",
+        "The SPICE name of the body-fixed reference frame for the shadower.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadoweeInfo = {
         "Shadowee",
         "Shadowee",
-        "This value is the SPICE name of object that is receiving the shadow from the "
-        "shadower.",
+        "The SPICE name of object that is receiving the shadow from the shadower.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

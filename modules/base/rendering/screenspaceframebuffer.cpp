@@ -48,6 +48,7 @@ documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
     return {
         "ScreenSpaceFramebuffer",
         "base_screenspace_framebuffer",
+        "",
         {}
     };
 }
@@ -104,7 +105,7 @@ bool ScreenSpaceFramebuffer::deinitializeGL() {
     return true;
 }
 
-void ScreenSpaceFramebuffer::render(float blackoutFactor) {
+void ScreenSpaceFramebuffer::render(const RenderData& renderData) {
     const glm::vec2& resolution = global::windowDelegate->currentDrawBufferResolution();
     const glm::vec4& size = _size.value();
 
@@ -144,7 +145,7 @@ void ScreenSpaceFramebuffer::render(float blackoutFactor) {
             glm::vec3((1.f / xratio), (1.f / yratio), 1.f)
         );
         const glm::mat4 modelTransform = globalRotation*translation*localRotation*scale;
-        draw(modelTransform, blackoutFactor);
+        draw(modelTransform, renderData);
     }
 }
 
@@ -183,7 +184,7 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
     _objectSize = glm::ivec2(resolution);
 
     _texture->uploadTexture();
-    _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     ghoul::opengl::FramebufferObject::deactivate();

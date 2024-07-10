@@ -42,6 +42,7 @@ Scene* sceneGraph();
 SceneGraphNode* sceneGraphNode(const std::string& name);
 const Renderable* renderable(const std::string& name);
 properties::Property* property(const std::string& uri);
+properties::PropertyOwner* propertyOwner(const std::string& uri);
 std::vector<properties::Property*> allProperties();
 
 } // namespace openspace

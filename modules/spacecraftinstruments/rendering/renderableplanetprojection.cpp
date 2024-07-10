@@ -138,7 +138,7 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderablePlanetProjection)]] Parameters {
-        // Contains information about projecting onto this planet
+        // Contains information about projecting onto this planet.
         ghoul::Dictionary projection
             [[codegen::reference("spacecraftinstruments_projectioncomponent")]];
 

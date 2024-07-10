@@ -7,7 +7,6 @@ asset.require("./fov")
 
 asset.meta = {
   Name = "BepiColombo",
-  Version = "1.0",
   Description =
     "This asset includes all of the other assets for the BepiColombo mission.",
   Author = "OpenSpace Team",

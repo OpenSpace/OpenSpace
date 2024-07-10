@@ -24,7 +24,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Earth Reference Labels",
-  Version = "1.0",
   Description = "Reference Labels layer for Earth globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

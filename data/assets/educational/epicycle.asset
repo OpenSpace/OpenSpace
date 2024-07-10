@@ -70,7 +70,6 @@ asset.export("FadeoutCyclesAction", FadeoutCyclesAction.Identifier)
 
 asset.meta = {
   Name = "Epicycle",
-  Version = "1.0",
   Description = [[This asset includes the trails of the planets from earth.
     In addition, it provides some actions for manipulating them.]],
   Author = "OpenSpace Team",

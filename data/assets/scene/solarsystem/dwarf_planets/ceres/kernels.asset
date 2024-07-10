@@ -40,7 +40,6 @@ asset.export("Frame", Frame)
 
 asset.meta = {
   Name = "Ceres Spice Kernels",
-  Version = "1.0",
   Description = "SPICE kernels for Ceres",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

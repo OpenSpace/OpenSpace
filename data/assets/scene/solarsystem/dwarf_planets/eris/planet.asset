@@ -54,7 +54,6 @@ asset.export("Planet", Planet)
 
 asset.meta = {
   Name = "Eris Globe",
-  Version = "1.0",
   Description = [[Globe of Eris]],
   Author = "OpenSpace Team",
   URL = "https://solarsystem.nasa.gov/planets/dwarf-planets/haumea/in-depth/",

@@ -25,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Moon Size Reference",
-  Version = "1.0",
   Description = "Size reference layer for Moon globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

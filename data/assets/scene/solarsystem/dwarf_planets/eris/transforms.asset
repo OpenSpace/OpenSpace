@@ -44,7 +44,6 @@ asset.export("Position", Position)
 
 asset.meta = {
   Name = "Eris Position (Keplerian)",
-  Version = "1.0",
   Description = [[Position of Eris. KeplerTranslation Version Data from
     JPL Horizons]],
   Author = "OpenSpace Team",

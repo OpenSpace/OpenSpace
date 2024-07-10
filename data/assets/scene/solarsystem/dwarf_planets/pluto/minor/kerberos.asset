@@ -15,9 +15,7 @@ local Kerberos = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 10000, 10000, 10000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 10000, 10000, 10000 }
   },
   Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "moon_minor_pluto" },
   GUI = {
@@ -98,7 +96,6 @@ asset.export(KerberosLabel)
 
 asset.meta = {
   Name = "Kerberos",
-  Version = "1.0",
   Description = "Globe and trail for Pluto's moon Kerberos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

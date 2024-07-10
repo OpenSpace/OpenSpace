@@ -4,7 +4,6 @@ asset.require("./layers/colorlayers/uranus_texture", true)
 
 asset.meta = {
   Name = "Default Uranus Layers",
-  Version = "1.0",
   Description = "Default Uranus layers are: Uranus texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -47,7 +47,6 @@ asset.export(SarSatellites)
 
 asset.meta = {
   Name = "Satellites Weather - Search & Rescue (SARSAT)",
-  Version = "1.0",
   Description = [[Satellites asset for Weather - Search & Rescue (SARSAT). Data from
     Celestrak]],
   Author = "OpenSpace Team",

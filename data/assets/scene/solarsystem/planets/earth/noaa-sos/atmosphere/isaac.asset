@@ -31,6 +31,7 @@ local LayerRadar = {
   Identifier = Identifier .. "-radar",
   Name = Name .. " (Radar)",
   Type = "TemporalTileProvider",
+  ZIndex = 100,
   Mode = "Folder",
   Folder = {
     Folder = radarDestination,
@@ -45,6 +46,7 @@ local LayerSat = {
   Identifier = Identifier .. "-sat",
   Name = Name .. " (Sat)",
   Type = "TemporalTileProvider",
+  ZIndex = 100,
   Mode = "Folder",
   Folder = {
     Folder = satDestination,
@@ -73,7 +75,6 @@ asset.export(LayerSat)
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

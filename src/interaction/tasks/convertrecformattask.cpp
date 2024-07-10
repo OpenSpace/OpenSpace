@@ -39,17 +39,6 @@ namespace {
 
     constexpr std::string_view KeyInFilePath = "InputFilePath";
     constexpr std::string_view KeyOutFilePath = "OutputFilePath";
-
-    std::string addFileSuffix(const std::string& filePath, const std::string& suffix) {
-        const size_t lastdot = filePath.find_last_of('.');
-        const std::string extension = filePath.substr(0, lastdot);
-        if (lastdot == std::string::npos) {
-            return filePath + suffix;
-        }
-        else {
-            return filePath.substr(0, lastdot) + suffix + extension;
-        }
-    }
 } // namespace
 
 namespace openspace::interaction {

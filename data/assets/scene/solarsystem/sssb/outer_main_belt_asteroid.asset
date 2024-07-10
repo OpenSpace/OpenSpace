@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Outer Main Belt Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_outer_main_belt_asteroid",
-  Version = 3
+  Version = 4
 })
 
 
@@ -45,7 +45,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Outer Main Asteroid Belt",
-  Version = "1.1",
     Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
       Outer Main Asteroid Belt group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

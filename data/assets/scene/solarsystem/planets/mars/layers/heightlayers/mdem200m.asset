@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "MDEM200M",
   Name = "HRSC MOLA Blended DEM Global 200m v2",
   Enabled = asset.enabled,
+  ZIndex = 20,
   FilePath = asset.resource("mdem200m.wms"),
   TilePixelSize = 129,
   Description = [[Blend of data derived from the Mars Orbiter Laser Altimeter
@@ -32,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Mars HRSC MOLA Blended DEM Global 200m v2",
-  Version = "1.1",
   Description = "ESRI Hosted ars HRSC MOLA Blended DEM",
   Author = "esri_astro",
   URL = "https://www.arcgis.com/home/item.html?id=225adad86379474ebc3d51a74573c99b",

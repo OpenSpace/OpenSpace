@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "LAMO_Sweden",
   Name = "LAMO [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("lamo.wms")
 }
 
@@ -23,7 +24,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "LAMO [Sweden]",
-  Version = "1.0",
   Description = [[]],
   Author = "",
   URL = "",

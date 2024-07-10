@@ -62,30 +62,30 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the arrow.",
+        "The RGB color for the arrow.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value specifies the number of segments that the shapes for the arrow are "
-        "separated in. A higher number leads to a higher resolution.",
+        "The number of segments that the shapes of the arrow are divided into. A higher "
+        "number leads to a higher resolution and smoother shape.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InvertInfo = {
         "Invert",
         "Invert Direction",
-        "If set to true, the arrow direction is inverted so that it points to the "
-        "start node instead of the end node",
+        "If true, the arrow direction is inverted so that it points to the start node "
+        "instead of the end node.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ArrowHeadSizeInfo = {
         "ArrowHeadSize",
         "Arrow Head Size",
-        "This size of the arrow head, given in relative value of the entire length of "
+        "The length of the arrow head, given in relative value of the entire length of "
         "the arrow. For example, 0.1 makes the arrow head length be 10% of the full "
         "arrow length.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -112,8 +112,9 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RelativeOffsetInfo = {
         "UseRelativeOffset",
         "Use Relative Offset Distance",
-        "Decide whether to use relative distances (in units of start node bounding "
-        "sphere) for the offset distance. If false, meters is used.",
+        "Decides whether to use relative distances for the offset distance. This means "
+        "that the offset distance will be computed as the provided 'Offset' value times "
+        "the bounding sphere of the start node. If false, meters is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -129,15 +130,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RelativeLengthInfo = {
         "UseRelativeLength",
         "Use Relative Length",
-        "Decide whether to use relative size (in units of start node bounding "
-        "sphere) for the length of the arrow. If false, meters is used.",
+        "Decides whether to use relative size for the length of the arrow. This means "
+        "that the arrow length will be computed as the provided 'Length' value times "
+        "the bounding sphere of the start node. If false, meters is used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
         "Width",
         "Width",
-        "This value specifies the width of the arrow shape.",
+        "The width of the arrow, in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -165,16 +167,24 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShadingEnabledInfo = {
         "PerformShading",
         "Perform Shading",
-        "This value determines whether shading should be applied to the arrow model.",
+        "Determines whether shading should be applied to the arrow model.",
         openspace::properties::Property::Visibility::User
     };
 
+    // A RenderableNodeArrow can be used to create a 3D arrow pointing in the direction
+    // of one scene graph node to another.
+    //
+    // The arrow will be placed at the `StartNode` at a distance of the provided
+    // `Offset` value. Per default, the `Length` and `Offset` of the arrow is specified
+    // in meters, but they may also be specified as a multiplier of the bounding sphere
+    // of the `StartNode`. The look of the arrow can be customized to change the width
+    // and length of both the arrow body and head.
     struct [[codegen::Dictionary(RenderableNodeArrow)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
-        std::string startNode [[codegen::notempty]];
+        std::string startNode [[codegen::identifier()]];
 
         // [[codegen::verbatim(EndNodeInfo.description)]]
-        std::string endNode [[codegen::notempty]];
+        std::string endNode [[codegen::identifier()]];
 
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -454,6 +464,8 @@ void RenderableNodeArrow::updateShapeTransforms(const RenderData& data) {
     // Rotation to point at the end node
     const glm::quat rotQuat = glm::rotation(glm::dvec3(0.0, 0.0, 1.0), arrowDirection);
     _pointDirectionRotation = glm::dmat4(glm::toMat4(rotQuat));
+
+    setBoundingSphere(length + offset);
 }
 
 void RenderableNodeArrow::render(const RenderData& data, RendererTasks&) {

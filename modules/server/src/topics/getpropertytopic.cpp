@@ -103,6 +103,10 @@ json GetPropertyTopic::propertyFromKey(const std::string& key) {
     if (prop) {
         return wrappedPayload(prop);
     }
+    properties::PropertyOwner* node = propertyOwner(key);
+    if (node) {
+        return wrappedPayload(node);
+    }
 
     return wrappedError(std::format("Property '{}' not found", key), 404);
 }

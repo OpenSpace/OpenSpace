@@ -13,8 +13,8 @@ local RenderableNodeLineExample = {
     LineWidth = 2
   },
   GUI = {
-    Name = "RenderableNodeLine Example",
-    Path = "/Example",
+    Name = "RenderableNodeLine - Basic",
+    Path = "/Examples",
     Description = [[Draws a line between two nodes in the scene.]]
   }
 }
@@ -34,7 +34,6 @@ asset.export(RenderableNodeLineExample)
 
 asset.meta = {
   Name = "RenderableNodeLine Example asset",
-  Version = "1.0",
   Description = [[Example of a RenderableNodeLine, that can be used to draw an line
     between two scene graph nodes.]],
   Author = "OpenSpace Team",

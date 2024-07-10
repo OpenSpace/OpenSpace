@@ -19,7 +19,6 @@ asset.export(Item)
 
 asset.meta = {
   Name = "Dashboard - Simulation Increment",
-  Version = "1.0",
   Description = [[This asset provides a dashboard item that shows the simulation
     increment, meaning how fast the in-game time progresses relative to the wall-clock]],
   Author = "OpenSpace Team",

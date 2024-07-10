@@ -31,8 +31,6 @@ local Venus = {
     Type = "RenderableGlobe",
     --Radii = { 6051900.0, 6051900.0, 6051800.0 },
     Radii = { 6051900.0, 6051900.0, 6051900.0 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "venus.labels",
@@ -96,10 +94,9 @@ asset.export(VenusLabel)
 
 
 asset.meta = {
-    Name = "Venus",
-    Version = "1.1",
-    Description = "Venus globe with labels, and main planet label",
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Venus",
+  Description = "Venus globe with labels, and main planet label",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

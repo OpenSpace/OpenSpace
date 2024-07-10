@@ -70,7 +70,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "HII Regions",
-  Version = "2.0",
   Description = "Digital Universe asset for HII Regions",
   Author = "Carter Emmart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

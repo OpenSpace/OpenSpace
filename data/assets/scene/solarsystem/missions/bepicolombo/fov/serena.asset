@@ -39,7 +39,6 @@ end)
 
 asset.meta = {
   Name = "Serena",
-  Version = "1.0",
   Description = [[
     The Search for Exospheric Refilling and Emitted Natural Abundances (SERENA) is a
     single instrument composed by 4 units devoted to the detection of neutral and ionized

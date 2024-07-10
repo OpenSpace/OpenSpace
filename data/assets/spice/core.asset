@@ -182,7 +182,6 @@ asset.export("Frame", Frame)
 
 asset.meta = {
   Name = "SPICE Base",
-  Version = "1.1",
   Description = [[This asset contains the spice base kernels necessary for any space
     application. Includes positions for Solar System bodies from 1850 to 2150]],
   Author = "OpenSpace Team",

@@ -33,7 +33,6 @@ asset.export(HH212Image)
 
 asset.meta = {
   Name = "HH 212 Image",
-  Version = "1.0",
   Description = "Screenspace image of HH 212",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

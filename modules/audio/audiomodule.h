@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___AUDIOMODULE___H__
-#define __OPENSPACE_MODULE_SPACE___AUDIOMODULE___H__
+#ifndef __OPENSPACE_MODULE_AUDIO___AUDIOMODULE___H__
+#define __OPENSPACE_MODULE_AUDIO___AUDIOMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -312,4 +312,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___AUDIOMODULE___H__
+#endif // __OPENSPACE_MODULE_AUDIO___AUDIOMODULE___H__

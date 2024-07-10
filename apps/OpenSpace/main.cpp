@@ -992,6 +992,9 @@ void setSgctDelegateFunctions() {
 
         return mousePosition;
     };
+    sgctDelegate.setStatisticsGraphScale = [](float scale) {
+        sgct::Engine::instance().setStatsGraphScale(scale);
+    };
 }
 
 std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,

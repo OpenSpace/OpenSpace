@@ -6,12 +6,13 @@ local Layer = {
   Identifier = "VIIRS_SNPP_Temporal",
   Name = "VIIRS SNPP (Temporal)",
   Enabled = asset.enabled,
+  ZIndex = 30,
   Type = "TemporalTileProvider",
   Mode = "Prototyped",
   Prototyped = {
     Time = {
       Start = "2015-11-24",
-      End = "Yesterday"
+      End = "Today"
     },
     TemporalResolution = "1d",
     TimeFormat = "YYYY-MM-DD",
@@ -40,7 +41,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "VIIRS SNPP (Temporal)",
-  Version = "1.1",
   Description = "This layer has the best daily Earth Image",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL =

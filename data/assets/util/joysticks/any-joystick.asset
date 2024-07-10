@@ -79,7 +79,6 @@ end)
 
 asset.meta = {
   Name = "Joystick controller: Any",
-  Version = "1.0",
   Description = [[
     Checks the name on the connected controllers and adds the cooresponding joystick asset
   ]],

@@ -24,10 +24,10 @@
 
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
 
-#ifdef OPENSPACE_MODULE_SPACE_ENABLED
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
-#endif // OPENSPACE_MODULE_SPACE_ENABLED
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
@@ -52,7 +52,7 @@ GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
 {}
 
 void GuiGlobeBrowsingComponent::render() {
-#ifdef OPENSPACE_MODULE_SPACE_ENABLED
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     using UrlInfo = GlobeBrowsingModule::UrlInfo;
     using Capabilities = GlobeBrowsingModule::Capabilities;
@@ -371,9 +371,9 @@ void GuiGlobeBrowsingComponent::render() {
         ImGui::PopID();
     }
     ImGui::Columns(1);
-#else // ^^^ OPENSPACE_MODULE_SPACE_ENABLED ||| !OPENSPACE_MODULE_SPACE_ENABLED vvv
+#else
     ImGui::Text("%s", "OpenSpace compiled without GlobeBrowsing support");
-#endif // OPENSPACE_MODULE_SPACE_ENABLED
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 }
 
 } // namespace openspace::gui

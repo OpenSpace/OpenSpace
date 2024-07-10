@@ -6,7 +6,6 @@ asset.require("./layers/newyork_layers", false)
 
 asset.meta = {
   Name = "Default Moon layers",
-  Version = "1.1",
   Description = [[Default Moon layers are: WAC, Clem Uvvis, Uvvis Hybrid, Kaguya,
     LRO LOLA Color Shaded Relief 388m v4, Lola Shade, and Lola DEM (3D).
 

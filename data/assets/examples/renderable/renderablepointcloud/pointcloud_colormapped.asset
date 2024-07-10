@@ -21,8 +21,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Color Mapped",
-    Path = "/Examples/RenderablePointCloud"
+    Name = "RenderablePointCloud - Color Mapped",
+    Path = "/Examples"
   }
 }
 

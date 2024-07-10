@@ -46,7 +46,6 @@ asset.export(DebrisCosmos)
 
 asset.meta = {
   Name = "Satellites Debris - Kosmos 2251 Debris",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Kosmos 2251 Debris. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

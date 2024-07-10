@@ -25,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Earth Size Reference",
-  Version = "1.0",
   Description = "Size reference layer for Earth globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

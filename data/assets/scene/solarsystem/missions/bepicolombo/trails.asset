@@ -65,7 +65,6 @@ asset.export(BepiColomboTrailMercury)
 
 asset.meta = {
   Name = "BepiColombo Trails",
-  Version = "1.0",
   Description = "This asset contains the trails for the BepiColombo spacecraft relative to the Sun and Mercury.",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
