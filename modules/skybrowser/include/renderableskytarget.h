@@ -44,8 +44,6 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void bindTexture() override;
 
-    glm::ivec3 borderColor() const;
-
     void setRatio(float ratio);
     void setColor(glm::ivec3 color);
     void setVerticalFov(double fov);

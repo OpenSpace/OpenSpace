@@ -167,10 +167,6 @@ void RenderableSkyTarget::setColor(glm::ivec3 color) {
     _borderColor = std::move(color);
 }
 
-glm::ivec3 RenderableSkyTarget::borderColor() const {
-    return _borderColor;
-}
-
 glm::dvec3 RenderableSkyTarget::rightVector() const {
     const double scaling =
         (_verticalFov / 70.0) * static_cast<double>(glm::compMax(_size.value()));
