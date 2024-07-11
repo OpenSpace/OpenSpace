@@ -22,6 +22,12 @@ By default, all tests always start paused, MRF caching is enabled, and the user 
 
     Script Equivalent: `openspace.action.triggerAction`
 
+  - `asset`: Loads a given asset file. The provided value must be a string that is the path to the asset file to be loaded.
+
+    Example: `{ "type": "asset", "value": "C:/path/to/file.asset" }`
+
+    Script Equivalent: `openspace.asset.add`
+
   - `deltatime`: Instantly changes the delta time in OpenSpace to the provided value. The provided value must be a number that is the delta time in seconds per real-time second that the engine should be set to.
 
     Example: `{ "type": "deltatime", "value": 10 }`
