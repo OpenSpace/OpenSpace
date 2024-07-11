@@ -172,10 +172,6 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     addProperty(_isPointingSpacecraft);
     addProperty(_updateDuringTargetAnimation);
 
-    _textureQuality.onChange([this]() {
-        _wwtCommunicator.updateBrowserDimensions();
-    });
-
     if (global::windowDelegate->isMaster()) {
         _wwtBorderColor = randomBorderColor();
     }
