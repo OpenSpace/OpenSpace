@@ -139,7 +139,7 @@ void TargetBrowserPair::initialize() {
     _targetRenderable->setColor(_browser->borderColor());
     const glm::vec2 dim = _browser->screenSpaceDimensions();
     _targetRenderable->setRatio(dim.x / dim.y);
-    _browser->updateBorderColor();
+    _browser->setBorderColor(_browser->borderColor());
     _browser->hideChromeInterface();
     _browser->setIsInitialized(true);
 }

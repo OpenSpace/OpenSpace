@@ -49,48 +49,50 @@ public:
     void update() override;
     float opacity() const noexcept override;
 
-    double verticalFov() const;
-    glm::ivec3 borderColor() const;
-    glm::dvec2 equatorialAim() const;
-    glm::dvec2 fieldsOfView() const;
-    float browserRatio() const;
+    // Images in WorldWide Telescope
+    void selectImage(const std::string& imageUrl);
+    void removeSelectedImage(const std::string& imageUrl);
+    void setImageOpacity(const std::string& imageUrl, float opacity);
+    void addImageLayerToWwt(std::string imageUrl);
+    void setImageOrder(const std::string& imageUrl, int order);
     std::vector<std::string> selectedImages() const;
     std::vector<double> opacities() const;
-    double borderRadius() const;
 
-    void selectImage(const std::string& imageUrl);
+    // Aim and browser ratio
     void setVerticalFov(double vfov);
+    double verticalFov() const;
     void setEquatorialAim(glm::dvec2 equatorial);
-    void setImageOpacity(const std::string& imageUrl, float opacity);
+    glm::dvec2 equatorialAim() const;
     void setTargetRoll(double roll);
-    void setBorderColor(glm::ivec3 color);
-    void removeSelectedImage(const std::string& imageUrl);
-
-    void hideChromeInterface();
-    void addImageLayerToWwt(std::string imageUrl);
-    void reload();
-    void setBorderRadius(double radius);
     void setRatio(float ratio);
+    float browserRatio() const;
+    glm::dvec2 fieldsOfView() const;
 
-    bool isImageCollectionLoaded() const;
+    // Look of browser window
+    glm::ivec3 borderColor() const;
+    double borderRadius() const;
+    void hideChromeInterface();
+    void setBorderColor(glm::ivec3 color);
+    void setBorderRadius(double radius);
 
-    void setImageCollectionIsLoaded(bool isLoaded);
-    void setImageOrder(const std::string& imageUrl, int order);
-    void loadImageCollection(const std::string& collection);
+    void reload();
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
-    bool isInitialized() const;
-    bool isPointingSpacecraft() const;
     bool shouldUpdateWhileTargetAnimates() const;
 
+    // Spacecraft pointing 
+    void setPointSpaceCraft(bool shouldPoint);
+    bool isPointingSpacecraft() const;
+
+    // Initialization process
+    bool isInitialized() const;
+    bool isImageCollectionLoaded() const;
+    void setImageCollectionIsLoaded(bool isLoaded);
+    void loadImageCollection(const std::string& collection);
     double setVerticalFovWithScroll(float scroll);
     void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
-    void setPointSpaceCraft(bool shouldPoint);
 
-    void updateTextureResolution();
-    void updateBorderColor();
-
-    // Copies rendered
+    // Display copies
     void addDisplayCopy(const glm::vec3& raePosition, int nCopies);
     void removeDisplayCopy();
     std::vector<std::pair<std::string, glm::dvec3>> displayCopies() const;
@@ -99,10 +101,17 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    SelectedImageDeque::iterator findSelectedImage(const std::string& imageUrl);
+    void updateTextureResolution();
 
+    SelectedImageDeque::iterator findSelectedImage(const std::string& imageUrl);
+    SelectedImageDeque _selectedImages;
+
+    int _borderRadiusTimer = -1;
     static constexpr int RadiusTimeOut = 25;
+    double _borderRadius = 0.0;
+
     properties::FloatProperty _textureQuality;
+    float _lastTextureQuality = 1.f;
     properties::BoolProperty _isHidden;
     properties::BoolProperty _isPointingSpacecraft;
     properties::BoolProperty _updateDuringTargetAnimation;
@@ -110,23 +119,18 @@ private:
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 
-    bool _borderColorIsDirty = false;
-    bool _equatorialAimIsDirty = false;
-    bool _isImageCollectionLoaded = false;
-    double _borderRadius = 0.0;
     glm::ivec3 _wwtBorderColor = glm::ivec3(70);
     glm::dvec2 _equatorialAim = glm::dvec2(0.0);
     double _targetRoll = 0.0;
-    SelectedImageDeque _selectedImages;
-
-    void bindTexture() override;
 
     // Flags
-    bool _isInitialized = false;
+    bool _borderColorIsDirty = false;
+    bool _equatorialAimIsDirty = false;
     bool _radiusIsDirty = false;
-    int _borderRadiusTimer = -1;
+    bool _isImageCollectionLoaded = false;
+    bool _isInitialized = false;
 
-    float _lastTextureQuality = 1.f;
+    void bindTexture() override;
 
     WwtCommunicator _wwtCommunicator;
 

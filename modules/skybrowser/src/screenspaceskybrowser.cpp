@@ -198,7 +198,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
         _isInitialized = false;
     });
 
-    _wwtCommunicator.property("Dimensions")->onChange([this]() {
+    _textureQuality.onChange([this]() {
         updateTextureResolution();
     });
 
@@ -260,22 +260,19 @@ void ScreenSpaceSkyBrowser::setPointSpaceCraft(bool shouldPoint) {
 }
 
 void ScreenSpaceSkyBrowser::updateTextureResolution() {
-    // Check if texture quality has changed. If it has, adjust accordingly
-    if (std::abs(_textureQuality.value() - _lastTextureQuality) > glm::epsilon<float>()) {
-        const float diffTextureQuality = _textureQuality / _lastTextureQuality;
-        const glm::vec2 res = glm::vec2(_wwtCommunicator.browserDimensions()) * diffTextureQuality;
-        _wwtCommunicator.setBrowserDimensions(glm::ivec2(res));
-        _lastTextureQuality = _textureQuality.value();
+    // Can't divide by zero
+    if (_lastTextureQuality < glm::epsilon<float>()) {
+        return;
     }
+    const float diffTextureQuality = _textureQuality / _lastTextureQuality;
+    const glm::vec2 res = glm::vec2(_wwtCommunicator.browserDimensions()) * diffTextureQuality;
+    _wwtCommunicator.setBrowserDimensions(glm::ivec2(res));
+    _lastTextureQuality = _textureQuality.value();
     _objectSize = glm::ivec3(_wwtCommunicator.browserDimensions(), 1);
 
     // The radius has to be updated when the texture resolution has changed
     _radiusIsDirty = true;
     _borderRadiusTimer = 0;
-}
-
-void ScreenSpaceSkyBrowser::updateBorderColor() {
-    _wwtCommunicator.setBorderColor(glm::ivec3(_borderColor.value()));
 }
 
 void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
@@ -325,7 +322,7 @@ std::vector<std::string> ScreenSpaceSkyBrowser::selectedImages() const {
 void ScreenSpaceSkyBrowser::setBorderColor(glm::ivec3 color) {
     _wwtBorderColor = std::move(color);
     _borderColorIsDirty = true;
-    _borderColor = color;
+    _borderColor = glm::vec3(color) / 255.f;
 }
 
 void ScreenSpaceSkyBrowser::removeDisplayCopy() {
@@ -448,7 +445,7 @@ void ScreenSpaceSkyBrowser::update() {
             _equatorialAimIsDirty = false;
         }
         if (_borderColorIsDirty) {
-            _wwtCommunicator.setBorderColor(glm::ivec3(_borderColor.value()));
+            _wwtCommunicator.setBorderColor(_wwtBorderColor);
             _borderColorIsDirty = false;
         }
         _lastUpdateTime = std::chrono::system_clock::now();
@@ -516,7 +513,9 @@ void ScreenSpaceSkyBrowser::reload() {
 }
 
 void ScreenSpaceSkyBrowser::setBorderRadius(double radius) {
-    _wwtCommunicator.setBorderRadius(radius);
+    _borderRadius = radius;
+    _radiusIsDirty = true;
+    _borderRadiusTimer = 0;
 }
 
 void ScreenSpaceSkyBrowser::setRatio(float ratio) {
