@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_geo",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=geo&FORMAT=kvn",
   Filename = "geo.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
