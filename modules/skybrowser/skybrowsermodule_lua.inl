@@ -222,7 +222,6 @@ std::string prunedIdentifier(std::string identifier) {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
-        pair->hideChromeInterface();
         pair->browser()->loadImageCollection(module->wwtImageCollectionUrl());
     }
 }

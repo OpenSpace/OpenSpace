@@ -306,10 +306,10 @@ nlohmann::json TargetBrowserPair::dataAsDictionary() const {
     std::vector<int> colorJson= { color.r, color.g, color.b };
 
     nlohmann::json result = {
-        { "id", browserId() },
-        { "targetId", targetNodeId() },
-        { "name", browserGuiName() },
-        { "fov", static_cast<double>(verticalFov()) },
+        { "id", _browser->identifier() },
+        { "targetId", _targetNode->identifier() },
+        { "name", _browser->guiName() },
+        { "fov", static_cast<double>(_browser->verticalFov()) },
         { "ra", spherical.x },
         { "dec", spherical.y },
         { "roll", targetRoll() },
@@ -372,10 +372,6 @@ void TargetBrowserPair::loadImageCollection(const std::string& collection) {
 
 void TargetBrowserPair::setImageOpacity(const std::string& imageUrl, float opacity) {
     _browser->setImageOpacity(imageUrl, opacity);
-}
-
-void TargetBrowserPair::hideChromeInterface() {
-    _browser->hideChromeInterface();
 }
 
 void TargetBrowserPair::sendIdToBrowser() const {
@@ -497,7 +493,7 @@ void TargetBrowserPair::centerTargetOnScreen() {
     // Get camera direction in celestial spherical coordinates
     const glm::dvec3 viewDirection = skybrowser::cameraDirectionGalactic();
     // Keep the current fov
-    const double currentFov = verticalFov();
+    const double currentFov = _browser->verticalFov();
     startAnimation(viewDirection, currentFov);
 }
 

@@ -106,7 +106,6 @@ public:
     void removeSelectedImage(const std::string& imageUrl);
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(const std::string& imageUrl, float opacity);
-    void hideChromeInterface();
 
 private:
     properties::FloatProperty _lineWidth;

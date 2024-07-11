@@ -67,7 +67,6 @@ public:
     void setVerticalFov(double vfov);
     double verticalFov() const;
     void setEquatorialAim(glm::dvec2 equatorial);
-    glm::dvec2 equatorialAim() const;
     void setTargetRoll(double roll);
     void setRatio(float ratio);
     float browserRatio() const;
@@ -111,10 +110,9 @@ private:
     properties::DoubleProperty _borderRadius;
     properties::DoubleProperty _roll;
     properties::DVec2Property _equatorialAim;
-
+    properties::DoubleProperty _verticalFov;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
-    properties::DoubleProperty _verticalFov;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 

@@ -587,10 +587,6 @@ SelectedImageDeque::iterator ScreenSpaceSkyBrowser::findSelectedImage(
     return it;
 }
 
-glm::dvec2 ScreenSpaceSkyBrowser::equatorialAim() const {
-    return _equatorialAim;
-}
-
 bool ScreenSpaceSkyBrowser::isImageCollectionLoaded() const {
     return _isImageCollectionLoaded;
 }
