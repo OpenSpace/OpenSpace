@@ -185,11 +185,6 @@ bool Browser::isReady() const {
     return _texture.get();
 }
 
-// Updates the browser size to match the size of the texture
-void Browser::updateBrowserSize() {
-    _browserDimensions = _texture->dimensions();
-}
-
 void Browser::reload() {
     _reload.trigger();
 }

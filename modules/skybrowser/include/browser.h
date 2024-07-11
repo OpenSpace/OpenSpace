@@ -73,10 +73,11 @@ public:
 
     void reload();
 
-    void updateBrowserSize();
-    void updateBrowserDimensions();
+    // Ratio x, y relative to each other. Y is kept constant
     void setRatio(float ratio);
     float browserRatio() const;
+
+    // Dimensions in pixels
     glm::ivec2 browserDimensions() const;
     void setBrowserDimensions(glm::ivec2 dimensions);
 
@@ -95,6 +96,8 @@ protected:
     bool _shouldReload = false;
 
 private:
+    void updateBrowserDimensions();
+
     class RenderHandler : public WebRenderHandler {
     public:
         void draw() override;
