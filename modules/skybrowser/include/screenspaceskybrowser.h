@@ -32,6 +32,9 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/dvec2property.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/list/doublelistproperty.h>
 
 namespace openspace {
 using SelectedImageDeque = std::deque<std::pair<std::string, double>>;
@@ -48,6 +51,8 @@ public:
     void render(const RenderData& renderData) override;
     void update() override;
     float opacity() const noexcept override;
+
+    void setAsPaired();
 
     // Images in WorldWide Telescope
     void selectImage(const std::string& imageUrl);
@@ -74,22 +79,17 @@ public:
     void hideChromeInterface();
     void setBorderColor(glm::ivec3 color);
     void setBorderRadius(double radius);
+    double setVerticalFovWithScroll(float scroll);
 
     void reload();
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
-    bool shouldUpdateWhileTargetAnimates() const;
-
-    // Spacecraft pointing 
-    void setPointSpaceCraft(bool shouldPoint);
-    bool isPointingSpacecraft() const;
 
     // Initialization process
-    bool isInitialized() const;
+    void setIdInBrowser() const;
+    void loadImageCollection(const std::string& collection);
     bool isImageCollectionLoaded() const;
     void setImageCollectionIsLoaded(bool isLoaded);
-    void loadImageCollection(const std::string& collection);
-    double setVerticalFovWithScroll(float scroll);
-    void setIdInBrowser() const;
+    bool isInitialized() const;
     void setIsInitialized(bool isInitialized);
 
     // Display copies
@@ -106,22 +106,21 @@ private:
     SelectedImageDeque::iterator findSelectedImage(const std::string& imageUrl);
     SelectedImageDeque _selectedImages;
 
-    int _borderRadiusTimer = -1;
-    static constexpr int RadiusTimeOut = 25;
-    double _borderRadius = 0.0;
+    properties::StringListProperty _selectedImagesUrls;
+    properties::DoubleListProperty _selectedImagesOpacities;
+    properties::DoubleProperty _borderRadius;
+    properties::DoubleProperty _roll;
+    properties::DVec2Property _equatorialAim;
 
     properties::FloatProperty _textureQuality;
-    float _lastTextureQuality = 1.f;
     properties::BoolProperty _isHidden;
-    properties::BoolProperty _isPointingSpacecraft;
-    properties::BoolProperty _updateDuringTargetAnimation;
     properties::DoubleProperty _verticalFov;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 
-    glm::ivec3 _wwtBorderColor = glm::ivec3(70);
-    glm::dvec2 _equatorialAim = glm::dvec2(0.0);
-    double _targetRoll = 0.0;
+    int _borderRadiusTimer = -1;
+    static constexpr int RadiusTimeOut = 25;
+    float _lastTextureQuality = 1.f;
 
     // Flags
     bool _borderColorIsDirty = false;

@@ -285,14 +285,14 @@ void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
         return;
     }
 
-    SceneGraphNode* target = global::renderEngine->scene()->sceneGraphNode(targetId);
-    ScreenSpaceSkyBrowser* browser = dynamic_cast<ScreenSpaceSkyBrowser*>(
-        global::renderEngine->screenSpaceRenderable(browserId)
-    );
+    ghoul::Dictionary init;
+    init.setValue("Target", std::string(targetId));
+    init.setValue("Browser", std::string(browserId));
 
+    std::unique_ptr<TargetBrowserPair> pair = std::make_unique<TargetBrowserPair>(init);
     // Ensure pair has both target and browser
-    if (browser && target) {
-        _targetsBrowsers.push_back(std::make_unique<TargetBrowserPair>(target, browser));
+    if (pair) {
+        _targetsBrowsers.push_back(std::move(pair));
     }
     _uniqueIdentifierCounter++;
     addPropertySubOwner(_targetsBrowsers.back().get());

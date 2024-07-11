@@ -29,6 +29,9 @@
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/json.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace ghoul { class Dictionary; }
 
@@ -42,7 +45,7 @@ class ScreenSpaceRenderable;
 
 class TargetBrowserPair : public properties::PropertyOwner  {
 public:
-    TargetBrowserPair(SceneGraphNode* target, ScreenSpaceSkyBrowser* browser);
+    TargetBrowserPair(const ghoul::Dictionary& dictionary);
 
     // Target & Browser
     void initialize();
@@ -107,6 +110,11 @@ public:
 
 private:
     properties::FloatProperty _lineWidth;
+    properties::Vec3Property _color;
+    properties::BoolProperty _isPointingSpacecraft;
+    properties::BoolProperty _updateDuringTargetAnimation;
+    properties::StringProperty _browserId;
+    properties::StringProperty _targetId;
 
     // Target and browser
     RenderableSkyTarget* _targetRenderable = nullptr;

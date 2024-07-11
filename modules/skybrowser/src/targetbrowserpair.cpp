@@ -31,14 +31,19 @@
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/misc/assert.h>
 #include <glm/gtc/constants.hpp>
 #include <functional>
 #include <chrono>
+#include <glm/gtx/color_space.hpp>
+#include <random>
 
 using nlohmann::json;
 
@@ -60,6 +65,20 @@ namespace {
         );
     }
 
+    glm::ivec3 randomBorderColor() {
+        // Generate a random border color with sufficient lightness and a n
+        std::random_device rd;
+        // Hue is in the unit degrees [0, 360]
+        std::uniform_real_distribution<float> hue(0.f, 360.f);
+
+        // Value in saturation are in the unit percent [0,1]
+        constexpr float Value = 0.9f; // Brightness
+        constexpr float Saturation = 0.5f;
+        const glm::vec3 hsvColor = glm::vec3(hue(rd), Saturation, Value);
+        const glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
+        return rgbColor;
+    }
+
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
@@ -67,31 +86,114 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+        "Color",
+        "Color",
+        "The color of the border of the sky browser and the line of the target.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PointSpacecraftInfo = {
+        "PointSpacecraft",
+        "Point Spacecraft",
+        "If checked, spacecrafts will point towards the coordinate of an image upon "
+        "selection.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UpdateDuringAnimationInfo = {
+        "UpdateDuringTargetAnimation",
+        "Update During Target Animation",
+        "If checked, the sky browser display copy will update its coordinates while "
+        "the target is animating.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BrowserInfo = {
+        "Browser",
+        "Sky Browser",
+        "The identifier of the sky browser of this pair.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
+        "Target",
+        "Sky Target",
+        "The identifier of the sky target of this pair.",
+        openspace::properties::Property::Visibility::User
+    };
+
     struct [[codegen::Dictionary(TargetBrowserPair)]] Parameters {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
+
+        // [[codegen::verbatim(ColorInfo.description)]]
+        std::optional<float> color;
+
+        // [[codegen::verbatim(PointSpacecraftInfo.description)]]
+        std::optional<bool> pointSpacecraft;
+
+        // [[codegen::verbatim(UpdateDuringAnimationInfo.description)]]
+        std::optional<bool> updateDuringTargetAnimation;
+
+        // [[codegen::verbatim(BrowserInfo.description)]]
+        std::string browser;
+
+        // [[codegen::verbatim(TargetInfo.description)]]
+        std::string target;
     };
+
 #include "targetbrowserpair_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
-                                     ScreenSpaceSkyBrowser* browser)
-    : properties::PropertyOwner({ "Guacamole" })
-    , _browser(browser)
-    , _targetNode(targetNode)
-    , _lineWidth(LineWidthInfo)
+TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "TargetBrowserPair" })
+	, _targetId(TargetInfo)
+	, _browserId(BrowserInfo)
+	, _lineWidth(LineWidthInfo)
+    , _color(ColorInfo)
+    , _isPointingSpacecraft(PointSpacecraftInfo, false)
+    , _updateDuringTargetAnimation(UpdateDuringAnimationInfo, false)
 {
-    ghoul_assert(browser, "Sky browser is null pointer");
-    ghoul_assert(targetNode, "Sky target is null pointer");
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _targetNode = global::renderEngine->scene()->sceneGraphNode(p.target);
+    _browser = dynamic_cast<ScreenSpaceSkyBrowser*>(
+        global::renderEngine->screenSpaceRenderable(p.browser)
+        );
+
+    ghoul_assert(_browser, "Sky browser is null pointer");
+    ghoul_assert(_targetNode, "Sky target is null pointer");
+
+    setIdentifier(std::format("{}Pair", _browser->identifier()));
 
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
+    
+    _isPointingSpacecraft = p.pointSpacecraft.value_or(_isPointingSpacecraft);
+    _updateDuringTargetAnimation = p.updateDuringTargetAnimation.value_or(
+        _updateDuringTargetAnimation
+    );
+
+    addProperty(_isPointingSpacecraft);
+    addProperty(_updateDuringTargetAnimation);
     addProperty(_lineWidth);
+    addProperty(_color);
+
     _lineWidth.onChange([this]() {
         _targetRenderable->property("LineWidth")->set(_lineWidth.value());
         });
-    LINFO(uri());
+
+    _color.onChange([this]() {
+        _browser->setBorderColor(glm::ivec3(_color.value() * 255.f));
+		_targetRenderable->setColor(glm::ivec3(_color.value() * 255.f));
+        });
+
+	if (global::windowDelegate->isMaster()) {
+		_color = glm::vec3(randomBorderColor()) / 255.f;
+	}
+    _browser->setAsPaired();
 }
 
 void TargetBrowserPair::setImageOrder(const std::string& imageUrl, int order) {
@@ -99,7 +201,6 @@ void TargetBrowserPair::setImageOrder(const std::string& imageUrl, int order) {
 }
 
 void TargetBrowserPair::startFinetuningTarget() {
-
     _startTargetPosition = _targetNode->worldPosition();
 }
 
@@ -117,7 +218,7 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
 
 void TargetBrowserPair::synchronizeAim() {
     const bool shouldUpdate =
-        _browser->shouldUpdateWhileTargetAnimates() ||
+        _updateDuringTargetAnimation ||
         !_targetAnimation.isAnimating();
     if (shouldUpdate && _browser->isInitialized()) {
         _browser->setEquatorialAim(targetDirectionEquatorial());
@@ -176,7 +277,7 @@ std::string TargetBrowserPair::targetNodeId() const {
 }
 
 bool TargetBrowserPair::pointSpaceCraft() const {
-    return _browser->isPointingSpacecraft();
+    return _isPointingSpacecraft;
 }
 
 double TargetBrowserPair::verticalFov() const {
@@ -326,7 +427,7 @@ void TargetBrowserPair::applyRoll() {
 }
 
 void TargetBrowserPair::setPointSpaceCraft(bool shouldPoint) {
-    _browser->setPointSpaceCraft(shouldPoint);
+    _isPointingSpacecraft = shouldPoint;
 }
 
 void TargetBrowserPair::incrementallyAnimateToCoordinate() {

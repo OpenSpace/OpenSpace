@@ -27,15 +27,13 @@
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <ghoul/opengl/texture.h>
 #include <optional>
-#include <glm/gtx/color_space.hpp>
-#include <random>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureQualityInfo = {
@@ -72,26 +70,46 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSpacecraftInfo = {
-        "PointSpacecraft",
-        "Point Spacecraft",
-        "If checked, spacecrafts will point towards the coordinate of an image upon "
-        "selection.",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo UpdateDuringAnimationInfo = {
-        "UpdateDuringTargetAnimation",
-        "Update During Target Animation",
-        "If checked, the sky browser display copy will update its coordinates while "
-        "the target is animating.",
-        openspace::properties::Property::Visibility::User
-    };
-
     constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
         "VerticalFov",
         "Vertical Field Of View",
         "The vertical field of view of the target.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SelectedImagesUrlsInfo = {
+        "SelectedImagesUrls",
+        "Selected Images Urls",
+        "Urls of the images that have been selected for this Sky Browser.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SelectedImagesOpacitiesInfo = {
+        "SelectedImagesOpacities",
+        "Selected Images Opacities",
+        "Opacities of the images that have been selected for this Sky Browser.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BorderRadiusInfo = {
+        "BorderRadius",
+        "Border Radius",
+        "The border radius of this Sky Browser.",
+    openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RollInfo = {
+        "Roll",
+        "Roll",
+        "The roll of the sky browser view.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EquatorialAimInfo = {
+        "EquatrialAim",
+        "Equatorial Aim",
+        "The aim of the Sky Browser, given in equatorial coordinates Right Ascension (Ra)"
+        " and declination (dec).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -109,31 +127,25 @@ namespace {
         // [[codegen::verbatim(IsHiddenInfo.description)]]
         std::optional<bool> isHidden;
 
-        // [[codegen::verbatim(PointSpacecraftInfo.description)]]
-        std::optional<bool> pointSpacecraft;
-
-        // [[codegen::verbatim(UpdateDuringAnimationInfo.description)]]
-        std::optional<bool> updateDuringTargetAnimation;
-
         // [[codegen::verbatim(VerticalFovInfo.description)]]
         std::optional<double> verticalFov;
+
+        // [[codegen::verbatim(SelectedImagesUrlsInfo.description)]]
+        std::optional<std::vector<std::string>> selectedImagesUrls;
+
+        // [[codegen::verbatim(SelectedImagesOpacitiesInfo.description)]]
+        std::optional<std::vector<double>> selectedImagesOpacities;
+
+        // [[codegen::verbatim(BorderRadiusInfo.description)]]
+        std::optional<double> borderRadius;
+
+        // [[codegen::verbatim(RollInfo.description)]]
+        std::optional<double> roll;
+
+        // [[codegen::verbatim(EquatorialAimInfo.description)]]
+        std::optional<glm::dvec2> equatorialAim;
     };
-
 #include "screenspaceskybrowser_codegen.cpp"
-
-    glm::ivec3 randomBorderColor() {
-        // Generate a random border color with sufficient lightness and a n
-        std::random_device rd;
-        // Hue is in the unit degrees [0, 360]
-        std::uniform_real_distribution<float> hue(0.f, 360.f);
-
-        // Value in saturation are in the unit percent [0,1]
-        constexpr float Value = 0.9f; // Brightness
-        constexpr float Saturation = 0.5f;
-        const glm::vec3 hsvColor = glm::vec3(hue(rd), Saturation, Value);
-        const glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
-        return rgbColor;
-    }
 } // namespace
 
 namespace openspace {
@@ -145,11 +157,15 @@ documentation::Documentation ScreenSpaceSkyBrowser::Documentation() {
 ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _wwtCommunicator(dictionary)
+    , _selectedImagesUrls(SelectedImagesUrlsInfo)
+    , _selectedImagesOpacities(SelectedImagesOpacitiesInfo)
+    , _borderRadius(BorderRadiusInfo)
+    , _roll(RollInfo)
+    , _equatorialAim(EquatorialAimInfo)
     , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
     , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
     , _isHidden(IsHiddenInfo, true)
-    , _isPointingSpacecraft(PointSpacecraftInfo, false)
-    , _updateDuringTargetAnimation(UpdateDuringAnimationInfo, false)
+
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
@@ -158,23 +174,21 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
 
     _textureQuality = p.textureQuality.value_or(_textureQuality);
     _isHidden = p.isHidden.value_or(_isHidden);
-    _isPointingSpacecraft = p.pointSpacecraft.value_or(_isPointingSpacecraft);
-    _updateDuringTargetAnimation = p.updateDuringTargetAnimation.value_or(
-        _updateDuringTargetAnimation
-    );
-    // Handle target dimension property
     _verticalFov = p.verticalFov.value_or(_verticalFov);
-    _verticalFov.setReadOnly(true);
+    _equatorialAim = p.equatorialAim.value_or(_equatorialAim);
+    _roll = p.roll.value_or(_roll);
+    _selectedImagesOpacities = p.selectedImagesOpacities.value_or(_selectedImagesOpacities);
+    _selectedImagesUrls = p.selectedImagesUrls.value_or(_selectedImagesUrls);
+    _borderRadius = p.borderRadius.value_or(_borderRadius);
 
     addProperty(_isHidden);
     addProperty(_textureQuality);
     addProperty(_verticalFov);
-    addProperty(_isPointingSpacecraft);
-    addProperty(_updateDuringTargetAnimation);
-
-    if (global::windowDelegate->isMaster()) {
-        _wwtBorderColor = randomBorderColor();
-    }
+    addProperty(_equatorialAim);
+    addProperty(_roll);
+    addProperty(_selectedImagesOpacities);
+    addProperty(_selectedImagesUrls);
+    addProperty(_borderRadius);
 
     _useRadiusAzimuthElevation.onChange(
         [this]() {
@@ -201,8 +215,10 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     _textureQuality.onChange([this]() {
         updateTextureResolution();
     });
-
+    
     _lastUpdateTime = std::chrono::system_clock::now();
+
+    // Set the size of the renderable to the browser dimensions
     _objectSize = glm::ivec3(_wwtCommunicator.browserDimensions(), 1);
 }
 
@@ -238,14 +254,6 @@ bool ScreenSpaceSkyBrowser::isInitialized() const {
     return _isInitialized;
 }
 
-bool ScreenSpaceSkyBrowser::isPointingSpacecraft() const {
-    return _isPointingSpacecraft;
-}
-
-bool ScreenSpaceSkyBrowser::shouldUpdateWhileTargetAnimates() const {
-    return _updateDuringTargetAnimation;
-}
-
 void ScreenSpaceSkyBrowser::setIdInBrowser() const {
     int currentNode = global::windowDelegate->currentNode();
     _wwtCommunicator.setIdInBrowser(std::format("{}_{}", identifier(), currentNode));
@@ -253,10 +261,6 @@ void ScreenSpaceSkyBrowser::setIdInBrowser() const {
 
 void ScreenSpaceSkyBrowser::setIsInitialized(bool isInitialized) {
     _isInitialized = isInitialized;
-}
-
-void ScreenSpaceSkyBrowser::setPointSpaceCraft(bool shouldPoint) {
-    _isPointingSpacecraft = shouldPoint;
 }
 
 void ScreenSpaceSkyBrowser::updateTextureResolution() {
@@ -320,7 +324,6 @@ std::vector<std::string> ScreenSpaceSkyBrowser::selectedImages() const {
 
 
 void ScreenSpaceSkyBrowser::setBorderColor(glm::ivec3 color) {
-    _wwtBorderColor = std::move(color);
     _borderColorIsDirty = true;
     _borderColor = glm::vec3(color) / 255.f;
 }
@@ -441,11 +444,11 @@ void ScreenSpaceSkyBrowser::update() {
 
     if (timeSinceLastUpdate > TimeUpdateInterval) {
         if (_equatorialAimIsDirty) {
-            _wwtCommunicator.setAim(_equatorialAim, _verticalFov, _targetRoll);
+            _wwtCommunicator.setAim(_equatorialAim, _verticalFov, _roll);
             _equatorialAimIsDirty = false;
         }
         if (_borderColorIsDirty) {
-            _wwtCommunicator.setBorderColor(_wwtBorderColor);
+            _wwtCommunicator.setBorderColor(glm::ivec3(_borderColor.value() * 255.f));
             _borderColorIsDirty = false;
         }
         _lastUpdateTime = std::chrono::system_clock::now();
@@ -487,8 +490,21 @@ float ScreenSpaceSkyBrowser::opacity() const noexcept {
     return _opacity;
 }
 
+// This Sky Browser is now controlled by a TargetBrowserPair
+// Therefore we are disabling UI interaction with the properties from the UI
+void ScreenSpaceSkyBrowser::setAsPaired() {
+    // These properties should only be set from the UI, scripting or Target Browser Pair
+    _verticalFov.setReadOnly(true);
+    _borderColor.setReadOnly(true);
+    _roll.setReadOnly(true);
+    _equatorialAim.setReadOnly(true);
+    _borderRadius.setReadOnly(true);
+    _selectedImagesOpacities.setReadOnly(true);
+    _selectedImagesUrls.setReadOnly(true);
+}
+
 glm::ivec3 ScreenSpaceSkyBrowser::borderColor() const {
-    return _wwtBorderColor;
+    return glm::ivec3(_borderColor.value() * 255.f);
 }
 
 void ScreenSpaceSkyBrowser::removeSelectedImage(const std::string& imageUrl) {
@@ -539,7 +555,7 @@ double ScreenSpaceSkyBrowser::borderRadius() const {
 }
 
 void ScreenSpaceSkyBrowser::setTargetRoll(double roll) {
-    _targetRoll = roll;
+    _roll = roll;
 }
 
 void ScreenSpaceSkyBrowser::setVerticalFov(double vfov) {
