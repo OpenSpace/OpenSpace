@@ -1,9 +1,8 @@
 -- Custom Shaders
--- This example loads a simple model with user custom shaders. The parent is not
--- set which defaults the position of the model to the center of the Solar System.
+-- This example loads a simple model with custom shaders.
 
 -- Load the example model from OpenSpace servers
--- If you want to use your own model, this block of code can safely be deleted
+-- If you want to use your own model, this block of code can be safely deleted
 local model = asset.resource({
   Name = "Animated Box",
   Type = "HttpSynchronization",

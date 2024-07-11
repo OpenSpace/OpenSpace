@@ -1,6 +1,5 @@
 -- Basic
--- This example loads a simple model. The parent is not set which defaults the position
--- of the model to the center of the Solar System.
+-- This example loads a simple model.
 
 -- Load the asset of the Sun to illuminate the model
 local sun = asset.require("scene/solarsystem/sun/transforms")
