@@ -43,6 +43,8 @@
 using nlohmann::json;
 
 namespace {
+    constexpr std::string_view _loggerCat = "TargetBrowserPair";
+
     void aimTargetGalactic(std::string_view id, const glm::dvec3& direction) {
         const glm::dvec3 positionCelestial = glm::normalize(direction) *
             openspace::skybrowser::CelestialSphereRadius;
@@ -57,19 +59,39 @@ namespace {
             openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
+
+    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+        "LineWidth",
+        "Line Width",
+        "The thickness of the line of the target. The larger number, the thicker line.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    struct [[codegen::Dictionary(TargetBrowserPair)]] Parameters {
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<float> lineWidth;
+    };
+#include "targetbrowserpair_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 TargetBrowserPair::TargetBrowserPair(SceneGraphNode* targetNode,
                                      ScreenSpaceSkyBrowser* browser)
-    : _browser(browser)
+    : properties::PropertyOwner({ "Guacamole" })
+    , _browser(browser)
     , _targetNode(targetNode)
+    , _lineWidth(LineWidthInfo)
 {
     ghoul_assert(browser, "Sky browser is null pointer");
     ghoul_assert(targetNode, "Sky target is null pointer");
 
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
+    addProperty(_lineWidth);
+    _lineWidth.onChange([this]() {
+        _targetRenderable->property("LineWidth")->set(_lineWidth.value());
+        });
+    LINFO(uri());
 }
 
 void TargetBrowserPair::setImageOrder(const std::string& imageUrl, int order) {

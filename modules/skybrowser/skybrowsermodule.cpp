@@ -295,6 +295,7 @@ void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
         _targetsBrowsers.push_back(std::make_unique<TargetBrowserPair>(target, browser));
     }
     _uniqueIdentifierCounter++;
+    addPropertySubOwner(_targetsBrowsers.back().get());
 }
 
 void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {

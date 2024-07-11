@@ -25,8 +25,10 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___TARGETBROWSERPAIR___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___TARGETBROWSERPAIR___H__
 
+#include <openspace/properties/propertyowner.h>
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/json.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace ghoul { class Dictionary; }
 
@@ -38,7 +40,7 @@ class ScreenSpaceSkyBrowser;
 class RenderableSkyTarget;
 class ScreenSpaceRenderable;
 
-class TargetBrowserPair {
+class TargetBrowserPair : public properties::PropertyOwner  {
 public:
     TargetBrowserPair(SceneGraphNode* target, ScreenSpaceSkyBrowser* browser);
 
@@ -104,6 +106,8 @@ public:
     void hideChromeInterface();
 
 private:
+    properties::FloatProperty _lineWidth;
+
     // Target and browser
     RenderableSkyTarget* _targetRenderable = nullptr;
     ScreenSpaceSkyBrowser* _browser = nullptr;

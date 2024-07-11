@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___BROWSER___H__
 
 #include <modules/webbrowser/include/webrenderhandler.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/triggerproperty.h>
@@ -59,7 +60,7 @@ class BrowserInstance;
 class RenderHandler;
 class WebKeyboardHandler;
 
-class Browser {
+class Browser : public properties::PropertyOwner {
 public:
     explicit Browser(const ghoul::Dictionary& dictionary);
     virtual ~Browser();
@@ -67,25 +68,27 @@ public:
     void initializeGL();
     void deinitializeGL();
     bool isReady() const;
-
     void render();
     void update();
 
-    void updateBrowserSize();
     void reload();
 
+    void updateBrowserSize();
+    void updateBrowserDimensions();
     void setRatio(float ratio);
     float browserRatio() const;
+    glm::ivec2 browserDimensions() const;
+    void setBrowserDimensions(glm::ivec2 dimensions);
 
+    void bindTexture();
 protected:
+    void executeJavascript(const std::string& script) const;
+
     properties::IVec2Property _browserDimensions;
     properties::StringProperty _url;
     properties::TriggerProperty _reload;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-    void updateBrowserDimensions();
-    void executeJavascript(const std::string& script) const;
 
     bool _isUrlDirty = false;
     bool _isDimensionsDirty = false;

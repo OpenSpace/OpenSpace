@@ -82,7 +82,8 @@ void Browser::RenderHandler::setTexture(GLuint t) {
 }
 
 Browser::Browser(const ghoul::Dictionary& dictionary)
-    : _browserDimensions(
+    : properties::PropertyOwner({ "Browser" })
+    , _browserDimensions(
         DimensionsInfo,
         glm::vec2(1000.f),
         glm::vec2(10.f),
@@ -105,6 +106,10 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
     _browserDimensions.onChange([this]() { _isDimensionsDirty = true; });
 
     _reload.onChange([this]() { _shouldReload = true; });
+
+    addProperty(_url);
+    addProperty(_browserDimensions);
+    addProperty(_reload);
 
     // Create browser and render handler
     _browserInstance = std::make_unique<BrowserInstance>(
@@ -204,6 +209,10 @@ float Browser::browserRatio() const {
            static_cast<float>(_texture->dimensions().y);
 }
 
+void Browser::bindTexture() {
+    _texture->bind();
+}
+
 void Browser::updateBrowserDimensions() {
     const glm::ivec2 dim = _browserDimensions;
     if (dim.x > 0 && dim.y > 0) {
@@ -211,6 +220,14 @@ void Browser::updateBrowserDimensions() {
         _browserInstance->reshape(dim);
         _isDimensionsDirty = false;
     }
+}
+
+glm::ivec2 Browser::browserDimensions() const {
+    return _browserDimensions;
+}
+
+void Browser::setBrowserDimensions(glm::ivec2 dimensions) {
+    _browserDimensions = dimensions;
 }
 
 void Browser::executeJavascript(const std::string& script) const {
