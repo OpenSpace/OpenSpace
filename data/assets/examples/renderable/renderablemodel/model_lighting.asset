@@ -1,0 +1,51 @@
+-- Lighting
+-- This example loads a simple model and load the Sun to illuminate it.
+
+-- Load the asset of the Sun to illuminate the model
+local sun = asset.require("scene/solarsystem/sun/transforms")
+
+-- Load the example model from OpenSpace servers
+-- If you want to use your own model, this block of code can be safely deleted
+local model = asset.resource({
+  Name = "Vertex Colors Test Model",
+  Type = "HttpSynchronization",
+  Identifier = "model_vertex_color_test",
+  Version = 1
+})
+
+local Node = {
+  Identifier = "RenderableModel_Example",
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "VertexColorTest.glb",
+    -- Use the line below insted of the one above if you want to use your own model
+    --GeometryFile = "C:/path/to/model.fbx",
+
+    -- Add the Sun as a light source to illuminate the model
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  GUI = {
+    Name = "RenderableModel - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
+
+
+-- Model credit
+--[[
+  Author = Ed Mackey
+  URL = "https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0/VertexColorTest"
+  License =
+    Creative Commons Attribution 4.0 International License,
+    https://creativecommons.org/licenses/by/4.0/
+]]
