@@ -3,11 +3,8 @@
 -- a set time, in this case "2024 07 09 12:00:00" and is set to loop both before and
 -- after that time.
 
--- Load the asset of the Sun to illuminate the model
-local sun = asset.require("scene/solarsystem/sun/transforms")
-
 -- Load the example model from OpenSpace servers
--- If you want to use your own model, this block of code can safely be deleted
+-- If you want to use your own model, this block of code can be safely deleted
 local model = asset.resource({
   Name = "Animated Box",
   Type = "HttpSynchronization",
@@ -29,11 +26,6 @@ local Node = {
     AnimationStartTime = "2024 07 09 12:00:00",
     -- Loop the animation both before and after the set start time
     AnimationMode = "LoopInfinitely",
-
-    -- Add the Sun as a light source to illuminate the model
-    LightSources = {
-      sun.LightSource
-    }
   },
   GUI = {
     Name = "RenderableModel - Animation Loop Infinitely",
