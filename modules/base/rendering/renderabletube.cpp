@@ -42,6 +42,7 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
 #include <glm/gtx/projection.hpp>
+#include <fstream>
 #include <optional>
 
 using json = nlohmann::json;
@@ -684,14 +685,14 @@ int RenderableTube::currentColorCutplaneParameterIndex() const {
 void RenderableTube::readDataFile() {
     std::filesystem::path file = absPath(_dataFile);
     if (!std::filesystem::is_regular_file(file)) {
-        LWARNING(fmt::format("The data file '{}' could not be found", file));
+        LWARNING(std::format("The data file '{}' could not be found", file));
         return;
     }
 
     // Open file
     std::ifstream fileStream(file);
     if (!fileStream.good()) {
-        LERROR(fmt::format("Failed to open data file '{}'", file));
+        LERROR(std::format("Failed to open data file '{}'", file));
         return;
     }
 
@@ -719,7 +720,7 @@ void RenderableTube::readDataFile() {
         if (major != version->end() && minor != version->end()) {
             foundVersion = true;
             if (*major != CurrentMajorVersion || *minor != CurrentMinorVersion) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "Unknown data version '{}.{}' found. The currently supported version "
                     "is {}.{}", major->dump(), minor->dump(), CurrentMajorVersion,
                     CurrentMinorVersion
@@ -816,7 +817,7 @@ void RenderableTube::readDataFile() {
 
                 // Check that file exits
                 if (!std::filesystem::is_regular_file(fullPath)) {
-                    LERROR(fmt::format("Cannot find texture file {}", fullPath));
+                    LERROR(std::format("Cannot find texture file {}", fullPath));
                 }
 
                 timePolygon.texturePath = fullPath;
@@ -898,19 +899,19 @@ void RenderableTube::loadSelectedSample() {
     }
 
     // Find information for the scen graph nodes, filenames start from 000001
-    std::string kernelPath = absPath(_kernelsDirectory / fmt::format("{:06}.bsp", std::stoi(_selectedSample.value()) + 1)).string();
+    std::string kernelPath = absPath(_kernelsDirectory / std::format("{:06}.bsp", std::stoi(_selectedSample.value()) + 1)).string();
     std::replace(kernelPath.begin(), kernelPath.end(), '\\', '/');
 
     // Identifier starts at 000001
-    std::string identifier = fmt::format("{:06}", std::stoi(_selectedSample.value()) + 1);
+    std::string identifier = std::format("{:06}", std::stoi(_selectedSample.value()) + 1);
 
     // Target starts at 1000000
-    std::string target = fmt::format("1{:06}", std::stoi(_selectedSample.value()));
+    std::string target = std::format("1{:06}", std::stoi(_selectedSample.value()));
     std::string start = std::string(Time(_data.front().timestamp).ISO8601());
     std::string end = std::string(Time(_data.back().timestamp).ISO8601());
 
     // Trail
-    std::string addTrailNodeScript = fmt::format(
+    std::string addTrailNodeScript = std::format(
         "openspace.spice.loadKernel('{0}'); "
         "openspace.addSceneGraphNode({{"
             "Identifier = '{1}_trail',"
@@ -948,7 +949,7 @@ void RenderableTube::loadSelectedSample() {
     );
 
     // Head
-    std::string addHeadNodeScript = fmt::format(
+    std::string addHeadNodeScript = std::format(
         "openspace.addSceneGraphNode({{"
             "Identifier = '{0}_head',"
             "Parent = 'SunCenter',"
@@ -991,12 +992,12 @@ void RenderableTube::initializeTextures() {
         std::unique_ptr<ghoul::opengl::Texture> t =
             ghoul::io::TextureReader::ref().loadTexture(_data[i].texturePath.string(), 2);
         if (t) {
-            LINFO(fmt::format("Loaded texture {}", _data[i].texturePath));
+            LINFO(std::format("Loaded texture {}", _data[i].texturePath));
             // Do not upload the loaded texture to the GPU, we just want it to
             // hold the data
         }
         else {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Could not find image file {}", _data[i].texturePath
             ));
         }
