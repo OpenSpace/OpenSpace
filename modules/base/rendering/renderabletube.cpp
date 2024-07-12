@@ -210,6 +210,39 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo EnableFadeInfo = {
+        "EnableFade",
+        "Enable tube fading of old data",
+        "Toggles whether the tube should fade older data out. If this value is "
+        "true, the 'Fade' parameter determines the speed of fading. If this value is "
+        "false, the entire tube is rendered at full opacity and color.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TubeLengthInfo = {
+        "TubeLength",
+        "Tube Length",
+        "The extent of the rendered tube. A value of 0 will result in no tube and a "
+        "value of 1 will result in a tube that covers the entire extent. The setting "
+        "only applies if 'EnableFade' is true. If it is false, this setting has "
+        "no effect.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TubeFadeAmountInfo = {
+        "TubeFadeAmount",
+        "Tube Fade Amount",
+        "The amount of the tube that should be faded. If the value is 0 then the "
+        "tube will have no fading applied. A value of 0.6 will result in a tube "
+        "where 60% of the extent of the tube will have fading applied to it. In other "
+        "words, the 40% closest to the head of the tube will be solid and the rest "
+        "will fade until completely transparent at the end of the tube. A value of 1 "
+        "will result in a tube that starts fading immediately, becoming fully "
+        "transparent by the end of the tube. This setting only applies if the "
+        "'EnableFade' value is true. If it is false, this setting has no effect.",
+        openspace::properties::Property::Visibility::User
+    };
+
     struct [[codegen::Dictionary(RenderableTube)]] Parameters {
         // The input file with data for the tube
         std::string file;
@@ -277,6 +310,15 @@ namespace {
 
         // [[codegen::verbatim(ShowAllTubeInfo.description)]]
         std::optional<bool> showAllTube;
+
+        // [[codegen::verbatim(EnableFadeInfo.description)]]
+        std::optional<bool> enableFade;
+
+        // [[codegen::verbatim(TubeLengthInfo.description)]]
+        std::optional<float> tubeLength;
+
+        // [[codegen::verbatim(TubeFadeAmountInfo.description)]]
+        std::optional<float> tubeFadeAmount;
 
         // [[codegen::verbatim(KernelDirectoryInfo.description)]]
         std::optional<std::string> kernelsDirectory;
@@ -365,6 +407,9 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _selectedSample(SelectedSampleInfo)
     , _sampleLineWidth(SampleLineWidthInfo, 3.f, 1.f, 10.f)
     , _sampleColor(SampleColorInfo, glm::vec3(0.f, 0.8f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _useTubeFade(EnableFadeInfo, true)
+    , _tubeLength(TubeLengthInfo, 1.f, 0.f, 1.f)
+    , _tubeFadeAmount(TubeFadeAmountInfo, 1.f, 0.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _dataFile = p.file;
@@ -482,6 +527,15 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
         std::filesystem::path folder = absPath(*p.kernelsDirectory);
         _kernelsDirectory = absPath(folder).string();
     }
+
+    _useTubeFade = p.enableFade.value_or(_useTubeFade);
+    addProperty(_useTubeFade);
+
+    _tubeLength = p.tubeLength.value_or(_tubeLength);
+    addProperty(_tubeLength);
+
+    _tubeFadeAmount = p.tubeFadeAmount.value_or(_tubeFadeAmount);
+    addProperty(_tubeFadeAmount);
 }
 
 bool RenderableTube::isReady() const {
@@ -515,6 +569,11 @@ void RenderableTube::initializeGL() {
         absPath("${MODULE_BASE}/shaders/tube_cutplane_fs.glsl")
     );
 
+    // Some uniforms are not used while rendering the cutplane
+    _shaderCutplane->setIgnoreUniformLocationError(
+        ghoul::opengl::ProgramObject::IgnoreError::Yes
+    );
+
     if (_hasColorMapFile) {
         _colorSettings.colorMapping->initializeTexture();
         _colorSettingsCutplane.colorMapping->initializeTexture();
@@ -538,6 +597,16 @@ void RenderableTube::initializeGL() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
         1,
+        1,
+        GL_UNSIGNED_INT,
+        GL_FALSE,
+        sizeof(PolygonVertex),
+        reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, polyId))
+    );
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(
+        2,
         3,
         GL_FLOAT,
         GL_FALSE,
@@ -545,9 +614,9 @@ void RenderableTube::initializeGL() {
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, normal))
     );
 
-    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
     glVertexAttribPointer(
-        2,
+        3,
         1,
         GL_FLOAT,
         GL_FALSE,
@@ -555,9 +624,9 @@ void RenderableTube::initializeGL() {
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, value))
     );
 
-    glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
     glVertexAttribPointer(
-        3,
+        4,
         2,
         GL_FLOAT,
         GL_FALSE,
@@ -565,9 +634,9 @@ void RenderableTube::initializeGL() {
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, tex))
     );
 
-    glEnableVertexAttribArray(4);
+    glEnableVertexAttribArray(5);
     glVertexAttribPointer(
-        4,
+        5,
         2,
         GL_FLOAT,
         GL_FALSE,
@@ -590,6 +659,16 @@ void RenderableTube::initializeGL() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
         1,
+        1,
+        GL_UNSIGNED_INT,
+        GL_FALSE,
+        sizeof(PolygonVertex),
+        reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, polyId))
+    );
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(
+        2,
         3,
         GL_FLOAT,
         GL_FALSE,
@@ -597,9 +676,9 @@ void RenderableTube::initializeGL() {
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, normal))
     );
 
-    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
     glVertexAttribPointer(
-        2,
+        3,
         1,
         GL_FLOAT,
         GL_FALSE,
@@ -607,9 +686,9 @@ void RenderableTube::initializeGL() {
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, value))
     );
 
-    glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
     glVertexAttribPointer(
-        3,
+        4,
         2,
         GL_FLOAT,
         GL_FALSE,
@@ -617,9 +696,9 @@ void RenderableTube::initializeGL() {
         reinterpret_cast<const GLvoid*>(offsetof(PolygonVertex, tex))
     );
 
-    glEnableVertexAttribArray(4);
+    glEnableVertexAttribArray(5);
     glVertexAttribPointer(
-        4,
+        5,
         2,
         GL_FLOAT,
         GL_FALSE,
@@ -1187,6 +1266,8 @@ void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
     centerPoint.position[1] = polygon->center.y;
     centerPoint.position[2] = polygon->center.z;
 
+    centerPoint.polyId = polygonIndex;
+
     // Calculate the normal, we know there are at least 3 point in the polygon
     glm::dvec3 v0 = polygon->center;
     glm::dvec3 v1 = polygon->points[0].coordinate;
@@ -1223,6 +1304,8 @@ void RenderableTube::addEdge(int polygonIndex, const TimePolygon const* polygon,
         sidePoint.position[0] = polygon->points[pointIndex].coordinate.x;
         sidePoint.position[1] = polygon->points[pointIndex].coordinate.y;
         sidePoint.position[2] = polygon->points[pointIndex].coordinate.z;
+
+        sidePoint.polyId = polygonIndex;
 
         sidePoint.normal[0] = normal.x;
         sidePoint.normal[1] = normal.y;
@@ -1296,6 +1379,8 @@ void RenderableTube::addSmoothSection(int polygonIndex, const TimePolygon const*
         sidePoint.position[0] = polygon->points[pointIndex].coordinate.x;
         sidePoint.position[1] = polygon->points[pointIndex].coordinate.y;
         sidePoint.position[2] = polygon->points[pointIndex].coordinate.z;
+
+        sidePoint.polyId = polygonIndex;
 
         // Calculate normal
         glm::dvec3 normal =
@@ -1400,6 +1485,12 @@ void RenderableTube::addLowPolySection(int polygonIndex, const TimePolygon const
         sidePointV3.position[0] = v3.coordinate.x;
         sidePointV3.position[1] = v3.coordinate.y;
         sidePointV3.position[2] = v3.coordinate.z;
+
+        // Polygon Index
+        sidePointV0.polyId = polygonIndex;
+        sidePointV1.polyId = polygonIndex + 1;
+        sidePointV2.polyId = polygonIndex + 1;
+        sidePointV3.polyId = polygonIndex;
 
         // Normal
         glm::dvec3 toNextPoly = glm::normalize(v1.coordinate - v0.coordinate);
@@ -1775,6 +1866,18 @@ void RenderableTube::setCommonUniforms(ghoul::opengl::ProgramObject* shader, con
         shader->setUniform("ambientIntensity", _shading.ambientIntensity);
         shader->setUniform("diffuseIntensity", _shading.diffuseIntensity);
         shader->setUniform("specularIntensity", _shading.specularIntensity);
+    }
+
+    // Fade calculation and settings
+    shader->setUniform("useTubeFade", _useTubeFade);
+    if (_useTubeFade) {
+        const float startPoint = 1.f - _tubeLength;
+        const float remainingRange = 1.f - startPoint;
+        const float delta = remainingRange * _tubeFadeAmount;
+        const float endPoint = std::min(startPoint + delta, 1.f);
+        shader->setUniform("tubeLength", startPoint);
+        shader->setUniform("tubeFadeAmount", endPoint);
+        shader->setUniform("nVisiblePoly", static_cast<int>(_firstPolygonAfterNow));
     }
 }
 

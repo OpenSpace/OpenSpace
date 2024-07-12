@@ -25,10 +25,11 @@
 #version __CONTEXT__
 
 layout (location = 0) in dvec3 in_position;
-layout (location = 1) in vec3 in_normal;
-layout (location = 2) in float in_value;
-layout (location = 3) in vec2 in_st_prev;
-layout (location = 4) in vec2 in_st_next;
+layout (location = 1) in vec3 in_polyId;
+layout (location = 2) in vec3 in_normal;
+layout (location = 3) in float in_value;
+layout (location = 4) in vec2 in_st_prev;
+layout (location = 5) in vec2 in_st_next;
 
 out float vs_depth;
 out vec3 vs_normal;

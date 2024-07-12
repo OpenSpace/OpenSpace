@@ -25,17 +25,25 @@
 #version __CONTEXT__
 
 layout (location = 0) in dvec3 in_position;
-layout (location = 1) in vec3 in_normal;
-layout (location = 2) in float in_value;
+layout (location = 1) in vec3 in_polyId;
+layout (location = 2) in vec3 in_normal;
+layout (location = 3) in float in_value;
 
 out float vs_depth;
+out uint vs_polyId;
 out vec3 vs_normal;
 out vec4 vs_positionViewSpace;
 out float vs_value;
+out float fade;
 
 uniform dmat4 modelViewTransform;
 uniform dmat4 projectionTransform;
 uniform mat3 normalTransform;
+
+uniform int nVisiblePoly;
+uniform bool useTubeFade;
+uniform float tubeLength;
+uniform float tubeFadeAmount;
 
 void main() {
   vs_value = in_value;
@@ -47,6 +55,32 @@ void main() {
   dvec4 positionClipSpace = projectionTransform * positionViewSpace;
   dvec4 positionScreenSpace = positionClipSpace;
   positionScreenSpace.z = 0.0;
+
+  // Calculate the tube fade
+  if (useTubeFade) {
+    // Convert the index to a [0,1] range
+    float current = float(in_polyId) / float(nVisiblePoly);
+
+    float fadeEnd = tubeLength;
+    float fadeStart = tubeFadeAmount;
+
+    float fadeValue = 0.0;
+    if (current <= fadeEnd) {
+        fadeValue = 0.0;
+    }
+    else if (current > fadeEnd && current < fadeStart) {
+        float delta = fadeStart - fadeEnd;
+        fadeValue = (current - fadeEnd) / delta;
+    }
+    else {
+        fadeValue = 1.0;
+    }
+
+    fade = clamp(fadeValue, 0.0, 1.0);
+  }
+  else {
+    fade = 1.0;
+  }
 
   gl_Position = vec4(positionScreenSpace);
   vs_depth = float(positionScreenSpace.w);

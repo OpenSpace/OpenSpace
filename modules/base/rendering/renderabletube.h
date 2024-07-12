@@ -64,6 +64,7 @@ public:
 private:
     struct PolygonVertex {
         GLdouble position[3];
+        GLuint polyId;
         GLfloat normal[3];
         GLfloat value;
         GLfloat tex[2];
@@ -157,6 +158,9 @@ private:
     properties::StringProperty _selectedSample;
     properties::FloatProperty _sampleLineWidth;
     properties::Vec3Property _sampleColor;
+    properties::BoolProperty _useTubeFade;
+    properties::FloatProperty _tubeLength;
+    properties::FloatProperty _tubeFadeAmount;
 
     std::vector<float> _lightIntensitiesBuffer;
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;

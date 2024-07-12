@@ -28,6 +28,7 @@ in float vs_depth;
 in vec3 vs_normal;
 in vec4 vs_positionViewSpace;
 in float vs_value;
+in float fade;
 
 uniform float opacity;
 uniform vec3 color;
@@ -135,7 +136,7 @@ Fragment getFragment() {
   frag.gPosition = vs_positionViewSpace;
   frag.gNormal = vec4(vs_normal, 0.0);
   frag.disableLDR2HDR = true;
-  frag.color.a = opacity;
+  frag.color.a = fade * opacity;
 
   return frag;
 }
