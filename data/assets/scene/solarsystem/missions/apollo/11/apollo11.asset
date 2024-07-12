@@ -1,6 +1,6 @@
 asset.require("../actions")
 asset.require("./actions")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local descentKeyframes = asset.require("./lem_descent")
 local descentRotationKeyframes = asset.require("./lem_descent_rotation")

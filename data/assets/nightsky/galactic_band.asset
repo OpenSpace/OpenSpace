@@ -78,7 +78,6 @@ asset.export("HideGalacticBand", HideGalacticBand.Identifier)
 
 asset.meta = {
   Name = "Galactic Line",
-  Version = "1.0",
   Description = [[A line representation of the Galactic Equator plane, including actions
     to toggle, hide and show it.]],
   Author = "OpenSpace Team",

@@ -81,9 +81,9 @@ private:
     properties::DoubleProperty _standOffDistance;
     properties::BoolProperty _alwaysDrawFov;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
-        targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,
-        squareColor, interpolation) _uniformCache;
+    UniformCache(modelViewProjectionTransform, colorStart, colorEnd,
+        activeColor, targetInFieldOfViewColor, intersectionStartColor,
+        intersectionEndColor, squareColor, interpolation) _uniformCache;
 
     bool _simplifyBounds = false;
 
@@ -131,6 +131,8 @@ private:
     RenderInformation _fieldOfViewBounds;
 
     struct {
+        properties::PropertyOwner container;
+
         /// Start color for uninteresting times
         properties::Vec3Property defaultStart;
         /// End color for uninteresting times

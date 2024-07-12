@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_BDR_NewYork",
   Name = "Messenger BDR [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("messenger_bdr_newyork.wms"),
   TilePixelSize = 360,
   Description = [[The Map Projected Basemap RDR (BDR) data set consists of a global
@@ -33,7 +34,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger BDR [New York]",
-  Version = "1.0",
   Description = [[Mercury MESSENGER MDIS Global Basemap BDR 166m layer for Mercury globe.
     This map is hosted on the OpenSpace server in New York]],
   Author = "USGS",

@@ -100,7 +100,6 @@ public:
         const glm::mat4& projectionMatrix);
     void drawOverlays();
     void postDraw();
-    void resetPropertyChangeFlags();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action,
         IsGuiWindow isGuiWindow);
     void charCallback(unsigned int codepoint, KeyModifier modifier,
@@ -117,7 +116,6 @@ public:
     void decode(std::vector<std::byte> data);
 
     properties::Property::Visibility visibility() const;
-    bool showHiddenSceneGraphNodes() const;
     void toggleShutdownMode();
 
     Mode currentMode() const;
@@ -134,7 +132,6 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
-    void writeDocumentation();
     void createUserDirectoriesIfNecessary();
 
     /**
@@ -148,11 +145,9 @@ private:
     void loadFonts();
 
     void runGlobalCustomizationScripts();
-    void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     properties::BoolProperty _printEvents;
     properties::OptionProperty _visibility;
-    properties::BoolProperty _showHiddenSceneGraphNodes;
     properties::FloatProperty _fadeOnEnableDuration;
     properties::BoolProperty _disableAllMouseInputs;
 

@@ -49,7 +49,7 @@ int IntProperty::fromLuaConversion(lua_State* state) const {
         return ghoul::lua::value<int>(state);
     }
     else {
-        throw ghoul::RuntimeError(fmt::format("Error extracting value in IntProperty"));
+        throw ghoul::RuntimeError("Error extracting value in IntProperty");
     }
 }
 

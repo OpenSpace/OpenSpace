@@ -81,7 +81,6 @@ asset.export("NeptuneMinorMoonsOff", NeptuneMinorMoonsOff.Identifier)
 
 asset.meta = {
   Name = "Neptune Minor Moons",
-  Version = "1.1",
   Description = [[Meta asset containing two moon groups: inner_moons and
     irregular_moons]],
   Author = "OpenSpace Team",

@@ -74,12 +74,12 @@ void performTasks(const std::string& path) {
         LINFO("Task queue has 1 item");
     }
     else {
-        LINFO(fmt::format("Task queue has {} items", tasks.size()));
+        LINFO(std::format("Task queue has {} items", tasks.size()));
     }
 
     for (size_t i = 0; i < tasks.size(); i++) {
         Task& task = *tasks[i].get();
-        LINFO(fmt::format(
+        LINFO(std::format(
             "Performing task {} out of {}: {}", i + 1, tasks.size(), task.description()
         ));
         ProgressBar progressBar(100);
@@ -164,7 +164,7 @@ int main(int argc, char** argv) {
 
     // If no task file was specified in as argument, run in CLI mode.
 
-    LINFO(fmt::format("Task root: {}", absPath("${TASKS}")));
+    LINFO(std::format("Task root: {}", absPath("${TASKS}")));
     std::filesystem::current_path(absPath("${TASKS}"));
 
     std::cout << "TASK > ";

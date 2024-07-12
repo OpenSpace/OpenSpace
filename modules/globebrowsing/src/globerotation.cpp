@@ -40,8 +40,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached Globe",
-        "The globe on which the longitude/latitude is specified",
-        // @VISIBILITY(2.5)
+        "The globe on which the longitude/latitude is specified.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -50,8 +49,7 @@ namespace {
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0",
-        // @VISIBILITY(2.25)
+        "globe. The default value is 0.0.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -60,8 +58,7 @@ namespace {
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0",
-        // @VISIBILITY(2.25)
+        "globe. The default value is 0.0.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -69,7 +66,7 @@ namespace {
         "Angle",
         "Angle",
         "A rotation angle that can be used to rotate the object around its own y-axis, "
-        "which will be pointing out of the globe's surface",
+        "which will be pointing out of the globe's surface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -78,16 +75,14 @@ namespace {
         "Use Heightmap",
         "If set to true, the heightmap will be used when computing the surface normal. "
         "This means that the object will be rotated to lay flat on the surface at the "
-        "given coordinate and follow the shape of the landscape",
-        // @VISIBILITY(2.5)
+        "given coordinate and follow the shape of the landscape.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseCameraInfo = {
         "UseCamera",
         "Use Camera",
-        "If this value is 'true', the lat and lon are updated to match the camera",
-        // @VISIBILITY(?)
+        "If this value is 'true', the lat and lon are updated to match the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -186,15 +181,14 @@ glm::vec3 GlobeRotation::computeSurfacePosition(double latitude, double longitud
     ghoul_assert(_globeNode, "Globe cannot be nullptr");
 
     GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
-    glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
+    const glm::vec3 groundPos = mod->cartesianCoordinatesFromGeo(
         *_globeNode,
         latitude,
         longitude,
         0.0
     );
 
-    SurfacePositionHandle h =
-        _globeNode->calculateSurfacePositionHandle(groundPos);
+    const SurfacePositionHandle h = _globeNode->calculateSurfacePositionHandle(groundPos);
 
     // Compute position including heightmap
     return mod->cartesianCoordinatesFromGeo(
@@ -228,12 +222,20 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         return _matrix;
     }
 
+    if (!_globeNode) {
+        LERRORC(
+            "GlobeRotation",
+            std::format("Could not find globe '{}'", _globe.value())
+        );
+        return _matrix;
+    }
+
     double lat = _latitude;
     double lon = _longitude;
 
     if (_useCamera) {
         GlobeBrowsingModule* mod = global::moduleEngine->module<GlobeBrowsingModule>();
-        glm::dvec3 position = mod->geoPosition();
+        const glm::dvec3 position = mod->geoPosition();
         lat = position.x;
         lon = position.y;
     }
@@ -251,8 +253,8 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         yAxis = glm::dvec3(glm::cross(v1, v2));
     }
     else {
-        float latitudeRad = glm::radians(static_cast<float>(lat));
-        float longitudeRad = glm::radians(static_cast<float>(lon));
+        const float latitudeRad = glm::radians(static_cast<float>(lat));
+        const float longitudeRad = glm::radians(static_cast<float>(lon));
         yAxis = _globeNode->ellipsoid().geodeticSurfaceNormal(
             { latitudeRad, longitudeRad }
         );

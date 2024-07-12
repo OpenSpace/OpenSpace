@@ -27,11 +27,14 @@
 
 #include <modules/spacecraftinstruments/util/sequenceparser.h>
 
+#include <filesystem>
+
 namespace openspace {
 
 class LabelParser : public SequenceParser {
 public:
-    LabelParser(std::string fileName, const ghoul::Dictionary& translationDictionary);
+    LabelParser(std::filesystem::path fileName,
+        const ghoul::Dictionary& translationDictionary);
 
     bool create() override;
 
@@ -39,7 +42,7 @@ private:
     std::string encode(const std::string& line) const;
     std::string decode(const std::string& line);
 
-    std::string _fileName;
+    std::filesystem::path _fileName;
     std::vector<std::string> _specsOfInterest;
 
     std::string _target;

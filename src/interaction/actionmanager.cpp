@@ -24,6 +24,8 @@
 
 #include <openspace/interaction/actionmanager.h>
 
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
@@ -49,6 +51,9 @@ void ActionManager::registerAction(Action action) {
     ghoul_assert(!hasAction(action.identifier), "Identifier already existed");
 
     const unsigned int hash = ghoul::hashCRC32(action.identifier);
+    global::eventEngine->publishEvent<events::EventActionAdded>(
+        action.identifier
+    );
     _actions[hash] = std::move(action);
 }
 
@@ -58,6 +63,9 @@ void ActionManager::removeAction(const std::string& identifier) {
 
     const unsigned int hash = ghoul::hashCRC32(identifier);
     const auto it = _actions.find(hash);
+    global::eventEngine->publishEvent<events::EventActionRemoved>(
+        identifier
+    );
     _actions.erase(it);
 }
 
@@ -88,7 +96,7 @@ void ActionManager::triggerAction(const std::string& identifier,
     if (!hasAction(identifier)) {
         LWARNINGC(
             "ActionManager",
-            fmt::format("Action '{}' not found in the list", identifier)
+            std::format("Action '{}' not found in the list", identifier)
         );
         return;
     }
@@ -97,18 +105,18 @@ void ActionManager::triggerAction(const std::string& identifier,
     std::string script =
         arguments.isEmpty() ?
         a.command :
-        fmt::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
+        std::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
 
     if (!shouldBeSynchronized || a.isLocal) {
         global::scriptEngine->queueScript(
-            script,
+            std::move(script),
             scripting::ScriptEngine::ShouldBeSynchronized::No,
             scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
     else {
         global::scriptEngine->queueScript(
-            script,
+            std::move(script),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );

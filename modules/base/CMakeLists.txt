@@ -47,6 +47,7 @@ set(HEADER_FILES
   rendering/pointcloud/renderableinterpolatedpoints.h
   rendering/pointcloud/renderablepointcloud.h
   rendering/pointcloud/renderablepolygoncloud.h
+  rendering/pointcloud/sizemappingcomponent.h
   rendering/renderablecartesianaxes.h
   rendering/renderabledisc.h
   rendering/renderablelabel.h
@@ -110,6 +111,7 @@ set(SOURCE_FILES
   rendering/pointcloud/renderableinterpolatedpoints.cpp
   rendering/pointcloud/renderablepointcloud.cpp
   rendering/pointcloud/renderablepolygoncloud.cpp
+  rendering/pointcloud/sizemappingcomponent.cpp
   rendering/renderablecartesianaxes.cpp
   rendering/renderabledisc.cpp
   rendering/renderablelabel.cpp
@@ -168,10 +170,10 @@ set(SHADER_FILES
   shaders/model_vs.glsl
   shaders/plane_fs.glsl
   shaders/plane_vs.glsl
-  shaders/pointcloud/billboardpoint_fs.glsl
-  shaders/pointcloud/billboardpoint_gs.glsl
-  shaders/pointcloud/billboardpoint_vs.glsl
-  shaders/pointcloud/billboardpoint_interpolated_vs.glsl
+  shaders/pointcloud/pointcloud_fs.glsl
+  shaders/pointcloud/pointcloud_gs.glsl
+  shaders/pointcloud/pointcloud_vs.glsl
+  shaders/pointcloud/pointcloud_interpolated_vs.glsl
   shaders/polygon_fs.glsl
   shaders/polygon_gs.glsl
   shaders/polygon_vs.glsl

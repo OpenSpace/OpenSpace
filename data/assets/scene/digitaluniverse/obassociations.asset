@@ -36,10 +36,11 @@ local Object = {
     Opacity = 0.7,
     File = speck .. "ob.speck",
     Unit = "pc",
-    Texture = textures .. "point4.png",
     PolygonSides = 7,
     SizeSettings = {
-      SizeMapping = { "diameter" },
+      SizeMapping = {
+        ParameterOptions = { "diameter" }
+      },
       ScaleExponent = 16.9,
       MaxSize = 17,
       EnableMaxSizeControl = true
@@ -77,7 +78,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "OB Associations",
-  Version = "3.0",
   Description = "Digital Universe asset for OB Associations",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

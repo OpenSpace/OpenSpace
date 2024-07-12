@@ -40,7 +40,6 @@ asset.export(MercuryTrail)
 
 asset.meta = {
   Name = "Mercury Trail",
-  Version = "1.1",
   Description = "Main trail for Mercury",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

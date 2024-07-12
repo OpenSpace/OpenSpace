@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___COLORMAPCOMPONENT___H__
-#define __OPENSPACE_CORE___COLORMAPCOMPONENT___H__
+#ifndef __OPENSPACE_CORE___COLORMAPPINGCOMPONENT___H__
+#define __OPENSPACE_CORE___COLORMAPPINGCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -62,19 +62,20 @@ public:
      * Initialize the color map information (ranges, etc.) based on the input dataset.
      *
      * \param dataset The *loaded* input dataset
+     * \param useCaching Whether caching should be used when loading the color map file
      */
-    void initialize(const dataloader::Dataset& dataset);
+    void initialize(const dataloader::Dataset& dataset, bool useCaching = true);
 
     /**
      * Initialize a 1D texture based on the entries in the color map file.
      */
     void initializeTexture();
 
-    void update(const dataloader::Dataset& dataset);
+    void update(const dataloader::Dataset& dataset, bool useCaching = true);
 
     static documentation::Documentation Documentation();
 
-    glm::vec4 colorFromColorMap(float value) const;
+    glm::vec4 colorFromColorMap(float valueToColorFrom) const;
 
     properties::BoolProperty enabled;
     properties::BoolProperty invert;
@@ -120,4 +121,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___COLORMAPCOMPONENT___H__
+#endif // __OPENSPACE_CORE___COLORMAPPINGCOMPONENT___H__

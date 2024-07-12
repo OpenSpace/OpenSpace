@@ -253,8 +253,11 @@ public:
      * \param documentationEntries The DocumentationEntry%s that are used to recursively
      *        test the ghoul::Dictionary that is contained inside. If this list is empty,
      *        only a type check is performed
+     * \param nEntries The exact number of entries that should be in the table. If the
+     *        value is not provided, any number (including 0) is allowed
      */
-    TableVerifier(std::vector<DocumentationEntry> documentationEntries = {});
+    TableVerifier(std::vector<DocumentationEntry> documentationEntries = {},
+        std::optional<int> nEntries = std::nullopt);
 
     /**
      * Checks whether the \p key%'s value is a table (= ghoul::Dictionary) and (if
@@ -277,6 +280,7 @@ public:
 
     /// The documentations passed in the constructor
     std::vector<DocumentationEntry> documentations;
+    std::optional<int> count;
 };
 
 /**
@@ -954,7 +958,7 @@ public:
      *       necessary to make the codegen work in all cases without complications there
      */
     OrVerifier(const std::vector<std::variant<Verifier*,
-        std::shared_ptr<Verifier>>> values);
+        std::shared_ptr<Verifier>>>& values);
 
     /**
      * Checks whether the \p dictionary contains the \p key and whether this key passes

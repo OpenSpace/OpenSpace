@@ -81,6 +81,8 @@ public:
     double minValidBoundingSphere() const;
     double findValidBoundingSphere(const SceneGraphNode* node) const;
 
+    double defaultArrivalHeight(const std::string& sgnIdentifier) const;
+
     const std::vector<SceneGraphNode*>& relevantNodes();
 
     /**
@@ -105,7 +107,7 @@ private:
      */
     void findRelevantNodes();
 
-    void removeRollRotation(CameraPose& pose);
+    void removeRollRotation(CameraPose& pose) const;
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;

@@ -39,11 +39,12 @@ namespace {
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed",
-        // @VISIBILITY(2.25)
+        "and displayed.",
         openspace::properties::Property::Visibility::User
     };
 
+    // A RenderablePlaneImageOnline creates a textured 3D plane, where the texture image
+    // is loaded from the internet though a web URL.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
@@ -77,19 +78,18 @@ RenderablePlaneImageOnline::RenderablePlaneImageOnline(
         }
 
         // Shape the plane based on the aspect ration of the image
-        glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
         if (_textureDimensions != textureDim) {
-            float aspectRatio = textureDim.x / textureDim.y;
-            float planeAspectRatio = _size.value().x / _size.value().y;
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
 
             if (std::abs(planeAspectRatio - aspectRatio) >
                 std::numeric_limits<float>::epsilon())
             {
-                glm::vec2 newSize =
+                _size =
                     aspectRatio > 0.f ?
                     glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
                     glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-                _size = newSize;
             }
 
             _textureDimensions = textureDim;
@@ -129,12 +129,12 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
             LERRORC(
                 "ScreenSpaceImageOnline",
-                fmt::format("Error loading image from URL '{}'", _texturePath.value())
+                std::format("Error loading image from URL '{}'", _texturePath.value())
             );
             return;
         }
@@ -165,19 +165,18 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
                 }
 
                 // Shape the plane based on the aspect ration of the image
-                glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+                const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
                 if (_textureDimensions != textureDim) {
-                    float aspectRatio = textureDim.x / textureDim.y;
-                    float planeAspectRatio = _size.value().x / _size.value().y;
+                    const float aspectRatio = textureDim.x / textureDim.y;
+                    const float planeAspectRatio = _size.value().x / _size.value().y;
 
                     if (std::abs(planeAspectRatio - aspectRatio) >
                         std::numeric_limits<float>::epsilon())
                     {
-                        glm::vec2 newSize =
+                        _size =
                             aspectRatio > 0.f ?
                             glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
                             glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-                        _size = newSize;
                     }
 
                     _textureDimensions = textureDim;

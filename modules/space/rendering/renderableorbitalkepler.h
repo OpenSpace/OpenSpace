@@ -54,6 +54,30 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    struct Appearance : properties::PropertyOwner {
+        Appearance();
+        /// Specifies the base color of the line/point
+        properties::Vec3Property color;
+        /// Line width for the line rendering part
+        properties::FloatProperty trailWidth;
+        /// Point size exponent for the point rendering part
+        properties::FloatProperty pointSizeExponent;
+        /// The option determining which rendering method to use
+        properties::BoolProperty enableMaxSize;
+        /// The option enables or disables Max Angular Size limit
+        properties::FloatProperty maxSize;
+        /// Max angular size between vector cameraToPoint and edge of the point
+        properties::OptionProperty renderingModes;
+        /// Specifies a multiplicative factor that fades out the trail line
+        properties::FloatProperty trailFade;
+        /// Specifies if the point outline should be enabled
+        properties::BoolProperty enableOutline;
+        /// Specifies the color of the point outline
+        properties::Vec3Property outlineColor;
+        /// Specifies how much if the point should be covered by the outline
+        properties::FloatProperty outlineWidth;
+    };
+
     void updateBuffers();
 
     bool _updateDataBuffersAtNextRender = false;
@@ -80,17 +104,26 @@ private:
     GLuint _vertexArray;
     GLuint _vertexBuffer;
 
-    ghoul::opengl::ProgramObject* _programObject;
+    ghoul::opengl::ProgramObject* _trailProgram;
+    ghoul::opengl::ProgramObject* _pointProgram;
     properties::StringProperty _path;
     properties::BoolProperty _contiguousMode;
     kepler::Format _format;
-    RenderableTrail::Appearance _appearance;
+    RenderableOrbitalKepler::Appearance _appearance;
 
-    UniformCache(modelView, projection, lineFade, inGameTime, color, opacity,
-        numberOfSegments) _uniformCache;
+    // Line cache
+    UniformCache(modelView, projection, trailFadeExponent, colorFadeCutoffValue,
+        inGameTime, color, opacity)
+        _uniformTrailCache;
+
+    // Point cache
+    UniformCache(modelTransform, viewTransform, projectionTransform,
+        cameraPositionWorld, cameraUpWorld,  inGameTime, color,
+        pointSizeExponent, enableMaxSize, maxSize, enableOutline,
+        outlineColor, outlineWeight, opacity)
+        _uniformPointCache;
 };
 
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___RENDERABLEORBITALKEPLER___H__
-

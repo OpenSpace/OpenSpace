@@ -75,7 +75,6 @@ end)
 
 asset.meta = {
   Name = "State Machine",
-  Version = "1.0",
   Description = [[Example of how to create a state machine in OpenSpace, where each
     state and transition between states may trigger different behaviors.]],
   Author = "OpenSpace Team",

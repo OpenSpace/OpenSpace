@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_LOI_Sweden",
   Name = "Messenger LOI [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("messenger_loi_sweden.wms")
 }
 
@@ -24,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger LOI [Sweden]",
-  Version = "1.0",
   Description = [[Mercury LOI layer for Mercury globe. This map is hosted on the OpenSpace
     server in Sweden]],
   Author = "USGS",

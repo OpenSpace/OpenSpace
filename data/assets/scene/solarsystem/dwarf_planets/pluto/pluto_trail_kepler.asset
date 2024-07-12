@@ -48,7 +48,6 @@ asset.export(PlutoKeplerianTrail)
 
 asset.meta = {
   Name = "Pluto Keplerian Trail",
-  Version = "1.0",
   Description = [[Full Keplerian trail of Pluto as observed by the Sun. Data from
     JPL Horizons]],
   Author = "OpenSpace Team",

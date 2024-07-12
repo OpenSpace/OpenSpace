@@ -39,25 +39,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered",
-        // @VISIBILITY(1.25)
+        "The color of the grid lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
         "Highlight Color",
-        "This value determines the color of the highlighted lines in the grid",
-        // @VISIBILITY(1.25)
+        "The color of the highlighted lines in the grid.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of Segments",
-        "This value specifies the number of segments that are used to render the "
-        "grid in each direction",
-        // @VISIBILITY(2.75)
+        "The number of segments to split the grid into, in each direction (x and y).",
         openspace::properties::Property::Visibility::User
     };
 
@@ -73,29 +69,29 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the grid",
-        // @VISIBILITY(1.5)
+        "The width of the grid lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
         "Highlight Line Width",
-        "This value specifies the line width of the highlighted lines in the grid",
+        "The width of the highlighted grid lines. The larger number, the thicker the "
+        "lines.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid Size",
-        "This value species the size of each dimensions of the grid",
+        "The size of the grid (in the x and y direction), given in meters.",
         openspace::properties::Property::Visibility::User
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the grid"
+        "The labels for the grid."
     };
 
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
@@ -262,7 +258,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     );
 
     if (orthoRight == glm::vec3(0.0)) {
-        glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+        const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
             glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
@@ -336,8 +332,8 @@ void RenderableGrid::update(const UpdateData&) {
 
     // If the number of segments are uneven the center won't be completly centered
     const glm::uvec2 center = glm::uvec2(nSegments.x / 2.f, nSegments.y / 2.f);
-    for (unsigned int i = 0; i < nSegments.x; ++i) {
-        for (unsigned int j = 0; j < nSegments.y; ++j) {
+    for (unsigned int i = 0; i < nSegments.x; i++) {
+        for (unsigned int j = 0; j < nSegments.y; j++) {
             const double y0 = -halfSize.y + j * step.y;
             const double y1 = y0 + step.y;
 
@@ -347,8 +343,8 @@ void RenderableGrid::update(const UpdateData&) {
             // Line in y direction
             bool shouldHighlight = false;
             if (_highlightRate.value().x != 0) {
-                int dist = abs(static_cast<int>(i) - static_cast<int>(center.x));
-                int rest = dist % _highlightRate.value().x;
+                const int dist = abs(static_cast<int>(i) - static_cast<int>(center.x));
+                const int rest = dist % _highlightRate.value().x;
                 shouldHighlight = rest == 0;
             }
 
@@ -364,8 +360,8 @@ void RenderableGrid::update(const UpdateData&) {
             // Line in x direction
             shouldHighlight = false;
             if (_highlightRate.value().y != 0) {
-                int dist = abs(static_cast<int>(j) - static_cast<int>(center.y));
-                int rest = dist % _highlightRate.value().y;
+                const int dist = abs(static_cast<int>(j) - static_cast<int>(center.y));
+                const int rest = dist % _highlightRate.value().y;
                 shouldHighlight = abs(rest) == 0;
             }
 
@@ -381,15 +377,17 @@ void RenderableGrid::update(const UpdateData&) {
     }
 
     // last x row
-    for (unsigned int i = 0; i < nSegments.x; ++i) {
+    for (unsigned int i = 0; i < nSegments.x; i++) {
         const double x0 = -halfSize.x + i * step.x;
         const double x1 = x0 + step.x;
 
         bool shouldHighlight = false;
         if (_highlightRate.value().y != 0) {
-            int dist = abs(static_cast<int>(nSegments.y) - static_cast<int>(center.y));
-            int rest = dist % _highlightRate.value().y;
-            shouldHighlight = abs(rest) == 0;
+            const int dist = std::abs(
+                static_cast<int>(nSegments.y) - static_cast<int>(center.y)
+            );
+            const int rest = dist % _highlightRate.value().y;
+            shouldHighlight = std::abs(rest) == 0;
         }
 
         if (shouldHighlight) {
@@ -403,15 +401,17 @@ void RenderableGrid::update(const UpdateData&) {
     }
 
     // last y col
-    for (unsigned int j = 0; j < nSegments.y; ++j) {
+    for (unsigned int j = 0; j < nSegments.y; j++) {
         const double y0 = -halfSize.y + j * step.y;
         const double y1 = y0 + step.y;
 
         bool shouldHighlight = false;
         if (_highlightRate.value().x != 0) {
-            int dist = abs(static_cast<int>(nSegments.x) - static_cast<int>(center.x));
-            int rest = dist % _highlightRate.value().x;
-            shouldHighlight = abs(rest) == 0;
+            const int dist = std::abs(
+                static_cast<int>(nSegments.x) - static_cast<int>(center.x)
+            );
+            const int rest = dist % _highlightRate.value().x;
+            shouldHighlight = std::abs(rest) == 0;
         }
         if (shouldHighlight) {
             _highlightArray.push_back({ halfSize.x, y0, 0.0 });

@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Potentially hazardous Asteroids)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_pha",
-  Version = 3
+  Version = 4
 })
 
 
@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 3,
     Color = { 0.98, 0.09, 0.06 },
-    TrailFade = 17
+    TrailFade = 17,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Potentially Hazardous Asteroids",
@@ -47,7 +48,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Potentially-Hazardous Asteroids",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     Potentially Hazardous group. ]],
   Author = [[JPL Small-Body Database hosted by California Institute of

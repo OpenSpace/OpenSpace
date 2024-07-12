@@ -30,7 +30,9 @@ local Object = {
         }
       }
     },
-    Texture = textures .. "point3A.png",
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Unit = "Mpc",
     Fading = {
       FadeInDistances = { 220.0, 650.0 } -- Fade in value in the same unit as "Unit"
@@ -77,7 +79,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Sloan Digital Sky Survey",
-  Version = "3.0",
   Description = "Digital Universe asset for The Sloan Digital Sky Survey (SDSS)",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

@@ -1,5 +1,5 @@
 local transform = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -30,7 +30,7 @@ local Euclid = {
     Rotation = {
       Type = "FixedRotation",
       Attached = "Euclid",
-      ZAxis = "Sun",
+      ZAxis = sun.SunCenter.Identifier,
       YAxis = { 0.0, 1.0, 0.0 },
       YAxisOrthogonal = true
     }
@@ -66,7 +66,6 @@ asset.export(Euclid)
 
 asset.meta = {
   Name = "Euclid Model",
-  Version = "1.0",
   Description = "This asset contains the model of ESA's Euclid spacecraft. The model is retrieved from https://scifleet.esa.int",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

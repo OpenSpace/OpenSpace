@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Mars-Crossing Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_mars-crossing_asteroid",
-  Version = 3
+  Version = 4
 })
 
 
@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 1,
     Color = { 0.814, 0.305, 0.22 },
-    TrailFade = 13
+    TrailFade = 13,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Mars-crossing Asteroids",
@@ -45,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Mars-Crossing Asteroids",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     Mars-Crossing group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

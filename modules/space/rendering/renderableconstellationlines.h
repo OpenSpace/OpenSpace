@@ -52,7 +52,7 @@ public:
 
     bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
@@ -81,13 +81,12 @@ private:
      */
     void selectionPropertyHasChanged() override;
 
+    properties::StringProperty _speckFile;
     properties::BoolProperty _drawElements;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, opacity,
         color) _uniformCache;
-
-    properties::StringProperty _speckFile;
 
     DistanceUnit _constellationUnit = DistanceUnit::Parsec;
 

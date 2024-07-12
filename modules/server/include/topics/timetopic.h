@@ -41,7 +41,7 @@ public:
 private:
     static constexpr int UnsetOnChangeHandle = -1;
 
-    const nlohmann::json getNextPrevDeltaTimeStepJson();
+    nlohmann::json getNextPrevDeltaTimeStepJson();
 
     void sendCurrentTime();
     void sendFullTimeData();

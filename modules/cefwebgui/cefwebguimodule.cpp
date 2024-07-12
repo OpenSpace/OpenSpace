@@ -32,7 +32,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
@@ -41,38 +41,35 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "This setting determines whether the browser should be enabled or not",
+        "This setting determines whether the browser should be enabled or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Trigger this property to reload the browser",
-        // @VISIBILITY(2.2)
+        "Trigger this property to reload the browser.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "Visible",
         "Is Visible",
-        "This setting determines whether the browser should be visible or not",
-        // @VISIBILITY(2.75)
+        "This setting determines whether the browser should be visible or not.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "GUI URL",
-        "The URL of the webpage that is used to load the WebGUI from",
-        // @VISIBILITY(3.5)
+        "The URL of the webpage that is used to load the WebGUI from.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
         "GuiScale",
         "Gui Scale",
-        "GUI scale multiplier",
+        "GUI scale multiplier.",
         openspace::properties::Property::Visibility::Always
     };
 } // namespace
@@ -102,7 +99,7 @@ void CefWebGuiModule::startOrStopGui() {
     const bool isMaster = global::windowDelegate->isMaster();
 
     if (_enabled && isMaster) {
-        LDEBUGC("WebBrowser", fmt::format("Loading GUI from {}", _url.value()));
+        LDEBUGC("WebBrowser", std::format("Loading GUI from '{}'", _url.value()));
 
         if (!_instance) {
             _instance = std::make_unique<BrowserInstance>(
@@ -140,8 +137,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     WebBrowserModule* webBrowserModule =
         global::moduleEngine->module<WebBrowserModule>();
 
-    bool available = webBrowserModule && webBrowserModule->isEnabled();
-
+    const bool available = webBrowserModule && webBrowserModule->isEnabled();
     if (!available) {
         return;
     }
@@ -232,7 +228,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
         if (isGuiWindow && isMaster && _instance) {
             if (global::windowDelegate->windowHasResized() || _instance->_shouldReshape) {
-                glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
+                const glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
                 _instance->reshape(static_cast<glm::ivec2>(
                     static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
                 ));

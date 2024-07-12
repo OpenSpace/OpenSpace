@@ -4,6 +4,7 @@ local Layer = {
   Identifier = "Messenger_DEM_Utah",
   Name = "Messenger DEM [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("messenger_dem_utah.wms"),
   Settings = {
     Gamma = 1.59,

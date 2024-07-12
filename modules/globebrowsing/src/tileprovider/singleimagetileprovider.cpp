@@ -32,7 +32,7 @@ namespace {
         "FilePath",
         "File Path",
         "The file path that is used for this image provider. The file must point to an "
-        "image that is then loaded and used for all tiles",
+        "image that is then loaded and used for all tiles.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -82,10 +82,10 @@ void SingleImageProvider::reset() {
         return;
     }
 
-    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_filePath, 2);
+    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_filePath.value(), 2);
     if (!_tileTexture) {
         throw ghoul::RuntimeError(
-            fmt::format("Unable to load texture '{}'", _filePath.value())
+            std::format("Unable to load texture '{}'", _filePath.value())
         );
     }
 

@@ -41,15 +41,16 @@ namespace {
         "This value is the path to the Lua script that will be executed to compute the "
         "scaling factor for this transformation. The script needs to define a function "
         "'scale' that takes the current simulation time in seconds past the J2000 epoch "
-        "as the first argument, the current wall time as milliseconds past the J2000 "
-        "epoch the second argument and computes the three scaling factors",
-        // @VISIBILITY(3.25)
+        "as the first argument, the simulation time in seconds past the J2000 epoch of "
+        "the last frame as the second argument, and the current wall time as "
+        "milliseconds past the J2000 epoch the third argument and computes the three "
+        "scaling factors returned as a table.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(LuaScale)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
-        std::string script;
+        std::filesystem::path script;
     };
 #include "luascale_codegen.cpp"
 } // namespace
@@ -60,22 +61,23 @@ documentation::Documentation LuaScale::Documentation() {
     return codegen::doc<Parameters>("base_scale_lua");
 }
 
-LuaScale::LuaScale()
+LuaScale::LuaScale(const ghoul::Dictionary& dictionary)
     : _luaScriptFile(ScriptInfo)
-    , _state(ghoul::lua::LuaState::IncludeStandardLibrary::No)
+    , _state(
+        ghoul::lua::LuaState::IncludeStandardLibrary::Yes,
+        ghoul::lua::LuaState::StrictState::No
+    )
 {
-    addProperty(_luaScriptFile);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _luaScriptFile.onChange([this]() {
         requireUpdate();
         _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
         _fileHandle->setCallback([this]() { requireUpdate(); });
     });
-}
+    addProperty(_luaScriptFile);
 
-LuaScale::LuaScale(const ghoul::Dictionary& dictionary) : LuaScale() {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    _luaScriptFile = absPath(p.script).string();
+    _luaScriptFile = p.script.string();
 }
 
 glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
@@ -87,7 +89,7 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     if (!isFunction) {
         LERRORC(
             "LuaScale",
-            fmt::format(
+            std::format(
                 "Script '{}' does not have a function 'scale'", _luaScriptFile.value()
             )
         );
@@ -100,25 +102,22 @@ glm::dvec3 LuaScale::scaleValue(const UpdateData& data) const {
     // Second argument is the number of seconds past the J2000 epoch of last frame
     ghoul::lua::push(_state, data.previousFrameTime.j2000Seconds());
 
-    // Second argument is the number of milliseconds past the J2000 epoch in wallclock
+    // Third argument is the number of milliseconds past the J2000 epoch in wallclock
     using namespace std::chrono;
     const auto now = std::chrono::high_resolution_clock::now();
     ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
     // Execute the scaling function
-    const int success = lua_pcall(_state, 2, 1, 0);
+    const int success = lua_pcall(_state, 3, 1, 0);
     if (success != 0) {
         LERRORC(
             "LuaScale",
-            fmt::format("Error executing 'scale': {}", lua_tostring(_state, -1))
+            std::format("Error executing 'scale': {}", lua_tostring(_state, -1))
         );
     }
 
-    const double x = luaL_checknumber(_state, -1);
-    const double y = luaL_checknumber(_state, -2);
-    const double z = luaL_checknumber(_state, -3);
-    lua_settop(_state, 0);
-    return glm::dvec3(x, y, z);
+    const glm::dvec3 scale = ghoul::lua::value<glm::dvec3>(_state);
+    return scale;
 }
 
 } // namespace openspace

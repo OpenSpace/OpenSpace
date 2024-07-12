@@ -123,7 +123,6 @@ asset.export("ToggleMeridian", ToggleMeridian.Identifier)
 
 asset.meta = {
   Name = "Meridian",
-  Version = "1.0",
   Description = [[A line representation of the Local Meridian, including actions
     to toggle, hide and show it.]],
   Author = "OpenSpace Team",

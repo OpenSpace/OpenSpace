@@ -103,11 +103,12 @@ public:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::filesystem::path& vsPath,
-        std::filesystem::path fsPath, ghoul::Dictionary data = ghoul::Dictionary());
+        const std::filesystem::path& fsPath,
+        ghoul::Dictionary data = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::filesystem::path& vsPath,
-        std::filesystem::path fsPath, const std::filesystem::path& csPath,
+        const std::filesystem::path& fsPath, const std::filesystem::path& csPath,
         ghoul::Dictionary data = ghoul::Dictionary());
 
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
@@ -164,7 +165,7 @@ private:
     void renderVersionInformation();
     void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
-    void renderDashboard();
+    void renderDashboard() const;
     float combinedBlackoutFactor() const;
 
     Camera* _camera = nullptr;
@@ -186,6 +187,7 @@ private:
     properties::IntListProperty _screenshotWindowIds;
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _showStatistics;
+    properties::FloatProperty _statisticsScale;
     properties::BoolProperty _screenshotUseDate;
     properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;

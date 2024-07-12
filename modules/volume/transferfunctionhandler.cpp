@@ -32,45 +32,44 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunction",
         "TransferFunction",
-        "All the envelopes used in the transfer function",
+        "All the envelopes used in the transfer function.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataUnitInfo = {
         "DataUnit",
         "DataUnit",
-        "Unit of the data",
+        "Unit of the data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinValueInfo = {
         "MinValue",
         "MinValue",
-        "Minimum value in the data",
+        "Minimum value in the data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxValueInfo = {
         "MaxValue",
         "MaxValue",
-        "Maximum value in the data",
+        "Maximum value in the data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveTransferFunctionInfo = {
         "SaveTransferFunction",
         "Save Transfer Function",
-        "Save your transfer function",
-        // @VISIBILITY(3.5)
+        "Save your transfer function.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
 namespace openspace::volume {
 
-TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
+TransferFunctionHandler::TransferFunctionHandler(properties::StringProperty prop)
     : properties::PropertyOwner({ "TransferFunctionHandler", "Tranfer Function Handler" })
-    , _transferFunctionPath(prop)
+    , _transferFunctionPath(std::move(prop))
     , _dataUnit(DataUnitInfo)
     , _minValue(MinValueInfo)
     , _maxValue(MaxValueInfo)
@@ -78,7 +77,7 @@ TransferFunctionHandler::TransferFunctionHandler(const properties::StringPropert
     , _transferFunctionProperty(TransferFunctionInfo)
 {
     _transferFunction = std::make_shared<openspace::TransferFunction>(
-        _transferFunctionPath
+        _transferFunctionPath.value()
     );
 }
 
@@ -143,7 +142,7 @@ void TransferFunctionHandler::setFilepath(std::string path) {
 }
 
 ghoul::opengl::Texture& TransferFunctionHandler::texture() {
-    return *_texture.get();
+    return *_texture;
 }
 
 void TransferFunctionHandler::uploadTexture() {

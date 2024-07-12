@@ -229,7 +229,6 @@ asset.export(ENLILStereoA)
 
 asset.meta = {
   Name = "Fieldlines from ENLIL model of 2012 event",
-  Version = "1.0",
   Description = "Magnetic fieldlines from ENLIL model for a 2012 CME event",
   Author = "CCMC",
   URL = "",

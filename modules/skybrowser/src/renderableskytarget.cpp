@@ -50,24 +50,24 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo crossHairSizeInfo = {
         "CrosshairSize",
         "Crosshair Size",
-        "Determines the size of the crosshair. The size is determined in fov (degrees)",
+        "The size of the crosshair given as a field of view (in degrees).",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RectangleThresholdInfo = {
         "RectangleThreshold",
         "Rectangle Threshold",
-        "When the field of view is larger than the rectangle threshold, a rectangle will "
-        "be rendered in the target",
-        // @VISIBILITY(2.33)
+        "A threshold value for the vertical field of view, in degrees, that decides when "
+        "a rectangle will be used to visualize the target in addition to the crosshair. "
+        "When the field of view is smaller than this value, only the crosshair will be "
+        "shown.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The thickness of the line of the target. The larger number, the thicker line",
-        // @VISIBILITY(1.33)
+        "The thickness of the line of the target. The larger number, the thicker line.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -75,16 +75,15 @@ namespace {
         "VerticalFov",
         "Vertical Field Of View",
         "The vertical field of view of the target.",
-        // @VISIBILITY(2.33)
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyRollInfo = {
        "ApplyRoll",
        "Apply Roll",
-       "Always rotate the target to have it's up direction aligned with the up direction "
-       "of the camera",
-        openspace::properties::Property::Visibility::User
+       "If true, always rotate the target to have its up direction aligned with the up "
+       "direction of the camera.",
+       openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
@@ -173,20 +172,20 @@ glm::ivec3 RenderableSkyTarget::borderColor() const {
 }
 
 glm::dvec3 RenderableSkyTarget::rightVector() const {
-    double scaling =
-        (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
+    const double scaling =
+        (_verticalFov / 70.0) * static_cast<double>(glm::compMax(_size.value()));
     return scaling * _rightVector;
 }
 
 glm::dvec3 RenderableSkyTarget::upVector() const {
-    double scaling =
-        (_verticalFov / 70) * static_cast<double>(glm::compMax(_size.value()));
+    const double scaling =
+        (_verticalFov / 70.0) * static_cast<double>(glm::compMax(_size.value()));
     return scaling * _upVector;
 }
 
 void RenderableSkyTarget::applyRoll() {
     Camera* camera = global::navigationHandler->camera();
-    glm::dvec3 normal = glm::normalize(camera->positionVec3() - _worldPosition);
+    const glm::dvec3 normal = glm::normalize(camera->positionVec3() - _worldPosition);
 
     _rightVector = glm::normalize(
         glm::cross(camera->lookUpVectorWorldSpace(), normal)
@@ -198,7 +197,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     ZoneScoped;
     const bool showRectangle = _verticalFov > _showRectangleThreshold;
 
-    glm::vec4 color = glm::vec4(glm::vec3(_borderColor) / 255.f, 1.0);
+    const glm::vec4 color = glm::vec4(glm::vec3(_borderColor) / 255.f, 1.0);
 
     _shader->activate();
     _shader->setUniform("opacity", opacity());
@@ -216,7 +215,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
             data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - _worldPosition);
+    const glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - _worldPosition);
     // There are two modes - 1) target rolls to have its up vector parallel to the
     // cameras up vector or 2) it is decoupled from the camera, in which case it needs to
     // be initialized once
@@ -253,7 +252,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
 
     _shader->setUniform("multiplyColor", _multiplyColor);
 
-    bool additiveBlending = (_blendMode == static_cast<int>(BlendMode::Additive));
+    const bool additiveBlending = _blendMode == static_cast<int>(BlendMode::Additive);
     if (additiveBlending) {
         glDepthMask(false);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);

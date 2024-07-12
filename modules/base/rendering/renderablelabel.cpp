@@ -92,70 +92,64 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
-        "This determines the blending mode that is applied to the renderable",
+        "This determines the blending mode that is applied to the renderable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The label text color",
-        // @VISIBILITY(1.33)
+        "The label text color.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font Size",
-        "The font size (in points) for the label",
-        // @VISIBILITY(2.5)
+        "The font size (in points) for the label.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value affects the size scale of the label",
-        // @VISIBILITY(2.75)
+        "Scales the size of the label, exponentially. The value is used as the exponent "
+        "in a 10^x computation to scale the label size.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
-        "The text that will be displayed on screen",
-        // @VISIBILITY(1.8)
+        "The text that will be displayed on screen.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min and Max Size",
-        "The minimum and maximum size (in pixels) of the label",
+        "The minimum and maximum size (in pixels) of the label.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation Matrix",
-        "Transformation matrix to be applied to the label",
-        // @VISIBILITY(3.6)
+        "Transformation matrix to be applied to the label.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationOptionInfo = {
         "OrientationOption",
         "Orientation Option",
-        "Label orientation rendering mode",
-        // @VISIBILITY(2.8)
+        "Label orientation rendering mode.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadingEffectInfo = {
         "EnableFading",
         "Enable/Disable Fade-in Effect",
-        "Enable/Disable the Fade-in effect",
-        // @VISIBILITY(?)
+        "Enable/Disable the Fade-in effect.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -166,7 +160,7 @@ namespace {
         "The first value is the distance before the closest distance and the second "
         "the one after the furthest distance. For example, with the unit Parsec (pc), "
         "a value of {1, 2} will make the label being fully faded out 1 Parsec before "
-        "the closest distance and 2 Parsec away from the furthest distance",
+        "the closest distance and 2 Parsec away from the furthest distance.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -174,14 +168,14 @@ namespace {
         "FadeDistances",
         "Fade Distances",
         "The distance range in which the labels should be fully opaque, specified in "
-        "the chosen unit. The distance from the position of the label to the camera",
+        "the chosen unit. The distance from the position of the label to the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeUnitOptionInfo = {
         "FadeUnit",
         "Fade Distance Unit",
-        "Distance unit for fade-in/-out distance calculations. Defaults to \"au\"",
+        "Distance unit for fade-in/-out distance calculations. Defaults to \"au\".",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -403,30 +397,32 @@ void RenderableLabel::render(const RenderData& data, RendererTasks&) {
     float fadeInVariable = 1.f;
 
     if (_enableFadingEffect) {
-        float distanceNodeToCamera = static_cast<float>(
+        const float distanceNodeToCamera = static_cast<float>(
             glm::distance(data.camera.positionVec3(), data.modelTransform.translation)
         );
         fadeInVariable = computeFadeFactor(distanceNodeToCamera);
     }
 
-    glm::dmat4 modelMatrix(1.0);
+    const glm::dmat4 modelMatrix = glm::dmat4(1.0);
     const glm::dmat4 modelViewProjectionTransform =
         calcModelViewProjectionTransform(data, modelMatrix);
 
-    glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
-    glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+    const glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+    const glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
     glm::dvec3 orthoRight = glm::normalize(
         glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
     );
     if (orthoRight == glm::dvec3(0.0)) {
-        glm::dvec3 otherVector(
+        const glm::dvec3 otherVector = glm::dvec3(
             cameraUpDirectionWorld.y,
             cameraUpDirectionWorld.x,
             cameraUpDirectionWorld.z
         );
         orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
     }
-    glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+    const glm::dvec3 orthoUp = glm::normalize(
+        glm::cross(cameraViewDirectionWorld, orthoRight)
+    );
 
     renderLabels(data, modelViewProjectionTransform, orthoRight, orthoUp, fadeInVariable);
 
@@ -464,7 +460,7 @@ void RenderableLabel::renderLabels(const RenderData& data,
     labelInfo.enableFalseDepth = false;
 
     // We don't use spice rotation and scale
-    glm::vec3 transformedPos(
+    const glm::vec3 transformedPos = glm::vec3(
         _transformationMatrix * glm::dvec4(data.modelTransform.translation, 1.0)
     );
 
@@ -478,25 +474,25 @@ void RenderableLabel::renderLabels(const RenderData& data,
 }
 
 float RenderableLabel::computeFadeFactor(float distanceNodeToCamera) const {
-    float distanceUnit = unit(_fadeUnitOption);
+    const float distanceUnit = unit(_fadeUnitOption);
 
-    float x = distanceNodeToCamera;
-    float startX = _fadeDistances.value().x * distanceUnit;
-    float endX = _fadeDistances.value().y * distanceUnit;
+    const float x = distanceNodeToCamera;
+    const float startX = _fadeDistances.value().x * distanceUnit;
+    const float endX = _fadeDistances.value().y * distanceUnit;
 
     // The distances over which the fading should happen
-    float fadingStartDistance = _fadeWidths.value().x * distanceUnit;
-    float fadingEndDistance = _fadeWidths.value().y * distanceUnit;
+    const float fadingStartDistance = _fadeWidths.value().x * distanceUnit;
+    const float fadingEndDistance = _fadeWidths.value().y * distanceUnit;
 
     if (x <= startX) {
-        float f1 = 1.f - (startX - x) / fadingStartDistance;
+        const float f1 = 1.f - (startX - x) / fadingStartDistance;
         return std::clamp(f1, 0.f, 1.f);
     }
     else if (x > startX && x < endX) {
         return 1.f; // not faded
     }
     else { // x >= endX
-        float f2 = 1.f - (x - endX) / fadingEndDistance;
+        const float f2 = 1.f - (x - endX) / fadingEndDistance;
         return std::clamp(f2, 0.f, 1.f);
     }
 }

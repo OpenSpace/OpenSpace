@@ -66,7 +66,7 @@ private:
      *
      * \param indexFile Path to json index file
      */
-    void readFieldlinePaths(const std::string& indexFile);
+    void readFieldlinePaths(const std::filesystem::path& indexFile);
 
     /**
      * Updates the _fieldlineState map to match the _fieldlines SelectionProperty and

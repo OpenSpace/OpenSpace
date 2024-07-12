@@ -40,7 +40,6 @@ asset.export(JupiterBarycenterTrail)
 
 asset.meta = {
   Name = "Jupiter Trail",
-  Version = "1.1",
   Description = "Trail of Jupiter's Barycenter as observed by the Sun",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

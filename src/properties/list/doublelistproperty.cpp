@@ -46,7 +46,7 @@ int DoubleListProperty::typeLua() const {
 }
 
 std::string DoubleListProperty::toStringConversion() const {
-    nlohmann::json json(_value);
+    const nlohmann::json json(_value);
     return json.dump();
 }
 

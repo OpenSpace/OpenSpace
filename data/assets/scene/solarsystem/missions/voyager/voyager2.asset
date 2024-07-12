@@ -1,4 +1,3 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local coreKernels = asset.require("spice/core")
 
@@ -8,7 +7,7 @@ local models = asset.resource({
   Name = "Voyager Model",
   Type = "HttpSynchronization",
   Identifier = "voyager_model",
-  Version = 1
+  Version = 2
 })
 
 local kernels = asset.resource({
@@ -61,56 +60,22 @@ local Voyager2 = {
       DestinationFrame = coreKernels.Frame.Galactic
     }
   },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = asset.enabled,
+    GeometryFile = models .. "Voyager.glb",
+    ModelTransform = RotationMatrix,
+    LightSources = {
+      sunTransforms.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
+  },
   GUI = {
     Name = "Voyager 2",
-    Path = "/Solar System/Missions/Voyager 2"
-  }
-}
-
-local Voyager2Main = {
-  Identifier = "Voyager_2_Main",
-  Parent = Voyager2.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Enabled = asset.enabled,
-    GeometryFile = models .. "voyager-main.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  Tag = { "voyager2_part" },
-  GUI = {
-    Name = "Voyager 2 Main",
-    Path = "/Solar System/Missions/Voyager 2"
-  }
-}
-
-local Voyager2Antenna = {
-  Identifier = "Voyager_2_Antenna",
-  Parent = Voyager2.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Enabled = asset.enabled,
-    GeometryFile = models .. "voyager-antenna.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  Tag = { "voyager2_part" },
-  GUI = {
-    Name = "Voyager 2 Antenna",
     Path = "/Solar System/Missions/Voyager 2"
   }
 }
@@ -133,8 +98,9 @@ local VoyagerTrailCruiseEarthJupiter = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977-AUG-20 16:07:06.535",
     EndTime = "1979 JUL 06",
-    -- 669 is the number of days between the Start and End time
-    SampleInterval = 669 * 2
+    -- 1 sample every 2d
+    SampleInterval = openspace.time.duration("1977-AUG-20 16:07:06.535", "1979 JUL 06") /
+                     openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -183,8 +149,9 @@ local VoyagerTrailCruiseJupiterSaturn = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1979 JUL 15",
     EndTime = "1981 AUG 23",
-    -- 770 is the number of days between the Start and End time
-    SampleInterval = 770 * 2
+    -- 1 sample every 2d
+    SampleInterval = openspace.time.duration("1979 JUL 15", "1981 AUG 23") /
+                     openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -233,8 +200,9 @@ local VoyagerTrailCruiseSaturnUranus = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1981 AUG 30",
     EndTime = "1986 JAN 22",
-    -- 1971 is the number of days between the Start and End time
-    SampleInterval = 1971 * 2
+    -- 1 sample every 2d
+    SampleInterval = openspace.time.duration("1981 AUG 30", "1986 JAN 22") /
+                     openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -283,8 +251,9 @@ local VoyagerTrailCruiseUranusNeptune = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1986 JAN 27",
     EndTime = "1989 AUG 24",
-    -- 1305 is the number of days between the Start and End time
-    SampleInterval = 1305 * 2
+    -- 1 sample every 2d
+    SampleInterval = openspace.time.duration("1986 JAN 27", "1989 AUG 24") /
+                     openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -333,8 +302,9 @@ local VoyagerTrailCruiseNeptuneInf = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1989 AUG 26",
     EndTime = "2100 JAN 01",
-    -- 40306 is the number of days between the Start and End time
-    SampleInterval = 40306 * 2
+    -- 1 sample every 2d
+    SampleInterval = openspace.time.duration("1989 AUG 26", "2100 JAN 01") /
+                     openspace.time.secondsPerYear() * 2
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -363,8 +333,6 @@ asset.onInitialize(function()
   openspace.action.registerAction(FocusVoyager2)
 
   openspace.addSceneGraphNode(Voyager2)
-  openspace.addSceneGraphNode(Voyager2Main)
-  openspace.addSceneGraphNode(Voyager2Antenna)
   openspace.addSceneGraphNode(VoyagerTrailCruiseEarthJupiter)
   openspace.addSceneGraphNode(VoyagerTrailEncounterJupiter)
   openspace.addSceneGraphNode(VoyagerTrailCruiseJupiterSaturn)
@@ -386,8 +354,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VoyagerTrailCruiseJupiterSaturn)
   openspace.removeSceneGraphNode(VoyagerTrailEncounterJupiter)
   openspace.removeSceneGraphNode(VoyagerTrailCruiseEarthJupiter)
-  openspace.removeSceneGraphNode(Voyager2Antenna)
-  openspace.removeSceneGraphNode(Voyager2Main)
   openspace.removeSceneGraphNode(Voyager2)
 
   openspace.action.removeAction(FocusVoyager2)
@@ -396,8 +362,6 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Voyager2)
-asset.export(Voyager2Main)
-asset.export(Voyager2Antenna)
 asset.export(VoyagerTrailCruiseEarthJupiter)
 asset.export(VoyagerTrailEncounterJupiter)
 asset.export(VoyagerTrailCruiseJupiterSaturn)
@@ -407,3 +371,14 @@ asset.export(VoyagerTrailEncounterUranus)
 asset.export(VoyagerTrailCruiseUranusNeptune)
 asset.export(VoyagerTrailEncounterNeptune)
 asset.export(VoyagerTrailCruiseNeptuneInf)
+
+asset.meta = {
+  Name = "Voyager 2 Model and Trails",
+  Description = [[
+    Voyager 2 model and trails from 1977 AUG 20 16:07:06.535 to 2100 JAN 01. Model credit:
+    NASA Visualization Technology Applications And Development (VTAD)
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

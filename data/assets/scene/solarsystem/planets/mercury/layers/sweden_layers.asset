@@ -16,7 +16,6 @@ asset.require("./colorlayers/messenger_mp3_utah", false)
 
 asset.meta = {
   Name = "Default Mercury Layers (Sweden)",
-  Version = "1.0",
   Description = [[Default Mercury layers are: Aluminium Abundance, Calcium Abundance,
     Iron Abundance, Magnesium Abundance, Silicon Abundance, Messenger MDIS,
     Messenger Mosaic, Messenger Mosaic2, Messenger BDR, Messenger HIE, Messenger HIW,

@@ -24,11 +24,12 @@
 
 #include <openspace/engine/downloadmanager.h>
 
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/thread.h>
 #include <curl/curl.h>
 #include <chrono>
@@ -46,13 +47,13 @@ namespace {
     };
 
     size_t writeData(void* ptr, size_t size, size_t nmemb, FILE* stream) {
-        size_t written = fwrite(ptr, size, nmemb, stream);
+        const size_t written = fwrite(ptr, size, nmemb, stream);
         return written;
     }
 
     size_t writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp) {
-        size_t realsize = size * nmemb;
-        auto mem = static_cast<openspace::DownloadManager::MemoryFile*>(userp);
+        const size_t realsize = size * nmemb;
+        auto* mem = static_cast<openspace::DownloadManager::MemoryFile*>(userp);
 
         // @TODO(abock): Remove this and replace mem->buffer with std::vector<char>
         mem->buffer = reinterpret_cast<char*>(
@@ -111,7 +112,7 @@ namespace {
 
 namespace openspace {
 
-DownloadManager::FileFuture::FileFuture(std::string file)
+DownloadManager::FileFuture::FileFuture(std::filesystem::path file)
     : filePath(std::move(file))
 {}
 
@@ -128,27 +129,29 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                                                                   FailOnError failOnError,
                                                                 unsigned int timeout_secs,
                                                 DownloadFinishedCallback finishedCallback,
-                                                DownloadProgressCallback progressCallback)
+                                          DownloadProgressCallback progressCallback) const
 {
     if (!overrideFile && std::filesystem::is_regular_file(file)) {
         return nullptr;
     }
 
-    auto future = std::make_shared<FileFuture>(file.filename().string());
+    auto future = std::make_shared<FileFuture>(file.filename());
     errno = 0;
 #ifdef WIN32
     FILE* fp;
-    errno_t error = fopen_s(&fp, file.string().c_str(), "wb");
+    const std::string f = file.string();
+    errno_t error = fopen_s(&fp, f.c_str(), "wb");
     if (error != 0) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not open/create file: {}. Errno: {}", file, errno
         ));
     }
 #else
-    FILE* fp = fopen(file.string().c_str(), "wb"); // write binary
+    const std::string f = file.string();
+    FILE* fp = fopen(f.c_str(), "wb"); // write binary
 #endif // WIN32
     if (!fp) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Could not open/create file: {}. Errno: {}", file, errno
         ));
     }
@@ -184,7 +187,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             #endif
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-            CURLcode res = curl_easy_perform(curl);
+            const CURLcode res = curl_easy_perform(curl);
             curl_easy_cleanup(curl);
             fclose(fp);
 
@@ -192,9 +195,9 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
                 future->isFinished = true;
             }
             else {
-                long rescode;
+                long rescode = 0;
                 curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &rescode);
-                future->errorMessage = fmt::format(
+                future->errorMessage = std::format(
                     "{}. HTTP code: {}", curl_easy_strerror(res), rescode
                 );
             }
@@ -227,7 +230,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                                                           SuccessCallback successCallback,
                                                               ErrorCallback errorCallback)
 {
-    LDEBUG(fmt::format("Start downloading file: '{}' into memory", url));
+    LDEBUG(std::format("Start downloading file '{}' into memory", url));
 
     auto downloadFunction = [url, successCb = std::move(successCallback),
                              errorCb = std::move(errorCallback)]()
@@ -256,13 +259,13 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
         CURLcode res = curl_easy_perform(curl);
         if (res == CURLE_OK) {
             // ask for the content-type
-            char* ct;
+            char* ct = nullptr;
             res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
             if (res == CURLE_OK) {
                 std::string extension = std::string(ct);
                 std::stringstream ss(extension);
-                getline(ss, extension ,'/');
-                getline(ss, extension);
+                ghoul::getline(ss, extension ,'/');
+                ghoul::getline(ss, extension);
                 file.format = extension;
             }
             else {
@@ -278,7 +281,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
                 errorCb(err);
             }
             else {
-                LWARNING(fmt::format("Error downloading '{}': {}", url, err));
+                LWARNING(std::format("Error downloading '{}': {}", url, err));
             }
             curl_easy_cleanup(curl);
             // Set a boolean variable in MemoryFile to determine if it is
@@ -293,8 +296,8 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
     return std::async(std::launch::async, downloadFunction);
 }
 
-void DownloadManager::getFileExtension(const std::string& url,
-                                       RequestFinishedCallback finishedCallback)
+void DownloadManager::fileExtension(const std::string& url,
+                                    RequestFinishedCallback finishedCallback) const
 {
     auto requestFunction = [url, finishedCb = std::move(finishedCallback)]() {
         CURL* curl = curl_easy_init();
@@ -304,7 +307,7 @@ void DownloadManager::getFileExtension(const std::string& url,
             curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
             CURLcode res = curl_easy_perform(curl);
             if (CURLE_OK == res) {
-                char* ct;
+                char* ct = nullptr;
                 // ask for the content-type
                 res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
                 if ((res == CURLE_OK) && ct && finishedCb) {

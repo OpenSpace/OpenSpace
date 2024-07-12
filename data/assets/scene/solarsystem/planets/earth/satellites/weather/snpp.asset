@@ -9,7 +9,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_snpp",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=37849&FORMAT=kvn",
   Filename = "SNPP.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -108,7 +108,6 @@ asset.export(SNPPLabel)
 
 asset.meta = {
   Name = "SNPP",
-  Version = "1.0",
   Description = [[Trail for SNPP. trail from Celestrak. Can be used in conjunction with
     VIIRS SNPP (Temporal) layer for Earth]],
   Author = "OpenSpace Team",

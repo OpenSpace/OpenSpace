@@ -44,18 +44,15 @@ public:
     explicit RenderablePolygonCloud(const ghoul::Dictionary& dictionary);
     ~RenderablePolygonCloud() override = default;
 
-    void initializeGL() override;
     void deinitializeGL() override;
 
     static documentation::Documentation Documentation();
 
 private:
-    void createPolygonTexture();
+    void initializeCustomTexture() override;
     void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
         GLuint textureHeight);
     void renderPolygonGeometry(GLuint vao);
-
-    void bindTextureForRendering() const override;
 
     int _nPolygonSides = 3;
 
@@ -63,6 +60,8 @@ private:
 
     GLuint _polygonVao = 0;
     GLuint _polygonVbo = 0;
+
+    bool _textureIsInitialized = false;
 };
 
 } // namespace openspace

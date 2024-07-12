@@ -85,7 +85,9 @@ public:
     OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator();
     PathNavigator& pathNavigator();
+
     bool isKeyFrameInteractionEnabled() const;
+    float jumpToFadeDuration() const;
     float interpolationTime() const;
 
     // Callback functions
@@ -143,9 +145,9 @@ public:
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
     void saveNavigationState(const std::filesystem::path& filepath,
-        const std::string& referenceFrameIdentifier);
+        const std::string& referenceFrameIdentifier) const;
 
-    void loadNavigationState(const std::string& filepath);
+    void loadNavigationState(const std::string& filepath, bool useTimeStamp);
 
     /**
      * Set camera state from a provided navigation state next frame. The actual position
@@ -164,6 +166,18 @@ public:
      * \param spec The node specification from which to compute the resulting camera pose
      */
     void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
+
+    /**
+     * Trigger a transition script after first fading out the rendering, and fading in
+     * the rendering when the script is finished. One example use case could be to fade
+     * out, move the camera to another focus node, and then fade in
+     *
+     * \param transitionScript The Lua script to handle the transition. Can be anything
+     * \param fadeDuration An optional duration for the fading. If unspecified, use the
+     *                     JumpToFadeDuration property
+     */
+    void triggerFadeToTransition(const std::string& transitionScript,
+        std::optional<float> fadeDuration = std::nullopt);
 
     /**
      * \return The Lua library that contains all Lua functions available to affect the
@@ -195,6 +209,7 @@ private:
     properties::BoolProperty _disableMouseInputs;
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
+    properties::FloatProperty _jumpToFadeDuration;
 };
 
 } // namespace openspace::interaction

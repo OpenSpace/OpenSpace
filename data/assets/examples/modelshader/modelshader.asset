@@ -25,7 +25,7 @@ local Model = {
     GeometryFile = model .. "BoxAnimated.glb",
     ModelScale = 3E7,
     -- (malej 2023-MAY-22) Note that PerformShading should be false in this example,
-    -- these example shaders dont't contain any light calculations
+    -- since these example shaders dont't contain any light calculations
     PerformShading = false,
     VertexShader = asset.resource("model_vs.glsl"),
     FragmentShader = asset.resource("model_fs.glsl"),
@@ -36,7 +36,7 @@ local Model = {
   },
   GUI = {
     Name = "Model Shader",
-    Path = "/Example",
+    Path = "/Examples",
     Description = "Simple box model with a custom shader"
   }
 }

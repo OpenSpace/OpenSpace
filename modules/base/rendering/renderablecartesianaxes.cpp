@@ -40,24 +40,21 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
         "XColor",
         "X Color",
-        "This value determines the color of the x axis",
-        // @VISIBILITY(1.5)
+        "The color of the x-axis.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo YColorInfo = {
         "YColor",
         "Y Color",
-        "This value determines the color of the y axis",
-        // @VISIBILITY(1.5)
+        "The color of the y-axis.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZColorInfo = {
         "ZColor",
         "Z Color",
-        "This value determines the color of the z axis",
-        // @VISIBILITY(1.5)
+        "The color of the z-axis.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -71,8 +68,6 @@ namespace {
     // other node as the Parent of the node with this renderable. Also, the axes have to
     // be scaled to match the parent object for the axes to be visible in the scene, for
     // example using a StaticScale.
-    //
-    // See example asset (@TODO: link to asset file).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];

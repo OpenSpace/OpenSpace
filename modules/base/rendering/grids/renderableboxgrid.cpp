@@ -39,29 +39,28 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered",
-        // @VISIBILITY(1.17)
+        "The color used for the grid lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid",
+        "The width of the grid lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid Size",
-        "This value species the size of each dimensions of the box",
+        "The size of each dimension of the box, in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the grid"
+        "The labels for the grid."
     };
 
     struct [[codegen::Dictionary(RenderableBoxGrid)]] Parameters {
@@ -210,7 +209,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
         );
 
         if (orthoRight == glm::vec3(0.0)) {
-            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+            const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
             right = glm::cross(viewDirection, otherVector);
             orthoRight = glm::normalize(
                 glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))

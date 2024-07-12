@@ -164,7 +164,6 @@ asset.export("ToggleEclipticBand", ToggleEclipticBand.Identifier)
 
 asset.meta = {
   Name = "Ecliptic Band/Line",
-  Version = "1.0",
   Description = [[A line and band representation of the Ecliptic plane, including actions
     to toggle, hide and show each of them.]],
   Author = "OpenSpace Team",

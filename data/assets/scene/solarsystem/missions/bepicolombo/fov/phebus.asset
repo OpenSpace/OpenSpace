@@ -114,7 +114,6 @@ end)
 
 asset.meta = {
   Name = "Phebus",
-  Version = "1.0",
   Description = [[
     The PHEBUS instrument is a UV spectrometer covering the spectral range going from
     50 nm to 315 nm with two additional narrow bands in the visible around 404 nm (K line)

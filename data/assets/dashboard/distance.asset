@@ -19,7 +19,6 @@ asset.export(Item)
 
 asset.meta = {
   Name = "Dashboard - Distance",
-  Version = "1.0",
   Description = "This asset provides a Distance dashboard item",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

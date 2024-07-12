@@ -8,7 +8,6 @@ asset.require("./heightlayers/magellan_newyork", asset.enabled)
 
 asset.meta = {
   Name = "Default Venus Layers (New York)",
-  Version = "1.0",
   Description = [[Default Venus layers are: Venus Texture, Magellan Mosaic,
     Clouds Magellan Combo, and Magellan Elevation (3D).
 

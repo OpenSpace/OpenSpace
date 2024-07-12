@@ -67,7 +67,6 @@ asset.export(Atmosphere)
 
 asset.meta = {
   Name = "Venus Atmosphere",
-  Version = "1.1",
   Description = "Atmosphere of Venus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -147,7 +147,7 @@ private:
     std::unique_ptr<TransferFunction> _transferFunction;
 
     // Paths to color tables. One for each 'extraQuantity'
-    std::vector<std::string> _colorTablePaths;
+    std::vector<std::filesystem::path> _colorTablePaths;
     // Values represents min & max values represented in the color table
     std::vector<glm::vec2> _colorTableRanges;
     // Values represents min & max limits for valid masking range

@@ -111,7 +111,6 @@ asset.export(StarOh3)
 
 asset.meta = {
   Name = "Star Tracker",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the three headed "Hydra" star trackers onboard Juice, which
     is measuring the location of stars and comparing them to their known locations in

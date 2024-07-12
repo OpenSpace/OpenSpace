@@ -155,7 +155,6 @@ set(OPENSPACE_SOURCE
   scene/scene.cpp
   scene/scene_lua.inl
   scene/sceneinitializer.cpp
-  scene/scenelicensewriter.cpp
   scene/scenegraphnode.cpp
   scene/timeframe.cpp
   scene/translation.cpp
@@ -347,7 +346,6 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/scale.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/scene.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/sceneinitializer.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/scene/scenelicensewriter.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/scenegraphnode.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/timeframe.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scene/translation.h
@@ -462,7 +460,7 @@ target_include_directories(openspace-core
 target_precompile_headers(openspace-core PRIVATE
   <openspace/json.h>
   <openspace/properties/numericalproperty.h>
-  [["ghoul/fmt.h"]]
+  [["ghoul/format.h"]]
   [["ghoul/glm.h"]]
   [["ghoul/misc/assert.h"]]
   [["ghoul/misc/boolean.h"]]

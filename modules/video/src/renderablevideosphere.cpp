@@ -77,7 +77,7 @@ void RenderableVideoSphere::update(const UpdateData&) {
 }
 
 void RenderableVideoSphere::bindTexture() {
-    _videoPlayer.frameTexture().get()->bind();
+    _videoPlayer.frameTexture()->bind();
 }
 
 } // namespace openspace

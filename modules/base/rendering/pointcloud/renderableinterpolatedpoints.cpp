@@ -43,7 +43,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
         "Value",
         "Value",
-        "The value to use for interpolation. The max value is set from the number of "
+        "The value used for interpolation. The max value is set from the number of "
         "steps in the dataset, so a step of one corresponds to one step in the dataset "
         "and values in-between will be determined using interpolation.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -130,9 +130,13 @@ namespace {
     // the first set of positions for the objects, the next N rows to the second set of
     // positions, and so on. The number of objects in the dataset must be specified in the
     // asset.
+    //
+    // MultiTexture:
+    // Note that if using multiple textures for the points based on values in the dataset,
+    // the used texture will be decided based on the first N set of points.
     struct [[codegen::Dictionary(RenderableInterpolatedPoints)]] Parameters {
         // The number of objects to read from the dataset. Every N:th datapoint will
-        // be interpreted as the same point, but at a different step in the interpolation
+        // be interpreted as the same point, but at a different step in the interpolation.
         int numberOfObjects [[codegen::greaterequal(1)]];
 
         struct Interpolation {
@@ -145,7 +149,7 @@ namespace {
             // [[codegen::verbatim(UseSplineInfo.description)]]
             std::optional<bool> useSplineInterpolation;
         };
-        // Initial settings for the interpolation
+        // Initial settings for the interpolation.
         std::optional<Interpolation> interpolation;
     };
 
@@ -164,7 +168,7 @@ documentation::Documentation RenderableInterpolatedPoints::Documentation() {
 RenderableInterpolatedPoints::Interpolation::Interpolation()
     : properties::PropertyOwner({ "Interpolation", "Interpolation", "" })
     , value(InterpolationValueInfo, 0.f, 0.f, 1.f)
-    , nSteps(StepsInfo)
+    , nSteps(StepsInfo, 1)
     , goToNextStep(JumpToNextInfo)
     , goToPrevStep(JumpToPrevInfo)
     , interpolateToNextStep(InterpolateToNextInfo)
@@ -177,7 +181,7 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     addProperty(value);
 
     auto triggerInterpolation = [](std::string_view identifier, float v, float d) {
-        std::string script = fmt::format(
+        std::string script = std::format(
             "openspace.setPropertyValueSingle(\"{}\", {}, {})",
             identifier, v, d
         );
@@ -264,23 +268,6 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
         );
     }
 
-    unsigned int nObjects = static_cast<unsigned int>(p.numberOfObjects);
-
-    // At this point, the dataset has been loaded and the number of points computed. We
-    // need to recompute them and compute how many steps the number of points
-    // corresponded to
-
-    if (_nDataPoints % nObjects != 0) {
-        LERROR(fmt::format(
-            "Mismatch between provided number of data entries and the specified number "
-            "of points. Expected the number of entries in the data file {} to be evenly "
-            "divisible by the number of points", _dataFile
-        ));
-    }
-
-    _interpolation.nSteps = _nDataPoints / nObjects;
-    _interpolation.value.setMaxValue(static_cast<float>(_interpolation.nSteps - 1));
-
     _interpolation.value.onChange([this]() {
         bool passedAKnot =
             glm::ceil(_interpolation.value) != glm::ceil(_prevInterpolationValue);
@@ -296,21 +283,50 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
         _shouldReinitializeBufferdata = true;
     });
 
-    // This property is mostly for show in the UI, but also used to tell how many points
-    // should be rendered. So make sure it is updated once we know the number of
-    // interpolation steps
-    _nDataPoints = nObjects;
+    _nObjectsInDataset = static_cast<unsigned int>(p.numberOfObjects);
+
+    if (_skipFirstDataPoint) {
+        LWARNING(
+            "Found setting to skip first data point in asset. This is not supported for "
+            "interpolated point clouds. Ignoring"
+        );
+        _skipFirstDataPoint = false;
+    }
+}
+
+void RenderableInterpolatedPoints::initialize() {
+    RenderablePointCloud::initialize();
+
+    // At this point, the dataset has been loaded and we know how many data points it
+    // contains => we can compute the number of interpolation steps
+    if (_nDataPoints % _nObjectsInDataset != 0) {
+        LERROR(std::format(
+            "Mismatch between provided number of data entries and the specified number "
+            "of points. Expected the number of entries in the data file '{}' to be "
+            "evenly divisible by the number of objects", _dataFile
+        ));
+    }
+
+    if (_nObjectsInDataset > 0) {
+        _interpolation.nSteps = _nDataPoints / _nObjectsInDataset;
+    }
+    _interpolation.value.setMaxValue(static_cast<float>(_interpolation.nSteps - 1));
+
+    // This is the property that is shown in the user interface, so update it so the user
+    // can get an idea of how many points will be rendered
+    _nDataPoints = _nObjectsInDataset;
 }
 
 void RenderableInterpolatedPoints::initializeShadersAndGlExtras() {
     _program = BaseModule::ProgramObjectManager.request(
         "RenderablePointCloud_Interpolated",
         []() {
+            std::filesystem::path path = absPath("${MODULE_BASE}/shaders/pointcloud");
             return global::renderEngine->buildRenderProgram(
                 "RenderablePointCloud_Interpolated",
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_interpolated_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_fs.glsl"),
-                absPath("${MODULE_BASE}/shaders/pointcloud/billboardpoint_gs.glsl")
+                path / "pointcloud_interpolated_vs.glsl",
+                path / "pointcloud_fs.glsl",
+                path / "pointcloud_gs.glsl"
             );
         }
     );
@@ -328,13 +344,12 @@ void RenderableInterpolatedPoints::deinitializeShaders() {
     _program = nullptr;
 }
 
-void RenderableInterpolatedPoints::bindDataForPointRendering() {
-    RenderablePointCloud::bindDataForPointRendering();
-
+void RenderableInterpolatedPoints::setExtraUniforms() {
     float t0 = computeCurrentLowerValue();
     float t = glm::clamp(_interpolation.value - t0, 0.f, 1.f);
+
     _program->setUniform("interpolationValue", t);
-    _program->setUniform("useSpline", _interpolation.useSpline);
+    _program->setUniform("useSpline", useSplineInterpolation());
 }
 
 void RenderableInterpolatedPoints::preUpdate() {
@@ -346,157 +361,172 @@ void RenderableInterpolatedPoints::preUpdate() {
 
 int RenderableInterpolatedPoints::nAttributesPerPoint() const {
     int n = RenderablePointCloud::nAttributesPerPoint();
-    // Need twice as much information as the regular points
-    n *= 2;
-    if (_interpolation.useSpline) {
+
+    // Always at least three extra position values (xyz)
+    n += 3;
+    if (useSplineInterpolation()) {
         // Use two more positions (xyz)
         n += 2 * 3;
     }
+    if (useOrientationData()) {
+        // Use one more orientation quaternion (wxyz)
+        n += 4;
+    }
+    // And potentially some more color and size data
+    n += hasColorData() ? 1 : 0;
+    n += hasSizeData() ? 1 : 0;
+
     return n;
 }
 
-std::vector<float> RenderableInterpolatedPoints::createDataSlice() {
-    ZoneScoped;
+bool RenderableInterpolatedPoints::useSplineInterpolation() const {
+    return _interpolation.useSpline && _interpolation.nSteps > 1;
+}
 
-    if (_dataset.entries.empty()) {
-        return std::vector<float>();
+void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
+                                                           std::vector<float>& result,
+                                                           double& maxRadius) const
+{
+    using namespace dataloader;
+    auto [firstIndex, secondIndex] = interpolationIndices(index);
+
+    const Dataset::Entry& e0 = _dataset.entries[firstIndex];
+    const Dataset::Entry& e1 = _dataset.entries[secondIndex];
+
+    glm::dvec3 position0 = transformedPosition(e0);
+    glm::dvec3 position1 = transformedPosition(e1);
+
+    const double r = glm::max(glm::length(position0), glm::length(position1));
+    maxRadius = glm::max(maxRadius, r);
+
+    for (int j = 0; j < 3; ++j) {
+        result.push_back(static_cast<float>(position0[j]));
     }
 
-    std::vector<float> result;
-    result.reserve(nAttributesPerPoint() * _nDataPoints);
-
-    // Find the information we need for the interpolation and to identify the points,
-    // and make sure these result in valid indices in all cases
-    float t0 = computeCurrentLowerValue();
-    float t1 = t0 + 1.f;
-    t1 = glm::clamp(t1, 0.f, _interpolation.value.maxValue());
-    unsigned int t0Index = static_cast<unsigned int>(t0);
-    unsigned int t1Index = static_cast<unsigned int>(t1);
-
-    // What datavar is in use for the index color
-    int colorParamIndex = currentColorParameterIndex();
-
-    // What datavar is in use for the size scaling (if present)
-    int sizeParamIndex = currentSizeParameterIndex();
-
-    double maxRadius = 0.0;
-
-    for (unsigned int i = 0; i < _nDataPoints; i++) {
-        using namespace dataloader;
-        const Dataset::Entry& e0 = _dataset.entries[t0Index * _nDataPoints + i];
-        const Dataset::Entry& e1 = _dataset.entries[t1Index * _nDataPoints + i];
-        glm::dvec3 position0 = transformedPosition(e0);
-        glm::dvec3 position1 = transformedPosition(e1);
-
-        const double r = glm::max(glm::length(position0), glm::length(position1));
-        maxRadius = glm::max(maxRadius, r);
-
-        // Positions
-        for (int j = 0; j < 3; ++j) {
-            result.push_back(static_cast<float>(position0[j]));
-        }
-
-        for (int j = 0; j < 3; ++j) {
-            result.push_back(static_cast<float>(position1[j]));
-        }
-
-        if (_interpolation.useSpline && _interpolation.nSteps > 1) {
-            // Compute the extra positions, before and after the other ones
-            unsigned int beforeIndex = static_cast<unsigned int>(
-                glm::max(t0 - 1.f, 0.f)
-            );
-            unsigned int afterIndex = static_cast<unsigned int>(
-                glm::min(t1 + 1.f, _interpolation.value.maxValue() - 1.f)
-            );
-
-            const Dataset::Entry& e00 = _dataset.entries[beforeIndex * _nDataPoints + i];
-            const Dataset::Entry& e11 = _dataset.entries[afterIndex * _nDataPoints + i];
-            glm::dvec3 positionBefore = transformedPosition(e00);
-            glm::dvec3 positionAfter = transformedPosition(e11);
-
-            for (int j = 0; j < 3; ++j) {
-                result.push_back(static_cast<float>(positionBefore[j]));
-            }
-
-            for (int j = 0; j < 3; ++j) {
-                result.push_back(static_cast<float>(positionAfter[j]));
-            }
-        }
-
-        // Colors
-        if (_hasColorMapFile) {
-            result.push_back(e0.data[colorParamIndex]);
-            result.push_back(e1.data[colorParamIndex]);
-        }
-
-        // Size data
-        if (_hasDatavarSize) {
-            // @TODO: Consider more detailed control over the scaling. Currently the value
-            // is multiplied with the value as is. Should have similar mapping properties
-            // as the color mapping
-            result.push_back(e0.data[sizeParamIndex]);
-            result.push_back(e1.data[sizeParamIndex]);
-        }
-
-        // @TODO: Also need to update label positions, if we have created labels from the dataset
-        // And make sure these are created from only the first set of points..
+    for (int j = 0; j < 3; ++j) {
+        result.push_back(static_cast<float>(position1[j]));
     }
-    setBoundingSphere(maxRadius);
-    return result;
+
+    if (useSplineInterpolation()) {
+        // Compute the extra positions, before and after the other ones. But make sure
+        // we do not overflow the allowed bound for the current interpolation step
+        int beforeIndex = glm::max(static_cast<int>(firstIndex - _nDataPoints), 0);
+        int maxT = static_cast<int>(_interpolation.value.maxValue() - 1.f);
+        int maxAllowedindex = maxT * _nDataPoints + index;
+        int afterIndex = glm::min(
+            static_cast<int>(secondIndex + _nDataPoints),
+            maxAllowedindex
+        );
+
+        const Dataset::Entry& e00 = _dataset.entries[beforeIndex];
+        const Dataset::Entry& e11 = _dataset.entries[afterIndex];
+        glm::dvec3 positionBefore = transformedPosition(e00);
+        glm::dvec3 positionAfter = transformedPosition(e11);
+
+        for (int j = 0; j < 3; ++j) {
+            result.push_back(static_cast<float>(positionBefore[j]));
+        }
+
+        for (int j = 0; j < 3; ++j) {
+            result.push_back(static_cast<float>(positionAfter[j]));
+        }
+    }
+}
+
+void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int index,
+                                                        std::vector<float>& result) const
+{
+    using namespace dataloader;
+    auto [firstIndex, secondIndex] = interpolationIndices(index);
+    const Dataset::Entry& e0 = _dataset.entries[firstIndex];
+    const Dataset::Entry& e1 = _dataset.entries[secondIndex];
+
+    if (hasColorData()) {
+        const int colorParamIndex = currentColorParameterIndex();
+        result.push_back(e0.data[colorParamIndex]);
+        result.push_back(e1.data[colorParamIndex]);
+    }
+
+    if (hasSizeData()) {
+        const int sizeParamIndex = currentSizeParameterIndex();
+        // @TODO: Consider more detailed control over the scaling. Currently the value
+        // is multiplied with the value as is. Should have similar mapping properties
+        // as the color mapping
+
+        // Convert to diameter if data is given as radius
+        float multiplier = _sizeSettings.sizeMapping->isRadius ? 2.f : 1.f;
+        result.push_back(multiplier * e0.data[sizeParamIndex]);
+        result.push_back(multiplier * e1.data[sizeParamIndex]);
+    }
+}
+
+void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index,
+                                                        std::vector<float>& result) const
+{
+    using namespace dataloader;
+    auto [firstIndex, secondIndex] = interpolationIndices(index);
+    const Dataset::Entry& e0 = _dataset.entries[firstIndex];
+    const Dataset::Entry& e1 = _dataset.entries[secondIndex];
+
+    glm::quat q0 = orientationQuaternion(e0);
+    glm::quat q1 = orientationQuaternion(e1);
+
+    result.push_back(q0.x);
+    result.push_back(q0.y);
+    result.push_back(q0.z);
+    result.push_back(q0.w);
+
+    result.push_back(q1.x);
+    result.push_back(q1.y);
+    result.push_back(q1.z);
+    result.push_back(q1.w);
 }
 
 void RenderableInterpolatedPoints::initializeBufferData() {
     if (_vao == 0) {
         glGenVertexArrays(1, &_vao);
-        LDEBUG(fmt::format("Generating Vertex Array id '{}'", _vao));
+        LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
     }
     if (_vbo == 0) {
         glGenBuffers(1, &_vbo);
-        LDEBUG(fmt::format("Generating Vertex Buffer Object id '{}'", _vbo));
+        LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
-    const int attibutesPerPoint = nAttributesPerPoint();
-    const unsigned int bufferSize = attibutesPerPoint * _nDataPoints * sizeof(float);
+    const int attibsPerPoint = nAttributesPerPoint();
+    const unsigned int bufferSize = attibsPerPoint * _nDataPoints * sizeof(float);
 
     // Allocate the memory for the buffer (we will want to upload the data quite often)
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
 
-    int attributeOffset = 0;
+    int offset = 0;
 
-    auto addFloatAttribute = [&](const std::string& name, GLint nValues) {
-        GLint attrib = _program->attributeLocation(name);
-        glEnableVertexAttribArray(attrib);
-        glVertexAttribPointer(
-            attrib,
-            nValues,
-            GL_FLOAT,
-            GL_FALSE,
-            attibutesPerPoint * sizeof(float),
-            (attributeOffset > 0) ?
-                reinterpret_cast<void*>(attributeOffset * sizeof(float)) :
-                nullptr
-        );
-        attributeOffset += nValues;
-    };
+    offset = bufferVertexAttribute("in_position0", 3, attibsPerPoint, offset);
+    offset = bufferVertexAttribute("in_position1", 3, attibsPerPoint, offset);
 
-    addFloatAttribute("in_position0", 3);
-    addFloatAttribute("in_position1", 3);
-
-    if (_interpolation.useSpline) {
-        addFloatAttribute("in_position_before", 3);
-        addFloatAttribute("in_position_after", 3);
+    if (useSplineInterpolation()) {
+        offset = bufferVertexAttribute("in_position_before", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_position_after", 3, attibsPerPoint, offset);
     }
 
-    if (_hasColorMapFile) {
-        addFloatAttribute("in_colorParameter0", 1);
-        addFloatAttribute("in_colorParameter1", 1);
+    if (hasColorData()) {
+        offset = bufferVertexAttribute("in_colorParameter0", 1, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_colorParameter1", 1, attibsPerPoint, offset);
     }
 
-    if (_hasDatavarSize) {
-        addFloatAttribute("in_scalingParameter0", 1);
-        addFloatAttribute("in_scalingParameter1", 1);
+    if (hasSizeData()) {
+        offset = bufferVertexAttribute("in_scalingParameter0", 1, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_scalingParameter1", 1, attibsPerPoint, offset);
+    }
+
+    if (useOrientationData()) {
+        offset = bufferVertexAttribute("in_orientation0", 4, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientation1", 4, attibsPerPoint, offset);
+    }
+
+    if (_hasSpriteTexture) {
+        offset = bufferVertexAttribute("in_textureLayer", 1, attibsPerPoint, offset);
     }
 
     glBindVertexArray(0);
@@ -539,6 +569,27 @@ float RenderableInterpolatedPoints::computeCurrentLowerValue() const {
     float maxAllowedT0 = glm::max(maxTValue - 1.f, 0.f);
     t0 = glm::clamp(t0, 0.f, maxAllowedT0);
     return t0;
+}
+
+float RenderableInterpolatedPoints::computeCurrentUpperValue() const {
+    float t0 = computeCurrentLowerValue();
+    float t1 = t0 + 1.f;
+    t1 = glm::clamp(t1, 0.f, _interpolation.value.maxValue());
+    return t1;
+}
+
+std::pair<size_t, size_t>
+RenderableInterpolatedPoints::interpolationIndices(unsigned int index) const
+{
+    float t0 = computeCurrentLowerValue();
+    float t1 = computeCurrentUpperValue();
+    unsigned int t0Index = static_cast<unsigned int>(t0);
+    unsigned int t1Index = static_cast<unsigned int>(t1);
+
+    size_t lower = size_t(t0Index * _nDataPoints + index);
+    size_t upper = size_t(t1Index * _nDataPoints + index);
+
+    return { lower, upper };
 }
 
 } // namespace openspace

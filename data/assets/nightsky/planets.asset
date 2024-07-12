@@ -210,7 +210,6 @@ asset.export("ToggleNightSkyPlanets", ToggleNightSkyPlanets.Identifier)
 
 asset.meta = {
   Name = "Night Sky Planets",
-  Version = "1.0",
   Description = [[A collection of night sky versions of the planets Mercury, Venus,
     Mars, Jupiter and Saturn, including actions to toggle, hide and show them.]],
   Author = "OpenSpace Team",

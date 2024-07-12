@@ -30,8 +30,6 @@ local Pluto = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 1173000, 1173000, 1173000 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "pluto.labels",
@@ -94,7 +92,6 @@ asset.export(PlutoLabel)
 
 asset.meta = {
   Name = "Pluto",
-  Version = "1.0",
   Description = "Pluto globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -1,6 +1,5 @@
 asset.require("./actions")
 asset.require("./mission")
-local sun = asset.require("scene/solarsystem/sun/sun")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
@@ -22,15 +21,13 @@ local band = asset.resource({
 
 
 local LaunchTime = "2021 DEC 25 12:20:00"
-local EndTime = "2024 JAN 22 00:00:00"
 
 local JWSTBand = {
   Identifier = "JWSTBand",
   Parent = transforms.JWSTPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = LaunchTime,
-    End = EndTime
+    Start = LaunchTime
   },
   Transform = {
     Rotation = {
@@ -65,8 +62,7 @@ local JWSTModel = {
   Parent = transforms.JWSTRotation.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = LaunchTime,
-    End = EndTime
+    Start = LaunchTime
   },
   Renderable = {
     Type = "RenderableModel",
@@ -77,7 +73,7 @@ local JWSTModel = {
     AnimationTimeScale = "Millisecond",
     AnimationMode = "Once",
     LightSources = {
-      sun.LightSource
+      sunTransforms.LightSource
     },
     PerformShading = true
   },
@@ -96,8 +92,7 @@ local JWSTFov = {
   Parent = JWSTModel.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = LaunchTime,
-    End = EndTime
+    Start = LaunchTime
   },
   Renderable = {
     Type = "RenderablePrism",
@@ -129,8 +124,7 @@ local JWSTLabel = {
   Parent = transforms.JWSTPosition.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = LaunchTime,
-    End = EndTime
+    Start = LaunchTime
   },
   Renderable = {
     Type = "RenderableLabel",
@@ -175,7 +169,6 @@ asset.export(JWSTLabel)
 
 asset.meta = {
   Name = "James Webb Space Telescope",
-  Version = "1.1",
   Description = [[
     James Webb Space Telescope animated model, safe viewing band, field of view and label.
   ]],

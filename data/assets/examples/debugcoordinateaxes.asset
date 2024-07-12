@@ -123,7 +123,6 @@ asset.export(SolarSystemBarycenterAxes)
 
 asset.meta = {
   Name = "Debug Coordinates",
-  Version = "1.0",
   Description = [[A set of coordinate axes demonstrating different XYZ coordinate
     reference frames that are useful for debugging, such as the Earth or Solar
     System Barycenter.]],

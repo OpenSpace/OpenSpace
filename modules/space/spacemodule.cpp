@@ -45,6 +45,7 @@
 #include <openspace/util/coordinateconversion.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 
@@ -55,7 +56,7 @@ namespace {
         "ShowExceptions",
         "Show Exceptions",
         "If enabled, errors from SPICE will be thrown and show up in the log. If "
-        "disabled, the errors will be ignored silently",
+        "disabled, the errors will be ignored silently.",
         openspace::properties::Property::Visibility::Developer
     };
 } // namespace
@@ -138,11 +139,14 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
 
 scripting::LuaLibrary SpaceModule::luaLibrary() const {
     return {
-        "space",
-        {
+        .name = "space",
+        .functions = {
             codegen::lua::ConvertFromRaDec,
             codegen::lua::ConvertToRaDec,
             codegen::lua::ReadKeplerFile
+        },
+        .scripts = {
+            absPath("${MODULE_SPACE}/scripts/spice.lua")
         }
     };
 }

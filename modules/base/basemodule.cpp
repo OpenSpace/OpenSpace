@@ -46,6 +46,7 @@
 #include <modules/base/rendering/pointcloud/renderableinterpolatedpoints.h>
 #include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 #include <modules/base/rendering/pointcloud/renderablepolygoncloud.h>
+#include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderabledisc.h>
 #include <modules/base/rendering/renderablelabel.h>
@@ -237,7 +238,6 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableModel::Documentation(),
         RenderableNodeArrow::Documentation(),
         RenderableNodeLine::Documentation(),
-        RenderablePlane::Documentation(),
         RenderablePlaneImageLocal::Documentation(),
         RenderablePlaneImageOnline::Documentation(),
         RenderablePlaneTimeVaryingImage::Documentation(),
@@ -245,7 +245,6 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderablePolygonCloud::Documentation(),
         RenderablePrism::Documentation(),
         RenderableRadialGrid::Documentation(),
-        RenderableSphere::Documentation(),
         RenderableSphereImageLocal::Documentation(),
         RenderableSphereImageOnline::Documentation(),
         RenderableSphericalGrid::Documentation(),
@@ -253,6 +252,8 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableTrailOrbit::Documentation(),
         RenderableTrailTrajectory::Documentation(),
         RenderableTube::Documentation(),
+
+        SizeMappingComponent::Documentation(),
 
         ScreenSpaceDashboard::Documentation(),
         ScreenSpaceFramebuffer::Documentation(),

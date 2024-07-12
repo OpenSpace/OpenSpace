@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Amor Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_amor_asteroid",
-  Version = 3
+  Version = 4
 })
 
 
@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 4,
     Color = { 1.0, 1.0, 1.0 },
-    TrailFade = 11
+    TrailFade = 11,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Amor Asteroids",
@@ -45,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Amor Asteroids",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Amor group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

@@ -4,11 +4,30 @@ local bookmarkHelper = asset.require("util/generate_bookmarks")
 -- ensure that it is loaded first
 asset.require("scene/solarsystem/planets/earth/earth")
 
+local localBookmarks = openspace.absPath("${USER}/bookmarks/localbookmarks.csv")
+local bookmarksDirectory = openspace.absPath("${USER}/bookmarks")
+
+if not openspace.directoryExists(bookmarksDirectory) then
+  openspace.createDirectory(bookmarksDirectory)
+end
+
+-- Create bookmarks file if it does not exist
+if not openspace.fileExists(localBookmarks) then
+  local file = io.open(localBookmarks, "w")
+  file:write(
+    "Group (optional),Name (required),Globe (optional),Lat (required if globe)," ..
+    "Lon (required if globe),Altitude (optional if globe),x (required if not globe)," ..
+    "y (required if not globe),z (required if not globe),Scale (optional)," ..
+    "LineWidth (optional)\n" ..
+    "NASA,Kennedy Space Center,Earth,28.6658276,-80.70282839,,,,,,\n"
+  )
+  file:close()
+end
+
 local nodes = bookmarkHelper.loadBookmarks(
   "Local Bookmarks",
-  "${ASSETS}/customization/localbookmarks.csv"
+  "${USER}/bookmarks/localbookmarks.csv"
 )
-
 
 asset.onInitialize(function()
   for _, n in ipairs(nodes) do

@@ -21,7 +21,9 @@ local Object = {
     Opacity = 1.0,
     File = speck .. "6dF.speck",
     Unit = "Mpc",
-    Texture = textures .. "point3A.png",
+    Texture = {
+      File = textures .. "point3A.png",
+    },
     Coloring = {
       FixedColor = { 1.0, 1.0, 0.0 },
       ColorMapping = {
@@ -70,7 +72,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "6dF Galaxies",
-  Version = "3.0",
   Description = "Digital Universe asset for The Six-degree Field (6dF) Galaxy Survey",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

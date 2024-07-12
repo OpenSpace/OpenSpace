@@ -35,7 +35,6 @@ asset.export(ExampleLines)
 
 asset.meta = {
   Name = "GeoJson Example - Lines",
-  Version = "1.0",
   Description = [[GeoJson example asset with lines]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

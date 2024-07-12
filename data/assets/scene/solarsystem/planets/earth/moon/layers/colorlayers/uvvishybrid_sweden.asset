@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "UvvisHybrid_Sweden",
   Name = "Uvvis Hybrid [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("uvvishybrid_sweden.wms"),
   Settings = {
     Gamma = 0.52,
@@ -36,7 +37,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Uvvis Hybrid [Sweden]",
-  Version = "1.1",
   Description = [[Moon Lunar Orbiter - Clementine UVVISv2 Hybrid Mosaic 59m v1 map of the
     Moon. This map is hosted on the OpenSpace server in Sweden]],
   Author = "USGS",

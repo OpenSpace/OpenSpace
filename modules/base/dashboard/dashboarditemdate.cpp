@@ -40,7 +40,7 @@ namespace {
         "FormatString",
         "Format String",
         "The format text describing how this dashboard item renders its text. This text "
-        "must contain exactly one {} which is a placeholder that will contain the date",
+        "must contain exactly one {} which is a placeholder that will contain the date.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -50,8 +50,7 @@ namespace {
         "The format string used for formatting the date/time before being passed to the "
         "string in FormatString. See "
         "https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html for full "
-        "information about how to structure this format",
-        // @VISIBILITY(2.75)
+        "information about how to structure this format.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -94,23 +93,27 @@ void DashboardItemDate::render(glm::vec2& penPosition) {
     );
 
     try {
+        penPosition.y -= _font->height();
         RenderFont(
             *_font,
             penPosition,
-            fmt::format(fmt::runtime(_formatString.value()), time)
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_formatString.value(), std::make_format_args(time))
         );
     }
-    catch (const fmt::format_error&) {
+    catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
-    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemDate::size() const {
     ZoneScoped;
 
     std::string_view time = global::timeManager->time().UTC();
-    return _font->boundingBox(fmt::format(fmt::runtime(_formatString.value()), time));
+    // @CPP26(abock): This can be replaced with std::runtime_format
+    return _font->boundingBox(
+        std::vformat(_formatString.value(), std::make_format_args(time))
+    );
 }
 
 } // namespace openspace

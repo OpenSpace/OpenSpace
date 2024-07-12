@@ -16,9 +16,7 @@ local Cordelia = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 40000, 40000, 40000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 40000, 40000, 40000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -98,9 +96,7 @@ local Ophelia = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 43000, 43000, 43000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 43000, 43000, 43000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -180,9 +176,7 @@ local Bianca = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 64000, 46000, 46000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 64000, 46000, 46000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -262,9 +256,7 @@ local Cressida = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 80000, 80000, 80000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 80000, 80000, 80000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -344,9 +336,7 @@ local Desdemona = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 64000, 64000, 64000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 64000, 64000, 64000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -426,9 +416,7 @@ local Juliet = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 94000, 94000, 94000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 94000, 94000, 94000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -508,9 +496,7 @@ local Portia = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 135000, 135000, 135000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 135000, 135000, 135000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -590,9 +576,7 @@ local Rosalind = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 72000, 72000, 72000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 72000, 72000, 72000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -672,9 +656,7 @@ local Cupid = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 18000, 18000, 18000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 18000, 18000, 18000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -754,9 +736,7 @@ local Belinda = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 90000, 90000, 90000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 90000, 90000, 90000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -836,9 +816,7 @@ local Perdita = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 30000, 30000, 30000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 30000, 30000, 30000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -918,9 +896,7 @@ local Puck = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 162000, 162000, 162000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 162000, 162000, 162000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1000,9 +976,7 @@ local Mab = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 25000, 25000, 25000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 25000, 25000, 25000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1222,7 +1196,6 @@ asset.export(MabLabel)
 
 asset.meta = {
   Name = "Uranus Irregular Retrograde Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Uranus' irregular retrograde moons:
     Cordelia, Ophelia, Bianca, Cressida, Desdemona, Juliet, Portia, Rosalind, Cupid,
     Belinda, Perdita, Puck and Mab. Blank globes and SPICE trails are generated for each

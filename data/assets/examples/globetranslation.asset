@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 
@@ -31,7 +31,8 @@ local ExampleFixedHeight = {
     }
   },
   GUI = {
-    Path = "/Example"
+    Name = "GlobeTranslation - Fixed Height",
+    Path = "/Examples"
   }
 }
 
@@ -55,7 +56,8 @@ local ExampleAdaptiveHeight = {
     }
   },
   GUI = {
-    Path = "/Example"
+    Name = "GlobeTranslation - Adaptive Height",
+    Path = "/Examples"
   }
 }
 
@@ -76,7 +78,6 @@ asset.export(ExampleAdaptiveHeight)
 
 asset.meta = {
   Name = "GlobeTranslation Example",
-  Version = "1.0",
   Description = [[An example that demonstrates how to place an object on a planet surface
     using the "GlobeTranslation" transform. For the altitude, a fixed height can be used,
     or the height can be queried from the height map]],

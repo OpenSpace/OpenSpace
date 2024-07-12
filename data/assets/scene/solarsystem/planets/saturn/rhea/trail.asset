@@ -41,7 +41,6 @@ asset.export(RheaTrail)
 
 asset.meta = {
   Name = "Rhea Trail",
-  Version = "1.0",
   Description = "Main trail for Rhea",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

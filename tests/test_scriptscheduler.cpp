@@ -37,7 +37,7 @@ TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
 
@@ -71,7 +71,7 @@ TEST_CASE("ScriptScheduler: Multiple Forward Single Jump", "[scriptscheduler]") 
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
@@ -114,7 +114,7 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
 
@@ -155,7 +155,7 @@ TEST_CASE("ScriptScheduler: Simple Backward", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
@@ -188,7 +188,7 @@ TEST_CASE("ScriptScheduler: Multiple Backward Single Jump", "[scriptscheduler]")
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
 
@@ -232,7 +232,7 @@ TEST_CASE("ScriptScheduler: Multiple Backward Ordering", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
@@ -271,7 +271,7 @@ TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     static const std::vector<double> TestTimes = {
@@ -280,16 +280,16 @@ TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
     };
 
     // First test if a new ScriptScheduler will return an empty list
-    for (double t : TestTimes) {
+    for (const double t : TestTimes) {
         ScriptScheduler scheduler;
-        std::vector<std::string> res = scheduler.progressTo(t);
+        const std::vector<std::string> res = scheduler.progressTo(t);
         CHECK(res.empty());
     }
 
     // Then test the same thing but keeping the same ScriptScheduler
     ScriptScheduler scheduler;
-    for (double t : TestTimes) {
-        std::vector<std::string> res = scheduler.progressTo(t);
+    for (const double t : TestTimes) {
+        const std::vector<std::string> res = scheduler.progressTo(t);
         CHECK(res.empty());
     }
 
@@ -303,7 +303,7 @@ TEST_CASE("ScriptScheduler: Forward Backwards", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
@@ -350,7 +350,7 @@ TEST_CASE("ScriptScheduler: Rewind", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
@@ -390,7 +390,7 @@ TEST_CASE("ScriptScheduler: CurrentTime", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     static const std::vector<double> TestValues = {
@@ -398,7 +398,7 @@ TEST_CASE("ScriptScheduler: CurrentTime", "[scriptscheduler]") {
         -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()
     };
 
-    for (double t : TestValues) {
+    for (const double t : TestValues) {
         ScriptScheduler scheduler;
         scheduler.progressTo(t);
         CHECK(t == scheduler.currentTime());
@@ -414,7 +414,7 @@ TEST_CASE("ScriptScheduler: All Scripts", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
@@ -457,7 +457,7 @@ TEST_CASE("ScriptScheduler: Jump Equal", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
@@ -497,7 +497,7 @@ TEST_CASE("ScriptScheduler: Same Time", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
@@ -530,7 +530,7 @@ TEST_CASE("ScriptScheduler: Multi Inner Jump", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
@@ -572,7 +572,7 @@ TEST_CASE(
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     ScriptScheduler::ScheduledScript script1;
@@ -613,7 +613,7 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering Multiple Load" "[scriptsch
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     ScriptScheduler::ScheduledScript script1;
@@ -652,7 +652,7 @@ TEST_CASE(
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     ScriptScheduler::ScheduledScript script1;
@@ -694,7 +694,7 @@ TEST_CASE(
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     ScriptScheduler scheduler;
@@ -731,7 +731,7 @@ TEST_CASE("ScriptScheduler: Forward Backwards Multiple Load", "[scriptscheduler]
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     ScriptScheduler::ScheduledScript script1;
@@ -774,7 +774,7 @@ TEST_CASE("ScriptScheduler: Rewind Multiple Load", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     ScriptScheduler::ScheduledScript script1;
@@ -811,7 +811,7 @@ TEST_CASE("ScriptScheduler: All Scripts Multiple Load", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     ScriptScheduler::ScheduledScript script1;
@@ -850,7 +850,7 @@ TEST_CASE("ScriptScheduler: All Scripts Mixed Load", "[scriptscheduler]") {
 
     SpiceManager::initialize();
     SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
     );
 
     ScriptScheduler::ScheduledScript script1;

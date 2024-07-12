@@ -46,26 +46,25 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture to be used for the color",
-        // @VISIBILITY(2.75)
+        "The path to a file with a one-dimensional texture to be used for the disc "
+        "color. The leftmost color will be innermost color when rendering the disc, "
+        "and the rightmost color will be the outermost color.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the outer radius of the disc in meter",
-        // @VISIBILITY(2.75)
+        "The outer radius of the disc, in meters.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
         "Width",
         "Width",
-        "This value is used to set the width of the disc. The actual width is set "
-        "based on the given size and this value should be set between 0 and 1. A value "
-        "of 1 results in a full circle and 0.5 a disc with an inner radius of 0.5*size",
+        "The disc width, given as a ratio of the full disc radius. For example, a value "
+        "of 1 results in a full circle, while 0.5 results in a disc where the inner "
+        "radius is half of the full radius.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -77,7 +76,7 @@ namespace {
         std::optional<float> size;
 
         // [[codegen::verbatim(WidthInfo.description)]]
-        std::optional<float> width;
+        std::optional<float> width [[codegen::inrange(0.0, 1.0)]];
     };
 #include "renderabledisc_codegen.cpp"
 } // namespace
@@ -152,7 +151,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
         calcModelViewProjectionTransform(data);
 
     _shader->setUniform(
-        _uniformCache.modelViewProjection,
+        _uniformCache.modelViewProjectionTransform,
         glm::mat4(modelViewProjectionTransform)
     );
     _shader->setUniform(_uniformCache.width, _width);
@@ -161,7 +160,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _shader->setUniform(_uniformCache.texture, unit);
+    _shader->setUniform(_uniformCache.colorTexture, unit);
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

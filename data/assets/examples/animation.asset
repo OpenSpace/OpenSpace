@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
@@ -34,8 +34,8 @@ local AnimationLoop = {
     }
   },
   GUI = {
-    Name = "Animated Model example (LoopFromStart)",
-    Path = "/Example",
+    Name = "Animated Model (LoopFromStart)",
+    Path = "/Examples",
     Description = "Simple animated box model with the animation mode 'LoopFromStart'"
   }
 }
@@ -61,8 +61,8 @@ local AnimationLoopInf = {
     }
   },
   GUI = {
-    Name = "Animated Model example (LoopInfinitely)",
-    Path = "/Example",
+    Name = "Animated Model (LoopInfinitely)",
+    Path = "/Examples",
     Description = "Simple animated box model with the animation mode 'LoopInfinitely'"
   }
 }
@@ -88,8 +88,8 @@ local AnimationOnce = {
     }
   },
   GUI = {
-    Name = "Animated Model example (Once)",
-    Path = "/Example",
+    Name = "Animated Model (Once)",
+    Path = "/Examples",
     Description = "Simple animated box model with the animation mode 'Once'"
   }
 }
@@ -115,8 +115,8 @@ local AnimationBounceInf = {
     }
   },
   GUI = {
-    Name = "Animated Model example (BounceInfinitely)",
-    Path = "/Example",
+    Name = "Animated Model (BounceInfinitely)",
+    Path = "/Examples",
     Description = "Simple animated box model with the animation mode 'BounceInfinitely'"
   }
 }
@@ -142,8 +142,8 @@ local AnimationBounce = {
     }
   },
   GUI = {
-    Name = "Animated Model example (BounceFromStart)",
-    Path = "/Example",
+    Name = "Animated Model (BounceFromStart)",
+    Path = "/Examples",
     Description = "Simple animated box model with the animation mode 'BounceFromStart'"
   }
 }
@@ -176,7 +176,6 @@ asset.export(AnimationBounce)
 
 asset.meta = {
   Name = "Animation Example asset",
-  Version = "1.0",
   Description = "Simple animation example asset with an animated box model",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
@@ -187,7 +186,6 @@ asset.meta = {
 -- @TODO: At the moment, this overwrites the previous meta description. Probably needs a way to specify multiple meta's per file?
 asset.meta = {
   Name = "Animated Box Model",
-  Version = "1.0",
   Description = "Simple animated box model",
   Author = "Cesium, https://cesium.com/",
   URL = "https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/BoxAnimated",

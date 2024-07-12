@@ -41,7 +41,6 @@ asset.export(IapetusTrail)
 
 asset.meta = {
   Name = "Iapetus Trail",
-  Version = "1.1",
   Description = "Main trail for Iapetus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

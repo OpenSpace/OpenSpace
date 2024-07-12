@@ -166,7 +166,6 @@ asset.export("ToggleTrailsExceptMoon", ToggleJwstTrails.Identifier)
 
 asset.meta = {
   Name = "Actions - JWST",
-  Version = "1.0",
   Description = "Actions related to the JWST mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

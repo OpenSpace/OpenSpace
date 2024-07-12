@@ -55,8 +55,13 @@ properties::Property* property(const std::string& uri) {
     return property;
 }
 
+properties::PropertyOwner* propertyOwner(const std::string& uri) {
+    properties::PropertyOwner* property = global::rootPropertyOwner->propertyOwner(uri);
+    return property;
+}
+
 std::vector<properties::Property*> allProperties() {
     return global::rootPropertyOwner->propertiesRecursive();
 }
 
-}  // namespace
+}  // namespace openspace

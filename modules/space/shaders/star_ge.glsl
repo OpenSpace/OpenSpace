@@ -27,7 +27,7 @@
 #include "PowerScaling/powerScalingMath.hglsl"
 
 layout(points) in;
-in vec4 vs_bvLumAbsMagAppMag[];
+in vec3 vs_bvLumAbsMag[];
 in vec3 vs_velocity[];
 in float vs_speed[];
 
@@ -42,24 +42,21 @@ flat out float gs_screenSpaceDepth;
 uniform float magnitudeExponent;
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
-uniform int psfParamConf;
+uniform int sizeComposition;
 uniform float lumCent;
 uniform float radiusCent;
-uniform float brightnessCent;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
 const double PARSEC = 3.08567756E16;
-//const double PARSEC = 3.08567782E16;
 
 // FRAGILE
 // All of these values have to be synchronized with the values in the optionproperty
-const int SizeCompositionOptionAppBrightness = 0;
-const int SizeCompositionOptionLumSize = 1;
-const int SizeCompositionOptionLumSizeAppBrightness = 2;
+const int SizeCompositionOptionLumSizeDistanceModulus = 0;
+const int SizeCompositionOptionAppBrightness = 1;
+const int SizeCompositionOptionLumSize = 2;
 const int SizeCompositionOptionLumSizeAbsMagnitude = 3;
 const int SizeCompositionOptionLumSizeAppMagnitude = 4;
-const int SizeCompositionOptionLumSizeDistanceModulus = 5;
 
 const float SunTemperature = 5800.0;
 const float SunAbsMagnitude = 4.83;
@@ -88,21 +85,6 @@ double scaleForLuminositySize(float bv, float luminance, float absMagnitude) {
   return (lumCent * adjustedLuminance + (radiusCent * starRadius)) * pow(10.0, magnitudeExponent);
 }
 
-double scaleForLuminositySizeAppBrightness(dvec3 dpos, float bv, float luminance, float absMagnitude) {
-  double luminosity = double(1.0 - luminance);
-  double distanceToStarInParsecs = trunc(length(dpos - eyePosition) / PARSEC);
-  double apparentBrightness = luminosity / distanceToStarInParsecs;
-  float L_over_Lsun = pow(2.51, SunAbsMagnitude - absMagnitude);
-  float temperature = bvToKelvin(bv);
-  float relativeTemperature = SunTemperature / temperature;
-  double starRadius = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
-
-  double scaledLuminance = lumCent * (luminance + 5E9);
-  double scaledStarRadius = radiusCent * starRadius;
-  double scaledBrightness = brightnessCent * apparentBrightness * 5E15;
-  return (scaledLuminance + scaledStarRadius + scaledBrightness) * pow(10.0, magnitudeExponent);
-}
-
 double scaleForAbsoluteMagnitude(float absMagnitude) {
   return (-absMagnitude + 35) * pow(10.0, magnitudeExponent + 8.5);
 }
@@ -111,19 +93,8 @@ double scaleForApparentMagnitude(dvec3 dpos, float absMag) {
   double distanceToStarInMeters = length(dpos - eyePosition);
   double distanceToCenterInMeters = length(eyePosition);
   float distanceToStarInParsecs = float(distanceToStarInMeters/PARSEC);
-  //float appMag = absMag + 5*log(distanceToStarInParsecs) - 5.0;
   float appMag = absMag + 5.0 * (log(distanceToStarInParsecs/10.0)/log(2.0));
-  //appMag = vs_bvLumAbsMagAppMag[0].w;
-
-  //scaleMultiply = (30.623 - appMag) * pow(10.0, magnitudeExponent + 7.0);// *
-  //float(distanceToStarInMeters/distanceToCenterInMeters);
-
   return (-appMag + 50.0) * pow(10.0, magnitudeExponent + 7.5);
-  // return log(35.f + appMag) *  pow(10.0, magnitudeExponent + 6.5f);
-  // return exp((35.f - appMag) * 0.2) * pow(10.0, magnitudeExponent + 2.5f);
-  // return appMag * pow(10.0, magnitudeExponent + 8.5f);
-  // return exp((-30.0 - appMag) * 0.45) * pow(10.0, magnitudeExponent + 8.f);
-  // return pow(10.0, (appMag - absMag)*(1.0/5.0) + 1.0) * pow(10.0, magnitudeExponent + 3.f);
 }
 
 double scaleForDistanceModulus(float absMag) {
@@ -136,45 +107,38 @@ void main() {
   vs_position = pos; // in object space
   dvec4 dpos  = modelMatrix * dvec4(pos, 1.0);
 
-  ge_bv = vs_bvLumAbsMagAppMag[0].x;
+  ge_bv = vs_bvLumAbsMag[0].x;
   ge_velocity = vs_velocity[0];
   ge_speed = vs_speed[0];
 
   double scaleMultiply = 1.0;
 
-  if (psfParamConf == SizeCompositionOptionAppBrightness) {
-    float luminance = vs_bvLumAbsMagAppMag[0].y;
+  if (sizeComposition == SizeCompositionOptionLumSizeDistanceModulus) {
+    float absMagnitude = vs_bvLumAbsMag[0].z;
+
+    scaleMultiply = scaleForDistanceModulus(absMagnitude);
+  }
+  else if (sizeComposition == SizeCompositionOptionAppBrightness) {
+    float luminance = vs_bvLumAbsMag[0].y;
 
     scaleMultiply = scaleForApparentBrightness(dpos.xyz, luminance);
   }
-  else if (psfParamConf == SizeCompositionOptionLumSize) {
-    float bv = vs_bvLumAbsMagAppMag[0].x;
-    float luminance = vs_bvLumAbsMagAppMag[0].y;
-    float absMagnitude = vs_bvLumAbsMagAppMag[0].z;
+  else if (sizeComposition == SizeCompositionOptionLumSize) {
+    float bv = vs_bvLumAbsMag[0].x;
+    float luminance = vs_bvLumAbsMag[0].y;
+    float absMagnitude = vs_bvLumAbsMag[0].z;
 
     scaleMultiply = scaleForLuminositySize(bv, luminance, absMagnitude);
   }
-  else if (psfParamConf == SizeCompositionOptionLumSizeAppBrightness) {
-    float bv = vs_bvLumAbsMagAppMag[0].x;
-    float luminance = vs_bvLumAbsMagAppMag[0].y;
-    float absMagnitude = vs_bvLumAbsMagAppMag[0].z;
-
-    scaleMultiply = scaleForLuminositySizeAppBrightness(dpos.xyz, bv, luminance, absMagnitude);
-  }
-  else if (psfParamConf == SizeCompositionOptionLumSizeAbsMagnitude) {
-    float absMagnitude = vs_bvLumAbsMagAppMag[0].z;
+  else if (sizeComposition == SizeCompositionOptionLumSizeAbsMagnitude) {
+    float absMagnitude = vs_bvLumAbsMag[0].z;
 
     scaleMultiply = scaleForAbsoluteMagnitude(absMagnitude);
   }
-  else if (psfParamConf == SizeCompositionOptionLumSizeAppMagnitude) {
-    float absMagnitude = vs_bvLumAbsMagAppMag[0].z;
+  else if (sizeComposition == SizeCompositionOptionLumSizeAppMagnitude) {
+    float absMagnitude = vs_bvLumAbsMag[0].z;
 
     scaleMultiply = scaleForApparentMagnitude(dpos.xyz, absMagnitude);
-  }
-  else if (psfParamConf == SizeCompositionOptionLumSizeDistanceModulus) {
-    float absMagnitude = vs_bvLumAbsMagAppMag[0].z;
-
-    scaleMultiply = scaleForDistanceModulus(absMagnitude);
   }
 
   dvec3 normal = eyePosition - dpos.xyz;
@@ -207,7 +171,7 @@ void main() {
   EmitVertex();
 
   gl_Position = lowerRight;
-  texCoords = vec2(1.0,0.0);
+  texCoords = vec2(1.0, 0.0);
   EmitVertex();
 
   gl_Position = upperLeft;

@@ -32,7 +32,6 @@ asset.export(Layer)
 
 asset.meta = {
   Name = "Stretched Video Example",
-  Version = "1.0",
   Description = "This is a video mapped to the simulation time in OpenSpace.",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",

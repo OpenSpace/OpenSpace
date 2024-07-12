@@ -21,11 +21,9 @@ local DeimosGlobe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7500, 6100, 5200 },
---Radius source
---https://sci.esa.int/documents/35171/36506/1567259108230-5-ESLAB46-Day2-Rosenblatt.pdf
-    SegmentsPerPatch = 90,
-    Layers = {}
+    -- Radius source
+    -- https://sci.esa.int/documents/35171/36506/1567259108230-5-ESLAB46-Day2-Rosenblatt.pdf
+    Radii = { 7500, 6100, 5200 }
   },
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
@@ -50,7 +48,6 @@ asset.export(DeimosGlobe)
 
 asset.meta = {
   Name = "Deimos Globe",
-  Version = "1.0",
   Description = "RenderableGlobe for Deimos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

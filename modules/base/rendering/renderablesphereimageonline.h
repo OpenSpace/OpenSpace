@@ -38,6 +38,9 @@ struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
+/**
+ * This class describes a sphere renderable that displays an image from an online source
+ */
 class RenderableSphereImageOnline : public RenderableSphere {
 public:
     RenderableSphereImageOnline(const ghoul::Dictionary& dictionary);
@@ -52,14 +55,11 @@ protected:
     void bindTexture() override;
 
 private:
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
-
     properties::StringProperty _textureUrl;
 
     std::future<DownloadManager::MemoryFile> _imageFuture;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-    bool _textureIsDirty = false;
+    bool _textureIsDirty = true;
 };
 
 } // namespace openspace

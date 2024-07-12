@@ -56,18 +56,18 @@ private:
     void actionRemove();
     void actionSelected();
     void actionSaved();
-    void clearActionFields();
+    void clearActionFields() const;
     void actionRejected();
     void chooseScripts();
-    void appendScriptsToTextfield(std::vector<std::string> scripts);
+    void appendScriptsToTextfield(const std::vector<std::string>& scripts) const;
 
     openspace::Profile::Keybinding* selectedKeybinding();
     void keybindingAdd();
     void keybindingRemove();
     void keybindingSelected();
-    void keybindingActionSelected(int);
+    void keybindingActionSelected(int) const;
     void keybindingSaved();
-    void clearKeybindingFields();
+    void clearKeybindingFields() const;
     void keybindingRejected();
 
     std::vector<openspace::Profile::Action>* _actions = nullptr;

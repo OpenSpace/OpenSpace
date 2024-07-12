@@ -110,7 +110,7 @@ void NumericalProperty<T>::setExponent(float exponent) {
         if (!isValidRange(_minimumValue, _maximumValue)) {
             LWARNINGC(
                 "NumericalProperty: setExponent",
-                fmt::format(
+                std::format(
                     "Setting exponent for properties with negative values in "
                     "[min, max] range is not yet supported. Property: {}",
                     this->fullyQualifiedIdentifier()

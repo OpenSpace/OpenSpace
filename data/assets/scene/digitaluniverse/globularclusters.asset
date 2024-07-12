@@ -72,7 +72,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Globular Clusters",
-  Version = "3.0",
   Description = [[Census: 157 globular clusters. DU Version 2.6. Globular star clusters
     are gravitationally bound groups of 100,000 to 1 million stars. They are compact,
     spherical "balls" of stars with very high stellar densities in their centers (stars

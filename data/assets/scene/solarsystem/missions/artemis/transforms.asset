@@ -37,7 +37,6 @@ asset.export(ArtemisPosition)
 
 asset.meta = {
   Name = "Artemis-1 Transforms",
-  Version = "1.0",
   Description = "Artemis-1 transforms, position relative to Earth",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

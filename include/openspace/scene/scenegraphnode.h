@@ -140,13 +140,14 @@ public:
 
     bool supportsDirectInteraction() const;
 
-    SceneGraphNode* childNode(const std::string& identifier);
+    SceneGraphNode* childNode(const std::string& id);
 
     const Renderable* renderable() const;
     Renderable* renderable();
 
     std::string guiPath() const;
     bool hasGuiHintHidden() const;
+    void setGuiHintHidden(bool value);
 
     static documentation::Documentation Documentation();
 
@@ -155,7 +156,7 @@ private:
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
     void computeScreenSpaceData(RenderData& newData);
-    void renderDebugSphere(const Camera& camera, double size, glm::vec4 color);
+    void renderDebugSphere(const Camera& camera, double size, const glm::vec4& color);
 
     std::atomic<State> _state = State::Loaded;
     std::vector<ghoul::mm_unique_ptr<SceneGraphNode>> _children;

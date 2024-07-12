@@ -27,7 +27,9 @@ local Object = {
     Enabled = false,
     Opacity = 1.0,
     File = HUDFSpeck .. "hudf.speck",
-    Texture = circle .. "circle.png",
+    Texture = {
+      File = circle .. "circle.png",
+    },
     Coloring = {
       ColorMapping = {
         File = ColorMap .. "hudf.cmap",
@@ -67,7 +69,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field",
-  Version = "2.0",
   Description = "Hubble Ultra Deep Field galaxy survey",
   Author = "Frank Summers (STScI), Brian Abbott (AMNH)",
   URL = "http://www.haydenplanetarium.org/universe",

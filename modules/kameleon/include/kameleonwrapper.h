@@ -28,6 +28,7 @@
 #include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <array>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -78,10 +79,10 @@ public:
 
     using Fieldlines = std::vector<std::vector<LinePoint>>;
 
-    explicit KameleonWrapper(const std::string& filename);
+    explicit KameleonWrapper(const std::filesystem::path& filename);
     ~KameleonWrapper();
 
-    bool open(const std::string& filename);
+    bool open(const std::filesystem::path& filename);
     void close();
 
     float* uniformSampledValues(const std::string& var,

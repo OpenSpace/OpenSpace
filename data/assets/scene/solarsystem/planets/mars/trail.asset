@@ -40,7 +40,6 @@ asset.export(MarsTrail)
 
 asset.meta = {
   Name = "Mars Trail",
-  Version = "1.1",
   Description = "Main Mars trail from SPICE",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

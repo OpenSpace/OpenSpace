@@ -52,15 +52,13 @@ namespace documentation { struct Documentation; }
 class RenderableStars : public Renderable {
 public:
     explicit RenderableStars(const ghoul::Dictionary& dictionary);
-    ~RenderableStars() override;
+    ~RenderableStars() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
 
     bool isReady() const override;
 
-    void loadPSFTexture();
-    void renderPSFToTexture();
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
@@ -75,6 +73,7 @@ private:
         FixedColor = 4
     };
 
+    void loadPSFTexture();
     void loadData();
     std::vector<float> createDataSlice(ColorOption option);
 
@@ -84,12 +83,12 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
 
-    properties::PropertyOwner _dataMappingContainer;
     struct {
+        properties::PropertyOwner container;
+
         properties::StringProperty bvColor;
         properties::StringProperty luminance;
         properties::StringProperty absoluteMagnitude;
-        properties::StringProperty apparentMagnitude;
         properties::StringProperty vx;
         properties::StringProperty vy;
         properties::StringProperty vz;
@@ -103,43 +102,45 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
     properties::Vec3Property _fixedColor;
     properties::BoolProperty _filterOutOfRange;
-    properties::StringProperty _pointSpreadFunctionTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
-    std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
 
-    properties::OptionProperty _psfMethodOption;
-    properties::OptionProperty _psfMultiplyOption;
-    properties::FloatProperty _lumCent;
-    properties::FloatProperty _radiusCent;
-    properties::FloatProperty _brightnessCent;
+    struct TextureComponent {
+        properties::PropertyOwner container;
+
+        properties::StringProperty texturePath;
+        properties::FloatProperty multiplier;
+        properties::FloatProperty gamma;
+        properties::FloatProperty scale;
+
+        std::unique_ptr<ghoul::opengl::Texture> texture;
+        std::unique_ptr<ghoul::filesystem::File> file;
+    };
+
+    TextureComponent _core;
+    TextureComponent _glare;
+
+    struct {
+        properties::PropertyOwner container;
+        properties::OptionProperty method;
+        properties::FloatProperty lumCent;
+        properties::FloatProperty radiusCent;
+    } _parameters;
+
     properties::FloatProperty _magnitudeExponent;
-    properties::PropertyOwner _spencerPSFParamOwner;
-    properties::FloatProperty _p0Param;
-    properties::FloatProperty _p1Param;
-    properties::FloatProperty _p2Param;
-    properties::FloatProperty _spencerAlphaConst;
-    properties::PropertyOwner _moffatPSFParamOwner;
-    properties::FloatProperty _FWHMConst;
-    properties::FloatProperty _moffatBetaConst;
-    properties::OptionProperty _renderingMethodOption;
-    properties::PropertyOwner _userProvidedTextureOwner;
-    properties::PropertyOwner _parametersOwner;
-    properties::PropertyOwner _moffatMethodOwner;
     properties::Vec2Property _fadeInDistances;
-    properties::BoolProperty _disableFadeInDistance;
+    properties::BoolProperty _enableFadeInDistance;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
-        modelMatrix, cameraUp, cameraViewProjectionMatrix, colorOption, magnitudeExponent,
-        eyePosition, psfParamConf, lumCent, radiusCent, brightnessCent, colorTexture,
-        alphaValue, psfTexture, otherDataTexture, otherDataRange, filterOutOfRange,
-        fixedColor
+        modelMatrix, cameraViewProjectionMatrix, cameraUp, eyePosition, colorOption,
+        magnitudeExponent, sizeComposition, lumCent, radiusCent, colorTexture, opacity,
+        otherDataTexture, otherDataRange, filterOutOfRange, fixedColor, glareTexture,
+        glareMultiplier, glareGamma, glareScale, hasCore, coreTexture, coreMultiplier,
+        coreGamma, coreScale
     ) _uniformCache;
 
     bool _speckFileIsDirty = true;
     bool _pointSpreadFunctionTextureIsDirty = true;
     bool _colorTextureIsDirty = true;
-    //bool _shapeTextureIsDirty = true;
     bool _dataIsDirty = true;
     bool _otherDataColorMapIsDirty = true;
 
@@ -152,10 +153,6 @@ private:
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
-    GLuint _psfVao = 0;
-    GLuint _psfVbo = 0;
-    GLuint _psfTexture = 0;
-    GLuint _convolvedTexture = 0;
 };
 
 } // namespace openspace

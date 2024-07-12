@@ -12,7 +12,6 @@ asset.export("image", image)
 
 asset.meta = {
   Name = "Orion Nebula",
-  Version = "1.0",
   Description = "Orion Nebula Image",
   Author = "Bill Schoening/NOIRLab/NSF/AURA",
   URL = "https://noirlab.edu/public/images/noao-02677/",

@@ -1,20 +1,20 @@
 openspace.documentation = {
     {
         Name = "markInterestingNodes",
-        Arguments = { sceneGraphNodes = "String[]" },
+        Arguments = {{ "sceneGraphNodes", "String[]" }},
         Documentation = "This function marks the scene graph nodes identified by name " ..
         "as interesting, which will provide shortcut access to focus buttons and " ..
         "featured properties"
     },
     {
         Name = "markInterestingTimes",
-        Arguments = { times = "Table[]" },
+        Arguments = {{ "times", "Table[]" }},
         Documentation = "This function marks interesting times for the current scene, " ..
         "which will create shortcuts for a quick access"
     },
     {
         Name = "removeInterestingNodes",
-        Arguments = { sceneGraphNodes = "String[]" },
+        Arguments = {{ "sceneGraphNodes", "String[]" }},
         Documentation = "This function removes unmarks the scene graph nodes " ..
         "identified by name as interesting, thus removing the shortcuts from the " ..
         "features properties list"
@@ -36,36 +36,36 @@ openspace.documentation = {
     },
     {
         Name = "rebindKey",
-        Arguments = { oldKey = "String", newKey = "String" },
+        Arguments = {{ "oldKey", "String" }, { "newKey", "String" }},
         Documentation = "Rebinds all scripts from the old key (first argument) to the " ..
         "new key (second argument)"
     },
     {
         Name = "appendToListProperty",
-        Arguments = { identifier = "String", value = "any" },
+        Arguments = {{ "identifier","String" }, { "value", "any" }},
         Documentation = "Add a value to the list property with the given identifier. " ..
         "The value can be any type, as long as it is the correct type for the given " ..
         "property. Note that a number will be converted to a string automatically."
     },
     {
         Name = "addToPropertyValue",
-        Arguments = { identifier = "String", value = "String | Number" },
+        Arguments = {{ "identifier", "String" } , { "value", "String | Number" }},
         Documentation = "Add a value to the property with the given identifier. " ..
         "Works on both numerical and string properties, where adding to a string " ..
         "property means appending the given string value to the existing string value."
     },
     {
         Name = "invertBooleanProperty",
-        Arguments = { identifier = "String" },
+        Arguments = {{ "identifier", "String" }},
         Documentation = "Inverts the value of a boolean property with the given "..
         "identifier"
     },
     {
         Name = "fadeIn",
         Arguments = {
-            identifier = "String",
-            fadeTime = "Number?",
-            endScript = "String?"
+            { "identifier", "String" },
+            { "fadeTime", "Number?" },
+            { "endScript", "String?" }
         },
         Documentation = "Fades in the node(s) with the given identifier over the given " ..
         "time in seconds. The identifier can contain a tag and/or a wildcard to target " ..
@@ -77,9 +77,9 @@ openspace.documentation = {
     {
         Name = "fadeOut",
         Arguments = {
-            identifier = "String",
-            fadeTime = "Number?",
-            endScript = "String?"
+            { "identifier", "String" },
+            { "fadeTime", "Number?" },
+            { "endScript", "String?" }
         },
         Documentation = "Fades out the node(s) with the given identifier over the given " ..
         "time in seconds. The identifier can contain a tag and/or a wildcard to target " ..
@@ -91,9 +91,9 @@ openspace.documentation = {
     {
         Name = "toggleFade",
         Arguments = {
-            identifier = "String",
-            fadeTime = "Number?",
-            endScript = "String?"
+            { "identifier", "String" },
+            { "fadeTime", "Number?" },
+            { "endScript", "String?" }
         },
         Documentation = [[Toggles the fade state of the node(s) with the given identifier over the given
           time in seconds. The identifier can contain a tag and/or a wildcard to target

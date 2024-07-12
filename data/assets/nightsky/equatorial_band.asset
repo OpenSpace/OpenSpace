@@ -92,7 +92,6 @@ asset.export("ToggleEquatorialLine", ToggleEquatorialLine.Identifier)
 
 asset.meta = {
   Name = "Equatorial Line",
-  Version = "1.0",
   Description = [[A line representation of the Equatorial plane, including actions
     to toggle, hide and show it.]],
   Author = "OpenSpace Team",

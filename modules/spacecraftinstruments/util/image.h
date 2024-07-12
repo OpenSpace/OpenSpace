@@ -34,7 +34,7 @@ namespace openspace {
 
 struct Image {
     TimeRange timeRange;
-    std::string path;
+    std::filesystem::path path;
     std::vector<std::string> activeInstruments;
     std::string target;
     bool isPlaceholder = false;

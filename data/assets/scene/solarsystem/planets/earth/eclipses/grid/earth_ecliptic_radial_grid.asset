@@ -51,7 +51,6 @@ asset.export(eclipticGrid)
 
 asset.meta = {
   Name = "Earth Ecliptic Grid",
-  Version = "1.0",
   Description = "A grid that shows the ecliptic of the Earth a radial grid",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -52,7 +52,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "DetectedTouchEvent",
         "Detected Touch Event",
-        "True when there is an active touch event",
+        "True when there is an active touch event.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -95,7 +95,7 @@ TouchModule::TouchModule()
                 FactoryManager::ref().factory<Renderable>();
 
             if (!fRenderable->hasClass(s)) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "In property 'DefaultDirectTouchRenderableTypes': '{}' is not a "
                     "registered renderable type. Ignoring", s
                 ));

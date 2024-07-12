@@ -4,7 +4,6 @@ asset.require("./layers/colorlayers/rhea_texture", true)
 
 asset.meta = {
   Name = "Default Rhea Layers",
-  Version = "1.0",
   Description = "Default Rhea layers are: Rhea Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

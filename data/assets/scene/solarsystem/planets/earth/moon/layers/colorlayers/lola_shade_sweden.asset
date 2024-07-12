@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Lola_Shade_Sweden",
   Name = "Lola Shade [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = asset.resource("lola_shade_sweden.wms"),
   Description = [[This is a shaded-relief of a original polar digital elevation model
     (DEM) from the Lunar Orbiter Laser Altimeter (LOLA; Smith et al., 2010), an instrument
@@ -32,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Lola Shade [Sweden]",
-  Version = "1.1",
   Description = [[Moon LRO LOLA Shaded Relief 237m v4 layer for Moon globe. This
     map is hosted on the OpenSpace server in Sweden]],
   Author = "USGS",

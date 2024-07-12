@@ -1,7 +1,7 @@
 openspace.globebrowsing.documentation = {
   {
     Name = "setNodePosition",
-    Arguments = { nodeIdentifer = "String", globeIdentifier = "String", latitude = "Number", longitude = "Number", altitude = "Number" },
+    Arguments = {{ "nodeIdentifer", "String" }, { "globeIdentifier", "String" }, { "latitude", "Number" }, { "longitude", "Number" }, { "altitude", "Number" }},
     Documentation =
         "Sets the position of a SceneGraphNode that has GlobeTranslation/GlobeRotations. " ..
         "Usage: openspace.globebrowsing.setNodePosition(" ..
@@ -9,7 +9,7 @@ openspace.globebrowsing.documentation = {
   },
   {
     Name = "setNodePositionFromCamera",
-    Arguments = { nodeIdentifer = "String", useAltitude = "Boolean" },
+    Arguments = {{ "nodeIdentifer", "String" }, { "useAltitude", "Boolean" }},
     Documentation =
         "Sets the position of a SceneGraphNode that has GlobeTranslation/GlobeRotations" ..
         " to match the camera. Only uses camera position not rotation. If useAltitude" ..

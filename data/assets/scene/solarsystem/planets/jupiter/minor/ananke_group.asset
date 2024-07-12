@@ -17,9 +17,7 @@ local S2010J2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -53,6 +51,7 @@ local S2010J2Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -79,7 +78,13 @@ local S2010J2Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2010 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2010J2",
@@ -99,9 +104,7 @@ local Thelxinoe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -135,6 +138,7 @@ local ThelxinoeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -161,7 +165,13 @@ local ThelxinoeLabel = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "Thelxinoe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thelxinoe",
@@ -181,9 +191,7 @@ local Euanthe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -217,6 +225,7 @@ local EuantheTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -243,7 +252,13 @@ local EuantheLabel = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "Euanthe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Euanthe",
@@ -263,9 +278,7 @@ local Iocaste = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -299,6 +312,7 @@ local IocasteTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -325,7 +339,13 @@ local IocasteLabel = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "Iocaste Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Iocaste",
@@ -345,9 +365,7 @@ local S2003J16 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -381,6 +399,7 @@ local S2003J16Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -407,7 +426,13 @@ local S2003J16Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2003 J 16 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J16",
@@ -427,9 +452,7 @@ local Praxidike = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -463,6 +486,7 @@ local PraxidikeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -489,7 +513,13 @@ local PraxidikeLabel = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "Praxidike Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Praxidike",
@@ -509,9 +539,7 @@ local Harpalyke = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -545,6 +573,7 @@ local HarpalykeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -571,7 +600,13 @@ local HarpalykeLabel = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "Harpalyke Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Harpalyke",
@@ -591,9 +626,7 @@ local Mneme = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -627,6 +660,7 @@ local MnemeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -653,7 +687,13 @@ local MnemeLabel = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "Mneme Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Mneme",
@@ -673,9 +713,7 @@ local Hermippe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -709,6 +747,7 @@ local HermippeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -735,7 +774,13 @@ local HermippeLabel = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "Hermippe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Hermippe",
@@ -755,9 +800,7 @@ local Thyone = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -791,6 +834,7 @@ local ThyoneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -817,7 +861,13 @@ local ThyoneLabel = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "Thyone Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Thyone",
@@ -837,9 +887,7 @@ local Ananke = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 28000, 28000, 28000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 28000, 28000, 28000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -873,6 +921,7 @@ local AnankeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -899,7 +948,13 @@ local AnankeLabel = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "Ananke Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/Ananke",
@@ -919,9 +974,7 @@ local S2021J1 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -955,6 +1008,7 @@ local S2021J1Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -981,7 +1035,13 @@ local S2021J1Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2021 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J1",
@@ -1001,9 +1061,7 @@ local S2021J2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1037,6 +1095,7 @@ local S2021J2Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1063,7 +1122,13 @@ local S2021J2Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2021 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J2",
@@ -1083,9 +1148,7 @@ local S2021J3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1119,6 +1182,7 @@ local S2021J3Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1145,7 +1209,13 @@ local S2021J3Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2021 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2021J3",
@@ -1165,9 +1235,7 @@ local S2022J3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1201,6 +1269,7 @@ local S2022J3Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1227,7 +1296,13 @@ local S2022J3Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2022 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2022J3",
@@ -1247,9 +1322,7 @@ local S2017J3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1283,6 +1356,7 @@ local S2017J3Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1309,7 +1383,13 @@ local S2017J3Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2017 J 3 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J3",
@@ -1329,9 +1409,7 @@ local S2017J7 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1365,6 +1443,7 @@ local S2017J7Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1391,7 +1470,13 @@ local S2017J7Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2017 J 7 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J7",
@@ -1411,9 +1496,7 @@ local S2017J9 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1447,6 +1530,7 @@ local S2017J9Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1473,7 +1557,13 @@ local S2017J9Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2017 J 9 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2017J9",
@@ -1493,9 +1583,7 @@ local S2003J2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1529,6 +1617,7 @@ local S2003J2Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1555,7 +1644,13 @@ local S2003J2Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2003 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J2",
@@ -1575,9 +1670,7 @@ local S2003J12 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1611,6 +1704,7 @@ local S2003J12Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_ananke",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1637,7 +1731,13 @@ local S2003J12Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
   GUI = {
     Name = "S/2003 J 12 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J12",
@@ -1893,7 +1993,6 @@ asset.export(S2003J12Label)
 
 asset.meta = {
   Name = "Jupiter Ananke Group Moons",
-  Version = "1.0",
   Description = [[Asset containing Jupiter's Ananke Group moons. Blank globes, SPICE
     trails, and labels are generated for each moon]],
   Author = "OpenSpace Team",

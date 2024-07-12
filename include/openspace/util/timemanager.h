@@ -41,17 +41,17 @@
 
 namespace openspace {
 
-struct TimeKeyframeData {
-    Time time;
-    double delta = 0.0;
-    bool pause = false;
-    bool jump = false;
-};
-
 class TimeManager : public properties::PropertyOwner {
 public:
     using CallbackHandle = int;
     using TimeChangeCallback = std::function<void()>;
+
+    struct TimeKeyframeData {
+        Time time;
+        double delta = 0.0;
+        bool pause = false;
+        bool jump = false;
+    };
 
     TimeManager();
 
@@ -98,8 +98,8 @@ public:
 
     void interpolateTime(double targetTime, double durationSeconds);
     void interpolateTimeRelative(double delta, double durationSeconds);
-    void interpolateDeltaTime(double targetDeltaTime, double durationSeconds);
-    void interpolatePause(bool pause, double durationSeconds);
+    void interpolateDeltaTime(double newDeltaTime, double interpolationDuration);
+    void interpolatePause(bool pause, double interpolationDuration);
 
     std::optional<double> nextDeltaTimeStep();
     std::optional<double> previousDeltaTimeStep();
@@ -110,7 +110,7 @@ public:
     void interpolateNextDeltaTimeStep(double durationSeconds);
     void interpolatePreviousDeltaTimeStep(double durationSeconds);
 
-    void addKeyframe(double timestamp, TimeKeyframeData kf);
+    void addKeyframe(double timestamp, TimeKeyframeData time);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
     void removeKeyframesAfter(double timestamp, bool inclusive = false);
 
@@ -137,10 +137,7 @@ private:
 
     void addDeltaTimesKeybindings();
     void clearDeltaTimesKeybindings();
-    double currentApplicationTimeForInterpolation() const;
     double previousApplicationTimeForInterpolation() const;
-
-    bool isPlayingBackSessionRecording() const;
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;

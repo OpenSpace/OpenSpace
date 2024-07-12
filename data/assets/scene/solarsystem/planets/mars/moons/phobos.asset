@@ -1,6 +1,6 @@
 local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -117,7 +117,6 @@ asset.export(PhobosTrail)
 
 asset.meta = {
   Name = "Phobos",
-  Version = "1.0",
   Description = "RenderableModel and Trail for Phobos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

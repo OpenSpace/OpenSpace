@@ -42,7 +42,7 @@ namespace {
         "LogGdalErrors",
         "Log GDAL errors",
         "If this value is enabled, any error that is raised by GDAL will be logged using "
-        "the logmanager. If this value is disabled, any error will be ignored",
+        "the logmanager. If this value is disabled, any error will be ignored.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -50,7 +50,7 @@ namespace {
         "GdalMaximumCacheSize",
         "GDAL maximum cache size",
         "This function sets the maximum amount of RAM memory in MB that GDAL is "
-        "permitted to use for caching",
+        "permitted to use for caching.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -97,9 +97,9 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     , _gdalMaximumCacheSize(
         GdalMaximumCacheInfo,
         static_cast<int>(maximumCacheSize / (1024ULL * 1024ULL)), // Default
-        0,                                          // Minimum: No caching
+        0, // Minimum: No caching
         static_cast<int>(maximumMaximumCacheSize / (1024ULL * 1024ULL)), // Maximum
-        1                                           // Step: One MB
+        1 // Step: One MB
     )
 {
     ZoneScoped;
@@ -108,11 +108,10 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     addProperty(_gdalMaximumCacheSize);
 
     GDALAllRegister();
-    CPLSetConfigOption(
-        "GDAL_DATA",
-        absPath("${MODULE_GLOBEBROWSING}/gdal_data").string().c_str()
-    );
-    CPLSetConfigOption("CPL_TMPDIR", absPath("${BASE}").string().c_str());
+    const std::string data = absPath("${MODULE_GLOBEBROWSING}/gdal_data").string();
+    CPLSetConfigOption("GDAL_DATA", data.c_str());
+    const std::string base = absPath("${BASE}").string();
+    CPLSetConfigOption("CPL_TMPDIR", base.c_str());
     CPLSetConfigOption("GDAL_HTTP_UNSAFESSL", "YES");
 
     CPLSetConfigOption("GDAL_HTTP_TIMEOUT", "3"); // 3 seconds
@@ -121,7 +120,7 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
     setGdalProxyConfiguration();
     CPLSetErrorHandler(gdalErrorHandler);
 
-    _gdalMaximumCacheSize.onChange([&] {
+    _gdalMaximumCacheSize.onChange([this] {
         // MB to Bytes
         GDALSetCacheMax64(
             static_cast<int64_t>(_gdalMaximumCacheSize) * 1024ULL * 1024ULL
@@ -140,13 +139,13 @@ void GdalWrapper::setGdalProxyConfiguration() {
 
         const std::string proxy = address + ":" + std::to_string(port);
         CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());
-        LDEBUG(fmt::format("Using proxy server {}", proxy));
+        LDEBUG(std::format("Using proxy server '{}'", proxy));
 
         if (!user.empty() && !password.empty()) {
-            std::string userPwd = user + ":" + password;
+            const std::string userPwd = user + ":" + password;
             CPLSetConfigOption("GDAL_HTTP_PROXYUSERPWD", userPwd.c_str());
             CPLSetConfigOption("GDAL_HTTP_PROXYAUTH", auth.c_str());
-            LDEBUG(fmt::format("Using authentication method: {}", auth));
+            LDEBUG(std::format("Using authentication method: {}", auth));
         }
     }
 }

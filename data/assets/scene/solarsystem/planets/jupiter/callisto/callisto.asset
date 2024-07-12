@@ -31,8 +31,6 @@ local Callisto = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 2410000,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "callisto.labels",
@@ -96,7 +94,6 @@ asset.export(CallistoLabel)
 
 asset.meta = {
   Name = "Callisto",
-  Version = "1.1",
   Description = "Callisto globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

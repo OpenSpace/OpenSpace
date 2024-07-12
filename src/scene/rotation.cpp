@@ -54,6 +54,8 @@ documentation::Documentation Rotation::Documentation() {
 ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     Rotation* result = FactoryManager::ref().factory<Rotation>()->create(

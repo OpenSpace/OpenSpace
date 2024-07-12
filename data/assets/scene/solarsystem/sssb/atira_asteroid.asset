@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Atira Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_atira_asteroid",
-  Version = 3
+  Version = 4
 })
 
 
@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 2,
     Color = { 0.5, 0.8, 1.0 },
-    TrailFade = 25
+    TrailFade = 25,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Atira Asteroids",
@@ -45,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Atira Asteroids",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Atira group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

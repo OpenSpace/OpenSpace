@@ -331,7 +331,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
 
     ghoul::Dictionary globalCustomizationScriptsDict;
-    for (size_t i = 0; i < globalCustomizationScripts.size(); ++i) {
+    for (size_t i = 0; i < globalCustomizationScripts.size(); i++) {
         globalCustomizationScriptsDict.setValue(
             std::to_string(i),
             globalCustomizationScripts[i]
@@ -340,8 +340,8 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("GlobalCustomizationScripts", globalCustomizationScriptsDict);
 
     ghoul::Dictionary fontsDict;
-    for (auto it = fonts.begin(); it != fonts.end(); ++it) {
-        fontsDict.setValue(it->first, it->second);
+    for (const auto& [name, path] : fonts) {
+        fontsDict.setValue(name, path);
     }
     res.setValue("Fonts", fontsDict);
 
@@ -363,7 +363,7 @@ ghoul::Dictionary Configuration::createDictionary() {
         loggingDict.setValue("CapabilitiesVerbosity", logging.capabilitiesVerbosity);
 
         ghoul::Dictionary logsDict;
-        for (size_t i = 0; i < logging.logs.size(); ++i) {
+        for (size_t i = 0; i < logging.logs.size(); i++) {
             logsDict.setValue(std::to_string(i), logging.logs[i]);
         }
         loggingDict.setValue("Logs", logsDict);
@@ -387,7 +387,10 @@ ghoul::Dictionary Configuration::createDictionary() {
     {
         ghoul::Dictionary loadingScreenDict;
         loadingScreenDict.setValue("IsShowingMessages", loadingScreen.isShowingMessages);
-        loadingScreenDict.setValue("IsShowingNodeNames", loadingScreen.isShowingNodeNames);
+        loadingScreenDict.setValue(
+            "IsShowingNodeNames",
+            loadingScreen.isShowingNodeNames
+        );
         loadingScreenDict.setValue(
             "IsShowingLogMessages",
             loadingScreen.isShowingLogMessages
@@ -413,8 +416,8 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("LayerServer", layerServerToString(layerServer));
 
     ghoul::Dictionary moduleConfigurationsDict;
-    for (auto it = moduleConfigurations.begin(); it != moduleConfigurations.end(); ++it) {
-        moduleConfigurationsDict.setValue(it->first, it->second);
+    for (const auto& [key, value] : moduleConfigurations) {
+        moduleConfigurationsDict.setValue(key, value);
     }
     res.setValue("ModuleConfigurations", moduleConfigurationsDict);
 
@@ -431,7 +434,7 @@ ghoul::Dictionary Configuration::createDictionary() {
         );
 
         ghoul::Dictionary identifierFiltersDict;
-        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); ++i) {
+        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); i++) {
             {
                 ghoul::Dictionary identifierFilterDict;
                 identifierFilterDict.setValue(
@@ -447,13 +450,13 @@ ghoul::Dictionary Configuration::createDictionary() {
                     static_cast<int>(openGLDebugContext.identifierFilters[i].identifier)
                 );
 
-                openGLDebugContextDict.setValue(std::to_string(i), identifierFilterDict);
+                identifierFiltersDict.setValue(std::to_string(i), identifierFilterDict);
             }
         }
         openGLDebugContextDict.setValue("IdentifierFilters", identifierFiltersDict);
 
         ghoul::Dictionary severityFiltersDict;
-        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); ++i) {
+        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); i++) {
             severityFiltersDict.setValue(
                 std::to_string(i),
                 openGLDebugContext.severityFilters[i]
@@ -486,7 +489,7 @@ void parseLuaState(Configuration& configuration) {
 
     // Shorten the rest of this function
     Configuration& c = configuration;
-    LuaState& s = c.state;
+    const LuaState& s = c.state;
 
     // The sgctConfigNameInitialized is a bit special
     lua_getglobal(s, "sgctconfiginitializeString");
@@ -503,7 +506,9 @@ void parseLuaState(Configuration& configuration) {
 
     // We go through all of the entries and lift them from global scope into the table on
     // the stack so that we can create a ghoul::Dictionary from this new table
-    documentation::Documentation doc = codegen::doc<Parameters>("core_configuration");
+    const documentation::Documentation doc = codegen::doc<Parameters>(
+        "core_configuration"
+    );
     for (const documentation::DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());
         lua_getglobal(s, e.key.c_str());
@@ -544,9 +549,9 @@ void parseLuaState(Configuration& configuration) {
     c.isPrintingEvents = p.printEvents.value_or(c.isPrintingEvents);
 
     if (p.consoleKey.has_value()) {
-        KeyWithModifier km = stringToKey(*p.consoleKey);
+        const KeyWithModifier km = stringToKey(*p.consoleKey);
         if (km.modifier != KeyModifier::None) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Console key '{}' must be a 'bare' key and cannot contain any modifiers",
                 *p.consoleKey
             ));
@@ -680,12 +685,12 @@ std::filesystem::path findConfiguration(const std::string& filename) {
         }
 
         // Otherwise, we traverse the directory tree up
-        std::filesystem::path nextDirectory = directory.parent_path();
+        const std::filesystem::path nextDirectory = directory.parent_path();
 
         if (directory == nextDirectory) {
             // We have reached the root of the file system and did not find the file
             throw ghoul::RuntimeError(
-                fmt::format("Could not find configuration file '{}'", filename),
+                std::format("Could not find configuration file '{}'", filename),
                 "ConfigurationManager"
             );
         }
@@ -702,7 +707,7 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     Configuration result;
 
     // Injecting the resolution of the primary screen into the Lua state
-    std::string script = fmt::format(
+    const std::string script = std::format(
         "ScreenResolution = {{ x = {}, y = {} }}",
         primaryMonitorResolution.x, primaryMonitorResolution.y
     );
@@ -710,16 +715,22 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
 
     // If there is an initial config helper file, load it into the state
     if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
-        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper).string());
+        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
     }
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(result.state, configurationFile.string());
+    ghoul::lua::runScriptFile(result.state, configurationFile);
+
+    // If an override file exist, we want to run it straight after
+    const std::filesystem::path override = std::format("{}.override", configurationFile);
+    if (std::filesystem::exists(override)) {
+        ghoul::lua::runScriptFile(result.state, override);
+    }
 
     parseLuaState(result);
 
     if (std::filesystem::is_regular_file(settingsFile)) {
-        Settings settings = loadSettings(settingsFile);
+        const Settings settings = loadSettings(settingsFile);
 
         patchConfiguration(result, settings);
     }

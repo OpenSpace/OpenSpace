@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "WAC_Sweden",
   Name = "WAC [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("wac_sweden.wms"),
   Settings = { Gamma = 0.84 },
   Description = [[Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera (WAC)
@@ -45,7 +46,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "WAC [Sweden]",
-  Version = "2.0",
   Description = [[Wide Angle Color map of the Moon. This map is hosted on the OpenSpace
     server in Sweden]],
   Author = "USGS",

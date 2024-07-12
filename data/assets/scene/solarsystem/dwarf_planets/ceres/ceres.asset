@@ -7,9 +7,7 @@ local Ceres = {
   Parent = transforms.CeresPosition.Identifier,
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 487300, 487300, 454700 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 487300, 487300, 454700 }
   },
   Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet" },
   GUI = {
@@ -56,7 +54,6 @@ asset.export(CeresLabel)
 
 asset.meta = {
   Name = "Ceres",
-  Version = "1.0",
   Description = "Ceres globe, and main label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

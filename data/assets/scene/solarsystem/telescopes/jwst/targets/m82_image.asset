@@ -12,7 +12,6 @@ asset.export("image", image)
 
 asset.meta = {
   Name = "M82 Galaxy",
-  Version = "1.0",
   Description = "M82 Galaxy Image",
   Author = [[
     NASA, ESA and the Hubble Heritage Team (STScI/AURA). Acknowledgment:

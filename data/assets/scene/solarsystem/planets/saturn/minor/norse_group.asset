@@ -17,9 +17,7 @@ local Phoebe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 218800, 217000, 203600 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 218800, 217000, 203600 }
   },
   Tag = {
     "moon_solarSystem",
@@ -53,6 +51,7 @@ local PhoebeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -79,7 +78,13 @@ local PhoebeLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Phoebe Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe",
@@ -99,9 +104,7 @@ local Skathi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -135,6 +138,7 @@ local SkathiTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -161,7 +165,13 @@ local SkathiLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Skathi Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi",
@@ -181,9 +191,7 @@ local S2007S2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -217,6 +225,7 @@ local S2007S2Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -243,7 +252,13 @@ local S2007S2Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2007 S 2 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2",
@@ -263,9 +278,7 @@ local Skoll = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -299,6 +312,7 @@ local SkollTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -325,7 +339,13 @@ local SkollLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Skoll Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll",
@@ -345,9 +365,7 @@ local S2004S13 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -381,6 +399,7 @@ local S2004S13Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -407,7 +426,13 @@ local S2004S13Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 13 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13",
@@ -427,9 +452,7 @@ local Greip = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -463,6 +486,7 @@ local GreipTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -489,7 +513,13 @@ local GreipLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Greip Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip",
@@ -509,9 +539,7 @@ local Hyrrokkin = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -545,6 +573,7 @@ local HyrrokkinTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -571,7 +600,13 @@ local HyrrokkinLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Hyrrokkin Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin",
@@ -591,9 +626,7 @@ local Jarnsaxa = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -627,6 +660,7 @@ local JarnsaxaTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -653,7 +687,13 @@ local JarnsaxaLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Jarnsaxa Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa",
@@ -673,9 +713,7 @@ local Mundilfari = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -709,6 +747,7 @@ local MundilfariTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -735,7 +774,13 @@ local MundilfariLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Mundilfari Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari",
@@ -755,9 +800,7 @@ local S2006S1 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -791,6 +834,7 @@ local S2006S1Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -817,7 +861,13 @@ local S2006S1Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2006 S 1 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1",
@@ -837,9 +887,7 @@ local S2004S17 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -873,6 +921,7 @@ local S2004S17Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -899,7 +948,13 @@ local S2004S17Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 17 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17",
@@ -919,9 +974,7 @@ local Bergelmir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -955,6 +1008,7 @@ local BergelmirTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -981,7 +1035,13 @@ local BergelmirLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Bergelmir Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir",
@@ -1001,9 +1061,7 @@ local Narvi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1037,6 +1095,7 @@ local NarviTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1063,7 +1122,13 @@ local NarviLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Narvi Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi",
@@ -1083,9 +1148,7 @@ local Suttungr = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1119,6 +1182,7 @@ local SuttungrTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1145,7 +1209,13 @@ local SuttungrLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Suttungr Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr",
@@ -1165,9 +1235,7 @@ local Hati = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1201,6 +1269,7 @@ local HatiTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1227,7 +1296,13 @@ local HatiLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Hati Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati",
@@ -1247,9 +1322,7 @@ local S2004S12 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1283,6 +1356,7 @@ local S2004S12Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1309,7 +1383,13 @@ local S2004S12Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 12 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12",
@@ -1329,9 +1409,7 @@ local Farbauti = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1365,6 +1443,7 @@ local FarbautiTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1391,7 +1470,13 @@ local FarbautiLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Farbauti Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti",
@@ -1411,9 +1496,7 @@ local Thrymr = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1447,6 +1530,7 @@ local ThrymrTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1473,7 +1557,13 @@ local ThrymrLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Thrymr Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr",
@@ -1493,9 +1583,7 @@ local Aegir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1529,6 +1617,7 @@ local AegirTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1555,7 +1644,13 @@ local AegirLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Aegir Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir",
@@ -1575,9 +1670,7 @@ local S2007S3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1611,6 +1704,7 @@ local S2007S3Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1637,7 +1731,13 @@ local S2007S3Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2007 S 3 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3",
@@ -1657,9 +1757,7 @@ local Bestla = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1693,6 +1791,7 @@ local BestlaTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1719,7 +1818,13 @@ local BestlaLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Bestla Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla",
@@ -1739,9 +1844,7 @@ local S2004S7 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1775,6 +1878,7 @@ local S2004S7Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1801,7 +1905,13 @@ local S2004S7Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 7 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7",
@@ -1821,9 +1931,7 @@ local S2006S3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1857,6 +1965,7 @@ local S2006S3Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1883,7 +1992,13 @@ local S2006S3Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2006 S 3 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3",
@@ -1903,9 +2018,7 @@ local Fenrir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1939,6 +2052,7 @@ local FenrirTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -1965,7 +2079,13 @@ local FenrirLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Fenrir Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir",
@@ -1985,9 +2105,7 @@ local Surtur = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2021,6 +2139,7 @@ local SurturTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2047,7 +2166,13 @@ local SurturLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Surtur Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur",
@@ -2067,9 +2192,7 @@ local Kari = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2103,6 +2226,7 @@ local KariTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2129,7 +2253,13 @@ local KariLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Kari Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari",
@@ -2149,9 +2279,7 @@ local Ymir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 18000, 18000, 18000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 18000, 18000, 18000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2185,6 +2313,7 @@ local YmirTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2211,7 +2340,13 @@ local YmirLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Ymir Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir",
@@ -2231,9 +2366,7 @@ local Loge = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2267,6 +2400,7 @@ local LogeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2293,7 +2427,13 @@ local LogeLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Loge Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge",
@@ -2313,9 +2453,7 @@ local Fornjot = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2349,6 +2487,7 @@ local FornjotTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2375,7 +2514,13 @@ local FornjotLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Fornjot Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot",
@@ -2395,9 +2540,7 @@ local Skadi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2431,6 +2574,7 @@ local SkadiTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2457,7 +2601,13 @@ local SkadiLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Skadi Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi",
@@ -2477,9 +2627,7 @@ local Gridr = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2513,6 +2661,7 @@ local GridrTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2539,7 +2688,13 @@ local GridrLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Gridr Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr",
@@ -2559,9 +2714,7 @@ local Angrboda = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2595,6 +2748,7 @@ local AngrbodaTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2621,7 +2775,13 @@ local AngrbodaLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Angrboda Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda",
@@ -2641,9 +2801,7 @@ local Skrymir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2677,6 +2835,7 @@ local SkrymirTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2703,7 +2862,13 @@ local SkrymirLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Skrymir Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir",
@@ -2723,9 +2888,7 @@ local Gerd = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2759,6 +2922,7 @@ local GerdTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2785,7 +2949,13 @@ local GerdLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Gerd Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd",
@@ -2805,9 +2975,7 @@ local S2004S26 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2841,6 +3009,7 @@ local S2004S26Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2867,7 +3036,13 @@ local S2004S26Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 26 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26",
@@ -2887,9 +3062,7 @@ local Eggther = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2923,6 +3096,7 @@ local EggtherTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -2949,7 +3123,13 @@ local EggtherLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Eggther Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther",
@@ -2969,9 +3149,7 @@ local Beli = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3005,6 +3183,7 @@ local BeliTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3031,7 +3210,13 @@ local BeliLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Beli Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli",
@@ -3051,9 +3236,7 @@ local Gunnlod = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3087,6 +3270,7 @@ local GunnlodTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3113,7 +3297,13 @@ local GunnlodLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Gunnlod Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod",
@@ -3133,9 +3323,7 @@ local Thiazzi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3169,6 +3357,7 @@ local ThiazziTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3195,7 +3384,13 @@ local ThiazziLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Thiazzi Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi",
@@ -3215,9 +3410,7 @@ local S2004S34 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3251,6 +3444,7 @@ local S2004S34Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3277,7 +3471,13 @@ local S2004S34Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 34 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34",
@@ -3297,9 +3497,7 @@ local Alvaldi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3333,6 +3531,7 @@ local AlvaldiTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3359,7 +3558,13 @@ local AlvaldiLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Alvaldi Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi",
@@ -3379,9 +3584,7 @@ local Geirrod = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3415,6 +3618,7 @@ local GeirrodTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3441,7 +3645,13 @@ local GeirrodLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "Geirrod Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod",
@@ -3461,9 +3671,7 @@ local S2004S28 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3497,6 +3705,7 @@ local S2004S28Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3523,7 +3732,13 @@ local S2004S28Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 28 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28",
@@ -3543,9 +3758,7 @@ local S2004S21 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3579,6 +3792,7 @@ local S2004S21Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3605,7 +3819,13 @@ local S2004S21Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 21 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21",
@@ -3625,9 +3845,7 @@ local S2004S36 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3661,6 +3879,7 @@ local S2004S36Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3687,7 +3906,13 @@ local S2004S36Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 36 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36",
@@ -3707,9 +3932,7 @@ local S2004S37 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3743,6 +3966,7 @@ local S2004S37Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3769,7 +3993,13 @@ local S2004S37Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 37 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37",
@@ -3789,9 +4019,7 @@ local S2004S39 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3825,6 +4053,7 @@ local S2004S39Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_norse",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -3851,7 +4080,13 @@ local S2004S39Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_norse"
+  },
   GUI = {
     Name = "S/2004 S 39 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39",
@@ -4432,7 +4667,6 @@ asset.export(S2004S39Label)
 
 asset.meta = {
   Name = "Saturn Norse Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Norse Group moons: Phoebe,
     Skathi, S2007S2, Skoll, S2004S13, Greip, Hyrrokkin, Jarnsaxa, Mundilfari, S2006S1,
     S2004S17, Bergelmir, Narvi, Suttungr, Hati, S2004S12, Farbauti, Thrymr, Aegir,

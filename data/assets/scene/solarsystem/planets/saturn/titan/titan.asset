@@ -31,8 +31,6 @@ local Titan = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 2576000,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "titan.labels",
@@ -97,7 +95,6 @@ asset.export(TitanLabel)
 
 asset.meta = {
   Name = "Titan",
-  Version = "1.2",
   Description = "Titan globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

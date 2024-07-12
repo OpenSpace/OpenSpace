@@ -48,14 +48,12 @@ mappingkey 1.0   255  255  255  255
 
 namespace openspace {
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
+std::filesystem::path FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
 
 FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath(
-        "${TEMPORARY}/default_transfer_function.txt"
-    ).string();
+    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
 
-    std::ofstream file(DefaultTransferFunctionFile);
+    std::ofstream file = std::ofstream(DefaultTransferFunctionFile);
     file << DefaultTransferfunctionSource;
 }
 

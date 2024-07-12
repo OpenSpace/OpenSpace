@@ -144,7 +144,7 @@ constexpr TimeUnit timeUnitFromString(std::string_view unitName) {
             found = i;
             break;
         }
-        ++i;
+        i++;
     }
 
     i = 0;
@@ -153,7 +153,7 @@ constexpr TimeUnit timeUnitFromString(std::string_view unitName) {
             found = i;
             break;
         }
-        ++i;
+        i++;
     }
 
     if (found != -1) {

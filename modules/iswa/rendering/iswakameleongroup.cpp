@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 
 namespace {
@@ -72,8 +73,8 @@ std::set<std::string> IswaKameleonGroup::fieldlineValue() const {
     return _fieldlines;
 }
 
-void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile,
-                                         std::string kameleonPath)
+void IswaKameleonGroup::setFieldlineInfo(std::filesystem::path fieldlineIndexFile,
+                                         std::filesystem::path kameleonPath)
 {
     if (fieldlineIndexFile != _fieldlineIndexFile) {
         _fieldlineIndexFile = std::move(fieldlineIndexFile);
@@ -98,18 +99,18 @@ void IswaKameleonGroup::registerProperties() {
     _fieldlines.onChange([this]() { updateFieldlineSeeds(); });
 }
 
-void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
-    LINFO(fmt::format("Reading seed points paths from file '{}'", indexFile));
+void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFile) {
+    LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
 
     // Read the index file from disk
     std::ifstream seedFile(indexFile);
     if (!seedFile.good()) {
-        LERROR(fmt::format("Could not open seed points file '{}'", indexFile));
+        LERROR(std::format("Could not open seed points file '{}'", indexFile));
     }
     else {
         std::string line;
         std::string fileContent;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             fileContent += line;
         }
 
@@ -118,7 +119,7 @@ void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
             json fieldlines = json::parse(fileContent);
             int i = 0;
 
-            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
+            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); it++) {
                 _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     identifier() + "/" + it.key(),

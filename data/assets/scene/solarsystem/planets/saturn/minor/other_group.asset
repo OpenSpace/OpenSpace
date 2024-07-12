@@ -18,9 +18,7 @@ local Aegaeon = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 500, 500, 500 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 500, 500, 500 }
   },
   Tag = {
     "moon_solarSystem",
@@ -54,6 +52,7 @@ local AegaeonTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -80,7 +79,13 @@ local AegaeonLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Aegaeon Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon",
@@ -100,9 +105,7 @@ local Methone = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3200, 3200, 3200 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3200, 3200, 3200 }
   },
   Tag = {
     "moon_solarSystem",
@@ -136,6 +139,7 @@ local MethoneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -162,7 +166,13 @@ local MethoneLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Methone Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone",
@@ -182,9 +192,7 @@ local Anthe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1800, 1800, 1800 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1800, 1800, 1800 }
   },
   Tag = {
     "moon_solarSystem",
@@ -218,6 +226,7 @@ local AntheTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -244,7 +253,13 @@ local AntheLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Anthe Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe",
@@ -264,9 +279,7 @@ local Pallene = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -300,6 +313,7 @@ local PalleneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -326,7 +340,13 @@ local PalleneLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Pallene Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene",
@@ -346,9 +366,7 @@ local Telesto = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 33000, 24000, 20000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 33000, 24000, 20000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -382,6 +400,7 @@ local TelestoTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -408,7 +427,13 @@ local TelestoLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Telesto Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto",
@@ -428,9 +453,7 @@ local Calypso = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 30000, 23000, 14000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 30000, 23000, 14000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -464,6 +487,7 @@ local CalypsoTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -490,7 +514,13 @@ local CalypsoLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Calypso Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso",
@@ -510,9 +540,7 @@ local Helene = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 43000, 38000, 26000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 43000, 38000, 26000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -546,6 +574,7 @@ local HeleneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -572,7 +601,13 @@ local HeleneLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Helene Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene",
@@ -592,9 +627,7 @@ local Polydeuces = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 2000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 2000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -628,6 +661,7 @@ local PolydeucesTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -654,7 +688,13 @@ local PolydeucesLabel = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "Polydeuces Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces",
@@ -674,9 +714,7 @@ local S2004S24 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -710,6 +748,7 @@ local S2004S24Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_other",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -736,7 +775,13 @@ local S2004S24Label = {
     FadeDistances = { 250.0, 1500.0 },
     FadeWidths = { 100.0, 1500.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_other"
+  },
   GUI = {
     Name = "S/2004 S 24 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24",
@@ -861,7 +906,6 @@ asset.export(S2004S24Label)
 
 asset.meta = {
   Name = "Saturn Other Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Other Group moons: Aegaeon,
     Methone, Anthe, Pallene, Telesto, Calypso, Helene, Polydeuces. Blank globes and SPICE
     trails are generated for each moon]],

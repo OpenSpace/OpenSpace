@@ -78,7 +78,6 @@ asset.export(EUVLayer)
 
 asset.meta = {
   Name = "Predictive Science Inc. EUV texture sequence Bastille Days",
-  Version = "1.2",
   Description = [[Texture sequence of an extreme ultraviolet (EUV) simulation during the CME]],
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

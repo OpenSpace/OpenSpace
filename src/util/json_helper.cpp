@@ -91,8 +91,8 @@ void sortJson(nlohmann::json& json, const std::string& key) {
         json.begin(),
         json.end(),
         [&key](const nlohmann::json& lhs, const nlohmann::json& rhs) {
-            std::string lhsString = ghoul::toLowerCase(lhs[key]);
-            std::string rhsString = ghoul::toLowerCase(rhs[key]);
+            const std::string lhsString = ghoul::toLowerCase(lhs[key]);
+            const std::string rhsString = ghoul::toLowerCase(rhs[key]);
 
             return rhsString > lhsString;
         }
@@ -116,7 +116,7 @@ ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
                 break;
             case nlohmann::json::value_t::object: {
                 ghoul::Dictionary subDict = jsonToDictionary(j);
-                dict.setValue(key, std::move(subDict));
+                dict.setValue(std::move(key), std::move(subDict));
                 break;
             }
             case nlohmann::json::value_t::array: {
@@ -126,21 +126,21 @@ ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
                 for (int i = 0; i < j.size(); i++) {
                     const nlohmann::json& value = j[i];
                     // We add 1 to the key to make Lua happy :-/
-                    addToDict(subDict, fmt::format("{}", i + 1), value);
+                    addToDict(subDict, std::format("{}", i + 1), value);
                 }
-                dict.setValue(key, std::move(subDict));
+                dict.setValue(std::move(key), std::move(subDict));
                 break;
             }
             case nlohmann::json::value_t::string:
-                dict.setValue(key, j.get<std::string>());
+                dict.setValue(std::move(key), j.get<std::string>());
                 break;
             case nlohmann::json::value_t::boolean:
-                dict.setValue(key, j.get<bool>());
+                dict.setValue(std::move(key), j.get<bool>());
                 break;
             case nlohmann::json::value_t::number_integer:
             case nlohmann::json::value_t::number_unsigned:
             case nlohmann::json::value_t::number_float:
-                dict.setValue(key, j.get<double>());
+                dict.setValue(std::move(key), j.get<double>());
                 break;
             case nlohmann::json::value_t::binary:
                 throw ghoul::RuntimeError(

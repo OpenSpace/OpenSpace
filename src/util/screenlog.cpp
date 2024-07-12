@@ -29,14 +29,14 @@
 namespace openspace {
 
 ScreenLog::ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel)
-    : _timeToLive(std::move(timeToLive))
+    : _timeToLive(timeToLive)
     , _logLevel(logLevel)
 {
     _entries.reserve(64);
 }
 
 void ScreenLog::removeExpiredEntries() {
-    std::lock_guard guard(_mutex);
+    const std::lock_guard guard(_mutex);
     const auto t = std::chrono::steady_clock::now();
 
     const auto rit = std::remove_if(
@@ -49,7 +49,9 @@ void ScreenLog::removeExpiredEntries() {
 }
 
 void ScreenLog::log(LogLevel level, std::string_view category, std::string_view message) {
-    std::lock_guard guard(_mutex);
+    ZoneScoped;
+
+    const std::lock_guard guard(_mutex);
     if (level >= _logLevel) {
         _entries.push_back({
             level,

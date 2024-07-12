@@ -12,7 +12,6 @@ asset.export("image", image)
 
 asset.meta = {
   Name = "HD 84406 Star",
-  Version = "1.0",
   Description = "JWST alignment image of star HD 84406",
   Author = "NASA/STScI",
   URL = "https://www.nasa.gov/press-release/nasa-s-webb-reaches-alignment-milestone-optics-working-successfully",

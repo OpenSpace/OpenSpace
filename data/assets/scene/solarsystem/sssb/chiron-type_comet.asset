@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Chiron-type Comet)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_chiron-type_comet",
-  Version = 3
+  Version = 4
 })
 
 
@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 10,
     Color = { 0.15, 0.1, 1.0 },
-    TrailFade = 25
+    TrailFade = 25,
+    PointSizeExponent = 10.5
   },
   GUI = {
     Name = "Chiron-type Comets",
@@ -45,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Chiron-Type Comets",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Chiron-Type group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

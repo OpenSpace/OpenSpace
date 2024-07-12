@@ -93,7 +93,7 @@ namespace {
 [[codegen::luawrap]] std::string readFile(std::filesystem::path file) {
     std::filesystem::path p = absPath(file);
     if (!std::filesystem::is_regular_file(p)) {
-        throw ghoul::lua::LuaError(fmt::format("Could not open file '{}'", file));
+        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file));
     }
 
     std::ifstream f(p);
@@ -103,29 +103,46 @@ namespace {
     return contents;
 }
 
-// Checks whether the provided file exists.
+// Checks whether the provided directory exists.
 [[codegen::luawrap]] bool directoryExists(std::filesystem::path file) {
     const bool e = std::filesystem::is_directory(absPath(std::move(file)));
     return e;
 }
 
-std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorted,
+/**
+ * Creates a directory at the provided path, returns true if directory was newly created
+ * and false otherwise. If `recursive` flag is set to true, it will automatically create
+ * any missing parent folder as well
+ */
+[[codegen::luawrap]] bool createDirectory(std::filesystem::path path,
+    bool recursive = false)
+{
+    if (recursive) {
+        return std::filesystem::create_directories(std::move(path));
+    }
+    else {
+        return std::filesystem::create_directory(std::move(path));
+    }
+}
+
+std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
+                                              bool recursive, bool sorted,
                                  std::function<bool(const std::filesystem::path&)> filter)
 {
     namespace fs = std::filesystem;
-    std::vector<std::string> result;
+    std::vector<std::filesystem::path> result;
     if (fs::is_directory(path)) {
         if (recursive) {
             for (fs::directory_entry e : fs::recursive_directory_iterator(path)) {
                 if (filter(e)) {
-                    result.push_back(e.path().string());
+                    result.push_back(e.path());
                 }
             }
         }
         else {
             for (fs::directory_entry e : fs::directory_iterator(path)) {
                 if (filter(e)) {
-                    result.push_back(e.path().string());
+                    result.push_back(e.path());
                 }
             }
         }
@@ -143,9 +160,10 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
  * default value for this parameter is "false". The third argument determines whether the
  * table that is returned is sorted. The default value for this parameter is "false".
  */
-[[codegen::luawrap]] std::vector<std::string> walkDirectory(std::string path,
-                                                            bool recursive = false,
-                                                            bool sorted = false)
+[[codegen::luawrap]] std::vector<std::filesystem::path> walkDirectory(
+                                                               std::filesystem::path path,
+                                                                   bool recursive = false,
+                                                                      bool sorted = false)
 {
     namespace fs = std::filesystem;
     return walkCommon(
@@ -163,9 +181,10 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
  * default value for this parameter is "false". The third argument determines whether the
  * table that is returned is sorted. The default value for this parameter is "false".
  */
-[[codegen::luawrap]] std::vector<std::string> walkDirectoryFiles(std::string path,
-                                                                 bool recursive = false,
-                                                                 bool sorted = false)
+[[codegen::luawrap]] std::vector<std::filesystem::path> walkDirectoryFiles(
+                                                               std::filesystem::path path,
+                                                                   bool recursive = false,
+                                                                      bool sorted = false)
 {
     namespace fs = std::filesystem;
     return walkCommon(
@@ -183,9 +202,10 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
  * default value for this parameter is "false". The third argument determines whether the
  * table that is returned is sorted. The default value for this parameter is "false".
  */
-[[codegen::luawrap]] std::vector<std::string> walkDirectoryFolders(std::string path,
+[[codegen::luawrap]] std::vector<std::filesystem::path> walkDirectoryFolders(
+                                                               std::filesystem::path path,
                                                                    bool recursive = false,
-                                                                   bool sorted = false)
+                                                                      bool sorted = false)
 {
     namespace fs = std::filesystem;
     return walkCommon(
@@ -224,15 +244,15 @@ std::vector<std::string> walkCommon(std::string path, bool recursive, bool sorte
     zip_close(z);
 
     if (is64) {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Error while unzipping {}: Zip64 archives are not supported", source
+        throw ghoul::lua::LuaError(std::format(
+            "Error while unzipping '{}': Zip64 archives are not supported", source
         ));
     }
 
     int ret = zip_extract(source.c_str(), destination.c_str(), nullptr, nullptr);
     if (ret != 0) {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Error {} while unzipping {}", ret, source
+        throw ghoul::lua::LuaError(std::format(
+            "Error while unzipping '{}': {}", source, ret
         ));
     }
 

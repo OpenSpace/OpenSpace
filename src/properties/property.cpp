@@ -78,13 +78,9 @@ const std::string& Property::identifier() const {
 
 std::string Property::fullyQualifiedIdentifier() const {
     std::string identifier = _identifier;
-    PropertyOwner* currentOwner = owner();
-    while (currentOwner) {
-        std::string ownerId = currentOwner->identifier();
-        if (!ownerId.empty()) {
-            identifier = ownerId + "." + identifier;
-        }
-        currentOwner = currentOwner->owner();
+    const std::string& ownerUri = owner()->uri();
+    if (!ownerUri.empty()) {
+        identifier = std::format("{}.{}", ownerUri, identifier);
     }
     return identifier;
 }
@@ -157,7 +153,7 @@ void Property::setNeedsConfirmation(bool state) {
 
 void Property::setViewOption(std::string option, bool value) {
     ghoul::Dictionary d;
-    d.setValue(option, value);
+    d.setValue(std::move(option), value);
     _metaData.setValue(std::string(MetaDataKeyViewOptions), d);
 }
 
@@ -165,7 +161,8 @@ bool Property::viewOption(const std::string& option, bool defaultValue) const {
     if (!_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
         return defaultValue;
     }
-    ghoul::Dictionary d = _metaData.value<ghoul::Dictionary>(MetaDataKeyViewOptions);
+    const ghoul::Dictionary d =
+        _metaData.value<ghoul::Dictionary>(MetaDataKeyViewOptions);
     if (d.hasKey(option)) {
         return d.value<bool>(option);
     }
@@ -185,7 +182,7 @@ std::string Property::jsonValue() const {
 Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
     ghoul_assert(callback, "The callback must not be empty");
 
-    OnChangeHandle handle = _currentHandleValue++;
+    const OnChangeHandle handle = _currentHandleValue++;
     _onChangeCallbacks.emplace_back(handle, std::move(callback));
     return handle;
 }
@@ -193,7 +190,7 @@ Property::OnChangeHandle Property::onChange(std::function<void()> callback) {
 Property::OnChangeHandle Property::onDelete(std::function<void()> callback) {
     ghoul_assert(callback, "The callback must not be empty");
 
-    OnDeleteHandle handle = _currentHandleValue++;
+    const OnDeleteHandle handle = _currentHandleValue++;
     _onDeleteCallbacks.emplace_back(handle, std::move(callback));
     return handle;
 }
@@ -266,15 +263,15 @@ void Property::resetToUnchanged() {
 }
 
 std::string Property::generateJsonDescription() const {
-    std::string cName = escapedJson(std::string(className()));
-    std::string identifier = fullyQualifiedIdentifier();
-    std::string identifierSan = escapedJson(identifier);
-    std::string gName = guiName();
-    std::string gNameSan = escapedJson(gName);
-    std::string metaData = generateMetaDataJsonDescription();
-    std::string description = generateAdditionalJsonDescription();
+    const std::string cName = escapedJson(std::string(className()));
+    const std::string identifier = fullyQualifiedIdentifier();
+    const std::string identifierSan = escapedJson(identifier);
+    const std::string gName = guiName();
+    const std::string gNameSan = escapedJson(gName);
+    const std::string metaData = generateMetaDataJsonDescription();
+    const std::string description = generateAdditionalJsonDescription();
 
-    return fmt::format(
+    return std::format(
         R"({{"{}":"{}","{}":"{}","{}":"{}","{}":{},"{}":{}}})",
         TypeKey, cName, IdentifierKey, identifierSan, NameKey, gNameSan, MetaDataKey,
         metaData, AdditionalDataKey, description
@@ -290,8 +287,9 @@ std::string Property::generateMetaDataJsonDescription() const {
         { Visibility::Developer, "Developer" },
         { Visibility::Hidden, "Hidden" }
     };
-    Visibility visibility = static_cast<Visibility>(
-        _metaData.value<std::underlying_type_t<Visibility>>(MetaDataKeyVisibility));
+    const Visibility visibility = static_cast<Visibility>(
+        _metaData.value<std::underlying_type_t<Visibility>>(MetaDataKeyVisibility)
+    );
     const std::string& vis = VisibilityConverter.at(visibility);
 
     bool isReadOnly = false;
@@ -306,8 +304,8 @@ std::string Property::generateMetaDataJsonDescription() const {
     }
     std::string needsConfirmationString = (needsConfirmation ? "true" : "false");
 
-    std::string groupId = groupIdentifier();
-    std::string sanitizedGroupId = escapedJson(groupId);
+    const std::string groupId = groupIdentifier();
+    const std::string sanitizedGroupId = escapedJson(groupId);
 
     std::string viewOptions = "{}";
     if (_metaData.hasValue<ghoul::Dictionary>(MetaDataKeyViewOptions)) {
@@ -316,7 +314,7 @@ std::string Property::generateMetaDataJsonDescription() const {
         );
     }
 
-    std::string result = fmt::format(
+    std::string result = std::format(
         R"({{"{}":"{}","{}":"{}","{}":{},"{}":{},"{}":{}}})",
         MetaDataKeyGroup, sanitizedGroupId,
         MetaDataKeyVisibility, vis,

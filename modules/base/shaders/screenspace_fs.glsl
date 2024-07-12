@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
+#include "hdr.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 in vec2 vs_st;
@@ -33,6 +34,9 @@ uniform vec3 color = vec3(1.0);
 uniform float opacity = 1.0;
 uniform float blackoutFactor = 1.0;
 uniform vec4 backgroundColor = vec4(0.0);
+uniform float hue;
+uniform float value;
+uniform float saturation;
 uniform float gamma = 1.0;
 uniform vec2 borderWidth = vec2(0.1);
 uniform vec3 borderColor = vec3(0.0);
@@ -57,6 +61,15 @@ Fragment getFragment() {
   }
 
   frag.depth = vs_depth;
-  frag.color.rgb = pow(frag.color.rgb, vec3(1.0/(gamma))) * blackoutFactor;
+
+  vec3 hsvColor = rgb2hsv(frag.color.rgb);
+  hsvColor.x = (hsvColor.x + hue);
+  if (hsvColor.x > 360.0) {
+    hsvColor -= 360.0;
+  }
+  hsvColor.y = clamp(hsvColor.y * saturation, 0.0, 1.0);
+  hsvColor.z = clamp(hsvColor.z * value, 0.0, 1.0);
+
+  frag.color.rgb = gammaCorrection(hsv2rgb(hsvColor), gamma) * blackoutFactor;
   return frag;
 }

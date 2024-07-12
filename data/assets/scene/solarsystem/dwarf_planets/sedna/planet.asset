@@ -1,4 +1,3 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
 local transforms = asset.require("./transforms")
 
 
@@ -15,9 +14,7 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 995000, 1060000, 1025000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 995000, 1060000, 1025000 }
   },
   GUI = {
     Name = "Sedna",
@@ -41,7 +38,6 @@ asset.export("Planet", Planet)
 
 asset.meta = {
   Name = "Sedna Globe",
-  Version = "1.0",
   Description = [[Globe of Sedna]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

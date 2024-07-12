@@ -16,9 +16,7 @@ local Naiad = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 96000, 60000, 52000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 96000, 60000, 52000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -98,9 +96,7 @@ local Thalassa = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 108000, 100000, 52000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 108000, 100000, 52000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -180,9 +176,7 @@ local Despina = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 180000, 148000, 128000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 180000, 148000, 128000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -262,9 +256,7 @@ local Galatea = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 204000, 184000, 144000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 204000, 184000, 144000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -344,9 +336,7 @@ local Larissa = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 216000, 204000, 168000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 216000, 204000, 168000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -426,9 +416,7 @@ local Hippocamp = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 16000, 16000, 16000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 16000, 16000, 16000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -508,9 +496,7 @@ local Proteus = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 436000, 416000, 402000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 436000, 416000, 402000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -671,7 +657,6 @@ asset.export(ProteusLabel)
 
 asset.meta = {
   Name = "Neptune Inner Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Neptune' inner prograde moons:
     Naiad, Thalassa, Despina, Galatea, Larissa, S2004N1, and Proteus. Blank globes and
     SPICE trails are generated for each moon]],

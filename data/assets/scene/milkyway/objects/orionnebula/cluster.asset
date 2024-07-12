@@ -16,11 +16,12 @@ local OrionClusterStars = {
   Renderable = {
     Type = "RenderableStars",
     File = sync .. "oricluster.speck",
-    Texture = sync .. "halo.png",
+    Glare = {
+      Texture = sync .. "halo.png"
+    },
     ColorMap = sync .. "colorbv.cmap",
     MagnitudeExponent = 5.02,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based",
     DataMapping = {
       Bv = "colorb_v",
       Luminance = "lum",
@@ -66,7 +67,6 @@ asset.export(OrionClusterStars)
 
 asset.meta = {
   Name = "Orion Nebula Star Cluster",
-  Version = "1.1",
   Description = [[Digital Universe asset for the Orion star cluster. To be used in
     conjunction with nebula model. Use orionnebula.asset to include both]],
   Author = "AMNH Digital Universe",

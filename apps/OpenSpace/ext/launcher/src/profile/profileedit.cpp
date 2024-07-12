@@ -36,7 +36,7 @@
 #include "profile/propertiesdialog.h"
 #include "profile/timedialog.h"
 #include <openspace/scene/profile.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
 #include <QLabel>
@@ -51,7 +51,7 @@
 using namespace openspace;
 
 namespace {
-    QString labelText(size_t size, QString title) {
+    QString labelText(size_t size, const QString& title) {
         QString label;
         if (size > 0) {
             label = title + " (" + QString::number(size) + ")";
@@ -74,14 +74,14 @@ namespace {
                                      const std::vector<Profile::Action>& actions)
     {
         std::string results;
-        for (Profile::Keybinding k : keybindings) {
+        for (const Profile::Keybinding& k : keybindings) {
             const auto it = std::find_if(
                 actions.cbegin(), actions.cend(),
                 [id = k.action](const Profile::Action& a) { return a.identifier == id; }
             );
 
             std::string name = it != actions.end() ? it->name : "Unknown action";
-            results += fmt::format("{} ({})\n", name, ghoul::to_string(k.key));
+            results += std::format("{} ({})\n", name, ghoul::to_string(k.key));
         }
         return results;
     }
@@ -89,17 +89,17 @@ namespace {
     std::string summarizeProperties(const std::vector<Profile::Property>& properties) {
         std::string results;
         for (openspace::Profile::Property p : properties) {
-            results += fmt::format("{} = {}\n", p.name, p.value);
+            results += std::format("{} = {}\n", p.name, p.value);
         }
         return results;
     }
 } // namespace
 
 ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
-                         std::string assetBasePath,
-                         std::string userAssetBasePath,
-                         std::string builtInProfileBasePath,
-                         std::string profileBasePath,
+                         std::filesystem::path assetBasePath,
+                         std::filesystem::path userAssetBasePath,
+                         std::filesystem::path builtInProfileBasePath,
+                         std::filesystem::path profileBasePath,
                          QWidget* parent)
     : QDialog(parent)
     , _profile(profile)
@@ -368,10 +368,10 @@ void ProfileEdit::duplicateProfile() {
 
     constexpr char Separator = '_';
     int version = 0;
-    if (size_t it = profile.rfind(Separator); it != std::string::npos) {
+    if (const size_t it = profile.rfind(Separator);  it != std::string::npos) {
         // If the value exists, we have a profile that potentially already has a version
         // number attached to it
-        std::string versionStr = profile.substr(it + 1);
+        const std::string versionStr = profile.substr(it + 1);
         try {
             version = std::stoi(versionStr);
 
@@ -392,11 +392,13 @@ void ProfileEdit::duplicateProfile() {
     while (true) {
         version++;
 
-        std::string candidate = profile + Separator + std::to_string(version);
-        std::string candidatePath = _profileBasePath + candidate + ".profile";
+        const std::string candidate = std::format("{}{}{}", profile, Separator, version);
+        const std::string candidatePath = std::format(
+            "{}{}.profile", _profileBasePath, candidate
+        );
 
         if (!std::filesystem::exists(candidatePath)) {
-            _profileEdit->setText(QString::fromStdString(std::move(candidate)));
+            _profileEdit->setText(QString::fromStdString(candidate));
             return;
         }
     }
@@ -489,7 +491,7 @@ void ProfileEdit::approved() {
         return;
     }
 
-    std::filesystem::path p = fmt::format(
+    const std::filesystem::path p = std::format(
         "{}/{}.profile", _builtInProfilesPath, profileName
     );
     if (std::filesystem::exists(p)) {

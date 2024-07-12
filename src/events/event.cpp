@@ -30,7 +30,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/tstring.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <functional>
@@ -45,12 +45,12 @@ namespace openspace::events {
 
 void log(int i, const EventSceneGraphNodeAdded& e) {
     ghoul_assert(e.type == EventSceneGraphNodeAdded::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SceneGraphNodeAdded: {}", i, e.node));
+    LINFO(std::format("[{}] SceneGraphNodeAdded: {}", i, e.uri));
 }
 
 void log(int i, const EventSceneGraphNodeRemoved& e) {
     ghoul_assert(e.type == EventSceneGraphNodeRemoved::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SceneGraphNodeRemoved: {}", i, e.node));
+    LINFO(std::format("[{}] SceneGraphNodeRemoved: {}", i, e.uri));
 }
 
 void log(int i, const EventParallelConnection& e) {
@@ -64,17 +64,17 @@ void log(int i, const EventParallelConnection& e) {
             default:                                  throw ghoul::MissingCaseException();
         }
     }(e.state);
-    LINFO(fmt::format("[{}] ParallelConnection ({})", i, state));
+    LINFO(std::format("[{}] ParallelConnection ({})", i, state));
 }
 
-void log(int i, [[ maybe_unused ]] const EventProfileLoadingFinished& e) {
+void log(int i, [[maybe_unused]] const EventProfileLoadingFinished& e) {
     ghoul_assert(e.type == EventProfileLoadingFinished::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ProfileLoadingFinished", i));
+    LINFO(std::format("[{}] ProfileLoadingFinished", i));
 }
 
 void log(int i, const EventApplicationShutdown& e) {
     ghoul_assert(e.type == EventApplicationShutdown::Type, "Wrong type");
-    std::string t = [](EventApplicationShutdown::State state) {
+    const std::string t = [](EventApplicationShutdown::State state) {
         switch (state) {
             case EventApplicationShutdown::State::Started:  return "started";
             case EventApplicationShutdown::State::Aborted:  return "aborted";
@@ -82,17 +82,17 @@ void log(int i, const EventApplicationShutdown& e) {
             default:                                  throw ghoul::MissingCaseException();
         }
     }(e.state);
-    LINFO(fmt::format("[{}] ApplicationShutdown", i));
+    LINFO(std::format("[{}] ApplicationShutdown", i));
 }
 
 void log(int i, const EventScreenSpaceRenderableAdded& e) {
     ghoul_assert(e.type == EventScreenSpaceRenderableAdded::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ScreenSpaceRenderableAdded: {}", i, e.renderable));
+    LINFO(std::format("[{}] ScreenSpaceRenderableAdded: {}", i, e.uri));
 }
 
 void log(int i, const EventScreenSpaceRenderableRemoved& e) {
     ghoul_assert(e.type == EventScreenSpaceRenderableRemoved::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ScreenSpaceRenderableRemoved: {}", i, e.renderable));
+    LINFO(std::format("[{}] ScreenSpaceRenderableRemoved: {}", i, e.uri));
 }
 
 void log(int i, const EventCameraFocusTransition& e) {
@@ -112,7 +112,7 @@ void log(int i, const EventCameraFocusTransition& e) {
         }
     }(e.transition);
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] CameraTransition: {}, {} ({})",
         i, reinterpret_cast<const void*>(e.camera), e.node, t
     ));
@@ -120,40 +120,50 @@ void log(int i, const EventCameraFocusTransition& e) {
 
 void log(int i, const EventTimeOfInterestReached& e) {
     ghoul_assert(e.type == EventTimeOfInterestReached::Type, "Wrong type");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] TimeOfInterestReached: {},  {}",
         i, e.time->UTC(), reinterpret_cast<const void*>(e.camera)
     ));
 }
 
-void log(int i, [[ maybe_unused ]] const EventMissionEventReached& e) {
+void log(int i, [[maybe_unused]] const EventMissionEventReached& e) {
     ghoul_assert(e.type == EventMissionEventReached::Type, "Wrong type");
-    LINFO(fmt::format("[{}] MissionEventReached", i));
+    LINFO(std::format("[{}] MissionEventReached", i));
 }
 
 void log(int i, const EventPlanetEclipsed& e) {
     ghoul_assert(e.type == EventPlanetEclipsed::Type, "Wrong type");
-    LINFO(fmt::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
+    LINFO(std::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
 }
 
-void log(int i, [[ maybe_unused ]] const EventInterpolationFinished& e) {
+void log(int i, [[maybe_unused]] const EventInterpolationFinished& e) {
     ghoul_assert(e.type == EventInterpolationFinished::Type, "Wrong type");
-    LINFO(fmt::format("[{}] InterpolationFinished", i));
+    LINFO(std::format("[{}] InterpolationFinished", i));
 }
 
 void log(int i, const EventFocusNodeChanged& e) {
     ghoul_assert(e.type == EventFocusNodeChanged::Type, "Wrong type");
-    LINFO(fmt::format("[{}] FocusNodeChanged: {} -> {}", i, e.oldNode, e.newNode));
+    LINFO(std::format("[{}] FocusNodeChanged: {} -> {}", i, e.oldNode, e.newNode));
 }
 
 void log(int i, const EventLayerAdded& e) {
     ghoul_assert(e.type == EventLayerAdded::Type, "Wrong type");
-    LINFO(fmt::format("[{}] LayerAdded: {}", i, e.layer));
+    LINFO(std::format("[{}] LayerAdded: {}", i, e.uri));
 }
 
 void log(int i, const EventLayerRemoved& e) {
     ghoul_assert(e.type == EventLayerRemoved::Type, "Wrong type");
-    LINFO(fmt::format("[{}] LayerRemoved: {}", i, e.layer));
+    LINFO(std::format("[{}] LayerRemoved: {}", i, e.uri));
+}
+
+void log(int i, const EventActionAdded& e) {
+    ghoul_assert(e.type == EventActionAdded::Type, "Wrong type");
+    LINFO(std::format("[{}] ActionAdded: {}", i, e.uri));
+}
+
+void log(int i, const EventActionRemoved& e) {
+    ghoul_assert(e.type == EventActionRemoved::Type, "Wrong type");
+    LINFO(std::format("[{}] ActionRemoved: {}", i, e.uri));
 }
 
 void log(int i, const EventSessionRecordingPlayback& e) {
@@ -169,12 +179,12 @@ void log(int i, const EventSessionRecordingPlayback& e) {
         }
     }(e.state);
 
-    LINFO(fmt::format("[{}] SessionRecordingPlayback: {}", i, state));
+    LINFO(std::format("[{}] SessionRecordingPlayback: {}", i, state));
 }
 
 void log(int i, const EventPointSpacecraft& e) {
     ghoul_assert(e.type == EventPointSpacecraft::Type, "Wrong type");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] PointSpacecraft: Ra: {}, Dec: {}, Duration: {}", i, e.ra, e.dec,
         e.duration
     ));
@@ -182,17 +192,17 @@ void log(int i, const EventPointSpacecraft& e) {
 
 void log(int i, const EventRenderableEnabled& e) {
     ghoul_assert(e.type == EventRenderableEnabled::Type, "Wrong type");
-    LINFO(fmt::format("[{}] EventRenderableEnabled: {}", i, e.node));
+    LINFO(std::format("[{}] EventRenderableEnabled: {}", i, e.node));
 }
 
 void log(int i, const EventRenderableDisabled& e) {
     ghoul_assert(e.type == EventRenderableDisabled::Type, "Wrong type");
-    LINFO(fmt::format("[{}] EventRenderableDisabled: {}", i, e.node));
+    LINFO(std::format("[{}] EventRenderableDisabled: {}", i, e.node));
 }
 
 void log(int i, const EventCameraPathStarted& e) {
     ghoul_assert(e.type == EventCameraPathStarted::Type, "Wrong type");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] EventCameraPathStarted:  Origin: '{}'  Destination: '{}'",
         i, e.origin, e.destination
     ));
@@ -200,7 +210,7 @@ void log(int i, const EventCameraPathStarted& e) {
 
 void log(int i, const EventCameraPathFinished& e) {
     ghoul_assert(e.type == EventCameraPathFinished::Type, "Wrong type");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] EventCameraPathFinished:  Origin: '{}'  Destination: '{}'",
         i, e.origin, e.destination
     ));
@@ -208,12 +218,17 @@ void log(int i, const EventCameraPathFinished& e) {
 
 void log(int i, const EventCameraMovedPosition& e) {
     ghoul_assert(e.type == EventCameraMovedPosition::Type, "Wrong type");
-    LINFO(fmt::format("[{}] EventCameraMovedPosition", i));
+    LINFO(std::format("[{}] EventCameraMovedPosition", i));
+}
+
+void log(int i, const EventScheduledScriptExecuted& e) {
+    ghoul_assert(e.type == EventScheduledScriptExecuted::Type, "Wrong type");
+    LINFO(std::format("[{}] ScheduledScriptExecuted: Script '{}'", i, e.script));
 }
 
 void log(int i, const CustomEvent& e) {
     ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
-    LINFO(fmt::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
+    LINFO(std::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
 }
 
 std::string_view toString(Event::Type type) {
@@ -234,6 +249,8 @@ std::string_view toString(Event::Type type) {
         case Event::Type::FocusNodeChanged: return "FocusNodeChanged";
         case Event::Type::LayerAdded: return "LayerAdded";
         case Event::Type::LayerRemoved: return "LayerRemoved";
+        case Event::Type::ActionAdded: return "ActionAdded";
+        case Event::Type::ActionRemoved: return "ActionRemoved";
         case Event::Type::SessionRecordingPlayback: return "SessionRecordingPlayback";
         case Event::Type::PointSpacecraft: return "PointSpacecraft";
         case Event::Type::RenderableEnabled: return "RenderableEnabled";
@@ -241,6 +258,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::CameraPathStarted: return "CameraPathStarted";
         case Event::Type::CameraPathFinished: return "CameraPathFinished";
         case Event::Type::CameraMovedPosition: return "CameraMovedPosition";
+        case Event::Type::ScheduledScriptExecuted: return "ScheduledScriptExecuted";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -293,6 +311,12 @@ Event::Type fromString(std::string_view str) {
     else if (str == "LayerRemoved") {
         return Event::Type::LayerRemoved;
     }
+    else if (str == "ActionAdded") {
+        return Event::Type::ActionAdded;
+    }
+    else if (str == "ActionRemoved") {
+        return Event::Type::ActionRemoved;
+    }
     else if (str == "SessionRecordingPlayback") {
         return Event::Type::SessionRecordingPlayback;
     }
@@ -314,11 +338,14 @@ Event::Type fromString(std::string_view str) {
     else if (str == "CameraMovedPosition") {
         return Event::Type::CameraMovedPosition;
     }
+    else if (str == "ScheduledScriptExecuted") {
+        return Event::Type::ScheduledScriptExecuted;
+    }
     else if (str == "Custom") {
         return Event::Type::Custom;
     }
 
-    throw ghoul::RuntimeError(fmt::format("Unknown event type '{}'", str));
+    throw ghoul::RuntimeError(std::format("Unknown event type '{}'", str));
 }
 
 ghoul::Dictionary toParameter(const Event& e) {
@@ -326,14 +353,14 @@ ghoul::Dictionary toParameter(const Event& e) {
     switch (e.type) {
         case Event::Type::SceneGraphNodeAdded:
             d.setValue(
-                "Node",
-                std::string(static_cast<const EventSceneGraphNodeAdded&>(e).node)
+                "Uri",
+                std::string(static_cast<const EventSceneGraphNodeAdded&>(e).uri)
             );
             break;
         case Event::Type::SceneGraphNodeRemoved:
             d.setValue(
-                "Node",
-                std::string(static_cast<const EventSceneGraphNodeRemoved&>(e).node)
+                "Uri",
+                std::string(static_cast<const EventSceneGraphNodeRemoved&>(e).uri)
             );
             break;
         case Event::Type::ParallelConnection:
@@ -367,17 +394,17 @@ ghoul::Dictionary toParameter(const Event& e) {
             break;
         case Event::Type::ScreenSpaceRenderableAdded:
             d.setValue(
-                "Renderable",
+                "Uri",
                 std::string(
-                    static_cast<const EventScreenSpaceRenderableAdded&>(e).renderable
+                    static_cast<const EventScreenSpaceRenderableAdded&>(e).uri
                 )
             );
             break;
         case Event::Type::ScreenSpaceRenderableRemoved:
             d.setValue(
-                "Renderable",
+                "Uri",
                 std::string(
-                    static_cast<const EventScreenSpaceRenderableRemoved&>(e).renderable
+                    static_cast<const EventScreenSpaceRenderableRemoved&>(e).uri
                 )
             );
             break;
@@ -429,30 +456,26 @@ ghoul::Dictionary toParameter(const Event& e) {
             break;
         case Event::Type::LayerAdded:
             d.setValue(
-                "Globe",
-                std::string(static_cast<const EventLayerAdded&>(e).node)
-            );
-            d.setValue(
-                "Group",
-                std::string(static_cast<const EventLayerAdded&>(e).layerGroup)
-            );
-            d.setValue(
-                "Layer",
-                std::string(static_cast<const EventLayerAdded&>(e).layer)
+                "Uri",
+                std::string(static_cast<const EventLayerAdded&>(e).uri)
             );
             break;
         case Event::Type::LayerRemoved:
             d.setValue(
-                "Globe",
-                std::string(static_cast<const EventLayerRemoved&>(e).node)
+                "Uri",
+                std::string(static_cast<const EventLayerRemoved&>(e).uri)
             );
+            break;
+        case Event::Type::ActionAdded:
             d.setValue(
-                "Group",
-                std::string(static_cast<const EventLayerRemoved&>(e).layerGroup)
+                "Uri",
+                std::string(static_cast<const EventActionAdded&>(e).uri)
             );
+            break;
+        case Event::Type::ActionRemoved:
             d.setValue(
-                "Layer",
-                std::string(static_cast<const EventLayerRemoved&>(e).layer)
+                "Uri",
+                std::string(static_cast<const EventActionRemoved&>(e).uri)
             );
             break;
         case Event::Type::SessionRecordingPlayback:
@@ -506,6 +529,12 @@ ghoul::Dictionary toParameter(const Event& e) {
             d.setValue(
                 "Destination",
                 std::string(static_cast<const EventCameraPathFinished&>(e).destination)
+            );
+            break;
+        case Event::Type::ScheduledScriptExecuted:
+            d.setValue(
+                "Script",
+                std::string(static_cast<const EventScheduledScriptExecuted&>(e).script)
             );
             break;
         case Event::Type::Custom:
@@ -571,6 +600,12 @@ void logAllEvents(const Event* e) {
             case Event::Type::LayerRemoved:
                 log(i, *static_cast<const EventLayerRemoved*>(e));
                 break;
+            case Event::Type::ActionAdded:
+                log(i, *static_cast<const EventActionAdded*>(e));
+                break;
+            case Event::Type::ActionRemoved:
+                log(i, *static_cast<const EventActionRemoved*>(e));
+                break;
             case Event::Type::SessionRecordingPlayback:
                 log(i, *static_cast<const EventSessionRecordingPlayback*>(e));
                 break;
@@ -592,6 +627,9 @@ void logAllEvents(const Event* e) {
             case Event::Type::CameraMovedPosition:
                 log(i, *static_cast<const EventCameraMovedPosition*>(e));
                 break;
+            case Event::Type::ScheduledScriptExecuted:
+                log(i, *static_cast<const EventScheduledScriptExecuted*>(e));
+                break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
                 break;
@@ -606,12 +644,12 @@ void logAllEvents(const Event* e) {
 
 EventSceneGraphNodeAdded::EventSceneGraphNodeAdded(const SceneGraphNode* node_)
     : Event(Type)
-    , node(temporaryString(node_->identifier()))
+    , uri(temporaryString(node_->uri()))
 {}
 
 EventSceneGraphNodeRemoved::EventSceneGraphNodeRemoved(const SceneGraphNode* node_)
     : Event(Type)
-    , node(temporaryString(node_->identifier()))
+    , uri(temporaryString(node_->uri()))
 {}
 
 EventParallelConnection::EventParallelConnection(State state_)
@@ -631,13 +669,13 @@ EventApplicationShutdown::EventApplicationShutdown(State state_)
 EventScreenSpaceRenderableAdded::EventScreenSpaceRenderableAdded(
                                                  const ScreenSpaceRenderable* renderable_)
     : Event(Type)
-    , renderable(temporaryString(renderable_->identifier()))
+    , uri(temporaryString(renderable_->uri()))
 {}
 
 EventScreenSpaceRenderableRemoved::EventScreenSpaceRenderableRemoved(
                                                  const ScreenSpaceRenderable* renderable_)
     : Event(Type)
-    , renderable(temporaryString(renderable_->identifier()))
+    , uri(temporaryString(renderable_->uri()))
 {}
 
 EventCameraFocusTransition::EventCameraFocusTransition(const Camera* camera_,
@@ -682,20 +720,24 @@ EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,
     ghoul_assert(newNode_, "There must be a new node");
 }
 
-EventLayerAdded::EventLayerAdded(std::string_view node_, std::string_view layerGroup_,
-                                 std::string_view layer_)
+EventLayerAdded::EventLayerAdded(std::string_view uri_)
     : Event(Type)
-    , node(temporaryString(node_))
-    , layerGroup(temporaryString(layerGroup_))
-    , layer(temporaryString(layer_))
+    , uri(temporaryString(uri_))
 {}
 
-EventLayerRemoved::EventLayerRemoved(std::string_view node_, std::string_view layerGroup_,
-                                     std::string_view layer_)
+EventLayerRemoved::EventLayerRemoved(std::string_view uri_)
     : Event(Type)
-    , node(temporaryString(node_))
-    , layerGroup(temporaryString(layerGroup_))
-    , layer(temporaryString(layer_))
+    , uri(temporaryString(uri_))
+{}
+
+EventActionAdded::EventActionAdded(std::string_view uri_)
+    : Event(Type)
+    , uri(temporaryString(uri_))
+{}
+
+EventActionRemoved::EventActionRemoved(std::string_view uri_)
+    : Event(Type)
+    , uri(temporaryString(uri_))
 {}
 
 EventSessionRecordingPlayback::EventSessionRecordingPlayback(State state_)
@@ -736,6 +778,11 @@ EventCameraPathFinished::EventCameraPathFinished(const SceneGraphNode* origin_,
 
 EventCameraMovedPosition::EventCameraMovedPosition()
     : Event(Type)
+{}
+
+EventScheduledScriptExecuted::EventScheduledScriptExecuted(std::string_view script_)
+    : Event(Type)
+    , script(temporaryString(script_))
 {}
 
 CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)

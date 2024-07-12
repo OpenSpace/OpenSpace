@@ -4,7 +4,6 @@ asset.require("./layers/colorlayers/sun_texture", true)
 
 asset.meta = {
   Name = "Default Sun layers",
-  Version = "1.0",
   Description = "Default Sun layers renderable globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

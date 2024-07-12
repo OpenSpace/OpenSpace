@@ -32,13 +32,20 @@ local Stars = {
   Renderable = {
     Type = "RenderableStars",
     File = speck .. "stars.speck",
-    Texture = textures .. "halo.png",
-    --ShapeTexture = textures .. "disc.png",
+    Core = {
+      Texture = textures .. "glare.png",
+      Multiplier = 15.0,
+      Gamma = 1.66,
+      Scale = 0.18
+    },
+    Glare = {
+      Texture = textures .. "halo.png",
+      Multiplier = 0.65
+    },
+    MagnitudeExponent = 6.325,
     ColorMap = colormaps .. "colorbv.cmap",
     OtherDataColorMap = colormaps .. "viridis.cmap",
-    MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based", -- or PSF
     DataMapping = {
       Bv = "colorb_v",
       Luminance = "lum",
@@ -70,14 +77,21 @@ local SunStar = {
   Renderable = {
     Type = "RenderableStars",
     File = sunspeck .. "sunstar.speck",
-    Texture = textures .. "halo.png",
-    --ShapeTexture = textures .. "disc.png",
+    Core = {
+      Texture = textures .. "glare.png",
+      Multiplier = 1.0,
+      Scale = 0.1
+    },
+    Glare = {
+      Texture = textures .. "halo.png",
+      Multiplier = 0.55,
+      Gamma = 1.1,
+      Size = 0.95
+    },
+    MagnitudeExponent = 6.25,
     ColorMap = colormaps .. "colorbv.cmap",
-    MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based", -- or PSF
-    FadeInDistances = { 0.0001, 0.1 },
-    RenderableType = "PostDeferredTransparent",
+    FadeInDistances = { 0.0075, 0.1 },
     DataMapping = {
       Bv = "colorb_v",
       Luminance = "lum",
@@ -116,7 +130,6 @@ asset.export(SunStar)
 
 asset.meta = {
   Name = "Stars",
-  Version = "2.1",
   Description = "Digital Universe asset for the stars",
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

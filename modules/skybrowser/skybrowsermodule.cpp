@@ -42,8 +42,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if the GUI for this module should be enabled",
-        // @VISIBILITY(2.5)
+        "Decides if the GUI for this module should be enabled.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -51,7 +50,7 @@ namespace {
         "ShowTitleInGuiBrowser",
         "Show Title in Gui Browser",
         "If true, the name of the currently selected sky browser is shown in the WebGUI "
-        "browser",
+        "browser.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -59,8 +58,7 @@ namespace {
         "AllowCameraRotation",
         "Allow Camera Rotation",
         "Toggles if the camera should rotate to look at the sky target if it is going "
-        "outside of the current field of view",
-        // @VISIBILITY(1.75)
+        "outside of the current field of view.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -68,21 +66,21 @@ namespace {
         "CameraRotationSpeed",
         "Camera Rotation Speed",
         "The speed of the rotation of the camera when the camera rotates to look at a "
-        "coordinate which is outside of the field of view",
+        "coordinate which is outside of the field of view.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetSpeedInfo = {
         "TargetAnimationSpeed",
         "Target Animation Speed",
-        "This determines the speed of the animation of the sky target",
+        "This determines the speed of the animation of the sky target.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserSpeedInfo = {
         "BrowserAnimationSpeed",
         "Field of View Animation Speed",
-        "This determines the speed of the animation of the field of view in the browser",
+        "This determines the speed of the animation of the field of view in the browser.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -90,8 +88,7 @@ namespace {
         "HideTargetsBrowsersWithGui",
         "Hide Targets and Browsers with GUI",
         "If checked, the targets and browsers will be disabled when the sky browser "
-        "panel is minimized",
-        // @VISIBILITY(2.25)
+        "panel is minimized.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -99,7 +96,7 @@ namespace {
         "InverseZoomDirection",
         "Inverse Zoom Direction",
         "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
-        "inversed",
+        "inversed.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -107,7 +104,6 @@ namespace {
         "SynchronizeAim",
         "Synchronize Aim",
         "If checked, the target and the browser will have synchronized aim.",
-        // @VISIBILITY(3.25)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -115,16 +111,14 @@ namespace {
         "SpaceCraftAnimationTime",
         "Space Craft Animation Time",
         "Sets the duration (in seconds) of the animation of the space craft when it is "
-        "pointed to where the target is aiming",
-        // @VISIBILITY(2.5)
+        "pointed to where the target is aiming.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ImageCollectionInfo = {
        "WwtImageCollectionUrl",
        "AAS WorldWide Telescope Image Collection Url",
-       "The url of the image collection which is loaded into AAS WorldWide Telescope",
-       // @VISIBILITY(3.75)
+       "The url of the image collection which is loaded into AAS WorldWide Telescope.",
        openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -211,10 +205,10 @@ SkyBrowserModule::SkyBrowserModule()
         constexpr double SolarSystemRadius = 30.0 * distanceconstants::AstronomicalUnit;
 
         // Disable browser and targets when camera is outside of solar system
-        bool camWasInSolarSystem = _isCameraInSolarSystem;
-        glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
+        const bool camWasInSolarSystem = _isCameraInSolarSystem;
+        const glm::dvec3 cameraPos = global::navigationHandler->camera()->positionVec3();
         _isCameraInSolarSystem = glm::length(cameraPos) < SolarSystemRadius;
-        bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
+        const bool vizModeChanged = _isCameraInSolarSystem != camWasInSolarSystem;
 
         // Visualization mode changed. Start fading in/out
         if (vizModeChanged) {
@@ -350,7 +344,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
 
     // Show the circle
     if (useScript) {
-        const std::string script = fmt::format(
+        const std::string script = std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);",
             id
         );
@@ -374,7 +368,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
     pos *= skybrowser::CelestialSphereRadius * 1.1;
 
     // Note that the position can only be set through the script engine
-    const std::string script = fmt::format(
+    const std::string script = std::format(
         "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
         id, ghoul::to_string(pos)
     );
@@ -388,7 +382,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
 void SkyBrowserModule::disableHoverCircle(bool useScript) {
     if (_hoverCircle && _hoverCircle->renderable()) {
         if (useScript) {
-            const std::string script = fmt::format(
+            const std::string script = std::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
                 _hoverCircle->identifier()
             );
@@ -439,23 +433,23 @@ TargetBrowserPair* SkyBrowserModule::pair(std::string_view id) const {
     );
     TargetBrowserPair* found = it != _targetsBrowsers.end() ? it->get() : nullptr;
     if (found == nullptr) {
-        LINFO(fmt::format("Identifier '{}' not found", id));
+        LINFO(std::format("Identifier '{}' not found", id));
     }
     return found;
 }
 
-void SkyBrowserModule::startRotatingCamera(glm::dvec3 endAnimation) {
+void SkyBrowserModule::startRotatingCamera(const glm::dvec3& endAnimation) {
     // Save coordinates to rotate to in galactic world coordinates
-    glm::dvec3 start = skybrowser::cameraDirectionGalactic();
-    double angle = skybrowser::angleBetweenVectors(start, endAnimation);
-    double time = angle / _cameraRotationSpeed;
+    const glm::dvec3 start = skybrowser::cameraDirectionGalactic();
+    const double angle = skybrowser::angleBetweenVectors(start, endAnimation);
+    const double time = angle / _cameraRotationSpeed;
     _cameraRotation = skybrowser::Animation(start, endAnimation, time);
     _cameraRotation.start();
 }
 
 void SkyBrowserModule::incrementallyRotateCamera() {
     if (_cameraRotation.isAnimating()) {
-        glm::dmat4 rotMat = _cameraRotation.rotationMatrix();
+        const glm::dmat4 rotMat = _cameraRotation.rotationMatrix();
         global::navigationHandler->camera()->rotate(glm::quat_cast(rotMat));
     }
 }

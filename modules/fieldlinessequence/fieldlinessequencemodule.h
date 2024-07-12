@@ -27,6 +27,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <filesystem>
+
 namespace openspace {
 
 class FieldlinesSequenceModule : public OpenSpaceModule {
@@ -37,7 +39,7 @@ public:
 
     std::vector<documentation::Documentation> documentations() const override;
 
-    static std::string DefaultTransferFunctionFile;
+    static std::filesystem::path DefaultTransferFunctionFile;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;

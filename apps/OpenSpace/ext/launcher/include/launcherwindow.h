@@ -32,6 +32,7 @@
 #include <sgct/error.h>
 #include <sgct/readconfig.h>
 #include <QApplication>
+#include <filesystem>
 #include <optional>
 
 namespace openspace { struct Configuration; }
@@ -89,26 +90,25 @@ public:
 
 private:
     QWidget* createCentralWidget();
-    void setBackgroundImage(const std::string& syncPath);
+    void setBackgroundImage(const std::filesystem::path& syncPath);
 
     void openProfileEditor(const std::string& profile, bool isUserProfile);
     void openWindowEditor(const std::string& winCfg, bool isUserWinCfg);
     void editRefusalDialog(const std::string& title, const std::string& msg,
         const std::string& detailedText);
 
-    void populateProfilesList(std::string preset);
-    void populateWindowConfigsList(std::string preset);
+    void populateProfilesList(const std::string& preset);
+    void populateWindowConfigsList(const std::string& preset);
     void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
-        std::filesystem::path savePath, const std::string& saveWindowCfgPath);
+        std::filesystem::path savePath, const std::filesystem::path& saveWindowCfgPath);
     void onNewWindowConfigSelection(int newIndex);
-    bool versionCheck(sgct::config::GeneratorVersion& v) const;
 
-    const std::string _assetPath;
-    const std::string _userAssetPath;
-    const std::string _configPath;
-    const std::string _userConfigPath;
-    const std::string _profilePath;
-    const std::string _userProfilePath;
+    const std::filesystem::path _assetPath;
+    const std::filesystem::path _userAssetPath;
+    const std::filesystem::path _configPath;
+    const std::filesystem::path _userConfigPath;
+    const std::filesystem::path _profilePath;
+    const std::filesystem::path _userProfilePath;
     bool _shouldLaunch = false;
     int _userAssetCount = 0;
     int _userConfigStartingIdx = 0;

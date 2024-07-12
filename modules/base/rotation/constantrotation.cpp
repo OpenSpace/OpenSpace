@@ -34,16 +34,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "RotationAxis",
         "Rotation Axis",
-        "This value is the rotation axis around which the object will rotate",
-        // @VISIBILITY(3.33)
+        "This value is the rotation axis around which the object will rotate.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationRateInfo = {
         "RotationRate",
         "Rotation Rate",
-        "This value determines the number of revolutions per in-game second",
-        // @VISIBILITY(3.33)
+        "This value determines the number of revolutions per in-game second.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -102,7 +100,7 @@ glm::dmat3 ConstantRotation::matrix(const UpdateData& data) const {
         _accumulatedRotation += glm::tau<double>();
     }
 
-    glm::dquat q = glm::angleAxis(_accumulatedRotation, _rotationAxis.value());
+    const glm::dquat q = glm::angleAxis(_accumulatedRotation, _rotationAxis.value());
     return glm::toMat3(q);
 }
 

@@ -1,6 +1,6 @@
 asset.require("scene/solarsystem/missions/dawn/mission")
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -169,7 +169,6 @@ asset.export(DawnFramingCamera2)
 
 asset.meta = {
   Name = "Dawn",
-  Version = "2.0",
   Description = "Dawn spacecraft and trail",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

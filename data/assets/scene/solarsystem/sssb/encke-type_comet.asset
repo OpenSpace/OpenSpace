@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Encke-type Comet)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_encke-type_comet",
-  Version = 3
+  Version = 4
 })
 
 
@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 2,
     Color = { 0.8, 0.34, 1.0 },
-    TrailFade = 23
+    TrailFade = 23,
+    PointSizeExponent = 10.0
   },
   GUI = {
     Name = "Encke-type Comets",
@@ -45,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Encke-Type Comets",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Encke-Type group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

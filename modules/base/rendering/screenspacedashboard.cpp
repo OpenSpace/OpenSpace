@@ -40,17 +40,20 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
-        "If this value is set to 'true', this ScreenSpaceDashboard will use the "
-        "main dashboard instead of creating an independent one",
+        "If true, this ScreenSpaceDashboard will use the main dashboard instead of "
+        "creating an independent one.",
         openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
-        // Specifies the GUI name of the ScreenSpaceDashboard
-        std::optional<std::string> name;
-
         // [[codegen::verbatim(UseMainInfo.description)]]
         std::optional<bool> useMainDashboard;
+
+        // A list of DashboardItems that are added automatically upon construction of the
+        // ScreenSpaceDashboard. This value must not be specified if `UseMainDashboard` is
+        // specified.
+        std::optional<std::vector<ghoul::Dictionary>>
+            items [[codegen::reference("dashboarditem")]];
     };
 #include "screenspacedashboard_codegen.cpp"
 } // namespace
@@ -69,8 +72,6 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // @TODO (abock, 2021-01-29) Should this be the name variable? The identifier wasn't
-    // declared in the documentation
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -86,13 +87,25 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
 
     _scale = 1.f;
     _scale.setMaxValue(15.f);
+
+    if (_useMainDashboard && p.items.has_value()) {
+        throw ghoul::RuntimeError("Cannot specify items when using the main dashboard");
+    }
+
+    if (p.items.has_value()) {
+        ghoul_assert(_useMainDashboard, "Cannot add items to the main dashboard");
+        for (const ghoul::Dictionary& item : *p.items) {
+            std::unique_ptr<DashboardItem> i = DashboardItem::createFromDictionary(item);
+            _dashboard.addDashboardItem(std::move(i));
+        }
+    }
 }
 
 bool ScreenSpaceDashboard::initializeGL() {
     ScreenSpaceFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(10.f, _size.value().w);
+        glm::vec2 penPosition = glm::vec2(0.f, _size.value().w);
 
         if (_useMainDashboard) {
             global::dashboard->render(penPosition);
@@ -106,15 +119,11 @@ bool ScreenSpaceDashboard::initializeGL() {
 }
 
 bool ScreenSpaceDashboard::deinitializeGL() {
-    //_fontRenderer = nullptr;
     return ScreenSpaceFramebuffer::deinitializeGL();
 }
 
 bool ScreenSpaceDashboard::isReady() const {
-    return /*(_fontRenderer != nullptr) &&
-           (_fontDate != nullptr) &&
-           (_fontInfo != nullptr) &&*/
-           ScreenSpaceFramebuffer::isReady();
+    return ScreenSpaceFramebuffer::isReady();
 }
 
 void ScreenSpaceDashboard::update() {
