@@ -6,14 +6,14 @@ The files are organized in folders, where the folder name is used as the "group"
 ## Test Structure
 Each test must have a `screenshot` instruction as the **last** entry, which causes an image to be created that is used as the result of the test. Only exactly one `screenshot` instruction per test is currently supported. Each `.ostest` file is a JSON file with two top-level keys: `profile` provides the name of the profile that should be loaded before running these test instructions, and `commands` is a list of instructions that should be executed after the profile is loaded. All instructions must have a `type` and `value` key to determine which type of instruction it is and the parameters for that instruction.
 
-By default, all tests always start paused, MRF caching is enabled, and the user interface and dashboard items are disabled.
+By default on the servers that generate tests for https://regression.openspaceproject.com, all tests always start paused, MRF caching is enabled, and the user interface and dashboard items are disabled.
 
 ### Best practices
   - All tests should start with the instruction to set a specific time to improve reproducibility
   - The fewer instructions there are per test, the better
   - Adding `wait` instructions to ensure OpenSpace has time to load dynamic datasets increases reliability, but too many `wait`s will slow down the overall testing
   - Avoid `recording` and use `navigationstate` and `time` instead
-  - Avoid `script` if possible and use dedicated instructions when they exist. If we see the same `script` instruction used in several tests, they can be upgraded to an instruction at a later stage
+  - Avoid `script` if possible and use dedicated instructions when they exist. If we see the same `script` instruction used in several tests, they can be upgraded to a dedicated instruction at a later stage
 
 ### Instructions
   - `action`: Triggers an action that must already be defined in the profile or previously defined in the test. The provided value must be a string that is the identifier of the action that should be triggered.
@@ -22,9 +22,9 @@ By default, all tests always start paused, MRF caching is enabled, and the user 
 
     Script Equivalent: `openspace.action.triggerAction`
 
-  - `asset`: Loads a given asset file. The provided value must be a string that is the path to the asset file to be loaded.
+  - `asset`: Loads a given asset file. The provided value must be a string that is the path to the asset file to be loaded. This is specified relative to the `data/asset` folder inside OpenSpace.
 
-    Example: `{ "type": "asset", "value": "C:/path/to/file.asset" }`
+    Example: `{ "type": "asset", "value": "path/to/file.asset" }`
 
     Script Equivalent: `openspace.asset.add`
 
@@ -46,7 +46,7 @@ By default, all tests always start paused, MRF caching is enabled, and the user 
 
     Script Equivalent: `openspace.time.setPause`
 
-  - `property`: Instantly sets a specific property or group of properties to the specified value. The provided value must be an object containing a `property` and another `value` key. The `property` key is the identifier or regex for the property or properties that should be set. The (other) `value` key is the new value for the property where the type must match the `property`.
+  - `property`: Instantly sets a specific property or group of properties to the specified value. The provided value must be an object containing another `property` and `value` key. The (other) `property` key is the identifier or regex for the property or properties that should be set. The (other) `value` key is the new value for the property where the type must match the (other) `property`.
 
     Example: `{ "type": "property", "value": { "property": "Scene.Constellations.Renderable.Enabled", "value": true } }`
 
