@@ -14,7 +14,7 @@ local model = asset.resource({
 })
 
 local Node = {
-  Identifier = "RenderableModel_Example",
+  Identifier = "RenderableModel_Example_Lighting",
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = model .. "VertexColorTest.glb",
@@ -27,7 +27,7 @@ local Node = {
     }
   },
   GUI = {
-    Name = "RenderableModel - Basic",
+    Name = "RenderableModel - Lighting",
     Path = "/Examples"
   }
 }
