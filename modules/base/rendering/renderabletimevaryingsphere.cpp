@@ -150,7 +150,6 @@ namespace {
         // An index specifying which layer in the fits file to display
         std::optional<int> fitsLayer;
         std::optional<bool> deleteDownloadsOnShutdown;
-        std::optional<std::filesystem::path> colorMap;
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -185,10 +184,6 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     }
     _deleteDownloadsOnShutdown =
         p.deleteDownloadsOnShutdown.value_or(_deleteDownloadsOnShutdown);
-    if (p.colorMap.has_value()) {
-        _transferFunctionPath = p.colorMap.value_or(_transferFunctionPath);
-        _isUsingColorMap = true;
-    }
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
@@ -205,11 +200,6 @@ void RenderableTimeVaryingSphere::initializeGL() {
     }
     addProperty(_textureSourcePath);
     definePropertyCallbackFunctions();
-    if (_isUsingColorMap) {
-        _transferFunction = std::make_unique<TransferFunction>(
-            absPath(_transferFunctionPath).string()
-        );
-    }
 }
 
 void RenderableTimeVaryingSphere::setupDynamicDownloading(
@@ -272,7 +262,7 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     newFile.time = extractTriggerTimeFromFitsFileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path, _fitsLayer);
     t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-
+    setMinMaxValues(t, newFile);
     newFile.texture = std::move(t);
 
     const std::vector<File>::const_iterator iter = std::upper_bound(
@@ -299,6 +289,7 @@ void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) 
     t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     t->purgeFromRAM();
 
+    setMinMaxValues(t, newFile);
     newFile.texture = std::move(t);
 
     const std::vector<File>::const_iterator iter = std::upper_bound(
@@ -310,6 +301,18 @@ void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) 
     );
     _files.insert(iter, std::move(newFile));
     computeSequenceEndTime();
+}
+
+void RenderableTimeVaryingSphere::setMinMaxValues(
+                                               std::unique_ptr<ghoul::opengl::Texture>& t,
+                                                                               File& file)
+{
+    const void* rawData = t->pixelData();
+    const float* pixelData = static_cast<const float*>(rawData);
+    size_t dataSize = t->dimensions().x * t->dimensions().y;
+    float min = *std::min_element(pixelData, pixelData);
+    float max = *std::max_element(pixelData, pixelData);
+    file.dataMinMax = { min, max };
 }
 
 void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
@@ -385,16 +388,12 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         // not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
     }
+    if (!_firstUpdate) {
+        _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
+    }
 }
 
 void RenderableTimeVaryingSphere::render(const RenderData& data, RendererTasks& task) {
-    if (_isUsingColorMap) {
-        _shader->activate();
-        ghoul::opengl::TextureUnit textureUnit;
-        textureUnit.activate();
-        _transferFunction->bind();
-        _shader->setUniform("colorTexture", textureUnit);
-    }
     RenderableSphere::render(data, task);
 }
 

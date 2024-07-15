@@ -28,7 +28,6 @@
 #include <modules/base/rendering/renderablesphere.h>
 
 #include <openspace/properties/optionproperty.h>
-#include <openspace/rendering/transferfunction.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
 
 //namespace ghoul::opengl { class Texture; }
@@ -70,6 +69,7 @@ public:
         std::filesystem::path path;
         double time;
         std::unique_ptr<ghoul::opengl::Texture> texture;
+        glm::vec2 dataMinMax;
 
         bool operator< (const File& other) const {
             return time < other.time;
@@ -84,6 +84,7 @@ private:
     void extractMandatoryInfoFromSourceFolder();
     void readFileFromImage(std::filesystem::path path);
     void readFileFromFits(std::filesystem::path path);
+    void setMinMaxValues(std::unique_ptr<ghoul::opengl::Texture>& t, File& file);
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
     void setupDynamicDownloading(const std::optional<int>& dataID,
@@ -122,9 +123,6 @@ private:
     bool _layerOptionsAdded = false;
     ghoul::opengl::Texture* _texture = nullptr;
     bool _textureIsDirty = false;
-    bool _isUsingColorMap = false;
-    std::filesystem::path _transferFunctionPath;
-    std::unique_ptr<TransferFunction> _transferFunction;
 
 };
 

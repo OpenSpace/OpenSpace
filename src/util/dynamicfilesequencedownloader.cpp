@@ -360,8 +360,10 @@ void DynamicFileSequenceDownloader::update(const double time, const double delta
         return;
     }
     if (_secondFrame) {
-        _secondFrame = false;
-        _thisFile = closestFileToNow(time);
+        if (_availableData.size() != 0) {
+            _secondFrame = false;
+            _thisFile = closestFileToNow(time);
+        }
         return;
     }
     // TODO figure out how to adapt the speedThreshhold

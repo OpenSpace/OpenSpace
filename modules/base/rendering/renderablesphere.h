@@ -26,8 +26,10 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/transferfunction.h>
 
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace ghoul::opengl { class ProgramObject; }
@@ -68,11 +70,17 @@ protected:
     properties::FloatProperty _fadeInThreshold;
     properties::FloatProperty _fadeOutThreshold;
 
+    glm::vec2 _dataMinMaxValues;
     ghoul::opengl::ProgramObject* _shader = nullptr;
 private:
 
     std::unique_ptr<Sphere> _sphere;
     bool _sphereIsDirty = false;
+
+    bool _isUsingColorMap = false;
+    std::filesystem::path _transferFunctionPath;
+    std::unique_ptr<TransferFunction> _transferFunction;
+
 
     UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
         colorTexture, mirrorTexture) _uniformCache;

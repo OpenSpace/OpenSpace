@@ -127,6 +127,10 @@ namespace {
 
         // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
         std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
+
+        // [[codegen::verbatim()]]
+        std::optional<std::filesystem::path> colorMap;
+
     };
 #include "renderablesphere_codegen.cpp"
 } // namespace
@@ -188,6 +192,11 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     addProperty(_fadeOutThreshold);
 
     setBoundingSphere(_size);
+
+    if (p.colorMap.has_value()) {
+        _transferFunctionPath = p.colorMap.value_or(_transferFunctionPath);
+        _isUsingColorMap = true;
+    }
 }
 
 bool RenderableSphere::isReady() const {
@@ -210,6 +219,12 @@ void RenderableSphere::initializeGL() {
     );
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
+
+    if (_isUsingColorMap) {
+        _transferFunction = std::make_unique<TransferFunction>(
+            absPath(_transferFunctionPath).string()
+        );
+    }
 }
 
 void RenderableSphere::deinitializeGL() {
@@ -307,6 +322,15 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     // Performance wise
     if (adjustedOpacity < 0.01f) {
         return;
+    }
+
+    _shader->setUniform("usingTransferFunction", _isUsingColorMap);
+    ghoul::opengl::TextureUnit transferfunctionUnit;
+    _shader->setUniform("transferFunction", transferfunctionUnit);
+    if (_isUsingColorMap) {
+        transferfunctionUnit.activate();
+        _transferFunction->bind();
+//        _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
     }
 
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
