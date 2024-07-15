@@ -1006,7 +1006,7 @@ void RenderableGlobe::update(const UpdateData& data) {
 }
 
 bool RenderableGlobe::renderedWithDesiredData() const {
-    return true;
+    return _allChunksAvailable;
 }
 
 const LayerManager& RenderableGlobe::layerManager() const {
