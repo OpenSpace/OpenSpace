@@ -1,5 +1,5 @@
 -- Lighting
--- This example loads a simple model and load the Sun to illuminate it.
+-- This example loads a model and load the Sun to illuminate it.
 
 -- Load the asset of the Sun to illuminate the model
 local sun = asset.require("scene/solarsystem/sun/transforms")

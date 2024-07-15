@@ -1,5 +1,5 @@
 -- Custom Shaders
--- This example loads a simple model with custom shaders.
+-- This example loads a model with custom shaders.
 
 -- Load the example model from OpenSpace servers
 -- If you want to use your own model, this block of code can be safely deleted
