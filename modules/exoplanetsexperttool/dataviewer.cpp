@@ -40,7 +40,6 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -102,40 +101,45 @@ namespace {
     }
 
     void setRenderableEnabled(std::string_view id, bool value) {
-        openspace::global::scriptEngine->queueScript(
-            fmt::format(
+        using namespace openspace;
+        global::scriptEngine->queueScript(
+            std::format(
                 "openspace.setPropertyValueSingle('{}', {});",
-                fmt::format("Scene.{}.Renderable.Enabled", id),
+                std::format("Scene.{}.Renderable.Enabled", id),
                 value ? "true" : "false"
             ),
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     };
 
     void setDefaultValueOrbitVisuals(bool shouldShowIfDefault) {
+        using namespace openspace;
         const std::string appearanceUri = "{defaultvalues_shape}.Renderable";
         if (shouldShowIfDefault) {
             // Draw using points
-            openspace::global::scriptEngine->queueScript(
-                fmt::format(
+            global::scriptEngine->queueScript(
+                std::format(
                     "openspace.setPropertyValue('{0}.Appearance.Rendering', 1.0);"
                     "openspace.setPropertyValue('{0}.Appearance.PointSize', 64.0);"
                     "openspace.setPropertyValue('{0}.Appearance.EnableFade', false);"
                     "openspace.setPropertyValue('{0}.Resolution', 100);",
                     appearanceUri
                 ),
-                openspace::scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
         else {
             // Draw using lines
-            openspace::global::scriptEngine->queueScript(
-                fmt::format(
+            global::scriptEngine->queueScript(
+                std::format(
                     "openspace.setPropertyValue('{0}.Appearance.Rendering', 0.0);"
                     "openspace.setPropertyValue('{0}.Appearance.EnableFade', true);",
                     appearanceUri
                 ),
-                openspace::scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     };
@@ -143,10 +147,12 @@ namespace {
     // Set increased reach factors of all exoplanet renderables, to trigger fading out of
     // glyph cloud
     void setIncreasedReachfactors() {
-        openspace::global::scriptEngine->queueScript(
+        using namespace openspace;
+        global::scriptEngine->queueScript(
             "openspace.setPropertyValue('{exoplanet}.ApproachFactor', 15000000.0)"
             "openspace.setPropertyValue('{exoplanet_system}.ApproachFactor', 15000000.0)",
-            openspace::scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 
@@ -162,7 +168,7 @@ namespace {
     // This should match the implementation in the exoplanet module
     std::string planetIdentifier(const openspace::exoplanets::ExoplanetItem& p) {
         using namespace openspace::exoplanets;
-        return fmt::format("{}_{}", openspace::makeIdentifier(p.hostName), p.component);
+        return std::format("{}_{}", openspace::makeIdentifier(p.hostName), p.component);
     }
 
     constexpr const glm::vec3 DefaultSelectedColor = { 0.2f, 0.8f, 1.f };
@@ -198,7 +204,7 @@ namespace {
         SYSTEMTIME t = {};
         GetLocalTime(&t);
 
-        return fmt::format(
+        return std::format(
             "{:0>2}:{:0>2}:{:0>2}.{:0<3}", t.wHour, t.wMinute, t.wSecond, t.wMilliseconds
         );
 #else
@@ -206,7 +212,7 @@ namespace {
         gettimeofday(&t, nullptr);
         tm* m = gmtime(&t.tv_sec);
 
-        return fmt::format(
+        return std::format(
             "{:0>2}:{:0>2}:{:0>2}.{:0<3}", m->tm_hour, m->tm_min, m->tm_sec, t.tv_usec / 1000
         );
 #endif
@@ -214,7 +220,7 @@ namespace {
 
     // Format stirng for system window name
     std::string systemWindowName(std::string_view host) {
-        return fmt::format("System: {}", host);
+        return std::format("System: {}", host);
     }
 
     constexpr const openspace::properties::Property::PropertyInfo ExternalSelectionInfo =
@@ -478,7 +484,7 @@ void DataViewer::renderStartupInfo() {
         ImGui::Spacing();
 
         if (ImGui::Button("Get in touch!")) {
-            system(fmt::format("start {}", GetInTouchLink).c_str());
+            system(std::format("start {}", GetInTouchLink).c_str());
         }
         ImGui::SameLine();
         ImGui::TextDisabled("(opens a webpage in your browser)");
@@ -552,9 +558,10 @@ void DataViewer::initializeRenderables() {
     node.setValue("Renderable", renderable);
     node.setValue("GUI", gui);
 
-    openspace::global::scriptEngine->queueScript(
-        fmt::format("openspace.addSceneGraphNode({})", ghoul::formatLua(node)),
-        scripting::ScriptEngine::RemoteScripting::Yes
+    global::scriptEngine->queueScript(
+        std::format("openspace.addSceneGraphNode({})", ghoul::formatLua(node)),
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -683,10 +690,10 @@ void DataViewer::render() {
             );
 
             if (ImGui::Button("Open in Chrome (Windows)")) {
-                system(fmt::format("start chrome.exe {}", path).c_str());
+                system(std::format("start chrome.exe {}", path).c_str());
             }
             if (ImGui::Button("Open in Firefox (Windows)")) {
-                system(fmt::format("start firefox {}", path).c_str());
+                system(std::format("start firefox {}", path).c_str());
             }
 
             ImGui::EndMenu();
@@ -694,7 +701,7 @@ void DataViewer::render() {
 
         if (_currentlyTargettedSystem.has_value()) {
             std::string system = (*_currentlyTargettedSystem);
-            if (ImGui::BeginMenu(fmt::format("System: {}", system.c_str()).c_str())) {
+            if (ImGui::BeginMenu(std::format("System: {}", system.c_str()).c_str())) {
                 bool isAlreadyOpen = std::find(
                     _shownPlanetSystemWindows.begin(),
                     _shownPlanetSystemWindows.end(),
@@ -941,9 +948,9 @@ void DataViewer::renderColormapWindow(bool* open) {
     for (int index = static_cast<int>(_variableSelection.size()) - 1; index >= 0; --index) {
         ColorMappedVariable& variable = _variableSelection[index];
 
-        ImGui::PushID(fmt::format("##variable{}", index).c_str());
+        ImGui::PushID(std::format("##variable{}", index).c_str());
 
-        ImGui::Text(fmt::format("{}.", index + 1).c_str());
+        ImGui::Text(std::format("{}.", index + 1).c_str());
         ImGui::SameLine();
 
         // Entire variable group
@@ -952,7 +959,7 @@ void DataViewer::renderColormapWindow(bool* open) {
         ImGui::PopID();
         ImGui::SameLine();
 
-        ImGui::PushID(fmt::format("##remove{}", index).c_str());
+        ImGui::PushID(std::format("##remove{}", index).c_str());
         if (_variableSelection.size() > 1 && ImGui::Button("x")) {
             _variableSelection.erase(_variableSelection.begin() + index);
             _colormapWasChanged = true;
@@ -978,7 +985,7 @@ void DataViewer::renderColormapWindow(bool* open) {
         for (int i = 0; i < nVariables; ++i) {
             std::string label = _columns[_variableSelection[i].columnIndex].name;
             label = label.substr(0, 10); // limit length
-            labelStrings.push_back(fmt::format(" {}. {}", i+1, label));
+            labelStrings.push_back(std::format(" {}. {}", i+1, label));
         }
 
         // Then build array with const char * from that array
@@ -1123,7 +1130,7 @@ void DataViewer::renderTableWindow(bool *open) {
     ImGui::SameLine();
     ImGui::TextColored(
         toImVec4(DescriptiveTextColor),
-        fmt::format("({})", _pinnedPlanets.size()).c_str()
+        std::format("({})", _pinnedPlanets.size()).c_str()
     );
     if (showPinnedTable) {
         renderTable("pinned_exoplanets_table", _pinnedPlanets, true);
@@ -1132,7 +1139,7 @@ void DataViewer::renderTableWindow(bool *open) {
     ImGui::Separator();
     ImGui::TextColored(
         toImVec4(DescriptiveTextColor),
-        fmt::format(
+        std::format(
             "Showing {} exoplanets out of a total {} ",
             _filteredData.size(), _data.size()
         ).c_str()
@@ -1275,7 +1282,7 @@ void DataViewer::renderTable(const std::string& tableId,
 
                 ImGui::TableNextColumn();
                 if (systemCanBeAdded(item.hostName)) {
-                    ImGui::PushID(fmt::format("addbutton{}", row).c_str());
+                    ImGui::PushID(std::format("addbutton{}", row).c_str());
                     if (ImGui::Button("+", ImVec2(20, RowHeight))) {
                         addExoplanetSystem(item.hostName);
                     }
@@ -1283,7 +1290,7 @@ void DataViewer::renderTable(const std::string& tableId,
                 }
                 else {
                     // Add a target button instead
-                    ImGui::PushID(fmt::format("targetbutton{}", row).c_str());
+                    ImGui::PushID(std::format("targetbutton{}", row).c_str());
 
                     // Check if is target item. The GUI name should be set from the planet name
                     const SceneGraphNode* node = global::navigationHandler->anchorNode();
@@ -1318,7 +1325,7 @@ void DataViewer::renderTable(const std::string& tableId,
                         );
 
                         // Context menu
-                        ImGui::PushID(fmt::format("context-{}", item.planetName).c_str());
+                        ImGui::PushID(std::format("context-{}", item.planetName).c_str());
                         if (ImGui::BeginPopupContextItem("item context menu")) {
                             ImGui::Text(item.planetName.c_str());
 
@@ -1344,16 +1351,16 @@ void DataViewer::renderTable(const std::string& tableId,
 
                             ImGui::Text(item.referenceName.c_str());
                             ImGui::SameLine();
-                            ImGui::PushID(fmt::format("Planetreflink-{}", item.planetName).c_str());
+                            ImGui::PushID(std::format("Planetreflink-{}", item.planetName).c_str());
 
                             if (ImGui::Button("Link")) {
-                                system(fmt::format("start {}", item.referenceUrl).c_str());
+                                system(std::format("start {}", item.referenceUrl).c_str());
                             }
                             ImGui::PopID();
 
                             ImGui::Separator();
 
-                            ImGui::PushID(fmt::format("ShowShystemView-{}", item.planetName).c_str());
+                            ImGui::PushID(std::format("ShowShystemView-{}", item.planetName).c_str());
 
                             bool isAlreadyOpen = std::find(
                                 _shownPlanetSystemWindows.begin(),
@@ -1390,7 +1397,7 @@ void DataViewer::renderTable(const std::string& tableId,
 
                         // Check double click, left mouse button
                         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-                            LINFO(fmt::format("Double click: {}", item.planetName));
+                            LINFO(std::format("Double click: {}", item.planetName));
                             addOrTargetPlanet(item);
 
                             // Also open the system view for that system
@@ -1586,11 +1593,11 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
         {
             const std::string filtersHeader = _appliedFilters.empty() ?
                 "Added filters" :
-                fmt::format("Added filters ({})", _appliedFilters.size());
+                std::format("Added filters ({})", _appliedFilters.size());
 
             // The ### operator overrides the ID, ignoring the preceding label
             // => Won't rerender when label changes
-            const std::string headerWithId = fmt::format("{}###FiltersHeader", filtersHeader);
+            const std::string headerWithId = std::format("{}###FiltersHeader", filtersHeader);
 
             if (ImGui::CollapsingHeader(headerWithId.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::Indent();
@@ -1610,7 +1617,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
                         const std::string queryString = f.filter.query();
                         ImGui::TableNextRow();
 
-                        ImGui::PushID(fmt::format("FilterColEnabled-{}", i).c_str());
+                        ImGui::PushID(std::format("FilterColEnabled-{}", i).c_str());
                         ImGui::TableNextColumn();
                         if (ImGui::Checkbox("##Enabled", &f.enabled)) {
                             _filterChanged = true;
@@ -1811,7 +1818,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
                 ImGui::SameLine();
                 ImGui::TextColored(
                     ImColor(200, 200, 200),
-                    fmt::format("{} items", _externalSelection.value().size()).c_str()
+                    std::format("{} items", _externalSelection.value().size()).c_str()
                 );
             }
 
@@ -1923,7 +1930,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     // Show how many values the filter corresponds to, without the limited rows
     ImGui::TextColored(
         toImVec4(DescriptiveTextColor),
-        fmt::format(
+        std::format(
             "Current internal filter corresponds to {} exoplanets and \n"
             "has {} active column filters \n", nItemsWithoutRowLimit, _appliedFilters.size()
         ).c_str()
@@ -1947,7 +1954,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     if (limitNumberOfRows) {
         ImGui::TextColored(
             toImVec4(DescriptiveTextColor),
-            fmt::format("After row limit : {}", nRowsAfterLimit).c_str()
+            std::format("After row limit : {}", nRowsAfterLimit).c_str()
         );
     }
 
@@ -1995,7 +2002,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     if (_useExternalSelection && !_externalSelection.value().empty()) {
         ImGui::TextColored(
             toImVec4(DescriptiveTextColor),
-            fmt::format("After applying external filtering: {}", _filteredData.size()).c_str()
+            std::format("After applying external filtering: {}", _filteredData.size()).c_str()
         );
     }
 
@@ -2136,37 +2143,40 @@ void DataViewer::renderSettingsMenuContent() {
     renderColumnSettingsModal();
 
     if (ImGui::Checkbox("Use fixed ring width", &useFixedWidth)) {
-        openspace::global::scriptEngine->queueScript(
-            fmt::format(
+        global::scriptEngine->queueScript(
+            std::format(
                 "openspace.setPropertyValueSingle('{}', {})",
-                fmt::format("Scene.{}.Renderable.UseFixedWidth",
+                std::format("Scene.{}.Renderable.UseFixedWidth",
                     ExoplanetsExpertToolModule::GlyphCloudIdentifier
                 ),
                 useFixedWidth
             ),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 
     if (ImGui::Checkbox("Show Kepler FOV cue", &showKepler)) {
-        openspace::global::scriptEngine->queueScript(
-            fmt::format(
+        global::scriptEngine->queueScript(
+            std::format(
                 "openspace.setPropertyValueSingle('{}', {})",
                 "Scene.KeplerPrism.Renderable.Enabled",
                 showKepler
             ),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 
     if (ImGui::Checkbox("Show line to Milky Way center", &showMilkyWayLine)) {
-        openspace::global::scriptEngine->queueScript(
-            fmt::format(
+        global::scriptEngine->queueScript(
+            std::format(
                 "openspace.setPropertyValueSingle('{}', {})",
                 "Scene.MilkyWayEarthLine.Renderable.Enabled",
                 showMilkyWayLine
             ),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 
@@ -2196,13 +2206,14 @@ void DataViewer::renderSettingsMenuContent() {
         );
 
         if (changed) {
-            openspace::global::scriptEngine->queueScript(
-                fmt::format(
+            global::scriptEngine->queueScript(
+                std::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.BillboardMinMaxSize', {})",
                     ExoplanetsExpertToolModule::GlyphCloudIdentifier,
                     ghoul::to_string(glm::dvec2(DefaultGlyphSize * glyphSizeScale))
                 ),
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     }
@@ -2231,7 +2242,7 @@ void DataViewer::renderColumnSettingsModal() {
     ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
 
     if (ImGui::BeginPopupModal("Set columns", NULL, flags)) {
-        ImGui::Text(fmt::format(
+        ImGui::Text(std::format(
             "Select up to 64 columns to show in the tool, out of {} ({} default columns, {} other columns)",
             _defaultColumns.size() + _otherColumns.size(),
             _defaultColumns.size(),
@@ -2323,7 +2334,7 @@ void DataViewer::renderColumnSettingsModal() {
 
         ImGui::TextColored(
             toImVec4(textColor),
-            fmt::format(
+            std::format(
                 "Selected: {} / {}", nSelected, IMGUI_TABLE_MAX_COLUMNS
             ).c_str()
         );
@@ -2399,11 +2410,12 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                 // we can't do it until the system is added to the scene
                 setIncreasedReachfactors();
 
-                openspace::global::scriptEngine->queueScript(
+                global::scriptEngine->queueScript(
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + hostIdentifier + "');"
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
-                    scripting::ScriptEngine::RemoteScripting::Yes
+                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                    scripting::ScriptEngine::ShouldSendToRemote::Yes
                 );
             }
 
@@ -2525,28 +2537,30 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                 const std::string planetDiscId = planetIdentifier(p) + "_Disc";
 
                 if (renderable(planetTrailId)) {
-                    std::string propertyId = fmt::format(
+                    std::string propertyId = std::format(
                         "Scene.{}.Renderable.Appearance.Color", planetTrailId
                     );
-                    openspace::global::scriptEngine->queueScript(
-                        fmt::format(
+                    global::scriptEngine->queueScript(
+                        std::format(
                             "openspace.setPropertyValueSingle('{}', {});",
                             propertyId, ghoul::to_string(color)
                         ),
-                        scripting::ScriptEngine::RemoteScripting::Yes
+                        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                        scripting::ScriptEngine::ShouldSendToRemote::Yes
                     );
                 }
 
                 if (renderable(planetDiscId)) {
-                    std::string propertyId = fmt::format(
+                    std::string propertyId = std::format(
                         "Scene.{}.Renderable.MultiplyColor", planetDiscId
                     );
-                    openspace::global::scriptEngine->queueScript(
-                        fmt::format(
+                    global::scriptEngine->queueScript(
+                        std::format(
                             "openspace.setPropertyValueSingle('{}', {});",
                             propertyId, ghoul::to_string(color)
                         ),
-                        scripting::ScriptEngine::RemoteScripting::Yes
+                        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                        scripting::ScriptEngine::ShouldSendToRemote::Yes
                     );
                 }
             };
@@ -2557,15 +2571,16 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                     return;
                 }
                 std::string appearance =
-                    fmt::format("Scene.{}.Renderable.Appearance", id);
+                    std::format("Scene.{}.Renderable.Appearance", id);
 
-                openspace::global::scriptEngine->queueScript(
-                    fmt::format(
+                global::scriptEngine->queueScript(
+                    std::format(
                         "openspace.setPropertyValueSingle('{0}.LineWidth', {1});"
                         "openspace.setPropertyValueSingle('{0}.Fade', {2});",
                         appearance, width, fade
                     ),
-                    scripting::ScriptEngine::RemoteScripting::Yes
+                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                    scripting::ScriptEngine::ShouldSendToRemote::Yes
                 );
             };
 
@@ -2823,13 +2838,13 @@ glm::vec4 DataViewer::colorFromColormap(const ExoplanetItem& item,
 void DataViewer::writeRenderDataToFile() {
     std::ofstream file(absPath(RenderDataFile), std::ios::binary);
     if (!file) {
-        LERROR(fmt::format("Cannot open file '{}' for writing", RenderDataFile));
+        LERROR(std::format("Cannot open file '{}' for writing", RenderDataFile));
         return;
     }
 
     std::ofstream labelfile(absPath(LabelsFile));
     if (!labelfile) {
-        LERROR(fmt::format("Cannot open file '{}' for writing", LabelsFile));
+        LERROR(std::format("Cannot open file '{}' for writing", LabelsFile));
     }
     labelfile << "textcolor 1" << std::endl;
 
@@ -2892,7 +2907,7 @@ void DataViewer::writeRenderDataToFile() {
         // Write label to file
         bool isAdded = std::find(hosts.begin(), hosts.end(), item.hostName) != hosts.end();
         if (!isAdded) {
-            labelfile << fmt::format(
+            labelfile << std::format(
                 "{} {} {} text {}",
                 position.x, position.y, position.z, item.hostName
             );
@@ -2905,14 +2920,15 @@ void DataViewer::writeRenderDataToFile() {
 
 void DataViewer::updateSelectionInRenderable() {
     const std::string indices = formatIndicesList(_selection);
-    const std::string uri = fmt::format(
+    const std::string uri = std::format(
         "Scene.{}.Renderable.Selection",
         ExoplanetsExpertToolModule::GlyphCloudIdentifier
     );
 
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         "openspace.setPropertyValueSingle('" + uri + "', { " + indices + " })",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -2928,7 +2944,7 @@ void DataViewer::addOrTargetPlanet(const ExoplanetItem& item) {
         // we can't do it until the system is added to the scene
         setIncreasedReachfactors();
 
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript(
             "openspace.setPropertyValueSingle("
                 "'NavigationHandler.OrbitalNavigator.Anchor',"
                 "'" + planetIdentifier(item) + "'"
@@ -2938,7 +2954,8 @@ void DataViewer::addOrTargetPlanet(const ExoplanetItem& item) {
                 "'NavigationHandler.OrbitalNavigator.RetargetAnchor', "
                 "nil"
             ");",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }
@@ -2953,29 +2970,32 @@ bool DataViewer::systemCanBeAdded(const std::string& host) const {
 }
 
 void DataViewer::addExoplanetSystem(const std::string& host) const {
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         "openspace.exoplanets.addExoplanetSystem('" + host + "')",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
 void DataViewer::refocusView() const {
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');"
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
 void DataViewer::flyToOverview() const {
     // Create a linear path to Earth
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         "openspace.pathnavigation.createPath({"
             "TargetType = 'Node', "
             "Target = 'Earth', "
@@ -2983,13 +3003,14 @@ void DataViewer::flyToOverview() const {
             "Duration = 4, "
             "PathType = 'Linear'"
         "});",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
 void DataViewer::flyToInsideView() const {
     // Create a linear path to Earth
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         "openspace.pathnavigation.createPath({"
             "TargetType = 'Node', "
             "Target = 'Earth', "
@@ -2997,7 +3018,8 @@ void DataViewer::flyToInsideView() const {
             "Duration = 4, "
             "PathType = 'Linear'"
         "});",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -3006,13 +3028,14 @@ void DataViewer::flyToStar(std::string_view hostIdentifier) const {
     // we can't do it until the system is added to the scene
     setIncreasedReachfactors();
 
-    openspace::global::scriptEngine->queueScript(
+    global::scriptEngine->queueScript(
         "openspace.setPropertyValueSingle("
             "'NavigationHandler.OrbitalNavigator.Anchor',"
-            "'" + std::string(hostIdentifier) + 
+            "'" + std::string(hostIdentifier) +
         "')"
         "openspace.pathnavigation.zoomToDistanceRelative(100.0, 5.0);",
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

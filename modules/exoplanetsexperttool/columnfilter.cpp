@@ -25,10 +25,9 @@
 #include <modules/exoplanetsexperttool/columnfilter.h>
 
 #include <modules/exoplanetsexperttool/datahelper.h>
-#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 
 namespace {
     constexpr const char _loggerCat[] = "ColumnFilter";
@@ -88,7 +87,7 @@ ColumnFilter::ColumnFilter(std::string query, Type type)
         }
         catch (const ghoul::RuntimeError& e) {
             _valid = false;
-            LWARNING(fmt::format("Failed creating numeric filter. {}", e.message));
+            LWARNING(std::format("Failed creating numeric filter. {}", e.message));
         }
     }
 }
@@ -192,7 +191,7 @@ bool ColumnFilter::passFilter(float value) const {
             }
         }
         else {
-            throw ghoul::RuntimeError(fmt::format("Invalid filter query '{}'", q));
+            throw ghoul::RuntimeError(std::format("Invalid filter query '{}'", q));
         }
 
         pass &= passSubquery; // true only if both are true

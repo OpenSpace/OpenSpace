@@ -30,7 +30,6 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
@@ -219,11 +218,11 @@ void RenderablePointData::update(const UpdateData&) {
     if (_isDirty) {
         if (_primaryPointsVAO == 0) {
             glGenVertexArrays(1, &_primaryPointsVAO);
-            LDEBUG(fmt::format("Generating Vertex Array id '{}'", _primaryPointsVAO));
+            LDEBUG(std::format("Generating Vertex Array id '{}'", _primaryPointsVAO));
         }
         if (_primaryPointsVBO == 0) {
             glGenBuffers(1, &_primaryPointsVBO);
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Generating Vertex Buffer Object id '{}'", _primaryPointsVBO
             ));
         }
@@ -265,11 +264,11 @@ void RenderablePointData::update(const UpdateData&) {
     if (_selectionChanged) {
         if (_selectedPointsVAO == 0) {
             glGenVertexArrays(1, &_selectedPointsVAO);
-            LDEBUG(fmt::format("Generating Vertex Array id '{}'", _selectedPointsVAO));
+            LDEBUG(std::format("Generating Vertex Array id '{}'", _selectedPointsVAO));
         }
         if (_selectedPointsVBO == 0) {
             glGenBuffers(1, &_selectedPointsVBO);
-            LDEBUG(fmt::format(
+            LDEBUG(std::format(
                 "Generating Vertex Buffer Object id '{}'", _selectedPointsVBO
             ));
         }
@@ -297,7 +296,7 @@ void RenderablePointData::update(const UpdateData&) {
                 newIndices.push_back(i);
             }
             else {
-                LINFO(fmt::format("No 3D point matching selected index '{}'", i));
+                LINFO(std::format("No 3D point matching selected index '{}'", i));
             }
         }
         selectedPoints.shrink_to_fit();
@@ -345,11 +344,11 @@ void RenderablePointData::update(const UpdateData&) {
 }
 
 void RenderablePointData::updateDataFromFile() {
-    LDEBUG(fmt::format("Updating point data from file: {}", _dataFile->path()));
+    LDEBUG(std::format("Updating point data from file: {}", _dataFile->path()));
 
     std::ifstream file(_dataFile->path(), std::ios::binary);
     if (!file) {
-        LERROR(fmt::format("Could not open file for reading: {}", _dataFile->path()));
+        LERROR(std::format("Could not open file for reading: {}", _dataFile->path()));
         return;
     }
 

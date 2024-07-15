@@ -29,13 +29,12 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/coordinateconversion.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/logging/logmanager.h>
 #include <json/json.hpp>
-#include <scn/scn.h>
+#include <scn/scan.h>
 #include <charconv>
 #include <cmath>
 #include <fstream>
@@ -80,7 +79,7 @@ DataLoader::DataLoader() : _inExoplanetsCsvPath(absPath(DataPath).string()) {}
 std::vector<ExoplanetItem> DataLoader::loadData() {
     std::ifstream exoplanetsCsvFile(_inExoplanetsCsvPath);
     if (!exoplanetsCsvFile.good()) {
-        LERROR(fmt::format("Failed to open input file '{}'", _inExoplanetsCsvPath));
+        LERROR(std::format("Failed to open input file '{}'", _inExoplanetsCsvPath));
         return std::vector<ExoplanetItem>();
     }
 
@@ -93,7 +92,7 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
 
     if (csvContent.empty()) {
         LERROR(
-            fmt::format("Could not read CSV data from file '{}'", _inExoplanetsCsvPath)
+            std::format("Could not read CSV data from file '{}'", _inExoplanetsCsvPath)
         );
         return std::vector<ExoplanetItem>();
     }
@@ -141,7 +140,7 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
                     p.component = data.at(0);
                 }
                 else {
-                    LWARNING(fmt::format(
+                    LWARNING(std::format(
                         "Could not read planet letter from data: '{}'", data
                     ));
                 }
@@ -253,29 +252,29 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
             // Data reference
             else if (column == "pl_refname") {
                 // Parse reference string
-                std::string temp; // junk string that we will ignore
-                std::string href;
-                std::string name;
-                //auto success =
-                //    scn::scan(data, "<a refstr={} href={} target=ref>{}</a>", r, href, name);
-
+                //
+                // TODO: try loading name like this instead
+                // scn::scan(data, "<a refstr={} href={} target=ref>{}</a>"
+                //
                 // For some reason we fail reading the name above. Try and see if splitting up the string helps
                 std::vector<std::string> list = ghoul::tokenizeString(data, '>');
                 list.pop_back(); // Last is always empty();
 
                 if (list.size() != 2) {
-                    LERROR(fmt::format(
+                    LERROR(std::format(
                         "Failed reading reference: '{}' (wrong format)", data)
                     );
                 }
 
                 // Read url
-                if (scn::scan(list[0], "<a refstr={} href={} target=ref", temp, href)) {
-                    p.referenceUrl = href;
+                auto res = scn::scan<std::string, std::string>(list[0], "<a refstr={} href={} target=ref");
+                if (res) {
+                    auto [refstr, href] = res->values();
+
                 }
 
                 // Remove final tag from name
-                name = ghoul::replaceAll(list[1], "</a", "");
+                std::string name = ghoul::replaceAll(list[1], "</a", "");
                 ghoul::trimWhitespace(name);
                 p.referenceName = name;
             }
