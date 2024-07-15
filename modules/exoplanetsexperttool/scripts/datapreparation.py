@@ -115,10 +115,10 @@ df = pd.concat([df0,df1])
 
 # ## Convert the pubdate to a datetime object
 # This is messy since there are three different datetime formats here.
-# Must make sure to sort before filtering.
+# Must make sure to sort before filtering, to grab the most recent record later on.
 
-## OBS! Actually, it seems that by now the pubdate have the same formatting, so just use as is.
-# This also avoids problems when the month in the format Y-M is zero, which it is for sme planets for some reason
+## TODO: There are some issues with the code below, so for now just use the pubdate as is.
+# This also avoids problems when the month in the format Y-M is zero, which for some reason is for a few entries
 df = df.sort_values(by='pl_pubdate', ascending=False)
 
 # df['dt_obj'] = df['pl_pubdate']
@@ -188,19 +188,11 @@ df.loc[df['sy_kmag'] <= 5., 'efficiency_kmag'] = 0.3
 # option to correct TSM for observatinoal efficiency with HST/WFC3
 #df['TSM'] = df['TSM']*np.sqrt(df['efficiency'])
 
-# TODO: figure out if needed
-# ## TODO: why are these here and not earlier? If computed earlier they could be used for computation
-# # Fill ars if missing: a(AU)/Rs(Ro)*215
-# df.pl_ratdor.fillna(df['pl_orbsmax']/df['st_rad']*215, inplace=True)
-
-# # Fill insolation if missing: Ts^4/ars^2 * (215^2/5772^4) = Ts^4/ars^2 * 4.166e-11
-# df.pl_insol.fillna(df['st_teff']**4/df['pl_ratdor']**2*4.166e-11, inplace=True)
-
 print("Computing ESM")
 # df['ed_ESM'] = Planck_ratio(df['pl_rprs2'], df['st_teff'], 1.1*df['pl_Teq'], 7.5e-6)
 # df['ESM'] = 4.29 * df['pl_rprs2'] * df['ed_ESM'] * 10**(-0.2*df['sy_kmag'])
 
-# Alteraitve verison from original script, to get the factors separately:
+# Alternative version from original script, to get the factors separately:
 df['pl_Tday'] = 1.1*df['pl_Teq']
 df['planck_ratio'] = Plancks_function(df['pl_Tday'], 7.5e-6) / Plancks_function(df['st_teff'], 7.5e-6)
 df['ESM'] = 4.29 * 1e6 * df['pl_rprs2'] * df['planck_ratio'] * 10**(-0.2*df['sy_kmag'])
