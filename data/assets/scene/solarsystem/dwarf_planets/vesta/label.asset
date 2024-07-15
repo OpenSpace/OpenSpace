@@ -6,8 +6,8 @@ local Label = {
   Identifier = "VestaLabel",
   Parent = transforms.Position.Identifier,
   Renderable = {
-    Enabled = asset.enabled,
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Vesta",
     FontSize = 50.0,
     Size = 8.5,
@@ -42,7 +42,6 @@ asset.export("Label", Label)
 
 asset.meta = {
   Name = "Vesta Label",
-  Version = "1.0",
   Description = [[Label of Vesta]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

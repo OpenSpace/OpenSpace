@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,7 +73,7 @@ std::vector<Geodetic2> geodetic2FromVertexList(const RenderableGlobe& globe,
     std::vector<Geodetic2> res;
     res.reserve(verts.size());
     for (const rendering::helper::VertexXYZNormal& v : verts) {
-        glm::dvec3 cartesian = glm::dvec3(v.xyz[0], v.xyz[1], v.xyz[2]);
+        const glm::dvec3 cartesian = glm::dvec3(v.xyz[0], v.xyz[1], v.xyz[2]);
         res.push_back(globe.ellipsoid().cartesianToGeodetic2(cartesian));
     }
     return res;
@@ -85,7 +85,7 @@ std::vector<float> heightMapHeightsFromGeodetic2List(const RenderableGlobe& glob
     std::vector<float> res;
     res.reserve(list.size());
     for (const Geodetic2& geo : list) {
-        float h = static_cast<float>(getHeightToReferenceSurface(geo, globe));
+        const float h = static_cast<float>(getHeightToReferenceSurface(geo, globe));
         res.push_back(h);
     }
     return res;
@@ -105,17 +105,17 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
     // Extrude polygon
     for (size_t nBound = 0; nBound < edgeVertices.size(); ++nBound) {
         const std::vector<glm::vec3>& boundary = edgeVertices[nBound];
-        for (size_t i = 1; i < boundary.size(); ++i) {
-            glm::vec3 v0 = boundary[i - 1];
-            glm::vec3 v1 = boundary[i ];
+        for (size_t i = 1; i < boundary.size(); i++) {
+            const glm::vec3& v0 = boundary[i - 1];
+            const glm::vec3& v1 = boundary[i];
 
             // Vertices close to globe (Based on origin which is the zero point here)
             // For now, use center of globe (TODO: allow setting the height)
-            glm::vec3 vOrigin = glm::vec3(0.f);
+            const glm::vec3 vOrigin = glm::vec3(0.f);
 
             // Outer boundary is the first one
             if (nBound == 0) {
-                glm::vec3 n = glm::vec3(
+                const glm::vec3 n = glm::vec3(
                     glm::normalize(glm::cross(v1 - vOrigin, v0 - vOrigin))
                 );
                 vertices.push_back({ vOrigin.x, vOrigin.y, vOrigin.z, n.x, n.y, n.z });
@@ -125,7 +125,9 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
             // Inner boundary
             else {
                 // Flipped winding order and normal for inner rings
-                glm::vec3 n = glm::normalize(glm::cross(v0 - vOrigin, v1 - vOrigin));
+                const glm::vec3 n = glm::normalize(
+                    glm::cross(v0 - vOrigin, v1 - vOrigin)
+                );
                 vertices.push_back({ vOrigin.x, vOrigin.y, vOrigin.z, n.x, n.y, n.z });
                 vertices.push_back({ v0.x, v0.y, v0.z, n.x, n.y, n.z });
                 vertices.push_back({ v1.x, v1.y, v1.z, n.x, n.y, n.z });
@@ -144,7 +146,7 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
 
 double getHeightToReferenceSurface(const Geodetic2& geo, const RenderableGlobe& globe) {
     // Compute model space coordinate, and potentially account for height map
-    glm::dvec3 posModelSpaceZeroHeight =
+    const glm::dvec3 posModelSpaceZeroHeight =
         globe.ellipsoid().cartesianSurfacePosition(geo);
 
     const SurfacePositionHandle posHandle =
@@ -158,8 +160,8 @@ glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
                                           float latOffset, float lonOffset)
 {
     // Account for lat long offset
-    double offsetLatRadians = glm::radians(latOffset);
-    double offsetLonRadians = glm::radians(lonOffset);
+    const double offsetLatRadians = glm::radians(latOffset);
+    const double offsetLonRadians = glm::radians(lonOffset);
 
     Geodetic3 adjusted = geo;
     adjusted.geodetic2.lat += offsetLatRadians;
@@ -171,8 +173,8 @@ glm::dvec3 computeOffsetedModelCoordinate(const Geodetic3& geo,
 std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3& v1,
                                          double h0, double h1, double maxDistance)
 {
-    double edgeLength = glm::distance(v1, v0);
-    int nSegments = static_cast<int>(std::ceil(edgeLength / maxDistance));
+    const double edgeLength = glm::distance(v1, v0);
+    const int nSegments = static_cast<int>(std::ceil(edgeLength / maxDistance));
 
     std::vector<PosHeightPair> positions;
     positions.reserve(nSegments + 1);
@@ -183,15 +185,15 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
     }
 
     for (int seg = 0; seg < nSegments; ++seg) {
-        double t = static_cast<double>(seg) / static_cast<double>(nSegments);
+        const double t = static_cast<double>(seg) / static_cast<double>(nSegments);
 
         // Interpolate both position and height value
-        glm::dvec3 newV = glm::mix(v0, v1, t);
-        double newHeight = glm::mix(h0, h1, t);
-        double heightDiff = newHeight - h0;
+        const glm::dvec3 newV = glm::mix(v0, v1, t);
+        const double newHeight = glm::mix(h0, h1, t);
+        const double heightDiff = newHeight - h0;
 
         // Compute position along arc between v0 and v1, with adjusted height value
-        glm::vec3 newVf = static_cast<glm::vec3>(
+        const glm::vec3 newVf = static_cast<glm::vec3>(
             (glm::length(v0) + heightDiff) * glm::normalize(newV)
         );
         positions.push_back({ newVf, newHeight });
@@ -230,66 +232,68 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
         maxDistance
     );
 
-    size_t nSteps01 = edge01.size();
-    size_t nSteps02 = edge02.size();
-    size_t nSteps12 = edge12.size();
-    size_t maxSteps = std::max(std::max(nSteps01, nSteps02), nSteps12);
+    const size_t nSteps01 = edge01.size();
+    const size_t nSteps02 = edge02.size();
+    const size_t nSteps12 = edge12.size();
+    const size_t maxSteps = std::max(std::max(nSteps01, nSteps02), nSteps12);
     vertices.reserve(maxSteps * maxSteps);
 
     // Add points inside the triangle
     std::vector<Coordinate> pointCoords;
     pointCoords.reserve(3 * maxSteps + 1);
 
+    const globebrowsing::Ellipsoid& ellipsoid = globe.ellipsoid();
+
     const float lengthEdge01 = glm::length(v1 - v0);
     const float lengthEdge02 = glm::length(v2 - v0);
-    for (size_t i = 1; i < nSteps01; ++i) {
-        for (size_t j = 1; j < nSteps02; ++j) {
-            glm::vec3 comp01 = edge01[i].position - v0;
-            glm::vec3 comp02 = edge02[j].position - v0;
+    for (size_t i = 1; i < nSteps01; i++) {
+        for (size_t j = 1; j < nSteps02; j++) {
+            const glm::vec3 comp01 = edge01[i].position - v0;
+            const glm::vec3 comp02 = edge02[j].position - v0;
 
-            double hComp01 = edge01[i].height - h0;
-            double hComp02 = edge02[j].height - h0;
+            const double hComp01 = edge01[i].height - h0;
+            const double hComp02 = edge02[j].height - h0;
 
-            float w1 = glm::length(comp01) / lengthEdge01;
-            float w2 = glm::length(comp02) / lengthEdge02;
+            const float w1 = glm::length(comp01) / lengthEdge01;
+            const float w2 = glm::length(comp02) / lengthEdge02;
 
             if (w1 + w2 > 1.f - std::numeric_limits<float>::epsilon()) {
                 continue; // Sum larger than 1.0 => Outside of triangle
             }
 
-            glm::vec3 pos = v0 + comp01 + comp02;
-            double height = h0 + hComp01 + hComp02;
+            const glm::vec3 pos = v0 + comp01 + comp02;
+            const double height = h0 + hComp01 + hComp02;
 
-            Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(pos);
-            Geodetic3 geo3 = { geo2, height };
+            const Geodetic2 geo2 = ellipsoid.cartesianToGeodetic2(pos);
+            const Geodetic3 geo3 = { geo2, height };
             pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
         }
     }
 
     // Add egde positions
-    for (size_t i = 0; i < maxSteps; ++i) {
+    for (size_t i = 0; i < maxSteps; i++) {
         if (i < edge01.size() - 1) {
-            Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(edge01[i].position);
-            Geodetic3 geo3 = { geo2, edge01[i].height };
+            const Geodetic2 geo2 = ellipsoid.cartesianToGeodetic2(edge01[i].position);
+            const Geodetic3 geo3 = { geo2, edge01[i].height };
             pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
         }
         if (i < edge02.size() - 1) {
-            Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(edge02[i].position);
-            Geodetic3 geo3 = { geo2, edge02[i].height };
+            const Geodetic2 geo2 = ellipsoid.cartesianToGeodetic2(edge02[i].position);
+            const Geodetic3 geo3 = { geo2, edge02[i].height };
             pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
         }
         if (i < edge12.size() - 1) {
-            Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(edge12[i].position);
-            Geodetic3 geo3 = { geo2, edge12[i].height };
+            const Geodetic2 geo2 = ellipsoid.cartesianToGeodetic2(edge12[i].position);
+            const Geodetic3 geo3 = { geo2, edge12[i].height };
             pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
         }
     }
 
     // Also add the final position (not part of the subdivide step above)
-    Geodetic2 geo2 = globe.ellipsoid().cartesianToGeodetic2(v2);
-    glm::dvec3 centerToEllipsoidSurface = globe.ellipsoid().geodeticSurfaceProjection(v2);
-    double height = glm::length(glm::dvec3(v2) - centerToEllipsoidSurface);
-    Geodetic3 geo3 = { geo2, height };
+    const Geodetic2 geo2 = ellipsoid.cartesianToGeodetic2(v2);
+    const glm::dvec3 centerToEllipsoidSurface = ellipsoid.geodeticSurfaceProjection(v2);
+    const double height = glm::length(glm::dvec3(v2) - centerToEllipsoidSurface);
+    const Geodetic3 geo3 = { geo2, height };
     pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
 
     pointCoords.shrink_to_fit();
@@ -330,11 +334,11 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
             count = 0;
             continue;
         }
-        Geodetic3 geodetic = geometryhelper::toGeodetic(coord);
+        const Geodetic3 geodetic = geometryhelper::toGeodetic(coord);
 
         // Note that offset should already have been applied to the coordinates. Use
         // zero offset => just get model coordinate
-        glm::vec3 v =
+        const glm::vec3 v =
             geometryhelper::computeOffsetedModelCoordinate(geodetic, globe, 0.f, 0.f);
 
         vertices.push_back({ v.x, v.y, v.z, 0.f, 0.f, 0.f });
@@ -343,7 +347,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
         // triangle vertices
         if (count == 3) {
             // Find previous vertices
-            size_t lastIndex = vertices.size() - 1;
+            const size_t lastIndex = vertices.size() - 1;
             rendering::helper::VertexXYZNormal& vert0 = vertices[lastIndex - 2];
             rendering::helper::VertexXYZNormal& vert1 = vertices[lastIndex - 1];
             rendering::helper::VertexXYZNormal& vert2 = vertices[lastIndex];

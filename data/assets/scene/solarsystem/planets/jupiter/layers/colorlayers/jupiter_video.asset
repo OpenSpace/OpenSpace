@@ -2,7 +2,7 @@ local globe = asset.require("../../jupiter")
 
 
 
-local data = asset.syncedResource({
+local data = asset.resource({
   Name = "Jupiter Video Layer",
   Type = "HttpSynchronization",
   Identifier = "jupiter_videos",
@@ -11,11 +11,12 @@ local data = asset.syncedResource({
 
 
 local Layer = {
+  Type = "VideoTileProvider",
   Identifier = "JupiterVideo",
-  Video = data .. "/jupiter_movie_3600.mp4",
   Name = "Jupiter Video",
   Enabled = true,
-  Type = "VideoTileLayer"
+  ZIndex = 10,
+  Video = data .. "/jupiter_movie_3600.mp4"
 }
 
 
@@ -33,7 +34,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Jupiter Video",
-  Version = "1.0",
   Description = "An video showing Jupiter.",
   Author = "NOAA",
   URL = "https://sos.noaa.gov/copyright/",

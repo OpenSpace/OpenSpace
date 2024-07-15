@@ -1,7 +1,7 @@
 openspace.globebrowsing.documentation = {
     {
         Name = "createTemporalGibsGdalXml",
-        Arguments = { layerName = "String", resolution = "String", format = "String" },
+        Arguments = {{ "layerName", "String" }, { "resolution", "String" }, { "format", "String" }},
         Documentation = [[
             Creates an XML configuration for a temporal GIBS dataset to be used in
             a TemporalTileprovider
@@ -9,7 +9,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "createGibsGdalXml",
-        Arguments = { layerName = "String", date = "String", resolution = "String", format = "String" },
+        Arguments = {{ "layerName", "String" }, { "date", "String" }, { "resolution",  "String" }, { "format", "String" }},
         Documentation =
             "Creates an XML configuration for a GIBS dataset." ..
             "Arguments are: layerName, date, resolution, format." ..
@@ -32,7 +32,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "addGibsLayer",
-        Arguments = { layer = "String", resolution = "String", format = "String", startDate = "String", endDate = "String" },
+        Arguments = {{ "layer", "String" }, { "resolution", "String" }, { "format", "String" }, { "startDate", "String" }, { "endDate", "String" }},
         Documentation = "Adds a new layer from NASA GIBS to the Earth globe. Arguments " ..
             "are: imagery layer name, imagery resolution, start date, end date, format. " ..
              "For all specifications, see " ..
@@ -42,7 +42,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "parseInfoFile",
-        Arguments = { file = "String" },
+        Arguments = {{ "file", "String" }},
         Documentation =
             "Parses the passed info file and return the table with the information " ..
             "provided in the info file. The return table contains the optional keys: " ..
@@ -53,7 +53,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "addBlendingLayersFromDirectory",
-        Arguments = { directory = "String", nodeName = "String" },
+        Arguments = {{ "directory", "String" }, { "nodeName", "String" }},
         Documentation =
             "Retrieves all info files recursively in the directory passed as the first " ..
             "argument to this function. The color and height tables retrieved from these " ..
@@ -63,7 +63,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "addFocusNodesFromDirectory",
-        Arguments = { directory = "String", nodeName = "String" },
+        Arguments = {{ "directory", "String" }, { "nodeName", "String" }},
         Documentation =
             "Retrieves all info files recursively in the directory passed as the first " ..
             "argument to this function. The name and location retrieved from these info " ..
@@ -73,7 +73,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "addFocusNodeFromLatLong",
-        Arguments = { name = "String", globeIdentifier = "String", latitude = "Number", longitude = "Number", altitude = "Number" },
+        Arguments = {{ "name", "String" }, { "globeIdentifier", "String" }, { "latitude", "Number" }, { "longitude", "Number" }, { "altitude", "Number" }},
         Documentation =
             "Creates a new SceneGraphNode that can be used as focus node. " ..
             "Usage: openspace.globebrowsing.addFocusNodeFromLatLong(" ..
@@ -81,7 +81,7 @@ openspace.globebrowsing.documentation = {
     },
     {
         Name = "loadWMSServersFromFile",
-        Arguments = { filePath = "String" },
+        Arguments = {{ "filePath", "String" }},
         Documentation =
             "Loads all WMS servers from the provided file and passes them to the " ..
             "'openspace.globebrowsing.loadWMSCapabilities' file."
@@ -200,6 +200,8 @@ openspace.globebrowsing.parseInfoFile = function (file)
     declare("ColorFile")
     declare("HeightFile")
     declare("Location")
+    declare("ZIndex")
+    declare("BlendMode")
 
     local dir = openspace.directoryForPath(file)
     local file_func, error = loadfile(file)
@@ -217,10 +219,21 @@ openspace.globebrowsing.parseInfoFile = function (file)
     local ColorFile = rawget(_G, "ColorFile")
     local HeightFile = rawget(_G, "HeightFile")
     local Location = rawget(_G, "Location")
+    local ZIndex = rawget(_G, "ZIndex")
+    local BlendMode = rawget(_G, "BlendMode")
 
     -- Now we can start
     local name = Name or Identifier
     local identifier = Identifier
+    local zIndex = ZIndex
+    local blendMode = BlendMode
+    if zIndex == "" then
+        zIndex = nil
+    end
+    if blendMode == "" then
+        -- Color blending is the default for .info files if nothing else is specified
+        blendMode = "Color"
+    end
 
     if identifier == "" then
         openspace.printError('Error loading file "' .. file .. '": No "Identifier" found')
@@ -234,7 +247,8 @@ openspace.globebrowsing.parseInfoFile = function (file)
             Name = name,
             Description = Description or "",
             FilePath = dir .. '/' .. ColorFile,
-            BlendMode = "Color"
+            BlendMode = blendMode,
+            ZIndex = zIndex
         }
     end
 
@@ -245,7 +259,8 @@ openspace.globebrowsing.parseInfoFile = function (file)
             Name = name,
             Description = Description or "",
             FilePath = dir .. '/' .. HeightFile,
-            TilePixelSize = 65
+            TilePixelSize = 65,
+            ZIndex = zIndex
         }
     end
 

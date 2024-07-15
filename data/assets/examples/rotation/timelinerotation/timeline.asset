@@ -1,0 +1,47 @@
+-- Basic
+-- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
+-- the coordinate axes are determined by a timeline of individual rotations. These rotations
+-- are keyframes that are used to seamlessly change between different orientations. This
+-- example transitions between three rotations over a long time span. This example will
+-- only work if the in-game time is set to January 1st, 2000.
+
+local Node = {
+  Identifier = "TimelineRotation_Example",
+  Transform = {
+    Rotation = {
+      Type = "TimelineRotation",
+      Keyframes = {
+        -- The first timeline entry
+        ["2000 JAN 01 00:00:00"] = {
+          Type = "StaticRotation",
+          Rotation = { math.pi, 0.0, 0.0 }
+        },
+        -- The second timeline entry
+        ["2000 JAN 01 12:00:00"] = {
+          Type = "StaticRotation",
+          Rotation = { 0.0, 0.0, 0.0 }
+        },
+        -- The third timeline entry
+        ["2000 JAN 01 23:59:59"] = {
+          Type = "StaticRotation",
+          Rotation = { 0.0, 0.0, math.pi }
+        }
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "TimelineRotation - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

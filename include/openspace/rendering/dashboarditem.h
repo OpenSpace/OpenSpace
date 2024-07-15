@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ public:
     static documentation::Documentation Documentation();
 
     static std::unique_ptr<DashboardItem> createFromDictionary(
-        ghoul::Dictionary dictionary
+        const ghoul::Dictionary& dictionary
     );
 
     DashboardItem(const ghoul::Dictionary& dictionary);

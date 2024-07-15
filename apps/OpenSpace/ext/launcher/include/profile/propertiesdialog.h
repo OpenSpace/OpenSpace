@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,19 +40,19 @@ class PropertiesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for properties class
+     * Constructor for properties class.
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
+     * \param properties The #openspace::Profile::Property object containing all data of
+     *        the new or imported profile
      */
     PropertiesDialog(QWidget* parent,
         std::vector<openspace::Profile::Property>* properties);
 
     /**
-     * Handles keypress while the Qt dialog window is open
+     * Handles keypress while the Qt dialog window is open.
      *
-     * \param evt #QKeyEvent object for the key press event
+     * \param evt The QKeyEvent object for the key press event
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 
@@ -69,7 +69,6 @@ private:
 
     void selectLineFromScriptLog();
 
-    QString createOneLineSummary(openspace::Profile::Property p);
     void transitionFromEditMode();
     void editBoxDisabled(bool disabled);
     bool areRequiredFormsFilled();

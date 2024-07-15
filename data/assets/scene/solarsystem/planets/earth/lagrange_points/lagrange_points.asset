@@ -7,7 +7,6 @@ asset.require("./l5")
 
 asset.meta = {
   Name = "Earth Lagrange Points",
-  Version = "1.0",
   Description = [[Meta asset to include all the Earth Lagrange points. Includes L1, L2, L4
     and L5]],
   Author = "OpenSpace Team",

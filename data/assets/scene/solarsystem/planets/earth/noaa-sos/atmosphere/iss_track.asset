@@ -18,7 +18,7 @@ local Description = [[The first piece of the International Space Station was sen
 local URL = "https://sos.noaa.gov/catalog/datasets/international-space-station-track/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -30,6 +30,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "4096.jpg",
   Description = Description
 }
@@ -49,7 +50,6 @@ asset.export(Layer)
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

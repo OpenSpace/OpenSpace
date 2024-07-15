@@ -7,7 +7,7 @@ local ToggleSun = {
       return
     end
 
-    if not openspace.getPropertyValue("Scene.Sun.Renderable.Enabled") then
+    if not openspace.propertyValue("Scene.Sun.Renderable.Enabled") then
       openspace.setPropertyValueSingle("Scene.Sun.Renderable.Enabled", true)
     end
 
@@ -61,7 +61,6 @@ asset.export("ToggleSun", ToggleSun.Identifier)
 
 asset.meta = {
   Name = "Actions - Toggle current Trails",
-  Version = "1.0",
   Description = "Asset providing actions to toggle trails",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

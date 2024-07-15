@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,7 +54,7 @@ void AuthorizationTopic::handleJson(const nlohmann::json& json) {
     }
     else {
         try {
-            std::string providedKey = json.at("key").get<std::string>();
+            const std::string providedKey = json.at("key").get<std::string>();
             if (authorize(providedKey)) {
                 _connection->setAuthorized(true);
                 _connection->sendJson(wrappedPayload({ KeyStatus, Authorized }));

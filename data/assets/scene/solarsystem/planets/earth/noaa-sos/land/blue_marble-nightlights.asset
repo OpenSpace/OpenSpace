@@ -19,7 +19,7 @@ needed to get a view of the clouds over the poles using thermal infrared imagery
 local URL = "https://sos.noaa.gov/catalog/datasets/blue-marble-and-nighttime-lights/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -33,7 +33,8 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "images",
   Description = Description
 }
@@ -53,7 +54,6 @@ asset.export(Layer)
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

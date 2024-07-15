@@ -5,10 +5,10 @@ asset.onInitialize(function()
   -- remove automatic restart on each property change, since frequent restarting seems to
   -- be unstable on MacOS.
 
-  local enabled = openspace.getPropertyValue("Modules.WebGui.ServerProcessEnabled")
+  local enabled = openspace.propertyValue("Modules.WebGui.ServerProcessEnabled")
   openspace.setPropertyValueSingle("Modules.WebGui.ServerProcessEnabled", false)
 
-  local directories = openspace.getPropertyValue("Modules.WebGui.Directories")
+  local directories = openspace.propertyValue("Modules.WebGui.Directories")
   directories[#directories + 1] = "screenshots"
   directories[#directories + 1] = "${SCREENSHOTS}"
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)

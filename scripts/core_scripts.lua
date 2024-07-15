@@ -1,20 +1,20 @@
 openspace.documentation = {
     {
         Name = "markInterestingNodes",
-        Arguments = { sceneGraphNodes = "String[]" },
+        Arguments = {{ "sceneGraphNodes", "String[]" }},
         Documentation = "This function marks the scene graph nodes identified by name " ..
         "as interesting, which will provide shortcut access to focus buttons and " ..
         "featured properties"
     },
     {
         Name = "markInterestingTimes",
-        Arguments = { times = "Table[]" },
+        Arguments = {{ "times", "Table[]" }},
         Documentation = "This function marks interesting times for the current scene, " ..
         "which will create shortcuts for a quick access"
     },
     {
         Name = "removeInterestingNodes",
-        Arguments = { sceneGraphNodes = "String[]" },
+        Arguments = {{ "sceneGraphNodes", "String[]" }},
         Documentation = "This function removes unmarks the scene graph nodes " ..
         "identified by name as interesting, thus removing the shortcuts from the " ..
         "features properties list"
@@ -36,36 +36,36 @@ openspace.documentation = {
     },
     {
         Name = "rebindKey",
-        Arguments = { oldKey = "String", newKey = "String" },
+        Arguments = {{ "oldKey", "String" }, { "newKey", "String" }},
         Documentation = "Rebinds all scripts from the old key (first argument) to the " ..
         "new key (second argument)"
     },
     {
         Name = "appendToListProperty",
-        Arguments = { identifier = "String", value = "any" },
+        Arguments = {{ "identifier","String" }, { "value", "any" }},
         Documentation = "Add a value to the list property with the given identifier. " ..
         "The value can be any type, as long as it is the correct type for the given " ..
         "property. Note that a number will be converted to a string automatically."
     },
     {
         Name = "addToPropertyValue",
-        Arguments = { identifier = "String", value = "String | Number" },
+        Arguments = {{ "identifier", "String" } , { "value", "String | Number" }},
         Documentation = "Add a value to the property with the given identifier. " ..
         "Works on both numerical and string properties, where adding to a string " ..
         "property means appending the given string value to the existing string value."
     },
     {
         Name = "invertBooleanProperty",
-        Arguments = { identifier = "String" },
+        Arguments = {{ "identifier", "String" }},
         Documentation = "Inverts the value of a boolean property with the given "..
         "identifier"
     },
     {
         Name = "fadeIn",
         Arguments = {
-            identifier = "String",
-            fadeTime = "Number?",
-            endScript = "String?"
+            { "identifier", "String" },
+            { "fadeTime", "Number?" },
+            { "endScript", "String?" }
         },
         Documentation = "Fades in the node(s) with the given identifier over the given " ..
         "time in seconds. The identifier can contain a tag and/or a wildcard to target " ..
@@ -77,9 +77,9 @@ openspace.documentation = {
     {
         Name = "fadeOut",
         Arguments = {
-            identifier = "String",
-            fadeTime = "Number?",
-            endScript = "String?"
+            { "identifier", "String" },
+            { "fadeTime", "Number?" },
+            { "endScript", "String?" }
         },
         Documentation = "Fades out the node(s) with the given identifier over the given " ..
         "time in seconds. The identifier can contain a tag and/or a wildcard to target " ..
@@ -91,9 +91,9 @@ openspace.documentation = {
     {
         Name = "toggleFade",
         Arguments = {
-            identifier = "String",
-            fadeTime = "Number?",
-            endScript = "String?"
+            { "identifier", "String" },
+            { "fadeTime", "Number?" },
+            { "endScript", "String?" }
         },
         Documentation = [[Toggles the fade state of the node(s) with the given identifier over the given
           time in seconds. The identifier can contain a tag and/or a wildcard to target
@@ -146,7 +146,7 @@ openspace.rebindKey = function(oldKey, newKey)
 end
 
 openspace.appendToListProperty = function(propertyIdentifier, newItem)
-    local list = openspace.getPropertyValue(propertyIdentifier)
+    local list = openspace.propertyValue(propertyIdentifier)
     if type(list) ~= 'table' then
         openspace.printError(
             "Error when calling script 'openspace.appendToListProperty': " ..
@@ -159,7 +159,7 @@ openspace.appendToListProperty = function(propertyIdentifier, newItem)
 end
 
 openspace.addToPropertyValue = function(propertyIdentifier, valueToAdd)
-    local value = openspace.getPropertyValue(propertyIdentifier)
+    local value = openspace.propertyValue(propertyIdentifier)
     if type(value) == 'string' then
         value = value .. valueToAdd;
     else
@@ -169,7 +169,7 @@ openspace.addToPropertyValue = function(propertyIdentifier, valueToAdd)
 end
 
 openspace.invertBooleanProperty = function(propertyIdentifier)
-    local value = openspace.getPropertyValue(propertyIdentifier)
+    local value = openspace.propertyValue(propertyIdentifier)
     if type(value) ~= 'boolean' then
         openspace.printError(
             "Error when calling script 'openspace.invertBooleanProperty': " ..
@@ -183,7 +183,7 @@ end
 openspace.fadeIn = function(identifier, fadeTime, endScript)
     -- Set default values for optional arguments
     endScript = endScript or ""
-    fadeTime = fadeTime or openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
+    fadeTime = fadeTime or openspace.propertyValue("OpenSpaceEngine.FadeDuration")
 
     local enabledProperty = identifier .. ".Enabled"
     local fadeProperty = identifier .. ".Fade"
@@ -197,7 +197,7 @@ openspace.fadeIn = function(identifier, fadeTime, endScript)
 
     if hasTag ~= nil or hasWild ~= nil then
         -- Regex, several nodes
-        local enabledPropertyList = openspace.getProperty(enabledProperty)
+        local enabledPropertyList = openspace.property(enabledProperty)
         if next(enabledPropertyList) == nil then
             -- List is empty, no matches found
             openspace.printError(
@@ -207,7 +207,7 @@ openspace.fadeIn = function(identifier, fadeTime, endScript)
             return
         end
 
-        local fadePropertyList = openspace.getProperty(fadeProperty)
+        local fadePropertyList = openspace.property(fadeProperty)
         if next(fadePropertyList) == nil then
             -- List is empty, no matches found
             openspace.printError(
@@ -234,7 +234,7 @@ openspace.fadeIn = function(identifier, fadeTime, endScript)
             )
             return
         else
-            isEnabled = openspace.getPropertyValue(enabledProperty)
+            isEnabled = openspace.propertyValue(enabledProperty)
         end
     end
 
@@ -250,7 +250,7 @@ end
 openspace.fadeOut = function(identifier, fadeTime, endScript)
     -- Set default values for optional arguments
     endScript = endScript or ""
-    fadeTime = fadeTime or openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
+    fadeTime = fadeTime or openspace.propertyValue("OpenSpaceEngine.FadeDuration")
 
     local enabledProperty = identifier .. ".Enabled"
     local fadeProperty = identifier .. ".Fade"
@@ -264,7 +264,7 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
 
     if hasTag ~= nil or hasWild ~= nil then
         -- Regex, several nodes
-        local enabledPropertyList = openspace.getProperty(enabledProperty)
+        local enabledPropertyList = openspace.property(enabledProperty)
         if next(enabledPropertyList) == nil then
             -- List is empty, no matches found
             openspace.printError(
@@ -274,7 +274,7 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
             return
         end
 
-        local fadePropertyList = openspace.getProperty(fadeProperty)
+        local fadePropertyList = openspace.property(fadeProperty)
         if next(fadePropertyList) == nil then
             -- List is empty, no matches found
             openspace.printError(
@@ -301,7 +301,7 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
             )
             return
         else
-            isEnabled = openspace.getPropertyValue(enabledProperty)
+            isEnabled = openspace.propertyValue(enabledProperty)
         end
     end
 
@@ -319,10 +319,10 @@ end
 
 openspace.toggleFade = function(renderable, fadeTime, endScript)
   if (fadeTime == nil) then
-    fadeTime = openspace.getPropertyValue("OpenSpaceEngine.FadeDuration")
+    fadeTime = openspace.propertyValue("OpenSpaceEngine.FadeDuration")
   end
-  local enabled = openspace.getPropertyValue(renderable .. ".Enabled")
-  local fadeState = openspace.getPropertyValue(renderable .. ".Fade")
+  local enabled = openspace.propertyValue(renderable .. ".Enabled")
+  local fadeState = openspace.propertyValue(renderable .. ".Fade")
   if (enabled) then
     if (fadeState < 0.5) then
       openspace.fadeIn(renderable, fadeTime-(fadeTime*fadeState), endScript)

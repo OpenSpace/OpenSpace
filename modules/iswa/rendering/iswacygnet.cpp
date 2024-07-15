@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -139,7 +139,8 @@ void IswaCygnet::initializeGL() {
             deinitialize();
             global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + identifier() + "')",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         });
     }
@@ -306,7 +307,8 @@ void IswaCygnet::initializeGroup() {
             LDEBUG(identifier() + " Event clearGroup");
             global::scriptEngine->queueScript(
                 "openspace.removeSceneGraphNode('" + identifier() + "')",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
         }
     );

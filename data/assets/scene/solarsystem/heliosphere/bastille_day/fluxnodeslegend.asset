@@ -1,8 +1,4 @@
-asset.require("spice/base")
-
-
-
-local TexturesPath = asset.syncedResource({
+local TexturesPath = asset.resource({
   Type = "HttpSynchronization",
   Name = "Streamnodes textures",
   Identifier = "streamnodes_legend",
@@ -23,11 +19,11 @@ local ToggleLegend = {
   Identifier = "os.bastilleday.fluxnodelegend.ToggleLegend",
   Name = "Toggle the legend image",
   Command = [[
-    if openspace.getPropertyValue("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled") then
+    if openspace.propertyValue("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled") then
       openspace.setPropertyValueSingle(
         "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
         0.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear",
         'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)'
       )
@@ -36,7 +32,7 @@ local ToggleLegend = {
       openspace.setPropertyValueSingle(
         "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
         1.0,
-        openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
         "Linear"
       )
     end
@@ -53,7 +49,7 @@ local HideLegend = {
     openspace.setPropertyValueSingle(
       "ScreenSpace.LegendFluxNodes-bastille-day-2000.Fade",
       0.0,
-      openspace.getPropertyValue("OpenSpaceEngine.FadeDuration"),
+      openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
       "Linear",
       'openspace.setPropertyValueSingle("ScreenSpace.LegendFluxNodes-bastille-day-2000.Enabled", false)'
     )
@@ -84,7 +80,6 @@ asset.export("HideLegend", HideLegend.Identifier)
 
 asset.meta = {
   Name = "Predictive Science Inc. Flux nodes legend for Bastille Days",
-  Version = "1.1",
   Description = [[Screen space renderable image legend of flux nodes for the bastille day
     CME event]],
   Author = "Christian Adamsson, Emilie Ho",

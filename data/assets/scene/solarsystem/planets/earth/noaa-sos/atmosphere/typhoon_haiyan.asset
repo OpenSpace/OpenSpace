@@ -12,7 +12,7 @@ to 195 mph. If confirmed, it would beat the previous record holder, Hurricane Ca
 local URL = "https://sos.noaa.gov/catalog/datasets/typhoon-haiyan-oct-nov-2013/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -25,7 +25,8 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = syncedDirectory .. "2048",
@@ -62,7 +63,6 @@ asset.export(Track)
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

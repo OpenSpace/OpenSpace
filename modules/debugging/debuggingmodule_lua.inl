@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,7 +56,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
     // Parent node. Note that we only render one path at a time, so remove the previously
     // rendered one, if any
-    std::string addParentScript = fmt::format(
+    std::string addParentScript = std::format(
         "if openspace.hasSceneGraphNode('{0}') then "
             "openspace.removeSceneGraphNode('{0}') "
         "end "
@@ -66,7 +66,8 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
     global::scriptEngine->queueScript(
         addParentScript,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 
     // Get the poses along the path
@@ -81,7 +82,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
     // Create node lines between the positions
     auto pointIdentifier = [](int i) {
-        return fmt::format("Point_{}", i);
+        return std::format("Point_{}", i);
     };
 
     auto addPoint = [](const std::string& id, glm::dvec3 p) {
@@ -97,8 +98,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
         "}";
 
         global::scriptEngine->queueScript(
-            fmt::format("openspace.addSceneGraphNode({})", pointNode),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            std::format("openspace.addSceneGraphNode({})", pointNode),
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     };
 
@@ -106,7 +108,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
                                    const glm::vec3& color, float lineWidth)
     {
         const std::string lineNode = "{"
-            "Identifier = '" + fmt::format("Line{}", id1) + "',"
+            "Identifier = '" + std::format("Line{}", id1) + "',"
             "Parent = '" + RenderedPathIdentifier + "',"
             "Renderable = {"
                 "Enabled = true,"
@@ -119,8 +121,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
         "}";
 
         global::scriptEngine->queueScript(
-            fmt::format("openspace.addSceneGraphNode({})", lineNode),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            std::format("openspace.addSceneGraphNode({})", lineNode),
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     };
 
@@ -130,7 +133,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
     {
         const glm::dvec3 dir = glm::normalize(p.rotation * glm::dvec3(0.0, 0.0, -1.0));
         const glm::dvec3 pointPosition = p.position + lineLength * dir;
-        const std::string id = fmt::format("{}_orientation", pointId);
+        const std::string id = std::format("{}_orientation", pointId);
 
         addPoint(id, pointPosition);
         addLineBetweenPoints(id, pointId, OrientationLineColor, 2.f);
@@ -156,8 +159,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 [[codegen::luawrap]] void removeRenderedCameraPath() {
     using namespace openspace;
     global::scriptEngine->queueScript(
-        fmt::format("openspace.removeSceneGraphNode('{}');", RenderedPathIdentifier),
-        scripting::ScriptEngine::RemoteScripting::Yes
+        std::format("openspace.removeSceneGraphNode('{}');", RenderedPathIdentifier),
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -179,7 +183,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
     // Parent node. Note that we only render one set of points at a time, so remove any
     // previously rendered ones
-    std::string addParentScript = fmt::format(
+    std::string addParentScript = std::format(
         "if openspace.hasSceneGraphNode('{0}') then "
             "openspace.removeSceneGraphNode('{0}') "
         "end "
@@ -189,13 +193,14 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
     global::scriptEngine->queueScript(
         addParentScript,
-        scripting::ScriptEngine::RemoteScripting::Yes
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 
     const std::vector<glm::dvec3> points = currentPath->controlPoints();
 
     const std::string guiPath =
-        fmt::format("{}/Camera Path Control Points", DebuggingGuiPath);
+        std::format("{}/Camera Path Control Points", DebuggingGuiPath);
 
     const char* colorTexturePath = "openspace.absPath("
         "openspace.createSingleColorImage('point_color', { 0.0, 1.0, 0.0 })"
@@ -225,8 +230,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
         "}";
 
         global::scriptEngine->queueScript(
-            fmt::format("openspace.addSceneGraphNode({})", node),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            std::format("openspace.addSceneGraphNode({})", node),
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 }
@@ -235,8 +241,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 [[codegen::luawrap]] void removePathControlPoints() {
     using namespace openspace;
     global::scriptEngine->queueScript(
-        fmt::format("openspace.removeSceneGraphNode('{}');", RenderedPointsIdentifier),
-        scripting::ScriptEngine::RemoteScripting::Yes
+        std::format("openspace.removeSceneGraphNode('{}');", RenderedPointsIdentifier),
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 
@@ -290,8 +297,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
     "}";
 
     global::scriptEngine->queueScript(
-        fmt::format("openspace.addSceneGraphNode({});", axes),
-        scripting::ScriptEngine::RemoteScripting::Yes
+        std::format("openspace.addSceneGraphNode({});", axes),
+        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+        scripting::ScriptEngine::ShouldSendToRemote::Yes
     );
 }
 

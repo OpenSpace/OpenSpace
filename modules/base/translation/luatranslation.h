@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,8 +39,7 @@ namespace documentation { struct Documentation; }
 
 class LuaTranslation : public Translation {
 public:
-    LuaTranslation();
-    LuaTranslation(const ghoul::Dictionary& dictionary);
+    explicit LuaTranslation(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;
 

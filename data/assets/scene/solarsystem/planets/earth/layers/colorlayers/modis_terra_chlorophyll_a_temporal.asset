@@ -6,7 +6,8 @@ local Layer = {
   Identifier = "MODIS_Terra_Chlorophyll_A_Temporal",
   Name = "MODIS Terra Chlorophyll A (Temporal)",
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
   Mode = "Prototyped",
   Prototyped = {
     Time = {
@@ -16,7 +17,7 @@ local Layer = {
     TemporalResolution = "1d",
     TimeFormat = "YYYY-MM-DD",
     Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
-      "MODIS_Terra_Chlorophyll_A",
+      "MODIS_Terra_L2_Chlorophyll_A",
       "1km",
       "png"
     )
@@ -40,7 +41,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "MODIS Terra Chlorophyll A (Temporal)",
-  Version = "1.1",
   Description = "GIBS hosted layer",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",

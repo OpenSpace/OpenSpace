@@ -19,7 +19,7 @@ surface temperatures. The sea surface temperature data is also from the ECCO2 mo
 local URL = "https://sos.noaa.gov/catalog/datasets/sea-surface-currents-and-temperature-gray-land/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -33,7 +33,8 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "images",
   Description = Description
 }
@@ -66,7 +67,6 @@ asset.export(Colorbar)
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

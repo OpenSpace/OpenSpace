@@ -2,13 +2,13 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local omm = asset.syncedResource({
+local omm = asset.resource({
   Name = "Satellite OMM Data (SpaceStations)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_stations",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=stations&FORMAT=kvn",
   Filename = "stations.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -21,7 +21,8 @@ local SpaceStations = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.9, 0.1, 0.0 },
-    Fade = 1.5,
+    TrailFade = 20,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
@@ -49,7 +50,6 @@ asset.export(SpaceStations)
 
 asset.meta = {
   Name = "Satellites SpaceStations",
-  Version = "1.0",
   Description = "Satellites asset for SpaceStations. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

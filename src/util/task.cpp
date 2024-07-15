@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,15 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
+
+    // The base class of all tasks. Specify the Type property to create one of the
+    // available task types. This property should be included in the same table object
+    // as the properties of the specific task.
+    //
+    // Tasks can be executed using the separate TaskRunner application. When starting the
+    // application, just enter the path to the file describing the task you want to run
+    // as input in the command line to initiate the run. All tasks should live in the task
+    // folder in the data folder of the OpenSpace installation.
     struct [[codegen::Dictionary(Task)]] Parameters {
         // This key specifies the type of Task that gets created. It has to be one of the
         // valid Tasks that are available for creation (see the FactoryDocumentation for a

@@ -1,10 +1,10 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
-local labelsPath = asset.syncedResource({
+local labelsPath = asset.resource({
   Name = "Mars Labels",
   Type = "HttpSynchronization",
   Identifier = "mars_labels",
@@ -21,20 +21,18 @@ local Mars = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS",
-      Observer = "MARS BARYCENTER"
+      Target = coreKernels.ID.Mars,
+      Observer = coreKernels.ID.MarsBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MARS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Mars,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = MarsRadii,
-    SegmentsPerPatch = 90,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "mars.labels",
@@ -60,8 +58,8 @@ local MarsLabel = {
   Identifier = "MarsLabel",
   Parent = Mars.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Mars",
     FontSize = 70.0,
     Size = 8.50,
@@ -105,7 +103,6 @@ asset.export(MarsLabel)
 
 asset.meta = {
   Name = "Mars",
-  Version = "1.1",
   Description = "Mars globe, and main globe label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

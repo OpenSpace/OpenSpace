@@ -9,3 +9,12 @@ asset.require("./zenith", false)
 asset.require("./planets", false)
 asset.require("actions/nightsky/camera", false)
 asset.require("actions/nightsky/daytime", false)
+
+
+asset.meta = {
+  Name = "Night Sky Assets",
+  Description = [[A collection of assets useful for studying the night sky.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

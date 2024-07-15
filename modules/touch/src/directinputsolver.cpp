@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,7 +64,7 @@ double distToMinimize(double* par, int x, void* fdata, LMstat* lmstat) {
 
     // { vec2 globalRot, zoom, roll, vec2 localRot }
     double q[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    for (int i = 0; i < ptr->nDOF; ++i) {
+    for (int i = 0; i < ptr->nDOF; i++) {
         q[i] = par[i];
     }
 
@@ -150,7 +150,7 @@ void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
     std::vector<double> dPar(ptr->nDOF, 0.0);
     dPar.assign(par, par + ptr->nDOF);
 
-    for (int i = 0; i < ptr->nDOF; ++i) {
+    for (int i = 0; i < ptr->nDOF; i++) {
         // Initial values
         double h = 1e-8;
         double lastG = 1;
@@ -158,7 +158,7 @@ void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
         double f1 = distToMinimize(dPar.data(), x, fdata, lmstat);
         dPar.at(i) = par[i];
         // Iterative process to find the minimum step h that gives a good gradient
-        for (int j = 0; j < 100; ++j) {
+        for (int j = 0; j < 100; j++) {
             if ((f1 - f0) != 0 && lastG == 0) { // found minimum step size h
                 // scale up to get a good initial guess value
                 h *= scale * scale * scale;
@@ -196,12 +196,12 @@ void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
     }
     if (ptr->nDOF == 2) {
         // normalize on 1 finger case to allow for horizontal/vertical movement
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < 2; i++) {
             g[i] = g[i] / std::abs(g[i]);
         }
     }
     else if (ptr->nDOF == 6) {
-        for (int i = 0; i < ptr->nDOF; ++i) {
+        for (int i = 0; i < ptr->nDOF; i++) {
             // lock to only pan and zoom on 3 finger case, no roll/orbit
             g[i] = (i == 2) ? g[i] : g[i] / std::abs(g[i]);
         }
@@ -226,7 +226,7 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
     std::vector<glm::dvec3> selectedPoints;
     std::vector<glm::dvec2> screenPoints;
 
-    for (int i = 0; i < nFingers; ++i) {
+    for (int i = 0; i < nFingers; i++) {
         const SelectedBody& sb = selectedBodies.at(i);
         selectedPoints.push_back(sb.coordinates);
         screenPoints.emplace_back(

@@ -1,9 +1,9 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
 
-local modelFolder = asset.syncedResource({
+local modelFolder = asset.resource({
   Name = "Eris Model",
   Type = "HttpSynchronization",
   Identifier = "eris_model",
@@ -54,7 +54,6 @@ asset.export("Planet", Planet)
 
 asset.meta = {
   Name = "Eris Globe",
-  Version = "1.0",
   Description = [[Globe of Eris]],
   Author = "OpenSpace Team",
   URL = "https://solarsystem.nasa.gov/planets/dwarf-planets/haumea/in-depth/",

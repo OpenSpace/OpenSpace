@@ -2,7 +2,7 @@ local globe = asset.require("../../jupiter")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Jupiter Textures",
   Type = "HttpSynchronization",
   Identifier = "jupiter_textures",
@@ -14,6 +14,7 @@ local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "jupiter_os.tif",
   Enabled = asset.enabled,
+  ZIndex = 5,
   CacheSettings = { Enabled = false }
 }
 
@@ -32,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Jupiter Texutre",
-  Version = "2.0",
   Description = "Default texture for Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

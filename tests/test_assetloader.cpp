@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,35 +40,32 @@
 #include <memory>
 
 TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
-    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-    ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
-    openspace::AssetManager assetLoader(
-        state,
-        absPath("${TESTDIR}/AssetLoaderTest/").string()
-    );
+    using namespace openspace;
+
+    const Scene scene = Scene(std::make_unique<SingleThreadedSceneInitializer>());
+    ghoul::lua::LuaState* state = global::scriptEngine->luaState();
+    AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
     CHECK_NOTHROW(assetLoader.add("passassertion"));
     CHECK_NOTHROW(assetLoader.add("failassertion"));
 }
 
 TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
-    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-    ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
-    openspace::AssetManager assetLoader(
-        state,
-        absPath("${TESTDIR}/AssetLoaderTest/").string()
-    );
+    using namespace openspace;
+
+    const Scene scene = Scene(std::make_unique<SingleThreadedSceneInitializer>());
+    ghoul::lua::LuaState* state = global::scriptEngine->luaState();
+    AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
     CHECK_NOTHROW(assetLoader.add("require"));
 }
 
 TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
-    openspace::Scene scene(std::make_unique<openspace::SingleThreadedSceneInitializer>());
-    ghoul::lua::LuaState* state = openspace::global::scriptEngine->luaState();
-    openspace::AssetManager assetLoader(
-        state,
-        absPath("${TESTDIR}/AssetLoaderTest/").string()
-    );
+    using namespace openspace;
+
+    const Scene scene = Scene(std::make_unique<SingleThreadedSceneInitializer>());
+    ghoul::lua::LuaState* state = global::scriptEngine->luaState();
+    AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
 
     CHECK_NOTHROW(assetLoader.add("assetfunctionsexist"));
 }

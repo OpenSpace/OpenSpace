@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -400,7 +400,7 @@ constexpr inline bool isKeypadKey(Key key) noexcept {
         key == Key::KeypadDivide;
 }
 
-KeyWithModifier stringToKey(std::string str);
+KeyWithModifier stringToKey(const std::string& str);
 std::string keyToString(KeyWithModifier keyWithModifier);
 
 // @TODO (abock, 2021-08-12) This function should die
@@ -430,7 +430,7 @@ template <>
 std::string to_string(const openspace::KeyModifier& mod);
 
 template <>
-std::string to_string(const openspace::KeyWithModifier& key);
+std::string to_string(const openspace::KeyWithModifier& keyMod);
 
 } // namespace ghoul
 

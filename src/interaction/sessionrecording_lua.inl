@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -200,6 +200,11 @@ namespace {
 // Returns true if session recording is currently playing back a recording.
 [[codegen::luawrap]] bool isPlayingBack() {
     return openspace::global::sessionRecording->isPlayingBack();
+}
+
+// Returns true if session recording is currently recording a recording.
+[[codegen::luawrap]] bool isRecording() {
+    return openspace::global::sessionRecording->isRecording();
 }
 
 #include "sessionrecording_lua_codegen.cpp"

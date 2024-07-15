@@ -6,7 +6,8 @@ local Layer = {
   Identifier = "ClemUvvis_NewYork",
   Name = "Clem Uvvis [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("clemuvvis_newyork.wms"),
+  ZIndex = 20,
+  FilePath = asset.resource("clemuvvis_newyork.wms"),
   Settings = {
     Gamma = 1.14,
     Multiplier = 1.4
@@ -32,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Clem Uvvis [New York]",
-  Version = "1.1",
   Description = [[Moon Clementine UVVIS Global Mosaic 118m v2 map of the Moon. This map
     is hosted on the OpenSpace server in New York]],
   Author = "USGS",

@@ -2,7 +2,7 @@ local transforms = asset.require("./transforms")
 
 
 
-local labelsPath = asset.syncedResource({
+local labelsPath = asset.resource({
   Name = "Earth Labels",
   Type = "HttpSynchronization",
   Identifier = "earth_labels",
@@ -19,9 +19,7 @@ local Earth = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = EarthEllipsoid,
-    SegmentsPerPatch = 64,
     PerformShading = false,
-    Layers = {},
     ShadowGroup = {
       Sources = {
         { Name = "Sun", Radius = 696300000 },
@@ -55,8 +53,8 @@ local EarthLabel = {
   Identifier = "EarthLabel",
   Parent = Earth.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Earth",
     FontSize = 70.0,
     Size = 8.50,
@@ -86,21 +84,21 @@ local FocusEarth = {
   ]],
   Documentation = "Set camera focus on the Earth",
   GuiPath = "/Solar System/Earth",
-  isLocal = false
+  IsLocal = false
 }
 
 local ToggleSatelliteTrails = {
   Identifier = "os.solarsystem.ToggleSatelliteTrails",
   Name = "Toggle satellite trails",
   Command = [[
-    local list = openspace.getProperty("{earth_satellites}.Renderable.Enabled")
+    local list = openspace.property("{earth_satellites}.Renderable.Enabled")
     for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.getPropertyValue(v))
+      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
     end
   ]],
   Documentation = "Toggle trails on or off for satellites around Earth",
   GuiPath = "/Solar System/Earth",
-  isLocal = false
+  IsLocal = false
 }
 
 
@@ -127,7 +125,6 @@ asset.export(EarthLabel)
 
 asset.meta = {
   Name = "Earth",
-  Version = "1.1",
   Description = "Earth is a special planet with special needs",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

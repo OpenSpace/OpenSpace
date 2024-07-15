@@ -6,7 +6,6 @@ asset.require("./label", false)
 
 asset.meta = {
   Name = "Sedna meta asset",
-  Version = "1.0",
   Description = [[Trail, Model and Label of Sedna.]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

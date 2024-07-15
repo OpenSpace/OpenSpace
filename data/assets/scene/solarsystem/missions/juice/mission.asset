@@ -1,0 +1,67 @@
+local Mission = {
+  Name = "Juice",
+  Image = "https://www.esa.int/var/esa/storage/images/science_exploration/space_science/juice/23388092-2-eng-GB/Juice_pillars.jpg",
+  Description = "ESA's Jupiter Icy Moons Explorer, Juice, will make detailed observations of the giant gas planet and its three large ocean-bearing moons - Ganymede, Callisto and Europa - with a suite of remote sensing, geophysical, and in situ instruments. The mission will characterize these moons as both planetary objects and possible habitats, explore Jupiter's complex environment in depth, and study the wider Jupiter system as an archetype for gas giants across the Universe.",
+  Milestones = {
+    {
+      Name = "Earth flyby 1",
+      Date = "2024 AUG 01 00:00:00"
+    },
+    {
+      Name = "Venus flyby",
+      Date = "2025 AUG 01 00:00:00"
+    },
+    {
+      Name = "Earth flyby 2",
+      Date = "2026 SEP 01 00:00:00"
+    },
+    {
+      Name = "Earth flyby 3",
+      Date = "2029 JAN 01 00:00:00"
+    },
+    {
+      Name = "Arrival at Jupiter",
+      Date = "2031 JUL 01 00:00:00"
+    },
+    {
+      Name = "Europa flyby 1",
+      Date = "2032 JUL 02 16:21:51"
+    },
+    {
+      Name = "Europa flyby 2",
+      Date = "2032 JUL 16 22:18:22"
+    }
+  },
+  Phases = {
+    {
+      Name = "Journey to Jupiter",
+      TimeRange = { Start = "2023 APR 05 16:25:00", End = "2031 JUL 01 00:00:00" }
+    },
+    {
+      Name = "Jupiter orbit",
+      TimeRange = { Start = "2031 JUL 01 00:00:00", End = "2033 NOV 01 00:00:00" },
+      Phases = {
+        {
+          Name = "Jupiter inclined phase - Callisto flybys",
+          TimeRange = { Start = "2032 AUG 01 00:00:00", End = "2033 AUG 01 00:00:00" },
+          Description = "ESA's Jupiter Icy Moons Explorer - Juice - will catch its first glimpse of ancient, cratered Callisto in June 2032, going on to whizz past the moon 21 times before making a final flyby in 2034. During these close encounters, Juice will collect valuable scientific treasure about the moon.",
+
+        }
+      }
+    },
+    {
+      Name = "Ganymede orbit",
+      TimeRange = { Start = "2034 NOV 01 00:00:00", End = "2035 SEP 01 00:00:00" },
+      Description = "Monstrous, mysterious Ganymede is the primary target of ESA's Jupiter Icy Moons Explorer (Juice) and the largest moon in the Solar System - larger even than Pluto and Mercury! Though Juice will make flybys of all three of Jupiter's largest Galilean moons (Ganymede, Europa and Callisto), Ganymede is the only one that the spacecraft will orbit. In doing so, Juice will become the first spacecraft ever to orbit a moon other than our own, enabling us to see the Jovian world in a whole new light. Ganymede is also the only moon in the Solar System to generate its own magnetic field. Juice will explore various key topics: Ganymede's puzzling magnetic field, its hidden ocean, its complex core, its ice content and shell, its interactions with its local environment and that of Jupiter, its past and present activity, and whether or not the moon could be - or ever have been - a habitable environment."
+    }
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.loadMission(Mission)
+end)
+
+asset.onDeinitialize(function()
+  openspace.unloadMission(Mission.Name)
+end)

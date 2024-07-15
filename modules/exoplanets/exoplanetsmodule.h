@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,8 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <filesystem>
 
 namespace openspace {
 
@@ -42,15 +44,18 @@ public:
     ~ExoplanetsModule() override = default;
 
     bool hasDataFiles() const;
-    std::string exoplanetsDataPath() const;
-    std::string lookUpTablePath() const;
-    std::string bvColormapPath() const;
-    std::string starTexturePath() const;
-    std::string starGlareTexturePath() const;
-    std::string noDataTexturePath() const;
-    std::string orbitDiscTexturePath() const;
-    std::string habitableZoneTexturePath() const;
+    std::filesystem::path exoplanetsDataPath() const;
+    std::filesystem::path lookUpTablePath() const;
+    std::filesystem::path teffToBvConversionFilePath() const;
+    std::filesystem::path bvColormapPath() const;
+    std::filesystem::path starTexturePath() const;
+    std::filesystem::path starGlareTexturePath() const;
+    std::filesystem::path noDataTexturePath() const;
+    std::filesystem::path orbitDiscTexturePath() const;
+    std::filesystem::path habitableZoneTexturePath() const;
+    glm::vec3 comparisonCircleColor() const;
     bool showComparisonCircle() const;
+    bool showOrbitUncertainty() const;
     bool showHabitableZone() const;
     bool useOptimisticZone() const;
     float habitableZoneOpacity() const;
@@ -70,7 +75,9 @@ protected:
     properties::StringProperty _orbitDiscTexturePath;
     properties::StringProperty _habitableZoneTexturePath;
 
+    properties::Vec3Property _comparisonCircleColor;
     properties::BoolProperty _showComparisonCircle;
+    properties::BoolProperty _showOrbitUncertainty;
     properties::BoolProperty _showHabitableZone;
     properties::BoolProperty _useOptimisticZone;
 

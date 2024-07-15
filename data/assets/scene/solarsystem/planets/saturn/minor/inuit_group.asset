@@ -1,5 +1,6 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels452 = asset.require("../kernels452")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,15 +10,13 @@ local Kiviuq = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "KIVIUQ",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Kiviuq,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 16000, 16000, 16000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 16000, 16000, 16000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -40,8 +39,8 @@ local KiviuqTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "KIVIUQ",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Kiviuq,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 448.16,
@@ -51,6 +50,7 @@ local KiviuqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -64,8 +64,8 @@ local KiviuqLabel = {
   Identifier = "KiviuqLabel",
   Parent = Kiviuq.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Kiviuq",
     FontSize = 70.0,
     Size = 7.1,
@@ -77,7 +77,13 @@ local KiviuqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Kiviuq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq",
@@ -91,15 +97,13 @@ local Ijiraq = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "IJIRAQ",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Ijiraq,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 12000, 12000, 12000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 12000, 12000, 12000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -122,8 +126,8 @@ local IjiraqTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "IJIRAQ",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Ijiraq,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 451.77,
@@ -133,6 +137,7 @@ local IjiraqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -146,8 +151,8 @@ local IjiraqLabel = {
   Identifier = "IjiraqLabel",
   Parent = Ijiraq.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Ijiraq",
     FontSize = 70.0,
     Size = 7.1,
@@ -159,7 +164,13 @@ local IjiraqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Ijiraq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq",
@@ -173,15 +184,13 @@ local Paaliaq = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PAALIAQ",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Paaliaq,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 22000, 22000, 22000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 22000, 22000, 22000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -204,8 +213,8 @@ local PaaliaqTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PAALIAQ",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Paaliaq,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 692.98,
@@ -215,6 +224,7 @@ local PaaliaqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -228,8 +238,8 @@ local PaaliaqLabel = {
   Identifier = "PaaliaqLabel",
   Parent = Paaliaq.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Paaliaq",
     FontSize = 70.0,
     Size = 7.1,
@@ -241,7 +251,13 @@ local PaaliaqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Paaliaq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq",
@@ -255,15 +271,13 @@ local Siarnaq = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SIARNAQ",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Siarnaq,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 40000, 40000, 40000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 40000, 40000, 40000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -286,8 +300,8 @@ local SiarnaqTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SIARNAQ",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Siarnaq,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 884.88,
@@ -297,6 +311,7 @@ local SiarnaqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -310,8 +325,8 @@ local SiarnaqLabel = {
   Identifier = "SiarnaqLabel",
   Parent = Siarnaq.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Siarnaq",
     FontSize = 70.0,
     Size = 7.1,
@@ -323,7 +338,13 @@ local SiarnaqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Siarnaq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq",
@@ -337,15 +358,13 @@ local Tarqeq = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TARQEQ",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Tarqeq,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -368,8 +387,8 @@ local TarqeqTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TARQEQ",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Tarqeq,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 894.86,
@@ -379,6 +398,7 @@ local TarqeqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -392,8 +412,8 @@ local TarqeqLabel = {
   Identifier = "TarqeqLabel",
   Parent = Tarqeq.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Tarqeq",
     FontSize = 70.0,
     Size = 7.1,
@@ -405,7 +425,13 @@ local TarqeqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Tarqeq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq",
@@ -419,15 +445,13 @@ local S2004S29 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "660",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S29,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -450,8 +474,8 @@ local S2004S29Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "660",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S29,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 858.77,
@@ -461,6 +485,7 @@ local S2004S29Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -474,8 +499,8 @@ local S2004S29Label = {
   Identifier = "S2004S29Label",
   Parent = S2004S29.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 29",
     FontSize = 70.0,
     Size = 7.1,
@@ -487,7 +512,13 @@ local S2004S29Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "S/2004 S 29 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29",
@@ -501,15 +532,13 @@ local S2004S31 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65067",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S31,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -532,8 +561,8 @@ local S2004S31Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65067",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2004S31,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 853.80,
@@ -543,6 +572,7 @@ local S2004S31Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -556,8 +586,8 @@ local S2004S31Label = {
   Identifier = "S2004S31Label",
   Parent = S2004S31.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2004 S 31",
     FontSize = 70.0,
     Size = 7.1,
@@ -569,7 +599,13 @@ local S2004S31Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "S/2004 S 31 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31",
@@ -583,15 +619,13 @@ local S2019S01 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65093",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2019S01,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -614,8 +648,8 @@ local S2019S01Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "65093",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.S2019S01,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 443.78,
@@ -625,6 +659,7 @@ local S2019S01Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -638,8 +673,8 @@ local S2019S01Label = {
   Identifier = "S2019S01Label",
   Parent = S2019S01.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2019 S 01",
     FontSize = 70.0,
     Size = 7.1,
@@ -651,7 +686,13 @@ local S2019S01Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "S/2019 S 01 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01",
@@ -661,9 +702,6 @@ local S2019S01Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat452)
-
-
   openspace.addSceneGraphNode(Kiviuq)
   openspace.addSceneGraphNode(KiviuqTrail)
   openspace.addSceneGraphNode(KiviuqLabel)
@@ -729,9 +767,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(KiviuqLabel)
   openspace.removeSceneGraphNode(KiviuqTrail)
   openspace.removeSceneGraphNode(Kiviuq)
-
-
-  openspace.spice.unloadKernel(kernel.sat452)
 end)
 
 asset.export(Kiviuq)
@@ -770,7 +805,6 @@ asset.export(S2019S01Label)
 
 asset.meta = {
   Name = "Saturn Inuit Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Inuit Group moons: Kiviuq,
     Ijiraq, Paaliaq, Siarnaq and Tarqeq. Blank globes and SPICE trails are generated for
     each moon]],

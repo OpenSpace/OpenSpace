@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,27 +40,34 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
         "XColor",
         "X Color",
-        "This value determines the color of the x axis",
-        // @VISIBILITY(1.5)
+        "The color of the x-axis.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo YColorInfo = {
         "YColor",
         "Y Color",
-        "This value determines the color of the y axis",
-        // @VISIBILITY(1.5)
+        "The color of the y-axis.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ZColorInfo = {
         "ZColor",
         "Z Color",
-        "This value determines the color of the z axis",
-        // @VISIBILITY(1.5)
+        "The color of the z-axis.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    // The RenderableCartesianAxes can be used to render the local Cartesian coordinate
+    // system, or reference frame, of another scene graph node. The colors of the axes
+    // can be customized but are per default set to Red, Green and Blue, for the X-, Y-
+    // and Z-axis, respectively.
+    //
+    // To add the axes, create a scene graph node with the RenderableCartesianAxes
+    // renderable and add it as a child to the other scene graph node, i.e. specify the
+    // other node as the Parent of the node with this renderable. Also, the axes have to
+    // be scaled to match the parent object for the axes to be visible in the scene, for
+    // example using a StaticScale.
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];
@@ -70,7 +77,6 @@ namespace {
 
         // [[codegen::verbatim(ZColorInfo.description)]]
         std::optional<glm::vec3> zColor [[codegen::color()]];
-
     };
 #include "renderablecartesianaxes_codegen.cpp"
 } // namespace
@@ -181,13 +187,7 @@ void RenderableCartesianAxes::deinitializeGL() {
 void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->activate();
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-                                          modelTransform;
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data);
 
     _program->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());

@@ -6,7 +6,8 @@ local Layer = {
   Identifier = "ClemUvvis_Utah",
   Name = "Clem Uvvis [Utah]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("clemuvvis_utah.wms"),
+  ZIndex = 20,
+  FilePath = asset.resource("clemuvvis_utah.wms"),
   Settings = {
     Gamma = 1.14,
     Multiplier = 1.4
@@ -33,7 +34,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Clem Uvvis [Utah]",
-  Version = "1.1",
   Description = [[Moon Clementine UVVIS Global Mosaic 118m v2 map of the Moon. This map
     is hosted on the OpenSpace server in Utah]],
   Author = "USGS",

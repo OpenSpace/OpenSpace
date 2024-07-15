@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,101 +38,89 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 9> UniformNames = {
-        "modelViewProjectionTransform", "colorStart", "colorEnd",
-        "activeColor", "targetInFieldOfViewColor", "intersectionStartColor",
-        "intersectionEndColor", "squareColor", "interpolation"
-    };
-
     constexpr int InterpolationSteps = 5;
     constexpr double Epsilon = 1e-4;
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value determines width of the lines connecting the instrument to the "
-        "corners of the field of view",
+        "The width of the lines that connect the instrument to the corners of the field "
+        "of view.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
         "StandOffDistance",
         "Standoff Distance Factor",
-        "This value determines the standoff distance factor which influences the "
-        "distance of the plane to the focus object. If this value is '1', the field of "
-        "view will be rendered exactly on the surface of, for example, a planet. With a "
-        "value of smaller than 1, the field of view will hover of ther surface, thus "
-        "making it more visible",
+        "A standoff distance factor which influences the distance of the plane to the "
+        "focus object. If the value is 1, the field of view will be rendered exactly on "
+        "the surface of, for example, a planet. With a value of smaller than 1, the "
+        "field of view will hover of the surface, thus making it more visible.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlwaysDrawFovInfo = {
         "AlwaysDrawFov",
         "Always Draw FOV",
-        "If this value is enabled, the field of view will always be drawn, regardless of "
-        "whether image information has been loaded or not",
-        // @VISIBILITY(2.5)
+        "If enabled, the field of view will always be drawn, regardless of whether image "
+        "information is currently available or not.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
-        "Colors.DefaultStart",
-        "Start of default color",
-        "This value determines the color of the field of view frustum close to the "
-        "instrument. The final colors are interpolated between this value and the end "
-        "color",
+        "DefaultStart",
+        "Default Start",
+        "The color that is used for the field of view frustum close to the instrument. "
+        "The final colors are interpolated between this value and the end color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DefaultEndColorInfo = {
-        "Colors.DefaultEnd",
-        "End of default color",
-        "This value determines the color of the field of view frustum close to the "
-        "target. The final colors are interpolated between this value and the start "
-        "color",
+    constexpr openspace::properties::Property::PropertyInfo ColorDefaultEndInfo = {
+        "DefaultEnd",
+        "Default End",
+        "The color that is used for the field of view frustum close to the target. The "
+        "final colors are interpolated between this value and the start color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ActiveColorInfo = {
-        "Colors.Active",
-        "Active Color",
-        "This value determines the color that is used when the instrument's field of "
-        "view is active",
+    constexpr openspace::properties::Property::PropertyInfo ColorActiveInfo = {
+        "Active",
+        "Active",
+        "The color that is used when the instrument's field of view is active.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TargetInFovInfo = {
-        "Colors.TargetInFieldOfView",
-        "Target in field-of-view Color",
-        "This value determines the color that is used if the target is inside the field "
-        "of view of the instrument but the instrument is not yet active",
+    constexpr openspace::properties::Property::PropertyInfo ColorTargetInFovInfo = {
+        "TargetInFieldOfView",
+        "Target in Field of View",
+        "The color that is used if the target is inside the field of view of the "
+        "instrument but the instrument is not yet active.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IntersectionStartInfo = {
-        "Colors.IntersectionStart",
-        "Start of the intersection",
-        "This value determines the color that is used close to the instrument if one of "
-        "the field of view corners is intersecting the target object. The final color is "
-        "retrieved by interpolating between this color and the intersection end color",
+    constexpr openspace::properties::Property::PropertyInfo ColorIntersectionStartInfo = {
+        "IntersectionStart",
+        "Intersection Start",
+        "The color that is used close to the instrument if one of the field of view "
+        "corners are intersecting the target object. The final color is an "
+        "interpolation of this color and the intersection end color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IntersectionEndInfo = {
-        "Colors.IntersectionEnd",
-        "End of the intersection",
-        "This value determines the color that is used close to the target if one of the "
-        "field of view corners is intersecting the target object. The final color is "
-        "retrieved by interpolating between this color and the intersection begin color",
+    constexpr openspace::properties::Property::PropertyInfo ColorIntersectionEndInfo = {
+        "IntersectionEnd",
+        "Intersection End",
+        "The color that is used close to the target if one of the field of view corners "
+        "is intersecting the target object. The final color is an interpolation of this "
+        "color and the intersection begin color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SquareColorInfo = {
-        "Colors.Square",
+        "Square",
         "Orthogonal Square",
-        "This value determines the color that is used for the field of view square in "
-        "the case that there is no intersection and that the instrument is not currently "
-        "active",
+        "The color that is used for the field of view square when there is no "
+        "intersection and that the instrument is not currently active.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -157,34 +145,33 @@ namespace {
     // Needs support for std::map first for the frameConversions
     struct [[codegen::Dictionary(RenderableFov)]] Parameters {
         // The SPICE name of the source body for which the field of view should be
-        // rendered
+        // rendered.
         std::string body;
 
         // The SPICE name of the source body's frame in which the field of view should be
-        // rendered
+        // rendered.
         std::string frame;
 
         struct Instrument {
-            // The SPICE name of the instrument that is rendered
+            // The SPICE name of the instrument that is rendered.
             std::string name;
 
             // The aberration correction that is used for this field of view. The default
-            // is 'NONE'
+            // is 'NONE'.
             std::optional<std::string> aberration [[codegen::inlist("NONE",
                 "LT", "LT+S", "CN", "CN+S", "XLT", "XLT+S", "XCN", "XCN+S")]];
         };
-        // A table describing the instrument whose field of view should be rendered
+        // A table describing the instrument whose field of view should be rendered.
         Instrument instrument;
 
-        // If this value is set to 'true', the field of view specified here will always be
-        // rendered, regardless of whether image information is currently available or not
+        // [[codegen::verbatim(AlwaysDrawFovInfo.description)]]
         std::optional<bool> alwaysDrawFov;
 
         // A list of potential targets (specified as SPICE names) that the field of view
-        // should be tested against
+        // should be tested against.
         std::vector<std::string> potentialTargets;
 
-        // A list of frame conversions that should be registered with the SpiceManager
+        // A list of frame conversions that should be registered with the SpiceManager.
         std::optional<std::map<std::string, std::string>> frameConversions;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
@@ -193,10 +180,9 @@ namespace {
         // [[codegen::verbatim(StandoffDistanceInfo.description)]]
         std::optional<float> standOffDistance;
 
-        // If this value is set to 'true' the field-of-views bounds values will be
-        // simplified on load. Bound vectors will be removed if they are the strict linear
-        // interpolation between the two neighboring vectors. This value is disabled on
-        // default
+        // If true, the field of view's bounds values will be simplified on load. Bound
+        // vectors will be removed if they are the strict linear interpolation between the
+        // two neighboring vectors. This value is disabled by default.
         std::optional<bool> simplifyBounds;
     };
 #include "renderablefov_codegen.cpp"
@@ -214,18 +200,24 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _standOffDistance(StandoffDistanceInfo, 0.9999, 0.99, 1.0, 0.000001)
     , _alwaysDrawFov(AlwaysDrawFovInfo, false)
     , _colors({
+        properties::PropertyOwner({"Colors", "Colors"}),
         { DefaultStartColorInfo, glm::vec3(0.4f), glm::vec3(0.f), glm::vec3(1.f) },
-        { DefaultEndColorInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) },
-        { ActiveColorInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f) },
-        { TargetInFovInfo, glm::vec3(0.f, 0.5f, 0.7f), glm::vec3(0.f), glm::vec3(1.f) },
+        { ColorDefaultEndInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) },
+        { ColorActiveInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f) },
         {
-            IntersectionStartInfo,
+            ColorTargetInFovInfo,
+            glm::vec3(0.f, 0.5f, 0.7f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        },
+        {
+            ColorIntersectionStartInfo,
             glm::vec3(1.f, 0.89f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
         },
         {
-            IntersectionEndInfo,
+            ColorIntersectionEndInfo,
             glm::vec3(1.f, 0.29f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
@@ -266,13 +258,31 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
     _simplifyBounds = p.simplifyBounds.value_or(_simplifyBounds);
 
-    addProperty(_colors.defaultStart);
-    addProperty(_colors.defaultEnd);
-    addProperty(_colors.active);
-    addProperty(_colors.targetInFieldOfView);
-    addProperty(_colors.intersectionStart);
-    addProperty(_colors.intersectionEnd);
-    addProperty(_colors.square);
+    _colors.defaultStart.setViewOption(properties::Property::ViewOptions::Color, true);
+    _colors.defaultEnd.setViewOption(properties::Property::ViewOptions::Color, true);
+    _colors.active.setViewOption(properties::Property::ViewOptions::Color, true);
+    _colors.targetInFieldOfView.setViewOption(
+        properties::Property::ViewOptions::Color,
+        true
+    );
+    _colors.intersectionStart.setViewOption(
+        properties::Property::ViewOptions::Color,
+        true
+    );
+    _colors.intersectionEnd.setViewOption(properties::Property::ViewOptions::Color, true);
+    _colors.square.setViewOption(
+        properties::Property::ViewOptions::Color,
+        true
+    );
+    _colors.container.addProperty(_colors.defaultStart);
+    _colors.container.addProperty(_colors.defaultEnd);
+    _colors.container.addProperty(_colors.active);
+    _colors.container.addProperty(_colors.targetInFieldOfView);
+    _colors.container.addProperty(_colors.intersectionStart);
+    _colors.container.addProperty(_colors.intersectionEnd);
+    _colors.container.addProperty(_colors.square);
+
+    addPropertySubOwner(_colors.container);
 }
 
 void RenderableFov::initializeGL() {
@@ -287,7 +297,7 @@ void RenderableFov::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     // Fetch information about the specific instrument
     SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(
@@ -301,14 +311,14 @@ void RenderableFov::initializeGL() {
         res.shape == SpiceManager::FieldOfViewResult::Shape::Rectangle;
     if (!supportedShape) {
         throw ghoul::RuntimeError(
-            fmt::format("'{}' has unsupported shape", _instrument.name),
+            std::format("'{}' has unsupported shape", _instrument.name),
             "RenderableFov"
         );
     }
 
     if (_simplifyBounds) {
         const size_t sizeBefore = res.bounds.size();
-        for (size_t i = 1; i < res.bounds.size() - 1; ++i) {
+        for (size_t i = 1; i < res.bounds.size() - 1; i++) {
             const glm::dvec3& prev = res.bounds[i - 1];
             const glm::dvec3& curr = res.bounds[i];
             const glm::dvec3& next = res.bounds[i + 1];
@@ -329,7 +339,7 @@ void RenderableFov::initializeGL() {
 
         LINFOC(
             _instrument.name,
-            fmt::format("Simplified from {} to {}", sizeBefore, sizeAfter)
+            std::format("Simplified from {} to {}", sizeBefore, sizeAfter)
         );
     }
 
@@ -447,27 +457,33 @@ bool RenderableFov::isReady() const {
 glm::dvec3 RenderableFov::orthogonalProjection(const glm::dvec3& vecFov, double time,
                                                const std::string& target) const
 {
-    const glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
-        target,
-        _instrument.spacecraft,
-        _instrument.referenceFrame,
-        _instrument.aberrationCorrection,
-        time
-    );
-    const glm::dvec3 fov = SpiceManager::ref().frameTransformationMatrix(
-        _instrument.name,
-        _instrument.referenceFrame,
-        time
-    ) * vecFov;
-    const glm::dvec3 p = glm::proj(vecToTarget, fov);
-    return p  * 1000.0; // km -> m
+    if (target.empty()) {
+        constexpr glm::dvec3 Up = glm::dvec3(1.0, 0.0, 0.0);
+        return glm::normalize(glm::cross(Up, vecFov));
+    }
+    else {
+        const glm::dvec3 vecToTarget = SpiceManager::ref().targetPosition(
+            target,
+            _instrument.spacecraft,
+            _instrument.referenceFrame,
+            _instrument.aberrationCorrection,
+            time
+        );
+        const glm::dvec3 fov = SpiceManager::ref().frameTransformationMatrix(
+            _instrument.name,
+            _instrument.referenceFrame,
+            time
+        ) * vecFov;
+        const glm::dvec3 p = glm::proj(vecToTarget, fov);
+        return p * 1000.0; // km -> m
+    }
 }
 
 void RenderableFov::computeIntercepts(double time, const std::string& target,
                                       bool isInFov)
 {
     auto makeBodyFixedReferenceFrame =
-        [&target](std::string ref) -> std::pair<std::string, bool>
+        [&target](const std::string& ref) -> std::pair<std::string, bool>
     {
         const bool convert = (ref.find("IAU_") == std::string::npos);
         if (convert) {
@@ -483,7 +499,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
     // First we fill the field-of-view bounds array by testing each bounds vector against
     // the object. We need to test it against the object (rather than using a fixed
     // distance) as the field of view rendering should stop at the surface
-    for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+    for (size_t i = 0; i < _instrument.bounds.size(); i++) {
         const glm::dvec3& bound = _instrument.bounds[i];
 
         RenderInformation::VBOData& first = _fieldOfViewBounds.data[2 * i];
@@ -509,7 +525,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
         else {
             // The target is in the field of view, but not the entire field of view has to
             // be filled by the target
-            std::pair<std::string, bool> ref = makeBodyFixedReferenceFrame(
+            const std::pair<std::string, bool> ref = makeBodyFixedReferenceFrame(
                 _instrument.referenceFrame
             );
 
@@ -576,7 +592,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
 
     // An early out for when the target is not in field of view
     if (!isInFov) {
-        for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+        for (size_t i = 0; i < _instrument.bounds.size(); i++) {
             // If none of the points are able to intersect with the target, we can just
             // copy the values from the field-of-view boundary. So we take each second
             // item (the first one is (0,0,0)) and replicate it 'InterpolationSteps' times
@@ -585,7 +601,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
     }
     else {
         // At least one point will intersect
-        for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+        for (size_t i = 0; i < _instrument.bounds.size(); i++) {
             // Wrap around the array index to 0
             const size_t j = (i == _instrument.bounds.size() - 1) ? 0 : i + 1;
 
@@ -657,7 +673,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
 
 #if 0 // DEBUG_THIS
     // At least one point will intersect
-    for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
+    for (size_t i = 0; i < _instrument.bounds.size(); i++) {
         // Wrap around the array index to 0
         const size_t j = (i == _instrument.bounds.size() - 1) ? 0 : i + 1;
 
@@ -720,7 +736,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                     copyFieldOfViewValues(i, p2, indexForBounds(j));
 
                     // Are recompute the intersecting ones
-                    for (size_t k = 0; k <= (p2 - p1); ++k) {
+                    for (size_t k = 0; k <= (p2 - p1); k++) {
                         const double t = t1 + k * (t2 - t1);
                         const glm::dvec3 interpolated = glm::mix(iBound, jBound, t);
                         const glm::vec3 icpt = interceptVector(interpolated);
@@ -758,19 +774,16 @@ void RenderableFov::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
     // Model transform and view transform needs to be in double precision
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::mat4 modelViewProjectionTransform =
+        calcModelViewProjectionTransform(data);
 
-    glm::mat4 modelViewProjectionTransform =
-        data.camera.projectionMatrix() *
-        glm::mat4(data.camera.combinedViewMatrix() * modelTransform);
+    _program->setUniform(
+        _uniformCache.modelViewProjectionTransform,
+        modelViewProjectionTransform
+    );
 
-    _program->setUniform(_uniformCache.modelViewProjection, modelViewProjectionTransform);
-
-    _program->setUniform(_uniformCache.defaultColorStart, _colors.defaultStart);
-    _program->setUniform(_uniformCache.defaultColorEnd, _colors.defaultEnd);
+    _program->setUniform(_uniformCache.colorStart, _colors.defaultStart);
+    _program->setUniform(_uniformCache.colorEnd, _colors.defaultEnd);
     _program->setUniform(_uniformCache.activeColor, _colors.active);
     _program->setUniform(
         _uniformCache.targetInFieldOfViewColor,
@@ -825,7 +838,7 @@ void RenderableFov::update(const UpdateData& data) {
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 
@@ -835,7 +848,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
 
     // First, for all potential targets, check whether they are in the field of view
     for (const std::string& pt : _instrument.potentialTargets) {
-        bool inFOV = SpiceManager::ref().isTargetInFieldOfView(
+        const bool inFOV = SpiceManager::ref().isTargetInFieldOfView(
             pt,
             _instrument.spacecraft,
             global::moduleEngine->module<SpacecraftInstrumentsModule>()->frameFromBody(
@@ -855,7 +868,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
 
     // If none of the targets is in field of view, either use the last target or if there
     // hasn't been one, find the closest target
-    if (_previousTarget.empty()) {
+    if (_previousTarget.empty() && !_instrument.potentialTargets.empty()) {
         // If we reached this, we haven't found a target in field of view and we don't
         // have a previously selected target, so the next best heuristic for a target is
         // the closest one
@@ -865,7 +878,7 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
             _instrument.potentialTargets.end(),
             distances.begin(),
             [&i = _instrument, &t = time] (const std::string& pt) {
-                double lt;
+                double lt = 0.0;
                 const glm::dvec3 p = SpiceManager::ref().targetPosition(
                     pt,
                     i.spacecraft,

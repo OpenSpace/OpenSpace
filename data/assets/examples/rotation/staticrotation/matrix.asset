@@ -1,0 +1,33 @@
+-- Matrix
+-- This asset creates a SceneGraphNode that only displays coordinate axes. The rotation of
+-- the coordinate axes are determined by a constant and unchanging static rotation that is
+-- provided by a 3-by-3 rotation matrix in column-major order.
+
+local Node = {
+  Identifier = "StaticRotation_Example_Matrix",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = {
+        -0.9999987, -0.0015927, 0.0000000,
+         0.0015927, -0.9999987, 0.0000000,
+         0.0000000,  0.0000000, 1.0000000
+      }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "StaticRotation - Matrix",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

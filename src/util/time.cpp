@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,10 +38,10 @@
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <cctype>
 #include <ctime>
 #include <mutex>
@@ -60,6 +60,17 @@ double Time::convertTime(const char* time) {
     return SpiceManager::ref().ephemerisTimeFromDate(time);
 }
 
+std::string Time::currentWallTime() {
+    const std::time_t t = std::time(nullptr);
+    std::tm* utcTime = std::gmtime(&t);
+    const std::string time = std::format(
+        "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
+        utcTime->tm_year + 1900, utcTime->tm_mon + 1, utcTime->tm_mday,
+        utcTime->tm_hour, utcTime->tm_min, utcTime->tm_sec
+    );
+    return time;
+}
+
 Time::Time(double secondsJ2000) : _time(secondsJ2000) {}
 
 Time::Time(const std::string& time) :
@@ -67,28 +78,27 @@ Time::Time(const std::string& time) :
 {}
 
 Time Time::now() {
-    Time now;
-    time_t secondsSince1970;
-    secondsSince1970 = time(nullptr);
+    const time_t secondsSince1970 = time(nullptr);
 
     const time_t secondsInAYear = static_cast<time_t>(365.25 * 24 * 60 * 60);
     const double secondsSince2000 = static_cast<double>(
         secondsSince1970 - 30 * secondsInAYear
     );
+    Time now;
     now.setTime(secondsSince2000);
     return now;
 }
 
-void Time::setTime(double value) {
-    _time = value;
+void Time::setTime(double j2000Seconds) {
+    _time = j2000Seconds;
 }
 
 double Time::j2000Seconds() const {
     return _time;
 }
 
-double Time::advanceTime(double delta) {
-    _time += delta;
+double Time::advanceTime(double deltaTime) {
+    _time += deltaTime;
     return _time;
 }
 
@@ -132,14 +142,57 @@ void Time::ISO8601(char* buffer) const {
     SpiceManager::ref().dateFromEphemerisTime(_time, buffer, S, Format);
 }
 
-void Time::setTimeRelativeFromProfile(const std::string& setTime) {
-    std::string t = currentWallTime();
-    std::variant<std::string, double> t2 = advancedTime(t, setTime);
-    ::setTime(std::get<std::string>(t2));
-}
+std::string Time::advancedTime(const std::string& base, std::string change) {
+    const double j2000Seconds = Time::convertTime(base);
 
-void Time::setTimeAbsoluteFromProfile(const std::string& setTime) {
-    ::setTime(setTime);
+    double dt = 0.0;
+    if (change.empty()) {
+        throw ghoul::RuntimeError("Modifier string must not be empty");
+    }
+    ghoul::trimWhitespace(change);
+    bool isNegative = false;
+    if (change[0] == '-') {
+        isNegative = true;
+        change = change.substr(1);
+    }
+
+    auto it = std::find_if(
+        change.begin(), change.end(),
+        [](unsigned char c) {
+            const bool digit = std::isdigit(c) != 0;
+            const bool isDot = c == '.';
+            return !digit && !isDot;
+        }
+    );
+
+    try {
+        const double value = std::stod(std::string(change.begin(), it));
+        const std::string_view uName = std::string_view(it, change.end());
+
+        TimeUnit unit = TimeUnit::Second;
+        if (uName == "s") { unit = TimeUnit::Second; }
+        else if (uName == "m") { unit = TimeUnit::Minute; }
+        else if (uName == "h") { unit = TimeUnit::Hour; }
+        else if (uName == "d") { unit = TimeUnit::Day; }
+        else if (uName == "M") { unit = TimeUnit::Month; }
+        else if (uName == "y") { unit = TimeUnit::Year; }
+        else {
+            throw ghoul::RuntimeError(std::format("Unknown unit '{}'", uName));
+        }
+
+        dt = openspace::convertTime(value, unit, TimeUnit::Second);
+        if (isNegative) {
+            dt *= -1.0;
+        }
+    }
+    catch (...) {
+        throw ghoul::RuntimeError(std::format(
+            "Error parsing relative time offset '{}'", change
+        ));
+    }
+
+    const std::string_view ret = Time(j2000Seconds + dt).ISO8601();
+    return std::string(ret);
 }
 
 scripting::LuaLibrary Time::luaLibrary() {
@@ -159,6 +212,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             codegen::lua::PauseToggleViaKeyboard,
             codegen::lua::SetPause,
             codegen::lua::InterpolatePause,
+            codegen::lua::IsPaused,
             codegen::lua::SetTime,
             codegen::lua::InterpolateTime,
             codegen::lua::InterpolateTimeRelative,
@@ -169,6 +223,9 @@ scripting::LuaLibrary Time::luaLibrary() {
             codegen::lua::CurrentApplicationTime,
             codegen::lua::AdvancedTime,
             codegen::lua::ConvertTime,
+            codegen::lua::Duration,
+            codegen::lua::SecondsPerDay,
+            codegen::lua::SecondsPerYear
         }
     };
 }

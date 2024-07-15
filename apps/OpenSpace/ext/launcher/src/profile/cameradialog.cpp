@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,19 @@
 #include "profile/cameradialog.h"
 
 #include "profile/line.h"
+#include <openspace/navigation/navigationstate.h>
 #include <QDialogButtonBox>
 #include <QDoubleValidator>
+#include <QFileDialog>
 #include <QFrame>
 #include <QGridLayout>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
-#include <QTabWidget>
 #include <QPlainTextEdit>
+#include <QPushButton>
+#include <QTabWidget>
+#include <fstream>
 
 namespace {
     constexpr int CameraTypeNode = 0;
@@ -44,29 +48,23 @@ namespace {
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     bool inNumericalRange(QLineEdit* le, float min, float max) {
-        QString s = le->text();
+        const QString s = le->text();
         bool validConversion = false;
-        float value = s.toFloat(&validConversion);
+        const float value = s.toFloat(&validConversion);
         if (!validConversion) {
             return false;
         }
-        if (value < min || value > max) {
-            return false;
-        }
-        return true;
+        return (value >= min) && (value <= max);
     }
 
     bool isNumericalLargerThan(QLineEdit* le, float limit) {
-        QString s = le->text();
+        const QString s = le->text();
         bool validConversion = false;
-        float value = s.toFloat(&validConversion);
+        const float value = s.toFloat(&validConversion);
         if (!validConversion) {
             return false;
         }
-        if (value > limit) {
-            return true;
-        }
-        return false;
+        return value > limit;
     }
 } // namespace
 
@@ -345,6 +343,45 @@ QWidget* CameraDialog::createNavStateWidget() {
         mainLayout->addWidget(box);
     }
 
+    QPushButton* loadFile = new QPushButton("Load state from file");
+    loadFile->setIcon(loadFile->style()->standardIcon(QStyle::SP_FileIcon));
+    connect(
+        loadFile, &QPushButton::clicked,
+        [this]() {
+            const QString file = QFileDialog::getOpenFileName(
+                this,
+                "Select navigate state file"
+            );
+
+            std::ifstream f = std::ifstream(file.toStdString());
+            const std::string contents = std::string(
+                std::istreambuf_iterator<char>(f),
+                std::istreambuf_iterator<char>()
+            );
+            const nlohmann::json json = nlohmann::json::parse(contents);
+
+            using namespace openspace::interaction;
+            NavigationState state = NavigationState(json);
+
+            _navState.anchor->setText(QString::fromStdString(state.anchor));
+            _navState.aim->setText(QString::fromStdString(state.aim));
+            _navState.refFrame->setText(QString::fromStdString(state.referenceFrame));
+            _navState.positionX->setText(QString::number(state.position.x));
+            _navState.positionY->setText(QString::number(state.position.y));
+            _navState.positionZ->setText(QString::number(state.position.z));
+
+            if (state.up.has_value()) {
+                _navState.upX->setText(QString::number(state.up->x));
+                _navState.upY->setText(QString::number(state.up->y));
+                _navState.upZ->setText(QString::number(state.up->z));
+            }
+
+            _navState.yaw->setText(QString::number(state.yaw));
+            _navState.pitch->setText(QString::number(state.pitch));
+        }
+    );
+    mainLayout->addWidget(loadFile);
+
     return tab;
 }
 
@@ -487,7 +524,7 @@ bool CameraDialog::areRequiredFormsFilledAndValid() {
     return allFormsOk;
 }
 
-void CameraDialog::addErrorMsg(QString errorDescription) {
+void CameraDialog::addErrorMsg(const QString& errorDescription) {
     QString contents = _errorMsg->text();
     if (!contents.isEmpty()) {
         contents += ", ";
@@ -521,7 +558,7 @@ void CameraDialog::approved() {
             !_navState.upY->text().isEmpty() &&
             !_navState.upZ->text().isEmpty())
         {
-            glm::dvec3 u = glm::dvec3(
+            const glm::dvec3 u = glm::dvec3(
                 _navState.upX->text().toDouble(),
                 _navState.upY->text().toDouble(),
                 _navState.upZ->text().toDouble()

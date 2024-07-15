@@ -1,10 +1,11 @@
 asset.require("./trail")
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
-local labelsPath = asset.syncedResource({
+local labelsPath = asset.resource({
   Name = "Saturn Labels",
   Type = "HttpSynchronization",
   Identifier = "saturn_labels",
@@ -18,20 +19,18 @@ local Dione = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DIONE",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels.ID.Dione,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_ENCELADUS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Dione,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 561400,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "dione.labels",
@@ -56,8 +55,8 @@ local DioneLabel = {
   Identifier = "DioneLabel",
   Parent = Dione.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Dione",
     FontSize = 70.0,
     Size = 6.0,
@@ -79,8 +78,6 @@ local DioneLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat441)
-
   openspace.addSceneGraphNode(Dione)
   openspace.addSceneGraphNode(DioneLabel)
 end)
@@ -88,8 +85,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(DioneLabel)
   openspace.removeSceneGraphNode(Dione)
-
-  openspace.spice.unloadKernel(kernel.sat441)
 end)
 
 asset.export(Dione)
@@ -99,7 +94,6 @@ asset.export(DioneLabel)
 
 asset.meta = {
   Name = "Dione",
-  Version = "1.0",
   Description = "Dione globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

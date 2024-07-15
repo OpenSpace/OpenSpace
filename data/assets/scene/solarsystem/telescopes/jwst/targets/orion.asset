@@ -33,7 +33,6 @@ asset.export(OrionImage)
 
 asset.meta = {
   Name = "Orion Nebula Image",
-  Version = "1.0",
   Description = "Screenspace image of the Orion Nebula",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

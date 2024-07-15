@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,6 +73,8 @@ struct Event {
         FocusNodeChanged,
         LayerAdded,
         LayerRemoved,
+        ActionAdded,
+        ActionRemoved,
         SessionRecordingPlayback,
         PointSpacecraft,
         RenderableEnabled,
@@ -80,7 +82,9 @@ struct Event {
         CameraPathStarted,
         CameraPathFinished,
         CameraMovedPosition,
-        Custom
+        ScheduledScriptExecuted,
+        Custom,
+        Last // sentinel value
     };
     constexpr explicit Event(Type type_) : type(type_) {}
 
@@ -111,7 +115,7 @@ void logAllEvents(const Event* e);
 //
 
 /**
- * This event is created whenever a new scene graph node is added to the system.  By the
+ * This event is created whenever a new scene graph node is added to the system. By the
  * time this event is signalled, the scene graph node has already been created and added
  * to the scene.
  */
@@ -121,16 +125,16 @@ struct EventSceneGraphNodeAdded : public Event {
     /**
      * Creates an instance of an EventSceneGraphNodeAdded event.
      *
-     * \param node_ The identifier of the node that was added
+     * \param node_ A pointer to the node that was added
      *
      * \pre node_ must not be nullptr
      */
     explicit EventSceneGraphNodeAdded(const SceneGraphNode* node_);
-    const tstring node;
+    const tstring uri;
 };
 
 /**
- * This event is created whenever a scene graph node was removed.  By the time this event
+ * This event is created whenever a scene graph node was removed. By the time this event
  * is signalled, the scene graph node has already been removed.
  */
 struct EventSceneGraphNodeRemoved : public Event {
@@ -139,12 +143,12 @@ struct EventSceneGraphNodeRemoved : public Event {
     /**
      * Creates an instance of an EventSceneGraphNodeRemoved event.
      *
-     * \param node_ The identifier of the node that was removed
+     * \param node_ A pointer to the node that was removed
      *
      * \pre node_ must not be nullptr
      */
     explicit EventSceneGraphNodeRemoved(const SceneGraphNode* node_);
-    const tstring node;
+    const tstring uri;
 };
 
 /**
@@ -164,7 +168,7 @@ struct EventParallelConnection : public Event {
     /**
      * Creates an instance of an EventParallelConnection event.
      *
-     * \param state_ The new state of the parallel connection system;  is one of
+     * \param state_ The new state of the parallel connection system; is one of
      *        `Established`, `Lost`, `HostshipGained`, or `HostshipLost`
      */
     explicit EventParallelConnection(State state_);
@@ -201,8 +205,8 @@ struct EventApplicationShutdown : public Event {
     /**
      * Creates an instance of an EventApplicationShutdown event.
      *
-     * \param state_ The next state of the application shutdown sequence;  is one of
-     *        `Started`, `Aborted`,  or `Finished`
+     * \param state_ The next state of the application shutdown sequence; is one of
+     *        `Started`, `Aborted`, or `Finished`
      */
     explicit EventApplicationShutdown(State state_);
     const State state;
@@ -210,7 +214,7 @@ struct EventApplicationShutdown : public Event {
 
 /**
  * This event is created when a new screenspace renderable has been created.  By the time
- * this event is craeted, the screenspace renderable is already registered and available.
+ * this event is created, the screenspace renderable is already registered and available.
  */
 struct EventScreenSpaceRenderableAdded : public Event {
     static constexpr Type Type = Event::Type::ScreenSpaceRenderableAdded;
@@ -223,13 +227,13 @@ struct EventScreenSpaceRenderableAdded : public Event {
      * \pre renderable_ must not be nullptr
      */
     explicit EventScreenSpaceRenderableAdded(const ScreenSpaceRenderable* renderable_);
-    const tstring renderable;
+    const tstring uri;
 };
 
 /**
  * This event is created when a screenspace renderable has been removed from the system.
  * When this event is created, the screenspace renderable has already been removed and is
- * no longer available
+ * no longer available.
  */
 struct EventScreenSpaceRenderableRemoved : public Event {
     static constexpr Type Type = Event::Type::ScreenSpaceRenderableRemoved;
@@ -238,9 +242,11 @@ struct EventScreenSpaceRenderableRemoved : public Event {
      * Creates an instance of an EventScreenSpaceRenderableRemoved event.
      *
      * \param renderable_ The the new screenspace renderable that was removed
+     *
+     * \pre renderable_ must not be nullptr
      */
     explicit EventScreenSpaceRenderableRemoved(const ScreenSpaceRenderable* renderable_);
-    const tstring renderable;
+    const tstring uri;
 };
 
 /**
@@ -248,18 +254,18 @@ struct EventScreenSpaceRenderableRemoved : public Event {
  * distances. Right now, only movement relative to camera's focus node is considered.
  * Each scene graph node has an interaction sphere radius that serves as the reference
  * distance for all spheres.
-```
-Diagram of events for a camera moving from right-to-left. Interaction sphere is 'O' in
-middle, and ')' are spherical boundaries. The approach factor, reach factor, and
-interaction sphere radius are all taken from the current focus node.
-
-|<------------------->|  Approach factor * Interaction sphere
-             |<------>|  Reach Factor * Interaction sphere
-
-(                       (           O          )                       )
-^                       ^                      ^                       ^
-Exiting                 Receding               Reaching                Approaching
-```
+ * ```
+ * Diagram of events for a camera moving from right-to-left. Interaction sphere is 'O' in
+ * middle, and ')' are spherical boundaries. The approach factor, reach factor, and
+ * interaction sphere radius are all taken from the current focus node.
+ *
+ * |<------------------->|  Approach factor * Interaction sphere
+ *              |<------>|  Reach Factor * Interaction sphere
+ *
+ * (                       (           O          )                       )
+ * ^                       ^                      ^                       ^
+ * Exiting                 Receding               Reaching                Approaching
+ * ```
  */
 struct EventCameraFocusTransition : public Event {
     static constexpr Type Type = Event::Type::CameraFocusTransition;
@@ -347,7 +353,7 @@ struct EventPlanetEclipsed : public Event {
 
 /**
  * This event is created when the interpolation of a property value is finished. If the
- * interpolation time of a property change is 0s, this event is not fired
+ * interpolation time of a property change is 0s, this event is not fired.
  */
 struct EventInterpolationFinished : public Event {
     static constexpr Type Type = Event::Type::InterpolationFinished;
@@ -395,20 +401,13 @@ struct EventLayerAdded : public Event {
     /**
      * Creates an instance of an EventLayerAdded event.
      *
-     * \param node_ The identifier of the globe to which the layer is added
-     * \param layerGroup_ The identifier of the layer group to which the layer is added
-     * \param layer_ The identifier of the layer that was added
+     * \param uri_ A string with the uri of the layer that was added
      *
-     * \pre node_ must not be empty
-     * \pre layerGroup_ must not be empty
-     * \pre layer_ must not be empty
+     * \pre uri_ must be a valid uri
      */
-    explicit EventLayerAdded(std::string_view node_, std::string_view layerGroup_,
-        std::string_view layer_);
+    explicit EventLayerAdded(std::string_view uri_);
 
-    const tstring node;
-    const tstring layerGroup;
-    const tstring layer;
+    const tstring uri;
 };
 
 /**
@@ -420,20 +419,49 @@ struct EventLayerRemoved : public Event {
     /**
      * Creates an instance of an EventLayerRemoved event.
      *
-     * \param node_ The identifier of the globe to which the layer is removed
-     * \param layerGroup_ The identifier of the layer group to which the layer is removed
-     * \param layer_ The identifier of the layer that was removed
+     * \param uri_ The uri of the layer that was removed
      *
-     * \pre node_ must not be empty
-     * \pre layerGroup_ must not be empty
-     * \pre layer_ must not be empty
+     * \pre uri_ must be a valid uri
      */
-    explicit EventLayerRemoved(std::string_view node_, std::string_view layerGroup_,
-        std::string_view layer_);
+    explicit EventLayerRemoved(std::string_view uri_);
 
-    const tstring node;
-    const tstring layerGroup;
-    const tstring layer;
+    const tstring uri;
+};
+
+/**
+ * This event is created when an action is added.
+ */
+struct EventActionAdded : public Event {
+    static constexpr Type Type = Event::Type::ActionAdded;
+
+    /**
+     * Creates an instance of an EventActionAdded event.
+     *
+     * \param uri_ A string with the uri of the action that was added
+     *
+     * \pre uri_ must be a valid uri
+     */
+    explicit EventActionAdded(std::string_view uri_);
+
+    const tstring uri;
+};
+
+/**
+ * This event is created when an action is removed.
+ */
+struct EventActionRemoved : public Event {
+    static constexpr Type Type = Event::Type::ActionRemoved;
+
+    /**
+     * Creates an instance of an EventActionRemoved event.
+     *
+     * \param uri_ The uri of the action that was removed
+     *
+     * \pre uri_ must be a valid uri
+     */
+    explicit EventActionRemoved(std::string_view uri_);
+
+    const tstring uri;
 };
 
 /**
@@ -562,7 +590,7 @@ struct EventCameraPathFinished : public Event {
 };
 
 /**
- * This event is created when the a camera moves location
+ * This event is created when the a camera moves location.
  */
 struct EventCameraMovedPosition : public Event {
     static constexpr Type Type = Event::Type::CameraMovedPosition;
@@ -571,6 +599,20 @@ struct EventCameraMovedPosition : public Event {
      * Creates an instance of an EventCameraMovedPosition event.
      */
     EventCameraMovedPosition();
+};
+
+/**
+ * This event is created when a scheduled script is executed.
+ */
+struct EventScheduledScriptExecuted : public Event {
+    static constexpr Type Type = Event::Type::ScheduledScriptExecuted;
+
+    /**
+     * Creates an instance of an ScheduledScriptExecuted event.
+     */
+    EventScheduledScriptExecuted(std::string_view script_);
+
+    const tstring script;
 };
 
 /**

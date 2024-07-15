@@ -1,0 +1,18 @@
+{
+  "profile": "juno",
+  "commands": [
+    { "type": "time", "value": "2016-07-01T00:00:01.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Juno",
+        "pitch": -0.0165756,
+        "position": [ -22.49081, 1.191533, 26.35740 ],
+        "up": [ 0.0288083, 0.999373, -0.0205962 ],
+        "yaw": 0.152454
+      }
+    },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

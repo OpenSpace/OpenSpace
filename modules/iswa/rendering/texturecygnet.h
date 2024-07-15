@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,10 +30,9 @@
 namespace openspace {
 
 /**
- * This class exist to abstract away the loading of images
- * from iSWA and updating of the textures for child geometries.
- * The class specifies the minimum interface that child classes
- * needs to implement.
+ * This class exist to abstract away the loading of images from iSWA and updating of the
+ * textures for child geometries. The class specifies the minimum interface that child
+ * classes needs to implement.
  */
 class TextureCygnet : public IswaCygnet {
 public:

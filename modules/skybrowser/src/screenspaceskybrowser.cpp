@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ namespace {
         "Quality of Texture",
         "A parameter to set the resolution of the texture. 1 is full resolution and "
         "slower frame rate. Lower value means lower resolution of texture and faster "
-        "frame rate",
+        "frame rate.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -53,15 +53,14 @@ namespace {
         "Display a copy of this sky browser at an additional position. This copy will "
         "not be interactive. The position is in RAE (Radius, Azimuth, Elevation) "
         "coordinates or Cartesian, depending on if the browser uses RAE or Cartesian "
-        "coordinates",
-        // @VISIBILITY(2.67)
+        "coordinates.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
         "ShowDisplayCopy",
         "Show Display Copy",
-        "Show the display copy",
+        "Show the display copy.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -69,7 +68,7 @@ namespace {
         "IsHidden",
         "Is Hidden",
         "If checked, the browser will be not be displayed. If it is not checked, it will "
-        "be",
+        "be.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -78,7 +77,6 @@ namespace {
         "Point Spacecraft",
         "If checked, spacecrafts will point towards the coordinate of an image upon "
         "selection.",
-        // @VISIBILITY(?)
         openspace::properties::Property::Visibility::User
     };
 
@@ -90,6 +88,13 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // This `ScreenSpaceRenderable` is used to display a screen space window showing the
+    // integrated World Wide Telescope view. The view will be dynamically updated when
+    // interacting with the view or with images in the SkyBrowser panel.
+    //
+    // A `ScreenSpaceSkyBrowser` should not be created from a `.asset` file, but is rather
+    // created from interacting with the SkyBrowser user interface panel. If created in
+    // an asset, it requires some extra scripting to work with the SkyBrowser feature.
     struct [[codegen::Dictionary(ScreenSpaceSkyBrowser)]] Parameters {
         // [[codegen::verbatim(TextureQualityInfo.description)]]
         std::optional<float> textureQuality;
@@ -113,11 +118,10 @@ namespace {
         std::uniform_real_distribution<float> hue(0.f, 360.f);
 
         // Value in saturation are in the unit percent [0,1]
-        float value = 0.9f; // Brightness
-        float saturation = 0.5f;
-        glm::vec3 hsvColor = glm::vec3(hue(rd), saturation, value);
-        glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
-
+        constexpr float Value = 0.9f; // Brightness
+        constexpr float Saturation = 0.5f;
+        const glm::vec3 hsvColor = glm::vec3(hue(rd), Saturation, Value);
+        const glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
         return rgbColor;
     }
 } // namespace
@@ -140,6 +144,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
 
     // Handle target dimension property
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
     _textureQuality = p.textureQuality.value_or(_textureQuality);
     _isHidden = p.isHidden.value_or(_isHidden);
     _isPointingSpacecraft = p.pointSpacecraft.value_or(_isPointingSpacecraft);
@@ -159,7 +164,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     _textureQuality.onChange([this]() { _isDimensionsDirty = true; });
 
     if (global::windowDelegate->isMaster()) {
-        _borderColor = randomBorderColor();
+        _wwtBorderColor = randomBorderColor();
     }
 
     _useRadiusAzimuthElevation.onChange(
@@ -194,16 +199,16 @@ bool ScreenSpaceSkyBrowser::initializeGL() {
 
 glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(const glm::dvec2& drag) {
     // Fine tuning of target
-    glm::dvec2 wwtFov = fieldsOfView();
-    glm::dvec2 openSpaceFOV = skybrowser::fovWindow();
+    const glm::dvec2 wwtFov = fieldsOfView();
+    const glm::dvec2 openSpaceFOV = skybrowser::fovWindow();
 
-    glm::dvec2 browserDim = screenSpaceDimensions();
-    glm::dvec2 angleResult = wwtFov * (drag / browserDim);
-    glm::dvec2 resultRelativeOs = angleResult / openSpaceFOV;
+    const glm::dvec2 browserDim = screenSpaceDimensions();
+    const glm::dvec2 angleResult = wwtFov * (drag / browserDim);
+    const glm::dvec2 resultRelativeOs = angleResult / openSpaceFOV;
 
     // Convert to screen space coordinate system
-    glm::dvec2 convertToScreenSpace = glm::dvec2((2.f * skybrowser::windowRatio()), 2.f);
-    glm::dvec2 result = -convertToScreenSpace * resultRelativeOs;
+    const glm::dvec2 screenSpace = glm::dvec2((2.f * skybrowser::windowRatio()), 2.f);
+    const glm::dvec2 result = -screenSpace * resultRelativeOs;
     return result;
 }
 
@@ -221,7 +226,7 @@ bool ScreenSpaceSkyBrowser::shouldUpdateWhileTargetAnimates() const {
 
 void ScreenSpaceSkyBrowser::setIdInBrowser() const {
     int currentNode = global::windowDelegate->currentNode();
-    WwtCommunicator::setIdInBrowser(fmt::format("{}_{}", identifier(), currentNode));
+    WwtCommunicator::setIdInBrowser(std::format("{}_{}", identifier(), currentNode));
 }
 
 void ScreenSpaceSkyBrowser::setIsInitialized(bool isInitialized) {
@@ -235,9 +240,9 @@ void ScreenSpaceSkyBrowser::setPointSpaceCraft(bool shouldPoint) {
 void ScreenSpaceSkyBrowser::updateTextureResolution() {
     // Check if texture quality has changed. If it has, adjust accordingly
     if (std::abs(_textureQuality.value() - _lastTextureQuality) > glm::epsilon<float>()) {
-        float diffTextureQuality = _textureQuality / _lastTextureQuality;
-        glm::vec2 newRes = glm::vec2(_browserDimensions.value()) * diffTextureQuality;
-        _browserDimensions = glm::ivec2(newRes);
+        const float diffTextureQuality = _textureQuality / _lastTextureQuality;
+        const glm::vec2 res = glm::vec2(_browserDimensions.value()) * diffTextureQuality;
+        _browserDimensions = glm::ivec2(res);
         _lastTextureQuality = _textureQuality.value();
     }
     _objectSize = glm::ivec3(_browserDimensions.value(), 1);
@@ -248,12 +253,14 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
 }
 
 void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
-    size_t start = _displayCopies.size();
+    const size_t start = _displayCopies.size();
     for (int i = 0; i < nCopies; i++) {
         openspace::properties::Property::PropertyInfo info = DisplayCopyInfo;
-        float azimuth = i * glm::two_pi<float>() / nCopies;
-        glm::vec3 position = raePosition + glm::vec3(0.f, azimuth, 0.f);
-        std::string idDisplayCopy = "DisplayCopy" + std::to_string(start + i);
+        const float azimuth = i * glm::two_pi<float>() / nCopies;
+        const glm::vec3 position = raePosition + glm::vec3(0.f, azimuth, 0.f);
+        // @TODO(abock) I think the lifetime for this string is a bit tricky. I don't
+        // think it will live long enough to be actually usable
+        const std::string idDisplayCopy = "DisplayCopy" + std::to_string(start + i);
         info.identifier = idDisplayCopy.c_str();
         _displayCopies.push_back(
             std::make_unique<properties::Vec3Property>(
@@ -264,13 +271,12 @@ void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCo
             )
         );
         openspace::properties::Property::PropertyInfo showInfo = DisplayCopyShowInfo;
-        std::string idDisplayCopyVisible = "ShowDisplayCopy" + std::to_string(start + i);
-        showInfo.identifier = idDisplayCopyVisible.c_str();
+        // @TODO(abock) I think the lifetime for this string is a bit tricky. I don't
+        // think it will live long enough to be actually usable
+        const std::string idDispCpyVis = "ShowDisplayCopy" + std::to_string(start + i);
+        showInfo.identifier = idDispCpyVis.c_str();
         _showDisplayCopies.push_back(
-            std::make_unique<properties::BoolProperty>(
-                showInfo,
-                true
-                )
+            std::make_unique<properties::BoolProperty>(showInfo, true)
         );
         addProperty(_displayCopies.back().get());
         addProperty(_showDisplayCopies.back().get());
@@ -290,9 +296,9 @@ std::vector<std::pair<std::string, glm::dvec3>>
 ScreenSpaceSkyBrowser::displayCopies() const
 {
     std::vector<std::pair<std::string, glm::dvec3>> vec;
-    using vec3Property = std::unique_ptr<properties::Vec3Property>;
-    for (const vec3Property& copy : _displayCopies) {
-        vec.push_back({ copy->identifier(), copy->value() });
+    vec.reserve(_displayCopies.size());
+    for (const std::unique_ptr<properties::Vec3Property>& copy : _displayCopies) {
+        vec.emplace_back(copy->identifier(), copy->value());
     }
     return vec;
 }
@@ -301,9 +307,9 @@ std::vector<std::pair<std::string, bool>>
 ScreenSpaceSkyBrowser::showDisplayCopies() const
 {
     std::vector<std::pair<std::string, bool>> vec;
-    using boolProperty = std::unique_ptr<properties::BoolProperty>;
-    for (const boolProperty& copy : _showDisplayCopies) {
-        vec.push_back({copy->identifier(), copy->value()});
+    vec.reserve(_showDisplayCopies.size());
+    for (const std::unique_ptr<properties::BoolProperty>& copy : _showDisplayCopies) {
+        vec.emplace_back(copy->identifier(), copy->value());
     }
     return vec;
 }
@@ -314,16 +320,16 @@ bool ScreenSpaceSkyBrowser::deinitializeGL() {
     return true;
 }
 
-void ScreenSpaceSkyBrowser::render() {
+void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
     WwtCommunicator::render();
 
     if (!_isHidden) {
-        draw(
+        const glm::mat4 mat =
             globalRotationMatrix() *
             translationMatrix() *
             localRotationMatrix() *
-            scaleMatrix()
-        );
+            scaleMatrix();
+        draw(mat, renderData);
     }
 
     // Render the display copies
@@ -342,12 +348,12 @@ void ScreenSpaceSkyBrowser::render() {
                 ));
             }
 
-            draw(
+            const glm::mat4 mat =
                 globalRotationMatrix() *
                 glm::translate(glm::mat4(1.f), coordinates) *
                 localRotation *
-                scaleMatrix()
-            );
+                scaleMatrix();
+            draw(mat, renderData);
         }
     }
 }
@@ -375,10 +381,12 @@ void ScreenSpaceSkyBrowser::update() {
 
 double ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
     // Make scroll more sensitive the smaller the FOV
-    double x = _verticalFov;
-    double zoomFactor = atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
-    double zoom = scroll > 0.0 ? zoomFactor : -zoomFactor;
+    const double x = _verticalFov;
+    const double zoomFactor =
+        atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
+    const double zoom = scroll > 0.0 ? zoomFactor : -zoomFactor;
     _verticalFov = std::clamp(_verticalFov + zoom, 0.0, 70.0);
+
     return _verticalFov;
 }
 

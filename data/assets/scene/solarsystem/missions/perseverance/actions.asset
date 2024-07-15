@@ -20,7 +20,7 @@ local Setup = {
   ]],
   Documentation = "Sets time and layers for Perseverance landing",
   GuiPath = "/Missions/Perseverance",
-  isLocal = false
+  IsLocal = false
 }
 
 
@@ -38,7 +38,6 @@ asset.export("Setup", Setup.Identifier)
 
 asset.meta = {
   Name = "Perseverance Actions",
-  Version = "1.0",
   Description = "Actions related to the Perseverance mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

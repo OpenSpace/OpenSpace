@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,14 +45,13 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
+class Camera;
 struct RenderData;
-struct UpdateData;
 struct RendererTasks;
 struct SurfacePositionHandle;
+struct UpdateData;
 
 namespace documentation { struct Documentation; }
-
-class Camera;
 
 // Unfortunately we can't move this struct into the Renderable until
 // https://bugs.llvm.org/show_bug.cgi?id=36684 is fixed
@@ -73,7 +72,7 @@ public:
     };
 
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
-        ghoul::Dictionary dictionary);
+        const ghoul::Dictionary& dictionary);
 
     Renderable(const ghoul::Dictionary& dictionary,
         RenderableSettings settings = RenderableSettings());
@@ -103,7 +102,7 @@ public:
     // representation is, the 'surface' is always the sphere around which interaction is
     // handled
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
-                                                const glm::dvec3& targetModelSpace) const;
+        const glm::dvec3& targetModelSpace) const;
 
     virtual bool renderedWithDesiredData() const;
 
@@ -129,7 +128,9 @@ protected:
 
     void setRenderBinFromOpacity();
 
-    /// Returns the full opacity constructed from the _opacity and _fade property values
+    /**
+     * Returns the full opacity constructed from the _opacity and _fade property values.
+     */
     float opacity() const noexcept override;
 
     SceneGraphNode* parent() const noexcept;
@@ -143,7 +144,73 @@ protected:
     // where all parts of the renderable should not be rendered in the same bin
     std::optional<RenderBin> _secondaryRenderBin;
 
+    struct AlternativeTransform {
+        std::optional<glm::dvec3> translation = std::nullopt;
+        std::optional<glm::dmat3> rotation = std::nullopt;
+        std::optional<glm::dvec3> scale = std::nullopt;
+    };
+
+    /**
+     * Calculates the model transformation matrix with the given data and returns it.
+     *
+     * \param data The RenderData for the object that the model transformation matrix
+     *        should be calculated for
+     * \param altTransform An object containing alternative transformations to use instead
+     *        of those given in data. The transforms can be translation, rotation and
+     *        scale.
+     *
+     * \return The resulting model transformation matrix in double precision
+     */
+    glm::dmat4 calcModelTransform(const RenderData& data,
+        const AlternativeTransform& altTransform = {
+            std::nullopt, std::nullopt, std::nullopt
+        }) const;
+
+    /**
+     * Calculates the model view transformation matrix with the given data and returns it.
+     *
+     * \param data The RenderData for the object that the model view transformation matrix
+     *        should be calculated for
+     * \param modelTransform An alternative model transformation matrix to use. If not
+     *        provided the function will calculate a new one.
+     * \return The resulting model view transformation matrix in double precision
+     */
+    glm::dmat4 calcModelViewTransform(const RenderData& data,
+        const std::optional<glm::dmat4>& modelTransform = std::nullopt) const;
+
+    /**
+     * Calculates the model view projection transformation matrix with the given data and
+     * returns it.
+     *
+     * \param data The RenderData for the object that the model view projection
+     *        transformation matrix should be calculated for
+     * \param modelTransform An alternative model transformation matrix to use. If not
+     *        provided the function will calculate a new one.
+     * \return The resulting model view projection transformation matrix in double
+     *         precision
+     */
+    glm::dmat4 calcModelViewProjectionTransform(const RenderData& data,
+        const std::optional<glm::dmat4>& modelTransform = std::nullopt) const;
+
+    /**
+     * Calculates the model, model view, and the model view projection transformation
+     * matricies with the given data and returns them in a tuple object.
+     *
+     * \param data The RenderData for the object that the transforms should be
+     *        calculated for
+     * \param altModelTransform An object containing alternative transformations to use
+     *        instead of those given in data. The transforms can be translation, rotation
+     *        and scale.
+     * \return A tuple object containing the resulting model, model view, and the
+     *         model view projection transformation matrices
+     */
+    std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> calcAllTransforms(
+        const RenderData& data, const AlternativeTransform& altModelTransform = {
+            std::nullopt, std::nullopt, std::nullopt
+        }) const;
+
 private:
+    void registerUpdateRenderBinFromOpacity();
 
     double _boundingSphere = 0.0;
     double _interactionSphere = 0.0;
@@ -151,8 +218,6 @@ private:
     const bool _shouldUpdateIfDisabled = false;
     bool _automaticallyUpdateRenderBin = true;
     bool _hasOverrideRenderBin = false;
-
-    void registerUpdateRenderBinFromOpacity();
 
     // We only want the SceneGraphNode to be able manipulate the parent, so we don't want
     // to provide a set method for this. Otherwise, anyone might mess around with our

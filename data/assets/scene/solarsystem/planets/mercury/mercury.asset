@@ -1,10 +1,10 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
-local labelsPath = asset.syncedResource({
+local labelsPath = asset.resource({
   Name = "Mercury Labels",
   Type = "HttpSynchronization",
   Identifier = "mercury_labels",
@@ -18,23 +18,19 @@ local Mercury = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY",
-      Observer = "MERCURY BARYCENTER"
+      Target = coreKernels.ID.Mercury,
+      Observer = coreKernels.ID.MercuryBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MERCURY",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Mercury,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 2439700,
-    Frame = "IAU_MERCURY",
-    Body = "MERCURY",
     CameraMinHeight = 300,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "Mercury.labels",
@@ -58,8 +54,8 @@ local MercuryLabel = {
   Identifier = "MercuryLabel",
   Parent = Mercury.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Mercury",
     FontSize = 70.0,
     Size = 8.5,
@@ -96,7 +92,6 @@ asset.export(MercuryLabel)
 
 asset.meta = {
   Name = "Mercury",
-  Version = "1.1",
   Description = "Mercury globe with labels, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

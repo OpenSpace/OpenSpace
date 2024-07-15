@@ -5,28 +5,28 @@ local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 asset.require("scene/solarsystem/planets/earth/moon/default_layers")
 
 
-local heightmaps = asset.syncedResource({
+local heightmaps = asset.resource({
   Name = "Apollo Globebrowsing Heightmaps",
   Type = "HttpSynchronization",
   Identifier = "apollo_globebrowsing_heightmaps",
   Version = 1
 })
 
-local basemaps = asset.syncedResource({
+local basemaps = asset.resource({
   Name = "Apollo Globebrowsing Basemaps",
   Type = "HttpSynchronization",
   Identifier = "apollo_globebrowsing_basemaps",
   Version = 1
 })
 
-local naclighting = asset.syncedResource({
+local naclighting = asset.resource({
   Name = "Apollo Globebrowsing NAC Lighting",
   Type = "HttpSynchronization",
   Identifier = "apollo_globebrowsing_naclighting",
   Version = 1
 })
 
-local stations = asset.syncedResource({
+local stations = asset.resource({
   Name = "Apollo 17 Globebrowsing Stations",
   Type = "HttpSynchronization",
   Identifier = "apollo_17_stations",
@@ -40,7 +40,7 @@ local ToggleKaguyaLayer = {
   Command = [[
     openspace.setPropertyValueSingle(
       "Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled",
-      not openspace.getPropertyValue("Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled")
+      not openspace.propertyValue("Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled")
     )
   ]],
   Documentation = "Toggles Moon Kaguya color layer",

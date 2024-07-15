@@ -2,13 +2,13 @@ local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
 
-local omm = asset.syncedResource({
+local omm = asset.resource({
   Name = "Satellite OMM Data (Indian ASAT test Debris)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_2019-006",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=2019-006&FORMAT=kvn",
   Filename = "2019-006.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -21,7 +21,8 @@ local DebrisAsat = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.25, 0.35, 0.45 },
-    Fade = 1.5,
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
@@ -46,7 +47,6 @@ asset.export(DebrisAsat)
 
 asset.meta = {
   Name = "Satellites Debris - Indian ASAT test Debris",
-  Version = "1.0",
   Description = [[Satellites asset for Debris - Indian ASAT test Debris. Data from
     Celestrak]],
   Author = "OpenSpace Team",

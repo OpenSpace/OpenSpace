@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,14 +49,14 @@ void WebsocketCameraStates::updateStateFromInput(
     std::pair<bool, glm::dvec2> localRotation = std::pair(false, glm::dvec2(0.0));
 
     if (!websocketInputStates.empty()) {
-        for (int i = 0; i < WebsocketInputState::MaxAxes; ++i) {
-            AxisInformation t = _axisMapping[i];
+        for (int i = 0; i < WebsocketInputState::MaxAxes; i++) {
+            const AxisInformation t = _axisMapping[i];
             if (t.type == AxisType::None) {
                 continue;
             }
 
             float value = websocketInputStates.axis(i);
-            bool hasValue = std::fabs(value) > t.deadzone;
+            const bool hasValue = std::fabs(value) > t.deadzone;
 
             if (!hasValue) {
                 value = 0.f;
@@ -198,7 +198,7 @@ void WebsocketCameraStates::clearButtonCommand(int button) {
             it = _buttonMapping.erase(it);
         }
         else {
-            ++it;
+            it++;
         }
     }
 }
@@ -206,7 +206,7 @@ void WebsocketCameraStates::clearButtonCommand(int button) {
 std::vector<std::string> WebsocketCameraStates::buttonCommand(int button) const {
     std::vector<std::string> result;
     auto itRange = _buttonMapping.equal_range(button);
-    for (auto it = itRange.first; it != itRange.second; ++it) {
+    for (auto it = itRange.first; it != itRange.second; it++) {
         result.push_back(it->second.command);
     }
     return result;

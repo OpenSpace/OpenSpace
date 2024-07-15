@@ -1,0 +1,8 @@
+local data = asset.resource({
+  Name = "Total Eclipse Paths",
+  Type = "HttpSynchronization",
+  Identifier = "earth-eclipse-path-total",
+  Version = 1
+})
+
+asset.export("path", data)

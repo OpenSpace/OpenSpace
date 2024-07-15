@@ -4,7 +4,7 @@ local globe = asset.require("../../mars")
 
 local Layer = {
   Identifier = "Indices",
-  Type = "TileIndexTileLayer",
+  Type = "TileIndexTileProvider",
   Enabled = asset.enabled
 }
 
@@ -23,7 +23,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Mars Indices",
-  Version = "1.0",
   Description = "This asset supplies a tile index layer for the Mars globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

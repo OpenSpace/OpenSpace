@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #include <modules/webbrowser/include/webrenderhandler.h>
 
 #include <ghoul/glm.h>
-#include <fmt/format.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace {
@@ -78,10 +77,10 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
 
     // Copy the updated rectangle line by line.
     for (int y = lowerUpdatingRectBound.y; y < upperUpdatingRectBound.y; ++y) {
-        int lineOffset = y * w + lowerUpdatingRectBound.x;
+        const int lineOffset = y * w + lowerUpdatingRectBound.x;
         // Chromium stores image upside down compared to OpenGL, so we flip it:
-        int invLineOffset = (h - y - 1) * w + lowerUpdatingRectBound.x;
-        int rectWidth = upperUpdatingRectBound.x - lowerUpdatingRectBound.x;
+        const int invLineOffset = (h - y - 1) * w + lowerUpdatingRectBound.x;
+        const int rectWidth = upperUpdatingRectBound.x - lowerUpdatingRectBound.x;
         std::copy(
             reinterpret_cast<const Pixel*>(buffer) + lineOffset,
             reinterpret_cast<const Pixel*>(buffer) + lineOffset + rectWidth,

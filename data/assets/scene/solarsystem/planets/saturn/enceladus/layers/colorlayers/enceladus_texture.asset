@@ -2,7 +2,7 @@ local globe = asset.require("../../enceladus")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Name = "Enceladus textures",
   Type = "HttpSynchronization",
   Identifier = "enceladus_textures",
@@ -14,6 +14,7 @@ local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "enceladus.jpg",
   Enabled = asset.enabled,
+  ZIndex = 5,
   CacheSettings = { Enabled = false }
 }
 
@@ -32,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Enceladus Texture",
-  Version = "1.0",
   Description = "Default jpg texture for Enceladus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

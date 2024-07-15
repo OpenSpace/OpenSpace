@@ -6,8 +6,8 @@ local Label = {
   Identifier = "GonggongLabel",
   Parent = transforms.Position.Identifier,
   Renderable = {
-    Enabled = asset.enabled,
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "Gonggong",
     FontSize = 70.0,
     Size = 9.10,
@@ -42,7 +42,6 @@ asset.export("Label", Label)
 
 asset.meta = {
   Name = "Gonggong Label",
-  Version = "1.0",
   Description = [[Label of Gonggong]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

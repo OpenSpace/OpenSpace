@@ -13,7 +13,7 @@ data from the satellite, developed by scientists at NOAA]]
 local URL = "https://sos.noaa.gov/catalog/datasets/vegetation-seasonal-changes-apr-2012-apr-2013/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
@@ -29,6 +29,7 @@ local Background1Layer = {
   Identifier = Identifier .. "-background-14a",
   Name = Name .. " (Background Week 14a)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2012_week14a.png",
   Description = Description
 }
@@ -37,6 +38,7 @@ local Background2Layer = {
   Identifier = Identifier .. "-background-14",
   Name = Name .. " (Background Week 14)",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = syncedDirectory .. "2012week14.png",
   Description = Description
 }
@@ -45,7 +47,8 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
   Mode = "Folder",
   Folder = {
     Folder = imagesDestination,
@@ -91,7 +94,6 @@ asset.export(Colorbar)
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

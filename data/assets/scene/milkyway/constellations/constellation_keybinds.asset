@@ -18,7 +18,6 @@ end)
 
 asset.meta = {
   Name = "Constellation Image Keybinds",
-  Version = "1.0",
   Description = "Artistic images depicting the constellations",
   Author = "James Hedberg",
   URL = "http://jameshedberg.com",

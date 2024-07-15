@@ -99,7 +99,6 @@ asset.export("LongLoop", LongLoop.Identifier)
 
 asset.meta = {
   Name = "Bastille day actions",
-  Version = "1.0",
   Description = "Asset with actions related to Bastille day",
   Author = "CCMC, OpenSpace Team",
   URL = "http://openspaceproject.com",
