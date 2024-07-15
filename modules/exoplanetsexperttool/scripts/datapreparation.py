@@ -118,7 +118,7 @@ df = pd.concat([df0,df1])
 # Must make sure to sort before filtering.
 
 ## OBS! Actually, it seems that by now the pubdate have the same formatting, so just use as is.
-# This also avoids problems when the month in the format Y-M is zero, which it is for sme planets for osme reaosn
+# This also avoids problems when the month in the format Y-M is zero, which it is for sme planets for some reason
 df = df.sort_values(by='pl_pubdate', ascending=False)
 
 # df['dt_obj'] = df['pl_pubdate']
@@ -144,21 +144,21 @@ agg_dict = dict(zip(cols, ['first'] * len(cols)))
 df = df[data_filter].groupby('pl_name', as_index = False).agg(agg_dict)
 
 # fill in columns where mass or radius are only in Jupiter units
-df.pl_rade.fillna(df.pl_radj*Rjup, inplace=True)
-df.pl_bmasse.fillna(df.pl_bmassj*Mjup, inplace=True)
-df.pl_bmasseerr1.fillna(df.pl_bmassjerr1*Mjup, inplace=True)
-df.pl_bmasseerr2.fillna(df.pl_bmassjerr2*Mjup, inplace=True)
+df.fillna({'pl_rade': df.pl_radj*Rjup}, inplace=True)
+df.fillna({'pl_bmasse': df.pl_bmassj*Mjup}, inplace=True)
+df.fillna({'pl_bmasseerr1': df.pl_bmassjerr1*Mjup}, inplace=True)
+df.fillna({'pl_bmasseerr2': df.pl_bmassjerr2*Mjup}, inplace=True)
 
 # ## Initialize new column for aggregate temperature
 # Try to use as few columns in the data as possible:
 # first populate with insolation flux
 df['pl_Teq'] = 278.*(df['pl_insol'])**0.25
 # if insolation is unavailable, try equilibrium temperature
-df.pl_Teq.fillna(df.pl_eqt, inplace=True)
+df.fillna({'pl_Teq': df.pl_eqt}, inplace=True)
 # if equilibrium temperature is unavailable, calculate from a/Rs and Teff
-df.pl_Teq.fillna(1/(np.sqrt(2*df['pl_ratdor']))*df['st_teff'], inplace=True)
+df.fillna({'pl_Teq': 1/(np.sqrt(2*df['pl_ratdor']))*df['st_teff']}, inplace=True)
 # if a/Rs is unavailable, calculate it from a [AU] and Rs [Rsun]
-df.pl_Teq.fillna(1/(np.sqrt(2*215.*df['pl_orbsmax']/df['st_rad']))*df['st_teff'], inplace=True)
+df.fillna({'pl_Teq': 1/(np.sqrt(2*215.*df['pl_orbsmax']/df['st_rad']))*df['st_teff']}, inplace=True)
 
 # fill rprs if not given
 df['pl_ratror'] = ReRs*df['pl_rade']/df['st_rad']
@@ -166,7 +166,7 @@ df['pl_ratror'] = ReRs*df['pl_rade']/df['st_rad']
 df['pl_rprs2'] = df['pl_ratror']**2
 
 # scale factor for TSM calculation https://arxiv.org/pdf/1805.03671.pdf
-df['scale'] = 0
+df['scale'] = 0.
 df.loc[df['pl_rade'] <= 1.5, 'scale'] = 0.19
 df.loc[df['pl_rade'] > 4.0, 'scale'] = 1.15
 df.loc[(df['pl_rade'] <= 4.0)&(df['pl_rade'] >2.75), 'scale'] = 1.28
@@ -177,11 +177,11 @@ print("Computing TSM")
 df['TSM'] = df['pl_rade'] * df['pl_rprs2']/(ReRs**2) * df['pl_Teq']/df['pl_bmasse'] * 10.**(-0.2*df['sy_jmag']) * df['scale']
 
 #calculates observational efficiency for HST (accounting for brightness of host star)
-df['efficiency'] = 1
+df['efficiency'] = 1.
 df.loc[df['sy_jmag'] <= 8.8, 'efficiency'] = (1.375*df['sy_jmag']**2 - 1.214*df['sy_jmag'] - 26.68)/64.58
 df.loc[df['sy_jmag'] <= 5., 'efficiency'] = 0.3
 
-df['efficiency_kmag'] = 1
+df['efficiency_kmag'] = 1.
 df.loc[df['sy_kmag'] <= 8.8, 'efficiency_kmag'] = (1.375*df['sy_kmag']**2 - 1.214*df['sy_kmag'] - 26.68)/64.58
 df.loc[df['sy_kmag'] <= 5., 'efficiency_kmag'] = 0.3
 
@@ -214,11 +214,11 @@ df.drop(columns=columnsToDrop, inplace=True)
 ## Fill nan position values with data from composite table, if there is any.
 # (this solves the problem of Trappist-1 not having a position, for example)
 temp_df = df[['pl_name']].merge(df_comppars, on='pl_name', how='left')
-df.sy_dist.fillna(temp_df.sy_dist, inplace=True)
-df.sy_disterr1.fillna(temp_df.sy_disterr1, inplace=True)
-df.sy_disterr2.fillna(temp_df.sy_disterr2, inplace=True)
-df.ra.fillna(temp_df.ra, inplace=True)
-df.dec.fillna(temp_df.dec, inplace=True)
+df.fillna({'sy_dist': temp_df.sy_dist}, inplace=True)
+df.fillna({'sy_disterr1': temp_df.sy_disterr1}, inplace=True)
+df.fillna({'sy_disterr2': temp_df.sy_disterr2}, inplace=True)
+df.fillna({'ra': temp_df.ra}, inplace=True)
+df.fillna({'dec': temp_df.dec}, inplace=True)
 
 ##################################################################
 # Chemical Abundances
