@@ -92,6 +92,10 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
         throw ghoul::RuntimeError("Cannot specify items when using the main dashboard");
     }
 
+    if (!_useMainDashboard) {
+        addPropertySubOwner(_dashboard);
+    }
+
     if (p.items.has_value()) {
         ghoul_assert(_useMainDashboard, "Cannot add items to the main dashboard");
         for (const ghoul::Dictionary& item : *p.items) {
