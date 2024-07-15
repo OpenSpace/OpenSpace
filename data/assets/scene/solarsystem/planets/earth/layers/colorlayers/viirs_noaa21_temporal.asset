@@ -1,20 +1,20 @@
 local globe = asset.require("../../earth")
-local noaa20 = asset.require("./definitions/noaa20")
+local noaa21 = asset.require("./definitions/noaa21")
 
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", noaa20.Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", noaa21.Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", noaa20.Layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", noaa21.Layer)
 end)
 
 
 
 asset.meta = {
-  Name = "VIIRS NOAA20 (Temporal)",
+  Name = "VIIRS NOAA21 (Temporal)",
   Description = "This layer has the best daily Earth Image",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL =

@@ -144,6 +144,19 @@ void TileProviderByDate::update() {
     // Then check update our current tile provider pointer
     const double time = global::timeManager->time().j2000Seconds();
     ghoul_assert(!_tileProviders.empty(), "There should be tile providers at this point");
+
+    // We use the first tileprovider for all times before the beginning start
+    if (time < _tileProviders.begin()->startTime) {
+        _currentTileProvider = _tileProviders.begin()->tileProvider.get();
+        return;
+    }
+
+    // And the last tileprovider for all times after the end
+    if (time > _tileProviders.back().startTime) {
+        _currentTileProvider = _tileProviders.back().tileProvider.get();
+        return;
+    }
+
     _currentTileProvider = _tileProviders.begin()->tileProvider.get();
     for (const Provider& p : _tileProviders) {
         if (p.startTime > time) {
