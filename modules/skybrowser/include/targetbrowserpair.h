@@ -27,11 +27,14 @@
 
 #include <openspace/properties/propertyowner.h>
 #include <modules/skybrowser/include/utility.h>
-#include <openspace/json.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/dvec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/triggerproperty.h>
+#include <openspace/json.h>
 
 namespace ghoul { class Dictionary; }
 
@@ -80,16 +83,12 @@ public:
     void setBorderColor(const glm::ivec3& color);
     void setBorderRadius(double radius);
     void setBrowserRatio(float ratio);
-    void setVerticalFovWithScroll(float scroll);
+    void setVerticalFovWithScroll(float scroll);  
     void setImageCollectionIsLoaded(bool isLoaded);
     void setPointSpaceCraft(bool shouldPoint);
-    void applyRoll();
 
-    double verticalFov() const;
     glm::ivec3 borderColor() const;
-    glm::dvec2 targetDirectionEquatorial() const;
     glm::dvec3 targetDirectionGalactic() const;
-    std::string browserGuiName() const;
     std::string browserId() const;
     std::string targetRenderableId() const;
     std::string targetNodeId() const;
@@ -109,12 +108,19 @@ public:
     void setImageOpacity(const std::string& imageUrl, float opacity);
 
 private:
-    properties::FloatProperty _lineWidth;
-    properties::Vec3Property _color;
-    properties::BoolProperty _isPointingSpacecraft;
-    properties::BoolProperty _updateDuringTargetAnimation;
     properties::StringProperty _browserId;
     properties::StringProperty _targetId;
+    properties::TriggerProperty _stopAnimations;
+    properties::BoolProperty _isPointingSpacecraft;
+    properties::BoolProperty _updateDuringTargetAnimation;
+
+    // Properties that are the same in the target and the browser
+    properties::BoolProperty _enabled;
+    properties::Vec3Property _color;
+    properties::DVec2Property _equatorialAim;
+    properties::DoubleProperty _verticalFov;
+    properties::DoubleProperty _borderRadius;
+    properties::FloatProperty _ratio;
 
     // Target and browser
     RenderableSkyTarget* _targetRenderable = nullptr;

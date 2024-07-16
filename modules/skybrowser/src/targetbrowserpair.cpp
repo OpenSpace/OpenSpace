@@ -79,10 +79,11 @@ namespace {
         return rgbColor;
     }
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "The thickness of the line of the target. The larger number, the thicker line.",
+    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "Determines if this target browser pair is enabled or not. If it is enabled, "
+        "the target and the browser that the pair controls is enabled.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -113,22 +114,58 @@ namespace {
         "Browser",
         "Sky Browser",
         "The identifier of the sky browser of this pair.",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "Target",
         "Sky Target",
         "The identifier of the sky target of this pair.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
+        "VerticalFov",
+        "Vertical Field Of View",
+        "The vertical field of view of the target.",
         openspace::properties::Property::Visibility::User
+    };
+    
+    constexpr openspace::properties::Property::PropertyInfo StopAnimationsInfo = {
+        "StopAnimations",
+        "Stop Animations",
+        "Stops all animations for the sky browser and target of this pair.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo BorderRadiusInfo = {
+        "BorderRadius",
+        "Border Radius",
+        "The border radius of this Sky Browser.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RatioInfo = {
+        "Ratio",
+        "Ratio",
+        "The ratio of the dimensions of the sky browser and target. This is defined as "
+        "width divided by height.",
+        openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EquatorialAimInfo = {
+        "EquatorialAim",
+        "Equatorial Aim",
+        "The equatorial aim (Ra, dec) of the sky browser and target.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(TargetBrowserPair)]] Parameters {
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
 
         // [[codegen::verbatim(ColorInfo.description)]]
-        std::optional<float> color;
+        std::optional<glm::vec3> color [[codegen::color()]];
 
         // [[codegen::verbatim(PointSpacecraftInfo.description)]]
         std::optional<bool> pointSpacecraft;
@@ -141,6 +178,18 @@ namespace {
 
         // [[codegen::verbatim(TargetInfo.description)]]
         std::string target;
+
+        // [[codegen::verbatim(VerticalFovInfo.description)]]
+        std::optional<double> verticalFov;
+
+        // [[codegen::verbatim(BorderRadiusInfo.description)]]
+        std::optional<double> borderRadius;
+
+        // [[codegen::verbatim(RatioInfo.description)]]
+        std::optional<float> ratio;
+
+        // [[codegen::verbatim(EquatorialAimInfo.description)]]
+        std::optional<glm::dvec2> equatorialAim;
     };
 
 #include "targetbrowserpair_codegen.cpp"
@@ -152,10 +201,17 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "TargetBrowserPair" })
 	, _targetId(TargetInfo)
 	, _browserId(BrowserInfo)
-	, _lineWidth(LineWidthInfo)
+	, _enabled(EnabledInfo, true)
     , _color(ColorInfo)
+    , _borderRadius(BorderRadiusInfo, 0.0, 0.0, 1.0)
     , _isPointingSpacecraft(PointSpacecraftInfo, false)
     , _updateDuringTargetAnimation(UpdateDuringAnimationInfo, false)
+    , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
+    , _stopAnimations(StopAnimationsInfo)
+    , _ratio(RatioInfo)
+    , _equatorialAim(
+        EquatorialAimInfo, glm::dvec2(0.0), glm::dvec2(0.0, -90.0), glm::dvec2(360.0, 90.0)
+    )
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -169,6 +225,11 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
 
     setIdentifier(std::format("{}Pair", _browser->identifier()));
 
+    _verticalFov = p.verticalFov.value_or(_verticalFov);
+    _borderRadius = p.verticalFov.value_or(_borderRadius);
+    _ratio = p.ratio.value_or(_ratio);
+    _equatorialAim = p.equatorialAim.value_or(_equatorialAim);
+
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
     
     _isPointingSpacecraft = p.pointSpacecraft.value_or(_isPointingSpacecraft);
@@ -178,16 +239,49 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
 
     addProperty(_isPointingSpacecraft);
     addProperty(_updateDuringTargetAnimation);
-    addProperty(_lineWidth);
+    addProperty(_ratio);
     addProperty(_color);
+    addProperty(_borderRadius);
+    addProperty(_enabled);
+    addProperty(_stopAnimations);
+    addProperty(_equatorialAim);
 
-    _lineWidth.onChange([this]() {
-        _targetRenderable->property("LineWidth")->set(_lineWidth.value());
+    _borderRadius.onChange([this]() {
+        _browser->property("BorderRadius")->set(_borderRadius.value());
+        _targetRenderable->property("BorderRadius")->set(_borderRadius.value());
         });
 
     _color.onChange([this]() {
         _browser->setBorderColor(glm::ivec3(_color.value() * 255.f));
-		_targetRenderable->setColor(glm::ivec3(_color.value() * 255.f));
+		_targetRenderable->setColor(_color.value());
+        });
+
+    _verticalFov.onChange([this]() {
+        _browser->property("VerticalFov")->set(_verticalFov.value());
+        _targetRenderable->property("VerticalFov")->set(_verticalFov.value());
+        });
+
+    _enabled.onChange([this]() {
+        _browser->property("Enabled")->set(_enabled.value());
+        _targetRenderable->property("Enabled")->set(_enabled.value());
+        });
+
+    _ratio.onChange([this]() {
+        _browser->property("Ratio")->set(_ratio.value());
+        _targetRenderable->property("Ratio")->set(_ratio.value());
+        });
+
+    _stopAnimations.onChange([this]() {
+        _fovAnimation.stop();
+        _targetAnimation.stop();
+        });
+
+    _equatorialAim.onChange([this]() {
+        glm::dvec3 aimGalactic = skybrowser::equatorialToGalactic(
+            skybrowser::sphericalToCartesian(_equatorialAim.value())
+        );
+        aimTargetGalactic(_targetNode->identifier(), aimGalactic);
+        _browser->property("EquatorialAim")->set(_equatorialAim.value());
         });
 
 	if (global::windowDelegate->isMaster()) {
@@ -213,7 +307,9 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
     const glm::dvec3 up = _targetRenderable->upVector() * percentage.y;
 
     const glm::dvec3 newPosition = _startTargetPosition - (right - up);
-    aimTargetGalactic(_targetNode->identifier(), newPosition);
+    _equatorialAim = skybrowser::cartesianToSpherical(
+        skybrowser::galacticToEquatorial(newPosition)
+    );
 }
 
 void TargetBrowserPair::synchronizeAim() {
@@ -221,51 +317,40 @@ void TargetBrowserPair::synchronizeAim() {
         _updateDuringTargetAnimation ||
         !_targetAnimation.isAnimating();
     if (shouldUpdate && _browser->isInitialized()) {
-        _browser->setEquatorialAim(targetDirectionEquatorial());
         _browser->setTargetRoll(targetRoll());
-        _targetRenderable->setVerticalFov(_browser->verticalFov());
     }
 }
 
 void TargetBrowserPair::setEnabled(bool enable) {
-    _browser->setEnabled(enable);
-    _targetRenderable->property("Enabled")->set(enable);
+    _enabled = enable;
 }
 
 bool TargetBrowserPair::isEnabled() const {
-    return _targetRenderable->isEnabled() || _browser->isEnabled();
+    return _enabled;
 }
 
 void TargetBrowserPair::initialize() {
-    _targetRenderable->setColor(_browser->borderColor());
+    _targetRenderable->setColor(_color.value());
     const glm::vec2 dim = _browser->screenSpaceDimensions();
     _targetRenderable->setRatio(dim.x / dim.y);
     _browser->setBorderColor(_browser->borderColor());
     _browser->hideChromeInterface();
+    _browser->property("EquatorialAim")->set(_equatorialAim.value());
     _browser->setIsInitialized(true);
 }
 
-glm::ivec3 TargetBrowserPair::borderColor() const {
-    return _browser->borderColor();
 void TargetBrowserPair::reloadDisplayCopies() {
     _browser->setIsInitialized(false);
     _browser->setImageCollectionIsLoaded(false);
     _browser->reload();
 }
 
-glm::dvec2 TargetBrowserPair::targetDirectionEquatorial() const {
-    const glm::dvec3 cartesian = skybrowser::galacticToEquatorial(
-        glm::normalize(_targetNode->worldPosition())
-    );
-    return skybrowser::cartesianToSpherical(cartesian);
+glm::ivec3 TargetBrowserPair::borderColor() const {
+    return _color.value() * 255.f;
 }
 
 glm::dvec3 TargetBrowserPair::targetDirectionGalactic() const {
     return glm::normalize(_targetNode->worldPosition());
-}
-
-std::string TargetBrowserPair::browserGuiName() const {
-    return _browser->guiName();
 }
 
 std::string TargetBrowserPair::browserId() const {
@@ -284,16 +369,12 @@ bool TargetBrowserPair::pointSpaceCraft() const {
     return _isPointingSpacecraft;
 }
 
-double TargetBrowserPair::verticalFov() const {
-    return _browser->verticalFov();
-}
-
 std::vector<std::string> TargetBrowserPair::selectedImages() const {
     return _browser->selectedImages();
 }
 
 nlohmann::json TargetBrowserPair::dataAsDictionary() const {
-    const glm::dvec2 spherical = targetDirectionEquatorial();
+    const glm::dvec2 spherical = _equatorialAim;
     const glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     std::vector<std::string> selectedImagesIndices;
@@ -313,13 +394,13 @@ nlohmann::json TargetBrowserPair::dataAsDictionary() const {
         { "id", _browser->identifier() },
         { "targetId", _targetNode->identifier() },
         { "name", _browser->guiName() },
-        { "fov", static_cast<double>(_browser->verticalFov()) },
+        { "fov", _verticalFov.value()},
         { "ra", spherical.x },
         { "dec", spherical.y },
         { "roll", targetRoll() },
         { "ratio", static_cast<double>(_browser->browserRatio()) },
         { "isFacingCamera", isFacingCamera() },
-        { "isUsingRae", isUsingRadiusAzimuthElevation() },
+        { "isUsingRae", _browser->isUsingRaeCoords() },
         { "selectedImages", selectedImagesIndices },
         { "scale", static_cast<double>(_browser->scale()) },
         { "opacities", _browser->opacities() },
@@ -386,44 +467,36 @@ std::vector<std::pair<std::string, glm::dvec3>> TargetBrowserPair::displayCopies
 }
 
 void TargetBrowserPair::setVerticalFov(double vfov) {
-    _browser->setVerticalFov(vfov);
-    _targetRenderable->setVerticalFov(vfov);
+    _verticalFov = vfov;
 }
 
 void TargetBrowserPair::setEquatorialAim(const glm::dvec2& aim) {
-    aimTargetGalactic(
-        _targetNode->identifier(),
-        skybrowser::equatorialToGalactic(skybrowser::sphericalToCartesian(aim))
-    );
-    _browser->setEquatorialAim(aim);
+    _equatorialAim = aim;
 }
 
 void TargetBrowserPair::setBorderColor(const glm::ivec3& color) {
-    _targetRenderable->setColor(color);
-    _browser->setBorderColor(color);
+    _color = glm::vec3(color) / 255.f;
 }
 
 void TargetBrowserPair::setBorderRadius(double radius) {
-    _browser->setBorderRadius(radius);
-    _targetRenderable->setBorderRadius(radius);
+    _borderRadius = radius;
 }
 
 void TargetBrowserPair::setBrowserRatio(float ratio) {
-    _browser->setRatio(ratio);
-    _targetRenderable->setRatio(ratio);
+    _ratio = ratio;
 }
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
-    const double fov = _browser->setVerticalFovWithScroll(scroll);
-    _targetRenderable->setVerticalFov(fov);
+    // Make scroll more sensitive the smaller the FOV
+    const double x = _verticalFov;
+    const double zoomFactor =
+        atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
+    const double zoom = scroll > 0.0 ? zoomFactor : -zoomFactor;
+    _verticalFov = std::clamp(_verticalFov + zoom, 0.0, 70.0);
 }
 
 void TargetBrowserPair::setImageCollectionIsLoaded(bool isLoaded) {
     _browser->setImageCollectionIsLoaded(isLoaded);
-}
-
-void TargetBrowserPair::applyRoll() {
-    _targetRenderable->applyRoll();
 }
 
 void TargetBrowserPair::setPointSpaceCraft(bool shouldPoint) {
@@ -433,23 +506,26 @@ void TargetBrowserPair::setPointSpaceCraft(bool shouldPoint) {
 void TargetBrowserPair::incrementallyAnimateToCoordinate() {
     // Animate the target before the field of view starts to animate
     if (_targetAnimation.isAnimating()) {
-        aimTargetGalactic(_targetNode->identifier(), _targetAnimation.newValue());
+        _equatorialAim = skybrowser::cartesianToSpherical(
+            skybrowser::galacticToEquatorial(_targetAnimation.newValue()
+            ));
     }
     else if (!_targetAnimation.isAnimating() && _targetIsAnimating) {
         // Set the finished position
-        aimTargetGalactic(_targetNode->identifier(), _targetAnimation.newValue());
+        _equatorialAim = skybrowser::cartesianToSpherical(
+            skybrowser::galacticToEquatorial(_targetAnimation.newValue()
+            ));
         _fovAnimation.start();
         _targetIsAnimating = false;
         _fovIsAnimating = true;
     }
     // After the target has animated to its position, animate the field of view
     if (_fovAnimation.isAnimating()) {
-        _browser->setVerticalFov(_fovAnimation.newValue());
-        _targetRenderable->setVerticalFov(_browser->verticalFov());
+        _verticalFov = _fovAnimation.newValue();
     }
     else if (!_fovAnimation.isAnimating() && _fovIsAnimating) {
         // Set the finished field of view
-        setVerticalFov(_fovAnimation.newValue());
+        _verticalFov = _fovAnimation.newValue();
         _fovIsAnimating = false;
     }
 }
@@ -469,8 +545,7 @@ void TargetBrowserPair::startFading(float goal, float fadeTime) {
 }
 
 void TargetBrowserPair::stopAnimations() {
-    _fovAnimation.stop();
-    _targetAnimation.stop();
+    _stopAnimations.trigger();
 }
 
 void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd) {
@@ -479,9 +554,9 @@ void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd)
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     const double fovSpeed = module->browserAnimationSpeed();
     // The speed is given degrees /sec
-    const double fovTime = std::abs(_browser->verticalFov() - fovEnd) / fovSpeed;
+    const double fovTime = std::abs(_verticalFov - fovEnd) / fovSpeed;
     // Fov animation
-    _fovAnimation = skybrowser::Animation(_browser->verticalFov(), fovEnd, fovTime);
+    _fovAnimation = skybrowser::Animation(_verticalFov.value(), fovEnd, fovTime);
 
     // Target animation
     const glm::dvec3 start = glm::normalize(_targetNode->worldPosition()) *
@@ -497,13 +572,11 @@ void TargetBrowserPair::centerTargetOnScreen() {
     // Get camera direction in celestial spherical coordinates
     const glm::dvec3 viewDirection = skybrowser::cameraDirectionGalactic();
     // Keep the current fov
-    const double currentFov = _browser->verticalFov();
+    const double currentFov = _verticalFov;
     startAnimation(viewDirection, currentFov);
 }
 
 double TargetBrowserPair::targetRoll() const {
-    // To remove the lag effect when moving the camera while having a locked
-    // target, send the locked coordinates to wwt
     const glm::dvec3 normal = glm::normalize(
         _targetNode->worldPosition() -
         global::navigationHandler->camera()->positionVec3()
