@@ -29,6 +29,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace::documentation { struct Documentation; }
 
@@ -45,7 +46,7 @@ public:
     void bindTexture() override;
 
     void setRatio(float ratio);
-    void setColor(glm::ivec3 color);
+    void setColor(glm::vec3 color);
     void setVerticalFov(double fov);
     void setBorderRadius(double radius);
 
@@ -62,13 +63,15 @@ private:
     properties::FloatProperty _crossHairSize;
     properties::FloatProperty _showRectangleThreshold;
     properties::FloatProperty _lineWidth;
+
+    // Properties that are the same in sky browser and pair
     properties::DoubleProperty _verticalFov;
+    properties::DoubleProperty _borderRadius;
     properties::BoolProperty _applyRoll;
+    properties::FloatProperty _ratio;
+    properties::Vec3Property _color;
 
     bool _isInitialized = false;
-    double _borderRadius = 0.0;
-    glm::ivec3 _borderColor = glm::ivec3(230);
-    float _ratio = 1.f;
     glm::dvec3 _rightVector;
     glm::dvec3 _upVector;
     glm::dvec3 _worldPosition;
