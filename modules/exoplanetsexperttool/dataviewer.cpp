@@ -2930,7 +2930,6 @@ bool DataViewer::systemCanBeAdded(const std::string& host) const {
 
 void DataViewer::addExoplanetSystem(const std::string& host) const {
     queueScriptSynced("openspace.exoplanets.addExoplanetSystem('" + host + "')");
-    queueScriptSynced("openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)"); // TODO: remove
 }
 
 void DataViewer::refocusView() const {
