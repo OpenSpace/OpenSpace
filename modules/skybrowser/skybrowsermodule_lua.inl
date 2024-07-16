@@ -78,17 +78,13 @@ std::string prunedIdentifier(std::string identifier) {
     if (id != "all") {
         TargetBrowserPair* pair = module->pair(id);
         if (pair) {
-            pair->browser()->setIsInitialized(false);
-            pair->browser()->setImageCollectionIsLoaded(false);
-            pair->browser()->reload();
+            pair->reloadDisplayCopies();
         }
     }
     else {
         const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
-            pair->browser()->setIsInitialized(false);
-            pair->browser()->setImageCollectionIsLoaded(false);
-            pair->browser()->reload();
+            pair->reloadDisplayCopies();
         }
     }
 }

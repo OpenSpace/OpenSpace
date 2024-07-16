@@ -247,6 +247,10 @@ void TargetBrowserPair::initialize() {
 
 glm::ivec3 TargetBrowserPair::borderColor() const {
     return _browser->borderColor();
+void TargetBrowserPair::reloadDisplayCopies() {
+    _browser->setIsInitialized(false);
+    _browser->setImageCollectionIsLoaded(false);
+    _browser->reload();
 }
 
 glm::dvec2 TargetBrowserPair::targetDirectionEquatorial() const {

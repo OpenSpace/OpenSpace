@@ -49,6 +49,7 @@ public:
 
     // Target & Browser
     void initialize();
+    void reloadDisplayCopies();
 
     // Animation
     void startAnimation(glm::dvec3 galacticCoords, double fovEnd);
