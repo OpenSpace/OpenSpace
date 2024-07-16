@@ -71,12 +71,37 @@
       "name": "{earth_satellites}.Renderable.Enabled",
       "type": "setPropertyValue",
       "value": "false"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.NightLayers.Earth_at_Night_2012.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.Overlays.Reference_Features.Enabled",
+      "type": "setPropertyValueSingle",
+      "value": "true"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.Overlays.Reference_Features.Settings.Multiplier",
+      "type": "setPropertyValueSingle",
+      "value": "15"
     }
   ],
   "time": {
     "is_paused": false,
     "type": "absolute",
-    "value": "2023-03-24T01:40:00"
+    "value": "2024-05-10T15:00:00"
   },
   "version": {
     "major": 1,
