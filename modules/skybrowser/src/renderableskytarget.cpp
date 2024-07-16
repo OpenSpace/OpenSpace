@@ -307,17 +307,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSkyTarget::setRatio(float ratio) {
-    // To avoid flooring of the size of the target, multiply by factor of 100
-    // Object size is really the pixel size so this calculation is not exact
     _ratio = ratio;
-}
-
-void RenderableSkyTarget::highlight(const glm::ivec3& addition) {
-    _borderColor += addition;
-}
-
-void RenderableSkyTarget::removeHighlight(const glm::ivec3& removal) {
-    _borderColor -= removal;
 }
 
 void RenderableSkyTarget::setVerticalFov(double fov) {

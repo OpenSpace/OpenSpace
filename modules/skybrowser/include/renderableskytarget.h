@@ -50,10 +50,6 @@ public:
     void setVerticalFov(double fov);
     void setBorderRadius(double radius);
 
-    // Display
-    void highlight(const glm::ivec3& addition);
-    void removeHighlight(const glm::ivec3& removal);
-
     static documentation::Documentation Documentation();
 
     void applyRoll();
