@@ -264,21 +264,6 @@ bool ScreenSpaceSkyBrowser::initializeGL() {
     return true;
 }
 
-glm::dvec2 ScreenSpaceSkyBrowser::fineTuneVector(const glm::dvec2& drag) {
-    // Fine tuning of target
-    const glm::dvec2 wwtFov = fieldsOfView();
-    const glm::dvec2 openSpaceFOV = skybrowser::fovWindow();
-
-    const glm::dvec2 browserDim = screenSpaceDimensions();
-    const glm::dvec2 angleResult = wwtFov * (drag / browserDim);
-    const glm::dvec2 resultRelativeOs = angleResult / openSpaceFOV;
-
-    // Convert to screen space coordinate system
-    const glm::dvec2 screenSpace = glm::dvec2((2.f * skybrowser::windowRatio()), 2.f);
-    const glm::dvec2 result = -screenSpace * resultRelativeOs;
-    return result;
-}
-
 bool ScreenSpaceSkyBrowser::isInitialized() const {
     return _isInitialized;
 }
@@ -432,12 +417,6 @@ void ScreenSpaceSkyBrowser::render(const RenderData& renderData) {
     }
 }
 
-glm::dvec2 ScreenSpaceSkyBrowser::fieldsOfView() const {
-    const double vFov = _verticalFov;
-    const double hFov = vFov * _wwtCommunicator.browserRatio();
-    return glm::dvec2(hFov, vFov);
-}
-
 float ScreenSpaceSkyBrowser::browserRatio() const {
     return _wwtCommunicator.browserRatio();
 }
@@ -486,17 +465,6 @@ void ScreenSpaceSkyBrowser::update() {
 
     ScreenSpaceRenderable::update();
 
-}
-
-double ScreenSpaceSkyBrowser::setVerticalFovWithScroll(float scroll) {
-    // Make scroll more sensitive the smaller the FOV
-    const double x = _verticalFov;
-    const double zoomFactor =
-        atan(x / 50.0) + exp(x / 40.0) - 0.99999999999999999999999999999;
-    const double zoom = scroll > 0.0 ? zoomFactor : -zoomFactor;
-    _verticalFov = std::clamp(_verticalFov + zoom, 0.0, 70.0);
-
-    return _verticalFov;
 }
 
 void ScreenSpaceSkyBrowser::bindTexture() {
@@ -587,16 +555,6 @@ void ScreenSpaceSkyBrowser::setTargetRoll(double roll) {
     _roll = roll;
 }
 
-void ScreenSpaceSkyBrowser::setVerticalFov(double vfov) {
-    _verticalFov = vfov;
-    _equatorialAimIsDirty = true;
-}
-
-void ScreenSpaceSkyBrowser::setEquatorialAim(glm::dvec2 equatorial) {
-    _equatorialAim = std::move(equatorial);
-    _equatorialAimIsDirty = true;
-}
-
 void ScreenSpaceSkyBrowser::loadImageCollection(const std::string& collection) {
     if (!_isImageCollectionLoaded) {
         _wwtCommunicator.loadImageCollection(collection);
@@ -628,10 +586,6 @@ void ScreenSpaceSkyBrowser::setImageOpacity(const std::string& imageUrl, float o
 
 void ScreenSpaceSkyBrowser::setImageCollectionIsLoaded(bool isLoaded) {
     _isImageCollectionLoaded = isLoaded;
-}
-
-double ScreenSpaceSkyBrowser::verticalFov() const {
-    return _verticalFov;
 }
 
 void ScreenSpaceSkyBrowser::setImageOrder(const std::string& imageUrl, int order) {

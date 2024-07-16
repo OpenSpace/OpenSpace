@@ -64,13 +64,9 @@ public:
     std::vector<double> opacities() const;
 
     // Aim and browser ratio
-    void setVerticalFov(double vfov);
-    double verticalFov() const;
-    void setEquatorialAim(glm::dvec2 equatorial);
     void setTargetRoll(double roll);
     void setRatio(float ratio);
     float browserRatio() const;
-    glm::dvec2 fieldsOfView() const;
 
     // Look of browser window
     glm::ivec3 borderColor() const;
@@ -78,10 +74,8 @@ public:
     void hideChromeInterface();
     void setBorderColor(glm::ivec3 color);
     void setBorderRadius(double radius);
-    double setVerticalFovWithScroll(float scroll);
 
     void reload();
-    glm::dvec2 fineTuneVector(const glm::dvec2& drag);
 
     // Initialization process
     void setIdInBrowser() const;
