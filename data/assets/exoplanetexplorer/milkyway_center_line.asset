@@ -23,18 +23,17 @@ local MilkyWayEarthLine = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MilkyWayEarthLine)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MilkyWayEarthLine)
 end)
-  
+
 asset.export(MilkyWayEarthLine)
 
 
 
 asset.meta = {
   Name = "Milky Way Center Line",
-  Version = "1.0",
   Description = [[A line to the MIlky Way center, from Earth]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

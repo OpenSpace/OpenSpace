@@ -23,7 +23,7 @@ local KeplerPrismBase = {
     Name = "Kepler Prism Base",
     Path = "/ExoplanetExplorer",
     Description = [[
-      Base SGN for the Kepler prism node. 
+      Base SGN for the Kepler prism node.
       Makes it easier to tranform ra dec coordinates
     ]],
     Hidden = true
@@ -63,19 +63,18 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(KeplerPrismBase)
   openspace.addSceneGraphNode(KeplerPrism)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(KeplerPrism)
   openspace.removeSceneGraphNode(KeplerPrismBase)
 end)
-  
+
 asset.export(KeplerPrism)
 
 
 
 asset.meta = {
   Name = "Kepler Field of View",
-  Version = "1.0",
   Description = [[A prism showing the Kepler field of view]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

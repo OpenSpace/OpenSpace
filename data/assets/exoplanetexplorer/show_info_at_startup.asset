@@ -1,14 +1,9 @@
 asset.onInitialize(function()
   openspace.setPropertyValueSingle("Modules.ExoplanetsExpertTool.ShowInfoAtStartup", true)
-
-end)
-  
-asset.onDeinitialize(function()
 end)
 
 asset.meta = {
   Name = "Show info at startup",
-  Version = "1.0",
   Description = [[Show an info window when opening the Exoplanet Explorer. ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

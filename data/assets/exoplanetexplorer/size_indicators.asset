@@ -54,19 +54,18 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(hundredParsecSphere)
   openspace.addSceneGraphNode(oneAuGrid)
 end)
-  
+
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(oneAuGrid)
   openspace.removeSceneGraphNode(hundredParsecSphere)
 end)
-  
+
 asset.export(hundredParsecSphere)
 asset.export(oneAuGrid)
 
 
 asset.meta = {
   Name = "Size indicators",
-  Version = "1.0",
   Description = [[Some size indicators used for the Exoplnaet Explorer tool. ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

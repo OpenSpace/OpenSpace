@@ -42,15 +42,6 @@
 namespace {
     constexpr std::string_view KeyType = "Type";
 
-    enum class RenderBinOption : int {
-        Background,
-        Opaque,
-        PreDeferredTransparent,
-        PostDeferredTransparent,
-        Overlay,
-        OpacityBased
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
