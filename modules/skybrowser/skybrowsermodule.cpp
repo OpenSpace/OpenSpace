@@ -569,8 +569,6 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::RemoveSelectedImageInBrowser,
             codegen::lua::AdjustCamera,
             codegen::lua::SetSelectedBrowser,
-            codegen::lua::TargetData,
-            codegen::lua::TargetDataDeprecated,
             codegen::lua::CreateTargetBrowserPair,
             codegen::lua::RemoveTargetBrowserPair,
             codegen::lua::SetOpacityOfImageLayer,
