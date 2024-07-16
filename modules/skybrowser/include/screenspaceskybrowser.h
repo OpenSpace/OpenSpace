@@ -111,6 +111,7 @@ private:
     properties::DoubleProperty _roll;
     properties::DVec2Property _equatorialAim;
     properties::DoubleProperty _verticalFov;
+    properties::FloatProperty _ratio;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;

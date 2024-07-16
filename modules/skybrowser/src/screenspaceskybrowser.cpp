@@ -106,11 +106,19 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo EquatorialAimInfo = {
-        "EquatrialAim",
+        "EquatorialAim",
         "Equatorial Aim",
-        "The aim of the Sky Browser, given in equatorial coordinates Right Ascension (Ra)"
-        " and declination (dec).",
+        "The aim of the Sky Browser, given in equatorial coordinates Right Ascension "
+        "(Ra) and declination (dec).",
         openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RatioInfo = {
+        "Ratio",
+        "Ratio",
+        "The ratio of the dimensions of the sky browser. This is defined as width "
+        "divided by height.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     // This `ScreenSpaceRenderable` is used to display a screen space window showing the
@@ -144,6 +152,10 @@ namespace {
 
         // [[codegen::verbatim(EquatorialAimInfo.description)]]
         std::optional<glm::dvec2> equatorialAim;
+
+        // [[codegen::verbatim(RatioInfo.description)]]
+        std::optional<float> ratio;
+
     };
 #include "screenspaceskybrowser_codegen.cpp"
 } // namespace
@@ -159,13 +171,15 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     , _wwtCommunicator(dictionary)
     , _selectedImagesUrls(SelectedImagesUrlsInfo)
     , _selectedImagesOpacities(SelectedImagesOpacitiesInfo)
-    , _borderRadius(BorderRadiusInfo)
-    , _roll(RollInfo)
-    , _equatorialAim(EquatorialAimInfo)
+    , _borderRadius(BorderRadiusInfo, 0.0, 0.0, 1.0)
+    , _roll(RollInfo, 0.0, 0.0, 180.0)
+    , _equatorialAim(EquatorialAimInfo,
+        glm::dvec2(0.0), glm::dvec2(0.0, -90.0), glm::dvec2(360.0, 90.0)
+    )
     , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
     , _textureQuality(TextureQualityInfo, 1.f, 0.25f, 1.f)
     , _isHidden(IsHiddenInfo, true)
-
+    , _ratio(RatioInfo, 1.f, 0.01f, 1.0f)
 {
     _identifier = makeUniqueIdentifier(_identifier);
 
@@ -180,6 +194,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     _selectedImagesOpacities = p.selectedImagesOpacities.value_or(_selectedImagesOpacities);
     _selectedImagesUrls = p.selectedImagesUrls.value_or(_selectedImagesUrls);
     _borderRadius = p.borderRadius.value_or(_borderRadius);
+    _ratio = p.ratio.value_or(_ratio);
 
     addProperty(_isHidden);
     addProperty(_textureQuality);
@@ -189,6 +204,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     addProperty(_selectedImagesOpacities);
     addProperty(_selectedImagesUrls);
     addProperty(_borderRadius);
+    addProperty(_ratio);
 
     _useRadiusAzimuthElevation.onChange(
         [this]() {
@@ -213,6 +229,19 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     });
 
     _textureQuality.onChange([this]() {
+        updateTextureResolution();
+    });
+
+    _verticalFov.onChange([this]() {
+        _equatorialAimIsDirty = true;
+    });
+
+    _equatorialAim.onChange([this]() {
+        _equatorialAimIsDirty = true;
+    });
+
+    _ratio.onChange([this]() {
+        _wwtCommunicator.setRatio(_ratio);
         updateTextureResolution();
     });
     
