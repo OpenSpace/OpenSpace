@@ -2,7 +2,7 @@ local speck = asset.resource({
   Name = "Star Uncertainty Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_star_uncertainty_data",
-  Version = 2
+  Version = 1
 })
 
 
