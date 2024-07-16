@@ -100,59 +100,52 @@ namespace {
         return lhs < rhs;
     }
 
-    void setRenderableEnabled(std::string_view id, bool value) {
+    void queueScriptSynced(const std::string& script) {
         using namespace openspace;
         global::scriptEngine->queueScript(
-            std::format(
-                "openspace.setPropertyValueSingle('{}', {});",
-                std::format("Scene.{}.Renderable.Enabled", id),
-                value ? "true" : "false"
-            ),
+            script,
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
+    }
+
+    void setRenderableEnabled(std::string_view id, bool value) {
+        using namespace openspace;
+        queueScriptSynced(std::format(
+            "openspace.setPropertyValueSingle('{}', {});",
+            std::format("Scene.{}.Renderable.Enabled", id),
+            value ? "true" : "false"
+        ));
     };
 
     void setDefaultValueOrbitVisuals(bool shouldShowIfDefault) {
-        using namespace openspace;
         const std::string appearanceUri = "{defaultvalues_shape}.Renderable";
         if (shouldShowIfDefault) {
             // Draw using points
-            global::scriptEngine->queueScript(
-                std::format(
-                    "openspace.setPropertyValue('{0}.Appearance.Rendering', 1.0);"
-                    "openspace.setPropertyValue('{0}.Appearance.PointSize', 64.0);"
-                    "openspace.setPropertyValue('{0}.Appearance.EnableFade', false);"
-                    "openspace.setPropertyValue('{0}.Resolution', 100);",
-                    appearanceUri
-                ),
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            queueScriptSynced(std::format(
+                "openspace.setPropertyValue('{0}.Appearance.Rendering', 1.0);"
+                "openspace.setPropertyValue('{0}.Appearance.PointSize', 64.0);"
+                "openspace.setPropertyValue('{0}.Appearance.EnableFade', false);"
+                "openspace.setPropertyValue('{0}.Resolution', 100);",
+                appearanceUri
+            ));
         }
         else {
             // Draw using lines
-            global::scriptEngine->queueScript(
-                std::format(
-                    "openspace.setPropertyValue('{0}.Appearance.Rendering', 0.0);"
-                    "openspace.setPropertyValue('{0}.Appearance.EnableFade', true);",
-                    appearanceUri
-                ),
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            queueScriptSynced(std::format(
+                "openspace.setPropertyValue('{0}.Appearance.Rendering', 0.0);"
+                "openspace.setPropertyValue('{0}.Appearance.EnableFade', true);",
+                appearanceUri
+            ));
         }
     };
 
     // Set increased reach factors of all exoplanet renderables, to trigger fading out of
     // glyph cloud
     void setIncreasedReachfactors() {
-        using namespace openspace;
-        global::scriptEngine->queueScript(
+        queueScriptSynced(
             "openspace.setPropertyValue('{exoplanet}.ApproachFactor', 15000000.0)"
-            "openspace.setPropertyValue('{exoplanet_system}.ApproachFactor', 15000000.0)",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+            "openspace.setPropertyValue('{exoplanet_system}.ApproachFactor', 15000000.0)"
         );
     }
 
@@ -558,10 +551,8 @@ void DataViewer::initializeRenderables() {
     node.setValue("Renderable", renderable);
     node.setValue("GUI", gui);
 
-    global::scriptEngine->queueScript(
-        std::format("openspace.addSceneGraphNode({})", ghoul::formatLua(node)),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    queueScriptSynced(
+        std::format("openspace.addSceneGraphNode({})", ghoul::formatLua(node))
     );
 }
 
@@ -2143,41 +2134,30 @@ void DataViewer::renderSettingsMenuContent() {
     renderColumnSettingsModal();
 
     if (ImGui::Checkbox("Use fixed ring width", &useFixedWidth)) {
-        global::scriptEngine->queueScript(
+        queueScriptSynced(std::format(
+            "openspace.setPropertyValueSingle('{}', {})",
             std::format(
-                "openspace.setPropertyValueSingle('{}', {})",
-                std::format("Scene.{}.Renderable.UseFixedWidth",
-                    ExoplanetsExpertToolModule::GlyphCloudIdentifier
-                ),
-                useFixedWidth
+                "Scene.{}.Renderable.UseFixedWidth",
+                ExoplanetsExpertToolModule::GlyphCloudIdentifier
             ),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+            useFixedWidth
+        ));
     }
 
     if (ImGui::Checkbox("Show Kepler FOV cue", &showKepler)) {
-        global::scriptEngine->queueScript(
-            std::format(
-                "openspace.setPropertyValueSingle('{}', {})",
-                "Scene.KeplerPrism.Renderable.Enabled",
-                showKepler
-            ),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        queueScriptSynced(std::format(
+            "openspace.setPropertyValueSingle('{}', {})",
+            "Scene.KeplerPrism.Renderable.Enabled",
+            showKepler
+        ));
     }
 
     if (ImGui::Checkbox("Show line to Milky Way center", &showMilkyWayLine)) {
-        global::scriptEngine->queueScript(
-            std::format(
-                "openspace.setPropertyValueSingle('{}', {})",
-                "Scene.MilkyWayEarthLine.Renderable.Enabled",
-                showMilkyWayLine
-            ),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        queueScriptSynced(std::format(
+            "openspace.setPropertyValueSingle('{}', {})",
+            "Scene.MilkyWayEarthLine.Renderable.Enabled",
+            showMilkyWayLine
+        ));
     }
 
     ImGui::Separator();
@@ -2206,15 +2186,11 @@ void DataViewer::renderSettingsMenuContent() {
         );
 
         if (changed) {
-            global::scriptEngine->queueScript(
-                std::format(
-                    "openspace.setPropertyValueSingle('Scene.{}.Renderable.BillboardMinMaxSize', {})",
-                    ExoplanetsExpertToolModule::GlyphCloudIdentifier,
-                    ghoul::to_string(glm::dvec2(DefaultGlyphSize * glyphSizeScale))
-                ),
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            queueScriptSynced(std::format(
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.BillboardMinMaxSize', {})",
+                ExoplanetsExpertToolModule::GlyphCloudIdentifier,
+                ghoul::to_string(glm::dvec2(DefaultGlyphSize * glyphSizeScale))
+            ));
         }
     }
 }
@@ -2410,13 +2386,12 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                 // we can't do it until the system is added to the scene
                 setIncreasedReachfactors();
 
-                global::scriptEngine->queueScript(
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + hostIdentifier + "');"
+                queueScriptSynced(std::format(
+                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '{}');"
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
                     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
-                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                    scripting::ScriptEngine::ShouldSendToRemote::Yes
-                );
+                    hostIdentifier
+                ));
             }
 
             ImGui::SameLine();
@@ -2540,28 +2515,20 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                     std::string propertyId = std::format(
                         "Scene.{}.Renderable.Appearance.Color", planetTrailId
                     );
-                    global::scriptEngine->queueScript(
-                        std::format(
-                            "openspace.setPropertyValueSingle('{}', {});",
-                            propertyId, ghoul::to_string(color)
-                        ),
-                        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                        scripting::ScriptEngine::ShouldSendToRemote::Yes
-                    );
+                    queueScriptSynced(std::format(
+                        "openspace.setPropertyValueSingle('{}', {});",
+                        propertyId, ghoul::to_string(color)
+                    ));
                 }
 
                 if (renderable(planetDiscId)) {
                     std::string propertyId = std::format(
                         "Scene.{}.Renderable.MultiplyColor", planetDiscId
                     );
-                    global::scriptEngine->queueScript(
-                        std::format(
-                            "openspace.setPropertyValueSingle('{}', {});",
-                            propertyId, ghoul::to_string(color)
-                        ),
-                        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                        scripting::ScriptEngine::ShouldSendToRemote::Yes
-                    );
+                    queueScriptSynced(std::format(
+                        "openspace.setPropertyValueSingle('{}', {});",
+                        propertyId, ghoul::to_string(color)
+                    ));
                 }
             };
 
@@ -2573,15 +2540,11 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                 std::string appearance =
                     std::format("Scene.{}.Renderable.Appearance", id);
 
-                global::scriptEngine->queueScript(
-                    std::format(
-                        "openspace.setPropertyValueSingle('{0}.LineWidth', {1});"
-                        "openspace.setPropertyValueSingle('{0}.Fade', {2});",
-                        appearance, width, fade
-                    ),
-                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                    scripting::ScriptEngine::ShouldSendToRemote::Yes
-                );
+                queueScriptSynced(std::format(
+                    "openspace.setPropertyValueSingle('{0}.LineWidth', {1});"
+                    "openspace.setPropertyValueSingle('{0}.Fade', {2});",
+                    appearance, width, fade
+                ));
             };
 
             auto resetTrailWidth = [&setTrailThicknessAndFade](const ExoplanetItem& p) {
@@ -2925,10 +2888,8 @@ void DataViewer::updateSelectionInRenderable() {
         ExoplanetsExpertToolModule::GlyphCloudIdentifier
     );
 
-    global::scriptEngine->queueScript(
-        "openspace.setPropertyValueSingle('" + uri + "', { " + indices + " })",
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    queueScriptSynced(
+        "openspace.setPropertyValueSingle('" + uri + "', { " + indices + " })"
     );
 }
 
@@ -2944,7 +2905,7 @@ void DataViewer::addOrTargetPlanet(const ExoplanetItem& item) {
         // we can't do it until the system is added to the scene
         setIncreasedReachfactors();
 
-        global::scriptEngine->queueScript(
+        queueScriptSynced(
             "openspace.setPropertyValueSingle("
                 "'NavigationHandler.OrbitalNavigator.Anchor',"
                 "'" + planetIdentifier(item) + "'"
@@ -2953,9 +2914,7 @@ void DataViewer::addOrTargetPlanet(const ExoplanetItem& item) {
             "openspace.setPropertyValueSingle("
                 "'NavigationHandler.OrbitalNavigator.RetargetAnchor', "
                 "nil"
-            ");",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+            ");"
         );
     }
 }
@@ -2970,56 +2929,41 @@ bool DataViewer::systemCanBeAdded(const std::string& host) const {
 }
 
 void DataViewer::addExoplanetSystem(const std::string& host) const {
-    global::scriptEngine->queueScript(
-        "openspace.exoplanets.addExoplanetSystem('" + host + "')",
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
-
-    global::scriptEngine->queueScript(
-        "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)",
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    queueScriptSynced("openspace.exoplanets.addExoplanetSystem('" + host + "')");
+    queueScriptSynced("openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)"); // TODO: remove
 }
 
 void DataViewer::refocusView() const {
-    global::scriptEngine->queueScript(
+    queueScriptSynced(
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');"
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
-        "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
     );
 }
 
 void DataViewer::flyToOverview() const {
     // Create a linear path to Earth
-    global::scriptEngine->queueScript(
+    queueScriptSynced(
         "openspace.pathnavigation.createPath({"
             "TargetType = 'Node', "
             "Target = 'Earth', "
             "Height = 5e+19, " // distance is what matters
             "Duration = 4, "
             "PathType = 'Linear'"
-        "});",
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        "});"
     );
 }
 
 void DataViewer::flyToInsideView() const {
     // Create a linear path to Earth
-    global::scriptEngine->queueScript(
+    queueScriptSynced(
         "openspace.pathnavigation.createPath({"
             "TargetType = 'Node', "
             "Target = 'Earth', "
             "Height = 5e+13, " // distance is what matters
             "Duration = 4, "
             "PathType = 'Linear'"
-        "});",
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        "});"
     );
 }
 
@@ -3028,14 +2972,12 @@ void DataViewer::flyToStar(std::string_view hostIdentifier) const {
     // we can't do it until the system is added to the scene
     setIncreasedReachfactors();
 
-    global::scriptEngine->queueScript(
+    queueScriptSynced(
         "openspace.setPropertyValueSingle("
             "'NavigationHandler.OrbitalNavigator.Anchor',"
             "'" + std::string(hostIdentifier) +
         "')"
-        "openspace.pathnavigation.zoomToDistanceRelative(100.0, 5.0);",
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        "openspace.pathnavigation.zoomToDistanceRelative(100.0, 5.0);"
     );
 }
 
