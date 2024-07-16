@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Brown Dwarf Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_brown_dwarfs_speck",
-  Version = 4
+  Version = 1
 })
 
 
