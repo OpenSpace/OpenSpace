@@ -516,7 +516,7 @@ void createExoplanetSystem(const std::string& starName,
     const std::string toEarthArrow = "{"
         "Identifier = '" + starIdentifier + "_EarthDirectionArrow',"
         "Renderable = {"
-            "Type = 'RenderableNodeDirectionHint',"
+            "Type = 'RenderableNodeArrow',"
             "StartNode = '" + starIdentifier + "',"
             "EndNode = 'Earth',"
             "Offset = " + std::to_string(1.5 * maxSemiMajor) + ","
