@@ -1,5 +1,5 @@
 local textures = asset.resource({
-  Name = "Point Texture",
+  Name = "Point Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_point_textures",
   Version = 1

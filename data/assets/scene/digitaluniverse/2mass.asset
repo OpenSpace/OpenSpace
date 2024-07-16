@@ -1,8 +1,8 @@
 local textures = asset.resource({
-  Name = "2MASS Textures",
+  Name = "Point Textures",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_2mass_textures",
-  Version = 2
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
 })
 
 local speck = asset.resource({
