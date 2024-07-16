@@ -83,13 +83,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
         "Draw Labels",
-        "Determines whether labels should be drawn or hidden"
+        "Determines whether labels should be drawn or hidden."
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the astronomical objects"
+        "The labels for the astronomical objects."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentIndexInfo = {
@@ -122,7 +122,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
 
     };
 #include "renderableexoplanetglyphcloud_codegen.cpp"
