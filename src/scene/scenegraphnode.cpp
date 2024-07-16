@@ -179,14 +179,14 @@ namespace {
         "GuiOrderNumber",
         "Gui Order Number",
         "This is an optional numerical value that will affect the sorting of this scene "
-        "graph node in relation ot its neighbors in the user interface. Nodes with the "
+        "graph node in relation to its neighbors in the GUI. Nodes with the "
         "same value will be sorted alphabetically.",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseGuiOrderInfo = {
         "UseGuiOrder",
-        "UseGuiOrder",
+        "Use Gui Order",
         "If true, use the 'GuiOrderNumber' to place this scene graph nodes in a sorted "
         "way in relation to its neighbors in the GUI",
         openspace::properties::Property::Visibility::Hidden
@@ -329,7 +329,7 @@ namespace {
 
             // If this value is specified, the scene graph node will be ordered in
             // relation to its neighbors in the GUI based on this value, so that nodes
-            // with a higher value appear later in the list. Scene graph noeds with the
+            // with a higher value appear later in the list. Scene graph nodes with the
             // same value will be sorted alphabetically.
             //
             // The nodes without a given value will be placed at the bottom of the list
