@@ -124,6 +124,8 @@ struct WindowDelegate {
 
     glm::vec2 (*mousePositionViewportRelative)(const glm::vec2& mousePosition) =
         [](const glm::vec2&) { return glm::vec2(0); };
+
+    void (*setStatisticsGraphScale)(float scale) = [](float) {};
 };
 
 } // namespace openspace

@@ -156,16 +156,16 @@ documentation::Documentation RenderableTrailTrajectory::Documentation() {
 
 RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
+    , _sweepChunkSize(SweepChunkSizeInfo, 200, 50, 5000)
+    , _enableSweepChunking(EnableSweepChunkingInfo, false)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
     , _sampleInterval(SampleIntervalInfo, 2.0, 2.0, 1e6)
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
     , _renderFullTrail(RenderFullPathInfo, false)
+    , _numberOfReplacementPoints(AccurateTrailPositionsInfo, 100, 0, 1000)
     , _maxVertex(glm::vec3(-std::numeric_limits<float>::max()))
     , _minVertex(glm::vec3(std::numeric_limits<float>::max()))
-    , _sweepChunkSize(SweepChunkSizeInfo, 200, 50, 5000)
-    , _enableSweepChunking(EnableSweepChunkingInfo, false)
-    , _numberOfReplacementPoints(AccurateTrailPositionsInfo, 100, 0, 1000)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

@@ -27,7 +27,7 @@ local C2019Q4BorisovTrail = {
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2015 JAN 01 00:00:00",
     EndTime = "2050 JAN 01 00:00:00",
-    SampleInterval = 60 * 60 * 24 -- = 86 400 seconds in 1 day
+    SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
     Name = "C/2019 Q4 Borisov Trail",

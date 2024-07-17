@@ -37,6 +37,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
@@ -63,13 +64,16 @@ std::vector<documentation::Documentation> DebuggingModule::documentations() cons
 
 scripting::LuaLibrary DebuggingModule::luaLibrary() const {
     return {
-        "debugging",
-        {
+        .name = "debugging",
+        .functions = {
             codegen::lua::RenderCameraPath,
             codegen::lua::RemoveRenderedCameraPath,
             codegen::lua::RenderPathControlPoints,
             codegen::lua::RemovePathControlPoints,
             codegen::lua::AddCartesianAxes
+        },
+        .scripts = {
+            absPath("${MODULE_DEBUGGING}/scripts/axes.lua")
         }
     };
 }

@@ -52,9 +52,9 @@ public:
     static constexpr char URISeparator = '.';
 
     struct PropertyOwnerInfo {
-        std::string identifier;
-        std::string guiName;
-        std::string description;
+        std::string identifier = "";
+        std::string guiName = "";
+        std::string description = "";
     };
 
     /**

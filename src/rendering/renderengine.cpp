@@ -146,6 +146,15 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo StatisticsScaleInfo = {
+        "StatisticsScale",
+        "Statistics Scale",
+        "This value is scaling the statatistics window by the provided amount. For flat "
+        "projections this is rarely necessary, but it is important when using a setup "
+        "where the cornders of the image are masked out.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
         "ScreenshotUseDate",
         "Screenshot Folder uses Date",
@@ -313,6 +322,7 @@ RenderEngine::RenderEngine()
     , _screenshotWindowIds(ScreenshotWindowIdsInfo)
     , _applyWarping(ApplyWarpingInfo, false)
     , _showStatistics(ShowStatisticsInfo, false)
+    , _statisticsScale(StatisticsScaleInfo, 1.f, 0.f, 1.f)
     , _screenshotUseDate(ScreenshotUseDateInfo, false)
     , _showFrameInformation(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
@@ -387,8 +397,16 @@ RenderEngine::RenderEngine()
 
     _showStatistics.onChange([this]() {
         global::windowDelegate->showStatistics(_showStatistics);
+        // We need to reset the scale as it is not updated when the statistics window is
+        // not currently shown
+        global::windowDelegate->setStatisticsGraphScale(_statisticsScale);
     });
     addProperty(_showStatistics);
+
+    _statisticsScale.onChange([this]() {
+        global::windowDelegate->setStatisticsGraphScale(_statisticsScale);
+    });
+    addProperty(_statisticsScale);
 
     _screenshotUseDate.onChange([this]() {
         // If there is no screenshot folder, don't bother with handling the change

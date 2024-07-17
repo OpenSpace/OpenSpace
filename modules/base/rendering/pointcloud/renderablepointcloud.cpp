@@ -267,24 +267,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
-        "Enabled",
-        "Size Mapping Enabled",
-        "Decides whether size mapping should be enabled. If true and at least one column "
-        "was loaded as an option for size mapping, the chosen data column will be used "
-        "to scale the size of the points.",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SizeMappingOptionInfo = {
-        "Parameter",
-        "Parameter Option",
-        "The name of a data parameter used for scaling of the points. The parameter "
-        "value will be used as a multiplicative factor to scale the size of the points. "
-        "Note that they may still be scaled by max size adjustment effects.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable Point Outline",
@@ -653,8 +635,8 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _colorSettings(dictionary)
     , _fading(dictionary)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
-    , _drawElements(DrawElementsInfo, true)
     , _useRotation(UseOrientationDataInfo, false)
+    , _drawElements(DrawElementsInfo, true)
     , _renderOption(
         OrientationRenderOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown

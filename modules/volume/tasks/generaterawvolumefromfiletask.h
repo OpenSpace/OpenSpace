@@ -22,41 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
+#ifndef __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMEFROMFILETASK___H__
+#define __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMEFROMFILETASK___H__
 
-#include <modules/volume/rendering/renderabletimevaryingvolume.h>
-#include <modules/volume/tasks/generaterawvolumetask.h>
-#include <modules/volume/tasks/generaterawvolumefromfiletask.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/task.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
 
-namespace openspace {
+#include <ghoul/glm.h>
+#include <filesystem>
+#include <string>
 
-using namespace volume;
+namespace openspace::volume {
 
-VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
+class GenerateRawVolumeFromFileTask : public Task {
+public:
+    GenerateRawVolumeFromFileTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation Documentation();
 
-void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* rFactory =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(rFactory, "No renderable factory existed");
-    rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
+private:
+    std::filesystem::path _inputFilePath;
+    std::filesystem::path _rawVolumeOutputPath;
+    std::filesystem::path _dictionaryOutputPath;
+    std::string _time;
+    std::string _dataValue;
 
-    ghoul::TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
-    ghoul_assert(tFactory, "No task factory existed");
-    tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
-    tFactory->registerClass<GenerateRawVolumeFromFileTask>("GenerateRawVolumeFromFileTask");
-}
+    glm::uvec3 _dimensions = glm::uvec3(0);
+    glm::vec3 _lowerDomainBound = glm::vec3(0.f);
+    glm::vec3 _upperDomainBound = glm::vec3(0.f);
+};
 
-std::vector<documentation::Documentation> VolumeModule::documentations() const {
-    return {
-        RenderableTimeVaryingVolume::Documentation(),
-        GenerateRawVolumeTask::Documentation()
-    };
-}
+} // namespace openspace::volume
 
-} // namespace openspace
+#endif // __OPENSPACE_MODULE_VOLUME___GENERATERAWVOLUMEFROMFILETASK___H__
