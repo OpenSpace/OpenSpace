@@ -27,6 +27,10 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/font/font.h>
+
 namespace openspace {
 
 class DebuggingModule : public OpenSpaceModule {
@@ -41,6 +45,14 @@ public:
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
+    void internalInitializeGL() override;
+
+private:
+    properties::BoolProperty _showStatistics;
+    properties::FloatProperty _statisticsScale;
+    properties::BoolProperty _showFrameInformation;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
 };
 
 } // namespace openspace

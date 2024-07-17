@@ -186,10 +186,7 @@ private:
 
     properties::IntListProperty _screenshotWindowIds;
     properties::BoolProperty _applyWarping;
-    properties::BoolProperty _showStatistics;
-    properties::FloatProperty _statisticsScale;
     properties::BoolProperty _screenshotUseDate;
-    properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
@@ -218,7 +215,6 @@ private:
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontCameraInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontVersionInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontShutdown;
