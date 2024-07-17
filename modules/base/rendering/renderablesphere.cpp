@@ -100,6 +100,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo IsUsingColorMapInfo = {
+        "IsUsingColorMap",
+        "Is Using Color Map",
+        "Used to toggle color map on or off on sphere. Mainly used for grayscale textures "
+        "from data, such as magnetograms for the sun.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size [[codegen::greater(0.f)]];
@@ -128,7 +136,7 @@ namespace {
         // [[codegen::verbatim(FadeOutThresholdInfo.description)]]
         std::optional<float> fadeOutThreshold [[codegen::inrange(0.0, 1.0)]];
 
-        // [[codegen::verbatim()]]
+        // Path to transferfunction / colormap
         std::optional<std::filesystem::path> colorMap;
 
     };
@@ -150,6 +158,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _disableFadeInDistance(DisableFadeInOutInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
     , _fadeOutThreshold(FadeOutThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
+    , _isUsingColorMap(IsUsingColorMapInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -196,6 +205,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     if (p.colorMap.has_value()) {
         _transferFunctionPath = p.colorMap.value_or(_transferFunctionPath);
         _isUsingColorMap = true;
+        addProperty(_isUsingColorMap);
     }
 }
 
@@ -330,7 +340,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     if (_isUsingColorMap) {
         transferfunctionUnit.activate();
         _transferFunction->bind();
-//        _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
+        _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
     }
 
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);

@@ -310,9 +310,9 @@ void RenderableTimeVaryingSphere::setMinMaxValues(
     const void* rawData = t->pixelData();
     const float* pixelData = static_cast<const float*>(rawData);
     size_t dataSize = t->dimensions().x * t->dimensions().y;
-    float min = *std::min_element(pixelData, pixelData);
-    float max = *std::max_element(pixelData, pixelData);
-    file.dataMinMax = { min, max };
+    float min = *std::min_element(pixelData, pixelData + dataSize);
+    float max = *std::max_element(pixelData, pixelData + dataSize);
+    file.dataMinMax = glm::vec2(min, max);
 }
 
 void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {

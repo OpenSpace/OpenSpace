@@ -32,7 +32,7 @@ in float vs_screenSpaceDepth;
 uniform sampler2D colorTexture;
 uniform bool usingTransferFunction;
 uniform sampler1D transferFunction;
-//uniform vec2 dataMinMaxValues;
+uniform vec2 dataMinMaxValues;
 uniform float opacity;
 uniform bool mirrorTexture;
 
@@ -46,10 +46,10 @@ Fragment getFragment() {
   }
   if (usingTransferFunction) {
     vec4 dataValue = texture(colorTexture, texCoord);
-    //float lookUpVal =
-    //  (dataValue.x - dataMinMaxValues.x) /
-    //  (dataMinMaxValues.y - dataMinMaxValues.x);
-    frag.color = texture(transferFunction, dataValue.x);
+    float lookUpVal =
+      (dataValue.x - dataMinMaxValues.x) /
+      (dataMinMaxValues.y - dataMinMaxValues.x);
+    frag.color = texture(transferFunction, lookUpVal);
   }
   else {
     frag.color = texture(colorTexture, texCoord);
