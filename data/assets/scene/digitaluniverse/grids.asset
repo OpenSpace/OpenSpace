@@ -271,7 +271,7 @@ local Plane1lh = {
   GUI = {
     Name = "1lh Grid",
     Path = "/Other/Grids",
-    OrderNumber = LightHour
+    OrderingNumber = LightHour
   }
 }
 
@@ -303,7 +303,7 @@ local Plane1ld = {
   GUI = {
     Name = "1ld Grid",
     Path = "/Other/Grids",
-    OrderNumber = LightDay
+    OrderingNumber = LightDay
   }
 }
 
@@ -335,7 +335,7 @@ local Plane1lm = {
   GUI = {
     Name = "1lm Grid",
     Path = "/Other/Grids",
-    OrderNumber = LightMonth
+    OrderingNumber = LightMonth
   }
 }
 
@@ -367,7 +367,7 @@ local Plane1ly = {
   GUI = {
     Name = "1ly Grid",
     Path = "/Other/Grids",
-    OrderNumber = LightYear
+    OrderingNumber = LightYear
   }
 }
 
@@ -399,7 +399,7 @@ local Plane10ly = {
   GUI = {
     Name = "10ly Grid",
     Path = "/Other/Grids",
-    OrderNumber = 10 * LightYear
+    OrderingNumber = 10 * LightYear
   }
 }
 
@@ -431,7 +431,7 @@ local Plane100ly = {
   GUI = {
     Name = "100ly Grid",
     Path = "/Other/Grids",
-    OrderNumber = 100 * LightYear
+    OrderingNumber = 100 * LightYear
   }
 }
 
@@ -463,7 +463,7 @@ local Plane1kly = {
   GUI = {
     Name = "1kly Grid",
     Path = "/Other/Grids",
-    OrderNumber = 1000 * LightYear
+    OrderingNumber = 1000 * LightYear
   }
 }
 
@@ -495,7 +495,7 @@ local Plane10kly = {
   GUI = {
     Name = "10kly Grid",
     Path = "/Other/Grids",
-    OrderNumber = 10000 * LightYear
+    OrderingNumber = 10000 * LightYear
   }
 }
 
@@ -522,7 +522,7 @@ local Plane100kly = {
   GUI = {
     Name = "100kly Grid",
     Path = "/Other/Grids",
-    OrderNumber = 100000 * LightYear
+    OrderingNumber = 100000 * LightYear
   }
 }
 
@@ -549,7 +549,7 @@ local Plane1Mly = {
   GUI = {
     Name = "1Mly Grid",
     Path = "/Other/Grids",
-    OrderNumber = 1E6 * LightYear
+    OrderingNumber = 1E6 * LightYear
   }
 }
 
@@ -576,7 +576,7 @@ local Plane10Mly = {
   GUI = {
     Name = "10Mly Grid",
     Path = "/Other/Grids",
-    OrderNumber = 10E6 * LightYear
+    OrderingNumber = 10E6 * LightYear
   }
 }
 
@@ -603,7 +603,7 @@ local Plane100Mly = {
   GUI = {
     Name = "100Mly Grid",
     Path = "/Other/Grids",
-    OrderNumber = 100E6 * LightYear
+    OrderingNumber = 100E6 * LightYear
   }
 }
 
@@ -630,7 +630,7 @@ local Plane20Gly = {
   GUI = {
     Name = "20Gly Grid",
     Path = "/Other/Grids",
-    OrderNumber = 20E9 * LightYear
+    OrderingNumber = 20E9 * LightYear
   }
 }
 

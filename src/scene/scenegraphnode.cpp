@@ -176,19 +176,19 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiOrderInfo = {
-        "GuiOrderNumber",
-        "Gui Order Number",
+        "GuiOrderingNumber",
+        "Gui Ordering Number",
         "This is an optional numerical value that will affect the sorting of this scene "
-        "graph node in relation to its neighbors in the GUI. Nodes with the "
-        "same value will be sorted alphabetically.",
+        "graph node in relation to its neighbors in the GUI. Nodes with the same value "
+        "will be sorted alphabetically.",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseGuiOrderInfo = {
-        "UseGuiOrder",
-        "Use Gui Order",
-        "If true, use the 'GuiOrderNumber' to place this scene graph nodes in a sorted "
-        "way in relation to its neighbors in the GUI",
+        "UseGuiOrdering",
+        "Use Gui Ordering",
+        "If true, use the 'GuiOrderingNumber' to place this scene graph node in a "
+        "sorted way in relation to its neighbors in the GUI",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -334,7 +334,7 @@ namespace {
             //
             // The nodes without a given value will be placed at the bottom of the list
             // and sorted alphabetically.
-            std::optional<double> orderNumber;
+            std::optional<double> orderingNumber;
         };
         // Additional information that is passed to GUI applications. These are all hints
         // and do not have any impact on the actual function of the scene graph node
@@ -389,9 +389,9 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
             result->_guiPath = *p.gui->path;
         }
 
-        result->_useGuiOrder = p.gui->orderNumber.has_value();
-        if (p.gui->orderNumber.has_value()) {
-            result->_guiOrderNumber = *p.gui->orderNumber;
+        result->_useGuiOrdering = p.gui->orderingNumber.has_value();
+        if (p.gui->orderingNumber.has_value()) {
+            result->_guiOrderingNumber = *p.gui->orderingNumber;
         }
     }
 
@@ -543,8 +543,8 @@ SceneGraphNode::SceneGraphNode()
     , _guiPath(GuiPathInfo, "/")
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
-    , _guiOrderNumber(GuiOrderInfo, 0.f)
-    , _useGuiOrder(UseGuiOrderInfo, false)
+    , _guiOrderingNumber(GuiOrderInfo, 0.f)
+    , _useGuiOrdering(UseGuiOrderInfo, false)
     , _transform {
         ghoul::mm_unique_ptr<Translation>(
             global::memoryManager->PersistentMemory.alloc<StaticTranslation>()
@@ -626,8 +626,8 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_guiDescription);
     addProperty(_guiHidden);
     addProperty(_guiPath);
-    addProperty(_guiOrderNumber);
-    addProperty(_useGuiOrder);
+    addProperty(_guiOrderingNumber);
+    addProperty(_useGuiOrdering);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -1149,14 +1149,6 @@ glm::dvec3 SceneGraphNode::worldScale() const {
 
 std::string SceneGraphNode::guiPath() const {
     return _guiPath;
-}
-
-float SceneGraphNode::guiOrderNumber() const {
-    return _guiOrderNumber;
-}
-
-bool SceneGraphNode::useGuiOrder() const {
-    return _useGuiOrder;
 }
 
 bool SceneGraphNode::hasGuiHintHidden() const {

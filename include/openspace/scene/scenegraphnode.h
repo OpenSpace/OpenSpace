@@ -146,8 +146,6 @@ public:
     Renderable* renderable();
 
     std::string guiPath() const;
-    float guiOrderNumber() const;
-    bool useGuiOrder() const;
     bool hasGuiHintHidden() const;
     void setGuiHintHidden(bool value);
 
@@ -181,8 +179,8 @@ private:
     properties::StringProperty _guiPath;
     properties::StringProperty _guiDisplayName;
     properties::StringProperty _guiDescription;
-    properties::FloatProperty _guiOrderNumber;
-    properties::BoolProperty _useGuiOrder;
+    properties::FloatProperty _guiOrderingNumber;
+    properties::BoolProperty _useGuiOrdering;
 
     // Transformation defined by translation, rotation and scale
     struct {
