@@ -219,6 +219,38 @@ void createExoplanetSystem(const std::string& starName,
         scripting::ScriptEngine::ShouldSendToRemote::No
     );
 
+    // Add a label for the star.
+    // The fade values are set based on the values for the Sun label
+    const std::string starLabel = "{"
+        "Identifier = '" + starIdentifier + "_Label',"
+        "Parent = '" + starIdentifier + "',"
+        "Renderable = {"
+          "Type = 'RenderableLabel',"
+          "Enabled = false,"
+          "Text = '" + sanitizedStarName + "',"
+          "FontSize = 70.0,"
+          "Size = 14.17,"
+          "MinMaxSize = { 1, 50 },"
+          "EnableFading = true,"
+          "FadeUnit = 'pc',"
+          "FadeDistances = { 1.33, 15.0 },"
+          "FadeWidths = {1.0, 20.0}"
+        "},"
+        "Tag = {'exoplanet_system_labels'},"
+        "GUI = {"
+            "Name = '" + sanitizedStarName + " Label',"
+            "Path = '" + guiPath + "'"
+        "}"
+    "}";
+
+    // No sync or send because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
+    global::scriptEngine->queueScript(
+        "openspace.addSceneGraphNode(" + starLabel + ");",
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
+    );
+
     // Planets
     for (size_t i = 0; i < system.planetNames.size(); i++) {
         // Note that we are here overriding some invalid parameters in the planet data.
