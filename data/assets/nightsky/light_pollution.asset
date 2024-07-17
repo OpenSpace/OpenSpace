@@ -42,7 +42,6 @@ local LightPollutionSphere = {
     Orientation = "Inside",
     MirrorTexture = true,
     FadeOutThreshold = 1.00,
-    Background = true,
     RenderBinMode = "PostDeferredTransparent",
     Enabled = asset.enabled
   },
@@ -51,7 +50,7 @@ local LightPollutionSphere = {
     Description = [[A sphere used to simulate the effect of light pollution on
       the night sky. Different pollution levels can be set using the provided actions.
       These alter the opacity of the sphere.]],
-    Path = "/Other/Night Sky",
+    Path = "/Night Sky/Effects",
     Hidden = false
   }
 }
