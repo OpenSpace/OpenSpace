@@ -274,10 +274,10 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(ReloadGui)
 
   openspace.clearKey("Shift+Up")
-  openspace.actiion.removeAction(DateToNowImmediate)
+  openspace.action.removeAction(DateToNowImmediate)
 
   openspace.clearKey("Up")
-  openspace.actiion.removeAction(DateToNowInterpolate)
+  openspace.action.removeAction(DateToNowInterpolate)
 
   openspace.clearKey("Shift+Down")
   openspace.action.removeAction(RealTimeDeltaStepImmediate)
