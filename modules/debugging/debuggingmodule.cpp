@@ -161,8 +161,7 @@ scripting::LuaLibrary DebuggingModule::luaLibrary() const {
             codegen::lua::RenderCameraPath,
             codegen::lua::RemoveRenderedCameraPath,
             codegen::lua::RenderPathControlPoints,
-            codegen::lua::RemovePathControlPoints,
-            codegen::lua::AddCartesianAxes
+            codegen::lua::RemovePathControlPoints
         },
         .scripts = {
             absPath("${MODULE_DEBUGGING}/scripts/axes.lua")
