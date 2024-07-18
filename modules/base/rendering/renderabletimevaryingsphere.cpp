@@ -119,6 +119,12 @@ namespace {
         "This value specifies which index in the fits file to extract and use as texture",
         openspace::properties::Property::Visibility::User
     };
+    constexpr openspace::properties::Property::PropertyInfo TextureFilterInfo = {
+        "TextureFilter",
+        "Texture Filter",
+        "Option to choose nearest neighobr or linear filter to texture.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
     constexpr openspace::properties::Property::PropertyInfo DeleteDownloadsOnShutdown = {
         "DeleteDownloadsOnShutdown",
         "Delete Downloads On Shutdown",
@@ -150,6 +156,12 @@ namespace {
         // An index specifying which layer in the fits file to display
         std::optional<int> fitsLayer;
         std::optional<bool> deleteDownloadsOnShutdown;
+        enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::TextureFilter)]] TextureFilter {
+            NearestNeighbor,
+            Linear,
+            Unspecified
+        };
+        std::optional<TextureFilter> textureFilter;
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -161,11 +173,12 @@ documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
 }
 
 RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
-                                                      const ghoul::Dictionary& dictionary)
+    const ghoul::Dictionary& dictionary)
     : RenderableSphere(dictionary)
     , _textureSourcePath(TextureSourceInfo)
     , _fitsLayer(FitsLayerInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _deleteDownloadsOnShutdown(DeleteDownloadsOnShutdown, true)
+    , _textureFilterProperty(TextureFilterInfo, properties::OptionProperty::DisplayType::Dropdown)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -184,6 +197,17 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
     }
     _deleteDownloadsOnShutdown =
         p.deleteDownloadsOnShutdown.value_or(_deleteDownloadsOnShutdown);
+
+    _textureFilterProperty.addOptions({
+        {static_cast<int>(TextureFilter::NearestNeighbor), "Nearest"},
+        {static_cast<int>(TextureFilter::Linear), "Linear"}
+    });
+    if (p.textureFilter.has_value()) {
+        _textureFilter = codegen::map<TextureFilter>(*p.textureFilter);
+    }
+    else {
+        _textureFilter = TextureFilter::Unspecified;
+    }
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
@@ -199,6 +223,7 @@ void RenderableTimeVaryingSphere::initializeGL() {
         loadTexture();
     }
     addProperty(_textureSourcePath);
+    addProperty(_textureFilterProperty);
     definePropertyCallbackFunctions();
 }
 
@@ -261,7 +286,15 @@ void RenderableTimeVaryingSphere::readFileFromFits(std::filesystem::path path) {
     //newFile.time = extractTriggerTimeFromISO8601FileName(path);
     newFile.time = extractTriggerTimeFromFitsFileName(path);
     std::unique_ptr<ghoul::opengl::Texture> t = loadTextureFromFits(path, _fitsLayer);
-    t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+    if (_textureFilter == TextureFilter::NearestNeighbor ||
+        _textureFilter == TextureFilter::Unspecified)
+    {
+        t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+    }
+    else if(_textureFilter == TextureFilter::Linear) {
+        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    }
+
     setMinMaxValues(t, newFile);
     newFile.texture = std::move(t);
 
@@ -286,7 +319,14 @@ void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) 
 
     t->setInternalFormat(GL_COMPRESSED_RGBA);
     t->uploadTexture();
-    t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    if (_textureFilter == TextureFilter::Linear ||
+        _textureFilter == TextureFilter::Unspecified)
+    {
+        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    }
+    else if (_textureFilter == TextureFilter::NearestNeighbor) {
+        t->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+    }
     t->purgeFromRAM();
 
     setMinMaxValues(t, newFile);
@@ -496,6 +536,21 @@ void RenderableTimeVaryingSphere::definePropertyCallbackFunctions() {
                 }
                 loadTexture();
             }
+        }
+    });
+
+    _textureFilterProperty.onChange([this]() {
+        switch (_textureFilterProperty) {
+        case(0):
+            for (auto file = _files.begin(); file != _files.end(); ++file) {
+                file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
+            }
+            break;
+        case(1):
+            for (auto file = _files.begin(); file != _files.end(); ++file) {
+                file->texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+            }
+            break;
         }
     });
 }

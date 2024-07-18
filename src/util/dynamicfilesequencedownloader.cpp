@@ -53,8 +53,8 @@ std::string formulateDataHttpRequest(double minTime, double maxTime,
     std::string min = std::string(Time(minTime).ISO8601());
     std::string max = std::string(Time(maxTime).ISO8601());
 
-    std::string minText = "&time.min=" + min; //min
-    std::string maxText = "&time.max=" + max; //max
+    std::string minText = "&time.min=" + min;
+    std::string maxText = "&time.max=" + max;
 
     return baseURL + std::to_string(dataID.first) + minText + maxText;
 }

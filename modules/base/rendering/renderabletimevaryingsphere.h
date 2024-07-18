@@ -49,6 +49,12 @@ public:
         DynamicLoading = 1,
         DynamicDownloading = 2
     };
+    enum class TextureFilter {
+        NearestNeighbor = 0,
+        Linear = 1,
+        Unspecified =2
+    };
+
     RenderableTimeVaryingSphere(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
@@ -113,6 +119,8 @@ private:
     //  DynamicFileSequenceDownloader downloads and updates the renderable with
     //  data downloaded from the web.
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;
+    properties::OptionProperty _textureFilterProperty;
+    TextureFilter _textureFilter;
 
     std::vector<File> _files;
     int _activeTriggerTimeIndex = 0;

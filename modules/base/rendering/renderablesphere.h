@@ -73,12 +73,13 @@ protected:
     glm::vec2 _dataMinMaxValues;
     ghoul::opengl::ProgramObject* _shader = nullptr;
     properties::BoolProperty _isUsingColorMap;
-private:
 
+private:
+    void definePropertyCallbackFunctions();
     std::unique_ptr<Sphere> _sphere;
     bool _sphereIsDirty = false;
 
-    std::filesystem::path _transferFunctionPath;
+    properties::StringProperty _transferFunctionPath;
     std::unique_ptr<TransferFunction> _transferFunction;
 
 

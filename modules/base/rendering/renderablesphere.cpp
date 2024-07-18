@@ -40,6 +40,8 @@
 #include <optional>
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableSphere";
+
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
@@ -108,6 +110,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo TransferFunctionPathInfo = {
+        "TransferFunctionPath",
+        "Transfer Function Path",
+        "Color Table/Transfer Function to use mainly for grayscale data such as "
+        "magnetograms on the sun.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size [[codegen::greater(0.f)]];
@@ -159,6 +169,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _fadeInThreshold(FadeInThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
     , _fadeOutThreshold(FadeOutThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
     , _isUsingColorMap(IsUsingColorMapInfo, false)
+    , _transferFunctionPath(TransferFunctionPathInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -203,9 +214,10 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     setBoundingSphere(_size);
 
     if (p.colorMap.has_value()) {
-        _transferFunctionPath = p.colorMap.value_or(_transferFunctionPath);
+        _transferFunctionPath = p.colorMap.value().string();
         _isUsingColorMap = true;
         addProperty(_isUsingColorMap);
+        addProperty(_transferFunctionPath);
     }
 }
 
@@ -228,11 +240,13 @@ void RenderableSphere::initializeGL() {
         }
     );
 
+    definePropertyCallbackFunctions();
+
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     if (_isUsingColorMap) {
         _transferFunction = std::make_unique<TransferFunction>(
-            absPath(_transferFunctionPath).string()
+            absPath(_transferFunctionPath)
         );
     }
 }
@@ -403,6 +417,18 @@ void RenderableSphere::update(const UpdateData&) {
 
 void RenderableSphere::unbindTexture() {
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void RenderableSphere::definePropertyCallbackFunctions() {
+    _transferFunctionPath.onChange([this]() {
+        std::filesystem::path newPath = absPath(_transferFunctionPath);
+        if (std::filesystem::exists(newPath)) {
+            _transferFunction = std::make_unique<TransferFunction>(newPath.string());
+        }
+        else {
+            LWARNING("Invalid path to transferfunction, please enter new path.");
+        }
+    });
 }
 
 } // namespace openspace
