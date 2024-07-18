@@ -29,7 +29,7 @@ project(OpenSpace)
 
 set(OPENSPACE_VERSION_MAJOR 0)
 set(OPENSPACE_VERSION_MINOR 20)
-set(OPENSPACE_VERSION_PATCH 0)
+set(OPENSPACE_VERSION_PATCH 1)
 set(OPENSPACE_VERSION_STRING "Beta-13")
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
