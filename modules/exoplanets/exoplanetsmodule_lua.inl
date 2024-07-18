@@ -286,6 +286,21 @@ void createExoplanetSystem(const std::string& starName,
             "Period = " + std::to_string(periodInSeconds) + ""
         "}";
 
+        const std::filesystem::path planetTexture = module->planetDefaultTexturePath();
+        std::string planetLayers = "";
+        if (!planetTexture.empty() && std::filesystem::is_regular_file(planetTexture)) {
+            planetLayers = std::format(
+                "ColorLayers = {{ {} }}",
+                "{"
+                    "Identifier = 'PlanetTexture',"
+                    "FilePath = openspace.absPath('" + formatPathToLua(planetTexture) + "'),"
+                    "BlendMode = 'Color',"
+                    "Enabled = true"
+                "}"
+            );
+        }
+        // TODO: what if file does not exist? Warn?
+
         const std::string planetNode = "{"
             "Identifier = '" + planetIdentifier + "',"
             "Parent = '" + starIdentifier + "',"
@@ -294,7 +309,7 @@ void createExoplanetSystem(const std::string& starName,
                 "Enabled = " + enabled + ","
                 "Radii = " + std::to_string(planetRadius) + "," // in meters
                 "PerformShading = true,"
-                "Layers = {},"
+                "Layers = {" + planetLayers + "},"
                 "LightSourceNode = '" + starIdentifier + "'"
             "},"
             "Transform = { "
