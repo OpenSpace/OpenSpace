@@ -155,6 +155,14 @@ void createExoplanetSystem(const std::string& starName,
     if (!std::isnan(bv)) {
         starColor = computeStarColor(bv);
         const std::filesystem::path starTexture = module->starTexturePath();
+
+        if (!starTexture.empty() && !std::filesystem::is_regular_file(starTexture)) {
+            LWARNING(std::format(
+                "Could not find specified star texture set in {} module: '{}'",
+                module->guiName(), starTexture
+            ));
+        }
+
         colorLayers =
             "{"
                 "Identifier = 'StarColor',"
@@ -220,6 +228,15 @@ void createExoplanetSystem(const std::string& starName,
     );
 
     // Planets
+
+    const std::filesystem::path planetTexture = module->planetDefaultTexturePath();
+    if (!planetTexture.empty() && !std::filesystem::is_regular_file(planetTexture)) {
+        LWARNING(std::format(
+            "Could not find specified planet default texture set in {} module: '{}'",
+            module->guiName(), planetTexture
+        ));
+    }
+
     for (size_t i = 0; i < system.planetNames.size(); i++) {
         // Note that we are here overriding some invalid parameters in the planet data.
         // Use a reference, so that it is changed down the line
@@ -286,9 +303,8 @@ void createExoplanetSystem(const std::string& starName,
             "Period = " + std::to_string(periodInSeconds) + ""
         "}";
 
-        const std::filesystem::path planetTexture = module->planetDefaultTexturePath();
         std::string planetLayers = "";
-        if (!planetTexture.empty() && std::filesystem::is_regular_file(planetTexture)) {
+        if (!planetTexture.empty()) {
             planetLayers = std::format(
                 "ColorLayers = {{ {} }}",
                 "{"
@@ -299,7 +315,6 @@ void createExoplanetSystem(const std::string& starName,
                 "}"
             );
         }
-        // TODO: what if file does not exist? Warn?
 
         const std::string planetNode = "{"
             "Identifier = '" + planetIdentifier + "',"
