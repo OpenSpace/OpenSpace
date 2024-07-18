@@ -74,6 +74,7 @@ set(HEADER_FILES
   src/tileprovider/texttileprovider.h
   src/tileprovider/tileindextileprovider.h
   src/tileprovider/tileprovider.h
+  src/tileprovider/tileproviderbydate.h
   src/tileprovider/tileproviderbyindex.h
   src/tileprovider/tileproviderbylevel.h
 )
@@ -120,6 +121,7 @@ set(SOURCE_FILES
   src/tileprovider/texttileprovider.cpp
   src/tileprovider/tileindextileprovider.cpp
   src/tileprovider/tileprovider.cpp
+  src/tileprovider/tileproviderbydate.cpp
   src/tileprovider/tileproviderbyindex.cpp
   src/tileprovider/tileproviderbylevel.cpp
 )
