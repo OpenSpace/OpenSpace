@@ -373,7 +373,7 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     }
 
     if (p.planetDefaultTexture.has_value()) {
-        _noDataTexturePath = p.planetDefaultTexture->string();
+        _planetDefaultTexturePath = p.planetDefaultTexture->string();
     }
 
     if (p.noDataTexture.has_value()) {

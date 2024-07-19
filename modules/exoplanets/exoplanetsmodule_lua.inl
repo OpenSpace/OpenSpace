@@ -305,15 +305,12 @@ void createExoplanetSystem(const std::string& starName,
 
         std::string planetLayers = "";
         if (!planetTexture.empty()) {
-            planetLayers = std::format(
-                "ColorLayers = {{ {} }}",
-                "{"
-                    "Identifier = 'PlanetTexture',"
-                    "FilePath = openspace.absPath('" + formatPathToLua(planetTexture) + "'),"
-                    "BlendMode = 'Color',"
-                    "Enabled = true"
-                "}"
-            );
+            planetLayers = "{"
+                "Identifier = 'PlanetTexture',"
+                "FilePath = openspace.absPath('" + formatPathToLua(planetTexture) + "'),"
+                "BlendMode = 'Color',"
+                "Enabled = true"
+            "}";
         }
 
         const std::string planetNode = "{"
@@ -324,7 +321,9 @@ void createExoplanetSystem(const std::string& starName,
                 "Enabled = " + enabled + ","
                 "Radii = " + std::to_string(planetRadius) + "," // in meters
                 "PerformShading = true,"
-                "Layers = {" + planetLayers + "},"
+                "Layers = {"
+                    "ColorLayers = {" + planetLayers + "}"
+                "},"
                 "LightSourceNode = '" + starIdentifier + "'"
             "},"
             "Transform = { "
