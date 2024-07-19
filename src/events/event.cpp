@@ -126,14 +126,14 @@ void log(int i, const EventFocusNodeChanged& e) {
     LINFO(std::format("[{}] FocusNodeChanged: {} -> {}", i, e.oldNode, e.newNode));
 }
 
-void log(int i, const EventLayerAdded& e) {
-    ghoul_assert(e.type == EventLayerAdded::Type, "Wrong type");
-    LINFO(std::format("[{}] LayerAdded: {}", i, e.uri));
+void log(int i, const EventPropertyTreeUpdated& e) {
+    ghoul_assert(e.type == EventPropertyTreeUpdated::Type, "Wrong type");
+    LINFO(std::format("[{}] PropertyTreeUpdated: {}", i, e.uri));
 }
 
-void log(int i, const EventLayerRemoved& e) {
-    ghoul_assert(e.type == EventLayerRemoved::Type, "Wrong type");
-    LINFO(std::format("[{}] LayerRemoved: {}", i, e.uri));
+void log(int i, const EventPropertyTreePruned& e) {
+    ghoul_assert(e.type == EventPropertyTreePruned::Type, "Wrong type");
+    LINFO(std::format("[{}] PropertyTreePruned: {}", i, e.uri));
 }
 
 void log(int i, const EventActionAdded& e) {
@@ -222,8 +222,8 @@ std::string_view toString(Event::Type type) {
         case Event::Type::PlanetEclipsed: return "PlanetEclipsed";
         case Event::Type::InterpolationFinished: return "InterpolationFinished";
         case Event::Type::FocusNodeChanged: return "FocusNodeChanged";
-        case Event::Type::LayerAdded: return "LayerAdded";
-        case Event::Type::LayerRemoved: return "LayerRemoved";
+        case Event::Type::PropertyTreeUpdated: return "PropertyTreeUpdated";
+        case Event::Type::PropertyTreePruned: return "PropertyTreePruned";
         case Event::Type::ActionAdded: return "ActionAdded";
         case Event::Type::ActionRemoved: return "ActionRemoved";
         case Event::Type::SessionRecordingPlayback: return "SessionRecordingPlayback";
@@ -268,11 +268,11 @@ Event::Type fromString(std::string_view str) {
     else if (str == "FocusNodeChanged") {
         return Event::Type::FocusNodeChanged;
     }
-    else if (str == "LayerAdded") {
-        return Event::Type::LayerAdded;
+    else if (str == "PropertyTreeUpdated") {
+        return Event::Type::PropertyTreeUpdated;
     }
-    else if (str == "LayerRemoved") {
-        return Event::Type::LayerRemoved;
+    else if (str == "PropertyTreePruned") {
+        return Event::Type::PropertyTreePruned;
     }
     else if (str == "ActionAdded") {
         return Event::Type::ActionAdded;
@@ -389,16 +389,16 @@ ghoul::Dictionary toParameter(const Event& e) {
                 std::string(static_cast<const EventFocusNodeChanged&>(e).newNode)
             );
             break;
-        case Event::Type::LayerAdded:
+        case Event::Type::PropertyTreeUpdated:
             d.setValue(
                 "Uri",
-                std::string(static_cast<const EventLayerAdded&>(e).uri)
+                std::string(static_cast<const EventPropertyTreeUpdated&>(e).uri)
             );
             break;
-        case Event::Type::LayerRemoved:
+        case Event::Type::PropertyTreePruned:
             d.setValue(
                 "Uri",
-                std::string(static_cast<const EventLayerRemoved&>(e).uri)
+                std::string(static_cast<const EventPropertyTreePruned&>(e).uri)
             );
             break;
         case Event::Type::ActionAdded:
@@ -517,11 +517,11 @@ void logAllEvents(const Event* e) {
             case Event::Type::FocusNodeChanged:
                 log(i, *static_cast<const EventFocusNodeChanged*>(e));
                 break;
-            case Event::Type::LayerAdded:
-                log(i, *static_cast<const EventLayerAdded*>(e));
+            case Event::Type::PropertyTreeUpdated:
+                log(i, *static_cast<const EventPropertyTreeUpdated*>(e));
                 break;
-            case Event::Type::LayerRemoved:
-                log(i, *static_cast<const EventLayerRemoved*>(e));
+            case Event::Type::PropertyTreePruned:
+                log(i, *static_cast<const EventPropertyTreePruned*>(e));
                 break;
             case Event::Type::ActionAdded:
                 log(i, *static_cast<const EventActionAdded*>(e));
@@ -621,12 +621,12 @@ EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,
     ghoul_assert(newNode_, "There must be a new node");
 }
 
-EventLayerAdded::EventLayerAdded(std::string_view uri_)
+EventPropertyTreeUpdated::EventPropertyTreeUpdated(std::string_view uri_)
     : Event(Type)
     , uri(temporaryString(uri_))
 {}
 
-EventLayerRemoved::EventLayerRemoved(std::string_view uri_)
+EventPropertyTreePruned::EventPropertyTreePruned(std::string_view uri_)
     : Event(Type)
     , uri(temporaryString(uri_))
 {}

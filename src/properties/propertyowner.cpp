@@ -137,13 +137,18 @@ std::string PropertyOwner::uri() const {
     std::string identifier = _identifier;
     PropertyOwner* currentOwner = owner();
     while (currentOwner) {
+        // We have reached the top of the property tree and the uri is finished
+        if (currentOwner == global::rootPropertyOwner) {
+            return identifier;
+        }
         const std::string& ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
             identifier = std::format("{}.{}", ownerId, identifier);
         }
         currentOwner = currentOwner->owner();
     }
-    return identifier;
+    // If the uri hasn't been sent at this point it is not valid, so send an empty string
+    return "";
 }
 
 bool PropertyOwner::hasProperty(const std::string& uri) const {
@@ -235,6 +240,12 @@ void PropertyOwner::addProperty(Property* prop) {
         else {
             _properties.push_back(prop);
             prop->setPropertyOwner(this);
+
+            // Validate the uri
+            if (!uri().empty()) {
+                std::string id = std::format("{}.{}", uri(), prop->identifier());
+                global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(id);
+            }
         }
     }
 }
@@ -282,6 +293,14 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
         else {
             _subOwners.push_back(owner);
             owner->setPropertyOwner(this);
+
+            // Validate the URI - due to initializations timings it is possible that the
+            // parents are not added to the property tree yet
+            std::string id = owner->uri();
+            if (!id.empty()) {
+                // If it is valid, we publish an event that this owner has been added
+                global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(id);
+            }
         }
     }
 }
@@ -302,6 +321,12 @@ void PropertyOwner::removeProperty(Property* prop) {
 
     // If we found the property identifier, we can delete it
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
+        // Validate the URI. Due to removal timings it is possible the parents are already
+        // removed from the property tree
+        if (!uri().empty()) {
+            std::string id = std::format("{}.{}", uri(), prop->identifier());
+            global::eventEngine->publishEvent<events::EventPropertyTreePruned>(id);
+        }
         (*it)->setPropertyOwner(nullptr);
         _properties.erase(it);
     }
@@ -330,6 +355,13 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
 
     // If we found the propertyowner, we can delete it
     if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
+        // Validate the URI. Due to removal timings it is possile the owners are
+        // already removed
+        std::string id = owner->uri();
+        if (!id.empty()) {
+            // Publish event for removal of property owner from the property tree
+            global::eventEngine->publishEvent<events::EventPropertyTreePruned>(id);
+        }
         _subOwners.erase(it);
     }
     else {

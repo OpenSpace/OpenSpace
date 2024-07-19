@@ -67,8 +67,8 @@ struct Event {
         PlanetEclipsed,
         InterpolationFinished,
         FocusNodeChanged,
-        LayerAdded,
-        LayerRemoved,
+        PropertyTreeUpdated,
+        PropertyTreePruned,
         ActionAdded,
         ActionRemoved,
         SessionRecordingPlayback,
@@ -315,37 +315,38 @@ struct EventFocusNodeChanged : public Event {
 };
 
 /**
- * This event is created when a layer is added to to a globe.
+ * This event is created a property owner or property has been added or has changed.
  */
-struct EventLayerAdded : public Event {
-    static constexpr Type Type = Event::Type::LayerAdded;
+struct EventPropertyTreeUpdated : public Event {
+    static constexpr Type Type = Event::Type::PropertyTreeUpdated;
 
     /**
-     * Creates an instance of an EventLayerAdded event.
+     * Creates an instance of an EventPropertyTreeUpdated event.
      *
-     * \param uri_ A string with the uri of the layer that was added
+     * \param uri_ A string with the uri of the property or property owner that was added
      *
      * \pre uri_ must be a valid uri
      */
-    explicit EventLayerAdded(std::string_view uri_);
+    explicit EventPropertyTreeUpdated(std::string_view uri_);
 
     const tstring uri;
 };
 
 /**
- * This event is created when a layer is removed from a globe.
+ * This event is created when a property owner or property is removed from a the property
+ * tree.
  */
-struct EventLayerRemoved : public Event {
-    static constexpr Type Type = Event::Type::LayerRemoved;
+struct EventPropertyTreePruned : public Event {
+    static constexpr Type Type = Event::Type::PropertyTreePruned;
 
     /**
-     * Creates an instance of an EventLayerRemoved event.
+     * Creates an instance of an EventPropertyTreePruned event.
      *
-     * \param uri_ The uri of the layer that was removed
+     * \param uri_ The uri of the property or property owner that was removed
      *
      * \pre uri_ must be a valid uri
      */
-    explicit EventLayerRemoved(std::string_view uri_);
+    explicit EventPropertyTreePruned(std::string_view uri_);
 
     const tstring uri;
 };
