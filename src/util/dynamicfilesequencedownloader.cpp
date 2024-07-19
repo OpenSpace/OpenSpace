@@ -118,14 +118,15 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
     // If it expands to more of a API call rather than a http-request, that code goes here
     // TODO: make_unique?
     nlohmann::json jsonResult;
-    HttpMemoryDownload respons(httpDataRequest);
+    HttpMemoryDownload responds(httpDataRequest);
     try {
-        respons.start();
-        respons.wait();
+        responds.start();
+        responds.wait();
 
-        const std::vector<char>& data = respons.downloadedData();
+        const std::vector<char>& data = responds.downloadedData();
+        //TODO what value is actually to large to handle?
         if (data.size() > std::numeric_limits<std::size_t>::max()) {
-            LERROR("To large");
+            LERROR("Http responds with list of available files to large");
         }
 
         jsonResult = nlohmann::json::parse(data);

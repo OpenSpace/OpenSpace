@@ -329,7 +329,9 @@ void RenderableTimeVaryingSphere::readFileFromImage(std::filesystem::path path) 
     }
     t->purgeFromRAM();
 
-    setMinMaxValues(t, newFile);
+    if (_isUsingColorMap) {
+        setMinMaxValues(t, newFile);
+    }
     newFile.texture = std::move(t);
 
     const std::vector<File>::const_iterator iter = std::upper_bound(
@@ -381,15 +383,6 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
             readFileFromImage(e.path());
         }
     }
-    // Should no longer need to sort after using insert here above instead
-    //std::sort(
-    //    _files.begin(),
-    //    _files.end(),
-    //    [](const File& a, const File& b) {
-    //        return a.time < b.time;
-    //    }
-    //);
-
     // Ensure that there are available and valid source files left
     if (_files.empty()) {
         throw ghoul::RuntimeError(
@@ -428,7 +421,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         // not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
     }
-    if (!_firstUpdate) {
+    if (!_firstUpdate && _isUsingColorMap) {
         _dataMinMaxValues = _files[_activeTriggerTimeIndex].dataMinMax;
     }
 }
@@ -468,6 +461,7 @@ void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTim
         _activeTriggerTimeIndex = static_cast<int>(_files.size()) - 1;
     }
 }
+
 void RenderableTimeVaryingSphere::updateDynamicDownloading(const double currentTime,
                                                                    const double deltaTime)
 {

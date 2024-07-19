@@ -14,73 +14,117 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                                                          const std::filesystem::path path,
                                                          int layerIndex)
 {
-    std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
+    try {
+        std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
+        if (!file.get()) {
+            LERROR(
+                std::format("Failed to open fits file '{}'", path.string())
+            );
+            return nullptr;
+        }
+        // Convirt fits path with fits-file-reader functions
+        const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(file);
+        int layerSize = fitsValues->width * fitsValues->height;
 
-    // Convirt fits path with fits-file-reader functions
-    const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(file);
-    int layerSize = fitsValues->width * fitsValues->height;
+        int nLayers = fitsValues->contents.size() / layerSize;
+        if (layerIndex > nLayers -1) {
+            LERROR(std::format(
+                "Chosen layer in fits file is not supported. Index to high. ",
+                "First layer chosen instead"
+            ));
+            layerIndex = 0;
+        }
+        // The numbers 64800, 16200 means: grab the fifth layer in the fits file, where the
+        // magnetogram map is, in the wsa file
+        std::valarray<float> layerValues =
+            fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
 
-    int nLayers = fitsValues->contents.size() / layerSize;
-    if (layerIndex > nLayers -1) {
-        LERROR(std::format(
-            "Chosen layer in fits file is not supported. Index to high. ",
-            "First layer chosen instead"
-        ));
-        layerIndex = 0;
+        // Calculate median:
+        //std::valarray<float> sorted = layerValues;
+        //std::sort(std::begin(sorted), std::end(sorted));
+        //float median;
+        //if (sorted.size() % 2 == 0)
+        //    median = (sorted[sorted.size() / 2 - 1] + sorted[sorted.size() / 2]) / 2;
+        //else
+        //    median = sorted[sorted.size() / 2];
+
+        const float maxValue = 50.f;// layerValues.max();
+        const float minValue = -50.f;// layerValues.min();
+        std::vector<float> imageData;
+        //test.assign(std::begin(layerValues), std::end(layerValues));
+        std::vector<glm::vec3> rgbLayers;
+        for (float mapValue : layerValues) {
+            // normalization
+            float normalizedValue = (mapValue - minValue) / (maxValue - minValue);
+            // clamping causes overexposure above and below max and min values intentionally
+            // as desired by Nick Arge from WSA
+            normalizedValue = std::clamp(normalizedValue, 0.f, 1.f);
+
+            imageData.emplace_back(normalizedValue);
+        }
+
+        // Create texture from imagedata
+        auto texture = std::make_unique<ghoul::opengl::Texture>(
+            imageData.data(),
+            glm::size3_t(fitsValues->width, fitsValues->height, 1),
+            GL_TEXTURE_2D,
+            ghoul::opengl::Texture::Format::Red,
+            GL_RED,
+            GL_FLOAT
+        );
+        texture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
+        // Tell it to use the single color channel as grayscale
+        convertTextureFormat(*texture, ghoul::opengl::Texture::Format::RGB);
+        texture->uploadTexture();
+        return std::move(texture);
     }
-    // The numbers 64800, 16200 means: grab the fifth layer in the fits file, where the
-    // magnetogram map is, in the wsa file
-    std::valarray<float> layerValues =
-        fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
-
-    // Calculate median:
-    //std::valarray<float> sorted = layerValues;
-    //std::sort(std::begin(sorted), std::end(sorted));
-    //float median;
-    //if (sorted.size() % 2 == 0)
-    //    median = (sorted[sorted.size() / 2 - 1] + sorted[sorted.size() / 2]) / 2;
-    //else
-    //    median = sorted[sorted.size() / 2];
-
-    const float maxValue = 50.f;// layerValues.max();
-    const float minValue = -50.f;// layerValues.min();
-    std::vector<float> imageData;
-    //test.assign(std::begin(layerValues), std::end(layerValues));
-    std::vector<glm::vec3> rgbLayers;
-    for (float mapValue : layerValues) {
-        // normalization
-        float normalizedValue = (mapValue - minValue) / (maxValue - minValue);
-        // clamping causes overexposure above and below max and min values intentionally
-        // as desired by Nick Arge from WSA
-        normalizedValue = std::clamp(normalizedValue, 0.f, 1.f);
-
-        imageData.emplace_back(normalizedValue);
+    catch (CCfits::FitsException& e) {
+        LERROR(
+            std::format("Failed to open fits file '{}'. '{}'", path.string(), e.message())
+        );
     }
-
-    // Create texture from imagedata
-    auto texture = std::make_unique<ghoul::opengl::Texture>(
-        imageData.data(),
-        glm::size3_t(fitsValues->width, fitsValues->height, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::Red,
-        GL_RED,
-        GL_FLOAT
-    );
-    texture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
-    // Tell it to use the single color channel as grayscale
-    convertTextureFormat(*texture, ghoul::opengl::Texture::Format::RGB);
-    texture->uploadTexture();
-    return std::move(texture);
+    catch (std::exception& e) {
+        LERROR(
+            std::format("Failed to open fits file '{}'. '{}'", path.string(), e.what())
+        );
+    }
+    catch (...) {
+        LERROR(
+            std::format("Unknown exception caught for file '{}'", path.string())
+        );
+    }
 }
 
 int nLayers(const std::filesystem::path path) {
-    std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
+    try {
+        std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
+        if (!file.get()) {
+            LERROR(
+                std::format("Failed to open fits file '{}'", path.string())
+            );
+            return -1;
+        }
+        // Convirt fits path with fits-file-reader functions
+        const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(file);
+        int layerSize = fitsValues->width * fitsValues->height;
 
-    // Convirt fits path with fits-file-reader functions
-    const std::shared_ptr<ImageData<float>> fitsValues = callCorrectImageReader(file);
-    int layerSize = fitsValues->width * fitsValues->height;
-
-    return fitsValues->contents.size() / layerSize;
+        return fitsValues->contents.size() / layerSize;
+    }
+    catch (CCfits::FitsException& e) {
+        LERROR(
+            std::format("Failed to open fits file '{}'. '{}'", path.string(), e.message())
+        );
+    }
+    catch (std::exception& e) {
+        LERROR(
+            std::format("Failed to open fits file '{}'. '{}'", path.string(), e.what())
+        );
+    }
+    catch (...) {
+        LERROR(
+            std::format("Unknown exception caught for file '{}'", path.string())
+        );
+    }
 }
 
 // It was easier to make this into a little function to return right away than store it
@@ -135,7 +179,6 @@ std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
     }
     catch (const FitsException& e) {
         LERROR("Could not read FITS layer");
-        //LERROR(std::format("Could not read FITS layer of '{}'. '{}'", GetType(U), e.message()));
     }
     return nullptr;
 }
@@ -146,15 +189,4 @@ float readHeaderValueFloat(const std::string key, const std::unique_ptr<FITS>& f
     image.readKey(key, value);
     return value;
 }
-
-
-
-
-
-
-
-
-
-
-
 } // namespace openspace
