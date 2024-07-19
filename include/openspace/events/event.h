@@ -58,13 +58,9 @@ struct Event {
     //     if they are triggered by events
     //  6. Add the new enum entry into the `toString` and `fromString` methods
     enum class Type : uint8_t {
-        SceneGraphNodeAdded,
-        SceneGraphNodeRemoved,
         ParallelConnection,
         ProfileLoadingFinished,
         ApplicationShutdown,
-        ScreenSpaceRenderableAdded,
-        ScreenSpaceRenderableRemoved,
         CameraFocusTransition,
         TimeOfInterestReached,
         MissionEventReached,
@@ -113,43 +109,6 @@ void logAllEvents(const Event* e);
 //
 //  Events
 //
-
-/**
- * This event is created whenever a new scene graph node is added to the system. By the
- * time this event is signalled, the scene graph node has already been created and added
- * to the scene.
- */
-struct EventSceneGraphNodeAdded : public Event {
-    static constexpr Type Type = Event::Type::SceneGraphNodeAdded;
-
-    /**
-     * Creates an instance of an EventSceneGraphNodeAdded event.
-     *
-     * \param node_ A pointer to the node that was added
-     *
-     * \pre node_ must not be nullptr
-     */
-    explicit EventSceneGraphNodeAdded(const SceneGraphNode* node_);
-    const tstring uri;
-};
-
-/**
- * This event is created whenever a scene graph node was removed. By the time this event
- * is signalled, the scene graph node has already been removed.
- */
-struct EventSceneGraphNodeRemoved : public Event {
-    static constexpr Type Type = Event::Type::SceneGraphNodeRemoved;
-
-    /**
-     * Creates an instance of an EventSceneGraphNodeRemoved event.
-     *
-     * \param node_ A pointer to the node that was removed
-     *
-     * \pre node_ must not be nullptr
-     */
-    explicit EventSceneGraphNodeRemoved(const SceneGraphNode* node_);
-    const tstring uri;
-};
 
 /**
  * This event is created whenever something in the parallel connection subsystem changes.
@@ -210,43 +169,6 @@ struct EventApplicationShutdown : public Event {
      */
     explicit EventApplicationShutdown(State state_);
     const State state;
-};
-
-/**
- * This event is created when a new screenspace renderable has been created.  By the time
- * this event is created, the screenspace renderable is already registered and available.
- */
-struct EventScreenSpaceRenderableAdded : public Event {
-    static constexpr Type Type = Event::Type::ScreenSpaceRenderableAdded;
-
-    /**
-     * Creates an instance of an EventScreenSpaceRenderableAdded event.
-     *
-     * \param renderable_ The the new screenspace renderable that was added to the system
-     *
-     * \pre renderable_ must not be nullptr
-     */
-    explicit EventScreenSpaceRenderableAdded(const ScreenSpaceRenderable* renderable_);
-    const tstring uri;
-};
-
-/**
- * This event is created when a screenspace renderable has been removed from the system.
- * When this event is created, the screenspace renderable has already been removed and is
- * no longer available.
- */
-struct EventScreenSpaceRenderableRemoved : public Event {
-    static constexpr Type Type = Event::Type::ScreenSpaceRenderableRemoved;
-
-    /**
-     * Creates an instance of an EventScreenSpaceRenderableRemoved event.
-     *
-     * \param renderable_ The the new screenspace renderable that was removed
-     *
-     * \pre renderable_ must not be nullptr
-     */
-    explicit EventScreenSpaceRenderableRemoved(const ScreenSpaceRenderable* renderable_);
-    const tstring uri;
 };
 
 /**

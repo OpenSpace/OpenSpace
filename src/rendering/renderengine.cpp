@@ -1069,8 +1069,6 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
     ScreenSpaceRenderable* ssr = s.get();
     global::screenSpaceRootPropertyOwner->addPropertySubOwner(ssr);
     global::screenSpaceRenderables->push_back(std::move(s));
-
-    global::eventEngine->publishEvent<events::EventScreenSpaceRenderableAdded>(ssr);
 }
 
 void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
@@ -1081,7 +1079,6 @@ void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     );
 
     if (it != global::screenSpaceRenderables->end()) {
-        global::eventEngine->publishEvent<events::EventScreenSpaceRenderableRemoved>(s);
         s->deinitializeGL();
         s->deinitialize();
         global::screenSpaceRootPropertyOwner->removePropertySubOwner(s);
