@@ -242,8 +242,9 @@ void PropertyOwner::addProperty(Property* prop) {
             prop->setPropertyOwner(this);
 
             // Validate the uri
-            if (!uri().empty()) {
-                std::string id = std::format("{}.{}", uri(), prop->identifier());
+            std::string uriParent = uri();
+            if (!uriParent.empty()) {
+                std::string id = std::format("{}.{}", uriParent, prop->identifier());
                 global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(id);
             }
         }
@@ -323,8 +324,9 @@ void PropertyOwner::removeProperty(Property* prop) {
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
         // Validate the URI. Due to removal timings it is possible the parents are already
         // removed from the property tree
-        if (!uri().empty()) {
-            std::string id = std::format("{}.{}", uri(), prop->identifier());
+        std::string uriParent = uri();
+        if (!uriParent.empty()) {
+            std::string id = std::format("{}.{}", uriParent, prop->identifier());
             global::eventEngine->publishEvent<events::EventPropertyTreePruned>(id);
         }
         (*it)->setPropertyOwner(nullptr);
