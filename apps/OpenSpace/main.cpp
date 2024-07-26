@@ -44,7 +44,6 @@
 #endif
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
 #include <sgct/commandline.h>
 #include <sgct/engine.h>
@@ -72,9 +71,6 @@
 #include <modules/spout/spoutwrapper.h>
 #endif // OPENSPACE_HAS_SPOUT
 
-#ifdef SGCT_HAS_GSTREAMER
-#include <gstreamerWebRTC.h>
-#endif // SGCT_HAS_GSTREAMER
 
 #ifdef OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 #include <float.h>
@@ -83,6 +79,12 @@
 #include <launcherwindow.h>
 #include <QApplication>
 #include <QMessageBox>
+
+#ifdef SGCT_HAS_GSTREAMER
+  //Un-define Qt 'signals' to prevent conflict with glib
+  #undef signals
+  #include <gstreamerWebRTC.h>
+#endif // SGCT_HAS_GSTREAMER
 
 using namespace openspace;
 using namespace sgct;
@@ -94,7 +96,7 @@ constexpr std::string_view SpoutTag = "Spout";
 constexpr std::string_view OpenVRTag = "OpenVR";
 
 // @TODO (abock, 2020-04-09): These state variables should disappear
-const Window* currentWindow = nullptr;
+const sgct::Window* currentWindow = nullptr;
 const BaseViewport* currentViewport = nullptr;
 Frustum::Mode currentFrustumMode;
 glm::mat4 currentModelMatrix;
@@ -309,7 +311,7 @@ void mainInitFunc(GLFWwindow*) {
         icon.width = x;
         icon.height = y;
 
-        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+        for (const std::unique_ptr<sgct::Window>& window : Engine::instance().windows()) {
             glfwSetWindowIcon(window->windowHandle(), 1, &icon);
         }
 
@@ -328,7 +330,7 @@ void mainInitFunc(GLFWwindow*) {
 
     // Find if we have at least one OpenVR window
     // Save reference to first OpenVR window, which is the one we will copy to the HMD.
-    for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+    for (const std::unique_ptr<sgct::Window>& window : Engine::instance().windows()) {
         if (window->hasTag(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
             FirstOpenVRWindow = window.get();
@@ -347,7 +349,7 @@ void mainInitFunc(GLFWwindow*) {
     }
 
     for (size_t i = 0; i < Engine::instance().windows().size(); i++) {
-        const Window& window = *Engine::instance().windows()[i];
+        const sgct::Window& window = *Engine::instance().windows()[i];
         if (!window.hasTag(SpoutTag)) {
             continue;
         }
@@ -737,14 +739,14 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         switch (currentWindow->stereoMode()) {
-            case Window::StereoMode::SideBySide:
-            case Window::StereoMode::SideBySideInverted:
+            case sgct::Window::StereoMode::SideBySide:
+            case sgct::Window::StereoMode::SideBySideInverted:
                 return glm::ivec2(
                     currentWindow->resolution().x / 2,
                     currentWindow->resolution().y
                 );
-            case Window::StereoMode::TopBottom:
-            case Window::StereoMode::TopBottomInverted:
+            case sgct::Window::StereoMode::TopBottom:
+            case sgct::Window::StereoMode::TopBottomInverted:
                 return glm::ivec2(
                     currentWindow->resolution().x,
                     currentWindow->resolution().y / 2
@@ -806,8 +808,8 @@ void setSgctDelegateFunctions() {
     };
     sgctDelegate.guiWindowResolution = []() {
         ZoneScoped;
-        const Window* guiWindow = nullptr;
-        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+        const sgct::Window* guiWindow = nullptr;
+        for (const std::unique_ptr<sgct::Window>& window : Engine::instance().windows()) {
             if (window->hasTag("GUI")) {
                 guiWindow = window.get();
                 break;
@@ -825,8 +827,8 @@ void setSgctDelegateFunctions() {
 
         // Detect which DPI scaling to use
         // 1. If there is a GUI window, use the GUI window's content scale value
-        const Window* dpiWindow = nullptr;
-        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+        const sgct::Window* dpiWindow = nullptr;
+        for (const std::unique_ptr<sgct::Window>& window : Engine::instance().windows()) {
             if (window->hasTag("GUI")) {
                 dpiWindow = window.get();
                 break;
@@ -853,7 +855,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.hasGuiWindow = []() {
         ZoneScoped;
 
-        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+        for (const std::unique_ptr<sgct::Window>& window : Engine::instance().windows()) {
             if (window->hasTag("GUI")) {
                 return true;
             }
@@ -978,7 +980,7 @@ void setSgctDelegateFunctions() {
         return ClusterManager::instance().thisNodeId();
     };
     sgctDelegate.mousePositionViewportRelative = [](const glm::vec2& mousePosition) {
-        for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
+        for (const std::unique_ptr<sgct::Window>& window : Engine::instance().windows()) {
             if (!isGuiWindow(window.get())) {
                 continue;
             }

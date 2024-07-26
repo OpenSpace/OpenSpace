@@ -71,7 +71,6 @@ if (SGCT_SPOUT_SUPPORT AND NOT OPENSPACE_MODULE_SPOUT)
   set(OPENSPACE_MODULE_SPOUT ON CACHE BOOL "Build OPENSPACE_MODULE_SPOUTModule" FORCE)
 endif ()
 
-
 #####
 # MacOS
 #####
@@ -108,35 +107,10 @@ if (OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION)
   target_compile_definitions(OpenSpace PRIVATE "OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION")
 endif ()
 
-begin_header("Dependency: SGCT")
-
-set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
-set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
-target_link_libraries(OpenSpace PRIVATE sgct)
-
-set_target_properties(sgct PROPERTIES FOLDER "External")
-set_target_properties(glfw PROPERTIES FOLDER "External")
-if (TARGET SGCTTest)
-  set_target_properties(SGCTTest PROPERTIES FOLDER "External")
+if (UNIX)
+  target_compile_definitions(OpenSpace PRIVATE "LINUX")
 endif ()
 
-if (UNIX AND (NOT APPLE))
-  target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
-endif ()
-
-add_custom_command(TARGET OpenSpace POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-  ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/sgct.schema.json
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../config/schema/sgct.schema.json
-  COMMAND_EXPAND_LISTS
-)
-
-end_header("Dependency: SGCT")
 
 begin_header("Dependency: Profile Editor")
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
@@ -196,10 +170,40 @@ if (WIN32)
   )
 endif ()
 
+begin_header("Dependency: SGCT")
+
+set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
+target_link_libraries(OpenSpace PRIVATE sgct)
+
+set_target_properties(sgct PROPERTIES FOLDER "External")
+set_target_properties(glfw PROPERTIES FOLDER "External")
+if (TARGET SGCTTest)
+  set_target_properties(SGCTTest PROPERTIES FOLDER "External")
+endif ()
+
+if (UNIX AND (NOT APPLE))
+  target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
+endif ()
+
+add_custom_command(TARGET OpenSpace POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct/sgct.schema.json
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../config/schema/sgct.schema.json
+  COMMAND_EXPAND_LISTS
+)
+
+end_header("Dependency: SGCT")
+
 # Handles dll copying and library linking for GStreamer functionality.
 if(SGCT_GSTREAMER_SUPPORT)
 	include(${PROJECT_SOURCE_DIR}/apps/OpenSpace/ext/sgct/ext/gstreamer/copy_gstreamer_libs.cmake)
-  copy_gstreamer_dlls(OpenSpace)
+  #copy_gstreamer_dlls(OpenSpace)
   link_gstreamer_libs(OpenSpace)
 
   target_compile_definitions(OpenSpace PUBLIC
