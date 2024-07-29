@@ -110,7 +110,7 @@ void queueAddSceneGraphNodeScript(const std::string& sgnTableAsString) {
     // No sync or send because this will already be called inside a Lua script,
     // therefor it has already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript(
-        std::format("openspace.addSceneGraphNode({});", sgnTableAsString),
+        std::format("openspace.addSceneGraphNode({})", sgnTableAsString),
         scripting::ScriptEngine::ShouldBeSynchronized::No,
         scripting::ScriptEngine::ShouldSendToRemote::No
     );
