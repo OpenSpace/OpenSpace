@@ -85,15 +85,16 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     _useMainDashboard = p.useMainDashboard.value_or(_useMainDashboard);
     addProperty(_useMainDashboard);
 
-    _scale = 1.f;
-    _scale.setMaxValue(15.f);
-
     if (_useMainDashboard && p.items.has_value()) {
         throw ghoul::RuntimeError("Cannot specify items when using the main dashboard");
     }
 
+    if (!_useMainDashboard) {
+        addPropertySubOwner(_dashboard);
+    }
+
     if (p.items.has_value()) {
-        ghoul_assert(_useMainDashboard, "Cannot add items to the main dashboard");
+        ghoul_assert(!_useMainDashboard, "Cannot add items to the main dashboard");
         for (const ghoul::Dictionary& item : *p.items) {
             std::unique_ptr<DashboardItem> i = DashboardItem::createFromDictionary(item);
             _dashboard.addDashboardItem(std::move(i));

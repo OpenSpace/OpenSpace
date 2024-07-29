@@ -88,18 +88,6 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-# See if working directory is clean or not
-execute_process(
-  COMMAND git diff-index --quiet HEAD --
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  RESULT_VARIABLE OPENSPACE_GIT_STATUS_RETURN
-)
-if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0)
-  set(OPENSPACE_GIT_STATUS "uncommitted changes")
-else ()
-  set(OPENSPACE_GIT_STATUS "")
-endif ()
-
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
 

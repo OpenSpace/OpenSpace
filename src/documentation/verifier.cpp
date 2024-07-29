@@ -267,7 +267,7 @@ TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
         TestResult::Offense o = {
             .offender = key,
             .reason = TestResult::Offense::Reason::Verification,
-            .explanation = "File did not exist"
+            .explanation = std::format("File '{}' did not exist", file)
         };
         res.offenses.push_back(std::move(o));
     }
@@ -294,7 +294,7 @@ TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
         TestResult::Offense o = {
             .offender = key,
             .reason = TestResult::Offense::Reason::Verification,
-            .explanation = "Directory did not exist"
+            .explanation = std::format("Directory '{}' did not exist", dir)
         };
         res.offenses.push_back(std::move(o));
     }
