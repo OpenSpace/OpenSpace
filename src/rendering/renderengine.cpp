@@ -109,7 +109,7 @@ namespace {
         "Shows the version on-screen information",
         "This value determines whether the Git version information (branch and commit) "
         "hash are shown on the screen.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowCameraInfo = {
