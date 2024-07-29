@@ -72,6 +72,8 @@ bool Translation::initialize() {
 }
 
 void Translation::update(const UpdateData& data) {
+    ZoneScoped;
+
     if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }
