@@ -250,11 +250,24 @@ public:
      */
     std::vector<std::string> allTags() const;
 
-    // TODO: documentation
+    /**
+     * Set a custom order for items in a given branch in the Scene GUI tree.
+     *
+     * \param guiPath The GUI path for which to set the order
+     * \param list A list of names of scene graph nodes or subgroups in the GUI, in the
+     *             order of which they should appear in the tree.
+     */
     void setGuiTreeOrdering(const std::string& guiPath,
         const std::vector<std::string>& list);
-    ghoul::Dictionary guiTreeOrdering() const;
 
+    /**
+     * Returns a dictionary containing all the currently set custom orderings for the
+     * Scene GUI tree.
+     *
+     * \return A dictionary containing key value pairs with custom item orderings for
+     *         specific paths in the Scene GUI tree
+     */
+    ghoul::Dictionary guiTreeOrdering() const;
 
 private:
     /**
