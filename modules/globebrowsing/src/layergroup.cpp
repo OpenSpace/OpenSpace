@@ -89,6 +89,11 @@ void LayerGroup::deinitialize() {
 void LayerGroup::update() {
     ZoneScoped;
 
+    for (const std::string& layer : _layersToDelete) {
+        deleteLayer(layer);
+    }
+    _layersToDelete.clear();
+
     _activeLayers.clear();
 
     for (const std::unique_ptr<Layer>& layer : _layers) {
@@ -215,6 +220,10 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
         }
     }
     LERROR("Could not find layer " + layerName);
+}
+
+void LayerGroup::scheduleDeleteLayer(const std::string& layerName) {
+    _layersToDelete.push_back(layerName);
 }
 
 void LayerGroup::moveLayer(int oldPosition, int newPosition) {

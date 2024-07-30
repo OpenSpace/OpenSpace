@@ -26,6 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/tileindex.h>
@@ -320,7 +322,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     _remove.onChange([this]() {
         if (_tileProvider) {
             _tileProvider->reset();
-            _parent.deleteLayer(identifier());
+            _parent.scheduleDeleteLayer(identifier());
         }
     });
 
