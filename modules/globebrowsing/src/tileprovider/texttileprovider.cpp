@@ -97,6 +97,8 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
 
         fontRenderer->render(*font, position, text, color);
 
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+
         tile = Tile{ texture, std::nullopt, Tile::Status::OK };
         tileCache->put(key, initData.hashKey, tile);
 
