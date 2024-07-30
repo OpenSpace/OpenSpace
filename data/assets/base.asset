@@ -87,4 +87,9 @@ asset.onInitialize(function()
   openspace.globebrowsing.loadWMSServersFromFile(
     openspace.absPath("${DATA}/globebrowsing_servers.lua")
   )
+
+  openspace.setGuiTreeOrdering(
+    "/",
+    { "Solar System", "Milky Way", "Universe", "Night Sky" }
+  )
 end)
