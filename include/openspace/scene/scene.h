@@ -251,9 +251,9 @@ public:
     std::vector<std::string> allTags() const;
 
     // TODO: documentation
-    void setGuiGroupOrdering(const std::string& guiPath,
+    void setGuiTreeOrdering(const std::string& guiPath,
         const std::vector<std::string>& list);
-    ghoul::Dictionary guiGroupsOrdering() const;
+    ghoul::Dictionary guiTreeOrdering() const;
 
 
 private:
@@ -340,7 +340,7 @@ private:
 
     ghoul::MemoryPool<4096> _memoryPool;
 
-    std::unordered_map<std::string, std::vector<std::string>> _guiGroupOrdering;
+    std::unordered_map<std::string, std::vector<std::string>> _guiTreeOrderingMap;
 };
 
 // Convert the input string to a format that is valid as an identifier

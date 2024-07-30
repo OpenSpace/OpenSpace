@@ -791,15 +791,16 @@ std::vector<std::string> Scene::allTags() const {
     return std::vector<std::string>(result.begin(), result.end());
 }
 
-void Scene::setGuiGroupOrdering(const std::string& guiPath,
-                                const std::vector<std::string>& list)
+void Scene::setGuiTreeOrdering(const std::string& guiPath,
+                               const std::vector<std::string>& list)
 {
-    _guiGroupOrdering[guiPath] = list;
+    _guiTreeOrderingMap[guiPath] = list;
+    global::eventEngine->publishEvent<events::EventGuiTreeUpdated>();
 }
 
-ghoul::Dictionary Scene::guiGroupsOrdering() const {
+ghoul::Dictionary Scene::guiTreeOrdering() const {
     ghoul::Dictionary dict;
-    for (const auto& [key, list] : _guiGroupOrdering) {
+    for (const auto& [key, list] : _guiTreeOrderingMap) {
         dict.setValue(key, list);
     }
     return dict;
@@ -894,8 +895,8 @@ scripting::LuaLibrary Scene::luaLibrary() {
             codegen::lua::BoundingSphere,
             codegen::lua::InteractionSphere,
             codegen::lua::MakeIdentifier,
-            codegen::lua::SetGuiGroupOrdering,
-            codegen::lua::GuiGroupsOrdering
+            codegen::lua::SetGuiTreeOrdering,
+            codegen::lua::GuiTreeOrdering
         }
     };
 }

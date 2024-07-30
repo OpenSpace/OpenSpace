@@ -1237,17 +1237,17 @@ enum class [[codegen::enum]] CustomPropertyType {
 /**
  * @TODO
  */
-[[codegen::luawrap]] void setGuiGroupOrdering(std::string guiPath,
-                                              std::vector<std::string> list)
+[[codegen::luawrap]] void setGuiTreeOrdering(std::string guiPath,
+                                             std::vector<std::string> list)
 {
-    return openspace::global::renderEngine->scene()->setGuiGroupOrdering(guiPath, list);
+    return openspace::global::renderEngine->scene()->setGuiTreeOrdering(guiPath, list);
 }
 
 /**
  * @TODO
  */
-[[codegen::luawrap]] ghoul::Dictionary guiGroupsOrdering() {
-    return openspace::global::renderEngine->scene()->guiGroupsOrdering();
+[[codegen::luawrap]] ghoul::Dictionary guiTreeOrdering() {
+    return openspace::global::renderEngine->scene()->guiTreeOrdering();
 }
 
 } // namespace
