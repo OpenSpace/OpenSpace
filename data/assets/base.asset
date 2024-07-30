@@ -92,4 +92,8 @@ asset.onInitialize(function()
     "/",
     { "Solar System", "Milky Way", "Universe", "Night Sky" }
   )
+  openspace.setGuiTreeOrdering(
+    "/Solar System",
+    { "Planets", "Dwarf Planets", "Sun", "Solar System Barycenter" }
+  )
 end)
