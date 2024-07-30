@@ -166,6 +166,14 @@ void createExoplanetSystem(const std::string& starName,
     if (!std::isnan(bv)) {
         starColor = computeStarColor(bv);
         const std::filesystem::path starTexture = module->starTexturePath();
+
+        if (!starTexture.empty() && !std::filesystem::is_regular_file(starTexture)) {
+            LWARNING(std::format(
+                "Could not find specified star texture set in {} module: '{}'",
+                module->guiName(), starTexture
+            ));
+        }
+
         colorLayers =
             "{"
                 "Identifier = 'StarColor',"
@@ -251,6 +259,15 @@ void createExoplanetSystem(const std::string& starName,
     queueAddSceneGraphNodeScript(starLabel);
 
     // Planets
+
+    const std::filesystem::path planetTexture = module->planetDefaultTexturePath();
+    if (!planetTexture.empty() && !std::filesystem::is_regular_file(planetTexture)) {
+        LWARNING(std::format(
+            "Could not find specified planet default texture set in {} module: '{}'",
+            module->guiName(), planetTexture
+        ));
+    }
+
     for (size_t i = 0; i < system.planetNames.size(); i++) {
         // Note that we are here overriding some invalid parameters in the planet data.
         // Use a reference, so that it is changed down the line
@@ -317,6 +334,16 @@ void createExoplanetSystem(const std::string& starName,
             "Period = " + std::to_string(periodInSeconds) + ""
         "}";
 
+        std::string planetLayers = "";
+        if (!planetTexture.empty()) {
+            planetLayers = "{"
+                "Identifier = 'PlanetTexture',"
+                "FilePath = openspace.absPath('" + formatPathToLua(planetTexture) + "'),"
+                "BlendMode = 'Color',"
+                "Enabled = true"
+            "}";
+        }
+
         const std::string planetNode = "{"
             "Identifier = '" + planetIdentifier + "',"
             "Parent = '" + starIdentifier + "',"
@@ -325,7 +352,9 @@ void createExoplanetSystem(const std::string& starName,
                 "Enabled = " + enabled + ","
                 "Radii = " + std::to_string(planetRadius) + "," // in meters
                 "PerformShading = true,"
-                "Layers = {},"
+                "Layers = {"
+                    "ColorLayers = {" + planetLayers + "}"
+                "},"
                 "LightSourceNode = '" + starIdentifier + "'"
             "},"
             "Transform = { "
