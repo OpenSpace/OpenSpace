@@ -77,10 +77,10 @@ const std::string& Property::identifier() const {
 }
 
 std::string Property::fullyQualifiedIdentifier() const {
-    std::string identifier = _identifier;
+    std::string identifier = "";
     const std::string& ownerUri = owner()->uri();
     if (!ownerUri.empty()) {
-        identifier = std::format("{}.{}", ownerUri, identifier);
+        identifier = std::format("{}.{}", ownerUri, _identifier);
     }
     return identifier;
 }
