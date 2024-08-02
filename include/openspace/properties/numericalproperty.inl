@@ -113,7 +113,7 @@ void NumericalProperty<T>::setExponent(float exponent) {
                 std::format(
                     "Setting exponent for properties with negative values in "
                     "[min, max] range is not yet supported. Property: {}",
-                    this->fullyQualifiedIdentifier()
+                    this->uri()
                 )
             );
             _exponent = 1.f;
