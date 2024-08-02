@@ -242,9 +242,9 @@ void PropertyOwner::addProperty(Property* prop) {
             prop->setPropertyOwner(this);
 
             // Validate the uri
-            std::string uriParent = uri();
-            if (!uriParent.empty()) {
-                std::string id = std::format("{}.{}", uriParent, prop->identifier());
+            std::string parentUri = uri();
+            if (!parentUri .empty()) {
+                std::string id = std::format("{}.{}", parentUri , prop->identifier());
                 global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(id);
             }
         }
