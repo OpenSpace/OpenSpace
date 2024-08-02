@@ -609,7 +609,7 @@ EventPlanetEclipsed::EventPlanetEclipsed(const SceneGraphNode* eclipsee_,
 EventInterpolationFinished::EventInterpolationFinished(
                                                     const properties::Property* property_)
     : Event(Type)
-    , property(temporaryString(property_->fullyQualifiedIdentifier()))
+    , property(temporaryString(property_->uri()))
 {}
 
 EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,

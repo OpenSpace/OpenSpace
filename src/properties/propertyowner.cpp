@@ -261,7 +261,7 @@ void PropertyOwner::addProperty(Property* prop) {
             prop->setPropertyOwner(this);
 
             // Notify change so we can update the UI
-            publishPropertyTreeUpdatedEvent(prop->fullyQualifiedIdentifier());
+            publishPropertyTreeUpdatedEvent(prop->uri());
         }
     }
 }
@@ -333,7 +333,7 @@ void PropertyOwner::removeProperty(Property* prop) {
     // If we found the property identifier, we can delete it
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
         // Notify change so we can update the UI
-        publishPropertyTreePrunedEvent(prop->fullyQualifiedIdentifier());
+        publishPropertyTreePrunedEvent(prop->uri());
 
         (*it)->setPropertyOwner(nullptr);
         _properties.erase(it);

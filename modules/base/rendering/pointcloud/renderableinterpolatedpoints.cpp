@@ -198,7 +198,7 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
         float remaining = value.maxValue() - value;
         float duration = remaining / speed;
         triggerInterpolation(
-            value.fullyQualifiedIdentifier(),
+            value.uri(),
             value.maxValue(),
             duration
         );
@@ -206,21 +206,21 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
 
     interpolateToStart.onChange([triggerInterpolation, this]() {
         float duration = value / speed;
-        triggerInterpolation(value.fullyQualifiedIdentifier(), 0.f, duration);
+        triggerInterpolation(value.uri(), 0.f, duration);
     });
 
     interpolateToNextStep.onChange([triggerInterpolation, this]() {
         float prevValue = glm::floor(value);
         float newValue = glm::min(prevValue + 1.f, value.maxValue());
         float duration = 1.f / speed;
-        triggerInterpolation(value.fullyQualifiedIdentifier(), newValue, duration);
+        triggerInterpolation(value.uri(), newValue, duration);
     });
 
     interpolateToPrevStep.onChange([triggerInterpolation, this]() {
         float prevValue = glm::ceil(value);
         float newValue = glm::max(prevValue - 1.f, value.minValue());
         float duration = 1.f / speed;
-        triggerInterpolation(value.fullyQualifiedIdentifier(), newValue, duration);
+        triggerInterpolation(value.uri(), newValue, duration);
     });
 
     addProperty(interpolateToEnd);
