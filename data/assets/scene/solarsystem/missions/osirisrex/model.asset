@@ -1,8 +1,9 @@
 local transforms = asset.require("./transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -22,18 +23,17 @@ local OsirisRex = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OSIRIS-REX",
-      Observer = "SSB"
+      Target = kernels.ID.OsirisRex,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "ORX_SPACECRAFT",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.OsirisRex,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    Body = "OSIRIS-REX",
     GeometryFile = models .. "orx_base_resized_12_sep_2016.obj",
     LightSources = {
       sun.LightSource,
@@ -60,13 +60,12 @@ local PolyCam = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "ORX_OCAMS_POLYCAM",
-      DestinationFrame = "ORX_SPACECRAFT"
+      SourceFrame = kernels.Frame.Polycam,
+      DestinationFrame = kernels.Frame.OsirisRex
     }
   },
   Renderable = {
     Type = "RenderableModel",
-    Body = "OSIRIS-REX",
     GeometryFile = models .. "orx_polycam_resized_12_sep_2016.obj",
     LightSources = {
       sun.LightSource,
@@ -86,9 +85,19 @@ local PolyCam = {
 local Rexis = {
   Identifier = "ORX_REXIS",
   Parent = OsirisRex.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0, 0.3371, 0.2712 }
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Rexis,
+      DestinationFrame = kernels.Frame.OsirisRex
+    }
+  },
   Renderable = {
     Type = "RenderableModel",
-    Body = "OSIRIS-REX",
     GeometryFile = models .. "orx_rexis_resized_12_sep_2016.obj",
     LightSources = {
       sun.LightSource,
@@ -97,17 +106,6 @@ local Rexis = {
         Type = "CameraLightSource",
         Intensity = 0.5
       }
-    }
-  },
-  Transform = {
-    Translation = {
-      Type = "StaticTranslation",
-      Position = { 0, 0.3371, 0.2712 }
-    },
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "ORX_REXIS",
-      DestinationFrame = "ORX_SPACECRAFT"
     }
   },
   GUI = {
@@ -122,14 +120,14 @@ local PolyCamFov = {
   Renderable = {
     Type = "RenderableFov",
     Body = "OSIRIS-REX",
-    Frame = "ORX_OCAMS_POLYCAM",
+    Frame = kernels.Frame.Polycam,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name = "ORX_OCAMS_POLYCAM",
+      Name = kernels.Frame.Polycam,
       Method = "ELLIPSOID",
       Aberration = "NONE"
     },
-    PotentialTargets = { BennuBodyId }
+    PotentialTargets = { kernels.ID.Bennu }
   },
   GUI = {
     Name = "POLYCAM FOV",
@@ -144,17 +142,17 @@ local PolyCamFov = {
 --   Parent = Rexis.Identifier,
 --   Renderable = {
 --     Type = "RenderableFov",
---     Body = "OSIRIS-REX",
---     Frame = "ORX_REXIS",
+--     Body = kernels.Frame.OsirisRex,
+--     Frame = kernels.Frame.Rexis,
 --     RGB = { 0.8, 0.7, 0.7 },
 --     Instrument = {
 --       Name = "ORX_REXIS",
 --       Method = "ELLIPSOID",
 --       Aberration = "NONE"
 --     },
---     PotentialTargets = { BennuBodyId },
+--     PotentialTargets = { kernels.ID.Bennu },
 --     FrameConversions = {
---       [BennuBodyId] = "IAU_BENNU"
+--       [kernels.ID.Bennu] = kernels.Frame.Bennu
 --     }
 --   },
 --   GUI = {
@@ -164,8 +162,6 @@ local PolyCamFov = {
 -- }
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(OsirisRex)
   openspace.addSceneGraphNode(PolyCam)
   openspace.addSceneGraphNode(Rexis)
@@ -179,8 +175,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Rexis)
   openspace.removeSceneGraphNode(PolyCam)
   openspace.removeSceneGraphNode(OsirisRex)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(OsirisRex)

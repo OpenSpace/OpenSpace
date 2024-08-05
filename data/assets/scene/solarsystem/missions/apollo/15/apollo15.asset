@@ -1,8 +1,8 @@
-asset.require("spice/base")
 asset.require("../actions")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local sun = asset.require("scene/solarsystem/sun/sun")
-local kernels = asset.require("scene/solarsystem/missions/apollo/15/kernels")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -20,14 +20,14 @@ local Apollo15 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "APOLLO 15",
-      Observer = "MOON",
-      Frame = "IAU_MOON"
+      Target = kernels.ID.Apollo15,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "A15_METRIC",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Apollo15Metric,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -57,9 +57,9 @@ local Apollo15Trail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "APOLLO 15",
-      Observer = "MOON",
-      Frame = "IAU_MOON"
+      Target = kernels.ID.Apollo15,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1971 JUL 26",
@@ -73,8 +73,6 @@ local Apollo15Trail = {
 }
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(Apollo15)
   openspace.addSceneGraphNode(Apollo15Trail)
 end)
@@ -82,8 +80,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo15Trail)
   openspace.removeSceneGraphNode(Apollo15)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo15)

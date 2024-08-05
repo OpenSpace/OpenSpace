@@ -13,8 +13,6 @@ local pioneer_horizons = asset.resource({
 })
 
 
-local SampleInterval = 24 * 60 * 60
-
 local Voyager1 = {
   Identifier = "Voyager1",
   Parent = "SolarSystemBarycenter",
@@ -34,8 +32,7 @@ local Voyager1 = {
     Fade = 5.0,
     StartTime = "1977 SEP 06 00:00:00",
     EndTime = "2030 JAN 01 00:00:00",
-    SampleInterval = SampleInterval,
-    TimeStampSubsampleFactor = 1
+    SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
     Name = "Voyager 1 Trail",
@@ -64,8 +61,7 @@ local Voyager2 = {
     Fade = 5.0,
     StartTime = "1977 AUG 21 00:00:00",
     EndTime = "2030 JAN 01 00:00:00",
-    SampleInterval = SampleInterval,
-    TimeStampSubsampleFactor = 1
+    SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
     Name = "Voyager 2 Trail",
@@ -94,8 +90,7 @@ local Pioneer10 = {
     Fade = 5.0,
     StartTime = "1972 MAR 04 00:00:00",
     EndTime = "2030 JAN 01 00:00:00",
-    SampleInterval = SampleInterval,
-    TimeStampSubsampleFactor = 1
+    SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
     Name = "Pioneer 10 Trail",
@@ -124,8 +119,7 @@ local Pioneer11 ={
     Fade = 5.0,
     StartTime = "1973 APR 07 00:00:00",
     EndTime = "2030 JAN 01 00:00:00",
-    SampleInterval = SampleInterval,
-    TimeStampSubsampleFactor = 1
+    SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
     Name = "Pioneer 11 Trail",
@@ -159,7 +153,6 @@ asset.export(Pioneer11)
 
 asset.meta = {
   Name = "Pioneer and Voyager Trails",
-  Version = "1.1",
   Description = [[Pioneer 10, Pioneer 11, Voyager 1 and Voyager 2 trails. Driven by JPL
     Horizons data for better performance then spice but lower resolution. Data is from
     shortly after mission launches until January 1st, 2030]],

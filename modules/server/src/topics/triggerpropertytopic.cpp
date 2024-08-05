@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
         const std::string& propertyKey = json.at("property").get<std::string>();
         global::scriptEngine->queueScript(
-            fmt::format(
+            std::format(
                 "openspace.setPropertyValueSingle(\"{}\", nil)", propertyKey
             ),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,

@@ -1,5 +1,5 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local data = asset.require('../hybrid_data')
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local data = asset.require("../hybrid_data")
 
 
 
@@ -27,7 +27,6 @@ end)
 
 asset.meta = {
   Name = "Hybrid 2005-04-08",
-  Version = "1.0",
   Description = "Hybrid eclipse map for 2005-04-08",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

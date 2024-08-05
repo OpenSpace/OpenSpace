@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -54,11 +54,11 @@ TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
 }
 
 TEST_CASE("FormatJson - Bool", "[formatjson]") {
-    bool trueVal = true;
-    bool falseVal = false;
+    constexpr bool TrueVal = true;
+    constexpr bool FalseVal = false;
 
-    CHECK(openspace::formatJson(trueVal) == "true");
-    CHECK(openspace::formatJson(falseVal) == "false");
+    CHECK(openspace::formatJson(TrueVal) == "true");
+    CHECK(openspace::formatJson(FalseVal) == "false");
 }
 
 TEST_CASE("FormatJson - Infinity & Nan", "[formatjson]") {

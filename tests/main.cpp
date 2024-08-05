@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,15 +58,12 @@ int main(int argc, char** argv) {
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
-    std::filesystem::path configFile = configuration::findConfiguration();
+    const std::filesystem::path configFile = findConfiguration();
     // Register the base path as the directory where 'filename' lives
-    std::filesystem::path base = configFile.parent_path();
+    const std::filesystem::path base = configFile.parent_path();
     FileSys.registerPathToken("${BASE}", base);
 
-    *global::configuration = configuration::loadConfigurationFromFile(
-        configFile.string(),
-        glm::ivec2(0)
-    );
+    *global::configuration = loadConfigurationFromFile(configFile, "", glm::ivec2(0));
     global::openSpaceEngine->registerPathTokens();
     global::openSpaceEngine->initialize();
 
@@ -81,7 +78,8 @@ int main(int argc, char** argv) {
     // All of the relevant tests initialize the SpiceManager
     openspace::SpiceManager::deinitialize();
 
-    int result = Catch::Session().run(argc, argv);
+
+    const int result = Catch::Session().run(argc, argv);
 
     // And the deinitialization needs the SpiceManager to be initialized
     openspace::SpiceManager::initialize();

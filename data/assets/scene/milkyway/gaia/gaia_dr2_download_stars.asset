@@ -28,7 +28,6 @@ asset.export("GaiaFullDataset", gaiaFull)
 
 asset.meta = {
   Name = "GaiaDR2 Download Stars",
-  Version = "1.1",
   Description = [[This asset contains code to sync gaia subsets from the OpenSpace
   servers. Edit this file to choose which subsets to sync. WARNING can use 150GB]],
   Author = "ESA/Gaia/DPAC",

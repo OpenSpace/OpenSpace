@@ -1,0 +1,44 @@
+local Dashboard = {
+  Identifier = "ScreenSpaceTime",
+  Name = "Time",
+  Type = "ScreenSpaceDashboard",
+  FaceCamera = false,
+  Scale = 3.0,
+  Items = {
+    {
+      Type = "DashboardItemDate",
+      Identifier = "Date",
+      GuiName = "Date",
+      FontSize = 72,
+      FormatString = "{}",
+      TimeFormat = "YYYY MON DD HR:MN:SC.### ::RND"
+    }
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Dashboard)
+
+  openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceTime.Size", {0.000000,0.000000,640.000000,320.000000})
+
+end)
+
+asset.onDeinitialize(function()
+  openspace.addScreenSpaceRenderable(Dashboard)
+end)
+
+asset.export(Dashboard)
+
+
+
+asset.meta = {
+  Name = "ScreenSpace - Date",
+  Description = [[
+    This asset provides a Date dashboard item that is shown on a screen space object.
+    This can be place on a dome surface to show the current time to the audience.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

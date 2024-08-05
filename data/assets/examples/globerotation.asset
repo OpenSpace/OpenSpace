@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 
@@ -41,7 +41,8 @@ local ExampleGlobeRotation = {
     }
   },
   GUI = {
-    Path = "/Example"
+    Name = "GlobeRotation",
+    Path = "/Examples"
   }
 }
 
@@ -58,11 +59,11 @@ asset.export(ExampleGlobeRotation)
 
 
 asset.meta = {
-  Name = "Model Example",
-  Version = "1.0",
+  Name = "GlobeRotation Example",
   Description = [[An example that demonstrates how to load a 3D model from a geometry
-    file, together with some basic functionality. The model is placed on the surface
-    of a planet using a GlobeRotation and GlobeTranslation.]],
+    file, placing it on a planetary surface and rotate it to align with the surface
+    normal using a "GlobeRotation" transform. Note that "GlobeTranslation" is needed to
+    put the model in the correct location.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

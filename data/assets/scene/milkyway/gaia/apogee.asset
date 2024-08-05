@@ -30,8 +30,9 @@ local GaiaAbundanceApogee = {
     OtherData = "FeH",
     MagnitudeExponent = 7.25,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based",
-    Texture = textures .. "halo.png",
+    Glare = {
+      Texture = textures .. "halo.png"
+    },
     ColorRange = { { -0.8, 0.6 } },
     -- ShapeTexture = textures .. "disc.png",
     ColorMap = colormaps .. "colorbv.cmap",
@@ -71,7 +72,6 @@ asset.export(GaiaAbundanceApogee)
 
 asset.meta = {
   Name = "Gaia Abundance Apogee",
-  Version = "1.0",
   Description = "This asset contains a RenderableStars dataset with metallicity data",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

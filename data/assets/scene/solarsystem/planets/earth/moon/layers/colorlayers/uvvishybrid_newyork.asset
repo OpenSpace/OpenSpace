@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "UvvisHybrid_NewYork",
   Name = "Uvvis Hybrid [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("uvvishybrid_newyork.wms"),
   Settings = {
     Gamma = 0.52,
@@ -36,7 +37,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Uvvis Hybrid [New York]",
-  Version = "1.1",
   Description = [[Moon Lunar Orbiter - Clementine UVVISv2 Hybrid Mosaic 59m v1 map of the
     Moon. This map is hosted on the OpenSpace server in New York]],
   Author = "USGS",

@@ -19,8 +19,26 @@ asset.resource({
   Name = "Example Large",
   Type = "UrlSynchronization",
   Identifier = "example_large",
-  Url = "http://ipv4.download.thinkbroadband.com/100MB.zip",
-  Override = true
+  Url = {
+    "http://speedtest.tele2.net/1GB.zip",
+    "http://speedtest.tele2.net/100MB.zip",
+
+    "https://proof.ovh.net/files/1Gb.dat",
+    "https://proof.ovh.net/files/100Mb.dat",
+
+    "https://speed.hetzner.de/1GB.bin",
+    "https://speed.hetzner.de/100MB.bin",
+
+    "http://ipv4.download.thinkbroadband.com/1GB.zip",
+    "http://ipv4.download.thinkbroadband.com/512MB.zip",
+    "http://ipv4.download.thinkbroadband.com/200MB.zip",
+    "http://ipv4.download.thinkbroadband.com/100MB.zip",
+    "http://ipv4.download.thinkbroadband.com/50MB.zip",
+    "http://ipv4.download.thinkbroadband.com/20MB.zip",
+    "http://ipv4.download.thinkbroadband.com/10MB.zip",
+    "http://ipv4.download.thinkbroadband.com/5MB.zip",
+  },
+  SecondsUntilResync = 0
 })
 
 asset.resource({
@@ -28,7 +46,7 @@ asset.resource({
   Type = "UrlSynchronization",
   Identifier = "example_medium",
   Url = "http://ipv4.download.thinkbroadband.com/5MB.zip",
-  Override = true
+  SecondsUntilResync = 0
 })
 
 -- Load a resource without hashing, meaning that the bare directory name will be
@@ -45,7 +63,6 @@ asset.resource({
 
 asset.meta = {
   Name = "UrlSynchronization",
-  Version = "1.0",
   Description = [[Example showing how to load resources (any type of data file) from
     online sources, using the UrlSynchronization resource type. These can then be used
     in other assets. See more information on resources on the OpenSpace wiki page.

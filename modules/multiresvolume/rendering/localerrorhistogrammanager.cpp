@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/util/progressbar.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "LocalErrorHistogramManager";
@@ -38,7 +38,7 @@ namespace openspace {
 LocalErrorHistogramManager::LocalErrorHistogramManager(TSP* tsp) : _tsp(tsp) {}
 
 bool LocalErrorHistogramManager::buildHistograms(int numBins) {
-    LINFO(fmt::format("Build histograms with {} bins each", numBins));
+    LINFO(std::format("Build histograms with {} bins each", numBins));
     _numBins = numBins;
 
     _file = &(_tsp->file());
@@ -133,11 +133,9 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset,
                 childValues = it->second;
             }
             else {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Child {} visited without cache, {}, {}",
-                    childIndex,
-                    bstOffset,
-                    octreeOffset
+                    childIndex, bstOffset, octreeOffset
                 ));
                 return false;
             }
@@ -154,7 +152,7 @@ bool LocalErrorHistogramManager::buildFromOctreeChild(unsigned int bstOffset,
                 parentValues = it->second;
             }
             else {
-                LERROR(fmt::format("Parent {} visited without cache", parentIndex));
+                LERROR(std::format("Parent {} visited without cache", parentIndex));
                 return false;
             }
         }
@@ -239,7 +237,7 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
                 childValues = it->second;
             }
             else {
-                LERROR(fmt::format("Child {} visited without cache", childIndex));
+                LERROR(std::format("Child {} visited without cache", childIndex));
                 return false;
             }
         }
@@ -255,7 +253,7 @@ bool LocalErrorHistogramManager::buildFromBstChild(unsigned int bstOffset,
                 parentValues = it->second;
             }
             else {
-                LERROR(fmt::format("Parent {} visited without cache", parentIndex));
+                LERROR(std::format("Parent {} visited without cache", parentIndex));
                 return false;
             }
         }
@@ -321,7 +319,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::filesystem::path& filen
 
     file.read(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
     _spatialHistograms = std::vector<Histogram>(_numInnerNodes);
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         const int offset = i * _numBins;
         // No need to deallocate histogram data, since histograms take ownership.
         float* data = new float[_numBins];
@@ -331,7 +329,7 @@ bool LocalErrorHistogramManager::loadFromFile(const std::filesystem::path& filen
 
     file.read(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
     _temporalHistograms = std::vector<Histogram>(_numInnerNodes);
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         const int offset = i * _numBins;
         // No need to deallocate histogram data, since histograms take ownership.
         float* data = new float[_numBins];
@@ -358,7 +356,7 @@ bool LocalErrorHistogramManager::saveToFile(const std::filesystem::path& filenam
     const int nFloats = _numInnerNodes * _numBins;
     std::vector<float> histogramData(nFloats);
 
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
         memcpy(
             &histogramData[offset],
@@ -368,7 +366,7 @@ bool LocalErrorHistogramManager::saveToFile(const std::filesystem::path& filenam
     }
     file.write(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
 
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
         memcpy(
             &histogramData[offset],

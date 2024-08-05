@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocket.h>
@@ -96,9 +96,10 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     if (!configuration.hasValue<ghoul::Dictionary>(KeyInterfaces)) {
         return;
     }
-    ghoul::Dictionary interfaces = configuration.value<ghoul::Dictionary>(KeyInterfaces);
+    const ghoul::Dictionary interfaces =
+        configuration.value<ghoul::Dictionary>(KeyInterfaces);
 
-    for (std::string_view key : interfaces.keys()) {
+    for (const std::string_view key : interfaces.keys()) {
         ghoul::Dictionary interfaceDictionary = interfaces.value<ghoul::Dictionary>(key);
 
         // @TODO (abock, 2019-09-17);  This is a hack to make the parsing of the
@@ -143,7 +144,7 @@ void ServerModule::preSync() {
 
         std::unique_ptr<ghoul::io::Socket> socket;
         while ((socket = socketServer->nextPendingSocket())) {
-            std::string address = socket->address();
+            const std::string address = socket->address();
             if (serverInterface->clientIsBlocked(address)) {
                 // Drop connection if the address is blocked.
                 continue;
@@ -200,7 +201,7 @@ void ServerModule::disconnectAll() {
         serverInterface->deinitialize();
     }
 
-    for (ConnectionData& connectionData : _connections) {
+    for (const ConnectionData& connectionData : _connections) {
         Connection& connection = *connectionData.connection;
         if (connection.socket() && connection.socket()->isConnected()) {
             connection.socket()->disconnect(
@@ -210,13 +211,13 @@ void ServerModule::disconnectAll() {
     }
 }
 
-void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
+void ServerModule::handleConnection(const std::shared_ptr<Connection>& connection) {
     ZoneScoped;
 
     std::string messageString;
     messageString.reserve(256);
     while (connection->socket()->getMessage(messageString)) {
-        std::lock_guard lock(_messageQueueMutex);
+        const std::lock_guard lock(_messageQueueMutex);
         _messageQueue.push_back({ connection, messageString });
     }
 }
@@ -224,19 +225,18 @@ void ServerModule::handleConnection(std::shared_ptr<Connection> connection) {
 void ServerModule::consumeMessages() {
     ZoneScoped;
 
-    std::lock_guard lock(_messageQueueMutex);
+    const std::lock_guard lock(_messageQueueMutex);
     while (!_messageQueue.empty()) {
         const Message& m = _messageQueue.front();
-        if (std::shared_ptr<Connection> c = m.connection.lock()) {
+        if (const std::shared_ptr<Connection>& c = m.connection.lock()) {
             c->handleMessage(m.messageString);
         }
         _messageQueue.pop_front();
     }
 }
 
-ServerModule::CallbackHandle ServerModule::addPreSyncCallback(CallbackFunction cb)
-{
-    CallbackHandle handle = _nextCallbackHandle++;
+ServerModule::CallbackHandle ServerModule::addPreSyncCallback(CallbackFunction cb) {
+    const CallbackHandle handle = _nextCallbackHandle++;
     _preSyncCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }

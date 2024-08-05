@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,9 +39,9 @@ public:
     /**
       * Returns the data contained at an index.
       *
-      * \param index that defines where the item is located in the tree model
-      * \param role Qt-defined role that describes the reason Qt is calling the
-      *             function (can be multiple times)
+      * \param index The index defining where the item is located in the tree model
+      * \param role Qt-defined role that describes the reason Qt is calling the function
+      *        (can be multiple times)
       * \return QVariant data object
       */
     QVariant data(const QModelIndex& index, int role) const final;
@@ -49,10 +49,10 @@ public:
     /**
       * Returns the header data of the tree view.
       *
-      * \param section of data to be obtained from header
-      * \param orientation of the query (e.g. Qt::horizontal)
-      * \param role Qt-defined role that describes the reason Qt is calling the
-      *             function (can be multiple times)
+      * \param section The data to be obtained from header
+      * \param orientation The orientation of the query (e.g. Qt::horizontal)
+      * \param role Qt-defined role that describes the reason Qt is calling the function
+      *        (can be multiple times)
       * \return QVariant data object in the header
       */
     QVariant headerData(int section, Qt::Orientation orientation,
@@ -61,10 +61,10 @@ public:
     /**
       * Returns the index of item in #QModelIndex object form.
       *
-      * \param row the row number
-      * \param column the column number
-      * \param parent index of parent
-      * \return #QModelIndex index of the item at specified position
+      * \param row The row number
+      * \param column The column number
+      * \param parent Index of parent
+      * \return QModelIndex index of the item at specified position
       */
     QModelIndex index(int row, int column,
         const QModelIndex& parent = QModelIndex()) const final;
@@ -72,18 +72,18 @@ public:
     /**
       * Returns the index of the parent of the item specified by input param.
       *
-      * \param index of item that is a child of the parent
-      * \return #QModelIndex index of the parent
+      * \param index The index of item that is a child of the parent
+      * \return QModelIndex index of the parent
       */
     QModelIndex parent(const QModelIndex& index) const final;
 
     /**
       * Returns the index of the parent of the item specified by the input params.
       *
-      * \param row the row number
-      * \param column the column number
-      * \param parent index of parent
-      * \return #QModelIndex index of the parent
+      * \param row The row number
+      * \param column The column number
+      * \param parent Index of parent
+      * \return QModelIndex index of the parent
       */
     QModelIndex parent(int row, int column,
         const QModelIndex& parent = QModelIndex()) const;
@@ -91,24 +91,24 @@ public:
     /**
       * Returns asset item at specified index.
       *
-      * \param index of item that is a child of the parent
-      * \return #assetTreeItem pointer to the item at the provided index
+      * \param index The index of item that is a child of the parent
+      * \return Pointer to the item at the provided index
       */
     AssetTreeItem* assetItem(const QModelIndex& index);
 
     /**
       * Returns number of children/rows of the parent.
       *
-      * \param parent #QModelIndex of the parent item
-      * \return number of children/rows of this parent
+      * \param parent QModelIndex of the parent item
+      * \return The number of children/rows of this parent
       */
     int rowCount(const QModelIndex& parent = QModelIndex()) const final;
 
     /**
       * Returns the number of columns of data in each item of the tree.
       *
-      * \param parent specified by the #QModelIndex index
-      * \return the number of data columns
+      * \param parent The parent specified by the QModelIndex index
+      * \return The number of data columns
       */
     int columnCount(const QModelIndex& parent = QModelIndex()) const final;
 
@@ -116,18 +116,18 @@ public:
       * Return the Qt flags of the item specified by index, which can include
       * Qt::ItemIsEnabled, Qt::ItemIsSelectable.
       *
-      * \param index specified by the #QModelIndex index
-      * \return the Qt flags
+      * \param index The index specified by the #QModelIndex index
+      * \return The Qt flags
       */
     Qt::ItemFlags flags(const QModelIndex& index) const final;
 
     /**
       * Set data at index \p index.
       *
-      * \param index location of the item to set
+      * \param index Location of the item to set
       * \param value The #QVariant data element to store at column \p column
       * \param role Qt-specific role to define context of the call
-      * \return true if the data set was successful
+      * \return `true` if the data set was successful
       */
     bool setData(const QModelIndex& index, const QVariant& value,
         int role = Qt::EditRole) final;
@@ -135,9 +135,8 @@ public:
     /**
       * Returns a vector of all #Assets selected in the tree view.
       *
-      * \param outputPaths vector of #openspace::Profile::Asset objects, each of which are
-      *                    selected
-      * \param outputItems vector of #assetTreeItem * objects, each of which are selected
+      * \param outputPaths The vector of paths that were selected
+      * \param outputItems The vector of AssetTreeItem that were selected
       */
     void getSelectedAssets(std::vector<std::string>& outputPaths,
         std::vector<AssetTreeItem*>& outputItems);
@@ -145,6 +144,7 @@ public:
     /**
       * Imports asset tree data for this model by recursively traversing the folder
       * structure.
+      *
       * \param assetBasePath The base path where to find all assets
       * \param assetBasePath The base path where to find user assets
       */
@@ -154,72 +154,72 @@ public:
     /**
       * Returns bool for if item is checked/selected.
       *
-      * \param index location of the item to set
-      * \return true if the item is checked
+      * \param index Location of the item to set
+      * \return `true` if the item is checked
       */
     bool isChecked(QModelIndex& index) const;
 
     /**
       * Answers query about whether or not item is an asset.
       *
-      * \param index location of the item to query
-      * \return true if the item is an asset (and not a directory)
+      * \param index Location of the item to query
+      * \return `true` if the item is an asset (and not a directory)
       */
     bool isAsset(QModelIndex& index) const;
 
     /**
       * Answers query about whether or not item is in the current filesystem.
       *
-      * \param index location of the item to query
-      * \return true if the data is in the filesystem
+      * \param index Location of the item to query
+      * \return `true` if the data is in the filesystem
       */
     bool inFilesystem(QModelIndex& index) const;
 
     /**
       * Returns number of child items of referenced item.
       *
-      * \param index location of the item to query
-      * \return number of child items
+      * \param index Location of the item to query
+      * \return Number of child items
       */
     int childCount(QModelIndex& index) const;
 
     /**
       * Returns a pointer to a child item of the current item.
       *
-      * \param row the child number of the current item
-      * \return assetTreeItem pointer to the child
+      * \param row The child number of the current item
+      * \return The pointer to the child
       */
     AssetTreeItem* child(int row) const;
 
     /**
       * Returns the asset name of the specified item.
       *
-      * \param index location of the item to query
-      * \return the asset name of the item
+      * \param index Location of the item to query
+      * \return The asset name of the item
       */
     QString name(QModelIndex& index) const;
 
     /**
       * Set asset name at specified index.
       *
-      * \param index location of the item to set
-      * \param name the asset name to set
+      * \param index Location of the item to set
+      * \param name The asset name to set
       */
-    void setName(QModelIndex& index, QString name);
+    void setName(QModelIndex& index, const QString& name);
 
     /**
       * Set state of checked/selected of an item.
       *
-      * \param index location of the item to set
-      * \param checked true if item is checked/selected
+      * \param index Location of the item to set
+      * \param checked `true` if item is checked/selected
       */
     void setChecked(QModelIndex& index, bool checked);
 
     /**
       * Set state of whether or not asset exists in filesystem.
       *
-      * \param index location of the item to set
-      * \param fileExists true if asset exists in filesystem
+      * \param index Location of the item to set
+      * \param fileExists `true` if asset exists in filesystem
       */
     void setExistenceInFilesystem(QModelIndex& index, bool fileExists);
 

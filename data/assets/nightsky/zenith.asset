@@ -33,7 +33,7 @@ local ZenithPosition = {
   },
   GUI = {
     Name = "Zenith Position",
-    Path = "/Other/Points",
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth",
     Hidden = true
   }
 }
@@ -61,7 +61,7 @@ local ZenithDot = {
     Description = [[A dot representation of the Local Zenith, based on the camera's
       current position on a planet. Use the provided show or toggle action to move it
       between planets. The default is Earth.]],
-    Path = "/Other/Points"
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth"
   }
 }
 
@@ -129,9 +129,9 @@ asset.export("HideZenith", HideZenith.Identifier)
 asset.export("ToggleZenith", ToggleZenith.Identifier)
 
 
+
 asset.meta = {
   Name = "Zenith",
-  Version = "1.0",
   Description = [[A dot representation of the Local Zenith (based on the current
     camera positon), including actions to toggle, hide and show it.]],
   Author = "OpenSpace Team",

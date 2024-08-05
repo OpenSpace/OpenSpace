@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,9 +40,9 @@ public:
     /**
      * Constructor for camera gui class
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
-     * \param parent Pointer to parent Qt widget (optional)
+     * \param parent Pointer to parent Qt widget
+     * \param profile The #openspace::Profile::CameraType object containing all data of
+     *        the new or imported profile
      */
     CameraDialog(QWidget* parent, std::optional<openspace::Profile::CameraType>* camera);
 
@@ -56,7 +56,7 @@ private:
     QWidget* createNavStateWidget();
     QWidget* createGeoWidget();
 
-    void addErrorMsg(QString errorDescription);
+    void addErrorMsg(const QString& errorDescription);
     bool areRequiredFormsFilledAndValid();
 
     std::optional<openspace::Profile::CameraType>* _camera = nullptr;

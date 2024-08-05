@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,6 +21,8 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
+#include <openspace/util/timeconversion.h>
 
 namespace {
 
@@ -192,6 +194,13 @@ namespace {
 }
 
 /**
+ * Returns whether the simulation time is currently paused or is progressing.
+ */
+[[codegen::luawrap]] bool isPaused() {
+    return openspace::global::timeManager->isPaused();
+}
+
+/**
  * Sets the current simulation time to the specified value. If the parameter is a number,
  * the value is the number of seconds past the J2000 epoch. If it is a string, it has to
  * be a valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS. Note: providing
@@ -329,7 +338,7 @@ namespace {
     }
     else {
         double v = std::get<double>(change);
-        c = fmt::format("{}s", v);
+        c = std::format("{}s", v);
     }
 
     std::string res = openspace::Time::advancedTime(std::move(b), std::move(c));
@@ -365,6 +374,36 @@ namespace {
     else {
         return std::string(Time(std::get<double>(time)).ISO8601());
     }
+}
+
+/**
+ * Returns the number of seconds between the provided start time and end time. If the end
+ * time is before the start time, the return value is negative. If the start time is equal
+ * to the end time, the return value is 0.
+ * Both start and end times must be valid ISO 8601 date strings.
+ */
+[[codegen::luawrap]] double duration(std::string start, std::string end) {
+    using namespace openspace;
+
+    const double tStart = Time::convertTime(start);
+    const double tEnd = Time::convertTime(end);
+    return tEnd - tStart;
+}
+
+/**
+ * Returns the number of seconds per day where a day in this case is exactly 24 hours.
+ * The total number of seconds is equal to 86400.
+ */
+[[codegen::luawrap]] int secondsPerDay() {
+    return openspace::SecondsPerDay;
+}
+
+/**
+ * Returns the number of seconds in a Julian year, which is equal to 31557600.
+ */
+[[codegen::luawrap]] int secondsPerYear() {
+    // We could use a call to SPICE here, but the value is a constant anyway
+    return openspace::SecondsPerYear;
 }
 
 #include "time_lua_codegen.cpp"

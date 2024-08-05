@@ -79,7 +79,6 @@ asset.export(GaiaStars)
 
 asset.meta = {
   Name = "Gaia Stars",
-  Version = "1.0",
   Description = [[This asset contains a subset of GaiaDR2. This subset contains 7.5M stars which have
   accurate values for a number of columns]],
   Author = "ESA/Gaia/DPAC",

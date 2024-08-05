@@ -4,7 +4,6 @@ asset.require("./satellites_interesting")
 
 asset.meta = {
   Name = "Satellites",
-  Version = "1.0",
   Description = "Default Earth Satellites. This file is loads satellites_interesting",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

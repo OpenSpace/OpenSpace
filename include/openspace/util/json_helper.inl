@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <type_traits>
@@ -72,21 +72,21 @@ std::string formatJson(T value) {
     }
     else if constexpr (internal::isGlmVector<T>()) {
         std::string values;
-        for (glm::length_t i = 0; i < ghoul::glm_components<T>::value; ++i) {
+        for (glm::length_t i = 0; i < ghoul::glm_components<T>::value; i++) {
             values += std::to_string(value[i]) + ',';
         }
         values.pop_back();
-        return fmt::format("[{}]", values);
+        return std::format("[{}]", values);
     }
     else if constexpr (internal::isGlmMatrix<T>()) {
         std::string values;
-        for (glm::length_t i = 0; i < T::type::row_type::length(); ++i) {
-            for (glm::length_t j = 0; j < T::type::col_type::length(); ++j) {
+        for (glm::length_t i = 0; i < T::type::row_type::length(); i++) {
+            for (glm::length_t j = 0; j < T::type::col_type::length(); j++) {
                 values += std::to_string(value[i][j]) + ',';
             }
         }
         values.pop_back();
-        return fmt::format("[{}]", values);
+        return std::format("[{}]", values);
     }
     else {
         static_assert(sizeof(T) == 0, "JSON formatting of type T not implemented");

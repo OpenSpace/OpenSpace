@@ -88,6 +88,11 @@
       "name": "NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance",
       "type": "setPropertyValue",
       "value": "20.0"
+    },
+    {
+      "name": "NavigationHandler.OrbitalNavigator.LimitZoom.MinimumAllowedDistance",
+      "type": "setPropertyValueSingle",
+      "value": "3.0"
     }
   ],
   "time": {

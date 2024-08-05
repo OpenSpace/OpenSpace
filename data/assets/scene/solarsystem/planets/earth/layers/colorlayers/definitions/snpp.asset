@@ -1,0 +1,33 @@
+local Layer = {
+  Identifier = "Temporal_SNPP_VIIRS",
+  Name = "Temporal SNPP VIIRS",
+  Type = "TemporalTileProvider",
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2015-11-24",
+      End = "Today"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "VIIRS_SNPP_CorrectedReflectance_TrueColor",
+      "250m",
+      "jpg"
+    )
+  },
+  PadTiles = false
+}
+
+
+asset.export("Layer", Layer)
+
+
+
+asset.meta = {
+  Name = "NOAA 20",
+  Description = [[A layer that sources its images from the Suomi NPP satellite that is part of the Joint Polar Satellite System.]],
+  Author = "OpenSpace Team",
+  URL = "http://www.openspaceproject.com",
+  License = "MIT License"
+}

@@ -48,7 +48,6 @@ end)
 
 asset.meta = {
   Name = "Static fieldline representation of Ganymede's magnetic field",
-  Version = "1.0",
   Description = [[
     Showing a single timestep of the magnetic fieldlines around Ganymede in the GPHIO
     coordinate system

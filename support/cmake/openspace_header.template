@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,8 +43,7 @@ constexpr std::string_view OPENSPACE_VERSION_STRING_FULL = "@OPENSPACE_VERSION_M
 
 constexpr std::string_view OPENSPACE_GIT_BRANCH = "@OPENSPACE_GIT_BRANCH@";
 constexpr std::string_view OPENSPACE_GIT_COMMIT = "@OPENSPACE_GIT_COMMIT@";
-constexpr std::string_view OPENSPACE_GIT_STATUS = "@OPENSPACE_GIT_STATUS@";
-constexpr std::string_view OPENSPACE_GIT_FULL = "@OPENSPACE_GIT_BRANCH@@@OPENSPACE_GIT_COMMIT@ @OPENSPACE_GIT_STATUS@";
+constexpr std::string_view OPENSPACE_GIT_FULL = "@OPENSPACE_GIT_BRANCH@@@OPENSPACE_GIT_COMMIT@";
 
 } // namespace openspace
 

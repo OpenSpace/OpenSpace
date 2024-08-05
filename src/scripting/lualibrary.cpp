@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ void LuaLibrary::merge(LuaLibrary rhs) {
             // want to overwrite it
             LERRORC(
                 "LuaLibrary",
-                fmt::format(
+                std::format(
                     "Lua function '{}' in library '{}' has been defined twice",
                     fun.name, rhs.name
                 )

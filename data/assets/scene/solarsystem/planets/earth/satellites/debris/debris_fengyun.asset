@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_1999-025",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=1999-025&FORMAT=kvn",
   Filename = "1999-025.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -21,7 +21,8 @@ local DebrisFengyun = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.784, 1.0, 0.737 },
-    Fade = 1.5,
+    TrailFade = 1.5,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
@@ -46,7 +47,6 @@ asset.export(DebrisFengyun)
 
 asset.meta = {
   Name = "Satellites Debris - Fengyun Debris",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Fengyun Debris. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

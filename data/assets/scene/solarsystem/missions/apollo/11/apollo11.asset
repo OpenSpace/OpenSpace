@@ -1,11 +1,11 @@
-asset.require("spice/base")
 asset.require("../actions")
 asset.require("./actions")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local descentKeyframes = asset.require("./lem_descent")
 local descentRotationKeyframes = asset.require("./lem_descent_rotation")
 local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -25,8 +25,6 @@ local lemModel = asset.resource({
 
 
 --landing - 1969-07-20T20:17:40
-local ApolloSpiceId = -911
-local ApolloLemSpiceId = -911500
 
 local Apollo11Position = {
   Identifier = "Apollo11Position",
@@ -39,15 +37,15 @@ local Apollo11Position = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = ApolloSpiceId,
-      Observer = "MOON",
-      Frame = "MOON_ME"
+      Target = kernels.ID.Apollo11,
+      Observer = coreKernels.ID.Moon,
+      Frame = kernels.ID.MoonME
     }
   },
   GUI = {
-    Hidden = true,
     Name = "Apollo 11",
-    Path = "/Solar System/Missions/Apollo/11"
+    Path = "/Solar System/Missions/Apollo/11",
+    Hidden = true
   }
 }
 
@@ -88,18 +86,18 @@ local Apollo11MoonTrail = {
   Parent = moonTransforms.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = ApolloSpiceId,
-      Observer = "MOON",
-      Frame = "IAU_MOON"
+      Target = kernels.ID.Apollo11,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Color = { 0.180000,0.510000,0.750000 },
     StartTime = "1969 JUL 19 19:38:29.183",
     EndTime = "1969 JUL 22 04:55:35.183",
     SampleInterval = 60,
-    EnableFade = false,
-    Enabled = false
+    EnableFade = false
   },
   GUI = {
     Name = "Apollo 11 Moon Orbits",
@@ -116,9 +114,9 @@ local lemTranslation = {
     -- a 10s linear transition to the location where the descentKeyframes start.
     ["1969 JUL 20 20:14:30"] = {
       Type = "SpiceTranslation",
-      Target = ApolloLemSpiceId,
-      Observer = "MOON",
-      Frame = "IAU_MOON"
+      Target = kernels.ID.Apollo11LEM,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     ["1969 JUL 20 20:14:40"] = {
       Type = "TimelineTranslation",
@@ -139,13 +137,13 @@ local Apollo11LemTrail = {
   Parent = moonTransforms.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
+    Enabled = false,
     Translation = lemTranslation,
     Color = { 0.780000,0.940000,0.340000 },
     StartTime = "1969 JUL 20 19:10:25.183",
     EndTime = "1969 JUL 20 20:17:46.183",
     SampleInterval = 2,
-    EnableFade = false,
-    Enabled = false
+    EnableFade = false
   },
   GUI = {
     Name = "Apollo 11 Lunar Lander Trail",
@@ -240,8 +238,6 @@ local Apollo11LemLandedModel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(Apollo11Position)
   openspace.addSceneGraphNode(Apollo11LemPosition)
   openspace.addSceneGraphNode(Apollo11Model)
@@ -259,8 +255,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo11Model)
   openspace.removeSceneGraphNode(Apollo11LemPosition)
   openspace.removeSceneGraphNode(Apollo11Position)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo11Position)

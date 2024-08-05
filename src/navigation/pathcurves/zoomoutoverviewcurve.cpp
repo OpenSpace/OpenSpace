@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,8 +71,8 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     if (start.nodeIdentifier() != end.nodeIdentifier() &&
         glm::length(startPosToEndPos) > Epsilon)
     {
-        const glm::dvec3 n1 = startTangentDir;
-        const glm::dvec3 n2 = endTangentDir;
+        const glm::dvec3& n1 = startTangentDir;
+        const glm::dvec3& n2 = endTangentDir;
         const glm::dvec3 halfWayPos = start.position() + 0.5 * startPosToEndPos;
 
         // Decide the step direction for the "overview point" based on the directions

@@ -43,7 +43,6 @@ asset.export(MoonMarker)
 
 asset.meta = {
   Name = "Moon marker",
-  Version = "1.0",
   Description = "Moon marker with name, sized for Earth view",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

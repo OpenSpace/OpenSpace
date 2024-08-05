@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,6 +52,7 @@ public:
     void connect();
     void setPort(std::string port);
     void setAddress(std::string address);
+    void setServerName(std::string name);
     void setName(std::string name);
     bool isHost();
     const std::string& hostName();
@@ -66,9 +67,9 @@ public:
     double latencyStandardDeviation() const;
 
     /**
-    * Returns the Lua library that contains all Lua functions available to affect the
-    * remote OS parallel connection.
-    */
+     * Returns the Lua library that contains all Lua functions available to affect the
+     * remote OS parallel connection.
+     */
     static scripting::LuaLibrary luaLibrary();
     ParallelConnection::Status status();
     int nConnections();
@@ -97,6 +98,7 @@ private:
 
     properties::StringProperty _password;
     properties::StringProperty _hostPassword;
+    properties::StringProperty _serverName;
 
     // While the port should in theory be an int,
     // we use a StringProperty to avoid a slider in the GUI.

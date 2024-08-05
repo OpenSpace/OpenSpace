@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,18 +36,18 @@ class MarkNodesDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for markNodes class
+     * Constructor for markNodes class.
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
+     * \param profile The list of marked nodes containing all data of the new or imported
+     *        profile
      */
     MarkNodesDialog(QWidget* parent, std::vector<std::string>* markedNodes);
 
     /**
-     * Handles keypress while the Qt dialog window is open
+     * Handles keypress while the Qt dialog window is open.
      *
-     * \param evt #QKeyEvent object for the key press event
+     * \param evt QKeyEvent object for the key press event
      */
     void keyPressEvent(QKeyEvent* evt) override;
 

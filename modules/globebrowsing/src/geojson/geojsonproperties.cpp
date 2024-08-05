@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
 #include <geos/io/GeoJSON.h>
-#include <scn/scn.h>
+#include <scn/scan.h>
 #include <algorithm>
 #include <cstdio>
 
@@ -61,7 +61,7 @@ namespace geojson::propertykeys {
     constexpr std::string_view TessellationMaxDistance = "tessellationDistance";
 
     constexpr std::string_view AltitudeMode = "altitudeMode";
-    constexpr std::string_view AltitudeModeClamp = "clampToGround";
+    //constexpr std::string_view AltitudeModeClamp = "clampToGround";
     constexpr std::string_view AltitudeModeAbsolute = "absolute";
     constexpr std::string_view AltitudeModeRelative = "relativeToGround";
 
@@ -71,7 +71,7 @@ namespace geojson::propertykeys {
 namespace {
     using PropertyInfo = openspace::properties::Property::PropertyInfo;
 
-    template <std::size_t SIZE>
+    template <size_t SIZE>
     bool keyMatches(const std::string_view key,
                     const std::array<std::string_view, SIZE>& keyAlternativesArray,
                     std::optional<const PropertyInfo> propInfo = std::nullopt)
@@ -100,10 +100,10 @@ namespace {
     }
 
     std::optional<glm::vec3> hexToRgb(std::string_view hexColor) {
-        glm::ivec3 rgb;
-        auto ret = scn::scan(hexColor, "#{:2x}{:2x}{:2x}", rgb.r, rgb.g, rgb.b);
+        auto ret = scn::scan<int, int, int>(hexColor, "#{:2x}{:2x}{:2x}");
         if (ret) {
-            return (1.f / 255.f) * glm::vec3(rgb);
+            auto [x, y, z] = ret->values();
+            return (1.f / 255.f) * glm::vec3(x, y, z);
         }
         else {
             return std::nullopt;
@@ -120,7 +120,7 @@ namespace {
                 // Should add some more information on which file the reading failed for
                 LERRORC(
                     "GeoJson",
-                    fmt::format(
+                    std::format(
                         "Failed reading color property. Expected 3 values, got {}",
                         val.size()
                     )
@@ -135,12 +135,12 @@ namespace {
             );
         }
         else if (value.isString()) {
-            const std::string hex = value.getString();
+            const std::string& hex = value.getString();
             std::optional<glm::vec3> c = hexToRgb(hex);
             if (!c) {
                 LERRORC(
                     "GeoJson",
-                    fmt::format(
+                    std::format(
                         "Failed reading color property. Did not find a hex color, got {}",
                         hex
                     )
@@ -151,13 +151,13 @@ namespace {
             }
         }
         return color;
-    };
+    }
 
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this object. A value of 0 means "
-        "completely transparent",
+        "completely transparent.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -165,7 +165,7 @@ namespace {
         "Color",
         "Color",
         "The color of the rendered geometry. For points it will be used as a multiply"
-        "color for any provided texture",
+        "color for any provided texture.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -173,7 +173,7 @@ namespace {
         "FillOpacity",
         "Fill Opacity",
         "This value determines the opacity of the filled portion of a polygon. Will "
-        "also be used for extruded features",
+        "also be used for extruded features.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -181,14 +181,14 @@ namespace {
         "FillColor",
         "Fill Color",
         "The color of the filled portion of a rendered polygon. Will also be used for "
-        "extruded features",
+        "extruded features.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The width of any rendered lines",
+        "The width of any rendered lines.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -196,7 +196,7 @@ namespace {
         "PointSize",
         "Point Size",
         "The size of any rendered points. The size will be scaled based on the "
-        "bounding sphere of the globe",
+        "bounding sphere of the globe.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -213,7 +213,7 @@ namespace {
         "Extrude",
         "Extrude",
         "If true, extrude the geometry to intersect the globe.Lines/polygons will be"
-        "extruded with polygons,and points with lines ",
+        "extruded with polygons,and points with lines.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -222,7 +222,7 @@ namespace {
         "Perform Shading",
         "If true, perform shading on any create meshes, either from polygons or "
         "extruded lines. The shading will be computed based on any light sources of the "
-        "GeoJson component",
+        "GeoJson component.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -233,7 +233,7 @@ namespace {
         "be interpreted. Absolute means that the height is interpreted as the height "
         "above the reference ellipsoid, while RelativeToGround takes the height map "
         "into account. For coordinates with only two values (latitude and longitude), "
-        "the height is considered to be equal to zero",
+        "the height is considered to be equal to zero.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -241,7 +241,7 @@ namespace {
         "PointTextureAnchor",
         "Point Texture Anchor",
         "Decides the placement of the point texture in relation to the position. "
-        "Default is a the bottom of the texture, but it can also be put at the center",
+        "Default is a the bottom of the texture, but it can also be put at the center.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -251,7 +251,7 @@ namespace {
         "If false, no tessellation to bend the geometry based on the curvature of the "
         "planet is performed. This leads to increased performance, but tessellation is "
         "neccessary for large geometry that spans a big portion of the globe. Otherwise "
-        "it may intersect the surface",
+        "it may intersect the surface.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -261,7 +261,7 @@ namespace {
         "If true, use the 'Tessellation Level' to control the level of detail for the "
         "tessellation. The distance used will be the 'Tessellation Distance' divided by "
         "the 'Tessellation Level', so the higher the level value, the smaller each "
-        "segment in the geomoetry will be",
+        "segment in the geomoetry will be.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -282,7 +282,7 @@ namespace {
         "larger than this distance will be automatically subdivided into smaller pieces "
         "matching this distance, while anything smaller will not be subdivided. Per "
         "default this will be set to a distance corresponding to about 1 degree "
-        "longitude on the globe",
+        "longitude on the globe.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -336,7 +336,7 @@ namespace {
 
         struct Tessellation {
             // [[codegen::verbatim(TessellationEnabledInfo.description)]]
-            std::optional<bool> ebabled;
+            std::optional<bool> enabled;
 
             // [[codegen::verbatim(UseTessellationLevelInfo.description)]]
             std::optional<bool> useTessellationLevel;
@@ -409,7 +409,8 @@ GeoJsonProperties::GeoJsonProperties()
     altitudeModeOption.addOptions({
         { static_cast<int>(AltitudeMode::Absolute), "Absolute" },
         { static_cast<int>(AltitudeMode::RelativeToGround), "Relative to Ground" }
-        //{ static_cast<int>(AltitudeMode::ClampToGround), "Clamp to Ground" } / TODO: add ClampToGround
+        // TODO: add ClampToGround
+        //{ static_cast<int>(AltitudeMode::ClampToGround), "Clamp to Ground" }
     });
     addProperty(altitudeModeOption);
 
@@ -459,10 +460,10 @@ void GeoJsonProperties::createFromDictionary(const ghoul::Dictionary& dictionary
     // Distances are computed based on a certain lat/long angle size
     constexpr float DefaultAngle = glm::radians(1.f);
     constexpr float MaxAngle = glm::radians(45.f);
-    float defaultDistance = static_cast<float>(
+    const float defaultDistance = static_cast<float>(
         globe.ellipsoid().longitudalDistance(0.f, 0.f, DefaultAngle)
     );
-    float maxDistance = static_cast<float>(
+    const float maxDistance = static_cast<float>(
         globe.ellipsoid().longitudalDistance(0.f, 0.f, MaxAngle)
     );
     tessellation.distance = defaultDistance;
@@ -531,7 +532,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
                 result.pointTextureAnchor = GeoJsonProperties::PointTextureAnchor::Center;
             }
             else {
-                LERRORC("GeoJson", fmt::format(
+                LERRORC("GeoJson", std::format(
                     "Point texture anchor mode '{}' not supported", mode
                 ));
             }
@@ -553,7 +554,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
             //    result.altitudeMode = GeoJsonProperties::AltitudeMode::ClampToGround;
             //}
             else {
-                LERRORC("GeoJson", fmt::format(
+                LERRORC("GeoJson", std::format(
                     "Altitude mode '{}' not supported", mode
                 ));
             }
@@ -586,7 +587,7 @@ GeoJsonOverrideProperties propsFromGeoJson(const geos::io::GeoJSONFeature& featu
         }
         catch (const geos::io::GeoJSONValue::GeoJSONTypeError&) {
             // @TODO: Should add some more information on which file the reading failed
-            LERRORC("GeoJson", fmt::format(
+            LERRORC("GeoJson", std::format(
                 "Error reading GeoJson property '{}'. Value has wrong type", key
             ));
         }
@@ -642,7 +643,9 @@ GeoJsonProperties::AltitudeMode PropertySet::altitudeMode() const {
 }
 
 bool PropertySet::tessellationEnabled() const {
-    return overrideValues.tessellationEnabled.value_or(defaultValues.tessellation.enabled);
+    return overrideValues.tessellationEnabled.value_or(
+        defaultValues.tessellation.enabled
+    );
 }
 
 bool PropertySet::useTessellationLevel() const {

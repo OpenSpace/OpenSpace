@@ -1,0 +1,25 @@
+{
+  "profile": "apollo",
+  "commands": [
+    { "type": "time", "value": "2000-01-01T12:00:00.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "MilkyWayVolume",
+        "pitch": -0.155824,
+        "position": [ -6.225812E19, -5.819011E20, -3.598294E20 ],
+        "up": [ 0.140140, 0.509858, -0.848767 ],
+        "yaw": -0.0304706
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.GaiaStars.Renderable.LuminosityMultiplier",
+        "value": 100.0
+      }
+    },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

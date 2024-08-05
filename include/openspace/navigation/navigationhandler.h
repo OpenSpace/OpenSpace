@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,7 +85,9 @@ public:
     OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator();
     PathNavigator& pathNavigator();
+
     bool isKeyFrameInteractionEnabled() const;
+    float jumpToFadeDuration() const;
     float interpolationTime() const;
 
     // Callback functions
@@ -143,15 +145,15 @@ public:
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
     void saveNavigationState(const std::filesystem::path& filepath,
-        const std::string& referenceFrameIdentifier);
+        const std::string& referenceFrameIdentifier) const;
 
-    void loadNavigationState(const std::string& filepath);
+    void loadNavigationState(const std::string& filepath, bool useTimeStamp);
 
     /**
      * Set camera state from a provided navigation state next frame. The actual position
      * will computed from the scene in the same frame as it is set.
      *
-     * \param state the navigation state to compute a camera positon from
+     * \param state The navigation state to compute a camera positon from
      */
     void setNavigationStateNextFrame(const NavigationState& state);
 
@@ -161,14 +163,26 @@ public:
      * node info. The actual position will computed from the scene in the same frame as
      * it is set.
      *
-     * \param spec the node specification from which to compute the resulting camera pose
+     * \param spec The node specification from which to compute the resulting camera pose
      */
     void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
 
     /**
-    * \return The Lua library that contains all Lua functions available to affect the
-    * interaction
-    */
+     * Trigger a transition script after first fading out the rendering, and fading in
+     * the rendering when the script is finished. One example use case could be to fade
+     * out, move the camera to another focus node, and then fade in
+     *
+     * \param transitionScript The Lua script to handle the transition. Can be anything
+     * \param fadeDuration An optional duration for the fading. If unspecified, use the
+     *                     JumpToFadeDuration property
+     */
+    void triggerFadeToTransition(const std::string& transitionScript,
+        std::optional<float> fadeDuration = std::nullopt);
+
+    /**
+     * \return The Lua library that contains all Lua functions available to affect the
+     *         interaction
+     */
     static scripting::LuaLibrary luaLibrary();
 
 private:
@@ -181,9 +195,9 @@ private:
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
-    static constexpr double InteractionHystersis = 0.0125;
     bool _inAnchorApproachSphere = false;
     bool _inAnchorReachSphere = false;
+    const SceneGraphNode* _lastAnchor = nullptr;
 
     OrbitalNavigator _orbitalNavigator;
     KeyframeNavigator _keyframeNavigator;
@@ -195,6 +209,7 @@ private:
     properties::BoolProperty _disableMouseInputs;
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
+    properties::FloatProperty _jumpToFadeDuration;
 };
 
 } // namespace openspace::interaction

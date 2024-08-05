@@ -1,0 +1,37 @@
+{
+  "profile": "osirisrex",
+  "commands": [
+    { "type": "time", "value": "2019-01-13T19:18:20.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "BennuBarycenter",
+        "pitch": -0.0249726,
+        "position": [ 634.3195, -73.81825, -210.5395 ],
+        "up": [ 0.260217, -0.340701, 0.903444 ],
+        "yaw": 0.0593456
+      }
+    },
+    { "type": "action", "value": "os.FadeDownTrails" },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.POLYCAM FOV.Renderable.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.OsirisRexTrailBennu.Renderable.Enabled",
+        "value": false
+      }
+    },
+    { "type": "pause", "value": false },
+    { "type": "wait", "value": 80 },
+    { "type": "pause", "value": true },
+    { "type": "time", "value": "2019-01-13T19:25:00.00" },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

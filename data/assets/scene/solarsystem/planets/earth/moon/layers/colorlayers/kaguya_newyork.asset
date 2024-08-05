@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Kaguya_NewYork",
   Name = "Kaguya [New York]",
   Enabled = asset.enabled,
+  ZIndex = 20,
   FilePath = asset.resource("kaguya_newyork.vrt"),
   Settings = {
     Gamma = 1.0,
@@ -32,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Kaguya [New York]",
-  Version = "1.1",
   Description = [[Moon SELENE Kaguya TC Global Orthomosaic 474m v2 layer for Moon globe.
     This map is hosted on the OpenSpace server in New York]],
   Author = "USGS",
