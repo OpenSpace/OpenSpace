@@ -247,61 +247,6 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
     );
 }
 
-/**
- * Adds a set of Cartesian axes to the scene graph node identified by the first string, to
- * illustrate its local coordinate system. The second (optional) argument is a scale
- * value, in meters.
- */
-[[codegen::luawrap]] void addCartesianAxes(std::string nodeIdentifier,
-                                           std::optional<double> scale)
-{
-    using namespace openspace;
-    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(nodeIdentifier);
-    if (!n) {
-        throw ghoul::lua::LuaError("Unknown scene graph node: " + nodeIdentifier);
-    }
-
-    if (!scale.has_value()) {
-        scale = 2.0 * n->boundingSphere();
-        if (n->boundingSphere() <= 0.0) {
-            LWARNINGC(
-                "Debugging: Cartesian Axes",
-                "Using zero bounding sphere for scale of created axes. You need to set "
-                "the scale manually for them to be visible"
-            );
-            scale = 1.0;
-        }
-    }
-
-    const std::string identifier = makeIdentifier(nodeIdentifier + "_AxesXYZ");
-    const std::string& axes = "{"
-        "Identifier = '" + identifier + "',"
-        "Parent = '" + nodeIdentifier + "',"
-        "Transform = { "
-            "Scale = {"
-                "Type = 'StaticScale',"
-                "Scale = " + std::to_string(*scale) + ""
-            "}"
-        "},"
-        "Renderable = {"
-            "Type = 'RenderableCartesianAxes',"
-            "Enabled = true,"
-            "XColor = { 1.0, 0.0, 0.0 },"
-            "YColor = { 0.0, 1.0, 0.0 },"
-            "ZColor = { 0.0, 0.0, 1.0 }"
-        "},"
-        "GUI = {"
-            "Name = '" + identifier + "',"
-            "Path = '" + DebuggingGuiPath + "/Coordiante Systems'"
-        "}"
-    "}";
-
-    global::scriptEngine->queueScript(
-        std::format("openspace.addSceneGraphNode({});", axes),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
-}
 
 #include "debuggingmodule_lua_codegen.cpp"
 

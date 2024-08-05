@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/stringhelper.h>
+#include <ios>
 
 namespace {
 
@@ -180,7 +181,7 @@ namespace {
     //
     // Load the TLE file
     //
-    std::ifstream f = std::ifstream(tle);
+    std::ifstream f = std::ifstream(tle, std::ios::binary);
     std::string contents = std::string(
         std::istreambuf_iterator<char>(f),
         std::istreambuf_iterator<char>()
@@ -188,8 +189,15 @@ namespace {
 
     // The TLE files returned by Celestrak are of the 3-line variant where the first line
     // contains a human-readable name for the spacecraft
+    // files are encoded with Windows line endings (CRLF)
 
     std::vector<std::string> lines = ghoul::tokenizeString(contents, '\n');
+
+    // erase carriage return characters
+    for (std::string& line : lines) {
+        line.erase(std::remove(begin(line), end(line), '\r'), end(line));
+    }
+
     const size_t nElements = lines.size() / 3;
     if (elementToExtract > nElements) {
         throw ghoul::RuntimeError(std::format(
@@ -198,18 +206,17 @@ namespace {
         ));
     }
 
-    constexpr int TLEColumnWidth = 70;
+    constexpr int TLEColumnWidth = 69;
 
-    // It should be 70, but we're removing the \n character at the end in the tokenization
     std::string line1 = lines[3 * elementToExtract + 1];
-    if (line1.size() != TLEColumnWidth - 1) {
+    if (line1.size() != TLEColumnWidth) {
         throw ghoul::RuntimeError(std::format(
             "Illformed TLE file {}, expected {} characters per line, got {}",
             tle, TLEColumnWidth, line1.size()
         ));
     }
     std::string line2 = lines[3 * elementToExtract + 2];
-    if (line2.size() != TLEColumnWidth - 1) {
+    if (line2.size() != TLEColumnWidth) {
         throw ghoul::RuntimeError(std::format(
             "Illformed TLE file {}, expected {} characters per line, got {}",
             tle, TLEColumnWidth, line2.size()
@@ -217,7 +224,7 @@ namespace {
     }
 
     // Copy the lines into a format that SPICE understands
-    SpiceChar spiceLines[2][TLEColumnWidth];
+    SpiceChar spiceLines[2][TLEColumnWidth + 1];
     std::strcpy(spiceLines[0], line1.c_str());
     std::strcpy(spiceLines[1], line2.c_str());
 
@@ -225,7 +232,7 @@ namespace {
     // Convert the Two Line Elements lines to the element sets
     SpiceDouble epoch;
     std::array<SpiceDouble, 10> elems;
-    getelm_c(1950, TLEColumnWidth, spiceLines, &epoch, elems.data());
+    getelm_c(1950, TLEColumnWidth + 1, spiceLines, &epoch, elems.data());
 
     // The size of a type SPK10 spice kernel is not affected by the time validity, so we
     // just pick the greatest one

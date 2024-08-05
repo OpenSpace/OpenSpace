@@ -40,7 +40,6 @@ asset.export(CallistoTrail)
 
 asset.meta = {
   Name = "Callisto Trail",
-  Version = "1.1",
   Description = "Trail of Callisto as observed by the Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

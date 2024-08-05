@@ -2,7 +2,7 @@ local speck = asset.resource({
   Name = "Alternate Star Labels Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_alternatestarlabels_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -13,10 +13,10 @@ local Object = {
     Enabled = false,
     Labels = {
       Enabled = true,
-      File = speck .. "altstarlabels.label",
+      File = speck .. "stars_alt_labels.label",
       Color = { 0.4, 0.4, 0.4 },
       Size = 14.7,
-      MinMaxSize = { 6, 20 },
+      MinMaxSize = { 15, 20 },
       Unit = "pc"
     },
     Opacity = 0.65,
@@ -25,13 +25,9 @@ local Object = {
   GUI = {
     Name = "Stars Labels - Alternate",
     Path = "/Milky Way/Stars",
-    Description = [[Census 3,395 star names. DU Version 1.8. <br>The main star data
-      identify the accepted IAU star names for the brightest stars. However, astronomers
-      have long cataloged thousands of stars beyond the brightest ones we see. Several
-      attempts over thousands of years to name all the visible stars have led to two
-      main catalogs: Johann Bayer's Catalog from 1603 and John Flamsteed's Catalog
-      published in 1725. (Description from URL) <br><br> Data Reference: Various
-      sources]]
+    Description = [[Alternate star labels for the stars. Priority goes to Bayer IDs
+      (Greek designations, like Alpha Orionis), then to Flamsteed numbers (like 1
+      Orionis).]]
   }
 }
 
@@ -49,10 +45,9 @@ asset.export(Object)
 
 
 asset.meta = {
-  Name = "Stars Labels - Alternate",
-  Version = "2.0",
-  Description = "Digital Universe asset for alternate start labels",
-  Author = "Brian Abbott (AMNH)",
+  Name = "Alternative Labels for the Stars",
+  Description = Object.GUI.Description,
+  Author = "Zack Reeves, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

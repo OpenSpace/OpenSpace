@@ -83,7 +83,6 @@ asset.export("JupiterMajorMoonsOff", JupiterMajorMoonsOff.Identifier)
 
 asset.meta = {
   Name = "Jupiter Major Moons",
-  Version = "1.1",
   Description = [[Meta asset containing Jupiters major moons: Callisto, Europa,
     Ganymede, and Io]],
   Author = "OpenSpace Team",

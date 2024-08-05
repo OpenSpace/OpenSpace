@@ -4,7 +4,6 @@ asset.require("./layers/colorlayers/tethys_texture", true)
 
 asset.meta = {
   Name = "Default Tethys Layers",
-  Version = "1.0",
   Description = "Default Tethys layers are: Tethys Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

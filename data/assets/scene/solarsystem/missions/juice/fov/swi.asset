@@ -131,7 +131,6 @@ asset.export(SwiFull)
 
 asset.meta = {
   Name = "SWI",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Submillimetre Wave Instrument (SWI), which is measuring
     the chemistry, meteorology, and structure of Jupiters middle atmosphere as well as the

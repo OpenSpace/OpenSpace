@@ -26,8 +26,7 @@ asset.export("20191118demmoseqccolorhillshade", treks_20191118demmoseqccolorhill
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_NAC_ColorHillshade],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_NAC_ColorHillshade]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

@@ -319,7 +319,6 @@ asset.export("NAC_DTM_APOLLO17_SLOPE", treks_NAC_DTM_APOLLO17_SLOPE)
 
 asset.meta = {
   Name = [[NASA Treks Layers for Moon LRO_Narrow_Angle_Camera]],
-  Version = "1.0",
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

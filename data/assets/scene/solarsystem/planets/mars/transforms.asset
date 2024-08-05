@@ -35,7 +35,6 @@ asset.export(MarsBarycenter)
 
 asset.meta = {
   Name = "Mars Transforms",
-  Version = "1.1",
   Description = "Transform with position for Mars",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

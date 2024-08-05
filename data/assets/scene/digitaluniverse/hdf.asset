@@ -32,11 +32,7 @@ local Object = {
     },
     Coloring = {
       ColorMapping = {
-        File = ColorMap .. "hudf.cmap",
-        ParameterOptions = {
-          { Key = "proximity", Range = { 1.0, 25.0 } },
-          { Key = "redshift", Range = { 0.0, 0.075 } }
-        }
+        File = ColorMap .. "hudf.cmap"
       }
     },
     Unit = "Mpc",
@@ -69,7 +65,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field",
-  Version = "2.0",
   Description = "Hubble Ultra Deep Field galaxy survey",
   Author = "Frank Summers (STScI), Brian Abbott (AMNH)",
   URL = "http://www.haydenplanetarium.org/universe",

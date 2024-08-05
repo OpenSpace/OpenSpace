@@ -26,8 +26,7 @@ asset.export("apollo14_28cm_mosaic_byte_geo_1_2_highContrast", treks_apollo14_28
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_LROC_Image_Mosaic_28cm],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_LROC_Image_Mosaic_28cm]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

@@ -41,7 +41,6 @@ asset.export(JuiceTrail)
 
 asset.meta = {
   Name = "Juice trajectory relative to the solar system's barycenter",
-  Version = "1.0",
   Description = [[
     The trajectory of the Juice spacecraft relative to the solar system's barycenter
   ]],

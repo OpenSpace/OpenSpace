@@ -37,7 +37,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "HiRISE Local Set DEM",
-  Version = "1.1",
   Description = [[HiRISE DEM layer for corresponding Local Set imager. This map is hosted
     by ESRI]],
   Author = "USGS",

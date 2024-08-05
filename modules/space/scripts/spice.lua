@@ -1,15 +1,17 @@
 openspace.space.documentation = {
   {
     Name = "tleToSpiceTranslation",
-    Arguments = {{ "tlePath", "String" }},
+    Arguments = {
+      { "tlePath", "String" }
+    },
     Return = "{ Translation, SpiceKernel }",
     Documentation = [[
-        Takes the provided TLE file, converts it into a SPICE kernel and returns a
-        SpiceTranslation instance that can be used to access the information in the TLE
-        file using SPICE's superior integral solver.
+      Takes the provided TLE file, converts it into a SPICE kernel and returns a
+      SpiceTranslation instance that can be used to access the information in the TLE
+      file using SPICE's superior integral solver.
 
-        The second return value is the spice kernel that should be loaded and unloaded by
-        whoever called this function.
+      The second return value is the spice kernel that should be loaded and unloaded by
+      whoever called this function.
     ]]
   }
 }

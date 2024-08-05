@@ -4,7 +4,7 @@ local guiCustomization = asset.require("customization/gui")
 
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "768c411e1430ad3ece3528a648ded7a862efb2d0"
+local frontendHash = "c607523e86ab29c573b157c956dcf0b0e4492395"
 
 local frontend = asset.resource({
   Identifier = "WebGuiFrontend",
@@ -94,7 +94,6 @@ asset.export("setCefRoute", setCefRoute)
 
 asset.meta = {
   Name = "WebGUI",
-  Version = "1.0",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

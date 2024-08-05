@@ -149,7 +149,6 @@ asset.export(VestaTrail)
 
 asset.meta = {
   Name = "Vesta",
-  Version = "1.1",
   Description = "Vesta model projection and trail",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

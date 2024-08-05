@@ -50,13 +50,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CompressionInfo = {
-        "Compression",
-        "Compression Algorithm",
-        "The compression algorithm to use for MRF cached tiles.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     enum class [[codegen::stringify()]] Compression {
         PNG = 0,
         JPEG,
@@ -88,7 +81,7 @@ namespace {
             // Specifies whether to use caching or not
             std::optional<bool> enabled;
 
-            // [[codegen::verbatim(CompressionInfo.description)]]
+            // The compression algorithm to use for MRF cached tiles
             enum class [[codegen::map(Compression)]] Compression {
                 PNG = 0,
                 JPEG,

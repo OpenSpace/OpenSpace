@@ -31,10 +31,6 @@ local ScaleModel = {
       Globe = earthAsset.Earth.Identifier,
       Latitude = Location[1],
       Longitude = Location[2]
-    },
-    Scale = {
-      Type = "StaticScale",
-      Scale = 4.38
     }
   },
   Renderable = {
@@ -42,7 +38,7 @@ local ScaleModel = {
     GeometryFile = modelFolder .. "eiffeltower.osmodel",
     RotationVector = { 0.0, 45.0, 0.0 },
     LightSources = { sunAsset.LightSource },
-    ModelScale = "Centimeter"
+    ModelScale = 0.0438
   },
   GUI = {
     Name = "Eiffel Tower",
@@ -94,7 +90,6 @@ asset.export("ResetPositionAction", ResetPositionAction.Identifier)
 
 asset.meta = {
   Name = "Scale Model - Eiffel Tower",
-  Version = "1.0",
   Description = [[A 1:1 scale model of the Eiffel Tower. Per default it is placed at
     its actual position in Paris, France. But the asset also includes actions to move it
     to a position under the camera, or back to its original position.]],

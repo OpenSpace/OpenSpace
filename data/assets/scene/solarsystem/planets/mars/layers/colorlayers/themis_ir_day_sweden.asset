@@ -36,7 +36,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Themis IR Day [Sweden]",
-  Version = "1.1",
   Description = [[Themis Day layer for Mars. This map is hosted on the OpenSpace server
     in Sweden]],
   Author = "USGS",

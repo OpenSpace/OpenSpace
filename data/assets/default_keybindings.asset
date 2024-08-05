@@ -158,6 +158,42 @@ local PreviousDeltaStepImmediate = {
   IsLocal = true
 }
 
+local RealTimeDeltaStepInterpolate = {
+  Identifier = "os.RealTimeDeltaStepInterpolate",
+  Name = "Reset the simulation time to realtime (interpolate)",
+  Command = "openspace.time.interpolateDeltaTime(1)",
+  Documentation = "Smoothly interpolate the simulation speed to match real-time speed",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local RealTimeDeltaStepImmediate = {
+  Identifier = "os.RealTimeDeltaStepImmediate",
+  Name = "Reset the simulation time to realtime (immediate)",
+  Command = "openspace.time.setDeltaTime(1)",
+  Documentation = "Immediately set the simulation speed to match real-time speed",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local DateToNowInterpolate = {
+  Identifier = "os.DateToNowInterpolate",
+  Name = "Set the in-game time to now (interpolate)",
+  Command = "openspace.time.interpolateTime(openspace.time.currentWallTime())",
+  Documentation = "Immediately set the current in-game time to the 'now' time",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local DateToNowImmediate = {
+  Identifier = "os.DateToNowImmediate",
+  Name = "Set the in-game time to now (immediate)",
+  Command = "openspace.time.setTime(openspace.time.currentWallTime())",
+  Documentation = "Smoothly interpolate the current in-game time to the 'now' time",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
 local ReloadGui = {
   Identifier = "os.ReloadGui",
   Name = "Reload GUI",
@@ -217,6 +253,18 @@ asset.onInitialize(function()
   openspace.action.registerAction(PreviousDeltaStepImmediate)
   openspace.bindKey("Shift+Left", PreviousDeltaStepImmediate.Identifier)
 
+  openspace.action.registerAction(RealTimeDeltaStepInterpolate)
+  openspace.bindKey("Down", RealTimeDeltaStepInterpolate.Identifier)
+
+  openspace.action.registerAction(RealTimeDeltaStepImmediate)
+  openspace.bindKey("Shift+Down", RealTimeDeltaStepImmediate.Identifier)
+
+  openspace.action.registerAction(DateToNowInterpolate)
+  openspace.bindKey("Up", DateToNowInterpolate.Identifier)
+
+  openspace.action.registerAction(DateToNowImmediate)
+  openspace.bindKey("Shift+Up", DateToNowImmediate.Identifier)
+
   openspace.action.registerAction(ReloadGui)
   openspace.bindKey("F5", ReloadGui.Identifier)
 end)
@@ -224,6 +272,18 @@ end)
 asset.onDeinitialize(function()
   openspace.clearKey("F5")
   openspace.action.removeAction(ReloadGui)
+
+  openspace.clearKey("Shift+Up")
+  openspace.action.removeAction(DateToNowImmediate)
+
+  openspace.clearKey("Up")
+  openspace.action.removeAction(DateToNowInterpolate)
+
+  openspace.clearKey("Shift+Down")
+  openspace.action.removeAction(RealTimeDeltaStepImmediate)
+
+  openspace.clearKey("Down")
+  openspace.action.removeAction(RealTimeDeltaStepInterpolate)
 
   openspace.clearKey("Shift+Left")
   openspace.action.removeAction(PreviousDeltaStepImmediate)

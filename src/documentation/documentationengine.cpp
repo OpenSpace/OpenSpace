@@ -50,8 +50,6 @@
 #include <future>
 
 namespace {
-    constexpr std::string_view _loggerCat = "DocumentationEngine";
-
     // General keys
     constexpr const char* NameKey = "name";
     constexpr const char* IdentifierKey = "identifier";
@@ -68,12 +66,10 @@ namespace {
     constexpr const char* CommandKey = "command";
 
     // Factory
-    constexpr const char* FactoryTitle = "Asset Components";
     constexpr const char* MembersKey = "members";
     constexpr const char* OptionalKey = "optional";
     constexpr const char* ReferenceKey = "reference";
     constexpr const char* FoundKey = "found";
-    constexpr const char* RestrictionsKey = "restrictions";
     constexpr const char* ClassesKey = "classes";
 
     constexpr const char* OtherName = "Other";
@@ -90,7 +86,6 @@ namespace {
     constexpr const char* UriKey = "uri";
 
     // Scripting
-    constexpr const char* ScriptingTitle = "Scripting API";
     constexpr const char* DefaultValueKey = "defaultValue";
     constexpr const char* ArgumentsKey = "arguments";
     constexpr const char* ReturnTypeKey = "returnType";
@@ -116,7 +111,6 @@ namespace {
     constexpr const char* AuthorKey = "author";
     constexpr const char* UrlKey = "url";
     constexpr const char* LicenseKey = "license";
-    constexpr const char* NoLicenseKey = "noLicense";
     constexpr const char* IdentifiersKey = "identifiers";
     constexpr const char* PathKey = "path";
     constexpr const char* AssetKey = "assets";
@@ -131,17 +125,19 @@ namespace {
     constexpr const char* FiltersKey = "filters";
     constexpr const char* ActionsKey = "actions";
 
-    nlohmann::json documentationToJson(const openspace::documentation::Documentation& d) {
+    nlohmann::json documentationToJson(
+                             const openspace::documentation::Documentation& documentation)
+    {
         using namespace openspace::documentation;
 
         nlohmann::json json;
 
-        json[NameKey] = d.name;
-        json[IdentifierKey] = d.id;
-        json[DescriptionKey] = d.description;
+        json[NameKey] = documentation.name;
+        json[IdentifierKey] = documentation.id;
+        json[DescriptionKey] = documentation.description;
         json[MembersKey] = nlohmann::json::array();
 
-        for (const DocumentationEntry& p : d.entries) {
+        for (const DocumentationEntry& p : documentation.entries) {
             nlohmann::json entry;
             entry[NameKey] = p.key;
             entry[OptionalKey] = p.optional.value;
@@ -156,7 +152,7 @@ namespace {
                 auto it = std::find_if(
                     doc.begin(),
                     doc.end(),
-                    [rv](const Documentation& doc) { return doc.id == rv->identifier; }
+                    [rv](const Documentation& d) { return d.id == rv->identifier; }
                 );
 
                 if (it == doc.end()) {
@@ -210,7 +206,7 @@ namespace {
             std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
             propertyJson[NameKey] = name;
             propertyJson[TypeKey] = p->className();
-            propertyJson[UriKey] = p->fullyQualifiedIdentifier();
+            propertyJson[UriKey] = p->uri();
             propertyJson[IdentifierKey] = p->identifier();
             propertyJson[DescriptionKey] = p->description();
 

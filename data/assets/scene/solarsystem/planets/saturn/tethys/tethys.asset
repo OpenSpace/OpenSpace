@@ -31,8 +31,6 @@ local Tethys = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 531100,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "tethys.labels",
@@ -95,7 +93,6 @@ asset.export(TethysLabel)
 
 asset.meta = {
   Name = "Tethys",
-  Version = "1.0",
   Description = "Tethys globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

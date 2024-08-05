@@ -36,7 +36,6 @@ asset.export(ExamplePoints)
 
 asset.meta = {
   Name = "GeoJson Example - Outfacing Points",
-  Version = "1.0",
   Description = [[GeoJson example asset with point that are aligned to "stick out" of
     the globe, i.e. face out of the planet]],
   Author = "OpenSpace Team",

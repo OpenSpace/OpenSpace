@@ -37,8 +37,7 @@ asset.export("NAC_POLE_PSR_SOUTH_STRETCH_EQ", treks_NAC_POLE_PSR_SOUTH_STRETCH_E
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_NAC_PSR_Mosaic_20mpp],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_NAC_PSR_Mosaic_20mpp]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

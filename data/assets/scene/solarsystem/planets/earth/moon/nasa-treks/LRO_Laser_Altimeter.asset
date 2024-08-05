@@ -26,8 +26,7 @@ asset.export("ldam_10", treks_ldam_10)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_Laser_Altimeter],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_Laser_Altimeter]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

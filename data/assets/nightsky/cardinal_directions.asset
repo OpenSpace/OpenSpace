@@ -33,7 +33,7 @@ local CardinalDirectionsPosition = {
   },
   GUI = {
     Name = "Cardinal Directions Position",
-    Path = "/Other/Night Sky",
+    Path = "/Night Sky",
     Hidden = true
   }
 }
@@ -63,7 +63,7 @@ local CardinalDirectionSphere = {
     Description = [[A textured sphere showing the cardinal directions.
       The sphere is placed on the planet surface and follows the camera's movements.
     ]],
-    Path = "/Other/Night Sky"
+    Path = "/Night Sky"
   }
 }
 
@@ -158,9 +158,9 @@ asset.export("ShowNeswLettersSmall", ShowNeswLettersSmall.Identifier)
 asset.export("HideNesw", HideNesw.Identifier)
 
 
+
 asset.meta = {
   Name = "Cardinal Directions",
-  Version = "1.0",
   Description = [[Adds a sphere showing the cardinal directions, that follows the camera
     around when navigating on the planet surface. It also includes actions to change the
     texture of the sphere to different styles.

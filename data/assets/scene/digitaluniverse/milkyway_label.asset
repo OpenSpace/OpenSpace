@@ -13,7 +13,7 @@ local TransformMatrix = {
 }
 
 
-local HomeLabel = {
+local Object = {
   Identifier = "HomeLabel",
   Renderable = {
     Type = "RenderablePointCloud",
@@ -30,28 +30,28 @@ local HomeLabel = {
   },
   GUI = {
     Name = "Home Label",
-    Path = "/Universe/Galaxies",
-    Description = "Label for the Milky Way titled 'Home', sided for the galactic level"
+    Path = "/Universe/Nearby Surveys",
+    Description = [[Label for the Milky Way titled 'Home', sized for viewing outside
+      the Milky Way Galaxy.]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(HomeLabel)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HomeLabel)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(HomeLabel)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "Home Label",
-  Version = "2.0",
-  Description = "Label for the Milky Way titled 'Home', sided for the galactic level",
+  Description = Object.GUI.Description,
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

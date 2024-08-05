@@ -65,7 +65,7 @@ void renderTooltip(Property* prop, double delay) {
         }
         ImGui::Text(
             "%s",
-            (std::string("Identifier: ") + prop->fullyQualifiedIdentifier()).c_str()
+            (std::string("Identifier: ") + prop->uri()).c_str()
         );
         ImGui::EndTooltip();
     }
@@ -95,7 +95,7 @@ void renderBoolProperty(Property* prop, const std::string& ownerName,
     }
 
     if (value != p->value()) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), value ? "true" : "false");
+        executeSetPropertyScript(p->uri(), value ? "true" : "false");
     }
     ImGui::PopID();
 }
@@ -158,7 +158,7 @@ void renderOptionProperty(Property* prop, const std::string& ownerName,
         }
     }
     if (value != p->value() && !isReadOnly) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeSetPropertyScript(p->uri(), std::to_string(value));
     }
     ImGui::PopID();
 }
@@ -200,7 +200,7 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName,
                 parameters.pop_back();
             }
             parameters += "}";
-            executeSetPropertyScript(p->fullyQualifiedIdentifier(), parameters);
+            executeSetPropertyScript(p->uri(), parameters);
         }
         ImGui::TreePop();
     }
@@ -231,7 +231,7 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
 
     if (hasNewValue) {
         executeSetPropertyScript(
-            p->fullyQualifiedIdentifier(),
+            p->uri(),
             "[[" + std::string(buffer.data()) + "]]"
         );
     }
@@ -283,7 +283,7 @@ void renderDoubleListProperty(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     const std::string value = p->stringValue();
-    renderListProperty(name, p->fullyQualifiedIdentifier(), value);
+    renderListProperty(name, p->uri(), value);
 
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -301,7 +301,7 @@ void renderIntListProperty(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     const std::string value = p->stringValue();
-    renderListProperty(name, p->fullyQualifiedIdentifier(), value);
+    renderListProperty(name, p->uri(), value);
 
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -319,7 +319,7 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     const std::string value = p->stringValue();
-    renderListProperty(name, p->fullyQualifiedIdentifier(), value);
+    renderListProperty(name, p->uri(), value);
 
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -358,7 +358,7 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeSetPropertyScript(p->uri(), std::to_string(value));
     }
 
     ImGui::PopID();
@@ -382,7 +382,7 @@ void renderIntProperty(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeSetPropertyScript(p->uri(), std::to_string(value));
     }
 
     ImGui::PopID();
@@ -405,7 +405,7 @@ void renderIVec2Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -428,7 +428,7 @@ void renderIVec3Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
     ImGui::PopID();
 }
@@ -450,7 +450,7 @@ void renderIVec4Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
     ImGui::PopID();
 }
@@ -479,7 +479,7 @@ void renderFloatProperty(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeSetPropertyScript(p->uri(), std::to_string(value));
     }
 
     ImGui::PopID();
@@ -509,7 +509,7 @@ void renderVec2Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -545,7 +545,7 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -581,7 +581,7 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -611,7 +611,7 @@ void renderDVec2Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -641,7 +641,7 @@ void renderDVec3Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -671,7 +671,7 @@ void renderDVec4Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -723,7 +723,7 @@ void renderDMat2Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -785,7 +785,7 @@ void renderDMat3Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -857,7 +857,7 @@ void renderDMat4Property(Property* prop, const std::string& ownerName,
     }
 
     if (changed) {
-        executeSetPropertyScript(p->fullyQualifiedIdentifier(), ghoul::to_string(value));
+        executeSetPropertyScript(p->uri(), ghoul::to_string(value));
     }
 
     ImGui::PopID();
@@ -872,7 +872,7 @@ void renderTriggerProperty(Property* prop, const std::string& ownerName,
 
     const bool pressed = ImGui::Button(name.c_str());
     if (pressed) {
-        executeSetPropertyScript(prop->fullyQualifiedIdentifier(), "nil");
+        executeSetPropertyScript(prop->uri(), "nil");
     }
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);

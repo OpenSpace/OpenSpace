@@ -41,7 +41,6 @@ asset.export(EnceladusTrail)
 
 asset.meta = {
   Name = "Enceladus Trail",
-  Version = "1.1",
   Description = "Trail for Enceladus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

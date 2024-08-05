@@ -83,6 +83,8 @@ glm::dvec3 Scale::scaleValue() const {
 }
 
 void Scale::update(const UpdateData& data) {
+    ZoneScoped;
+
     if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }

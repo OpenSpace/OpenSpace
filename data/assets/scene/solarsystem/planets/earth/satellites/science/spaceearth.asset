@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_science",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=science&FORMAT=kvn",
   Filename = "science.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -47,7 +47,6 @@ asset.export(ScienceSatellites)
 
 asset.meta = {
   Name = "Satellites Science Space & Earth Science",
-  Version = "1.0",
   Description = "Satellites asset for Science Space & Earth Science. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

@@ -295,7 +295,6 @@ asset.export("Frame", Frame)
 
 asset.meta = {
   Name = "BepiColombo Kernels",
-  Version = "1.0",
   Description = "This asset contains the SPICE kernels for the BepiColombo mission.",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

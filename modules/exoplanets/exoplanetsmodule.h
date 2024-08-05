@@ -51,6 +51,7 @@ public:
     std::filesystem::path starTexturePath() const;
     std::filesystem::path starGlareTexturePath() const;
     std::filesystem::path noDataTexturePath() const;
+    std::filesystem::path planetDefaultTexturePath() const;
     std::filesystem::path orbitDiscTexturePath() const;
     std::filesystem::path habitableZoneTexturePath() const;
     glm::vec3 comparisonCircleColor() const;
@@ -72,6 +73,7 @@ protected:
     properties::StringProperty _starTexturePath;
     properties::StringProperty _starGlareTexturePath;
     properties::StringProperty _noDataTexturePath;
+    properties::StringProperty _planetDefaultTexturePath;
     properties::StringProperty _orbitDiscTexturePath;
     properties::StringProperty _habitableZoneTexturePath;
 

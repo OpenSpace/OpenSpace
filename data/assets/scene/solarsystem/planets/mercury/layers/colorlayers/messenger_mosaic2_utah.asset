@@ -25,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger Mosaic2 [Utah]",
-  Version = "1.0",
   Description = [[Mercury Messenger Mosaic2 layer for Mercury globe. This map is hosted on
     the OpenSpace server in Utah]],
   Author = "USGS",

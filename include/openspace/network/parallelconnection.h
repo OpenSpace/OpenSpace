@@ -86,7 +86,7 @@ public:
     ParallelConnection::Message receiveMessage();
 
     // Gonna do some UTF-like magic once we reach 255 to introduce a second byte or so
-    static constexpr uint8_t ProtocolVersion = 6;
+    static constexpr uint8_t ProtocolVersion = 7;
 
 private:
     std::unique_ptr<ghoul::io::TcpSocket> _socket;

@@ -16,9 +16,7 @@ local Miranda = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 471600, 468000, 466000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 471600, 468000, 466000 }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
   GUI = {
@@ -85,9 +83,7 @@ local Ariel = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1162000, 1156000, 1155000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1162000, 1156000, 1155000 }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
   GUI = {
@@ -154,9 +150,7 @@ local Umbriel = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1169400, 1169400, 1169400 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1169400, 1169400, 1169400 }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
   GUI = {
@@ -223,9 +217,7 @@ local Titania = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1576800, 1576800, 1576800 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1576800, 1576800, 1576800 }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
   GUI = {
@@ -292,9 +284,7 @@ local Oberon = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1522800, 1522800, 1522800 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1522800, 1522800, 1522800 }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
   GUI = {
@@ -482,7 +472,6 @@ asset.export("UranusMajorMoonsOff", UranusMajorMoonsOff.Identifier)
 
 asset.meta = {
   Name = "Uranus Marjor Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Uranus' major moons: Miranda, Ariel,
     Umbriel, Titania, and Oberon. Blank globes and SPICE trails are generated for each
     moon]],

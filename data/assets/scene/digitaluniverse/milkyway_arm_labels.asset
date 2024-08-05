@@ -40,12 +40,15 @@ local Object = {
   },
   GUI = {
     Name = "Milky Way Arms Labels",
-    Path = "/Milky Way",
-    Description = [[Census: 1 image. DU Version:  1.2. This image contains labels for
-      the Milky Way's spiral arms. We label them in this manner ("hard coding" the
-      labels into an image rather than having native labels) so that they can retain
-      their size, shape, and location as they overlay the galaxy. (Description from
-      Digital Universe Data Profiles)]]
+    Path = "/Milky Way/Galaxy",
+    Description = [[This is an image that contains labels for the Milky Way's spiral
+      arms. We label them in this manner--"hard-coding" the labels into an image rather
+      than having native labels--so that they can retain their size, shape, and location
+      as they overlay the galaxy. These labels are designed to be a guide, and they map
+      more accurately to the various datasets in the Digital Universe. For example, the
+      pulsars, the star-forming (HII) regions, and open clusters all show the local spiral
+      structure. We can use trends in these data sets to map the arms of the Milky Way.
+      Census: 1 image.]]
   }
 }
 
@@ -64,28 +67,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Milky Way Arms Labels",
-  Version = "2.0",
-  Description = "Image with arm labels for the Milky Way galaxy",
+  Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
-  License = [[Copyright &#169; American Museum of Natural History. All rights reserved.
-    <br><br> Downloading the Atlas: AMNH offers the Atlas free of charge via our
-    website, http://www.haydenplanetarium.org/. The User is free to download and/or
-    duplicate verbatim copies of the Atlas provided this license and copyright
-    information accompany the Atlas. <br><br> Modifying the Atlas: The user is free to
-    modify the Atlas by either adding data or altering existing data, provided it is
-    for personal use only. Once the user modifies the Atlas, it is no longer part of
-    AMNH's Atlas and cannot be used publicly alongside or within the Atlas without
-    written permission from AMNH. <br><br> Distributing the Atlas: The user is
-    forbidden to distribute and use the Atlas for profit, as part of a software and/or
-    production system that will subsequently be redistributed, or for public
-    consumption (via print, electronic media, or broadcast/produced pieces) without
-    written permission from AMNH. <br><br> Neither the names of American Museum of
-    Natural History and Hayden Planetarium nor the names of their contributors may be
-    used to endorse or promote products derived from this Atlas without specific,
-    prior written permission. <br><br> The Atlas is free but is offered WITHOUT ANY
-    WARRANTY of any kind. We provide the Atlas as is and take no responsibility for
-    any damage resulting from the use of this Atlas. The entire risk as to the quality
-    and performance of this product is with the user. <br><br> For more information,
-    please visit http://www.haydenplanetarium.org/universe]]
+  License = "AMNH Digital Universe"
 }

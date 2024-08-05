@@ -26,8 +26,7 @@ asset.export("20200415_lacusmortis_orthomos_filled_8bit_lzw", treks_20200415_lac
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_NAC_Mosaic],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_NAC_Mosaic]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

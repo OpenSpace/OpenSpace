@@ -19,7 +19,6 @@ asset.export(Item)
 
 asset.meta = {
   Name = "Dashboard - GlobeLocation",
-  Version = "1.0",
   Description = "This asset provides a GlobeLocation dashboard item",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

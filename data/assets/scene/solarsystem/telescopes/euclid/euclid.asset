@@ -6,7 +6,6 @@ asset.require("./mission")
 
 asset.meta = {
   Name = "Euclid",
-  Version = "1.0",
   Description = "This asset includes all of the other assets for the Euclid mission.",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

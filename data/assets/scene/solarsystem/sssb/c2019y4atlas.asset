@@ -10,6 +10,9 @@ local orbit = asset.resource({
 }) .. "c2019y4atlas.hrz"
 
 
+local StartTime = "1950 JAN 1 00:00:00"
+local EndTime = "2100 JAN 1 00:00:00"
+
 local C2019Y4AtlasTrail = {
   Identifier = "C2019Y4AtlasTrail",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
@@ -26,10 +29,9 @@ local C2019Y4AtlasTrail = {
     },
     Color = { 0.533333, 0.850980, 0.996078 },
     EnableFade = false,
-    StartTime = "1950 JAN 1 0:00:00",
-    EndTime = "2100 JAN 1 00:00:00",
-    SampleInterval = 52595, -- About 14h 36m 35.5200s in seconds
-    TimeStampSubsampleFactor = 1
+    StartTime = StartTime,
+    EndTime = EndTime,
+    SampleInterval = openspace.time.duration(StartTime, EndTime) / 90000
   },
   GUI = {
     Name = "C2019 Y4 Atlas Trail",
@@ -71,7 +73,6 @@ asset.export(C2019Y4AtlasTrail)
 
 asset.meta = {
   Name = "C/2019 Y4 Atlas",
-  Version = "1.2",
   Description = [[This asset contains the trail and position of C/2019 Y4 Atlas from
     1950 JAN 01 00:00:00 to 2100 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",

@@ -97,6 +97,10 @@ local Philae = {
   Identifier = "Philae",
   Parent = PhilaePosition.Identifier,
   Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 1.0, 0.0, -1.25 }
+    },
     Rotation = {
       Type = "StaticRotation",
       Rotation = { 0.0, math.pi / 2.0, 0.0 }

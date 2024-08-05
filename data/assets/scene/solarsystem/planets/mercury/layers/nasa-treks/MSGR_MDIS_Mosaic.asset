@@ -125,8 +125,7 @@ asset.export("MSGR_Sholem_Aleichem_Crater_Wall_Ortho_8m", treks_MSGR_Sholem_Alei
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mercury MSGR_MDIS_Mosaic],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mercury MSGR_MDIS_Mosaic]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mercury",
   License = "NASA/Treks",

@@ -2,7 +2,7 @@ local speck = asset.resource({
   Name = "Stars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "stars_du",
-  Version = 5
+  Version = 6
 })
 
 local sunspeck = asset.resource({
@@ -62,13 +62,13 @@ local Stars = {
   GUI = {
     Name = "Stars",
     Path = "/Milky Way/Stars",
-    Description = [[Census:  116,584 stars with 321 labels.<br> DU Version 8.10. This
-      star catalog is a combination of all available star catalogs, wherein we
-      choose the best distance available to place the stars around the Sun as
-      accurately as is possible. (Description from URL) <br><br> Data Reference:
-      Gaia Data Release 3 (Gaia Collaboration, 2022); XHIP: An Extended Hipparcos
-      Compilation (Anderson E., Francis C. 2012); Hipparcos Catalog (European Space Agency
-      1997); Gliese Catalog (Gliese and Jahriess 1991)]]
+    Description = [[These are the nearby stars that surround the Sun and are close enough
+      to get accurate distances. These include all the stars we see with the unaided eye
+      and many stars dimmer than that. Over the entire night sky, all year round, and in
+      the northern and southern hemispheres, we can see roughly 9,000 stars total with
+      the unaided eye. Stars are the light factories of the universe, and come in a
+      variety of sizes, colors, and brightnesses. The base catalog is Hipparcos, with Gaia
+      DR3 data applied for distance and velocity when available. Census: 112,746 stars.]]
   }
 }
 
@@ -105,10 +105,10 @@ local SunStar = {
     DimInAtmosphere = true
   },
   GUI = {
-    Name = "Sun Star",
+    Name = "Sun",
     Path = "/Milky Way/Stars",
-    Description = [[Individual star to represent the sun when outside of the solar
-      system]]
+    Description = [[Individual star to represent the Sun when outside of the Solar
+      System.]]
   }
 }
 
@@ -130,9 +130,8 @@ asset.export(SunStar)
 
 asset.meta = {
   Name = "Stars",
-  Version = "3.0",
-  Description = "Digital Universe asset for the stars",
-  Author = "Brian Abbott (AMNH)",
+  Description = Stars.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves, Andrew Ayala, Jackie Faherty (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

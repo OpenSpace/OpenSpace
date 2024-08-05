@@ -22,8 +22,7 @@ local Object = {
     Texture = textures .. "eso0932a_blend.png",
     Orientation = "Inside",
     MirrorTexture = true,
-    FadeOutThreshold = 0.01,
-    Background = true
+    FadeOutThreshold = 0.01
   },
   GUI = {
     Name = "Milky Way (ESO)",
@@ -47,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "MilkyWay Galaxy (ESO)",
-  Version = "1.0",
   Description = [[This asset contains an alternate to the Digital Universe image for the
     Milky Way from ESO]],
   Author = "ESO/S. Brunier",

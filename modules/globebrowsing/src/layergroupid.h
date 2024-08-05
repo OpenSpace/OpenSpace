@@ -84,6 +84,7 @@ struct Layer {
         SizeReferenceTileProvider,
         TemporalTileProvider,
         TileIndexTileProvider,
+        TileProviderByDate,
         TileProviderByIndex,
         TileProviderByLevel,
         SolidColor,
@@ -95,7 +96,7 @@ struct Layer {
     std::string_view identifier;
 };
 
-constexpr std::array<Layer, 11> Layers = {
+constexpr std::array<Layer, 12> Layers = {
     Layer {
         .id = Layer::ID::DefaultTileProvider,
         .identifier = "DefaultTileProvider"
@@ -119,6 +120,10 @@ constexpr std::array<Layer, 11> Layers = {
     Layer {
         .id = Layer::ID::TileIndexTileProvider,
         .identifier = "TileIndexTileProvider"
+    },
+    Layer {
+        .id = Layer::ID::TileProviderByDate,
+        .identifier = "TileProviderByDate"
     },
     Layer {
         .id = Layer::ID::TileProviderByIndex,

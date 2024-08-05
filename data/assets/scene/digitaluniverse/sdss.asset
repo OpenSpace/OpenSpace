@@ -1,15 +1,15 @@
 local textures = asset.resource({
-  Name = "Sloan Digital Sky Survey Textures",
+  Name = "Point Textures",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_sloandss_textures",
-  Version = 2
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
 })
 
 local speck = asset.resource({
   Name = "Sloan Digital Sky Survey Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_sloandss_speck",
-  Version = 3
+  Version = 4
 })
 
 
@@ -19,14 +19,13 @@ local Object = {
     Type = "RenderablePointCloud",
     Enabled = true,
     Opacity = 0.8,
-    File = speck .. "SDSSgals.speck",
+    File = speck .. "sdss.speck",
     Coloring = {
       FixedColor = { 0.8, 0.8, 1.0 },
       ColorMapping = {
         File = speck .. "SDSSgals.cmap",
         ParameterOptions = {
-          { Key = "proximity", Range = { 1.0, 50.0 } },
-          { Key = "redshift", Range = { 0.0, 0.075 } }
+          { Key = "num_nearby_galaxies", Range = { 1.0, 25.0 } }
         }
       }
     },
@@ -45,22 +44,16 @@ local Object = {
   },
   GUI = {
     Name = "Sloan Digital Sky Survey",
-    Path = "/Universe/Galaxies",
-    Description = [[Census: 2,600,258 galaxies. DU Version 10.6.<br> The Sloan Digital
-      Sky Survey (SDSS) is an ambitious project to image about 35% of the sky, deep
-      into the universe. The survey measured the position and brightness of almost 1
-      billion objects, and obtained spectra to more than 4 million objects. This is
-      not an all-sky survey, so there are large parts of the sky that remain
-      unobserved, which produces the bow tie distribution and the black areas where
-      there surely are galaxies, but we have yet to observe them. These galaxies
-      appear to extend beyond the 2dF survey to distances that exceed 5 billion
-      light years. However, the weblike structure of clusters, filaments, and voids
-      seems to fade by about 2 billion light years. Beyond this distance, the
-      completeness of the survey drops so that only the intrinsically bright
-      galaxies are visible. The weblike cosmic structure is echoed in these data,
-      with orange clusters standing out among the less dense aqua-colored galaxies
-      and the less dense regions of green-colored galaxies. (Description from URL)
-      <br><br> Data Reference: Sloan Digital Sky Survey (http://www.sdss.org/)]]
+    Path = "/Universe/Deep Sky Surveys",
+    Description = [[The Sloan Digital Sky Survey (SDSS) is an ambitious project to image
+      about 35% of the sky, deep into the universe. The SDSS galaxies form triangular
+      wedges, revealing those parts of the sky observed by the telescope. If the entire
+      sky were covered, you would see a spherical distribution of galaxies surrounding
+      the Milky Way. With only 35% of the entire sky observed, we see only a few select
+      slices or larger wedgelike portions from that sphere. The weblike cosmic structure
+      is echoed in these data, with orange clusters standing out among the less dense
+      aqua-colored galaxies and the less dense regions of green-colored galaxies.
+      Census: 2,862,767 galaxies.]]
   }
 }
 
@@ -78,10 +71,9 @@ asset.export(Object)
 
 
 asset.meta = {
-  Name = "Sloan Digital Sky Survey",
-  Version = "3.0",
-  Description = "Digital Universe asset for The Sloan Digital Sky Survey (SDSS)",
-  Author = "Brian Abbott (AMNH)",
+  Name = "Sloan Digital Sky Survey Galaxies",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves (AMNH), Eric Gawiser (Rutgers)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

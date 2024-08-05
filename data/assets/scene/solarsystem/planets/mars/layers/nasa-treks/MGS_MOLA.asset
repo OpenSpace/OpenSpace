@@ -54,8 +54,7 @@ asset.export("mola_roughness", treks_mola_roughness)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MGS_MOLA],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MGS_MOLA]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

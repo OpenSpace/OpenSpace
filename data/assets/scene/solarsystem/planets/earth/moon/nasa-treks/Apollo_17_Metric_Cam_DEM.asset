@@ -38,7 +38,6 @@ asset.export("Apollo17_MetricCam_Gray_Global_1024ppd", treks_Apollo17_MetricCam_
 
 asset.meta = {
   Name = [[NASA Treks Layers for Moon Apollo_17_Metric_Cam_DEM],
-  Version = "1.0",
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

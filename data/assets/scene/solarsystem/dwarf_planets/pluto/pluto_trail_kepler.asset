@@ -19,7 +19,7 @@ local PlutoKeplerianTrail = {
       AscendingNode = 110.2099981996057,
       ArgumentOfPeriapsis = 114.2248569189779,
       MeanAnomaly = 14.53,
-      Epoch = "2000 01 01 00:00",
+      Epoch = "2000 JAN 01 00:00:00",
       Period = 7824380000
     },
     Color = { 0.2, 0.8, 0.3 },
@@ -48,7 +48,6 @@ asset.export(PlutoKeplerianTrail)
 
 asset.meta = {
   Name = "Pluto Keplerian Trail",
-  Version = "1.0",
   Description = [[Full Keplerian trail of Pluto as observed by the Sun. Data from
     JPL Horizons]],
   Author = "OpenSpace Team",

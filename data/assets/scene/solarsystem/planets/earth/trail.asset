@@ -39,7 +39,6 @@ asset.export(EarthTrail)
 
 asset.meta = {
   Name = "Earth Trail",
-  Version = "1.1",
   Description = "Trail of Earth as observed by the Sun",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

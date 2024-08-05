@@ -29,7 +29,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "MOLA HRSC [Sweden]",
-  Version = "1.1",
   Description = [[Colorzied elevation data for Mars. This map is hosted on the OpenSpace
     server in Sweden]],
   Author = "OpenSpace Team",

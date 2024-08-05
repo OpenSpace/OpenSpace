@@ -41,6 +41,7 @@ documentation::Documentation GeoJsonManager::Documentation() {
     return {
         "GeoJsonManager",
         "globebrowsing_geojsonmanager",
+        "",
         {}
     };
 }

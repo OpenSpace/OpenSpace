@@ -39,7 +39,6 @@ asset.export(NebulaPosition)
 
 asset.meta = {
   Name = "Orion Nebula Transforms",
-  Version = "1.0",
   Description = [[This asset contains the position of the Orion Nebula. Generally you
     would not include this asset as other assets would include it]],
   Author = "Brian Abbott (AMNH)",

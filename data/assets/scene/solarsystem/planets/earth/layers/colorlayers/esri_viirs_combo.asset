@@ -1,4 +1,7 @@
 local globe = asset.require("../../earth")
+local snpp = asset.require("./definitions/snpp")
+local noaa20 = asset.require("./definitions/noaa20")
+local noaa21 = asset.require("./definitions/noaa21")
 
 
 
@@ -12,24 +15,14 @@ local Layer = {
     {
       MaxLevel = 4,
       TileProvider = {
-        Identifier = "Temporal_VIIRS_SNPP",
-        Name = "Temporal VIIRS SNPP",
-        Type = "TemporalTileProvider",
-        Mode = "Prototyped",
-        Prototyped = {
-          Time = {
-            Start = "2015-11-24",
-            End = "2024-05-27"
-          },
-          TemporalResolution = "1d",
-          TimeFormat = "YYYY-MM-DD",
-          Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
-            "VIIRS_SNPP_CorrectedReflectance_TrueColor",
-            "250m",
-            "jpg"
-          )
-        },
-        PadTiles = false
+        Identifier = "VIIRS_Joint_Layer",
+        Name = "VIIRS Joint Layer",
+        Type = "TileProviderByDate",
+        Providers = {
+          ["2015-11-24"] = snpp.Layer,
+          ["2018-01-05"] = noaa20.Layer,
+          ["2024-04-19"] = noaa21.Layer
+        }
       }
     },
     {
@@ -43,8 +36,8 @@ local Layer = {
     }
   },
   PadTiles = false,
-  Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
-    Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]]
+  Description = [[Level based layer combining different VIIRS layers and ESRI World
+    Imagery. VIIRS is faded out at tile level 4]]
 }
 
 
@@ -62,7 +55,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "ESRI VIIRS Combo",
-  Version = "1.1",
   Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
   Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]],
   Author = "OpenSpace Tem",

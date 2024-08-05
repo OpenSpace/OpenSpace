@@ -26,8 +26,7 @@ asset.export("mars_pahrump_patch_8k_256m", treks_mars_pahrump_patch_8k_256m)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MSL],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MSL]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

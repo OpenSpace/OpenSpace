@@ -31,8 +31,6 @@ local Moon = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 1738140,
-    SegmentsPerPatch = 64,
-    Layers = {},
     ShadowGroup = {
       Sources = {
         { Name = sunAsset.Sun.Identifier, Radius = 696300000 },
@@ -137,7 +135,6 @@ asset.export("ToggleMoonShading", ToggleMoonShading.Identifier)
 
 asset.meta = {
   Name = "Moon",
-  Version = "1.2",
   Description = "Moon globe with labels and actions",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

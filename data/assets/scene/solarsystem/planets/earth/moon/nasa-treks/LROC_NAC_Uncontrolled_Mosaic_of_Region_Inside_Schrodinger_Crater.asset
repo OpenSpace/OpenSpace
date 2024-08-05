@@ -26,8 +26,7 @@ asset.export("SchrodingerMareNortheq", treks_SchrodingerMareNortheq)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LROC_NAC_Uncontrolled_Mosaic_of_Region_Inside_Schrodinger_Crater],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LROC_NAC_Uncontrolled_Mosaic_of_Region_Inside_Schrodinger_Crater]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

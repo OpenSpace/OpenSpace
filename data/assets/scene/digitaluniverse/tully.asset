@@ -54,30 +54,25 @@ local TullyGalaxies = {
       FadeInDistances = { 0.001, 1.0 } -- Fade in value in the same unit as "Unit"
     },
     SizeSettings = {
-      ScaleExponent = 21.9,
+      ScaleExponent = 21.7,
       MaxSize = 0.3,
       EnableMaxSizeControl = true
     }
   },
   GUI = {
     Name = "Tully Galaxies",
-    Path = "/Universe/Galaxies",
-    Description = [[Census: 30,059 galaxies. DU Version 1.5.<br> The Tully Catalog is
-      the most polished, accurate catalog of nearby galaxies. It includes over 30,000
-      galaxies in the local universe that surround the Milky Way. This catalog
-      demonstrates the large-scale structure of the universe exceptionally well. And,
-      each galaxy has a representative image reflecting its morphological type, and is
-      properly sized and inclined. Size and shape. The data form a cube, which is an
+    Path = "/Universe/Nearby Surveys",
+    Description = [[The Tully Catalog is the most polished, accurate catalog of nearby
+      galaxies. It includes over 30,000 galaxies in the local universe that surround the
+      Milky Way. This catalog demonstrates the large-scale structure of the universe
+      exceptionally well. Each galaxy has a representative image that is properly sized
+      and inclined and reflects its morphological type. The data form a cube, which is an
       arbitrary cutoff based on the completeness of these data. Beyond this, data from
-      these sources are not as reliable, so effort is made to show a complete picture,
-      albeit limited by observations (for example, we cannot see dwarf galaxies much
-      beyond the Local Group). The size of the cube is roughly 1 billion light years on
-      a diagonal (so the farthest galaxies in the dataset are about 1 billion light
-      years from the Milky Way), or about 700 million light years per side.
-      <br><br>Colors. Orange denotes more dense regions of the local universe, aqua is
-      given to galaxies in an intermediate-density area, and green is given to lower
-      density regions.(Description from URL) <br><br> Data Reference: Tully Galaxy
-      Catalog: Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]]
+      these sources are not as reliable. The size of the cube is roughly 1 billion light
+      years on a diagonal, or about 700 million light years per side. Colors: Orange
+      denotes more dense regions of the local universe, aqua is given to galaxies in an
+      intermediate-density area, and green is given to lower density regions. Census:
+      30,059 galaxies.]]
   }
 }
 
@@ -111,17 +106,14 @@ local TullyGalaxiesImages = {
   },
   GUI = {
     Name = "Tully Galaxies Images",
-    Path = "/Universe/Galaxies",
-    Description = [[Each galaxy is represented by an image
-      that represents its morphological type (spiral, elliptical, etc.). Most of these
-      come from The Galaxy Catalog. A handful of nearby galaxies are represented by
-      their actual images, which come mostly from the National Optical Astronomy
-      Observatory (NOAO). Each of these images has been altered from its original state.
-      These images were taken from Earth on some of the world's largest telescopes, so
-      foreground stars from our own Galaxy appear in each image. We are representing
-      galaxies in extragalactic space, so we have removed the stars from each image.
-      (Description from URL) <br><br> Data Reference: Tully Galaxy Catalog: Brent Tully
-      (U Hawaii), Stuart Levy (NCSA/UIUC)]]
+    Path = "/Universe/Nearby Surveys",
+    Description = [[Each Tully galaxy is represented by an image that represents its
+      morphological type (spiral, elliptical, etc.). Most of these come from The Galaxy
+      Catalog. A handful of nearby galaxies are represented by their actual images, which
+      come mostly from the National Optical Astronomy Observatory (NOAO). Each of these
+      images has been altered from its original state. Taken from Earth, foreground stars
+      from our own Galaxy appear in each image and were removed. Census: 30,159 galaxy
+      images.]]
   }
 }
 
@@ -143,9 +135,7 @@ asset.export(TullyGalaxiesImages)
 
 asset.meta = {
   Name = "Tully Galaxies",
-  Version = "5.0",
-  Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
-    images]],
+  Description = TullyGalaxies.GUI.Description,
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

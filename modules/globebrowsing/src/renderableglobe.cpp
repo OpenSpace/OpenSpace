@@ -280,7 +280,7 @@ namespace {
         std::optional<bool> renderAtDistance;
 
         // A list of layers that should be added to the globe.
-        std::map<std::string, ghoul::Dictionary> layers
+        std::optional<std::map<std::string, ghoul::Dictionary>> layers
             [[codegen::reference("globebrowsing_layermanager")]];
 
         // Specifies information about planetary labels that can be rendered on the
@@ -633,8 +633,13 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     // @TODO (abock, 2021-03-25) The layermanager should be changed to take a
     // std::map<std::string, ghoul::Dictionary> instead and then we don't need to get it
     // as a bare dictionary anymore and can use the value from the struct directly
-    const ghoul::Dictionary layersDict = dictionary.value<ghoul::Dictionary>("Layers");
-    _layerManager.initialize(layersDict);
+    if (dictionary.hasValue<ghoul::Dictionary>("Layers")) {
+        const ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>("Layers");
+        _layerManager.initialize(dict);
+    }
+    else {
+        _layerManager.initialize(ghoul::Dictionary());
+    }
 
     addProperty(Fadeable::_opacity);
     addProperty(_generalProperties.performShading);

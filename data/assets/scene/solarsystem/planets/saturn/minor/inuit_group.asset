@@ -16,9 +16,7 @@ local Kiviuq = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 16000, 16000, 16000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 16000, 16000, 16000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -105,9 +103,7 @@ local Ijiraq = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 12000, 12000, 12000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 12000, 12000, 12000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -194,9 +190,7 @@ local Paaliaq = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 22000, 22000, 22000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 22000, 22000, 22000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -283,9 +277,7 @@ local Siarnaq = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 40000, 40000, 40000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 40000, 40000, 40000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -372,9 +364,7 @@ local Tarqeq = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -461,9 +451,7 @@ local S2004S29 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -550,9 +538,7 @@ local S2004S31 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -639,9 +625,7 @@ local S2019S01 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -821,7 +805,6 @@ asset.export(S2019S01Label)
 
 asset.meta = {
   Name = "Saturn Inuit Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Inuit Group moons: Kiviuq,
     Ijiraq, Paaliaq, Siarnaq and Tarqeq. Blank globes and SPICE trails are generated for
     each moon]],

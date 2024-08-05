@@ -21,9 +21,9 @@ local Object = {
     Labels = {
       Enabled = true,
       File = speck .. "galclust.label",
-      Color = { 1.0, 0.44, 0.0 },
+      Color = { 0.9, 0.5, 0.22 },
       Size = 22,
-      MinMaxSize = { 8, 20 },
+      MinMaxSize = { 8, 15 },
       Unit = "Mpc",
       TransformationMatrix = TransformMatrix
     },
@@ -33,12 +33,10 @@ local Object = {
   },
   GUI = {
     Name = "Galaxy Cluster Labels",
-    Path = "/Universe/Galaxies",
-    Description = [[Census 15 galaxy cluster labels. DU Version 1.2. <br>The Galaxy
-      clusters dataset is a series of labels that mark where the large clusters of
-      galaxies are in the nearby universe. These labels must be used in conjunction
-      with the Tully galaxy group.(Description from URL) <br><br> Data Reference:
-      Brian Abbott (AMNH)]]
+    Path = "/Universe/Nearby Surveys",
+    Description = [[The galaxy clusters dataset is a series of labels that mark where the
+      large clusters of galaxies are in the nearby universe. These labels must be used in
+      conjunction with the Tully galaxy group. Census: 15 galaxy cluster labels.]]
   }
 }
 
@@ -57,8 +55,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Galaxy Clusters Labels",
-  Version = "2.0",
-  Description = "Digital Universe asset for Galaxy Clusters",
+  Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

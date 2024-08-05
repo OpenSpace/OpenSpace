@@ -26,8 +26,7 @@ asset.export("ApolloZone_MetricCam_ClrShade_Global_1024ppd", treks_ApolloZone_Me
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon Apollo_Zone_Metric_Cam_DEM],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon Apollo_Zone_Metric_Cam_DEM]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

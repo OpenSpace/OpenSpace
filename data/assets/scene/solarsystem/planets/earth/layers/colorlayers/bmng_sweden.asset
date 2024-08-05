@@ -27,7 +27,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Blue Marble Next Generation (Sweden)",
-  Version = "1.1",
   Description = [[Web loaded full resolution map of Blue Marble Next Generation. This map
     is hosted on the OpenSpace servers in Sweden]],
   Author = "OpenSpace Team",

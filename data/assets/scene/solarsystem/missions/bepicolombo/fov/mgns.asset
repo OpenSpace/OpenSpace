@@ -40,7 +40,6 @@ end)
 
 asset.meta = {
   Name = "MGNS",
-  Version = "1.0",
   Description = [[
     The Mercury Gamma-ray and Neutron Spectrometer (MGNS) on board BepiColombo Mercury
     Planet Orbiter is designed to observe and study the gamma-ray and neutron emissions of

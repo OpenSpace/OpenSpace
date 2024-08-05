@@ -26,8 +26,7 @@ asset.export("LRO_DIVINER_ClrRockFreeSurfaceTemp_Global_128ppd", treks_LRO_DIVIN
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_Diviner_Surface_Temperature_Mosaic_128ppd],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_Diviner_Surface_Temperature_Mosaic_128ppd]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

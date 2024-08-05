@@ -25,8 +25,8 @@ local AltAzGridPosition = {
     }
   },
   GUI = {
-    Name = "Altitude/Azimuth Grid Position",
-    Path = "/Other/Night Sky",
+    Name = "Altitude-Azimuth Grid Position",
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth",
     Hidden = true
   }
 }
@@ -48,17 +48,17 @@ local AltAzGrid = {
     Type = "RenderableSphericalGrid",
     Enabled = asset.enabled,
     Opacity = 0.8,
-    Color = { 0.4, 0.8, 0.4 },
+    Color = { 0.2, 0.4, 0.2 },
     LineWidth = 2.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   GUI = {
-    Name = "Altitude/Azimuth Grid",
+    Name = "Altitude-Azimuth Grid",
     Description = [[A local Altitude/Azimuth grid centered around your position on a
     planetary surface. The grid can be toggled, hidden or shown using the accompanying
     actions in the actions panel, under "Night Sky". Use these actions to move it to
     another planet. The default is Earth.]],
-    Path = "/Other/Night Sky"
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth"
   }
 }
 
@@ -126,9 +126,9 @@ asset.export("HideAltaz", HideAltaz.Identifier)
 asset.export("ToggleAltaz", ToggleAltaz.Identifier)
 
 
+
 asset.meta = {
   Name = "Altitude/Azimuth Grid",
-  Version = "1.0",
   Description = [[A local Altitude/Azimuth grid centered around your position on a
     planetary surface. The asset also includes some actions to toggle, hide or
     show the grid.]],

@@ -26,8 +26,7 @@ asset.export("LRO_Diviner_CF_Filled_Global_8ppd", treks_LRO_Diviner_CF_Filled_Gl
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_Diviner_CF_Mosaic],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_Diviner_CF_Mosaic]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

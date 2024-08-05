@@ -193,7 +193,6 @@ asset.export(JWSTSunTrail)
 
 asset.meta = {
   Name = "James Webb Space Telescope Trails",
-  Version = "1.0",
   Description = [[
     Trail of James Webb Space Telescope in respect to Earth, L2 and the Sun
   ]],

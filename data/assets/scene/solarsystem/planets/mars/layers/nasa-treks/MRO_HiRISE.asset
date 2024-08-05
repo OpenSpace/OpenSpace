@@ -308,8 +308,7 @@ asset.export("PSP_001501_2280_RED", treks_PSP_001501_2280_RED)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MRO_HiRISE],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MRO_HiRISE]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

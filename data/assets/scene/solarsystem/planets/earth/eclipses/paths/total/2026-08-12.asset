@@ -27,7 +27,6 @@ end)
 
 asset.meta = {
   Name = "Total 2026-08-12",
-  Version = "1.0",
   Description = "Total eclipse map for 2026-08-12",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

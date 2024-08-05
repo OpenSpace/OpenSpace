@@ -38,6 +38,13 @@ GUIKeyboardHandler::GUIKeyboardHandler() {
             return isGuiWindow ? previous : false;
         }
     );
+    global::callback::character->emplace_back(
+        [this](unsigned int, KeyModifier, IsGuiWindow isGuiWindow) -> bool {
+            const bool previous = _keyConsumed;
+            _keyConsumed = false;
+            return isGuiWindow ? previous : false;
+        }
+    );
 }
 
 } // namespace openspace

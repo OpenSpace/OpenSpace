@@ -26,7 +26,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Phobos Global Shaded Relief [USGS]",
-  Version = "1.1",
   Author = "USGS/NASA",
   URL = "https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html",
   License = "NASA/PDS"

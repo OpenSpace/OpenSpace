@@ -151,15 +151,17 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
 #elif (#{#{layerGroup}#{i}LayerType} == 5) // TileIndexTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
-#elif (#{#{layerGroup}#{i}LayerType} == 6) // TileProviderByIndex
+#elif (#{#{layerGroup}#{i}LayerType} == 6) // TileProviderByDate
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
-#elif (#{#{layerGroup}#{i}LayerType} == 7) // TileProviderByLevel
+#elif (#{#{layerGroup}#{i}LayerType} == 7) // TileProviderByIndex
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
-#elif (#{#{layerGroup}#{i}LayerType} == 8) // SolidColor
+#elif (#{#{layerGroup}#{i}LayerType} == 8) // TileProviderByLevel
+  c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
+#elif (#{#{layerGroup}#{i}LayerType} == 9) // SolidColor
   c.rgb = #{layerGroup}[#{i}].color;
-#elif (#{#{layerGroup}#{i}LayerType} == 9) // SpoutImageProvider
+#elif (#{#{layerGroup}#{i}LayerType} == 10) // SpoutImageProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
-#elif (#{#{layerGroup}#{i}LayerType} == 10) // VideoTileProvider
+#elif (#{#{layerGroup}#{i}LayerType} == 11) // VideoTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
 #endif
 

@@ -27,8 +27,7 @@ local OumuamuaTrail = {
     Color = { 0.9, 0.9, 0.0 },
     StartTime = "2014 JAN 01 00:00:00",
     EndTime = "2050 JAN 01 00:00:00",
-    SampleInterval = 86400,
-    TimeStampSubsampleFactor = 1
+    SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
     Name = "'Oumuamua Trail",
@@ -73,7 +72,6 @@ asset.export(OumuamuaTrail)
 
 asset.meta = {
   Name = "'Oumuamua",
-  Version = "1.2",
   Description = [[This asset contains the trail and position of 'Oumuamua from 2014
     JAN 01 00:00:00 to 2050 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",

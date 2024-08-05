@@ -26,8 +26,7 @@ asset.export("LRO_DIVINER_ClrCF_Global_128ppd", treks_LRO_DIVINER_ClrCF_Global_1
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_Diviner_CF_Mosaic_128ppd],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_Diviner_CF_Mosaic_128ppd]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

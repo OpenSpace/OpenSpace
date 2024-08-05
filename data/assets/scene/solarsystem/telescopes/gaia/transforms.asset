@@ -48,7 +48,6 @@ asset.export(GaiaPosition)
 
 asset.meta = {
   Name = "Gaia Transform",
-  Version = "1.0",
   Description = [[This asset contains the position of Gaia from 2013 DEC 19 09:55:27 to
     2026 SEP 14 21:15:27. Data from JPL Horizons]],
   Author = "OpenSpace Team",

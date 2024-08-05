@@ -78,7 +78,6 @@ asset.export(ExampleAdaptiveHeight)
 
 asset.meta = {
   Name = "GlobeTranslation Example",
-  Version = "1.0",
   Description = [[An example that demonstrates how to place an object on a planet surface
     using the "GlobeTranslation" transform. For the altitude, a fixed height can be used,
     or the height can be queried from the height map]],

@@ -90,7 +90,6 @@ asset.export(GPHIO)
 
 asset.meta = {
   Name = "Transformations for the JUICE mission profile",
-  Version = "1.0",
   Description = [[
     Contains all of the base transformations necessary for the JUICE mission in the Jovian
     system

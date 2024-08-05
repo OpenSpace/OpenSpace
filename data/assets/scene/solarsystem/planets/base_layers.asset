@@ -28,7 +28,6 @@ asset.require("./neptune/default_layers")
 
 asset.meta = {
   Name = "Base Solar System Layers",
-  Version = "1.0",
   Description = [[Adds base layers for all planets. Remove this asset and include
     individual layers for planets to customize planet layers.
     The base layers do not depend on any particular OpenSpace server but are still

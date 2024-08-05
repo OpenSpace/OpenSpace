@@ -42,7 +42,6 @@ asset.export(VenusTrailEarth)
 
 asset.meta = {
   Name = "Venus Trail from Earth",
-  Version = "1.1",
   Description = "Trail of Venus as observed by the Earth",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

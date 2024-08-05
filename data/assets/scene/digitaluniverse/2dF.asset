@@ -1,8 +1,8 @@
 local textures = asset.resource({
-  Name = "2dF Textures",
+  Name = "Point Textures",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_2dF_textures",
-  Version = 2
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
 })
 
 local speck = asset.resource({
@@ -41,20 +41,13 @@ local Object = {
   },
   GUI = {
     Name = "2dF Galaxies",
-    Path = "/Universe/Galaxies",
-    Description = [[Census 229,293 galaxies. DU Version 1.7. <br> The Two-degree Field
-    (2dF) Survey was a project designed to map portions of the extragalactic universe. The
-    2dF instrument was mounted on the 3.9-meter (12.8-foot) Anglo-Australian Telescope
-    (AAT), located 450 km (280 miles) northwest of Sydney. The telescope has a two-degree
-    field of view on the sky, enabling large parts of the sky to be observed at one time.
-    For each pointing of the telescope, the instrument can acquire up to 400 spectra
-    simultaneously via optical fibers that feed into two spectrographs. Each spectrograph
-    sees light that is between 350 nm and 800 nm, spanning the visible spectrum. <br><br>
-    The 2dF survey has three main components: the North Galactic Pole strip, the South
-    Galactic Pole strip, and the random fields that surround the South Galactic Pole
-    strip. The galaxy survey is composed of about 230,000 galaxies with brightness and
-    redshift measurements. (Description from URL) <br><br> Data Reference: 2dF Galaxy
-    Redshift Survey (2dFGRS Team, 1998-2003)]]
+    Path = "/Universe/Deep Sky Surveys",
+    Description = [[The Two-degree Field (2dF) Survey was a project designed to map
+      portions of the extragalactic universe. The 2dF survey has three main components:
+      the North Galactic Pole strip, the South Galactic Pole strip, and the random fields
+      that surround the South Galactic Pole strip. Colors: Orange galaxies show dense
+      regions of galaxies, aqua galaxies are areas of intermediate density, and green
+      galaxies are areas of lower density. Census: 229,293 galaxies.]]
   }
 }
 
@@ -73,8 +66,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "2dF Galaxies",
-  Version = "3.0",
-  Description = "Digital Universe asset for the The Two-degree Field (2dF) Survey",
+  Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH), Eric Gawiser (Rutgers U)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

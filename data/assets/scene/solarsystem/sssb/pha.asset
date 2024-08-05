@@ -48,7 +48,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Potentially-Hazardous Asteroids",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     Potentially Hazardous group. ]],
   Author = [[JPL Small-Body Database hosted by California Institute of

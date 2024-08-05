@@ -21,9 +21,7 @@ local Neptune = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 24764000.0, 24764000.0, 24314000.0 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 24764000.0, 24764000.0, 24314000.0 }
   },
   Tag = { "planet_solarSystem", "planet_giants" },
   GUI = {
@@ -76,7 +74,6 @@ asset.export(NeptuneLabel)
 
 asset.meta = {
   Name = "Neptune",
-  Version = "1.1",
   Description = "Neptune globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

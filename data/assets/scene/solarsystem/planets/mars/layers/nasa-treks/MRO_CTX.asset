@@ -651,8 +651,7 @@ asset.export("Zephyria_CTX_BlockAdj_dd", treks_Zephyria_CTX_BlockAdj_dd)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MRO_CTX],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MRO_CTX]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

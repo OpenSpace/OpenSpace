@@ -53,7 +53,7 @@ Fragment getFragment() {
   if (vs_st.x < borderWidth.x || vs_st.x > 1 - borderWidth.x ||
       vs_st.y < borderWidth.y || vs_st.y > 1 - borderWidth.y)
   {
-    frag.color = vec4(borderColor, 1.0);
+    frag.color = vec4(borderColor, opacity);
   }
 
   if (frag.color.a == 0.0) {

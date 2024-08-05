@@ -33,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Clem Uvvis [New York]",
-  Version = "1.1",
   Description = [[Moon Clementine UVVIS Global Mosaic 118m v2 map of the Moon. This map
     is hosted on the OpenSpace server in New York]],
   Author = "USGS",

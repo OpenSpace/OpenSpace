@@ -26,8 +26,7 @@ asset.export("LRO_NAC_Mosaic_1mpp", treks_LRO_NAC_Mosaic_1mpp)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_NAC_Mosaic_1mpp],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_NAC_Mosaic_1mpp]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

@@ -53,7 +53,6 @@ asset.export(Janus)
 
 asset.meta = {
   Name = "Janus",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Jovis Amorum ac Natorum Undique Scrutator (JANUS)
     instrument onboard Juice, which is the camera operating in visible wavelengths. See

@@ -83,7 +83,6 @@ asset.export(GaiaTrailEclip)
 
 asset.meta = {
   Name = "Gaia Trail",
-  Version = "1.0",
   Description = [[This asset contains the trail of Gaia around both Earth and the Sun.
     Data from JPL Horizons from 2013 DEC 19 09:55:27 to 2026 SEP 14 21:15:27]],
   Author = "OpenSpace Team",

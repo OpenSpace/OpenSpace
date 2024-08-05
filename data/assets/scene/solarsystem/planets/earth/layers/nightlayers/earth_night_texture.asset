@@ -35,7 +35,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Blue Marble Night",
-  Version = "1.1",
   Description = "Fallback layer for earth night image if no internet is available",
   Author = "OpenSpace Team",
   URL = "https://visibleearth.nasa.gov/collection/1484/blue-marble",

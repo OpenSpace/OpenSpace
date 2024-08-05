@@ -78,8 +78,7 @@ asset.export("TES_Thermal_Inertia", treks_TES_Thermal_Inertia)
 
 
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MGS_TES],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MGS_TES]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

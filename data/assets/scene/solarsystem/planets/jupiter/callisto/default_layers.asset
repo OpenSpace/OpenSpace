@@ -4,7 +4,6 @@ asset.require("./layers/colorlayers/callisto_texture", true)
 
 asset.meta = {
   Name = "Default Callisto Layers",
-  Version = "1.0",
   Description = "Default Callisto layers are: Callisto Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

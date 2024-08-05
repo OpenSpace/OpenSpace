@@ -39,7 +39,6 @@ asset.export("Layer", Layer)
 
 asset.meta = {
   Name = "Triton Voyager2 Mosaic",
-  Version = "1.0",
   Description = [[Voyager2 mosaic of Triton. This layer is local in the sync folder.]],
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Triton/Mosaic/" ..

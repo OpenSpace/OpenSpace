@@ -33,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "MOC WA Color [New York]",
-  Version = "1.1",
   Description = [[Main color map layer for Mars. This map is hosted
     on the OpenSpace server in New York]],
   Author = "OpenSpace Team",

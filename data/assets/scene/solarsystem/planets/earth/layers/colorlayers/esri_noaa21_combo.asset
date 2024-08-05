@@ -1,4 +1,5 @@
 local globe = asset.require("../../earth")
+local noaa21 = asset.require("./definitions/noaa21")
 
 
 
@@ -11,26 +12,7 @@ local Layer = {
   LevelTileProviders = {
     {
       MaxLevel = 4,
-      TileProvider = {
-        Identifier = "Temporal_VIIRS_NOAA21",
-        Name = "Temporal VIIRS NOAA21",
-        Type = "TemporalTileProvider",
-        Mode = "Prototyped",
-        Prototyped = {
-          Time = {
-            Start = "2024-04-19",
-            End = "Today"
-          },
-          TemporalResolution = "1d",
-          TimeFormat = "YYYY-MM-DD",
-          Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
-            "VIIRS_NOAA21_CorrectedReflectance_TrueColor",
-            "250m",
-            "jpg"
-          )
-        },
-        PadTiles = false
-      }
+      TileProvider = noaa21.Layer
     },
     {
       MaxLevel = 22,
@@ -62,7 +44,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "ESRI NOAA20 VIIRS Combo",
-  Version = "1.0",
   Description = [[Level based layer combining "NOAA20 SNPP (Temporal)" and ESRI World
   Imagery. "NOAA20 SNPP (Temporal)" is faded out at tile level 4]],
   Author = "OpenSpace Tem",

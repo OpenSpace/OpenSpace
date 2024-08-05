@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Supernova Remnants Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_supernovaremnants_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -20,8 +20,8 @@ local Object = {
     Enabled = false,
     Labels = {
       File = speck .. "snr.label",
-      Color = { 0.6, 0.46, 0.0 },
-      Size = 16.44,
+      Color = { 0.51, 0.40, 0.04 },
+      Size = 16.0,
       MinMaxSize = { 4, 100 },
       Unit = "pc"
     },
@@ -40,12 +40,16 @@ local Object = {
   },
   GUI = {
     Name = "Supernova Remnants",
-    Path = "/Milky Way",
-    Description = [[Census: 112 supernova remnants.<br> DU Version 3.7. A supernova
-      remnant is the ejected gas that results from a supernova. It glows for a
-      cosmically short period of time before mixing with the interstellar medium.
-      (Description from URL) <br><br> Data Reference: The First Fermi LAT SNR
-      Catalog (Acero+, 2016)]]
+    Path = "/Milky Way/Nebulae",
+    Description = [[A supernova remnant is the nebulous gas left over from a supernova
+      explosion. This gas expands at great speeds and rams into the surrounding
+      interstellar gas. This excites the surrounding gas and causes it to glow, producing
+      the nebulous cloud we observe from Earth. A supernova remnant contains a neutron
+      star or pulsar at its center, the core of the dying star. The cloud that enshrouds
+      the core does not last long, though. After about 50,000 years, the gas mixes into
+      the interstellar medium and no longer glows. Astronomically, this is a very short
+      time, so the supernova remnants we see must be left from explosions that have
+      occurred recently, cosmically speaking. Census: 112 supernova remnants.]]
   }
 }
 
@@ -63,9 +67,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Supernova Remnants",
-  Version = "3.0",
-  Description = "Digital Universe asset for Supernova Remnants",
-  Author = "Brian Abbott (AMNH)",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

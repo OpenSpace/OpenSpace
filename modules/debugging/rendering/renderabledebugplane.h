@@ -33,7 +33,7 @@ class RenderableDebugPlane : public RenderablePlane {
 public:
     RenderableDebugPlane(const ghoul::Dictionary& dictionary);
 
-    bool isReady() const;
+    bool isReady() const override;
 
     static documentation::Documentation Documentation();
 

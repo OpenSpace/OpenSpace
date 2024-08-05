@@ -1614,7 +1614,7 @@ void setCameraFromProfile(const Profile& p) {
                 }
                 else {
                     geoScript = std::format(
-                        "openspace.globebrowsing.flyToGeo2([[{}]], {}, {}, 0)",
+                        "openspace.globebrowsing.flyToGeo2([[{}]], {}, {}, false, 0)",
                         geo.anchor, geo.latitude, geo.longitude
                     );
                 }

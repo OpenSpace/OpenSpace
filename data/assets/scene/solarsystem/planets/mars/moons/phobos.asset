@@ -117,7 +117,6 @@ asset.export(PhobosTrail)
 
 asset.meta = {
   Name = "Phobos",
-  Version = "1.0",
   Description = "RenderableModel and Trail for Phobos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
