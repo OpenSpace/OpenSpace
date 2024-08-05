@@ -71,63 +71,48 @@ struct DataPoint {
     };
 };
 
+// TODO: Automatically determine which columns have uncertainty and sould be represented with a datapoint.
+
 struct ExoplanetItem {
     int id; // Id used for UI (same as row number in data file)
-    std::string planetName;
-    std::string hostName;
-    char component;
 
-    int discoveryYear;
-    std::string discoveryMethod;
-    std::string discoveryTelescope;
-    std::string discoveryInstrument;
-
-    DataPoint radius; // in Earth radii
-    DataPoint mass; // in Earth mass
-    DataPoint eqilibriumTemp;  // in Kelvin
-    DataPoint eccentricity;
-    DataPoint semiMajorAxis; // in AU
-    DataPoint period; // in days
-    DataPoint inclination;
-    float tsm = std::numeric_limits<float>::quiet_NaN();
-    float esm = std::numeric_limits<float>::quiet_NaN();
-    DataPoint surfaceGravity;
-
-    // System
-    bool multiSystemFlag;
-    int nStars;
-    int nPlanets;
-
-    // Star
-    DataPoint starEffectiveTemp; // in Kelvin
-    DataPoint starAge; // in Gyr
-    DataPoint starRadius; // in Solar radii
-    DataPoint starMetallicity; // in dex
-    std::string starMetallicityRatio;
-    DataPoint magnitudeJ; // apparent magnitude in the J band (star)
-    DataPoint magnitudeK; // apparent magnitude in the K band (star)
-
-    // Position
-    DataPoint ra; // in decimal degrees
-    DataPoint dec; // in decimal degrees
-    DataPoint distance; // in Parsec
     std::optional<glm::dvec3> position = std::nullopt; // in Parsec
 
-    // Detected molecules in atmosphere
-    std::string moleculesDetection;
-    std::string moleculesUpperLimit;
-    std::string moleculesNoDetection;
-    float waterDetection = std::numeric_limits<float>::quiet_NaN();
+    std::string name;
+    std::string hostName;
 
     // Data reference
     std::string referenceName;
     std::string referenceUrl;
 
-    // Any other kind of data that might be interesting. can be numeric or string
-    std::map<std::string, std::variant<std::string, float>> otherColumns;
+    // A map between column name and a string/float value
+    std::map<std::string, std::variant<std::string, float>> dataColumns;
+
+    float sizeValue = 0.f;
+    DataPoint ra;
+    DataPoint dec;
+    DataPoint distance;
 
     // The planet's internal index within its system, from the inside out
     int indexInSystem = -1;
+};
+
+struct DataSettings {
+    std::string dataFile;
+
+    // Column names for certain columns that we need for the tool to work
+    struct {
+        std::string positionRa;
+        std::string positionDec;
+        std::string positionDistance;
+
+        std::string name;
+        std::string hostName; // TODO: optional
+        std::string ringSize; // TODO: optional
+        std::string referenceLink; // TODO: optional
+    } dataMapping;
+
+    // TODO: column info
 };
 
 } // namespace openspace

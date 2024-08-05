@@ -25,6 +25,7 @@
 #include <modules/exoplanetsexperttool/dataviewer.h>
 
 #include <modules/exoplanets/exoplanetshelper.h>
+#include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
 #include <modules/exoplanetsexperttool/rendering/renderablepointdata.h>
@@ -85,19 +86,6 @@ namespace {
     bool caseInsensitiveLessThan(const char* lhs, const char* rhs) {
         int res = _stricmp(lhs, rhs);
         return res < 0;
-    }
-
-    bool compareValues(float lhs, float rhs) {
-        if (std::isnan(lhs)) {
-            // also includes rhs is nan, in which case the order does not matter
-            return true;
-        }
-
-        // rhs is nan, but not lhs
-        if (std::isnan(rhs)) {
-            return false;
-        }
-        return lhs < rhs;
     }
 
     void queueScriptSynced(const std::string& script) {
@@ -161,7 +149,7 @@ namespace {
     // This should match the implementation in the exoplanet module
     std::string planetIdentifier(const openspace::exoplanets::ExoplanetItem& p) {
         using namespace openspace::exoplanets;
-        return std::format("{}_{}", openspace::makeIdentifier(p.hostName), p.component);
+        return openspace::makeIdentifier(p.name);
     }
 
     constexpr const glm::vec3 DefaultSelectedColor = { 0.2f, 0.8f, 1.f };
@@ -258,105 +246,16 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     }
     _filteredDataWithoutExternalSelection = _filteredData;
 
-    // Fill planets internal indices in system (based on semimajor axis)
-    std::map<std::string, std::vector<size_t>>::iterator it;
-    for (it = _hostIdToPlanetsMap.begin(); it != _hostIdToPlanetsMap.end(); it++) {
-        std::vector<size_t> planetIds = it->second;
-        std::sort(
-            planetIds.begin(),
-            planetIds.end(),
-            [&data = _data](const size_t a, const size_t b) -> bool {
-                float v1 = data[a].semiMajorAxis.value;
-                float v2 = data[b].semiMajorAxis.value;
-                return compareValues(v1, v2);
-            }
-        );
-        for (int i = 0; i < static_cast<int>(planetIds.size()); ++i) {
-            _data[planetIds[i]].indexInSystem = i;
-        }
-    }
-
     _defaultColumns = {
         { "Name", ColumnID::Name },
-        { "Host", ColumnID::Host },
-        { "Year", ColumnID::DiscoveryYear, "%.0f", "Discovery year"},
-        { "Planets", ColumnID::NPlanets, "%.0f" },
-        { "Stars ", ColumnID::NStars, "%.0f" },
-        { "ESM", ColumnID::ESM, "%.2f" },
-        { "TSM", ColumnID::TSM, "%.2f" },
-        {
-            "Radius",
-            ColumnID::PlanetRadius,
-            "%.2f",
-            "Planet radius in Earth radii"
-        },
-        {
-            "Teq",
-            ColumnID::PlanetTemperature,
-            "%.0f",
-            "Planet equilibrium temperature (K)"
-        },
-        { "Mass", ColumnID::PlanetMass, "%.2f", "in Earth masses" },
-        { "Mass Err (%)", ColumnID::PlanetMassError, "%.2f", "Mass uncertainty"},
-        { "Surface gravity", ColumnID::SurfaceGravity, "%.2f", "(m/s^2)"},
-        // Orbits
-        { "Semi-major axis", ColumnID::SemiMajorAxis, "%.2f", "(AU)"},
-        { "Eccentricity", ColumnID::Eccentricity, "%.2f" },
-        { "Orbit period", ColumnID::Period, "%.2f" },
-        { "Inclination", ColumnID::Inclination, "%.2f" },
-        // Star
-        {
-            "Star Teff",
-            ColumnID::StarTemperature,
-            "%.0f",
-            "Star effective temperature (K)"
-        },
-        { "Star radius ", ColumnID::StarRadius, "%.2f", "(Solar)"},
-        { "Star age", ColumnID::StarAge, "%.2f", "(Gyr)"},
-        { "MagJ", ColumnID::MagnitudeJ, "%.2f" },
-        { "MagK", ColumnID::MagnitudeK, "%.2f" },
-        { "Distance ", ColumnID::Distance, "%.2f", "(pc)"},
-        { "Ra", ColumnID::Ra, "%.2f" },
-        { "Dec", ColumnID::Dec, "%.2f" },
-        { "Metallicity (dex)", ColumnID::Metallicity, "%.2f" },
-        { "Metallicity ratio", ColumnID::MetallicityRatio },
-        // Discovery
-        { "Discovery method", ColumnID::DiscoveryMethod },
-        { "Telescope", ColumnID::DiscoveryTelescope },
-        { "Instrument", ColumnID::DiscoveryInstrument },
-        // Detected molecules
-        {
-            "Detected",
-            ColumnID::MoleculesDetection,
-            std::nullopt,
-            "Detected molecules from IAC ExoAtmospheres dataset"
-        },
-        {
-            "Upper limit",
-            ColumnID::MoleculesUpperLimit,
-            std::nullopt,
-            "Upper limit detection of molecules from IAC ExoAtmospheres dataset"
-        },
-        {
-            "No detection",
-            ColumnID::MoleculesNoDetection,
-            std::nullopt,
-            "No detection molecules from IAC ExoAtmospheres dataset"
-        },
-        {
-            "Water detection",
-            ColumnID::WaterDetection,
-            "%.0f",
-            "Flag for whether water has been detected in the planet atmosphere "
-            "(1 = yes, -1 = no, 0 = maybe/upper limit)"
-        }
+        { "Host", ColumnID::Host }
     };
 
     _columns = _defaultColumns;
     _selectedDefaultColumns.assign(_defaultColumns.size(), true);
     // Add other oclumns, if there are any. Assume all data items have the same columns
-    if (_data.size() > 0 && _data.front().otherColumns.size() > 0) {
-        for (auto col : _data.front().otherColumns) {
+    if (_data.size() > 0 && _data.front().dataColumns.size() > 0) {
+        for (auto col : _data.front().dataColumns) {
             Column c = { col.first, ColumnID::Other };
             _otherColumns.push_back(c);
             bool isSelected = false;
@@ -720,9 +619,9 @@ void DataViewer::render() {
         renderColormapWindow(&showColormapWindow);
     }
 
-    if (showScatterPlotWindow) {
-        renderScatterPlotWindow(&showScatterPlotWindow);
-    }
+    //if (showScatterPlotWindow) {
+    //    renderScatterPlotWindow(&showScatterPlotWindow);
+    //}
 
     if (showTable) {
         renderTableWindow(&showTable);
@@ -1003,110 +902,110 @@ void DataViewer::renderColormapWindow(bool* open) {
     ImGui::End();
 }
 
-void DataViewer::renderScatterPlotWindow(bool* open) {
-    ImGui::SetNextWindowSize(ImVec2(450, 400), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Scatter plots", open)) {
-        ImGui::End();
-        return;
-    }
-
-    std::vector<float> ra, dec;
-    ra.reserve(_filteredData.size());
-    dec.reserve(_filteredData.size());
-
-    for (size_t i : _filteredData) {
-        const ExoplanetItem& item = _data[i];
-        if (item.ra.hasValue() && item.dec.hasValue()) {
-            ra.push_back(item.ra.value);
-            dec.push_back(item.dec.value);
-        }
-    }
-
-    std::vector<float> ra_selected, dec_selected;
-    ra_selected.reserve(_selection.size());
-    dec_selected.reserve(_selection.size());
-
-    for (size_t i : _selection) {
-        const ExoplanetItem& item = _data[i];
-        if (item.ra.hasValue() && item.dec.hasValue()) {
-            ra_selected.push_back(item.ra.value);
-            dec_selected.push_back(item.dec.value);
-        }
-    }
-
-    // Ra dec plot
-    ImGui::BeginGroup();
-
-    ImVec4 selectedColor =
-    { DefaultSelectedColor.x, DefaultSelectedColor.y, DefaultSelectedColor.z, 1.f };
-
-    ImGui::Spacing();
-
-    const ColorMappedVariable& first = _variableSelection.front();
-
-    // Scatterplot
-    static const ImVec2 plotSize = { 400, 300 };
-    ImPlotFlags plotFlags = ImPlotFlags_NoLegend;
-    ImPlotAxisFlags axisFlags = ImPlotAxisFlags_None;
-
-    static float pointSize = 1.5f;
-    ImPlot::PushColormap(_colormaps[first.colormapIndex]);
-    ImPlot::SetNextPlotLimits(0.0, 360.0, -90.0, 90.0, ImGuiCond_Always);
-    if (ImPlot::BeginPlot("Star Coordinate", "Ra", "Dec", plotSize, plotFlags, axisFlags)) {
-        ImPlot::PushStyleVar(ImPlotStyleVar_MarkerSize, pointSize);
-
-        for (size_t i : _filteredData) {
-            const ExoplanetItem& item = _data[i];
-
-            if (!item.ra.hasValue() || !item.dec.hasValue()) {
-                continue;
-            }
-
-            const ImVec4 pointColor = toImVec4(colorFromColormap(
-                item,
-                _variableSelection.front()
-            )); // from first map
-
-            const ImPlotPoint point = { item.ra.value, item.dec.value };
-            const char* label = "Data " + i;
-            ImPlot::PushStyleColor(ImPlotCol_MarkerFill, pointColor);
-            ImPlot::PushStyleColor(ImPlotCol_MarkerOutline, pointColor);
-            ImPlot::PlotScatter(label, &point.x, &point.y, 1);
-            ImPlot::PopStyleColor();
-            ImPlot::PopStyleColor();
-        }
-        ImPlot::PopStyleVar();
-
-        ImPlot::PushStyleVar(ImPlotStyleVar_MarkerSize, 3.f * pointSize);
-        ImPlot::PushStyleColor(ImPlotCol_MarkerFill, selectedColor);
-        ImPlot::PushStyleColor(ImPlotCol_MarkerOutline, selectedColor);
-        ImPlot::PlotScatter(
-            "Selected",
-            ra_selected.data(),
-            dec_selected.data(),
-            static_cast<int>(ra_selected.size())
-        );
-        ImPlot::PopStyleColor();
-        ImPlot::PopStyleColor();
-        ImPlot::PopStyleVar();
-        ImPlot::EndPlot();
-
-        ImGui::SameLine();
-        ImPlot::ColormapScale(
-            "##ColorScale",
-            first.colorScaleMin,
-            first.colorScaleMax,
-            ImVec2(60, plotSize.y)
-        );
-
-        ImGui::SetNextItemWidth(70);
-        ImGui::DragFloat("Point size", &pointSize, 0.1f, 0.f, 5.f);
-        ImPlot::PopColormap();
-    }
-    ImGui::EndGroup(); // ra dec plot group
-
-    ImGui::End();
-}
+//void DataViewer::renderScatterPlotWindow(bool* open) {
+//    ImGui::SetNextWindowSize(ImVec2(450, 400), ImGuiCond_FirstUseEver);
+//    if (!ImGui::Begin("Scatter plots", open)) {
+//        ImGui::End();
+//        return;
+//    }
+//
+//    std::vector<float> ra, dec;
+//    ra.reserve(_filteredData.size());
+//    dec.reserve(_filteredData.size());
+//
+//    for (size_t i : _filteredData) {
+//        const ExoplanetItem& item = _data[i];
+//        if (item.ra.hasValue() && item.dec.hasValue()) {
+//            ra.push_back(item.ra.value);
+//            dec.push_back(item.dec.value);
+//        }
+//    }
+//
+//    std::vector<float> ra_selected, dec_selected;
+//    ra_selected.reserve(_selection.size());
+//    dec_selected.reserve(_selection.size());
+//
+//    for (size_t i : _selection) {
+//        const ExoplanetItem& item = _data[i];
+//        if (item.ra.hasValue() && item.dec.hasValue()) {
+//            ra_selected.push_back(item.ra.value);
+//            dec_selected.push_back(item.dec.value);
+//        }
+//    }
+//
+//    // Ra dec plot
+//    ImGui::BeginGroup();
+//
+//    ImVec4 selectedColor =
+//    { DefaultSelectedColor.x, DefaultSelectedColor.y, DefaultSelectedColor.z, 1.f };
+//
+//    ImGui::Spacing();
+//
+//    const ColorMappedVariable& first = _variableSelection.front();
+//
+//    // Scatterplot
+//    static const ImVec2 plotSize = { 400, 300 };
+//    ImPlotFlags plotFlags = ImPlotFlags_NoLegend;
+//    ImPlotAxisFlags axisFlags = ImPlotAxisFlags_None;
+//
+//    static float pointSize = 1.5f;
+//    ImPlot::PushColormap(_colormaps[first.colormapIndex]);
+//    ImPlot::SetNextPlotLimits(0.0, 360.0, -90.0, 90.0, ImGuiCond_Always);
+//    if (ImPlot::BeginPlot("Star Coordinate", "Ra", "Dec", plotSize, plotFlags, axisFlags)) {
+//        ImPlot::PushStyleVar(ImPlotStyleVar_MarkerSize, pointSize);
+//
+//        for (size_t i : _filteredData) {
+//            const ExoplanetItem& item = _data[i];
+//
+//            if (!item.ra.hasValue() || !item.dec.hasValue()) {
+//                continue;
+//            }
+//
+//            const ImVec4 pointColor = toImVec4(colorFromColormap(
+//                item,
+//                _variableSelection.front()
+//            )); // from first map
+//
+//            const ImPlotPoint point = { item.ra.value, item.dec.value };
+//            const char* label = "Data " + i;
+//            ImPlot::PushStyleColor(ImPlotCol_MarkerFill, pointColor);
+//            ImPlot::PushStyleColor(ImPlotCol_MarkerOutline, pointColor);
+//            ImPlot::PlotScatter(label, &point.x, &point.y, 1);
+//            ImPlot::PopStyleColor();
+//            ImPlot::PopStyleColor();
+//        }
+//        ImPlot::PopStyleVar();
+//
+//        ImPlot::PushStyleVar(ImPlotStyleVar_MarkerSize, 3.f * pointSize);
+//        ImPlot::PushStyleColor(ImPlotCol_MarkerFill, selectedColor);
+//        ImPlot::PushStyleColor(ImPlotCol_MarkerOutline, selectedColor);
+//        ImPlot::PlotScatter(
+//            "Selected",
+//            ra_selected.data(),
+//            dec_selected.data(),
+//            static_cast<int>(ra_selected.size())
+//        );
+//        ImPlot::PopStyleColor();
+//        ImPlot::PopStyleColor();
+//        ImPlot::PopStyleVar();
+//        ImPlot::EndPlot();
+//
+//        ImGui::SameLine();
+//        ImPlot::ColormapScale(
+//            "##ColorScale",
+//            first.colorScaleMin,
+//            first.colorScaleMax,
+//            ImVec2(60, plotSize.y)
+//        );
+//
+//        ImGui::SetNextItemWidth(70);
+//        ImGui::DragFloat("Point size", &pointSize, 0.1f, 0.f, 5.f);
+//        ImPlot::PopColormap();
+//    }
+//    ImGui::EndGroup(); // ra dec plot group
+//
+//    ImGui::End();
+//}
 
 void DataViewer::renderTableWindow(bool *open) {
     ImGui::SetNextWindowSize(DefaultWindowSize, ImGuiCond_FirstUseEver);
@@ -1247,7 +1146,7 @@ void DataViewer::renderTable(const std::string& tableId,
                 bool passSearch = ColumnFilter(
                     std::string(search),
                     ColumnFilter::Type::Text
-                ).passFilter(_data[r].planetName);
+                ).passFilter(_data[r].name);
 
                 if (passSearch) {
                     displayedRows.push_back(r); // Go to next
@@ -1285,7 +1184,7 @@ void DataViewer::renderTable(const std::string& tableId,
 
                     // Check if is target item. The GUI name should be set from the planet name
                     const SceneGraphNode* node = global::navigationHandler->anchorNode();
-                    bool isCurrentAnchor = node && node->guiName() == item.planetName;
+                    bool isCurrentAnchor = node && node->guiName() == item.name;
                     if (isCurrentAnchor) {
                         ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0, 153, 112).Value);
                         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(0, 204, 150).Value);
@@ -1310,15 +1209,15 @@ void DataViewer::renderTable(const std::string& tableId,
 
                     if (col.id == ColumnID::Name) {
                         bool changed = ImGui::Selectable(
-                            item.planetName.c_str(),
+                            item.name.c_str(),
                             itemIsSelected,
                             selectableFlags
                         );
 
                         // Context menu
-                        ImGui::PushID(std::format("context-{}", item.planetName).c_str());
+                        ImGui::PushID(std::format("context-{}", item.name).c_str());
                         if (ImGui::BeginPopupContextItem("item context menu")) {
-                            ImGui::Text(item.planetName.c_str());
+                            ImGui::Text(item.name.c_str());
 
                             auto foundIndex = std::find(
                                 _pinnedPlanets.begin(),
@@ -1342,7 +1241,7 @@ void DataViewer::renderTable(const std::string& tableId,
 
                             ImGui::Text(item.referenceName.c_str());
                             ImGui::SameLine();
-                            ImGui::PushID(std::format("Planetreflink-{}", item.planetName).c_str());
+                            ImGui::PushID(std::format("Planetreflink-{}", item.name).c_str());
 
                             if (ImGui::Button("Link")) {
                                 system(std::format("start {}", item.referenceUrl).c_str());
@@ -1351,7 +1250,7 @@ void DataViewer::renderTable(const std::string& tableId,
 
                             ImGui::Separator();
 
-                            ImGui::PushID(std::format("ShowShystemView-{}", item.planetName).c_str());
+                            ImGui::PushID(std::format("ShowShystemView-{}", item.name).c_str());
 
                             bool isAlreadyOpen = std::find(
                                 _shownPlanetSystemWindows.begin(),
@@ -1388,7 +1287,7 @@ void DataViewer::renderTable(const std::string& tableId,
 
                         // Check double click, left mouse button
                         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-                            LINFO(std::format("Double click: {}", item.planetName));
+                            LINFO(std::format("Double click: {}", item.name));
                             addOrTargetPlanet(item);
 
                             // Also open the system view for that system
@@ -1705,7 +1604,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
     static bool overrideInternalSelection = false;
     bool useHighestValue = true;  // This default value does not matter
-    ColumnID rowLimitCol = ColumnID::TSM; // This default value does not matter
+    ColumnID rowLimitCol = ColumnID::Name; // This default value does not matter
     bool rowLimitFilterChanged = false;
     if (showRowLimitSection) {
         rowLimitFilterChanged |= ImGui::Checkbox("##RowLimit", &limitNumberOfRows);
@@ -1844,51 +1743,55 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
         for (int i = 0; i < _data.size(); i++) {
             const ExoplanetItem& d = _data[i];
 
+            bool filteredOut = false;
+
+            // TODO: add a way to configure these predefined filters
+
             // Pre-defined filters
-            bool filteredOut = hideNanTsm && std::isnan(d.tsm);
-            filteredOut |= hideNanEsm && std::isnan(d.esm);
-            filteredOut |= showOnlyMultiPlanetSystems && !d.multiSystemFlag;
-            filteredOut |= showOnlyHasPosition && !d.position.has_value();
+            //bool filteredOut = hideNanTsm && std::isnan(d.tsm);
+            //filteredOut |= hideNanEsm && std::isnan(d.esm);
+            //filteredOut |= showOnlyMultiPlanetSystems && !d.multiSystemFlag;
+            //filteredOut |= showOnlyHasPosition && !d.position.has_value();
 
-            bool hasBinFilter = showTerrestrial || showSmallSubNeptunes ||
-                                showLargeSubNeptunes || showSubJovians ||
-                                showLargerPlanets;
+            //bool hasBinFilter = showTerrestrial || showSmallSubNeptunes ||
+            //                    showLargeSubNeptunes || showSubJovians ||
+            //                    showLargerPlanets;
 
-            if (hasBinFilter) {
-                bool matchesBinFilter = false;
-                if (d.radius.hasValue()) {
-                    float r = d.radius.value;
-                    // TODO: make it possible to set these values
-                    matchesBinFilter |= showTerrestrial && (r <= 1.5);
-                    matchesBinFilter |= showSmallSubNeptunes && (r > 1.5 && r <= 2.75);
-                    matchesBinFilter |= showLargeSubNeptunes && (r > 2.75 && r <= 4.0);
-                    matchesBinFilter |= showSubJovians && (r > 4.0 && r <= 10.0);
-                    matchesBinFilter |= showLargerPlanets && (r > 10.0);
-                }
-                filteredOut |= !matchesBinFilter;
-            }
+            //if (hasBinFilter) {
+            //    bool matchesBinFilter = false;
+            //    if (d.radius.hasValue()) {
+            //        float r = d.radius.value;
+            //        // TODO: make it possible to set these values
+            //        matchesBinFilter |= showTerrestrial && (r <= 1.5);
+            //        matchesBinFilter |= showSmallSubNeptunes && (r > 1.5 && r <= 2.75);
+            //        matchesBinFilter |= showLargeSubNeptunes && (r > 2.75 && r <= 4.0);
+            //        matchesBinFilter |= showSubJovians && (r > 4.0 && r <= 10.0);
+            //        matchesBinFilter |= showLargerPlanets && (r > 10.0);
+            //    }
+            //    filteredOut |= !matchesBinFilter;
+            //}
 
-            // Shortcut filter for discovery method
-            bool passDiscoveryMethod = false;
+            //// Shortcut filter for discovery method
+            //bool passDiscoveryMethod = false;
 
-            bool isTransit = ColumnFilter(
-                "transit",
-                ColumnFilter::Type::Text
-            ).passFilter(d.discoveryMethod);
+            //bool isTransit = ColumnFilter(
+            //    "transit",
+            //    ColumnFilter::Type::Text
+            //).passFilter(d.discoveryMethod);
 
-            bool isRV = ColumnFilter(
-                "radial velocity",
-                ColumnFilter::Type::Text
-            ).passFilter(d.discoveryMethod);
+            //bool isRV = ColumnFilter(
+            //    "radial velocity",
+            //    ColumnFilter::Type::Text
+            //).passFilter(d.discoveryMethod);
 
-            if (showOther && !(isTransit || isRV)) {
-                passDiscoveryMethod = true;
-            }
-            else {
-                passDiscoveryMethod |= (showTransit && isTransit);
-                passDiscoveryMethod |= (showRadialVelocity && isRV);
-            }
-            filteredOut |= !passDiscoveryMethod;
+            //if (showOther && !(isTransit || isRV)) {
+            //    passDiscoveryMethod = true;
+            //}
+            //else {
+            //    passDiscoveryMethod |= (showTransit && isTransit);
+            //    passDiscoveryMethod |= (showRadialVelocity && isRV);
+            //}
+            //filteredOut |= !passDiscoveryMethod;
 
             // Other filters
             for (const ColumnFilterEntry& f : _appliedFilters) {
@@ -2045,7 +1948,7 @@ void DataViewer::renderPlanetTooltip(int index) const {
     const ExoplanetItem& item = _data[index];
 
     if (ImGui::Begin("##planetToolTip", NULL, flags)) {
-        ImGui::Text(item.planetName.c_str());
+        ImGui::Text(item.name.c_str());
     }
 }
 
@@ -2651,7 +2554,7 @@ bool DataViewer::compareColumnValues(int columnIndex, const ExoplanetItem& left,
         );
     }
     else if (std::holds_alternative<float>(leftValue) && std::holds_alternative<float>(rightValue)) {
-        return compareValues(std::get<float>(leftValue), std::get<float>(rightValue));
+        return data::compareValues(std::get<float>(leftValue), std::get<float>(rightValue));
     }
     else {
         LERROR("Trying to compare mismatching column types");
@@ -2665,78 +2568,12 @@ std::variant<const char*, float> DataViewer::valueFromColumn(int columnIndex,
     ColumnID column = _columns[columnIndex].id;
     switch (column) {
         case ColumnID::Name:
-            return item.planetName.c_str();
+            return item.name.c_str();
         case ColumnID::Host:
             return item.hostName.c_str();
-        case ColumnID::DiscoveryYear:
-            return static_cast<float>(item.discoveryYear);
-        case ColumnID::NPlanets:
-            return static_cast<float>(item.nPlanets);
-        case ColumnID::NStars:
-            return static_cast<float>(item.nStars);
-        case ColumnID::ESM:
-            return item.esm;
-        case ColumnID::TSM:
-            return item.tsm;
-        case ColumnID::PlanetRadius:
-            return item.radius.value;
-        case ColumnID::PlanetTemperature:
-            return item.eqilibriumTemp.value;
-        case ColumnID::PlanetMass:
-            return item.mass.value;
-        case ColumnID::PlanetMassError:
-            return item.mass.relativeErrorRange(); // TODO: make it possible to change whicha and how errors are being shown
-        case ColumnID::SurfaceGravity:
-            return item.surfaceGravity.value;
-        // Orbits
-        case ColumnID::SemiMajorAxis:
-            return item.semiMajorAxis.value;
-        case ColumnID::Eccentricity:
-            return item.eccentricity.value;
-        case ColumnID::Period:
-            return item.period.value;
-        case ColumnID::Inclination:
-            return item.inclination.value;
-        // Star
-        case ColumnID::StarTemperature:
-            return item.starEffectiveTemp.value;
-        case ColumnID::StarRadius:
-            return item.starRadius.value;
-        case ColumnID::StarAge:
-            return item.starAge.value;
-        case ColumnID::MagnitudeJ:
-            return item.magnitudeJ.value;
-        case ColumnID::MagnitudeK:
-            return item.magnitudeK.value;
-        case ColumnID::Distance:
-            return item.distance.value;
-        case ColumnID::Ra:
-            return item.ra.value;
-        case ColumnID::Dec:
-            return item.dec.value;
-        case ColumnID::Metallicity:
-            return item.starMetallicity.value;
-        case ColumnID::MetallicityRatio:
-            return item.starMetallicityRatio.c_str();
-        // Discovery
-        case ColumnID::DiscoveryMethod:
-            return item.discoveryMethod.c_str();
-        case ColumnID::DiscoveryTelescope:
-            return item.discoveryTelescope.c_str();
-        case ColumnID::DiscoveryInstrument:
-            return item.discoveryInstrument.c_str();
-        // Detected molecules
-        case ColumnID::MoleculesDetection:
-            return item.moleculesDetection.c_str();
-        case ColumnID::MoleculesUpperLimit:
-            return item.moleculesUpperLimit.c_str();
-        case ColumnID::MoleculesNoDetection:
-            return item.moleculesNoDetection.c_str();
-        case ColumnID::WaterDetection:
-            return item.waterDetection;
         case ColumnID::Other: {
             std::string key = _columns[columnIndex].name;
-            const std::variant<std::string, float>& value = item.otherColumns.at(key);
+            const std::variant<std::string, float>& value = item.dataColumns.at(key);
 
             if (std::holds_alternative<std::string>(value)) {
                 return std::get<std::string>(value).c_str();

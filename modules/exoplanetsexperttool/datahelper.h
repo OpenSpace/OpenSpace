@@ -33,6 +33,8 @@ double parseDoubleData(const std::string& str);
 
 int parseIntegerData(const std::string& str);
 
+bool compareValues(float lhs, float rhs);
+
 } // namespace openspace::data
 
 #endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATAHELPER___H__

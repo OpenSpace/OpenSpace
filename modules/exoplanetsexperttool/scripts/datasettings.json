@@ -1,0 +1,142 @@
+{
+    "datafile": "data/aggregated_data.csv",
+    "data_mapping": {
+        "position_ra": "ra",
+        "position_dec": "dec",
+        "position_distance": "sy_dist",
+        "name": "pl_name",
+        "hostName": "hostname",
+        "ring_size": "pl_orbsmax",
+        "reference_link": "pl_refname"
+    },
+    "column_info": {
+        "pl_name": {
+            "name": "Name",
+            "text": true
+        },
+        "hostname": {
+            "name": "Host",
+            "text": true
+        },
+        "disc_year": {
+            "name": "Year",
+            "format": "%.0f",
+            "desc": "Discovery year"
+        },
+        "sy_pnum": {
+            "name": "Planets",
+            "format": "%.0f"
+        },
+        "sy_snum": {
+            "name": "Stars",
+            "format": "%.0f"
+        },
+        "ESM": {
+            "name": "ESM"
+        },
+        "TSM": {
+            "name": "TSM"
+        },
+        "pl_rade": {
+            "name": "Radius",
+            "desc": "Planet radius in Earth radii"
+        },
+        "pl_Teq": {
+            "name": "Teq",
+            "format": "%.0f",
+            "desc": "Planet equilibrium temperature (K)"
+        },
+        "pl_bmasse": {
+            "name": "Mass",
+            "desc": "in Earth masses"
+        },
+        "_TODO_mass_error": {
+            "name": "Mass Err (%)",
+            "desc": "Mass uncertainty"
+        },
+        "_TODO_surface_gravity": {
+            "name": "Surface gravity",
+            "desc": "(m/s^2)"
+        },
+        "pl_orbsmax": {
+            "name": "Semi-major axis",
+            "desc": "(AU)"
+        },
+        "pl_orbeccen": {
+            "name": "Eccentricity"
+        },
+        "pl_orbper": {
+            "name": "Orbit period"
+        },
+        "pl_orbincl": {
+            "name": "Inclination"
+        },
+        "st_teff": {
+            "name": "Star Teff",
+            "desc": "Star effective temperature (K)"
+        },
+        "st_rad": {
+            "name": "Star radius",
+            "desc": "(Solar)"
+        },
+        "st_age": {
+            "name": "Star age",
+            "desc": "(Gyr)"
+        },
+        "sy_jmag": {
+            "name": "MagJ"
+        },
+        "sy_kmag": {
+            "name": "MagK"
+        },
+        "sy_dist": {
+            "name": "Distance",
+            "desc": "(pc)"
+        },
+        "ra": {
+            "name": "Ra"
+        },
+        "dec": {
+            "name": "Dec"
+        },
+        "st_met": {
+            "name": "Metallicity (dex)"
+        },
+        "st_metratio": {
+            "name": "Metallicity ratio",
+            "text": true
+        },
+        "discoverymethod": {
+            "name": "Discovery method",
+            "text": true
+        },
+        "disc_telescope": {
+            "name": "Telescope",
+            "text": true
+        },
+        "disc_instrument": {
+            "name": "Instrument",
+            "text": true
+        },
+        "molecule_detection": {
+            "name": "Detected",
+            "desc": "Detected molecules from IAC ExoAtmospheres dataset",
+            "text": true
+        },
+        "molecule_upperLimit": {
+            "name": "Upper limit",
+            "desc": "Upper limit detection of molecules from IAC ExoAtmospheres dataset",
+            "text": true
+        },
+        "molecule_noDetection": {
+            "name": "No detection",
+            "desc": "Upper limit detection of molecules from IAC ExoAtmospheres dataset",
+            "text": true
+        },
+        "_TODO_molecule_waterDetection": {
+            "name": "No detection",
+            "format": "%.0f",
+            "desc": "Flag for whether water has been detected in the planet atmosphere (1 = yes, -1 = no, 0 = maybe/upper limit)"
+        }
+    }
+}

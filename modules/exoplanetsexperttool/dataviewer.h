@@ -43,37 +43,6 @@ namespace openspace::exoplanets {
 enum ColumnID {
     Name,
     Host,
-    DiscoveryYear,
-    NPlanets,
-    NStars,
-    ESM,
-    TSM,
-    PlanetRadius,
-    PlanetTemperature,
-    PlanetMass,
-    PlanetMassError,
-    SurfaceGravity,
-    SemiMajorAxis,
-    Eccentricity,
-    Period,
-    Inclination,
-    StarTemperature,
-    StarRadius,
-    StarAge,
-    MagnitudeJ,
-    MagnitudeK,
-    Distance,
-    Ra,
-    Dec,
-    Metallicity,
-    MetallicityRatio,
-    DiscoveryMethod,
-    DiscoveryTelescope,
-    DiscoveryInstrument,
-    MoleculesDetection,
-    MoleculesUpperLimit,
-    MoleculesNoDetection,
-    WaterDetection,
     Other
 };
 
@@ -94,7 +63,7 @@ public:
 private:
     struct ColorMappedVariable {
         int colormapIndex = 0;
-        int columnIndex = 5; // Default column is ESM. OBS! Fragile!
+        int columnIndex = 0;
         float colorScaleMin = 0.f;
         float colorScaleMax = 100.f;
         float opacity = 1.f;
@@ -111,7 +80,7 @@ private:
         bool useFixedHeight, std::string_view search = "");
 
     void renderTableWindow(bool* open);
-    void renderScatterPlotWindow(bool* open);
+    //void renderScatterPlotWindow(bool* open);
 
     // Returns true if value was changed. If relevantSystem given,
     // also show a button to color based on planets in that system

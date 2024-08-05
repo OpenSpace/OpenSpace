@@ -36,9 +36,6 @@ public:
     DataLoader();
 
     std::vector<ExoplanetItem> loadData();
-
-private:
-    std::string _inExoplanetsCsvPath;
 };
 
 } // namespace openspace::exoplanets

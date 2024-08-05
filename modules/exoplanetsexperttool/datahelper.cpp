@@ -66,4 +66,17 @@ int parseIntegerData(const std::string& str) {
     return std::numeric_limits<int>::quiet_NaN();
 };
 
+bool compareValues(float lhs, float rhs) {
+    if (std::isnan(lhs)) {
+        // also includes rhs is nan, in which case the order does not matter
+        return true;
+    }
+
+    // rhs is nan, but not lhs
+    if (std::isnan(rhs)) {
+        return false;
+    }
+    return lhs < rhs;
+}
+
 } // namespace openspace::data
