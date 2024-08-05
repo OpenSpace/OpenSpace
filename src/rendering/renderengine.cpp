@@ -53,12 +53,14 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/io/model/modelreaderbinary.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/io/texture/texturereaderstb.h>
+#include <ghoul/io/texture/texturewriter.h>
+#include <ghoul/io/texture/texturewriterstb.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/profiling.h>
@@ -450,6 +452,10 @@ void RenderEngine::initialize() {
 
     ghoul::io::TextureReader::ref().addReader(
         std::make_unique<ghoul::io::TextureReaderCMAP>()
+    );
+
+    ghoul::io::TextureWriter::ref().addWriter(
+        std::make_unique<ghoul::io::TextureWriterSTB>()
     );
 
     ghoul::io::ModelReader::ref().addReader(
