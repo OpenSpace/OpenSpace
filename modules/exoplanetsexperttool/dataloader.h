@@ -35,7 +35,8 @@ class DataLoader {
 public:
     DataLoader();
 
-    std::vector<ExoplanetItem> loadData();
+    static DataSettings loadDataSettingsFromJson();
+    static std::vector<ExoplanetItem> loadData(const DataSettings& settings);
 };
 
 } // namespace openspace::exoplanets

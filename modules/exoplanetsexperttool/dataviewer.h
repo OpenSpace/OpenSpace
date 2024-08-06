@@ -40,18 +40,7 @@
 
 namespace openspace::exoplanets {
 
-enum ColumnID {
-    Name,
-    Host,
-    Other
-};
-
-struct Column {
-    std::string name;
-    ColumnID id;
-    std::optional<const char*> format = std::nullopt;
-    std::optional<const char*> description = std::nullopt;
-};
+using ColumnKey = std::string;
 
 class DataViewer : public properties::PropertyOwner {
 public:
@@ -80,7 +69,6 @@ private:
         bool useFixedHeight, std::string_view search = "");
 
     void renderTableWindow(bool* open);
-    //void renderScatterPlotWindow(bool* open);
 
     // Returns true if value was changed. If relevantSystem given,
     // also show a button to color based on planets in that system
@@ -110,7 +98,8 @@ private:
     void renderColumnValue(int columnIndex, std::optional<const char*> format,
         const ExoplanetItem& item);
 
-    int columnIndexFromId(ColumnID id) const;
+    int columnIndexFromKey(const ColumnKey& key) const;
+    const char* columnNameFromKey(const ColumnKey& key) const;
 
     std::variant<const char*, float> valueFromColumn(int columnIndex,
         const ExoplanetItem& item) const;
@@ -140,7 +129,7 @@ private:
     void flyToInsideView() const;
     void flyToStar(std::string_view hostIdentifier) const;
 
-    DataLoader _dataLoader;
+    DataSettings _dataSettings;
     std::vector<ExoplanetItem> _data;
     std::vector<size_t> _filteredData;  // The indices of the items which will be rendered
     std::vector<size_t> _selection;     // Indices of selected data points
@@ -149,13 +138,13 @@ private:
 
     std::map<std::string, std::vector<size_t>> _hostIdToPlanetsMap;
 
-    std::vector<Column> _defaultColumns;
-    std::vector<Column> _otherColumns;
+    std::vector<ColumnKey> _defaultColumns;
+    std::vector<ColumnKey> _otherColumns;
 
     std::deque<bool> _selectedDefaultColumns;
     std::deque<bool> _selectedOtherColumns;
 
-    std::vector<Column> _columns;
+    std::vector<ColumnKey> _columns;
 
     std::vector<const char*> _colormaps;
     bool _colormapWasChanged = true;
@@ -179,7 +168,7 @@ private:
     bool _filterChanged = false;
     bool _selectionChanged = false;
 
-    // Keep track on whether ctrl is held, to prevent undesried interaction
+    // Keep track of whether ctrl is held, to prevent undesired interaction
     // when interacting with glyphs
     bool _holdingCtrl = false;
 

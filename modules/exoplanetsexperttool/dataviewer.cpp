@@ -235,8 +235,10 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
         _externalSelectionChanged = true;
     });
 
+    _dataSettings = DataLoader::loadDataSettingsFromJson();
+
     // Load the dataset
-    _data = _dataLoader.loadData();
+    _data = DataLoader::loadData(_dataSettings);
 
     // Initialize filtered data index list and map of host star to planet indices
     _filteredData.reserve(_data.size());
@@ -246,20 +248,26 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     }
     _filteredDataWithoutExternalSelection = _filteredData;
 
-    _defaultColumns = {
-        { "Name", ColumnID::Name },
-        { "Host", ColumnID::Host }
-    };
+    // The default column are the which info has been provided for, if they exist in the
+    // dataset
+    _defaultColumns.reserve(_dataSettings.columnInfo.size());
+    for (auto const& [key, value] : _dataSettings.columnInfo) {
+        if (_data.front().dataColumns.contains(key)) {
+            _defaultColumns.push_back(key);
+        }
+    }
 
     _columns = _defaultColumns;
-    _selectedDefaultColumns.assign(_defaultColumns.size(), true);
+    _selectedDefaultColumns.assign(_columns.size(), true);
+
     // Add other oclumns, if there are any. Assume all data items have the same columns
-    if (_data.size() > 0 && _data.front().dataColumns.size() > 0) {
-        for (auto col : _data.front().dataColumns) {
-            Column c = { col.first, ColumnID::Other };
-            _otherColumns.push_back(c);
-            bool isSelected = false;
-            _selectedOtherColumns.push_back(isSelected);
+    if (_data.size() > 0) {
+        for (auto const& [key, value] : _data.front().dataColumns) {
+            if (!_dataSettings.columnInfo.contains(key)) {
+                _otherColumns.push_back(key);
+                bool isSelected = false;
+                _selectedOtherColumns.push_back(isSelected);
+            }
         }
     }
 
@@ -493,7 +501,6 @@ void DataViewer::render() {
     static bool showTable = true;
     static bool showFilterSettingsWindow = false;
     static bool showColormapWindow = false;
-    static bool showScatterPlotWindow = false;
     static bool showHelpers = false;
 
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
@@ -512,7 +519,6 @@ void DataViewer::render() {
             ImGui::MenuItem("Table", NULL, &showTable);
             ImGui::MenuItem("Filters", NULL, &showFilterSettingsWindow);
             ImGui::MenuItem("Color mapping", NULL, &showColormapWindow);
-            ImGui::MenuItem("Scatter plot", NULL, &showScatterPlotWindow);
             if (mod->showInfoWindowAtStartup()) {
                 ImGui::Separator();
                 ImGui::MenuItem("Start-up info", NULL, &_shouldOpenInfoWindow);
@@ -619,10 +625,6 @@ void DataViewer::render() {
         renderColormapWindow(&showColormapWindow);
     }
 
-    //if (showScatterPlotWindow) {
-    //    renderScatterPlotWindow(&showScatterPlotWindow);
-    //}
-
     if (showTable) {
         renderTableWindow(&showTable);
     }
@@ -689,14 +691,14 @@ bool DataViewer::renderColormapEdit(ColorMappedVariable& variable,
     ImGui::BeginGroup();
     {
         ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::BeginCombo("Column", _columns[variable.columnIndex].name.c_str())) {
+        if (ImGui::BeginCombo("Column", columnNameFromKey(_columns[variable.columnIndex]))) {
             for (int i = 0; i < _columns.size(); ++i) {
                 // Ignore non-numeric columns
                 if (!isNumericColumn(i)) {
                     continue;
                 }
 
-                const char* name = _columns[i].name.c_str();
+                const char* name = columnNameFromKey(_columns[i]);
                 if (ImGui::Selectable(name, variable.columnIndex == i)) {
                     variable.columnIndex = i;
                     wasChanged = true;
@@ -865,147 +867,44 @@ void DataViewer::renderColormapWindow(bool* open) {
     // Circle plot to show which parameters map to which part of a glyph
     ImGui::SameLine();
     {
-        int nVariables = static_cast<int>(_variableSelection.size());
-        std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
+        // TODO: revive
 
-        // First build array with real strings. Note that this has to stay alive for
-        // the netire lifetime of the char * array
-        std::vector<std::string> labelStrings;
-        labelStrings.reserve(nVariables);
-        for (int i = 0; i < nVariables; ++i) {
-            std::string label = _columns[_variableSelection[i].columnIndex].name;
-            label = label.substr(0, 10); // limit length
-            labelStrings.push_back(std::format(" {}. {}", i+1, label));
-        }
+        //int nVariables = static_cast<int>(_variableSelection.size());
+        //std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
 
-        // Then build array with const char * from that array
-        std::vector<const char*> labels;
-        labels.reserve(nVariables);
-        for (int i = 0; i < nVariables; ++i) {
-            labels.push_back(labelStrings[i].data());
-        }
+        //// First build array with real strings. Note that this has to stay alive for
+        //// the netire lifetime of the char * array
+        //std::vector<std::string> labelStrings;
+        //labelStrings.reserve(nVariables);
+        //for (int i = 0; i < nVariables; ++i) {
+        //    std::string label = _columns[_variableSelection[i].columnIndex].name;
+        //    label = label.substr(0, 10); // limit length
+        //    labelStrings.push_back(std::format(" {}. {}", i+1, label));
+        //}
 
-        // Reverse vector to get the order its actually rendered
-        std::reverse(labels.begin(), labels.end());
+        //// Then build array with const char * from that array
+        //std::vector<const char*> labels;
+        //labels.reserve(nVariables);
+        //for (int i = 0; i < nVariables; ++i) {
+        //    labels.push_back(labelStrings[i].data());
+        //}
 
-        constexpr const int ColorScaleHeight = 140;
-        ImVec2 plotSize = ImVec2(1.5 * ColorScaleHeight, ColorScaleHeight);
-        ImPlot::SetNextPlotLimits(0, 1.5, 0, 1, ImGuiCond_Always);
-        if (ImPlot::BeginPlot("##Pie", NULL, NULL, plotSize, ImPlotFlags_Equal | ImPlotFlags_NoMousePos, ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_NoDecorations)) {
-            ImPlot::PlotPieChart(labels.data(), data.data(), nVariables, 1.1, 0.5, 0.3, true, NULL);
-            ImPlot::EndPlot();
-        }
+        //// Reverse vector to get the order its actually rendered
+        //std::reverse(labels.begin(), labels.end());
+
+        //constexpr const int ColorScaleHeight = 140;
+        //ImVec2 plotSize = ImVec2(1.5 * ColorScaleHeight, ColorScaleHeight);
+        //ImPlot::SetNextPlotLimits(0, 1.5, 0, 1, ImGuiCond_Always);
+        //if (ImPlot::BeginPlot("##Pie", NULL, NULL, plotSize, ImPlotFlags_Equal | ImPlotFlags_NoMousePos, ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_NoDecorations)) {
+        //    ImPlot::PlotPieChart(labels.data(), data.data(), nVariables, 1.1, 0.5, 0.3, true, NULL);
+        //    ImPlot::EndPlot();
+        //}
     }
 
     ImGui::EndGroup(); // variables + plot group
 
     ImGui::End();
 }
-
-//void DataViewer::renderScatterPlotWindow(bool* open) {
-//    ImGui::SetNextWindowSize(ImVec2(450, 400), ImGuiCond_FirstUseEver);
-//    if (!ImGui::Begin("Scatter plots", open)) {
-//        ImGui::End();
-//        return;
-//    }
-//
-//    std::vector<float> ra, dec;
-//    ra.reserve(_filteredData.size());
-//    dec.reserve(_filteredData.size());
-//
-//    for (size_t i : _filteredData) {
-//        const ExoplanetItem& item = _data[i];
-//        if (item.ra.hasValue() && item.dec.hasValue()) {
-//            ra.push_back(item.ra.value);
-//            dec.push_back(item.dec.value);
-//        }
-//    }
-//
-//    std::vector<float> ra_selected, dec_selected;
-//    ra_selected.reserve(_selection.size());
-//    dec_selected.reserve(_selection.size());
-//
-//    for (size_t i : _selection) {
-//        const ExoplanetItem& item = _data[i];
-//        if (item.ra.hasValue() && item.dec.hasValue()) {
-//            ra_selected.push_back(item.ra.value);
-//            dec_selected.push_back(item.dec.value);
-//        }
-//    }
-//
-//    // Ra dec plot
-//    ImGui::BeginGroup();
-//
-//    ImVec4 selectedColor =
-//    { DefaultSelectedColor.x, DefaultSelectedColor.y, DefaultSelectedColor.z, 1.f };
-//
-//    ImGui::Spacing();
-//
-//    const ColorMappedVariable& first = _variableSelection.front();
-//
-//    // Scatterplot
-//    static const ImVec2 plotSize = { 400, 300 };
-//    ImPlotFlags plotFlags = ImPlotFlags_NoLegend;
-//    ImPlotAxisFlags axisFlags = ImPlotAxisFlags_None;
-//
-//    static float pointSize = 1.5f;
-//    ImPlot::PushColormap(_colormaps[first.colormapIndex]);
-//    ImPlot::SetNextPlotLimits(0.0, 360.0, -90.0, 90.0, ImGuiCond_Always);
-//    if (ImPlot::BeginPlot("Star Coordinate", "Ra", "Dec", plotSize, plotFlags, axisFlags)) {
-//        ImPlot::PushStyleVar(ImPlotStyleVar_MarkerSize, pointSize);
-//
-//        for (size_t i : _filteredData) {
-//            const ExoplanetItem& item = _data[i];
-//
-//            if (!item.ra.hasValue() || !item.dec.hasValue()) {
-//                continue;
-//            }
-//
-//            const ImVec4 pointColor = toImVec4(colorFromColormap(
-//                item,
-//                _variableSelection.front()
-//            )); // from first map
-//
-//            const ImPlotPoint point = { item.ra.value, item.dec.value };
-//            const char* label = "Data " + i;
-//            ImPlot::PushStyleColor(ImPlotCol_MarkerFill, pointColor);
-//            ImPlot::PushStyleColor(ImPlotCol_MarkerOutline, pointColor);
-//            ImPlot::PlotScatter(label, &point.x, &point.y, 1);
-//            ImPlot::PopStyleColor();
-//            ImPlot::PopStyleColor();
-//        }
-//        ImPlot::PopStyleVar();
-//
-//        ImPlot::PushStyleVar(ImPlotStyleVar_MarkerSize, 3.f * pointSize);
-//        ImPlot::PushStyleColor(ImPlotCol_MarkerFill, selectedColor);
-//        ImPlot::PushStyleColor(ImPlotCol_MarkerOutline, selectedColor);
-//        ImPlot::PlotScatter(
-//            "Selected",
-//            ra_selected.data(),
-//            dec_selected.data(),
-//            static_cast<int>(ra_selected.size())
-//        );
-//        ImPlot::PopStyleColor();
-//        ImPlot::PopStyleColor();
-//        ImPlot::PopStyleVar();
-//        ImPlot::EndPlot();
-//
-//        ImGui::SameLine();
-//        ImPlot::ColormapScale(
-//            "##ColorScale",
-//            first.colorScaleMin,
-//            first.colorScaleMax,
-//            ImVec2(60, plotSize.y)
-//        );
-//
-//        ImGui::SetNextItemWidth(70);
-//        ImGui::DragFloat("Point size", &pointSize, 0.1f, 0.f, 5.f);
-//        ImPlot::PopColormap();
-//    }
-//    ImGui::EndGroup(); // ra dec plot group
-//
-//    ImGui::End();
-//}
 
 void DataViewer::renderTableWindow(bool *open) {
     ImGui::SetNextWindowSize(DefaultWindowSize, ImGuiCond_FirstUseEver);
@@ -1082,11 +981,11 @@ void DataViewer::renderTable(const std::string& tableId,
         // Columns
         for (int colIdx = 0; colIdx < _columns.size(); colIdx++) {
             ImGuiTableColumnFlags colFlags = ImGuiTableColumnFlags_PreferSortDescending;
-            const Column c = _columns[colIdx];
-            if (c.id == ColumnID::Name) {
+            const ColumnKey c = _columns[colIdx];
+            if (c == _dataSettings.dataMapping.name) {
                 colFlags |= ImGuiTableColumnFlags_DefaultSort;
             }
-            ImGui::TableSetupColumn(c.name.c_str(), colFlags, 0.f, colIdx);
+            ImGui::TableSetupColumn(columnNameFromKey(c), colFlags, 0.f, colIdx);
         }
 
         // Make header and first column (name) always visible
@@ -1099,17 +998,17 @@ void DataViewer::renderTable(const std::string& tableId,
         ImGui::TableHeader("");
 
         for (int colIdx = 0; colIdx < _columns.size(); colIdx++) {
-            const Column c = _columns[colIdx];
+            const ColumnKey c = _columns[colIdx];
             ImGui::TableSetColumnIndex(colIdx + 1);
             ImGui::PushID(colIdx);
-            ImGui::TableHeader(c.name.c_str());
+            ImGui::TableHeader(columnNameFromKey(c));
 
-            if (colIdx >= 0) {
-                if (c.description.has_value()) {
-                    const float TEXT_WIDTH = ImGui::CalcTextSize(c.name.c_str()).x;
-                    ImGui::SameLine(0.0f, TEXT_WIDTH + 2.f);
-                    renderHelpMarker(*c.description);
-                }
+            if (_dataSettings.columnInfo.contains(c) &&
+                _dataSettings.columnInfo[c].description.has_value())
+            {
+                const float TEXT_WIDTH = ImGui::CalcTextSize(columnNameFromKey(c)).x;
+                ImGui::SameLine(0.0f, TEXT_WIDTH + 2.f);
+                renderHelpMarker(_dataSettings.columnInfo[c].description.value().c_str());
             }
 
             ImGui::PopID();
@@ -1204,10 +1103,10 @@ void DataViewer::renderTable(const std::string& tableId,
                 }
 
                 for (int colIdx = 0; colIdx < _columns.size(); colIdx++) {
-                    const Column col = _columns[colIdx];
+                    const ColumnKey col = _columns[colIdx];
                     ImGui::TableNextColumn();
 
-                    if (col.id == ColumnID::Name) {
+                    if (col == _dataSettings.dataMapping.name) {
                         bool changed = ImGui::Selectable(
                             item.name.c_str(),
                             itemIsSelected,
@@ -1325,7 +1224,9 @@ void DataViewer::renderTable(const std::string& tableId,
                         continue;
                     }
 
-                    renderColumnValue(colIdx, col.format, item);
+                    // TODO: Revive formatting
+                    auto format = std::nullopt;
+                    renderColumnValue(colIdx, format, item);
                 }
             }
         }
@@ -1419,9 +1320,9 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
             ImGui::Separator();
             ImGui::Text("Filter on column");
             ImGui::SetNextItemWidth(120);
-            if (ImGui::BeginCombo("##Column", _columns[filterColIndex].name.c_str())) {
+            if (ImGui::BeginCombo("##Column", columnNameFromKey(_columns[filterColIndex]))) {
                 for (int i = 0; i < _columns.size(); ++i) {
-                    if (ImGui::Selectable(_columns[i].name.c_str(), filterColIndex == i)) {
+                    if (ImGui::Selectable(columnNameFromKey(_columns[i]), filterColIndex == i)) {
                         filterColIndex = i;
                     }
                 }
@@ -1515,7 +1416,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
                         ImGui::PopID();
 
                         ImGui::TableNextColumn();
-                        ImGui::Text(_columns[f.columnIndex].name.c_str());
+                        ImGui::Text(columnNameFromKey(_columns[f.columnIndex]));
 
                         ImGui::TableNextColumn();
                         ImGui::Text("    ");
@@ -1604,7 +1505,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
     static bool overrideInternalSelection = false;
     bool useHighestValue = true;  // This default value does not matter
-    ColumnID rowLimitCol = ColumnID::Name; // This default value does not matter
+    ColumnKey rowLimitCol = _columns.front(); // This default value does not matter
     bool rowLimitFilterChanged = false;
     if (showRowLimitSection) {
         rowLimitFilterChanged |= ImGui::Checkbox("##RowLimit", &limitNumberOfRows);
@@ -1655,14 +1556,14 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
         }
 
         ImGui::SetNextItemWidth(100);
-        if (ImGui::BeginCombo("##RowLimitColumn", _columns[currentMetricChoiceIndex].name.c_str())) {
+        if (ImGui::BeginCombo("##RowLimitColumn", columnNameFromKey(_columns[currentMetricChoiceIndex]))) {
             for (int i = 0; i < _columns.size(); ++i) {
                 // Ignore non-numeric columns
                 if (!isNumericColumn(i)) {
                     continue;
                 }
 
-                const char* name = _columns[i].name.c_str();
+                const char* name = columnNameFromKey(_columns[i]);
                 if (ImGui::Selectable(name, currentMetricChoiceIndex == i)) {
                     currentMetricChoiceIndex = i;
                     rowLimitFilterChanged = true;
@@ -1671,7 +1572,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
             ImGui::EndCombo();
         }
 
-        rowLimitCol = _columns[currentMetricChoiceIndex].id;
+        rowLimitCol = _columns[currentMetricChoiceIndex];
     }
     _filterChanged |= rowLimitFilterChanged;
 
@@ -1837,7 +1738,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
             // We are interested in the largest, so flip the order
             const ExoplanetItem& l = _data[useHighestValue ? rhs : lhs];
             const ExoplanetItem& r = _data[useHighestValue ? lhs : rhs];
-            return compareColumnValues(columnIndexFromId(rowLimitCol), l, r);
+            return compareColumnValues(columnIndexFromKey(rowLimitCol), l, r);
         };
 
         std::sort(_filteredData.begin(), _filteredData.end(), compare);
@@ -2130,6 +2031,8 @@ void DataViewer::renderColumnSettingsModal() {
 
         ImGui::Separator();
 
+        // TODO: Show required columns and make sure they are always selected (like name)
+
         // Default columns
         ImGui::BeginGroup();
         {
@@ -2154,18 +2057,9 @@ void DataViewer::renderColumnSettingsModal() {
                     canSelectMore = false;
                 }
 
-                const Column& c = _defaultColumns[i];
+                const ColumnKey& c = _defaultColumns[i];
 
-                if (c.id == ColumnID::Name) {
-                    // Name is required
-                    ImGui::Checkbox(c.name.c_str(), &_selectedDefaultColumns[i]);
-                    ImGui::SameLine();
-                    ImGui::TextDisabled(" (required)");
-                    _selectedDefaultColumns[i] = true;
-                }
-                else {
-                    ImGui::Checkbox(c.name.c_str(), &_selectedDefaultColumns[i]);
-                }
+                ImGui::Checkbox(columnNameFromKey(c), &_selectedDefaultColumns[i]);
 
                 nSelected += _selectedDefaultColumns[i] ? 1 : 0;
             }
@@ -2199,8 +2093,8 @@ void DataViewer::renderColumnSettingsModal() {
                     canSelectMore = false;
                 }
 
-                const Column& c = _otherColumns[i];
-                ImGui::Checkbox(c.name.c_str(), &_selectedOtherColumns[i]);
+                const ColumnKey& c = _otherColumns[i];
+                ImGui::Checkbox(columnNameFromKey(c), &_selectedOtherColumns[i]);
                 nSelected += _selectedOtherColumns[i] ? 1 : 0;
             }
             ImGui::EndGroup();
@@ -2527,17 +2421,21 @@ void DataViewer::renderColumnValue(int columnIndex, std::optional<const char*> f
     }
 }
 
-int DataViewer::columnIndexFromId(ColumnID id) const {
-    ghoul_assert(id != ColumnID::Other, "Can only check specific columns");
-
+int DataViewer::columnIndexFromKey(const ColumnKey& key) const {
     for (int i = 0; i < _columns.size(); i++) {
-        if (_columns[i].id == id) {
+        if (_columns[i] == key) {
             return i;
         }
     }
     throw("Could not find column"); // not found
 }
 
+const char* DataViewer::columnNameFromKey(const ColumnKey& key) const {
+    if (_dataSettings.columnInfo.contains(key)) {
+        return _dataSettings.columnInfo.at(key).name.c_str();
+    }
+    return key.c_str();
+}
 
 bool DataViewer::compareColumnValues(int columnIndex, const ExoplanetItem& left,
                                      const ExoplanetItem& right) const
@@ -2565,26 +2463,13 @@ bool DataViewer::compareColumnValues(int columnIndex, const ExoplanetItem& left,
 std::variant<const char*, float> DataViewer::valueFromColumn(int columnIndex,
                                                          const ExoplanetItem& item) const
 {
-    ColumnID column = _columns[columnIndex].id;
-    switch (column) {
-        case ColumnID::Name:
-            return item.name.c_str();
-        case ColumnID::Host:
-            return item.hostName.c_str();
-        case ColumnID::Other: {
-            std::string key = _columns[columnIndex].name;
-            const std::variant<std::string, float>& value = item.dataColumns.at(key);
+    std::string key = _columns[columnIndex];
+    const std::variant<std::string, float>& value = item.dataColumns.at(key);
 
-            if (std::holds_alternative<std::string>(value)) {
-                return std::get<std::string>(value).c_str();
-            }
-            else {
-                return std::get<float>(value);
-            }
-        }
-        default:
-            throw ghoul::MissingCaseException();
+    if (std::holds_alternative<std::string>(value)) {
+        return std::get<std::string>(value).c_str();
     }
+    return std::get<float>(value);
 }
 
 bool DataViewer::isNumericColumn(int index) const {

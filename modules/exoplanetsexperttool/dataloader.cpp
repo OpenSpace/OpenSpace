@@ -48,6 +48,7 @@ namespace {
 
     // @TODO: naturally, this path should not be hardcoded
     constexpr std::string_view DataSettingsPath = "scripts/datasettings.json";
+    constexpr std::string_view BasePath = "${MODULES}/exoplanetsexperttool";
 
     constexpr const double EarthMass = 5.972e24; // kg
     constexpr const double EarthRadius = 6.3781e6; // meter
@@ -74,7 +75,7 @@ namespace {
     void from_json(const nlohmann::json& j, openspace::exoplanets::DataSettings& s) {
         j.at("datafile").get_to(s.dataFile);
 
-        nlohmann::json dataMapping = j.at("data_mapping");
+        const nlohmann::json dataMapping = j.at("data_mapping");
         dataMapping.at("position_ra").get_to(s.dataMapping.positionRa);
         dataMapping.at("position_dec").get_to(s.dataMapping.positionDec);
         dataMapping.at("position_distance").get_to(s.dataMapping.positionDistance);
@@ -82,6 +83,23 @@ namespace {
         dataMapping.at("hostName").get_to(s.dataMapping.hostName);
         dataMapping.at("ring_size").get_to(s.dataMapping.ringSize);
         dataMapping.at("reference_link").get_to(s.dataMapping.referenceLink);
+
+        const nlohmann::json columnInfo = j.at("column_info");
+        for (auto& [key, value] : columnInfo.items()) {
+            openspace::exoplanets::DataSettings::ColumnInfo info;
+            value.at("name").get_to(info.name);
+            if (value.contains("format")) {
+                std::string temp;
+                value.at("format").get_to(temp);
+                info.format = temp;
+            }
+            if (value.contains("desc")) {
+                std::string temp;
+                value.at("desc").get_to(temp);
+                info.description = temp;
+            }
+            s.columnInfo[key] = info;
+        }
     }
 
 } // namespace
@@ -90,10 +108,10 @@ namespace openspace::exoplanets {
 
 DataLoader::DataLoader() {}
 
-std::vector<ExoplanetItem> DataLoader::loadData() {
+DataSettings DataLoader::loadDataSettingsFromJson() {
     // For some reason, this token does not exist yet.
     //std::filesystem::path basePath = absPath("${MODULE_EXOPLANETSEXPERTTOOL}");
-    std::filesystem::path basePath = absPath("${MODULES}/exoplanetsexperttool");
+    std::filesystem::path basePath = absPath(BasePath);
     std::filesystem::path settingsPath = basePath / std::filesystem::path(DataSettingsPath);
 
     std::ifstream datasetConfigFile(settingsPath);
@@ -101,8 +119,11 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
 
     DataSettings settings;
     from_json(j, settings);
+    return settings;
+}
 
-    std::filesystem::path csvFilePath = basePath / settings.dataFile;
+std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
+    std::filesystem::path csvFilePath = absPath(BasePath) / settings.dataFile;
     std::ifstream exoplanetsCsvFile(csvFilePath);
 
     if (!exoplanetsCsvFile.good()) {
@@ -284,12 +305,10 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
     // Handle missing values
 
     std::map<std::string, bool> colIsNumeric;
-    auto first = planets.front().dataColumns;
+    auto firstDataValues = planets.front().dataColumns;
 
     // Determine the type of all other columns
-    for (auto iter = first.begin(); iter != first.end(); ++iter) {
-        const std::string key = iter->first;
-
+    for (const auto& [key, value] : firstDataValues) {
         // Default is text
         colIsNumeric[key] = false;
 
@@ -309,9 +328,7 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
     }
 
     // Replace all the missing values in the numeric columns with NaN values
-    for (auto iter = first.begin(); iter != first.end(); ++iter) {
-        const std::string key = iter->first;
-
+    for (const auto& [key, value] : firstDataValues) {
         if (!colIsNumeric[key]) {
             continue;
         }
@@ -332,8 +349,6 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
     for (int i = 0; i < planets.size(); i++) {
         hostIdToPlanetsMap[makeIdentifier(planets[i].hostName)].push_back(i);
     }
-
-    // TODO: Get the ring indexInSystem From the column given in the config file
 
     // Fill planets internal indices in system (based on whatever column is used for size)
     std::map<std::string, std::vector<size_t>>::iterator it;

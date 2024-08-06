@@ -112,9 +112,14 @@ struct DataSettings {
         std::string referenceLink; // TODO: optional
     } dataMapping;
 
-    // TODO: column info
+    struct ColumnInfo {
+        std::string name;
+        std::optional<std::string> format;
+        std::optional<std::string> description;
+    };
+    std::map<std::string, ColumnInfo> columnInfo; // Mapped by "column key"
 };
 
-} // namespace openspace
+} // namespace openspace::exoplanets
 
 #endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATASTRUCTURES___H__
