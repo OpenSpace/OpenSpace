@@ -196,6 +196,7 @@ print("Computing ESM")
 df['pl_Tday'] = 1.1*df['pl_Teq']
 df['planck_ratio'] = Plancks_function(df['pl_Tday'], 7.5e-6) / Plancks_function(df['st_teff'], 7.5e-6)
 df['ESM'] = 4.29 * 1e6 * df['pl_rprs2'] * df['planck_ratio'] * 10**(-0.2*df['sy_kmag'])
+df.loc[df['ESM'] < 0.001, 'ESM'] = "" # Replace really low values with nothing
 
 # TODO: propagate errors, so we get uncertainties for ESM and TSM
 

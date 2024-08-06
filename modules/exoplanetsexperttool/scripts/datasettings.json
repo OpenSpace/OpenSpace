@@ -12,11 +12,11 @@
     "column_info": {
         "pl_name": {
             "name": "Name",
-            "text": true
+            "isText": true
         },
         "hostname": {
             "name": "Host",
-            "text": true
+            "isText": true
         },
         "disc_year": {
             "name": "Year",
@@ -107,34 +107,34 @@
         },
         "st_metratio": {
             "name": "Metallicity ratio",
-            "text": true
+            "isText": true
         },
         "discoverymethod": {
             "name": "Discovery method",
-            "text": true
+            "isText": true
         },
         "disc_telescope": {
             "name": "Telescope",
-            "text": true
+            "isText": true
         },
         "disc_instrument": {
             "name": "Instrument",
-            "text": true
+            "isText": true
         },
-        "molecule_detection": {
+        "_TODO_molecule_detection": {
             "name": "Detected",
             "desc": "Detected molecules from IAC ExoAtmospheres dataset",
-            "text": true
+            "isText": true
         },
-        "molecule_upperLimit": {
+        "_TODO_molecule_upperLimit": {
             "name": "Upper limit",
             "desc": "Upper limit detection of molecules from IAC ExoAtmospheres dataset",
-            "text": true
+            "isText": true
         },
-        "molecule_noDetection": {
+        "_TODO_molecule_noDetection": {
             "name": "No detection",
             "desc": "Upper limit detection of molecules from IAC ExoAtmospheres dataset",
-            "text": true
+            "isText": true
         },
         "_TODO_molecule_waterDetection": {
             "name": "No detection",

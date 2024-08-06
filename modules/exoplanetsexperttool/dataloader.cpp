@@ -50,9 +50,6 @@ namespace {
     constexpr std::string_view DataSettingsPath = "scripts/datasettings.json";
     constexpr std::string_view BasePath = "${MODULES}/exoplanetsexperttool";
 
-    constexpr const double EarthMass = 5.972e24; // kg
-    constexpr const double EarthRadius = 6.3781e6; // meter
-
     bool hasEnding(std::string const& fullString, std::string const& ending) {
         if (fullString.length() >= ending.length()) {
             int comp = fullString.compare(
@@ -97,6 +94,11 @@ namespace {
                 std::string temp;
                 value.at("desc").get_to(temp);
                 info.description = temp;
+            }
+            if (value.contains("isText")) {
+                bool temp = false;
+                value.at("isText").get_to(temp);
+                info.isText = temp;
             }
             s.columnInfo[key] = info;
         }
@@ -187,11 +189,17 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
             // Parse data column values
 
             float parsedNumeric = data::parseFloatData(data);
+
+            bool hasIsTextInfo = settings.columnInfo.contains(column) &&
+                settings.columnInfo.at(column).isText.has_value();
+
+            bool shouldEnforceString = hasIsTextInfo ? *settings.columnInfo.at(column).isText : false;
+
             if (data.empty()) {
                 // All columns should have empty string for missing values
                 p.dataColumns[column] = "";
             }
-            else if (!std::isnan(parsedNumeric)) {
+            else if (!std::isnan(parsedNumeric) && !shouldEnforceString) {
                 p.dataColumns[column] = parsedNumeric;
             }
             else {

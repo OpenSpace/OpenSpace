@@ -116,6 +116,10 @@ struct DataSettings {
         std::string name;
         std::optional<std::string> format;
         std::optional<std::string> description;
+
+        // Sometimes, a seemingly numeric column should really be a text-based one.
+        // This allows us to control that
+        std::optional<bool> isText;
     };
     std::map<std::string, ColumnInfo> columnInfo; // Mapped by "column key"
 };
