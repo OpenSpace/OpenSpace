@@ -56,7 +56,7 @@
             "name": "Mass Err (%)",
             "desc": "Mass uncertainty"
         },
-        "_TODO_surface_gravity": {
+        "pl_surface_gravity": {
             "name": "Surface gravity",
             "desc": "(m/s^2)"
         },

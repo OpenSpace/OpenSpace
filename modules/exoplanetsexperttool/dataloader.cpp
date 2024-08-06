@@ -193,7 +193,8 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
             bool hasIsTextInfo = settings.columnInfo.contains(column) &&
                 settings.columnInfo.at(column).isText.has_value();
 
-            bool shouldEnforceString = hasIsTextInfo ? *settings.columnInfo.at(column).isText : false;
+            bool shouldEnforceString =
+                hasIsTextInfo ? *settings.columnInfo.at(column).isText : false;
 
             if (data.empty()) {
                 // All columns should have empty string for missing values
@@ -206,21 +207,6 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
                 // Non empty string value
                 p.dataColumns[column] = data;
             }
-
-            // Molecules in atmosphere
-            // Note that molecules are separated with '&' signs. We replace those
-  /*          else if (column == "molecule_detection") {
-                auto molecules = ghoul::tokenizeString(data, '&');
-                p.moleculesDetection = ghoul::join(molecules, ", ");
-            }
-            else if (column == "molecule_upperLimit") {
-                auto molecules = ghoul::tokenizeString(data, '&');
-                p.moleculesUpperLimit = ghoul::join(molecules, ", ");
-            }
-            else if (column == "molecule_noDetection") {
-                auto molecules = ghoul::tokenizeString(data, '&');
-                p.moleculesNoDetection = ghoul::join(molecules, ", ");
-            }*/
         }
 
         // Compute galactic position of item
@@ -231,48 +217,8 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
             p.position = icrsToGalacticCartesian(ra, dec, p.distance.value);
         }
 
-        // Check if water has been detected
-        // TODO: move to python
-        // 1 = yes, 0 = maybe, -1 = no
-        //constexpr const char WaterKey[] = "H2O";
-        //if (p.moleculesDetection.find(WaterKey) != std::string::npos) {
-        //    p.waterDetection = 1.f;
-        //}
-        //else if (p.moleculesUpperLimit.find(WaterKey) != std::string::npos) {
-        //    p.waterDetection = 0.f;
-        //}
-        //else if (p.moleculesNoDetection.find(WaterKey) != std::string::npos) {
-        //    p.waterDetection = -1.f;
-        //}
-
-        //// If unknown, compute planet mass
-        //// TODO: move to python
-        //if ((!p.mass.hasValue()) && p.radius.hasValue()) {
-        //    float r = p.radius.value;
-
-        //    // Mass radius relationship from Chen & Kipping (2017)
-        //    // See eq. (2) in https://arxiv.org/pdf/1805.03671.pdf
-
-        //    if (r < 1.23f) { // Terran
-        //        p.mass.value = 0.9718f * glm::pow(r, 3.58f);
-        //    }
-        //    else if (r < 14.26) { // Neptunian
-        //        p.mass.value = 1.436f * glm::pow(r, 1.70f);
-        //    }
-        //    // TODO: constant for larger planets (Jovian & Stellar)
-        //    // Use their python package!
-        //    // Their paper: https://iopscience.iop.org/article/10.3847/1538-4357/834/1/17
-        //}
-
-        // TODO: move to python
-        //if (p.radius.hasValue() && p.mass.hasValue()) {
-        //    constexpr const double G = 6.67430e-11;
-        //    const double r = static_cast<double>(p.radius.value) * EarthRadius;
-        //    const double M = static_cast<double>(p.mass.value) * EarthMass;
-        //    p.surfaceGravity.value = static_cast<float>((G * M) / (r * r));
-        //}
-
-        // Virification related to "other columns"
+        // Verification related to "other columns". All rows should have the same number
+        // of columns
         if (nDataColumns == -1) {
             nDataColumns = static_cast<int>(p.dataColumns.size());
         }
