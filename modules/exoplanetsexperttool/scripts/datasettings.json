@@ -32,10 +32,12 @@
             "format": "%.0f"
         },
         "ESM": {
-            "name": "ESM"
+            "name": "ESM",
+            "format": "%.2f"
         },
         "TSM": {
-            "name": "TSM"
+            "name": "TSM",
+            "format": "%.2f"
         },
         "pl_rade": {
             "name": "Radius",
@@ -73,6 +75,7 @@
         },
         "st_teff": {
             "name": "Star Teff",
+            "format": "%.0f",
             "desc": "Star effective temperature (K)"
         },
         "st_rad": {

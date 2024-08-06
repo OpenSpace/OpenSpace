@@ -1224,8 +1224,16 @@ void DataViewer::renderTable(const std::string& tableId,
                         continue;
                     }
 
-                    // TODO: Revive formatting
-                    auto format = std::nullopt;
+                    std::optional<const char*> format = std::nullopt;
+
+                    if (_dataSettings.columnInfo.contains(_columns[colIdx])) {
+                        const DataSettings::ColumnInfo& colInfo =
+                            _dataSettings.columnInfo.at(_columns[colIdx]);
+
+                        if (colInfo.format.has_value()) {
+                            format = colInfo.format.value().c_str();
+                        }
+                    }
                     renderColumnValue(colIdx, format, item);
                 }
             }
@@ -2413,7 +2421,7 @@ void DataViewer::renderColumnValue(int columnIndex, std::optional<const char*> f
             ImGui::TextUnformatted("");
         }
         else {
-            ImGui::Text(format.value_or("%f"), v);
+            ImGui::Text(format.value_or("%.4f"), v);
         }
     }
     else if (std::holds_alternative<const char*>(value)) {
