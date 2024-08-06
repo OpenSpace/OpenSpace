@@ -162,6 +162,10 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
 
         p.id = row - 1;
 
+        DataPoint ra;
+        DataPoint dec;
+        DataPoint distance;
+
         for (int col = 0; col < columns.size(); col++) {
             const std::string& column = columns[col];
             const std::string& data = csvContent[row][col];
@@ -177,13 +181,13 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
                 p.sizeValue = data::parseFloatData(data);
             }
             else if (column == settings.dataMapping.positionRa) {
-                p.ra.value = data::parseFloatData(data);
+                ra.value = data::parseFloatData(data);
             }
             else if (column == settings.dataMapping.positionDec) {
-                p.dec.value = data::parseFloatData(data);
+                dec.value = data::parseFloatData(data);
             }
             else if (column == settings.dataMapping.positionDistance) {
-                p.distance.value = data::parseFloatData(data);
+                distance.value = data::parseFloatData(data);
             }
 
             // Parse data column values
@@ -210,11 +214,9 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
         }
 
         // Compute galactic position of item
-        bool hasPos = p.ra.hasValue() && p.dec.hasValue() && p.distance.hasValue();
+        bool hasPos = ra.hasValue() && dec.hasValue() && distance.hasValue();
         if (hasPos) {
-            const float ra = p.ra.value;
-            const float dec = p.dec.value;
-            p.position = icrsToGalacticCartesian(ra, dec, p.distance.value);
+            p.position = icrsToGalacticCartesian(ra.value, dec.value, distance.value);
         }
 
         // Verification related to "other columns". All rows should have the same number

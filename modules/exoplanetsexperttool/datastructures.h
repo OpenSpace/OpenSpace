@@ -30,6 +30,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <variant>
 
 namespace openspace::exoplanets {
@@ -89,9 +90,6 @@ struct ExoplanetItem {
     std::map<std::string, std::variant<std::string, float>> dataColumns;
 
     float sizeValue = 0.f;
-    DataPoint ra;
-    DataPoint dec;
-    DataPoint distance;
 
     // The planet's internal index within its system, from the inside out
     int indexInSystem = -1;
@@ -121,7 +119,7 @@ struct DataSettings {
         // This allows us to control that
         std::optional<bool> isText;
     };
-    std::map<std::string, ColumnInfo> columnInfo; // Mapped by "column key"
+    std::unordered_map<std::string, ColumnInfo> columnInfo; // Mapped by "column key"
 };
 
 } // namespace openspace::exoplanets

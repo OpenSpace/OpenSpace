@@ -35,6 +35,7 @@
 #include <ghoul/glm.h>
 #include <deque>
 #include <optional>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -136,7 +137,7 @@ private:
 
     std::vector<size_t> _pinnedPlanets;
 
-    std::map<std::string, std::vector<size_t>> _hostIdToPlanetsMap;
+    std::unordered_map<std::string, std::vector<size_t>> _hostIdToPlanetsMap;
 
     std::vector<ColumnKey> _defaultColumns;
     std::vector<ColumnKey> _otherColumns;
