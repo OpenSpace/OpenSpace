@@ -1,9 +1,9 @@
 local Mission = {
   Name = "Aurorasaurus",
-  Image = "https://www.nasa.gov/wp-content/uploads/2023/03/solve-aurorasaurus.png",
   Description = "Aurorasaurus is the first and only citizen science initiative that tracks auroras around the world via reports on our website and social media. All aurora-related tweets and reports are placed on the Aurorasaurus.org map. We then ask people to log in and verify the tweets or reports. Each verified report serves as a valuable data point for scientists to analyze and incorporate into space weather models.",
+  Image = "https://www.nasa.gov/wp-content/uploads/2023/03/solve-aurorasaurus.png",
   Link = "https://aurorasaurus.org/",
-  Milestones = {
+  --[[ Milestones = {
     {
       Name = "Partial Eclipse",
       Date = "2023 Mar 23 10:36:11",
@@ -29,18 +29,18 @@ local Mission = {
       Date = "2023 Mar 27 08:49:20",
       Image = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-9900-full-2023-07-0823%3A40%2B0000.png"
     }
-  },
+  }, ]]
   Phases = {
     {
-      Name = "March 2023 storm",
-      TimeRange = { Start = "2023 Mar 21 01:00:00", End = "2023 Mar 24 12:00:00" },
+      Name = "May 2024 storm",
+      TimeRange = { Start = "2024 MAY 10 15:00:00", End = "2024 MAY 11 07:30:00" },
       Description = "Aurorasaurus is the first and only citizen science initiative that tracks auroras around the world via reports on our website and social media. All aurora-related tweets and reports are placed on the Aurorasaurus.org map. We then ask people to log in and verify the tweets or reports. Each verified report serves as a valuable data point for scientists to analyze and incorporate into space weather models.",
-      Image = "https://www.nasa.gov/wp-content/uploads/2023/03/solve-aurorasaurus.png",
+      Image = "C:/Users/alundkvi/Documents/work/scripts/oval_legend.png",
       Actions = { "os.apollo17.setup.LandingSite", "os.apollo.DisableApolloSites" }
     },
     {
-      Name = "March 2023 storm2",
-      TimeRange = { Start = "2023 MAR 24 12:00:01", End = "2023 MAR 27 23:00:00" },
+      Name = "May 2024 storm2",
+      TimeRange = { Start = "2024 MAY 11 07:30:01", End = "2024 MAY 12 00:00:00" },
       Description = "Aurorasaurus is the first and only citizen science initiative that tracks auroras around the world via reports on our website and social media. All aurora-related tweets and reports are placed on the Aurorasaurus.org map. We then ask people to log in and verify the tweets or reports. Each verified report serves as a valuable data point for scientists to analyze and incorporate into space weather models.",
       Image = "https://www.nasa.gov/wp-content/uploads/2023/03/solve-aurorasaurus.png",
       Link = "https://aurorasaurus.org/",
@@ -49,13 +49,101 @@ local Mission = {
   }
 }
 
+
+local ToggleColorLegend = {
+  Identifier = "os.bastilleday.colorLegend.ToggleColorLegend",
+  Name = "Toggle the color legend image",
+  Command = [[
+    if openspace.propertyValue("ScreenSpace.color-legend-aurora-oval.Enabled") then
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.color-legend-aurora-oval.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("ScreenSpace.color-legend-aurora-oval.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("ScreenSpace.color-legend-aurora-oval.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.color-legend-aurora-oval.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle the color legend image",
+  GuiPath = "/Aurorasaurus/Prediction",
+  IsLocal = false
+}
+
+local ToggleLegend = {
+  Identifier = "os.bastilleday.auroraovallegend.ToggleLegend",
+  Name = "Toggle the legend image",
+  Command = [[
+    if openspace.propertyValue("ScreenSpace.Legend-aurora-oval.Enabled") then
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.Legend-aurora-oval.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("ScreenSpace.Legend-aurora-oval.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("ScreenSpace.Legend-aurora-oval.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.Legend-aurora-oval.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle the legend image",
+  GuiPath = "/Aurorasaurus/Prediction",
+  IsLocal = false
+}
+
+local Legend = {
+  Identifier = "Legend-aurora-oval",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = "C:/Users/alundkvi/Documents/work/scripts/oval_legend_v2.png",
+  FaceCamera = false,
+  Scale = 0.15,
+  CartesianPosition = { -0.707970, -0.34, -2.2180 },
+  Rotation = { 0.0, 0.0, 0.36652 }
+}
+
+local colorLegend = {
+  Identifier = "color-legend-aurora-oval",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = "C:/Users/alundkvi/Documents/work/scripts/colorLegendWifi.png",
+  FaceCamera = false,
+  Scale = 0.15,
+  CartesianPosition = { -0.707970, -0.34, -2.2180 },
+  Rotation = { 0.0, 0.0, 0.36652 }
+}
+
 asset.onInitialize(function()
+  openspace.action.registerAction(ToggleLegend)
+  openspace.action.registerAction(ToggleColorLegend)
   openspace.loadMission(Mission)
+  openspace.addScreenSpaceRenderable(Legend)
+  openspace.addScreenSpaceRenderable(colorLegend)
 end)
 
 asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleLegend)
+  openspace.action.removeAction(ToggleColorLegend)
   openspace.unloadMission(Mission.Name)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.removeScreenSpaceRenderable(colorLegend)
 end)
+
+asset.export(Legend)
+asset.export(colorLegend)
+asset.export("ToggleLegend", ToggleLegend.Identifier)
+asset.export("ToggleColorLegend", ToggleColorLegend.Identifier)
 
 asset.meta = {
   Name = "Aurorasaurus Timeline",

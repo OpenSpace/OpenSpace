@@ -21,24 +21,24 @@ local AuroraGreenPinkWhite381 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_381.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_381.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -68,24 +68,24 @@ local AuroraGreenPinkRedWhite382 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_382.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_382.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -115,11 +115,11 @@ local timeFrameIconPinkWhite383 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/whitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/whitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -149,24 +149,24 @@ local AuroraGreenPinkRedWhite384 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_384.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_384.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -196,11 +196,11 @@ local timeFrameIconGreenPinkWhite385 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -230,11 +230,11 @@ local timeFrameIconGreenPink386 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -264,11 +264,11 @@ local timeFrameIconPink387 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -289,8 +289,8 @@ local notSeenAuroraIcon388 = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earth.Earth.Identifier,
-      Latitude = 51.57742172613942,
-      Longitude = -2.786335180852445,
+      Latitude = 51.4969138455867,
+      Longitude = -0.1283179148412354,
       Altitude = 95000,
       UseHeightmap = false
     }
@@ -298,11 +298,11 @@ local notSeenAuroraIcon388 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-Origin = "Center",
-Billboard = true,
-Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-Opacity = 1.0,
-Enabled = true
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -332,11 +332,11 @@ local timeFrameIconPink389 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -366,11 +366,11 @@ local timeFrameIconGreenPinkRedWhite390 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -400,11 +400,11 @@ local timeFrameIconGreenPink391 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -434,24 +434,24 @@ local AuroraGreenPink392 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_392.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_392.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -481,11 +481,11 @@ local timeFrameIconGreenRedWhite393 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -515,24 +515,24 @@ local AuroraGreenPinkWhite394 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_394.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_394.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -562,11 +562,11 @@ local timeFrameIconGreenRed395 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -596,24 +596,24 @@ local AuroraGreenPinkRedWhite396 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_396.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_396.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -643,24 +643,24 @@ local AuroraGreenPinkRed397 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_397.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_397.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -690,11 +690,11 @@ local timeFrameIconGreenPinkRedWhite398 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -724,24 +724,24 @@ local AuroraGreenPink399 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_399.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_399.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -771,24 +771,24 @@ local AuroraGreenRed400 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_400.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_400.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -818,24 +818,24 @@ local AuroraGreen401 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_401.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_401.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -865,24 +865,24 @@ local AuroraGreenRed402 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_402.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_402.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -912,24 +912,24 @@ local AuroraGreenPinkWhite403 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_403.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_403.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -959,11 +959,11 @@ local timeFrameIconPinkRed404 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -993,24 +993,24 @@ local AuroraGreenPink405 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_405.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_405.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1040,24 +1040,24 @@ local AuroraGreenPinkRed406 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_406.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_406.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1087,11 +1087,11 @@ local timeFrameIconGreenPinkRed407 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1121,11 +1121,11 @@ local timeFrameIconPinkRedWhite408 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1155,24 +1155,24 @@ local AuroraGreenPink409 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_409.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_409.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1202,24 +1202,24 @@ local AuroraGreenPink410 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_410.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_410.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1249,11 +1249,11 @@ local timeFrameIconGreenPinkRed411 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1267,15 +1267,15 @@ local notSeenAuroraIcon412 = {
   Parent = earth.Earth.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2024 May 10 22:45:00",
+    Start = "2024 May 10 21:00:00",
     End = "2024 May 10 23:00:00"
   },
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earth.Earth.Identifier,
-      Latitude = 53.13170793865006,
-      Longitude = -4.171086807499562,
+      Latitude = 51.57321274435322,
+      Longitude = -3.028855165907395,
       Altitude = 95000,
       UseHeightmap = false
     }
@@ -1283,11 +1283,11 @@ local notSeenAuroraIcon412 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-Origin = "Center",
-Billboard = true,
-Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-Opacity = 1.0,
-Enabled = true
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1317,24 +1317,24 @@ local AuroraGreenPinkRed413 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_413.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_413.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1364,24 +1364,24 @@ local AuroraGreenPinkWhite414 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_414.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_414.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1411,24 +1411,24 @@ local AuroraGreenRed415 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_415.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_415.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1458,11 +1458,11 @@ local timeFrameIconGreenPinkWhite416 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1492,24 +1492,24 @@ local AuroraGreenRedWhite417 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_417.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_417.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1539,24 +1539,24 @@ local AuroraGreenPinkWhite418 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_418.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_418.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1586,24 +1586,24 @@ local AuroraGreenPink419 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_419.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_419.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1633,11 +1633,11 @@ local timeFrameIconGreenRed420 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1667,11 +1667,11 @@ local timeFrameIconPinkRed421 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1701,11 +1701,11 @@ local timeFrameIconPink422 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1735,24 +1735,24 @@ local AuroraGreenRed423 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_423.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_423.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1782,11 +1782,11 @@ local timeFrameIconGreenPink424 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1816,24 +1816,24 @@ local AuroraGreenRed425 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_425.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_425.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1863,24 +1863,24 @@ local AuroraGreenPinkWhite426 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_426.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_426.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1910,11 +1910,11 @@ local timeFrameIconGreenPinkRedWhite427 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1944,24 +1944,24 @@ local AuroraGreenPinkWhite428 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_428.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_428.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -1991,11 +1991,11 @@ local timeFrameIconGreenPinkRedWhite429 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2025,24 +2025,24 @@ local AuroraGreenRed430 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_430.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_430.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2072,24 +2072,24 @@ local AuroraGreenPink431 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_431.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_431.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2119,11 +2119,11 @@ local timeFrameIconGreenPinkRed432 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2153,11 +2153,11 @@ local timeFrameIconGreenPinkRedWhite433 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2187,24 +2187,24 @@ local Aurora434 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_434.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_434.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2234,24 +2234,24 @@ local AuroraRed435 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_435.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/red2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_435.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/red2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2281,24 +2281,24 @@ local AuroraGreenPink436 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_436.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_436.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2328,11 +2328,11 @@ local timeFrameIconGreenPinkRed437 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2362,24 +2362,24 @@ local AuroraGreenPink438 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_438.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_438.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2409,24 +2409,24 @@ local Aurora439 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_439.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_439.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2456,11 +2456,11 @@ local timeFrameIconGreenRedWhite440 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2490,24 +2490,24 @@ local AuroraGreenPink441 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_441.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_441.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2537,11 +2537,11 @@ local timeFrameIcon442 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2571,11 +2571,11 @@ local timeFrameIconGreenPinkRedWhite443 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2605,11 +2605,11 @@ local timeFrameIconPinkWhite444 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/whitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/whitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2639,11 +2639,11 @@ local timeFrameIconGreenPinkRedWhite445 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2673,24 +2673,24 @@ local AuroraGreenPinkWhite446 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_446.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_446.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2720,11 +2720,11 @@ local timeFrameIconGreenPink447 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2754,11 +2754,11 @@ local timeFrameIconGreenPinkRed448 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2788,24 +2788,24 @@ local Aurora449 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_449.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_449.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2835,24 +2835,24 @@ local AuroraGreenPinkRedWhite450 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_450.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_450.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2882,11 +2882,11 @@ local timeFrameIconPink451 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2916,11 +2916,11 @@ local timeFrameIconPink452 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2950,24 +2950,24 @@ local AuroraRed453 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_453.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/red2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_453.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/red2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -2997,24 +2997,24 @@ local Aurora454 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_454.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_454.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3044,24 +3044,24 @@ local AuroraGreenPinkRedWhite455 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_455.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_455.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3091,11 +3091,11 @@ local timeFrameIconGreenPink456 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3125,24 +3125,24 @@ local AuroraGreenPinkRed457 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_457.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_457.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3172,11 +3172,11 @@ local timeFrameIconGreenPinkRed458 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3206,24 +3206,24 @@ local AuroraGreenRed459 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_459.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_459.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3253,24 +3253,24 @@ local AuroraGreenRed460 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_460.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_460.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3300,11 +3300,11 @@ local timeFrameIconPink461 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3334,24 +3334,24 @@ local AuroraGreenPinkRedWhite462 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_462.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_462.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3372,8 +3372,8 @@ local notSeenAuroraIcon463 = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earth.Earth.Identifier,
-      Latitude = 51.44057048393305,
-      Longitude = -1.0641524182988062,
+      Latitude = 51.505492606134354,
+      Longitude = -2.5555016064921627,
       Altitude = 95000,
       UseHeightmap = false
     }
@@ -3381,11 +3381,11 @@ local notSeenAuroraIcon463 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-Origin = "Center",
-Billboard = true,
-Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-Opacity = 1.0,
-Enabled = true
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3415,24 +3415,24 @@ local AuroraGreenPinkRed464 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_464.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_464.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3462,24 +3462,24 @@ local AuroraGreenPinkRedWhite465 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_465.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_465.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3509,24 +3509,24 @@ local AuroraPink466 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_466.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_466.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3556,24 +3556,24 @@ local AuroraGreenPinkRed467 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_467.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_467.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3603,24 +3603,24 @@ local AuroraGreenPink468 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_468.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_468.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3650,11 +3650,11 @@ local timeFrameIconGreenPinkRed469 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3684,24 +3684,24 @@ local AuroraPink470 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_470.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_470.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3722,8 +3722,8 @@ local notSeenAuroraIcon471 = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earth.Earth.Identifier,
-      Latitude = 53.710355520616226,
-      Longitude = -0.1033924740498874,
+      Latitude = 53.52742224536213,
+      Longitude = -2.6338531089294333,
       Altitude = 95000,
       UseHeightmap = false
     }
@@ -3731,11 +3731,11 @@ local notSeenAuroraIcon471 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-Origin = "Center",
-Billboard = true,
-Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-Opacity = 1.0,
-Enabled = true
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3765,11 +3765,11 @@ local timeFrameIconGreenPinkRedWhite472 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3799,24 +3799,24 @@ local AuroraGreenPinkRed473 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_473.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_473.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3846,11 +3846,11 @@ local timeFrameIconPinkWhite474 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/whitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/whitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3880,24 +3880,24 @@ local AuroraGreenRedWhite475 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_475.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_475.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3927,24 +3927,24 @@ local AuroraGreenPinkRedWhite476 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_476.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_476.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -3974,24 +3974,24 @@ local AuroraGreenRed477 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_477.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_477.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4005,15 +4005,15 @@ local notSeenAuroraIcon478 = {
   Parent = earth.Earth.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2024 May 10 21:45:00",
-    End = "2024 May 10 22:00:00"
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
   },
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earth.Earth.Identifier,
-      Latitude = 52.67587299892272,
-      Longitude = -1.3685745255543709,
+      Latitude = 38.696125662352195,
+      Longitude = -9.366385714098477,
       Altitude = 95000,
       UseHeightmap = false
     }
@@ -4021,11 +4021,11 @@ local notSeenAuroraIcon478 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-Origin = "Center",
-Billboard = true,
-Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-Opacity = 1.0,
-Enabled = true
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4055,11 +4055,11 @@ local timeFrameIconGreenPinkRedWhite479 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4089,11 +4089,11 @@ local timeFrameIconGreenRed480 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4123,24 +4123,24 @@ local AuroraGreenPinkRed481 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_481.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_481.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4170,11 +4170,11 @@ local timeFrameIconGreenPink482 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4204,24 +4204,24 @@ local AuroraGreenPinkRedWhite483 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_483.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_483.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4251,24 +4251,24 @@ local Aurora484 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_484.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_484.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/green2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4298,11 +4298,11 @@ local timeFrameIconGreenPink485 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4332,24 +4332,24 @@ local AuroraGreenPinkRed486 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_486.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_486.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4379,24 +4379,24 @@ local AuroraGreenPinkRedWhite487 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_487.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_487.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4426,24 +4426,24 @@ local AuroraGreenPink488 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_488.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_488.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4473,24 +4473,24 @@ local AuroraGreenPinkRedWhite489 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_489.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_489.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4520,24 +4520,24 @@ local AuroraGreenPink490 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_490.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_490.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4567,11 +4567,11 @@ local timeFrameIconGreenPinkRed491 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4601,11 +4601,11 @@ local timeFrameIconGreenPink492 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4635,24 +4635,24 @@ local AuroraGreenPink493 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_493.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_493.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4682,24 +4682,24 @@ local AuroraRed494 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_494.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/red2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_494.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/red2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4729,11 +4729,11 @@ local timeFrameIconGreenPinkWhite495 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4763,24 +4763,24 @@ local AuroraGreenPinkRed496 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_496.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_496.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4810,11 +4810,11 @@ local timeFrameIconGreenPinkRed497 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4844,24 +4844,24 @@ local AuroraGreenPinkRed498 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_498.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_498.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4891,11 +4891,11 @@ local timeFrameIconGreenRed499 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4925,24 +4925,24 @@ local AuroraGreenRed500 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_500.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_500.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -4972,24 +4972,24 @@ local AuroraGreenPinkRedWhite501 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_501.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_501.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5019,24 +5019,24 @@ local AuroraGreenPinkRed502 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_502.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_502.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5066,24 +5066,24 @@ local AuroraGreenRed503 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_503.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_503.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5113,24 +5113,24 @@ local AuroraGreenPink504 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_504.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_504.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5160,11 +5160,11 @@ local timeFrameIconGreenPinkWhite505 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5194,24 +5194,24 @@ local AuroraGreenPink506 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_506.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_506.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5241,24 +5241,24 @@ local AuroraGreenPink507 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_507.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_507.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5288,24 +5288,24 @@ local AuroraGreenRed508 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_508.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_508.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5335,24 +5335,24 @@ local AuroraGreenPink509 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_509.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_509.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5382,24 +5382,24 @@ local AuroraGreenPinkRed510 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_510.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_510.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5429,24 +5429,24 @@ local AuroraGreenPink511 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_511.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_511.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5476,11 +5476,11 @@ local timeFrameIconGreenRed512 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5510,24 +5510,24 @@ local AuroraGreenRed513 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_513.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_513.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5557,11 +5557,11 @@ local timeFrameIconRed514 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/red2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/red2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5591,11 +5591,11 @@ local timeFrameIconPinkRed515 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5625,11 +5625,11 @@ local timeFrameIconGreenPink516 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5659,24 +5659,24 @@ local AuroraGreenRed517 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_517.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_517.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5706,24 +5706,24 @@ local AuroraGreenPinkRedWhite518 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_518.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_518.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5753,24 +5753,24 @@ local AuroraGreenRed519 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_519.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_519.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5800,24 +5800,24 @@ local AuroraGreenPink520 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_520.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_520.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5847,24 +5847,24 @@ local AuroraGreenWhite521 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_521.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhite2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_521.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhite2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5894,11 +5894,11 @@ local timeFrameIconGreenRed522 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5928,11 +5928,11 @@ local timeFrameIconGreenPinkWhite523 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5962,11 +5962,11 @@ local timeFrameIconRedWhite524 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redWhite2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redWhite2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -5996,11 +5996,11 @@ local timeFrameIconGreenPinkRedWhite525 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6030,11 +6030,11 @@ local timeFrameIconGreenPinkRedWhite526 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6064,24 +6064,24 @@ local AuroraGreenPink527 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_527.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_527.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6111,11 +6111,11 @@ local timeFrameIconGreenPinkRedWhite528 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6145,11 +6145,11 @@ local timeFrameIconGreenRedWhite529 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6179,11 +6179,11 @@ local timeFrameIconGreenPinkRedWhite530 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6213,11 +6213,11 @@ local timeFrameIconGreenPinkRed531 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6247,11 +6247,11 @@ local timeFrameIconGreenRed532 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6281,24 +6281,24 @@ local AuroraPinkRedWhite533 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_533.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_533.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/redWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6328,24 +6328,24 @@ local AuroraGreenRedWhite534 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_534.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_534.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6375,11 +6375,11 @@ local timeFrameIconGreenPinkWhite535 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6409,11 +6409,11 @@ local timeFrameIconGreenPinkRed536 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6443,24 +6443,24 @@ local AuroraRed537 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_537.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/red2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_537.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/red2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6490,11 +6490,11 @@ local timeFrameIconGreenRedWhite538 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6524,24 +6524,24 @@ local AuroraGreenPink539 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_539.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_539.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6571,24 +6571,24 @@ local AuroraPink540 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_540.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_540.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6618,11 +6618,11 @@ local timeFrameIconGreenPink541 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6652,24 +6652,24 @@ local AuroraGreenPink542 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_542.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_542.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6699,24 +6699,24 @@ local AuroraGreenPinkRedWhite543 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_543.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_543.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6746,24 +6746,24 @@ local AuroraGreenRedWhite544 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_544.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_544.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhite2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6793,11 +6793,11 @@ local timeFrameIconGreenRed545 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRed2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6827,11 +6827,11 @@ local timeFrameIconGreenPink546 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6861,24 +6861,24 @@ local AuroraGreenPinkRed547 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_547.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_547.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6908,24 +6908,24 @@ local AuroraGreenPinkRed548 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_548.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_548.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6955,11 +6955,11 @@ local timeFrameIconGreenPinkRedWhite549 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -6989,11 +6989,11 @@ local timeFrameIconGreenPinkRedWhite550 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7023,11 +7023,11 @@ local timeFrameIconGreenPinkRedWhite551 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7057,24 +7057,24 @@ local AuroraGreenPink552 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_552.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_552.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7104,24 +7104,24 @@ local AuroraGreenPinkRedWhite553 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_553.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_553.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7151,24 +7151,24 @@ local AuroraGreenPinkRed554 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_554.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_554.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7198,11 +7198,11 @@ local timeFrameIconGreenPinkWhite555 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7232,24 +7232,24 @@ local AuroraGreenPink556 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_556.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_556.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7263,15 +7263,15 @@ local notSeenAuroraIcon557 = {
   Parent = earth.Earth.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2024 May 10 23:45:00",
+    Start = "2024 May 11 00:15:00",
     End = "2024 May 11 00:30:00"
   },
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earth.Earth.Identifier,
-      Latitude = 52.27393208651205,
-      Longitude = -0.6284157312700284,
+      Latitude = 51.47093114350985,
+      Longitude = -3.1900144851380037,
       Altitude = 95000,
       UseHeightmap = false
     }
@@ -7279,11 +7279,11 @@ local notSeenAuroraIcon557 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-Origin = "Center",
-Billboard = true,
-Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-Opacity = 1.0,
-Enabled = true
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7313,11 +7313,11 @@ local timeFrameIconGreenPinkRed558 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7347,11 +7347,11 @@ local timeFrameIconGreenPink559 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7381,24 +7381,24 @@ local AuroraGreenPink560 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_560.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_560.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7428,24 +7428,24 @@ local AuroraGreenPinkRedWhite561 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_561.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_561.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7459,15 +7459,15 @@ local notSeenAuroraIcon562 = {
   Parent = earth.Earth.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
-    Start = "2024 May 10 21:30:00",
-    End = "2024 May 11 00:00:00"
+    Start = "2024 May 11 00:15:00",
+    End = "2024 May 11 00:30:00"
   },
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
       Globe = earth.Earth.Identifier,
-      Latitude = 52.942981268718555,
-      Longitude = -1.1779419585931323,
+      Latitude = 52.78698081711841,
+      Longitude = -0.0008856452868511,
       Altitude = 95000,
       UseHeightmap = false
     }
@@ -7475,11 +7475,11 @@ local notSeenAuroraIcon562 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-Origin = "Center",
-Billboard = true,
-Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-Opacity = 1.0,
-Enabled = true
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7509,24 +7509,24 @@ local AuroraGreenPinkWhite563 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_563.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_563.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7556,11 +7556,11 @@ local timeFrameIconGreenPinkRed564 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7590,24 +7590,24 @@ local AuroraGreenPinkRedWhite565 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_565.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_565.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7637,11 +7637,11 @@ local timeFrameIconGreenPinkRedWhite566 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7671,11 +7671,11 @@ local timeFrameIconPink567 = {
   Renderable = {
     Type = "RenderablePlaneImageLocal",
     Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
-        Opacity = 1.0,
-        Enabled = true
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/pink2.png",
+      Opacity = 1.0,
+      Enabled = true
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7705,24 +7705,24 @@ local AuroraGreenPinkRed568 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_568.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_568.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7752,24 +7752,24 @@ local AuroraGreenPinkRedWhite569 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_569.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_569.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -7799,24 +7799,24 @@ local AuroraGreenPinkWhite570 = {
   Renderable = {
     Type = "RenderableSwitch",
     Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_570.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_570.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons/greenWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",

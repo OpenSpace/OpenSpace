@@ -340,40 +340,6 @@ Enabled = true
 }
 
 
-local notSeenAuroraIcon3430 = {
-  Identifier = "notSeenAuroraIcon3430",
-  Parent = earth.Earth.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = "2024 May 11 06:00:00",
-    End = "2024 May 11 07:15:00"
-  },
-  Transform = {
-    Translation = {
-      Type = "GlobeTranslation",
-      Globe = earth.Earth.Identifier,
-      Latitude = 49.08877477685354,
-      Longitude = -122.13715227830606,
-      Altitude = 95000,
-      UseHeightmap = false
-    }
-  },
-  Renderable = {
-    Type = "RenderablePlaneImageLocal",
-    Size = 75000,
-Origin = "Center",
-Billboard = true,
-Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-Opacity = 1.0,
-Enabled = true
-  },
-  GUI = {
-    Path = "/Aurorasaurus",
-    Name = "Aurora not seen 3430"
-  }
-}
-
-
 local AuroraGreenPinkRedWhite3432 = {
   Identifier = "AuroraGreenPinkRedWhite3432",
   Parent = earth.Earth.Identifier,
@@ -7135,7 +7101,6 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(notSeenAuroraIcon3428)
   openspace.addSceneGraphNode(notSeenAuroraIcon3429)
   openspace.addSceneGraphNode(notSeenAuroraIcon3430)
-  openspace.addSceneGraphNode(notSeenAuroraIcon3430)
   openspace.addSceneGraphNode(AuroraGreenPinkRedWhite3432)
   openspace.addSceneGraphNode(AuroraGreenPinkRed3433)
   openspace.addSceneGraphNode(notSeenAuroraIcon3434)
@@ -7328,7 +7293,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(notSeenAuroraIcon3428)
   openspace.removeSceneGraphNode(notSeenAuroraIcon3429)
   openspace.removeSceneGraphNode(notSeenAuroraIcon3430)
-  openspace.removeSceneGraphNode(notSeenAuroraIcon3430)
   openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite3432)
   openspace.removeSceneGraphNode(AuroraGreenPinkRed3433)
   openspace.removeSceneGraphNode(notSeenAuroraIcon3434)
@@ -7519,7 +7483,6 @@ asset.export(notSeenAuroraIcon3426)
 asset.export(notSeenAuroraIcon3427)
 asset.export(notSeenAuroraIcon3428)
 asset.export(notSeenAuroraIcon3429)
-asset.export(notSeenAuroraIcon3430)
 asset.export(notSeenAuroraIcon3430)
 asset.export(AuroraGreenPinkRedWhite3432)
 asset.export(AuroraGreenPinkRed3433)

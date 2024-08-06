@@ -1,0 +1,343 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local geojsonPath = asset.resource("geojson/")
+
+local AuroraIcons = {
+  Identifier = "AuroraIcons",
+  File = geojsonPath .. "auroraViewLine.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 12:39:00",
+    End = "2024 May 10 13:45:00"
+  },
+  HeightOffset = 100000,
+  Name = "All Aurora Icons"
+}
+
+local AuroraViewline2 = {
+  Identifier = "AuroraViewLine2",
+  File = geojsonPath .. "auroraViewLine2.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 13:45:00",
+    End = "2024 May 10 14:45:00"
+  },
+  HeightOffset = 100000,
+  Name = "All Aurora Icons"
+}
+
+local AuroraOval1 = {
+  Identifier = "AuroraOval1",
+  File = geojsonPath .. "oval_geojsons/output1.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 13:45:00",
+    End = "2024 May 10 14:45:00"
+  },
+  HeightOffset = 1000000,
+  Name = "AuroraOval1"
+}
+local AuroraOval2 = {
+  Identifier = "AuroraOval2",
+  File = geojsonPath .. "oval_geojsons/output2.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 13:45:00",
+    End = "2024 May 10 14:45:00"
+  },
+  HeightOffset = 1000000,
+  Name = "AuroraOval2"
+}
+local AuroraOval3 = {
+  Identifier = "AuroraOval3",
+  File = geojsonPath .. "oval_geojsons/output3.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 13:45:00",
+    End = "2024 May 10 14:45:00"
+  },
+  HeightOffset = 100000,
+  Name = "AuroraOval3"
+}
+local AuroraOval4 = {
+  Identifier = "AuroraOval4",
+  File = geojsonPath .. "oval_geojsons/output4.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval4"
+}
+local AuroraOval5 = {
+  Identifier = "AuroraOval5",
+  File = geojsonPath .. "oval_geojsons/output5.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval5"
+}
+local AuroraOval6 = {
+  Identifier = "AuroraOval6",
+  File = geojsonPath .. "oval_geojsons/output6.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval6"
+}
+local AuroraOval7 = {
+  Identifier = "AuroraOval7",
+  File = geojsonPath .. "oval_geojsons/output7.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval7"
+}
+local AuroraOval8 = {
+  Identifier = "AuroraOval8",
+  File = geojsonPath .. "oval_geojsons/output8.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval8"
+}
+local AuroraOval9 = {
+  Identifier = "AuroraOval9",
+  File = geojsonPath .. "oval_geojsons/output9.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval9"
+}
+local AuroraOval10 = {
+  Identifier = "AuroraOval10",
+  File = geojsonPath .. "oval_geojsons/output10.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval10"
+}
+local AuroraOval11 = {
+  Identifier = "AuroraOval11",
+  File = geojsonPath .. "oval_geojsons/output11.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval11"
+} 
+
+local AuroraOval12 = {
+  Identifier = "AuroraOval12",
+  File = geojsonPath .. "oval_geojsons/output12.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval12"
+} 
+local AuroraOval13 = {
+  Identifier = "AuroraOval13",
+  File = geojsonPath .. "oval_geojsons/output13.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval13"
+} 
+
+local AuroraOval14 = {
+  Identifier = "AuroraOval14",
+  File = geojsonPath .. "oval_geojsons/output14.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval14"
+} 
+
+local AuroraOval15 = {
+  Identifier = "AuroraOval15",
+  File = geojsonPath .. "oval_geojsons/output15.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval15"
+} 
+
+local AuroraOval16 = {
+  Identifier = "AuroraOval16",
+  File = geojsonPath .. "oval_geojsons/output16.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval16"
+} 
+
+local AuroraOval17 = {
+  Identifier = "AuroraOval17",
+  File = geojsonPath .. "oval_geojsons/output17.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval17"
+} 
+
+local AuroraOval18 = {
+  Identifier = "AuroraOval18",
+  File = geojsonPath .. "oval_geojsons/output18.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval18"
+} 
+
+local AuroraOval19 = {
+  Identifier = "AuroraOval19",
+  File = geojsonPath .. "oval_geojsons/output19.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval19"
+} 
+
+local AuroraOval20 = {
+  Identifier = "AuroraOval20",
+  File = geojsonPath .. "oval_geojsons/output20.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval20"
+} 
+
+local AuroraOval21 = {
+  Identifier = "AuroraOval21",
+  File = geojsonPath .. "oval_geojsons/output21.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval21"
+} 
+
+local AuroraOval22 = {
+  Identifier = "AuroraOval22",
+  File = geojsonPath .. "oval_geojsons/output22.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval22"
+} 
+
+local AuroraOval23 = {
+  Identifier = "AuroraOval23",
+  File = geojsonPath .. "oval_geojsons/output23.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval23"
+} 
+
+local AuroraOval24 = {
+  Identifier = "AuroraOval24",
+  File = geojsonPath .. "oval_geojsons/output24.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval24"
+} 
+
+local AuroraOval25 = {
+  Identifier = "AuroraOval25",
+  File = geojsonPath .. "oval_geojsons/output25.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval25"
+} 
+
+local AuroraOval26 = {
+  Identifier = "AuroraOval26",
+  File = geojsonPath .. "oval_geojsons/output26.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval26"
+} 
+
+local AuroraOval27 = {
+  Identifier = "AuroraOval27",
+  File = geojsonPath .. "oval_geojsons/output27.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval27"
+} 
+
+local AuroraOval28 = {
+  Identifier = "AuroraOval28",
+  File = geojsonPath .. "oval_geojsons/output28.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval28"
+} 
+
+local AuroraOval29 = {
+  Identifier = "AuroraOval29",
+  File = geojsonPath .. "oval_geojsons/output29.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval29"
+} 
+
+local AuroraOval30 = {
+  Identifier = "AuroraOval30",
+  File = geojsonPath .. "oval_geojsons/output30.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval30"
+} 
+
+local AuroraOval31 = {
+  Identifier = "AuroraOval31",
+  File = geojsonPath .. "oval_geojsons/output31.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval31"
+} 
+
+local AuroraOval32 = {
+  Identifier = "AuroraOval32",
+  File = geojsonPath .. "oval_geojsons/output12.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval32"
+} 
+
+local AuroraOval33 = {
+  Identifier = "AuroraOval33",
+  File = geojsonPath .. "oval_geojsons/output33.geojson",
+  HeightOffset = 100000,
+  Name = "AuroraOval33"
+} 
+
+
+asset.onInitialize(function()
+
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraIcons)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval1)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval2)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval3)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval4)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval5)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval6)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval7)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval8)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval9)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval10)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval11)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval12)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval13)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval14)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval15)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval16)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval17)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval18)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval19)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval20)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval21)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval22)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval23)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval24)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval25)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval26)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval27)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval28)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval29)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval30)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval31)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval32)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraOval33)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, AuroraViewline2)
+
+end)
+
+asset.onDeinitialize(function()
+
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraIcons)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval1)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval2)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval3)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval4)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval5)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval6)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval7)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval8)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval9)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval10)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval11)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval12)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval13)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval14)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval15)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval16)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval17)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval18)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval19)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval20)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval21)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval22)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval23)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval24)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval25)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval26)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval27)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval28)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval29)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval30)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval31)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval32)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraOval33)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, AuroraViewline2)
+
+end)

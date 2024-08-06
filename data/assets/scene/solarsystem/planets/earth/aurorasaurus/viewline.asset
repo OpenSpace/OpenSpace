@@ -1,0 +1,2009 @@
+
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local geojsonPath = asset.resource("geojson/viewline_geojsons/")
+
+
+local Viewline_1 = {
+  Identifier = "Viewline_2024-05-10 15-00-00_1",
+  File = geojsonPath .. "2024-05-10_15-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 15:00:00",
+    End = "2024 May 10 15:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 15-00-00_1"
+}
+
+
+local Viewline_2 = {
+  Identifier = "Viewline_2024-05-10 15-15-00_2",
+  File = geojsonPath .. "2024-05-10_15-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 15:15:00",
+    End = "2024 May 10 15:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 15-15-00_2"
+}
+
+
+local Viewline_3 = {
+  Identifier = "Viewline_2024-05-10 15-30-00_3",
+  File = geojsonPath .. "2024-05-10_15-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 15:30:00",
+    End = "2024 May 10 15:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 15-30-00_3"
+}
+
+
+local Viewline_4 = {
+  Identifier = "Viewline_2024-05-10 15-45-00_4",
+  File = geojsonPath .. "2024-05-10_15-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 15:45:00",
+    End = "2024 May 10 16:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 15-45-00_4"
+}
+
+
+local Viewline_5 = {
+  Identifier = "Viewline_2024-05-10 16-00-00_5",
+  File = geojsonPath .. "2024-05-10_16-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 16:00:00",
+    End = "2024 May 10 16:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 16-00-00_5"
+}
+
+
+local Viewline_6 = {
+  Identifier = "Viewline_2024-05-10 16-15-00_6",
+  File = geojsonPath .. "2024-05-10_16-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 16:15:00",
+    End = "2024 May 10 16:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 16-15-00_6"
+}
+
+
+local Viewline_7 = {
+  Identifier = "Viewline_2024-05-10 16-30-00_7",
+  File = geojsonPath .. "2024-05-10_16-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 16:30:00",
+    End = "2024 May 10 16:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 16-30-00_7"
+}
+
+
+local Viewline_8 = {
+  Identifier = "Viewline_2024-05-10 16-45-00_8",
+  File = geojsonPath .. "2024-05-10_16-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 16:45:00",
+    End = "2024 May 10 17:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 16-45-00_8"
+}
+
+
+local Viewline_9 = {
+  Identifier = "Viewline_2024-05-10 17-00-00_9",
+  File = geojsonPath .. "2024-05-10_17-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 17:00:00",
+    End = "2024 May 10 17:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 17-00-00_9"
+}
+
+
+local Viewline_10 = {
+  Identifier = "Viewline_2024-05-10 17-15-00_10",
+  File = geojsonPath .. "2024-05-10_17-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 17:15:00",
+    End = "2024 May 10 17:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 17-15-00_10"
+}
+
+
+local Viewline_11 = {
+  Identifier = "Viewline_2024-05-10 17-30-00_11",
+  File = geojsonPath .. "2024-05-10_17-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 17:30:00",
+    End = "2024 May 10 17:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 17-30-00_11"
+}
+
+
+local Viewline_12 = {
+  Identifier = "Viewline_2024-05-10 17-45-00_12",
+  File = geojsonPath .. "2024-05-10_17-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 17:45:00",
+    End = "2024 May 10 18:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 17-45-00_12"
+}
+
+
+local Viewline_13 = {
+  Identifier = "Viewline_2024-05-10 18-00-00_13",
+  File = geojsonPath .. "2024-05-10_18-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 18:00:00",
+    End = "2024 May 10 18:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 18-00-00_13"
+}
+
+
+local Viewline_14 = {
+  Identifier = "Viewline_2024-05-10 18-15-00_14",
+  File = geojsonPath .. "2024-05-10_18-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 18:15:00",
+    End = "2024 May 10 18:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 18-15-00_14"
+}
+
+
+local Viewline_15 = {
+  Identifier = "Viewline_2024-05-10 18-30-00_15",
+  File = geojsonPath .. "2024-05-10_18-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 18:30:00",
+    End = "2024 May 10 18:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 18-30-00_15"
+}
+
+
+local Viewline_16 = {
+  Identifier = "Viewline_2024-05-10 18-45-00_16",
+  File = geojsonPath .. "2024-05-10_18-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 18:45:00",
+    End = "2024 May 10 19:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 18-45-00_16"
+}
+
+
+local Viewline_17 = {
+  Identifier = "Viewline_2024-05-10 19-00-00_17",
+  File = geojsonPath .. "2024-05-10_19-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 19:00:00",
+    End = "2024 May 10 19:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 19-00-00_17"
+}
+
+
+local Viewline_18 = {
+  Identifier = "Viewline_2024-05-10 19-15-00_18",
+  File = geojsonPath .. "2024-05-10_19-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 19:15:00",
+    End = "2024 May 10 19:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 19-15-00_18"
+}
+
+
+local Viewline_19 = {
+  Identifier = "Viewline_2024-05-10 19-30-00_19",
+  File = geojsonPath .. "2024-05-10_19-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 19:30:00",
+    End = "2024 May 10 19:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 19-30-00_19"
+}
+
+
+local Viewline_20 = {
+  Identifier = "Viewline_2024-05-10 19-45-00_20",
+  File = geojsonPath .. "2024-05-10_19-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 19:45:00",
+    End = "2024 May 10 20:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 19-45-00_20"
+}
+
+
+local Viewline_21 = {
+  Identifier = "Viewline_2024-05-10 20-00-00_21",
+  File = geojsonPath .. "2024-05-10_20-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 20:00:00",
+    End = "2024 May 10 20:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 20-00-00_21"
+}
+
+
+local Viewline_22 = {
+  Identifier = "Viewline_2024-05-10 20-15-00_22",
+  File = geojsonPath .. "2024-05-10_20-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 20:15:00",
+    End = "2024 May 10 20:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 20-15-00_22"
+}
+
+
+local Viewline_23 = {
+  Identifier = "Viewline_2024-05-10 20-30-00_23",
+  File = geojsonPath .. "2024-05-10_20-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 20:30:00",
+    End = "2024 May 10 20:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 20-30-00_23"
+}
+
+
+local Viewline_24 = {
+  Identifier = "Viewline_2024-05-10 20-45-00_24",
+  File = geojsonPath .. "2024-05-10_20-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 20:45:00",
+    End = "2024 May 10 21:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 20-45-00_24"
+}
+
+
+local Viewline_25 = {
+  Identifier = "Viewline_2024-05-10 21-00-00_25",
+  File = geojsonPath .. "2024-05-10_21-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:00:00",
+    End = "2024 May 10 21:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 21-00-00_25"
+}
+
+
+local Viewline_26 = {
+  Identifier = "Viewline_2024-05-10 21-15-00_26",
+  File = geojsonPath .. "2024-05-10_21-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:15:00",
+    End = "2024 May 10 21:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 21-15-00_26"
+}
+
+
+local Viewline_27 = {
+  Identifier = "Viewline_2024-05-10 21-30-00_27",
+  File = geojsonPath .. "2024-05-10_21-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:30:00",
+    End = "2024 May 10 21:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 21-30-00_27"
+}
+
+
+local Viewline_28 = {
+  Identifier = "Viewline_2024-05-10 21-45-00_28",
+  File = geojsonPath .. "2024-05-10_21-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:45:00",
+    End = "2024 May 10 22:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 21-45-00_28"
+}
+
+
+local Viewline_29 = {
+  Identifier = "Viewline_2024-05-10 22-00-00_29",
+  File = geojsonPath .. "2024-05-10_22-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 22:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 22-00-00_29"
+}
+
+
+local Viewline_30 = {
+  Identifier = "Viewline_2024-05-10 22-15-00_30",
+  File = geojsonPath .. "2024-05-10_22-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 22:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 22-15-00_30"
+}
+
+
+local Viewline_31 = {
+  Identifier = "Viewline_2024-05-10 22-30-00_31",
+  File = geojsonPath .. "2024-05-10_22-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 22:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 22-30-00_31"
+}
+
+
+local Viewline_32 = {
+  Identifier = "Viewline_2024-05-10 22-45-00_32",
+  File = geojsonPath .. "2024-05-10_22-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 22-45-00_32"
+}
+
+
+local Viewline_33 = {
+  Identifier = "Viewline_2024-05-10 23-00-00_33",
+  File = geojsonPath .. "2024-05-10_23-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 10 23:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 23-00-00_33"
+}
+
+
+local Viewline_34 = {
+  Identifier = "Viewline_2024-05-10 23-15-00_34",
+  File = geojsonPath .. "2024-05-10_23-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:15:00",
+    End = "2024 May 10 23:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 23-15-00_34"
+}
+
+
+local Viewline_35 = {
+  Identifier = "Viewline_2024-05-10 23-30-00_35",
+  File = geojsonPath .. "2024-05-10_23-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:30:00",
+    End = "2024 May 10 23:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 23-30-00_35"
+}
+
+
+local Viewline_36 = {
+  Identifier = "Viewline_2024-05-10 23-45-00_36",
+  File = geojsonPath .. "2024-05-10_23-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:45:00",
+    End = "2024 May 11 00:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-10 23-45-00_36"
+}
+
+
+local Viewline_37 = {
+  Identifier = "Viewline_2024-05-11 00-00-00_37",
+  File = geojsonPath .. "2024-05-11_00-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:00:00",
+    End = "2024 May 11 00:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 00-00-00_37"
+}
+
+
+local Viewline_38 = {
+  Identifier = "Viewline_2024-05-11 00-15-00_38",
+  File = geojsonPath .. "2024-05-11_00-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:15:00",
+    End = "2024 May 11 00:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 00-15-00_38"
+}
+
+
+local Viewline_39 = {
+  Identifier = "Viewline_2024-05-11 00-30-00_39",
+  File = geojsonPath .. "2024-05-11_00-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:30:00",
+    End = "2024 May 11 00:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 00-30-00_39"
+}
+
+
+local Viewline_40 = {
+  Identifier = "Viewline_2024-05-11 00-45-00_40",
+  File = geojsonPath .. "2024-05-11_00-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:45:00",
+    End = "2024 May 11 01:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 00-45-00_40"
+}
+
+
+local Viewline_41 = {
+  Identifier = "Viewline_2024-05-11 01-00-00_41",
+  File = geojsonPath .. "2024-05-11_01-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:00:00",
+    End = "2024 May 11 01:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 01-00-00_41"
+}
+
+
+local Viewline_42 = {
+  Identifier = "Viewline_2024-05-11 01-15-00_42",
+  File = geojsonPath .. "2024-05-11_01-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:15:00",
+    End = "2024 May 11 01:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 01-15-00_42"
+}
+
+
+local Viewline_43 = {
+  Identifier = "Viewline_2024-05-11 01-30-00_43",
+  File = geojsonPath .. "2024-05-11_01-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:30:00",
+    End = "2024 May 11 01:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 01-30-00_43"
+}
+
+
+local Viewline_44 = {
+  Identifier = "Viewline_2024-05-11 01-45-00_44",
+  File = geojsonPath .. "2024-05-11_01-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:45:00",
+    End = "2024 May 11 02:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 01-45-00_44"
+}
+
+
+local Viewline_45 = {
+  Identifier = "Viewline_2024-05-11 02-00-00_45",
+  File = geojsonPath .. "2024-05-11_02-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 02-00-00_45"
+}
+
+
+local Viewline_46 = {
+  Identifier = "Viewline_2024-05-11 02-15-00_46",
+  File = geojsonPath .. "2024-05-11_02-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 02-15-00_46"
+}
+
+
+local Viewline_47 = {
+  Identifier = "Viewline_2024-05-11 02-30-00_47",
+  File = geojsonPath .. "2024-05-11_02-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 02-30-00_47"
+}
+
+
+local Viewline_48 = {
+  Identifier = "Viewline_2024-05-11 02-45-00_48",
+  File = geojsonPath .. "2024-05-11_02-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:45:00",
+    End = "2024 May 11 03:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 02-45-00_48"
+}
+
+
+local Viewline_49 = {
+  Identifier = "Viewline_2024-05-11 03-00-00_49",
+  File = geojsonPath .. "2024-05-11_03-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 03:00:00",
+    End = "2024 May 11 03:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 03-00-00_49"
+}
+
+
+local Viewline_50 = {
+  Identifier = "Viewline_2024-05-11 03-15-00_50",
+  File = geojsonPath .. "2024-05-11_03-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 03:15:00",
+    End = "2024 May 11 03:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 03-15-00_50"
+}
+
+
+local Viewline_51 = {
+  Identifier = "Viewline_2024-05-11 03-30-00_51",
+  File = geojsonPath .. "2024-05-11_03-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 03:30:00",
+    End = "2024 May 11 03:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 03-30-00_51"
+}
+
+
+local Viewline_52 = {
+  Identifier = "Viewline_2024-05-11 03-45-00_52",
+  File = geojsonPath .. "2024-05-11_03-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 03:45:00",
+    End = "2024 May 11 04:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 03-45-00_52"
+}
+
+
+local Viewline_53 = {
+  Identifier = "Viewline_2024-05-11 04-00-00_53",
+  File = geojsonPath .. "2024-05-11_04-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 04:00:00",
+    End = "2024 May 11 04:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 04-00-00_53"
+}
+
+
+local Viewline_54 = {
+  Identifier = "Viewline_2024-05-11 04-15-00_54",
+  File = geojsonPath .. "2024-05-11_04-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 04:15:00",
+    End = "2024 May 11 04:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 04-15-00_54"
+}
+
+
+local Viewline_55 = {
+  Identifier = "Viewline_2024-05-11 04-30-00_55",
+  File = geojsonPath .. "2024-05-11_04-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 04:30:00",
+    End = "2024 May 11 04:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 04-30-00_55"
+}
+
+
+local Viewline_56 = {
+  Identifier = "Viewline_2024-05-11 04-45-00_56",
+  File = geojsonPath .. "2024-05-11_04-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 04:45:00",
+    End = "2024 May 11 05:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 04-45-00_56"
+}
+
+
+local Viewline_57 = {
+  Identifier = "Viewline_2024-05-11 05-00-00_57",
+  File = geojsonPath .. "2024-05-11_05-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 05:00:00",
+    End = "2024 May 11 05:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 05-00-00_57"
+}
+
+
+local Viewline_58 = {
+  Identifier = "Viewline_2024-05-11 05-15-00_58",
+  File = geojsonPath .. "2024-05-11_05-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 05:15:00",
+    End = "2024 May 11 05:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 05-15-00_58"
+}
+
+
+local Viewline_59 = {
+  Identifier = "Viewline_2024-05-11 05-30-00_59",
+  File = geojsonPath .. "2024-05-11_05-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 05:30:00",
+    End = "2024 May 11 05:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 05-30-00_59"
+}
+
+
+local Viewline_60 = {
+  Identifier = "Viewline_2024-05-11 05-45-00_60",
+  File = geojsonPath .. "2024-05-11_05-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 05:45:00",
+    End = "2024 May 11 06:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 05-45-00_60"
+}
+
+
+local Viewline_61 = {
+  Identifier = "Viewline_2024-05-11 06-00-00_61",
+  File = geojsonPath .. "2024-05-11_06-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 06:00:00",
+    End = "2024 May 11 06:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 06-00-00_61"
+}
+
+
+local Viewline_62 = {
+  Identifier = "Viewline_2024-05-11 06-15-00_62",
+  File = geojsonPath .. "2024-05-11_06-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 06:15:00",
+    End = "2024 May 11 06:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 06-15-00_62"
+}
+
+
+local Viewline_63 = {
+  Identifier = "Viewline_2024-05-11 06-30-00_63",
+  File = geojsonPath .. "2024-05-11_06-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 06:30:00",
+    End = "2024 May 11 06:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 06-30-00_63"
+}
+
+
+local Viewline_64 = {
+  Identifier = "Viewline_2024-05-11 06-45-00_64",
+  File = geojsonPath .. "2024-05-11_06-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 06:45:00",
+    End = "2024 May 11 07:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 06-45-00_64"
+}
+
+
+local Viewline_65 = {
+  Identifier = "Viewline_2024-05-11 07-00-00_65",
+  File = geojsonPath .. "2024-05-11_07-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 07:00:00",
+    End = "2024 May 11 07:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 07-00-00_65"
+}
+
+
+local Viewline_66 = {
+  Identifier = "Viewline_2024-05-11 07-15-00_66",
+  File = geojsonPath .. "2024-05-11_07-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 07:15:00",
+    End = "2024 May 11 07:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 07-15-00_66"
+}
+
+
+local Viewline_67 = {
+  Identifier = "Viewline_2024-05-11 07-30-00_67",
+  File = geojsonPath .. "2024-05-11_07-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 07:30:00",
+    End = "2024 May 11 07:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 07-30-00_67"
+}
+
+
+local Viewline_68 = {
+  Identifier = "Viewline_2024-05-11 07-45-00_68",
+  File = geojsonPath .. "2024-05-11_07-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 07:45:00",
+    End = "2024 May 11 08:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 07-45-00_68"
+}
+
+
+local Viewline_69 = {
+  Identifier = "Viewline_2024-05-11 08-00-00_69",
+  File = geojsonPath .. "2024-05-11_08-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 08:00:00",
+    End = "2024 May 11 08:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 08-00-00_69"
+}
+
+
+local Viewline_70 = {
+  Identifier = "Viewline_2024-05-11 08-15-00_70",
+  File = geojsonPath .. "2024-05-11_08-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 08:15:00",
+    End = "2024 May 11 08:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 08-15-00_70"
+}
+
+
+local Viewline_71 = {
+  Identifier = "Viewline_2024-05-11 08-30-00_71",
+  File = geojsonPath .. "2024-05-11_08-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 08:30:00",
+    End = "2024 May 11 08:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 08-30-00_71"
+}
+
+
+local Viewline_72 = {
+  Identifier = "Viewline_2024-05-11 08-45-00_72",
+  File = geojsonPath .. "2024-05-11_08-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 08:45:00",
+    End = "2024 May 11 09:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 08-45-00_72"
+}
+
+
+local Viewline_73 = {
+  Identifier = "Viewline_2024-05-11 09-00-00_73",
+  File = geojsonPath .. "2024-05-11_09-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 09:00:00",
+    End = "2024 May 11 09:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 09-00-00_73"
+}
+
+
+local Viewline_74 = {
+  Identifier = "Viewline_2024-05-11 09-15-00_74",
+  File = geojsonPath .. "2024-05-11_09-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 09:15:00",
+    End = "2024 May 11 09:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 09-15-00_74"
+}
+
+
+local Viewline_75 = {
+  Identifier = "Viewline_2024-05-11 09-30-00_75",
+  File = geojsonPath .. "2024-05-11_09-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 09:30:00",
+    End = "2024 May 11 09:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 09-30-00_75"
+}
+
+
+local Viewline_76 = {
+  Identifier = "Viewline_2024-05-11 09-45-00_76",
+  File = geojsonPath .. "2024-05-11_09-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 09:45:00",
+    End = "2024 May 11 10:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 09-45-00_76"
+}
+
+
+local Viewline_77 = {
+  Identifier = "Viewline_2024-05-11 10-00-00_77",
+  File = geojsonPath .. "2024-05-11_10-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 10:00:00",
+    End = "2024 May 11 10:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 10-00-00_77"
+}
+
+
+local Viewline_78 = {
+  Identifier = "Viewline_2024-05-11 10-15-00_78",
+  File = geojsonPath .. "2024-05-11_10-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 10:15:00",
+    End = "2024 May 11 10:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 10-15-00_78"
+}
+
+
+local Viewline_79 = {
+  Identifier = "Viewline_2024-05-11 10-30-00_79",
+  File = geojsonPath .. "2024-05-11_10-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 10:30:00",
+    End = "2024 May 11 10:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 10-30-00_79"
+}
+
+
+local Viewline_80 = {
+  Identifier = "Viewline_2024-05-11 10-45-00_80",
+  File = geojsonPath .. "2024-05-11_10-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 10:45:00",
+    End = "2024 May 11 11:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 10-45-00_80"
+}
+
+
+local Viewline_81 = {
+  Identifier = "Viewline_2024-05-11 11-00-00_81",
+  File = geojsonPath .. "2024-05-11_11-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 11:00:00",
+    End = "2024 May 11 11:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 11-00-00_81"
+}
+
+
+local Viewline_82 = {
+  Identifier = "Viewline_2024-05-11 11-15-00_82",
+  File = geojsonPath .. "2024-05-11_11-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 11:15:00",
+    End = "2024 May 11 11:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 11-15-00_82"
+}
+
+
+local Viewline_83 = {
+  Identifier = "Viewline_2024-05-11 11-30-00_83",
+  File = geojsonPath .. "2024-05-11_11-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 11:30:00",
+    End = "2024 May 11 11:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 11-30-00_83"
+}
+
+
+local Viewline_84 = {
+  Identifier = "Viewline_2024-05-11 11-45-00_84",
+  File = geojsonPath .. "2024-05-11_11-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 11:45:00",
+    End = "2024 May 11 12:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 11-45-00_84"
+}
+
+
+local Viewline_85 = {
+  Identifier = "Viewline_2024-05-11 12-00-00_85",
+  File = geojsonPath .. "2024-05-11_12-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 12:00:00",
+    End = "2024 May 11 12:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 12-00-00_85"
+}
+
+
+local Viewline_86 = {
+  Identifier = "Viewline_2024-05-11 12-15-00_86",
+  File = geojsonPath .. "2024-05-11_12-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 12:15:00",
+    End = "2024 May 11 12:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 12-15-00_86"
+}
+
+
+local Viewline_87 = {
+  Identifier = "Viewline_2024-05-11 12-30-00_87",
+  File = geojsonPath .. "2024-05-11_12-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 12:30:00",
+    End = "2024 May 11 12:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 12-30-00_87"
+}
+
+
+local Viewline_88 = {
+  Identifier = "Viewline_2024-05-11 12-45-00_88",
+  File = geojsonPath .. "2024-05-11_12-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 12:45:00",
+    End = "2024 May 11 13:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 12-45-00_88"
+}
+
+
+local Viewline_89 = {
+  Identifier = "Viewline_2024-05-11 13-00-00_89",
+  File = geojsonPath .. "2024-05-11_13-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 13:00:00",
+    End = "2024 May 11 13:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 13-00-00_89"
+}
+
+
+local Viewline_90 = {
+  Identifier = "Viewline_2024-05-11 13-15-00_90",
+  File = geojsonPath .. "2024-05-11_13-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 13:15:00",
+    End = "2024 May 11 13:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 13-15-00_90"
+}
+
+
+local Viewline_91 = {
+  Identifier = "Viewline_2024-05-11 13-30-00_91",
+  File = geojsonPath .. "2024-05-11_13-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 13:30:00",
+    End = "2024 May 11 13:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 13-30-00_91"
+}
+
+
+local Viewline_92 = {
+  Identifier = "Viewline_2024-05-11 13-45-00_92",
+  File = geojsonPath .. "2024-05-11_13-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 13:45:00",
+    End = "2024 May 11 14:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 13-45-00_92"
+}
+
+
+local Viewline_93 = {
+  Identifier = "Viewline_2024-05-11 14-00-00_93",
+  File = geojsonPath .. "2024-05-11_14-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 14:00:00",
+    End = "2024 May 11 14:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 14-00-00_93"
+}
+
+
+local Viewline_94 = {
+  Identifier = "Viewline_2024-05-11 14-15-00_94",
+  File = geojsonPath .. "2024-05-11_14-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 14:15:00",
+    End = "2024 May 11 14:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 14-15-00_94"
+}
+
+
+local Viewline_95 = {
+  Identifier = "Viewline_2024-05-11 14-30-00_95",
+  File = geojsonPath .. "2024-05-11_14-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 14:30:00",
+    End = "2024 May 11 14:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 14-30-00_95"
+}
+
+
+local Viewline_96 = {
+  Identifier = "Viewline_2024-05-11 14-45-00_96",
+  File = geojsonPath .. "2024-05-11_14-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 14:45:00",
+    End = "2024 May 11 15:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 14-45-00_96"
+}
+
+
+local Viewline_97 = {
+  Identifier = "Viewline_2024-05-11 15-00-00_97",
+  File = geojsonPath .. "2024-05-11_15-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 15:00:00",
+    End = "2024 May 11 15:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 15-00-00_97"
+}
+
+
+local Viewline_98 = {
+  Identifier = "Viewline_2024-05-11 15-15-00_98",
+  File = geojsonPath .. "2024-05-11_15-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 15:15:00",
+    End = "2024 May 11 15:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 15-15-00_98"
+}
+
+
+local Viewline_99 = {
+  Identifier = "Viewline_2024-05-11 15-30-00_99",
+  File = geojsonPath .. "2024-05-11_15-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 15:30:00",
+    End = "2024 May 11 15:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 15-30-00_99"
+}
+
+
+local Viewline_100 = {
+  Identifier = "Viewline_2024-05-11 15-45-00_100",
+  File = geojsonPath .. "2024-05-11_15-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 15:45:00",
+    End = "2024 May 11 16:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 15-45-00_100"
+}
+
+
+local Viewline_101 = {
+  Identifier = "Viewline_2024-05-11 16-00-00_101",
+  File = geojsonPath .. "2024-05-11_16-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 16:00:00",
+    End = "2024 May 11 16:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 16-00-00_101"
+}
+
+
+local Viewline_102 = {
+  Identifier = "Viewline_2024-05-11 16-15-00_102",
+  File = geojsonPath .. "2024-05-11_16-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 16:15:00",
+    End = "2024 May 11 16:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 16-15-00_102"
+}
+
+
+local Viewline_103 = {
+  Identifier = "Viewline_2024-05-11 16-30-00_103",
+  File = geojsonPath .. "2024-05-11_16-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 16:30:00",
+    End = "2024 May 11 16:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 16-30-00_103"
+}
+
+
+local Viewline_104 = {
+  Identifier = "Viewline_2024-05-11 16-45-00_104",
+  File = geojsonPath .. "2024-05-11_16-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 16:45:00",
+    End = "2024 May 11 17:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 16-45-00_104"
+}
+
+
+local Viewline_105 = {
+  Identifier = "Viewline_2024-05-11 17-00-00_105",
+  File = geojsonPath .. "2024-05-11_17-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 17:00:00",
+    End = "2024 May 11 17:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 17-00-00_105"
+}
+
+
+local Viewline_106 = {
+  Identifier = "Viewline_2024-05-11 17-15-00_106",
+  File = geojsonPath .. "2024-05-11_17-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 17:15:00",
+    End = "2024 May 11 17:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 17-15-00_106"
+}
+
+
+local Viewline_107 = {
+  Identifier = "Viewline_2024-05-11 17-30-00_107",
+  File = geojsonPath .. "2024-05-11_17-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 17:30:00",
+    End = "2024 May 11 17:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 17-30-00_107"
+}
+
+
+local Viewline_108 = {
+  Identifier = "Viewline_2024-05-11 17-45-00_108",
+  File = geojsonPath .. "2024-05-11_17-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 17:45:00",
+    End = "2024 May 11 18:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 17-45-00_108"
+}
+
+
+local Viewline_109 = {
+  Identifier = "Viewline_2024-05-11 18-00-00_109",
+  File = geojsonPath .. "2024-05-11_18-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 18:00:00",
+    End = "2024 May 11 18:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 18-00-00_109"
+}
+
+
+local Viewline_110 = {
+  Identifier = "Viewline_2024-05-11 18-15-00_110",
+  File = geojsonPath .. "2024-05-11_18-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 18:15:00",
+    End = "2024 May 11 18:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 18-15-00_110"
+}
+
+
+local Viewline_111 = {
+  Identifier = "Viewline_2024-05-11 18-30-00_111",
+  File = geojsonPath .. "2024-05-11_18-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 18:30:00",
+    End = "2024 May 11 18:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 18-30-00_111"
+}
+
+
+local Viewline_112 = {
+  Identifier = "Viewline_2024-05-11 18-45-00_112",
+  File = geojsonPath .. "2024-05-11_18-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 18:45:00",
+    End = "2024 May 11 19:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 18-45-00_112"
+}
+
+
+local Viewline_113 = {
+  Identifier = "Viewline_2024-05-11 19-00-00_113",
+  File = geojsonPath .. "2024-05-11_19-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 19:00:00",
+    End = "2024 May 11 19:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 19-00-00_113"
+}
+
+
+local Viewline_114 = {
+  Identifier = "Viewline_2024-05-11 19-15-00_114",
+  File = geojsonPath .. "2024-05-11_19-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 19:15:00",
+    End = "2024 May 11 19:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 19-15-00_114"
+}
+
+
+local Viewline_115 = {
+  Identifier = "Viewline_2024-05-11 19-30-00_115",
+  File = geojsonPath .. "2024-05-11_19-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 19:30:00",
+    End = "2024 May 11 19:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 19-30-00_115"
+}
+
+
+local Viewline_116 = {
+  Identifier = "Viewline_2024-05-11 19-45-00_116",
+  File = geojsonPath .. "2024-05-11_19-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 19:45:00",
+    End = "2024 May 11 20:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 19-45-00_116"
+}
+
+
+local Viewline_117 = {
+  Identifier = "Viewline_2024-05-11 20-00-00_117",
+  File = geojsonPath .. "2024-05-11_20-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 20:00:00",
+    End = "2024 May 11 20:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 20-00-00_117"
+}
+
+
+local Viewline_118 = {
+  Identifier = "Viewline_2024-05-11 20-15-00_118",
+  File = geojsonPath .. "2024-05-11_20-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 20:15:00",
+    End = "2024 May 11 20:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 20-15-00_118"
+}
+
+
+local Viewline_119 = {
+  Identifier = "Viewline_2024-05-11 20-30-00_119",
+  File = geojsonPath .. "2024-05-11_20-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 20:30:00",
+    End = "2024 May 11 20:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 20-30-00_119"
+}
+
+
+local Viewline_120 = {
+  Identifier = "Viewline_2024-05-11 20-45-00_120",
+  File = geojsonPath .. "2024-05-11_20-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 20:45:00",
+    End = "2024 May 11 21:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 20-45-00_120"
+}
+
+
+local Viewline_121 = {
+  Identifier = "Viewline_2024-05-11 21-00-00_121",
+  File = geojsonPath .. "2024-05-11_21-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 21:00:00",
+    End = "2024 May 11 21:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 21-00-00_121"
+}
+
+
+local Viewline_122 = {
+  Identifier = "Viewline_2024-05-11 21-15-00_122",
+  File = geojsonPath .. "2024-05-11_21-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 21:15:00",
+    End = "2024 May 11 21:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 21-15-00_122"
+}
+
+
+local Viewline_123 = {
+  Identifier = "Viewline_2024-05-11 21-30-00_123",
+  File = geojsonPath .. "2024-05-11_21-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 21:30:00",
+    End = "2024 May 11 21:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 21-30-00_123"
+}
+
+
+local Viewline_124 = {
+  Identifier = "Viewline_2024-05-11 21-45-00_124",
+  File = geojsonPath .. "2024-05-11_21-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 21:45:00",
+    End = "2024 May 11 22:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 21-45-00_124"
+}
+
+
+local Viewline_125 = {
+  Identifier = "Viewline_2024-05-11 22-00-00_125",
+  File = geojsonPath .. "2024-05-11_22-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 22:00:00",
+    End = "2024 May 11 22:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 22-00-00_125"
+}
+
+
+local Viewline_126 = {
+  Identifier = "Viewline_2024-05-11 22-15-00_126",
+  File = geojsonPath .. "2024-05-11_22-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 22:15:00",
+    End = "2024 May 11 22:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 22-15-00_126"
+}
+
+
+local Viewline_127 = {
+  Identifier = "Viewline_2024-05-11 22-30-00_127",
+  File = geojsonPath .. "2024-05-11_22-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 22:30:00",
+    End = "2024 May 11 22:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 22-30-00_127"
+}
+
+
+local Viewline_128 = {
+  Identifier = "Viewline_2024-05-11 22-45-00_128",
+  File = geojsonPath .. "2024-05-11_22-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 22:45:00",
+    End = "2024 May 11 23:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 22-45-00_128"
+}
+
+
+local Viewline_129 = {
+  Identifier = "Viewline_2024-05-11 23-00-00_129",
+  File = geojsonPath .. "2024-05-11_23-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 23:00:00",
+    End = "2024 May 11 23:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 23-00-00_129"
+}
+
+
+local Viewline_130 = {
+  Identifier = "Viewline_2024-05-11 23-15-00_130",
+  File = geojsonPath .. "2024-05-11_23-15-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 23:15:00",
+    End = "2024 May 11 23:30:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 23-15-00_130"
+}
+
+
+local Viewline_131 = {
+  Identifier = "Viewline_2024-05-11 23-30-00_131",
+  File = geojsonPath .. "2024-05-11_23-30-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 23:30:00",
+    End = "2024 May 11 23:45:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 23-30-00_131"
+}
+
+
+local Viewline_132 = {
+  Identifier = "Viewline_2024-05-11 23-45-00_132",
+  File = geojsonPath .. "2024-05-11_23-45-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 23:45:00",
+    End = "2024 May 12 00:00:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-11 23-45-00_132"
+}
+
+
+local Viewline_133 = {
+  Identifier = "Viewline_2024-05-12 00-00-00_133",
+  File = geojsonPath .. "2024-05-12_00-00-00.geojson",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 00:00:00",
+    End = "2024 May 12 00:15:00"
+  },
+  HeightOffset = 75000,
+  Name = "Viewline_2024-05-12 00-00-00_133"
+}
+
+
+asset.onInitialize(function()
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_1)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_2)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_3)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_4)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_5)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_6)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_7)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_8)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_9)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_10)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_11)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_12)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_13)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_14)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_15)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_16)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_17)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_18)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_19)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_20)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_21)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_22)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_23)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_24)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_25)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_26)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_27)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_28)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_29)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_30)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_31)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_32)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_33)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_34)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_35)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_36)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_37)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_38)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_39)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_40)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_41)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_42)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_43)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_44)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_45)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_46)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_47)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_48)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_49)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_50)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_51)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_52)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_53)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_54)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_55)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_56)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_57)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_58)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_59)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_60)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_61)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_62)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_63)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_64)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_65)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_66)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_67)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_68)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_69)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_70)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_71)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_72)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_73)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_74)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_75)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_76)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_77)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_78)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_79)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_80)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_81)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_82)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_83)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_84)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_85)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_86)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_87)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_88)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_89)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_90)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_91)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_92)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_93)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_94)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_95)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_96)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_97)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_98)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_99)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_100)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_101)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_102)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_103)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_104)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_105)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_106)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_107)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_108)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_109)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_110)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_111)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_112)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_113)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_114)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_115)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_116)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_117)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_118)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_119)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_120)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_121)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_122)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_123)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_124)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_125)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_126)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_127)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_128)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_129)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_130)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_131)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_132)
+openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Viewline_133)
+
+end)
+
+asset.onDeinitialize(function()
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_1)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_2)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_3)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_4)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_5)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_6)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_7)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_8)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_9)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_10)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_11)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_12)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_13)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_14)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_15)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_16)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_17)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_18)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_19)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_20)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_21)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_22)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_23)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_24)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_25)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_26)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_27)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_28)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_29)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_30)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_31)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_32)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_33)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_34)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_35)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_36)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_37)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_38)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_39)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_40)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_41)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_42)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_43)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_44)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_45)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_46)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_47)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_48)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_49)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_50)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_51)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_52)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_53)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_54)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_55)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_56)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_57)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_58)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_59)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_60)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_61)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_62)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_63)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_64)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_65)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_66)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_67)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_68)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_69)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_70)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_71)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_72)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_73)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_74)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_75)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_76)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_77)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_78)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_79)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_80)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_81)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_82)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_83)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_84)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_85)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_86)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_87)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_88)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_89)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_90)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_91)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_92)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_93)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_94)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_95)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_96)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_97)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_98)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_99)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_100)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_101)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_102)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_103)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_104)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_105)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_106)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_107)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_108)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_109)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_110)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_111)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_112)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_113)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_114)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_115)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_116)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_117)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_118)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_119)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_120)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_121)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_122)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_123)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_124)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_125)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_126)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_127)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_128)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_129)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_130)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_131)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_132)
+openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Viewline_133)
+
+end)
+

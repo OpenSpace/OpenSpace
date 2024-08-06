@@ -3,13 +3,53 @@ local showAllAuroras = {
     Identifier = "os.allAuroras",
     Name = "Show all Auroras",
     Command = [[
-        openspace.setPropertyValue("Scene.Aurora*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.Aurora*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Fade",1,1)
+        openspace.fadeIn("Scene.Aurora*.Renderable")
+        openspace.fadeIn("Scene.icon*.Renderable")
     ]],
     Documentation = [[]],
-    GuiPath = "/Aurorasaurus",
+    GuiPath = "/Aurorasaurus/Icons",
+    IsLocal = false
+  }
+
+  local toggleNotSeenAuroras = {
+    Identifier = "os.toggleNotSeenAuroras",
+    Name = "Toggle not seen Auroras",
+    Command = [[
+        if openspace.propertyValue("Scene.notSeenAuroraIcon1.Renderable.Enabled") then
+          openspace.setPropertyValue("Scene.notSeenAuroraIcon*.Renderable.Fade",0,1)
+          openspace.setPropertyValue("Scene.notSeenAuroraIcon*.Renderable.Enabled", false)
+        else
+          openspace.setPropertyValue("Scene.notSeenAuroraIcon*.Renderable.Enabled", true)
+          openspace.setPropertyValue("Scene.notSeenAuroraIcon*.Renderable.Fade",1,1)
+        end
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Icons",
+    IsLocal = false
+  }
+
+  local toggleShapeIcons = {
+    Identifier = "os.toggleShapeIcons",
+    Name = "Toggle shapes on icons",
+    Command = [[
+        if openspace.propertyValue("Scene.shapeAuroraGreenPinkRed4.Renderable.Enabled") then
+          openspace.setPropertyValue("Scene.shape*.Renderable.Fade",0,1)
+          openspace.setPropertyValue("Scene.shape*.Renderable.Enabled", false)
+          openspace.setPropertyValue("Scene.Aurora*.Renderable.Enabled", true)
+          openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Enabled", true)
+          openspace.setPropertyValue("Scene.Aurora*.Renderable.Fade",1,1)
+          openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Fade",1,1)
+        else
+          openspace.setPropertyValue("Scene.Aurora*.Renderable.Fade",0,1)
+          openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Fade",0,1)
+          openspace.setPropertyValue("Scene.Aurora*.Renderable.Enabled", false)
+          openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Enabled", false)
+          openspace.setPropertyValue("Scene.shape*.Renderable.Enabled", true)
+          openspace.setPropertyValue("Scene.shape*.Renderable.Fade",1,1)
+        end
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Icons",
     IsLocal = false
   }
 
@@ -18,24 +58,18 @@ local showRedAuroras = {
     Name = "Show only red Auroras",
     Command = [[
         openspace.setPropertyValue("Scene.Aurora*.Renderable.Enabled", false)
-        openspace.setPropertyValue("Scene.Aurora*.Renderable.Fade",0)
-        openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Enabled", false)
-        openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Fade",0)
-        openspace.setPropertyValue("Scene.AuroraGreenRed*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.AuroraGreenRed*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenRed*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenRed*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.AuroraRed*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.AuroraRed*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIconRed*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIconRed*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.AuroraGreenPinkRed*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.AuroraGreenPinkRed*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenPinkRed*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenPinkRed*.Renderable.Fade",1,1)
+        openspace.setPropertyValue("Scene.icon*.Renderable.Enabled", false)
+        openspace.fadeIn("Scene.AuroraGreenRed*.Renderable")
+        openspace.fadeIn("Scene.iconGreenRed*.Renderable")
+        openspace.fadeIn("Scene.AuroraRed*.Renderable")
+        openspace.fadeIn("Scene.iconRed*.Renderable")
+        openspace.fadeIn("Scene.AuroraPinkRed*.Renderable")
+        openspace.fadeIn("Scene.iconPinkRed*.Renderable")
+        openspace.fadeIn("Scene.AuroraGreenPinkRed*.Renderable")
+        openspace.fadeIn("Scene.iconGreenPinkRed*.Renderable")
     ]],
     Documentation = [[Toggles the visibility of all red auroras and disables the others]],
-    GuiPath = "/Aurorasaurus",
+    GuiPath = "/Aurorasaurus/Icons",
     IsLocal = false
   }
 
@@ -44,16 +78,12 @@ local showRedAuroras = {
     Name = "Show only green Auroras",
     Command = [[
         openspace.setPropertyValue("Scene.Aurora*.Renderable.Enabled", false)
-        openspace.setPropertyValue("Scene.Aurora*.Renderable.Fade",0)
-        openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Enabled", false)
-        openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Fade",0)
-        openspace.setPropertyValue("Scene.AuroraGreen*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.AuroraGreen*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIconGreen*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIconGreen*.Renderable.Fade",1,1)
+        openspace.setPropertyValue("Scene.icon*.Renderable.Enabled", false)
+        openspace.fadeIn("Scene.AuroraGreen*.Renderable")
+        openspace.fadeIn("Scene.iconGreen*.Renderable")
     ]],
     Documentation = [[]],
-    GuiPath = "/Aurorasaurus",
+    GuiPath = "/Aurorasaurus/Icons",
     IsLocal = false
   }
 
@@ -62,20 +92,14 @@ local showRedAuroras = {
     Name = "Show only pink Auroras",
     Command = [[
         openspace.setPropertyValue("Scene.Aurora*.Renderable.Enabled", false)
-        openspace.setPropertyValue("Scene.Aurora*.Renderable.Fade",0)
-        openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Enabled", false)
-        openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Fade",0)
-        openspace.setPropertyValue("Scene.AuroraGreenPink*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.AuroraGreenPink*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenPink*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenPink*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.AuroraPink*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.AuroraPink*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIconPink*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIconPink*.Renderable.Fade",1,1)
+        openspace.setPropertyValue("Scene.icon*.Renderable.Enabled", false)
+        openspace.fadeIn("Scene.AuroraGreenPink*.Renderable")
+        openspace.fadeIn("Scene.iconGreenPink*.Renderable")
+        openspace.fadeIn("Scene.AuroraPink*.Renderable")
+        openspace.fadeIn("Scene.iconPink*.Renderable")
     ]],
     Documentation = [[]],
-    GuiPath = "/Aurorasaurus",
+    GuiPath = "/Aurorasaurus/Icons",
     IsLocal = false
   }
 
@@ -84,49 +108,118 @@ local showRedAuroras = {
     Name = "Show only white Auroras",
     Command = [[
         openspace.setPropertyValue("Scene.Aurora*.Renderable.Enabled", false)
-        openspace.setPropertyValue("Scene.Aurora*.Renderable.Fade",0)
-        openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Enabled", false)
-        openspace.setPropertyValue("Scene.timeFrameIcon*.Renderable.Fade",0)
-        openspace.setPropertyValue("Scene.AuroraGreenWhite*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.AuroraGreenWhite*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenWhite*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenWhite*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.AuroraWhite*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.AuroraWhite*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIconWhite*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIconWhite*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.AuroraGreenPinkWhite*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.AuroraGreenPinkWhite*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenPinkWhite*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenPinkWhite*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.AuroraGreenPinkRedWhite*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.AuroraGreenPinkRedWhite*.Renderable.Fade",1,1)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenPinkRedWhite*.Renderable.Enabled", true)
-        openspace.setPropertyValue("Scene.timeFrameIconGreenPinkRedWhite*.Renderable.Fade",1,1)
+        openspace.setPropertyValue("Scene.icon*.Renderable.Enabled", false)
+        openspace.fadeIn("Scene.AuroraGreenWhite*.Renderable")
+        openspace.fadeIn("Scene.iconGreenWhite*.Renderable")
+        openspace.fadeIn("Scene.AuroraWhite*.Renderable")
+        openspace.fadeIn("Scene.iconWhite*.Renderable")
+        openspace.fadeIn("Scene.AuroraRedWhite*.Renderable")
+        openspace.fadeIn("Scene.iconRedWhite*.Renderable")
+        openspace.fadeIn("Scene.AuroraGreenPinkWhite*.Renderable")
+        openspace.fadeIn("Scene.iconGreenGreenPinkWhite*.Renderable")
+        openspace.fadeIn("Scene.AuroraGreenPinkRedWhite*.Renderable")
+        openspace.fadeIn("Scene.iconGreenPinkRedWhite*.Renderable")
     ]],
     Documentation = [[]],
-    GuiPath = "/Aurorasaurus",
+    GuiPath = "/Aurorasaurus/Icons",
+    IsLocal = false
+  }
+
+
+  local enableViewline = {
+    Identifier = "os.enableViewline",
+    Name = "Enable Viewline",
+    Command = [[
+      openspace.fadeIn("Scene.Earth.Renderable.GeoJson.Viewline_2024-05*")
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Prediction",
+    IsLocal = false
+  }
+
+  local disableViewline = {
+    Identifier = "os.disableViewline",
+    Name = "Disable Viewline",
+    Command = [[
+        openspace.fadeOut("Scene.Earth.Renderable.GeoJson.Viewline_2024-05*")
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Prediction",
+    IsLocal = false
+  }
+
+  local enableOval = {
+    Identifier = "os.enableOval",
+    Name = "Enable Oval",
+    Command = [[
+      openspace.fadeIn("Scene.Earth.Renderable.GeoJson.AuroraOval_2024-05*")
+      openspace.setPropertyValueSingle("ScreenSpace.Legend-aurora-oval.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.Legend-aurora-oval.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Prediction",
+    IsLocal = false
+  }
+
+  local disableOval = {
+    Identifier = "os.disableOval",
+    Name = "Disable Oval",
+    Command = [[
+        openspace.fadeOut("Scene.Earth.Renderable.GeoJson.AuroraOval_2024-05*")
+        openspace.setPropertyValueSingle(
+          "ScreenSpace.Legend-aurora-oval.Fade",
+          0.0,
+          openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+          "Linear",
+          'openspace.setPropertyValueSingle("ScreenSpace.Legend-aurora-oval.Enabled", false)'
+        )
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Prediction",
     IsLocal = false
   }
 
   asset.onInitialize(function()
     openspace.action.registerAction(showAllAuroras)
+    openspace.action.registerAction(toggleNotSeenAuroras)
+    openspace.action.registerAction(toggleShapeIcons)
     openspace.action.registerAction(showGreenAuroras)
     openspace.action.registerAction(showPinkAuroras)
     openspace.action.registerAction(showWhiteAuroras)
     openspace.action.registerAction(showRedAuroras)
+    openspace.action.registerAction(enableViewline)
+    openspace.action.registerAction(disableViewline)
+    openspace.action.registerAction(enableOval)
+    openspace.action.registerAction(disableOval)
   end)
 
   asset.onDeinitialize(function()
     openspace.action.removeAction(showAllAuroras)
+    openspace.action.removeAction(toggleNotSeenAuroras)
+    openspace.action.removeAction(toggleShapeIcons)
     openspace.action.removeAction(showGreenAuroras)
     openspace.action.removeAction(showPinkAuroras)
     openspace.action.removeAction(showWhiteAuroras)
     openspace.action.removeAction(showRedAuroras)
+    openspace.action.removeAction(enableViewline)
+    openspace.action.removeAction(disableViewline)
+    openspace.action.removeAction(enableOval)
+    openspace.action.removeAction(disableOval)
   end)
 
   asset.export("showAllAuroras", showAllAuroras.Identifier)
+  asset.export("enableNotSeenAuroras", toggleNotSeenAuroras.Identifier)
+  asset.export("toggleShapeIcons", toggleShapeIcons.Identifier)
   asset.export("showGreenAuroras", showGreenAuroras.Identifier)
   asset.export("showPinkAuroras", showPinkAuroras.Identifier)
   asset.export("showWhiteAuroras", showWhiteAuroras.Identifier)
   asset.export("ShowRedAuroras", showRedAuroras.Identifier)
+  asset.export("enableViewline", enableViewline.Identifier)
+  asset.export("disableViewline", disableViewline.Identifier)
+  asset.export("enableViewline", enableOval.Identifier)
+  asset.export("disableViewline", disableOval.Identifier)

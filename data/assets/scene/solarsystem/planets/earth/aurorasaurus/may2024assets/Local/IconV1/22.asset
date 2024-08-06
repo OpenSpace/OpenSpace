@@ -102,40 +102,6 @@ Enabled = true
 }
 
 
-local notSeenAuroraIcon3993 = {
-  Identifier = "notSeenAuroraIcon3993",
-  Parent = earth.Earth.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = "2024 May 10 22:15:00",
-    End = "2024 May 10 22:30:00"
-  },
-  Transform = {
-    Translation = {
-      Type = "GlobeTranslation",
-      Globe = earth.Earth.Identifier,
-      Latitude = 51.36917769890656,
-      Longitude = 0.4979965088671534,
-      Altitude = 95000,
-      UseHeightmap = false
-    }
-  },
-  Renderable = {
-    Type = "RenderablePlaneImageLocal",
-    Size = 75000,
-Origin = "Center",
-Billboard = true,
-Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-Opacity = 1.0,
-Enabled = true
-  },
-  GUI = {
-    Path = "/Aurorasaurus",
-    Name = "Aurora not seen 3993"
-  }
-}
-
-
 local timeFrameIconPinkRed3995 = {
   Identifier = "timeFrameIconPinkRed3995",
   Parent = earth.Earth.Identifier,
@@ -528,7 +494,6 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(notSeenAuroraIcon3990)
   openspace.addSceneGraphNode(notSeenAuroraIcon3992)
   openspace.addSceneGraphNode(notSeenAuroraIcon3993)
-  openspace.addSceneGraphNode(notSeenAuroraIcon3993)
   openspace.addSceneGraphNode(timeFrameIconPinkRed3995)
   openspace.addSceneGraphNode(notSeenAuroraIcon3996)
   openspace.addSceneGraphNode(notSeenAuroraIcon3997)
@@ -546,7 +511,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(notSeenAuroraIcon3990)
   openspace.removeSceneGraphNode(notSeenAuroraIcon3992)
   openspace.removeSceneGraphNode(notSeenAuroraIcon3993)
-  openspace.removeSceneGraphNode(notSeenAuroraIcon3993)
   openspace.removeSceneGraphNode(timeFrameIconPinkRed3995)
   openspace.removeSceneGraphNode(notSeenAuroraIcon3996)
   openspace.removeSceneGraphNode(notSeenAuroraIcon3997)
@@ -562,7 +526,6 @@ end)
 
 asset.export(notSeenAuroraIcon3990)
 asset.export(notSeenAuroraIcon3992)
-asset.export(notSeenAuroraIcon3993)
 asset.export(notSeenAuroraIcon3993)
 asset.export(timeFrameIconPinkRed3995)
 asset.export(notSeenAuroraIcon3996)

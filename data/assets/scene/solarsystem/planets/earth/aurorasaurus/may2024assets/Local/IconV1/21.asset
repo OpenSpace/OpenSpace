@@ -115,53 +115,6 @@ local AuroraGreen3803 = {
 }
 
 
-local AuroraGreen3803 = {
-  Identifier = "AuroraGreen3803",
-  Parent = earth.Earth.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = "2024 May 11 06:00:00",
-    End = "2024 May 11 07:00:00"
-  },
-  Transform = {
-    Translation = {
-      Type = "GlobeTranslation",
-      Globe = earth.Earth.Identifier,
-      Latitude = 47.36235097163588,
-      Longitude = -123.10423187132439,
-      Altitude = 120000,
-      UseHeightmap = false
-    }
-  },
-  Renderable = {
-    Type = "RenderableSwitch",
-    Renderable1 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3803.jpg",
-          Opacity = 1,
-          Enabled = true
-        },
-        Renderable2 = {
-          Type = "RenderablePlaneImageLocal",
-          Size = 75000,
-          Origin = "Center",
-          Billboard = true,
-          Texture = "${USER_ASSETS}/aurorasaurus/icons/green.png",
-          Opacity = 1,
-          Enabled = true
-        },
-        DistanceThreshold = 1000000
-  },
-  GUI = {
-    Path = "/Aurorasaurus",
-    Name = "Aurora Image 3803"
-  }
-}
-
-
 local notSeenAuroraIcon3805 = {
   Identifier = "notSeenAuroraIcon3805",
   Parent = earth.Earth.Identifier,
@@ -6699,7 +6652,6 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(notSeenAuroraIcon3801)
   openspace.addSceneGraphNode(timeFrameIconGreenPinkRedWhite3802)
   openspace.addSceneGraphNode(AuroraGreen3803)
-  openspace.addSceneGraphNode(AuroraGreen3803)
   openspace.addSceneGraphNode(notSeenAuroraIcon3805)
   openspace.addSceneGraphNode(AuroraRed3806)
   openspace.addSceneGraphNode(AuroraGreenPinkRed3807)
@@ -6892,7 +6844,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(notSeenAuroraIcon3801)
   openspace.removeSceneGraphNode(timeFrameIconGreenPinkRedWhite3802)
   openspace.removeSceneGraphNode(AuroraGreen3803)
-  openspace.removeSceneGraphNode(AuroraGreen3803)
   openspace.removeSceneGraphNode(notSeenAuroraIcon3805)
   openspace.removeSceneGraphNode(AuroraRed3806)
   openspace.removeSceneGraphNode(AuroraGreenPinkRed3807)
@@ -7083,7 +7034,6 @@ end)
 
 asset.export(notSeenAuroraIcon3801)
 asset.export(timeFrameIconGreenPinkRedWhite3802)
-asset.export(AuroraGreen3803)
 asset.export(AuroraGreen3803)
 asset.export(notSeenAuroraIcon3805)
 asset.export(AuroraRed3806)

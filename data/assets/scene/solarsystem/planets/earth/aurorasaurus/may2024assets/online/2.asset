@@ -1,0 +1,7041 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local imagePath = asset.resource("C:/Users/alundkvi/Documents/work/data/AuroraData/AuroraImages/")
+
+local AuroraGreenRed430 = {
+  Identifier = "AuroraGreenRed430",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.650362146285325,
+      Longitude = -0.048737746234883084,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12665-full-2024-05-1022%3A53%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 430"
+  }
+}
+
+
+local AuroraGreenPink431 = {
+  Identifier = "AuroraGreenPink431",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.689086854049066,
+      Longitude = 1.9140447954185602,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12666-full-2024-05-1022%3A53%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 431"
+  }
+}
+
+
+local Aurora434 = {
+  Identifier = "Aurora434",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.14925197572733,
+      Longitude = 1.0883800899575764,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12669-full-2024-05-1022%3A54%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 434"
+  }
+}
+
+
+local AuroraRed435 = {
+  Identifier = "AuroraRed435",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.799041327649576,
+      Longitude = 6.996582046695437,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12670-full-2024-05-1022%3A54%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 435"
+  }
+}
+
+
+local AuroraGreenPink436 = {
+  Identifier = "AuroraGreenPink436",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.545056806570024,
+      Longitude = -0.7689355222146499,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12671-full-2024-05-1022%3A54%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 436"
+  }
+}
+
+
+local AuroraGreenPink438 = {
+  Identifier = "AuroraGreenPink438",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.695510034942494,
+      Longitude = 1.8890547705946101,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12673-full-2024-05-1022%3A55%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 438"
+  }
+}
+
+
+local Aurora439 = {
+  Identifier = "Aurora439",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.36626595756635,
+      Longitude = 1.5848682242838645,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12675-full-2024-05-1022%3A55%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 439"
+  }
+}
+
+
+local AuroraGreenPink441 = {
+  Identifier = "AuroraGreenPink441",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:15:00",
+    End = "2024 May 10 22:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.158946079484416,
+      Longitude = 0.929105478997754,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12677-full-2024-05-1022%3A55%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 441"
+  }
+}
+
+
+local AuroraGreenPinkWhite446 = {
+  Identifier = "AuroraGreenPinkWhite446",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.029229505614545,
+      Longitude = 1.7511651352742885,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12682-full-2024-05-1022%3A55%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 446"
+  }
+}
+
+
+local Aurora449 = {
+  Identifier = "Aurora449",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.15833780203494,
+      Longitude = 1.1251272408531594,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12685-full-2024-05-1022%3A55%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 449"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite450 = {
+  Identifier = "AuroraGreenPinkRedWhite450",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.7368918653437,
+      Longitude = -2.991006037182383,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12686-full-2024-05-1022%3A55%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 450"
+  }
+}
+
+
+local AuroraRed453 = {
+  Identifier = "AuroraRed453",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.802246782916235,
+      Longitude = 7.0135672414680155,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12689-full-2024-05-1022%3A56%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 453"
+  }
+}
+
+
+local Aurora454 = {
+  Identifier = "Aurora454",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.00018796999327,
+      Longitude = -0.33960160494494146,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12690-full-2024-05-1022%3A56%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 454"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite455 = {
+  Identifier = "AuroraGreenPinkRedWhite455",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.25351572663386,
+      Longitude = -0.3168277827979035,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12691-full-2024-05-1022%3A56%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 455"
+  }
+}
+
+
+local AuroraGreenPinkRed457 = {
+  Identifier = "AuroraGreenPinkRed457",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:15:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.700462043390274,
+      Longitude = 1.923344363303833,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12693-full-2024-05-1022%3A56%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 457"
+  }
+}
+
+
+local AuroraGreenRed459 = {
+  Identifier = "AuroraGreenRed459",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.83583846223357,
+      Longitude = -0.4389576884786858,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12695-full-2024-05-1022%3A56%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 459"
+  }
+}
+
+
+local AuroraGreenRed460 = {
+  Identifier = "AuroraGreenRed460",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.14155703439495,
+      Longitude = 0.7047118188671568,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12696-full-2024-05-1022%3A57%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 460"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite462 = {
+  Identifier = "AuroraGreenPinkRedWhite462",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.64057048393308,
+      Longitude = 1.1358475817011937,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12698-full-2024-05-1022%3A57%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 462"
+  }
+}
+
+
+local AuroraGreenPinkRed464 = {
+  Identifier = "AuroraGreenPinkRed464",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.14016554649013,
+      Longitude = -1.0218090419434025,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12700-full-2024-05-1022%3A57%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 464"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite465 = {
+  Identifier = "AuroraGreenPinkRedWhite465",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.99583002100686,
+      Longitude = -0.9656892536797805,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12701-full-2024-05-1022%3A58%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 465"
+  }
+}
+
+
+local AuroraPink466 = {
+  Identifier = "AuroraPink466",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 42.77243564476613,
+      Longitude = 17.957185701479148,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12702-full-2024-05-1022%3A58%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 466"
+  }
+}
+
+
+local AuroraGreenPinkRed467 = {
+  Identifier = "AuroraGreenPinkRed467",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.183687231844395,
+      Longitude = -1.5395270516493007,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12703-full-2024-05-1022%3A58%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 467"
+  }
+}
+
+
+local AuroraGreenPink468 = {
+  Identifier = "AuroraGreenPink468",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.324987548494356,
+      Longitude = 0.670757433117667,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12704-full-2024-05-1022%3A58%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 468"
+  }
+}
+
+
+local AuroraPink470 = {
+  Identifier = "AuroraPink470",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.91035552061626,
+      Longitude = 2.0966075259501125,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12706-full-2024-05-1022%3A58%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 470"
+  }
+}
+
+
+local AuroraGreenPinkRed473 = {
+  Identifier = "AuroraGreenPinkRed473",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.8441945913838,
+      Longitude = 2.2226636141459792,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12711-full-2024-05-1022%3A58%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 473"
+  }
+}
+
+
+local AuroraGreenRedWhite475 = {
+  Identifier = "AuroraGreenRedWhite475",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.83479436694138,
+      Longitude = 3.491843832589386,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12713-full-2024-05-1022%3A59%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 475"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite476 = {
+  Identifier = "AuroraGreenPinkRedWhite476",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.62727804455756,
+      Longitude = 3.3851629426914576,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12714-full-2024-05-1022%3A59%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 476"
+  }
+}
+
+
+local AuroraGreenRed477 = {
+  Identifier = "AuroraGreenRed477",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:45:00",
+    End = "2024 May 10 22:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.87587299892275,
+      Longitude = 0.8314254744456291,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12715-full-2024-05-1022%3A59%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 477"
+  }
+}
+
+
+local AuroraGreenPinkRed481 = {
+  Identifier = "AuroraGreenPinkRed481",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.85339009308019,
+      Longitude = 2.1658434179607804,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12719-full-2024-05-1022%3A59%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 481"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite483 = {
+  Identifier = "AuroraGreenPinkRedWhite483",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.568220734099505,
+      Longitude = 0.924985904906584,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12721-full-2024-05-1023%3A00%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 483"
+  }
+}
+
+
+local Aurora484 = {
+  Identifier = "Aurora484",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.450982389267445,
+      Longitude = -2.24568828722568,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12722-full-2024-05-1023%3A00%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 484"
+  }
+}
+
+
+local AuroraGreenPinkRed486 = {
+  Identifier = "AuroraGreenPinkRed486",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.55956508634566,
+      Longitude = 1.3990780404226877,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12724-full-2024-05-1023%3A00%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 486"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite487 = {
+  Identifier = "AuroraGreenPinkRedWhite487",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.202357239431265,
+      Longitude = 1.3052490172152933,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12725-full-2024-05-1023%3A00%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 487"
+  }
+}
+
+
+local AuroraGreenPink488 = {
+  Identifier = "AuroraGreenPink488",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.49291729441654,
+      Longitude = 3.29097026623995,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12726-full-2024-05-1023%3A00%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 488"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite489 = {
+  Identifier = "AuroraGreenPinkRedWhite489",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.54149989707979,
+      Longitude = 3.218778753033056,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12727-full-2024-05-1023%3A00%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 489"
+  }
+}
+
+
+local AuroraGreenPink490 = {
+  Identifier = "AuroraGreenPink490",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.015976552516534,
+      Longitude = 1.0537524765232344,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12728-full-2024-05-1023%3A00%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 490"
+  }
+}
+
+
+local AuroraGreenPink493 = {
+  Identifier = "AuroraGreenPink493",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.21864951638543,
+      Longitude = 4.24314592711147,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12731-full-2024-05-1023%3A01%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 493"
+  }
+}
+
+
+local AuroraRed494 = {
+  Identifier = "AuroraRed494",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.417849162087414,
+      Longitude = 0.7582074254232876,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12732-full-2024-05-1023%3A01%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 494"
+  }
+}
+
+
+local AuroraGreenPinkRed496 = {
+  Identifier = "AuroraGreenPinkRed496",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.21502847585796,
+      Longitude = 0.4542695270395934,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12735-full-2024-05-1023%3A01%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 496"
+  }
+}
+
+
+local AuroraGreenPinkRed498 = {
+  Identifier = "AuroraGreenPinkRed498",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.13740236122998,
+      Longitude = -0.5438177475862163,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12737-full-2024-05-1023%3A01%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 498"
+  }
+}
+
+
+local AuroraGreenRed500 = {
+  Identifier = "AuroraGreenRed500",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.77464627902438,
+      Longitude = 0.2834411628953073,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12739-full-2024-05-1023%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 500"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite501 = {
+  Identifier = "AuroraGreenPinkRedWhite501",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.39958265948894,
+      Longitude = 0.7482687644847541,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12740-full-2024-05-1023%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 501"
+  }
+}
+
+
+local AuroraGreenPinkRed502 = {
+  Identifier = "AuroraGreenPinkRed502",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.00902808698776,
+      Longitude = 1.824880407935116,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12741-full-2024-05-1023%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 502"
+  }
+}
+
+
+local AuroraGreenRed503 = {
+  Identifier = "AuroraGreenRed503",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 22:15:00",
+    End = "2024 May 11 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.72623718368389,
+      Longitude = -0.4678394432767487,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12742-full-2024-05-1023%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 503"
+  }
+}
+
+
+local AuroraGreenPink504 = {
+  Identifier = "AuroraGreenPink504",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.73496679650903,
+      Longitude = -0.5538514010810918,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12743-full-2024-05-1023%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 504"
+  }
+}
+
+
+local AuroraGreenPink506 = {
+  Identifier = "AuroraGreenPink506",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.85472078849447,
+      Longitude = -0.9576688376207261,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12745-full-2024-05-1023%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 506"
+  }
+}
+
+
+local AuroraGreenPink507 = {
+  Identifier = "AuroraGreenPink507",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.63060743397568,
+      Longitude = 1.0201161271558237,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12746-full-2024-05-1023%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 507"
+  }
+}
+
+
+local AuroraGreenRed508 = {
+  Identifier = "AuroraGreenRed508",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.275047342717826,
+      Longitude = 0.7175718053633828,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12747-full-2024-05-1023%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 508"
+  }
+}
+
+
+local AuroraGreenPink509 = {
+  Identifier = "AuroraGreenPink509",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.556340705887244,
+      Longitude = 2.786050918333406,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12748-full-2024-05-1023%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 509"
+  }
+}
+
+
+local AuroraGreenPinkRed510 = {
+  Identifier = "AuroraGreenPinkRed510",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.10463664463416,
+      Longitude = 0.9706915961256437,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12749-full-2024-05-1023%3A03%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 510"
+  }
+}
+
+
+local AuroraGreenPink511 = {
+  Identifier = "AuroraGreenPink511",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.67369192038323,
+      Longitude = 0.9816832960203643,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12750-full-2024-05-1023%3A03%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 511"
+  }
+}
+
+
+local AuroraGreenRed513 = {
+  Identifier = "AuroraGreenRed513",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.109405720553006,
+      Longitude = 0.7693110396517375,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12753-full-2024-05-1023%3A03%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 513"
+  }
+}
+
+
+local AuroraGreenRed517 = {
+  Identifier = "AuroraGreenRed517",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.205569158092196,
+      Longitude = 6.895732754261962,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12757-full-2024-05-1023%3A04%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 517"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite518 = {
+  Identifier = "AuroraGreenPinkRedWhite518",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.611814795264536,
+      Longitude = -1.9188243174815753,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12758-full-2024-05-1023%3A04%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 518"
+  }
+}
+
+
+local AuroraGreenRed519 = {
+  Identifier = "AuroraGreenRed519",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 20:30:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.45396550102482,
+      Longitude = -2.8663556607227196,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12759-full-2024-05-1023%3A04%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 519"
+  }
+}
+
+
+local AuroraGreenPink520 = {
+  Identifier = "AuroraGreenPink520",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.466274544800875,
+      Longitude = 3.246605945319298,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12760-full-2024-05-1023%3A04%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 520"
+  }
+}
+
+
+local AuroraGreenWhite521 = {
+  Identifier = "AuroraGreenWhite521",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.66286069545174,
+      Longitude = 1.5680177761230372,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12761-full-2024-05-1023%3A04%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 521"
+  }
+}
+
+
+local AuroraGreenPink527 = {
+  Identifier = "AuroraGreenPink527",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.39230143461934,
+      Longitude = 0.5099140082326389,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12767-full-2024-05-1023%3A05%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 527"
+  }
+}
+
+
+local AuroraPinkRedWhite533 = {
+  Identifier = "AuroraPinkRedWhite533",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.74652086144129,
+      Longitude = -0.34871634270667035,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12773-full-2024-05-1023%3A05%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 533"
+  }
+}
+
+
+local AuroraGreenRedWhite534 = {
+  Identifier = "AuroraGreenRedWhite534",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.938735827733716,
+      Longitude = 0.9402595143579646,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12774-full-2024-05-1023%3A05%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 534"
+  }
+}
+
+
+local AuroraRed537 = {
+  Identifier = "AuroraRed537",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 43.190579140272376,
+      Longitude = 30.82582490644098,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12777-full-2024-05-1023%3A06%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 537"
+  }
+}
+
+
+local AuroraGreenPink539 = {
+  Identifier = "AuroraGreenPink539",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:30:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.698531933574046,
+      Longitude = -2.651233087379013,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12779-full-2024-05-1023%3A06%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 539"
+  }
+}
+
+
+local AuroraPink540 = {
+  Identifier = "AuroraPink540",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.17791461243719,
+      Longitude = -0.6791572905938279,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12780-full-2024-05-1023%3A07%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 540"
+  }
+}
+
+
+local AuroraGreenPink542 = {
+  Identifier = "AuroraGreenPink542",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 22:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.4924897415103,
+      Longitude = -0.03187248757048372,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12782-full-2024-05-1023%3A07%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 542"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite543 = {
+  Identifier = "AuroraGreenPinkRedWhite543",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.48280100798242,
+      Longitude = 1.9249100323013513,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12783-full-2024-05-1023%3A07%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 543"
+  }
+}
+
+
+local AuroraGreenRedWhite544 = {
+  Identifier = "AuroraGreenRedWhite544",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.60022849349447,
+      Longitude = -0.9375305692742417,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12784-full-2024-05-1023%3A07%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 544"
+  }
+}
+
+
+local AuroraGreenPinkRed547 = {
+  Identifier = "AuroraGreenPinkRed547",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.721165957903985,
+      Longitude = 0.6154855989062241,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12787-full-2024-05-1023%3A50%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 547"
+  }
+}
+
+
+local AuroraGreenPinkRed548 = {
+  Identifier = "AuroraGreenPinkRed548",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.105796916958894,
+      Longitude = 0.9738303031730744,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12788-full-2024-05-1023%3A50%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 548"
+  }
+}
+
+
+local AuroraGreenPink552 = {
+  Identifier = "AuroraGreenPink552",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:15:00",
+    End = "2024 May 10 23:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.450217716027915,
+      Longitude = 0.9708447842580015,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12792-full-2024-05-1100%3A27%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 552"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite553 = {
+  Identifier = "AuroraGreenPinkRedWhite553",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.36840274799867,
+      Longitude = -4.163195718600156,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12793-full-2024-05-1100%3A28%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 553"
+  }
+}
+
+
+local AuroraGreenPinkRed554 = {
+  Identifier = "AuroraGreenPinkRed554",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.67230268769051,
+      Longitude = -0.10427890275396379,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12794-full-2024-05-1100%3A28%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 554"
+  }
+}
+
+
+local AuroraGreenPink556 = {
+  Identifier = "AuroraGreenPink556",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:45:00",
+    End = "2024 May 11 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.47393208651208,
+      Longitude = 1.5715842687299715,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12796-full-2024-05-1100%3A28%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 556"
+  }
+}
+
+
+local AuroraGreenPink560 = {
+  Identifier = "AuroraGreenPink560",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:00:00",
+    End = "2024 May 11 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.979613127573735,
+      Longitude = 0.6733033540176111,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12801-full-2024-05-1100%3A30%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 560"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite561 = {
+  Identifier = "AuroraGreenPinkRedWhite561",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:30:00",
+    End = "2024 May 11 00:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.142981268718586,
+      Longitude = 1.0220580414068676,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12803-full-2024-05-1100%3A30%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 561"
+  }
+}
+
+
+local AuroraGreenPinkWhite563 = {
+  Identifier = "AuroraGreenPinkWhite563",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 11 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.86989446810024,
+      Longitude = -0.284082469738408,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12805-full-2024-05-1100%3A31%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 563"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite565 = {
+  Identifier = "AuroraGreenPinkRedWhite565",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.653640839761856,
+      Longitude = 1.1819210301886427,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12807-full-2024-05-1100%3A33%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 565"
+  }
+}
+
+
+local AuroraGreenPinkRed568 = {
+  Identifier = "AuroraGreenPinkRed568",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 11 00:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.532433406232364,
+      Longitude = -1.1710027125621731,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12812-full-2024-05-1100%3A33%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 568"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite569 = {
+  Identifier = "AuroraGreenPinkRedWhite569",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:30:00",
+    End = "2024 May 11 00:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.57826217114578,
+      Longitude = -0.1430972509924081,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12813-full-2024-05-1100%3A34%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 569"
+  }
+}
+
+
+local AuroraGreenPinkWhite570 = {
+  Identifier = "AuroraGreenPinkWhite570",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 11 00:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.923790623016814,
+      Longitude = -3.5231409063792594,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12814-full-2024-05-1100%3A34%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 570"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite571 = {
+  Identifier = "AuroraGreenPinkRedWhite571",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.57194083794682,
+      Longitude = 0.7094336990118346,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12815-full-2024-05-1100%3A34%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 571"
+  }
+}
+
+
+local AuroraGreenPink573 = {
+  Identifier = "AuroraGreenPink573",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:00:00",
+    End = "2024 May 11 00:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.69822993117803,
+      Longitude = 2.040715550009433,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12817-full-2024-05-1100%3A34%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 573"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite574 = {
+  Identifier = "AuroraGreenPinkRedWhite574",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:30:00",
+    End = "2024 May 10 23:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.136764769533606,
+      Longitude = -2.5589052935976158,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12818-full-2024-05-1100%3A35%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 574"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite575 = {
+  Identifier = "AuroraGreenPinkRedWhite575",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.66125419024247,
+      Longitude = 10.649319133418308,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12819-full-2024-05-1100%3A35%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 575"
+  }
+}
+
+
+local AuroraGreenPinkRed577 = {
+  Identifier = "AuroraGreenPinkRed577",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.06810503566448,
+      Longitude = 2.0971542300405197,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12821-full-2024-05-1100%3A36%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 577"
+  }
+}
+
+
+local AuroraGreenPinkWhite578 = {
+  Identifier = "AuroraGreenPinkWhite578",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.51377525268442,
+      Longitude = 1.9978500943566022,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12823-full-2024-05-1100%3A36%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 578"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite581 = {
+  Identifier = "AuroraGreenPinkRedWhite581",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 11 00:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.394061787940736,
+      Longitude = 2.326590855243951,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12826-full-2024-05-1100%3A37%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 581"
+  }
+}
+
+
+local AuroraRed583 = {
+  Identifier = "AuroraRed583",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:30:00",
+    End = "2024 May 11 00:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = -31.534476535913765,
+      Longitude = -13.804235412792742,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12828-full-2024-05-1100%3A39%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 583"
+  }
+}
+
+
+local AuroraGreenPinkRed584 = {
+  Identifier = "AuroraGreenPinkRed584",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:30:00",
+    End = "2024 May 11 00:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.70404551266459,
+      Longitude = -4.2199523185320675,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12829-full-2024-05-1100%3A39%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 584"
+  }
+}
+
+
+local AuroraGreenPink587 = {
+  Identifier = "AuroraGreenPink587",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 11 00:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.769624559117034,
+      Longitude = -1.6890679152059334,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12833-full-2024-05-1100%3A41%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 587"
+  }
+}
+
+
+local AuroraGreenPinkRed590 = {
+  Identifier = "AuroraGreenPinkRed590",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.03929719134777,
+      Longitude = 1.4647814698487756,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12836-full-2024-05-1100%3A42%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 590"
+  }
+}
+
+
+local AuroraGreenPinkWhite592 = {
+  Identifier = "AuroraGreenPinkWhite592",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:45:00",
+    End = "2024 May 11 00:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.066943436592,
+      Longitude = 1.0498944168561282,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12838-full-2024-05-1100%3A43%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 592"
+  }
+}
+
+
+local AuroraGreenPinkWhite594 = {
+  Identifier = "AuroraGreenPinkWhite594",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 11 00:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.22081130232959,
+      Longitude = -0.6301847717583688,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12841-full-2024-05-1100%3A45%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 594"
+  }
+}
+
+
+local AuroraGreenRed595 = {
+  Identifier = "AuroraGreenRed595",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:15:00",
+    End = "2024 May 11 00:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.893420261074674,
+      Longitude = -0.29976480249854653,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12842-full-2024-05-1100%3A45%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 595"
+  }
+}
+
+
+local AuroraGreenPink598 = {
+  Identifier = "AuroraGreenPink598",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:45:00",
+    End = "2024 May 11 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.9352881715648,
+      Longitude = 0.9436008276973493,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12848-full-2024-05-1100%3A47%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 598"
+  }
+}
+
+
+local AuroraGreenPinkRed601 = {
+  Identifier = "AuroraGreenPinkRed601",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.896149713471964,
+      Longitude = 14.168555109350434,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12851-full-2024-05-1100%3A48%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 601"
+  }
+}
+
+
+local AuroraGreen607 = {
+  Identifier = "AuroraGreen607",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.595319917424575,
+      Longitude = 1.9248354753070245,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12857-full-2024-05-1100%3A51%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 607"
+  }
+}
+
+
+local AuroraRed608 = {
+  Identifier = "AuroraRed608",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 20:00:00",
+    End = "2024 May 10 20:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = -31.36964818825426,
+      Longitude = 119.22179345146853,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12858-full-2024-05-1100%3A51%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 608"
+  }
+}
+
+
+local AuroraRed609 = {
+  Identifier = "AuroraRed609",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 49.360244540219114,
+      Longitude = 21.99209937612363,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12859-full-2024-05-1100%3A52%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 609"
+  }
+}
+
+
+local AuroraGreenPinkRed613 = {
+  Identifier = "AuroraGreenPinkRed613",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:00:00",
+    End = "2024 May 11 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.4244139667599,
+      Longitude = -0.4977134833848473,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12863-full-2024-05-1100%3A53%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 613"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite614 = {
+  Identifier = "AuroraGreenPinkRedWhite614",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:45:00",
+    End = "2024 May 11 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.87238245001712,
+      Longitude = -1.5887729837040292,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12864-full-2024-05-1100%3A54%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 614"
+  }
+}
+
+
+local AuroraGreenPink615 = {
+  Identifier = "AuroraGreenPink615",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:45:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.95921418823212,
+      Longitude = 1.8486728640039811,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12865-full-2024-05-1100%3A54%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 615"
+  }
+}
+
+
+local AuroraGreenRed616 = {
+  Identifier = "AuroraGreenRed616",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:45:00",
+    End = "2024 May 11 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.63743853406734,
+      Longitude = -0.039761384050470305,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12866-full-2024-05-1100%3A54%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 616"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite617 = {
+  Identifier = "AuroraGreenPinkRedWhite617",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:45:00",
+    End = "2024 May 11 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.59245621152237,
+      Longitude = 3.0160798933948594,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12867-full-2024-05-1100%3A56%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 617"
+  }
+}
+
+
+local AuroraGreenRed620 = {
+  Identifier = "AuroraGreenRed620",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:45:00",
+    End = "2024 May 11 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.47008190567003,
+      Longitude = 7.977057153209014,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12870-full-2024-05-1100%3A58%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 620"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite622 = {
+  Identifier = "AuroraGreenPinkRedWhite622",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 11 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.22290580999837,
+      Longitude = 2.388247757471827,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12873-full-2024-05-1101%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 622"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite623 = {
+  Identifier = "AuroraGreenPinkRedWhite623",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:00:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.43557543353756,
+      Longitude = -3.110738974352657,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12874-full-2024-05-1101%3A02%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 623"
+  }
+}
+
+
+local AuroraGreenPink625 = {
+  Identifier = "AuroraGreenPink625",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 57.175461951775375,
+      Longitude = 0.5478022892111015,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12879-full-2024-05-1101%3A08%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 625"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite626 = {
+  Identifier = "AuroraGreenPinkRedWhite626",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 11 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.84364851083641,
+      Longitude = 1.388549008224568,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12880-full-2024-05-1101%3A08%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 626"
+  }
+}
+
+
+local AuroraGreenPink627 = {
+  Identifier = "AuroraGreenPink627",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:30:00",
+    End = "2024 May 11 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.821021371103875,
+      Longitude = 1.4653923906076476,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12881-full-2024-05-1101%3A08%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 627"
+  }
+}
+
+
+local AuroraPinkRed628 = {
+  Identifier = "AuroraPinkRed628",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:00:00",
+    End = "2024 May 11 01:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.54361905335131,
+      Longitude = -4.072866566294774,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12882-full-2024-05-1101%3A08%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 628"
+  }
+}
+
+
+local AuroraGreenPinkRed629 = {
+  Identifier = "AuroraGreenPinkRed629",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 10 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.08162168786964,
+      Longitude = 3.1237324471235763,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12883-full-2024-05-1101%3A09%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 629"
+  }
+}
+
+
+local AuroraGreenPinkRed630 = {
+  Identifier = "AuroraGreenPinkRed630",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.97912302256976,
+      Longitude = 0.6900149122690312,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12884-full-2024-05-1101%3A10%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 630"
+  }
+}
+
+
+local AuroraGreenPinkWhite632 = {
+  Identifier = "AuroraGreenPinkWhite632",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:30:00",
+    End = "2024 May 11 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.08039267850234,
+      Longitude = 3.0779193301172625,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12886-full-2024-05-1101%3A11%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 632"
+  }
+}
+
+
+local AuroraGreenPinkRed633 = {
+  Identifier = "AuroraGreenPinkRed633",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 11 01:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.78094327051136,
+      Longitude = -0.8632662538263531,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12888-full-2024-05-1101%3A11%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 633"
+  }
+}
+
+
+local AuroraGreenPinkRed634 = {
+  Identifier = "AuroraGreenPinkRed634",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:45:00",
+    End = "2024 May 10 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 59.33797386421856,
+      Longitude = 0.08878309268006118,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12889-full-2024-05-1101%3A11%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 634"
+  }
+}
+
+
+local AuroraGreenPink637 = {
+  Identifier = "AuroraGreenPink637",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 11 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.71297592165234,
+      Longitude = 1.0677632691406838,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12892-full-2024-05-1101%3A14%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 637"
+  }
+}
+
+
+local AuroraGreenPink638 = {
+  Identifier = "AuroraGreenPink638",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:00:00",
+    End = "2024 May 11 01:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.96557607842839,
+      Longitude = -0.21296537888240563,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12893-full-2024-05-1101%3A14%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 638"
+  }
+}
+
+
+local AuroraPinkRed640 = {
+  Identifier = "AuroraPinkRed640",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.70022228206768,
+      Longitude = 0.7923878224274123,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12897-full-2024-05-1101%3A15%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 640"
+  }
+}
+
+
+local AuroraGreenPinkRed642 = {
+  Identifier = "AuroraGreenPinkRed642",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 11 00:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.07738250908502,
+      Longitude = 0.07665876668893729,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12899-full-2024-05-1101%3A17%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 642"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite643 = {
+  Identifier = "AuroraGreenPinkRedWhite643",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:15:00",
+    End = "2024 May 11 00:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.83659962065797,
+      Longitude = -0.002373557688645722,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12900-full-2024-05-1101%3A17%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 643"
+  }
+}
+
+
+local AuroraPinkRed645 = {
+  Identifier = "AuroraPinkRed645",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:00:00",
+    End = "2024 May 11 01:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.741750014225914,
+      Longitude = 2.729359649477841,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12902-full-2024-05-1101%3A18%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 645"
+  }
+}
+
+
+local AuroraGreenPink647 = {
+  Identifier = "AuroraGreenPink647",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.20067379106547,
+      Longitude = -0.60586324851296,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12904-full-2024-05-1101%3A19%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 647"
+  }
+}
+
+
+local AuroraGreenRedWhite648 = {
+  Identifier = "AuroraGreenRedWhite648",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:30:00",
+    End = "2024 May 11 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.144389362995526,
+      Longitude = -0.5569715218061089,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12905-full-2024-05-1101%3A20%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 648"
+  }
+}
+
+
+local AuroraGreenPinkRed650 = {
+  Identifier = "AuroraGreenPinkRed650",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.617934141968355,
+      Longitude = -0.3709371123380835,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12907-full-2024-05-1101%3A20%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 650"
+  }
+}
+
+
+local AuroraPink651 = {
+  Identifier = "AuroraPink651",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:15:00",
+    End = "2024 May 11 01:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.53184224596271,
+      Longitude = 0.193828655214217,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12908-full-2024-05-1101%3A21%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 651"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite656 = {
+  Identifier = "AuroraGreenPinkRedWhite656",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 10 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.65261724414617,
+      Longitude = -0.7023441466058766,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12915-full-2024-05-1101%3A26%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 656"
+  }
+}
+
+
+local AuroraGreenPink657 = {
+  Identifier = "AuroraGreenPink657",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 11 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.05611668172723,
+      Longitude = 2.094046205091402,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12916-full-2024-05-1101%3A26%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 657"
+  }
+}
+
+
+local AuroraPink658 = {
+  Identifier = "AuroraPink658",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:00:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 42.81430688978289,
+      Longitude = -1.8070132013181495,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12917-full-2024-05-1101%3A26%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 658"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite660 = {
+  Identifier = "AuroraGreenPinkRedWhite660",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:15:00",
+    End = "2024 May 11 00:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.67187401873774,
+      Longitude = 0.6690360125844984,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12921-full-2024-05-1101%3A28%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 660"
+  }
+}
+
+
+local AuroraRed662 = {
+  Identifier = "AuroraRed662",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 23:15:00",
+    End = "2024 May 11 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = -51.61198919068582,
+      Longitude = -65.55237193219521,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12925-full-2024-05-1101%3A35%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 662"
+  }
+}
+
+
+local Aurora665 = {
+  Identifier = "Aurora665",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:30:00",
+    End = "2024 May 11 01:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.73207219593818,
+      Longitude = -66.8065521047168,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12931-full-2024-05-1101%3A37%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 665"
+  }
+}
+
+
+local AuroraGreenPinkRed672 = {
+  Identifier = "AuroraGreenPinkRed672",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:15:00",
+    End = "2024 May 11 01:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.69149757379838,
+      Longitude = -4.198528838678803,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12938-full-2024-05-1101%3A42%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 672"
+  }
+}
+
+
+local Aurora673 = {
+  Identifier = "Aurora673",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:30:00",
+    End = "2024 May 11 01:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.260887594781856,
+      Longitude = 0.26531035360778255,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12940-full-2024-05-1101%3A46%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 673"
+  }
+}
+
+
+local AuroraGreenPink676 = {
+  Identifier = "AuroraGreenPink676",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:00:00",
+    End = "2024 May 11 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.89893569364495,
+      Longitude = 0.6602329445903087,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12946-full-2024-05-1101%3A48%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 676"
+  }
+}
+
+
+local AuroraGreenPinkRed678 = {
+  Identifier = "AuroraGreenPinkRed678",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:45:00",
+    End = "2024 May 11 02:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.59847506327484,
+      Longitude = 1.3708647951410162,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12949-full-2024-05-1101%3A53%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 678"
+  }
+}
+
+
+local AuroraGreen679 = {
+  Identifier = "AuroraGreen679",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:45:00",
+    End = "2024 May 11 01:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 36.99194827449341,
+      Longitude = -80.26746993176481,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12950-full-2024-05-1101%3A52%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 679"
+  }
+}
+
+
+local AuroraGreenWhite680 = {
+  Identifier = "AuroraGreenWhite680",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:45:00",
+    End = "2024 May 11 02:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 43.072385408860065,
+      Longitude = -78.50946530239015,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12951-full-2024-05-1101%3A53%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 680"
+  }
+}
+
+
+local AuroraGreenPinkRed681 = {
+  Identifier = "AuroraGreenPinkRed681",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:30:00",
+    End = "2024 May 11 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.739565300254895,
+      Longitude = -0.1923264205264238,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12952-full-2024-05-1101%3A55%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 681"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite689 = {
+  Identifier = "AuroraGreenPinkRedWhite689",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:30:00",
+    End = "2024 May 10 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.56386057811697,
+      Longitude = 1.8974037170016584,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12961-full-2024-05-1101%3A59%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 689"
+  }
+}
+
+
+local AuroraGreenRed692 = {
+  Identifier = "AuroraGreenRed692",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:45:00",
+    End = "2024 May 11 02:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.461898627688605,
+      Longitude = -69.11882525087192,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12965-full-2024-05-1102%3A00%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 692"
+  }
+}
+
+
+local AuroraGreenWhite693 = {
+  Identifier = "AuroraGreenWhite693",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:45:00",
+    End = "2024 May 11 02:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.22156212389031,
+      Longitude = -68.7443623198173,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12966-full-2024-05-1102%3A01%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 693"
+  }
+}
+
+
+local AuroraGreenRed696 = {
+  Identifier = "AuroraGreenRed696",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:30:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.18849600753812,
+      Longitude = 1.7778374771261587,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12970-full-2024-05-1102%3A04%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 696"
+  }
+}
+
+
+local AuroraGreenPink697 = {
+  Identifier = "AuroraGreenPink697",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 00:00:00",
+    End = "2024 May 11 00:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.70340132868607,
+      Longitude = 1.8763290433977236,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12972-full-2024-05-1102%3A04%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 697"
+  }
+}
+
+
+local AuroraGreenRed698 = {
+  Identifier = "AuroraGreenRed698",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.04402535513327,
+      Longitude = 0.9974111248950759,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12973-full-2024-05-1102%3A04%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 698"
+  }
+}
+
+
+local AuroraPinkRedWhite700 = {
+  Identifier = "AuroraPinkRedWhite700",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.20211696528575,
+      Longitude = -82.37898217785565,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12977-full-2024-05-1102%3A08%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 700"
+  }
+}
+
+
+local AuroraGreenPink701 = {
+  Identifier = "AuroraGreenPink701",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:00:00",
+    End = "2024 May 11 01:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.06977142648893,
+      Longitude = 1.1529758612184229,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12978-full-2024-05-1102%3A08%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 701"
+  }
+}
+
+
+local AuroraGreenRed702 = {
+  Identifier = "AuroraGreenRed702",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 42.98729138642629,
+      Longitude = -75.66333731810789,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12979-full-2024-05-1102%3A08%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 702"
+  }
+}
+
+
+local AuroraGreenPink704 = {
+  Identifier = "AuroraGreenPink704",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 42.96386609331582,
+      Longitude = -78.46451260657018,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12981-full-2024-05-1102%3A10%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 704"
+  }
+}
+
+
+local AuroraGreenPinkRed706 = {
+  Identifier = "AuroraGreenPinkRed706",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 42.15427129617218,
+      Longitude = -80.8038013608285,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12983-full-2024-05-1102%3A10%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 706"
+  }
+}
+
+
+local AuroraGreenPinkRed709 = {
+  Identifier = "AuroraGreenPinkRed709",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 42.63093258924572,
+      Longitude = -79.19939440223467,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12986-full-2024-05-1102%3A12%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 709"
+  }
+}
+
+
+local AuroraGreenPink711 = {
+  Identifier = "AuroraGreenPink711",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 43.932050488350406,
+      Longitude = -85.95513443128775,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12988-full-2024-05-1102%3A13%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 711"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite715 = {
+  Identifier = "AuroraGreenPinkRedWhite715",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.27514220498192,
+      Longitude = -66.89665291351601,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12993-full-2024-05-1102%3A18%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 715"
+  }
+}
+
+
+local AuroraGreenPinkWhite716 = {
+  Identifier = "AuroraGreenPinkWhite716",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:45:00",
+    End = "2024 May 11 02:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.4151476937654,
+      Longitude = -68.80620434956363,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12994-full-2024-05-1102%3A18%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 716"
+  }
+}
+
+
+local AuroraGreenPinkWhite718 = {
+  Identifier = "AuroraGreenPinkWhite718",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.472080183746996,
+      Longitude = -67.60154434038238,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12996-full-2024-05-1102%3A18%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 718"
+  }
+}
+
+
+local Aurora719 = {
+  Identifier = "Aurora719",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.22212586309795,
+      Longitude = -71.67759763210448,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12997-full-2024-05-1102%3A19%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 719"
+  }
+}
+
+
+local AuroraGreenRed720 = {
+  Identifier = "AuroraGreenRed720",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 37.00973299186366,
+      Longitude = -80.29191384445193,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-12998-full-2024-05-1102%3A19%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 720"
+  }
+}
+
+
+local AuroraGreenPink721 = {
+  Identifier = "AuroraGreenPink721",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.21511280303039,
+      Longitude = -68.72927160845687,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13000-full-2024-05-1102%3A19%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 721"
+  }
+}
+
+
+local AuroraGreenPink728 = {
+  Identifier = "AuroraGreenPink728",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 42.12532022316162,
+      Longitude = -79.76978602082048,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13007-full-2024-05-1102%3A22%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 728"
+  }
+}
+
+
+local AuroraGreenPink730 = {
+  Identifier = "AuroraGreenPink730",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 41.87076254235488,
+      Longitude = -81.98492201522988,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13009-full-2024-05-1102%3A23%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 730"
+  }
+}
+
+
+local AuroraGreenRedWhite734 = {
+  Identifier = "AuroraGreenRedWhite734",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:45:00",
+    End = "2024 May 11 00:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.864295678033976,
+      Longitude = -1.867772790884134,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13013-full-2024-05-1102%3A24%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 734"
+  }
+}
+
+
+local AuroraGreenPink736 = {
+  Identifier = "AuroraGreenPink736",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 41.88232379398127,
+      Longitude = -81.98456864675467,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13015-full-2024-05-1102%3A24%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 736"
+  }
+}
+
+
+local AuroraGreenPink737 = {
+  Identifier = "AuroraGreenPink737",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.63569500043675,
+      Longitude = -67.53036640238611,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13018-full-2024-05-1102%3A25%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 737"
+  }
+}
+
+
+local AuroraPink738 = {
+  Identifier = "AuroraPink738",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 38.10233560691238,
+      Longitude = -76.8795698487498,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13019-full-2024-05-1102%3A26%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 738"
+  }
+}
+
+
+local AuroraGreenPink741 = {
+  Identifier = "AuroraGreenPink741",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.34105063005305,
+      Longitude = -71.09797854144786,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13022-full-2024-05-1102%3A27%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 741"
+  }
+}
+
+
+local AuroraGreenPink743 = {
+  Identifier = "AuroraGreenPink743",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.368785827831125,
+      Longitude = -79.11437289411951,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13025-full-2024-05-1102%3A27%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 743"
+  }
+}
+
+
+local AuroraPink744 = {
+  Identifier = "AuroraPink744",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 39.454719321446994,
+      Longitude = -78.21373887854857,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13026-full-2024-05-1102%3A28%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 744"
+  }
+}
+
+
+local AuroraGreenRed746 = {
+  Identifier = "AuroraGreenRed746",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 36.011466520410785,
+      Longitude = -76.49942118301772,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13028-full-2024-05-1102%3A28%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 746"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite747 = {
+  Identifier = "AuroraGreenPinkRedWhite747",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.2630472662433,
+      Longitude = -81.84351076983596,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13029-full-2024-05-1102%3A29%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 747"
+  }
+}
+
+
+local AuroraGreenPink748 = {
+  Identifier = "AuroraGreenPink748",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 39.92389227322024,
+      Longitude = -89.98942651297058,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13030-full-2024-05-1102%3A30%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 748"
+  }
+}
+
+
+local AuroraGreenPinkRed749 = {
+  Identifier = "AuroraGreenPinkRed749",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 45.27945520802595,
+      Longitude = -75.88585524633511,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13031-full-2024-05-1102%3A30%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 749"
+  }
+}
+
+
+local AuroraGreen750 = {
+  Identifier = "AuroraGreen750",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 55.37227530533398,
+      Longitude = -0.04026391469549112,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13032-full-2024-05-1102%3A31%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 750"
+  }
+}
+
+
+local AuroraPink752 = {
+  Identifier = "AuroraPink752",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 32.519762127206654,
+      Longitude = -95.66704841965655,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13035-full-2024-05-1102%3A32%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 752"
+  }
+}
+
+
+local AuroraGreenPinkRed753 = {
+  Identifier = "AuroraGreenPinkRed753",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 38.41774907332461,
+      Longitude = -84.59391682301371,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13036-full-2024-05-1102%3A32%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 753"
+  }
+}
+
+
+local AuroraGreenPink758 = {
+  Identifier = "AuroraGreenPink758",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.6513775754525,
+      Longitude = -68.88058492890316,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13041-full-2024-05-1102%3A35%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 758"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite760 = {
+  Identifier = "AuroraGreenPinkRedWhite760",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 43.69231904964302,
+      Longitude = -81.57722776340209,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13043-full-2024-05-1102%3A35%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 760"
+  }
+}
+
+
+local AuroraGreenPinkRed762 = {
+  Identifier = "AuroraGreenPinkRed762",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.581681961708476,
+      Longitude = -82.05914087988265,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13046-full-2024-05-1102%3A36%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 762"
+  }
+}
+
+
+local AuroraPink763 = {
+  Identifier = "AuroraPink763",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 32.39256392205257,
+      Longitude = -93.57108227604117,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13047-full-2024-05-1102%3A36%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 763"
+  }
+}
+
+
+local AuroraGreenPink767 = {
+  Identifier = "AuroraGreenPink767",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.0237250916182,
+      Longitude = -83.75675634554925,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13051-full-2024-05-1102%3A38%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 767"
+  }
+}
+
+
+local AuroraGreenRed769 = {
+  Identifier = "AuroraGreenRed769",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.75522010384369,
+      Longitude = -68.96395515646564,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13054-full-2024-05-1102%3A38%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 769"
+  }
+}
+
+
+local AuroraGreenPinkRed771 = {
+  Identifier = "AuroraGreenPinkRed771",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:45:00",
+    End = "2024 May 11 02:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.756648193821896,
+      Longitude = -81.30123102026718,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13056-full-2024-05-1102%3A39%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 771"
+  }
+}
+
+
+local Aurora772 = {
+  Identifier = "Aurora772",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.32762318015279,
+      Longitude = -81.85733680644499,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13057-full-2024-05-1102%3A40%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 772"
+  }
+}
+
+
+local AuroraGreenPink773 = {
+  Identifier = "AuroraGreenPink773",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 42.1829627969507,
+      Longitude = -80.90730437819818,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13058-full-2024-05-1102%3A40%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 773"
+  }
+}
+
+
+local AuroraPinkRedWhite774 = {
+  Identifier = "AuroraPinkRedWhite774",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.2221855427672,
+      Longitude = -76.29045543105653,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13059-full-2024-05-1102%3A40%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 774"
+  }
+}
+
+
+local Aurora779 = {
+  Identifier = "Aurora779",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 46.95937363744571,
+      Longitude = -83.43261899044359,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13066-full-2024-05-1102%3A41%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 779"
+  }
+}
+
+
+local AuroraGreenPink782 = {
+  Identifier = "AuroraGreenPink782",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.33335891326602,
+      Longitude = -76.89179158634781,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13069-full-2024-05-1102%3A42%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 782"
+  }
+}
+
+
+local AuroraGreenPink785 = {
+  Identifier = "AuroraGreenPink785",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:15:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.805512519339835,
+      Longitude = -69.04278617635069,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13073-full-2024-05-1102%3A43%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 785"
+  }
+}
+
+
+local AuroraGreenRed786 = {
+  Identifier = "AuroraGreenRed786",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 01:00:00",
+    End = "2024 May 11 01:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.55276809912484,
+      Longitude = -0.7307882435553601,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13074-full-2024-05-1102%3A43%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 786"
+  }
+}
+
+
+local AuroraGreenPinkRed788 = {
+  Identifier = "AuroraGreenPinkRed788",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 44.67267558846624,
+      Longitude = -81.41526527522,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13076-full-2024-05-1102%3A44%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 788"
+  }
+}
+
+
+local Aurora792 = {
+  Identifier = "Aurora792",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 32.456891028650055,
+      Longitude = -92.7133232120161,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13080-full-2024-05-1102%3A45%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 792"
+  }
+}
+
+
+local AuroraGreenPinkRedWhite795 = {
+  Identifier = "AuroraGreenPinkRedWhite795",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 02:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 38.20655618587641,
+      Longitude = -77.84373306899504,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageOnline",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      URL = "https://aurprod.s3.amazonaws.com:443/media/web-observation-pics/webobservation-13085-full-2024-05-1102%3A46%2B0000.png",
+      Opacity = 1,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 795"
+  }
+}
+
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(AuroraGreenRed430)
+  openspace.addSceneGraphNode(AuroraGreenPink431)
+  openspace.addSceneGraphNode(Aurora434)
+  openspace.addSceneGraphNode(AuroraRed435)
+  openspace.addSceneGraphNode(AuroraGreenPink436)
+  openspace.addSceneGraphNode(AuroraGreenPink438)
+  openspace.addSceneGraphNode(Aurora439)
+  openspace.addSceneGraphNode(AuroraGreenPink441)
+  openspace.addSceneGraphNode(AuroraGreenPinkWhite446)
+  openspace.addSceneGraphNode(Aurora449)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite450)
+  openspace.addSceneGraphNode(AuroraRed453)
+  openspace.addSceneGraphNode(Aurora454)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite455)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed457)
+  openspace.addSceneGraphNode(AuroraGreenRed459)
+  openspace.addSceneGraphNode(AuroraGreenRed460)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite462)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed464)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite465)
+  openspace.addSceneGraphNode(AuroraPink466)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed467)
+  openspace.addSceneGraphNode(AuroraGreenPink468)
+  openspace.addSceneGraphNode(AuroraPink470)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed473)
+  openspace.addSceneGraphNode(AuroraGreenRedWhite475)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite476)
+  openspace.addSceneGraphNode(AuroraGreenRed477)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed481)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite483)
+  openspace.addSceneGraphNode(Aurora484)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed486)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite487)
+  openspace.addSceneGraphNode(AuroraGreenPink488)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite489)
+  openspace.addSceneGraphNode(AuroraGreenPink490)
+  openspace.addSceneGraphNode(AuroraGreenPink493)
+  openspace.addSceneGraphNode(AuroraRed494)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed496)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed498)
+  openspace.addSceneGraphNode(AuroraGreenRed500)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite501)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed502)
+  openspace.addSceneGraphNode(AuroraGreenRed503)
+  openspace.addSceneGraphNode(AuroraGreenPink504)
+  openspace.addSceneGraphNode(AuroraGreenPink506)
+  openspace.addSceneGraphNode(AuroraGreenPink507)
+  openspace.addSceneGraphNode(AuroraGreenRed508)
+  openspace.addSceneGraphNode(AuroraGreenPink509)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed510)
+  openspace.addSceneGraphNode(AuroraGreenPink511)
+  openspace.addSceneGraphNode(AuroraGreenRed513)
+  openspace.addSceneGraphNode(AuroraGreenRed517)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite518)
+  openspace.addSceneGraphNode(AuroraGreenRed519)
+  openspace.addSceneGraphNode(AuroraGreenPink520)
+  openspace.addSceneGraphNode(AuroraGreenWhite521)
+  openspace.addSceneGraphNode(AuroraGreenPink527)
+  openspace.addSceneGraphNode(AuroraPinkRedWhite533)
+  openspace.addSceneGraphNode(AuroraGreenRedWhite534)
+  openspace.addSceneGraphNode(AuroraRed537)
+  openspace.addSceneGraphNode(AuroraGreenPink539)
+  openspace.addSceneGraphNode(AuroraPink540)
+  openspace.addSceneGraphNode(AuroraGreenPink542)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite543)
+  openspace.addSceneGraphNode(AuroraGreenRedWhite544)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed547)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed548)
+  openspace.addSceneGraphNode(AuroraGreenPink552)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite553)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed554)
+  openspace.addSceneGraphNode(AuroraGreenPink556)
+  openspace.addSceneGraphNode(AuroraGreenPink560)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite561)
+  openspace.addSceneGraphNode(AuroraGreenPinkWhite563)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite565)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed568)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite569)
+  openspace.addSceneGraphNode(AuroraGreenPinkWhite570)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite571)
+  openspace.addSceneGraphNode(AuroraGreenPink573)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite574)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite575)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed577)
+  openspace.addSceneGraphNode(AuroraGreenPinkWhite578)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite581)
+  openspace.addSceneGraphNode(AuroraRed583)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed584)
+  openspace.addSceneGraphNode(AuroraGreenPink587)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed590)
+  openspace.addSceneGraphNode(AuroraGreenPinkWhite592)
+  openspace.addSceneGraphNode(AuroraGreenPinkWhite594)
+  openspace.addSceneGraphNode(AuroraGreenRed595)
+  openspace.addSceneGraphNode(AuroraGreenPink598)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed601)
+  openspace.addSceneGraphNode(AuroraGreen607)
+  openspace.addSceneGraphNode(AuroraRed608)
+  openspace.addSceneGraphNode(AuroraRed609)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed613)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite614)
+  openspace.addSceneGraphNode(AuroraGreenPink615)
+  openspace.addSceneGraphNode(AuroraGreenRed616)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite617)
+  openspace.addSceneGraphNode(AuroraGreenRed620)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite622)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite623)
+  openspace.addSceneGraphNode(AuroraGreenPink625)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite626)
+  openspace.addSceneGraphNode(AuroraGreenPink627)
+  openspace.addSceneGraphNode(AuroraPinkRed628)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed629)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed630)
+  openspace.addSceneGraphNode(AuroraGreenPinkWhite632)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed633)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed634)
+  openspace.addSceneGraphNode(AuroraGreenPink637)
+  openspace.addSceneGraphNode(AuroraGreenPink638)
+  openspace.addSceneGraphNode(AuroraPinkRed640)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed642)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite643)
+  openspace.addSceneGraphNode(AuroraPinkRed645)
+  openspace.addSceneGraphNode(AuroraGreenPink647)
+  openspace.addSceneGraphNode(AuroraGreenRedWhite648)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed650)
+  openspace.addSceneGraphNode(AuroraPink651)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite656)
+  openspace.addSceneGraphNode(AuroraGreenPink657)
+  openspace.addSceneGraphNode(AuroraPink658)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite660)
+  openspace.addSceneGraphNode(AuroraRed662)
+  openspace.addSceneGraphNode(Aurora665)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed672)
+  openspace.addSceneGraphNode(Aurora673)
+  openspace.addSceneGraphNode(AuroraGreenPink676)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed678)
+  openspace.addSceneGraphNode(AuroraGreen679)
+  openspace.addSceneGraphNode(AuroraGreenWhite680)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed681)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite689)
+  openspace.addSceneGraphNode(AuroraGreenRed692)
+  openspace.addSceneGraphNode(AuroraGreenWhite693)
+  openspace.addSceneGraphNode(AuroraGreenRed696)
+  openspace.addSceneGraphNode(AuroraGreenPink697)
+  openspace.addSceneGraphNode(AuroraGreenRed698)
+  openspace.addSceneGraphNode(AuroraPinkRedWhite700)
+  openspace.addSceneGraphNode(AuroraGreenPink701)
+  openspace.addSceneGraphNode(AuroraGreenRed702)
+  openspace.addSceneGraphNode(AuroraGreenPink704)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed706)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed709)
+  openspace.addSceneGraphNode(AuroraGreenPink711)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite715)
+  openspace.addSceneGraphNode(AuroraGreenPinkWhite716)
+  openspace.addSceneGraphNode(AuroraGreenPinkWhite718)
+  openspace.addSceneGraphNode(Aurora719)
+  openspace.addSceneGraphNode(AuroraGreenRed720)
+  openspace.addSceneGraphNode(AuroraGreenPink721)
+  openspace.addSceneGraphNode(AuroraGreenPink728)
+  openspace.addSceneGraphNode(AuroraGreenPink730)
+  openspace.addSceneGraphNode(AuroraGreenRedWhite734)
+  openspace.addSceneGraphNode(AuroraGreenPink736)
+  openspace.addSceneGraphNode(AuroraGreenPink737)
+  openspace.addSceneGraphNode(AuroraPink738)
+  openspace.addSceneGraphNode(AuroraGreenPink741)
+  openspace.addSceneGraphNode(AuroraGreenPink743)
+  openspace.addSceneGraphNode(AuroraPink744)
+  openspace.addSceneGraphNode(AuroraGreenRed746)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite747)
+  openspace.addSceneGraphNode(AuroraGreenPink748)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed749)
+  openspace.addSceneGraphNode(AuroraGreen750)
+  openspace.addSceneGraphNode(AuroraPink752)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed753)
+  openspace.addSceneGraphNode(AuroraGreenPink758)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite760)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed762)
+  openspace.addSceneGraphNode(AuroraPink763)
+  openspace.addSceneGraphNode(AuroraGreenPink767)
+  openspace.addSceneGraphNode(AuroraGreenRed769)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed771)
+  openspace.addSceneGraphNode(Aurora772)
+  openspace.addSceneGraphNode(AuroraGreenPink773)
+  openspace.addSceneGraphNode(AuroraPinkRedWhite774)
+  openspace.addSceneGraphNode(Aurora779)
+  openspace.addSceneGraphNode(AuroraGreenPink782)
+  openspace.addSceneGraphNode(AuroraGreenPink785)
+  openspace.addSceneGraphNode(AuroraGreenRed786)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed788)
+  openspace.addSceneGraphNode(Aurora792)
+  openspace.addSceneGraphNode(AuroraGreenPinkRedWhite795)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(AuroraGreenRed430)
+  openspace.removeSceneGraphNode(AuroraGreenPink431)
+  openspace.removeSceneGraphNode(Aurora434)
+  openspace.removeSceneGraphNode(AuroraRed435)
+  openspace.removeSceneGraphNode(AuroraGreenPink436)
+  openspace.removeSceneGraphNode(AuroraGreenPink438)
+  openspace.removeSceneGraphNode(Aurora439)
+  openspace.removeSceneGraphNode(AuroraGreenPink441)
+  openspace.removeSceneGraphNode(AuroraGreenPinkWhite446)
+  openspace.removeSceneGraphNode(Aurora449)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite450)
+  openspace.removeSceneGraphNode(AuroraRed453)
+  openspace.removeSceneGraphNode(Aurora454)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite455)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed457)
+  openspace.removeSceneGraphNode(AuroraGreenRed459)
+  openspace.removeSceneGraphNode(AuroraGreenRed460)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite462)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed464)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite465)
+  openspace.removeSceneGraphNode(AuroraPink466)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed467)
+  openspace.removeSceneGraphNode(AuroraGreenPink468)
+  openspace.removeSceneGraphNode(AuroraPink470)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed473)
+  openspace.removeSceneGraphNode(AuroraGreenRedWhite475)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite476)
+  openspace.removeSceneGraphNode(AuroraGreenRed477)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed481)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite483)
+  openspace.removeSceneGraphNode(Aurora484)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed486)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite487)
+  openspace.removeSceneGraphNode(AuroraGreenPink488)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite489)
+  openspace.removeSceneGraphNode(AuroraGreenPink490)
+  openspace.removeSceneGraphNode(AuroraGreenPink493)
+  openspace.removeSceneGraphNode(AuroraRed494)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed496)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed498)
+  openspace.removeSceneGraphNode(AuroraGreenRed500)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite501)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed502)
+  openspace.removeSceneGraphNode(AuroraGreenRed503)
+  openspace.removeSceneGraphNode(AuroraGreenPink504)
+  openspace.removeSceneGraphNode(AuroraGreenPink506)
+  openspace.removeSceneGraphNode(AuroraGreenPink507)
+  openspace.removeSceneGraphNode(AuroraGreenRed508)
+  openspace.removeSceneGraphNode(AuroraGreenPink509)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed510)
+  openspace.removeSceneGraphNode(AuroraGreenPink511)
+  openspace.removeSceneGraphNode(AuroraGreenRed513)
+  openspace.removeSceneGraphNode(AuroraGreenRed517)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite518)
+  openspace.removeSceneGraphNode(AuroraGreenRed519)
+  openspace.removeSceneGraphNode(AuroraGreenPink520)
+  openspace.removeSceneGraphNode(AuroraGreenWhite521)
+  openspace.removeSceneGraphNode(AuroraGreenPink527)
+  openspace.removeSceneGraphNode(AuroraPinkRedWhite533)
+  openspace.removeSceneGraphNode(AuroraGreenRedWhite534)
+  openspace.removeSceneGraphNode(AuroraRed537)
+  openspace.removeSceneGraphNode(AuroraGreenPink539)
+  openspace.removeSceneGraphNode(AuroraPink540)
+  openspace.removeSceneGraphNode(AuroraGreenPink542)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite543)
+  openspace.removeSceneGraphNode(AuroraGreenRedWhite544)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed547)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed548)
+  openspace.removeSceneGraphNode(AuroraGreenPink552)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite553)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed554)
+  openspace.removeSceneGraphNode(AuroraGreenPink556)
+  openspace.removeSceneGraphNode(AuroraGreenPink560)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite561)
+  openspace.removeSceneGraphNode(AuroraGreenPinkWhite563)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite565)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed568)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite569)
+  openspace.removeSceneGraphNode(AuroraGreenPinkWhite570)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite571)
+  openspace.removeSceneGraphNode(AuroraGreenPink573)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite574)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite575)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed577)
+  openspace.removeSceneGraphNode(AuroraGreenPinkWhite578)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite581)
+  openspace.removeSceneGraphNode(AuroraRed583)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed584)
+  openspace.removeSceneGraphNode(AuroraGreenPink587)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed590)
+  openspace.removeSceneGraphNode(AuroraGreenPinkWhite592)
+  openspace.removeSceneGraphNode(AuroraGreenPinkWhite594)
+  openspace.removeSceneGraphNode(AuroraGreenRed595)
+  openspace.removeSceneGraphNode(AuroraGreenPink598)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed601)
+  openspace.removeSceneGraphNode(AuroraGreen607)
+  openspace.removeSceneGraphNode(AuroraRed608)
+  openspace.removeSceneGraphNode(AuroraRed609)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed613)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite614)
+  openspace.removeSceneGraphNode(AuroraGreenPink615)
+  openspace.removeSceneGraphNode(AuroraGreenRed616)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite617)
+  openspace.removeSceneGraphNode(AuroraGreenRed620)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite622)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite623)
+  openspace.removeSceneGraphNode(AuroraGreenPink625)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite626)
+  openspace.removeSceneGraphNode(AuroraGreenPink627)
+  openspace.removeSceneGraphNode(AuroraPinkRed628)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed629)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed630)
+  openspace.removeSceneGraphNode(AuroraGreenPinkWhite632)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed633)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed634)
+  openspace.removeSceneGraphNode(AuroraGreenPink637)
+  openspace.removeSceneGraphNode(AuroraGreenPink638)
+  openspace.removeSceneGraphNode(AuroraPinkRed640)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed642)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite643)
+  openspace.removeSceneGraphNode(AuroraPinkRed645)
+  openspace.removeSceneGraphNode(AuroraGreenPink647)
+  openspace.removeSceneGraphNode(AuroraGreenRedWhite648)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed650)
+  openspace.removeSceneGraphNode(AuroraPink651)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite656)
+  openspace.removeSceneGraphNode(AuroraGreenPink657)
+  openspace.removeSceneGraphNode(AuroraPink658)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite660)
+  openspace.removeSceneGraphNode(AuroraRed662)
+  openspace.removeSceneGraphNode(Aurora665)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed672)
+  openspace.removeSceneGraphNode(Aurora673)
+  openspace.removeSceneGraphNode(AuroraGreenPink676)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed678)
+  openspace.removeSceneGraphNode(AuroraGreen679)
+  openspace.removeSceneGraphNode(AuroraGreenWhite680)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed681)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite689)
+  openspace.removeSceneGraphNode(AuroraGreenRed692)
+  openspace.removeSceneGraphNode(AuroraGreenWhite693)
+  openspace.removeSceneGraphNode(AuroraGreenRed696)
+  openspace.removeSceneGraphNode(AuroraGreenPink697)
+  openspace.removeSceneGraphNode(AuroraGreenRed698)
+  openspace.removeSceneGraphNode(AuroraPinkRedWhite700)
+  openspace.removeSceneGraphNode(AuroraGreenPink701)
+  openspace.removeSceneGraphNode(AuroraGreenRed702)
+  openspace.removeSceneGraphNode(AuroraGreenPink704)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed706)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed709)
+  openspace.removeSceneGraphNode(AuroraGreenPink711)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite715)
+  openspace.removeSceneGraphNode(AuroraGreenPinkWhite716)
+  openspace.removeSceneGraphNode(AuroraGreenPinkWhite718)
+  openspace.removeSceneGraphNode(Aurora719)
+  openspace.removeSceneGraphNode(AuroraGreenRed720)
+  openspace.removeSceneGraphNode(AuroraGreenPink721)
+  openspace.removeSceneGraphNode(AuroraGreenPink728)
+  openspace.removeSceneGraphNode(AuroraGreenPink730)
+  openspace.removeSceneGraphNode(AuroraGreenRedWhite734)
+  openspace.removeSceneGraphNode(AuroraGreenPink736)
+  openspace.removeSceneGraphNode(AuroraGreenPink737)
+  openspace.removeSceneGraphNode(AuroraPink738)
+  openspace.removeSceneGraphNode(AuroraGreenPink741)
+  openspace.removeSceneGraphNode(AuroraGreenPink743)
+  openspace.removeSceneGraphNode(AuroraPink744)
+  openspace.removeSceneGraphNode(AuroraGreenRed746)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite747)
+  openspace.removeSceneGraphNode(AuroraGreenPink748)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed749)
+  openspace.removeSceneGraphNode(AuroraGreen750)
+  openspace.removeSceneGraphNode(AuroraPink752)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed753)
+  openspace.removeSceneGraphNode(AuroraGreenPink758)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite760)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed762)
+  openspace.removeSceneGraphNode(AuroraPink763)
+  openspace.removeSceneGraphNode(AuroraGreenPink767)
+  openspace.removeSceneGraphNode(AuroraGreenRed769)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed771)
+  openspace.removeSceneGraphNode(Aurora772)
+  openspace.removeSceneGraphNode(AuroraGreenPink773)
+  openspace.removeSceneGraphNode(AuroraPinkRedWhite774)
+  openspace.removeSceneGraphNode(Aurora779)
+  openspace.removeSceneGraphNode(AuroraGreenPink782)
+  openspace.removeSceneGraphNode(AuroraGreenPink785)
+  openspace.removeSceneGraphNode(AuroraGreenRed786)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed788)
+  openspace.removeSceneGraphNode(Aurora792)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRedWhite795)
+end)
+
+asset.export(AuroraGreenRed430)
+asset.export(AuroraGreenPink431)
+asset.export(Aurora434)
+asset.export(AuroraRed435)
+asset.export(AuroraGreenPink436)
+asset.export(AuroraGreenPink438)
+asset.export(Aurora439)
+asset.export(AuroraGreenPink441)
+asset.export(AuroraGreenPinkWhite446)
+asset.export(Aurora449)
+asset.export(AuroraGreenPinkRedWhite450)
+asset.export(AuroraRed453)
+asset.export(Aurora454)
+asset.export(AuroraGreenPinkRedWhite455)
+asset.export(AuroraGreenPinkRed457)
+asset.export(AuroraGreenRed459)
+asset.export(AuroraGreenRed460)
+asset.export(AuroraGreenPinkRedWhite462)
+asset.export(AuroraGreenPinkRed464)
+asset.export(AuroraGreenPinkRedWhite465)
+asset.export(AuroraPink466)
+asset.export(AuroraGreenPinkRed467)
+asset.export(AuroraGreenPink468)
+asset.export(AuroraPink470)
+asset.export(AuroraGreenPinkRed473)
+asset.export(AuroraGreenRedWhite475)
+asset.export(AuroraGreenPinkRedWhite476)
+asset.export(AuroraGreenRed477)
+asset.export(AuroraGreenPinkRed481)
+asset.export(AuroraGreenPinkRedWhite483)
+asset.export(Aurora484)
+asset.export(AuroraGreenPinkRed486)
+asset.export(AuroraGreenPinkRedWhite487)
+asset.export(AuroraGreenPink488)
+asset.export(AuroraGreenPinkRedWhite489)
+asset.export(AuroraGreenPink490)
+asset.export(AuroraGreenPink493)
+asset.export(AuroraRed494)
+asset.export(AuroraGreenPinkRed496)
+asset.export(AuroraGreenPinkRed498)
+asset.export(AuroraGreenRed500)
+asset.export(AuroraGreenPinkRedWhite501)
+asset.export(AuroraGreenPinkRed502)
+asset.export(AuroraGreenRed503)
+asset.export(AuroraGreenPink504)
+asset.export(AuroraGreenPink506)
+asset.export(AuroraGreenPink507)
+asset.export(AuroraGreenRed508)
+asset.export(AuroraGreenPink509)
+asset.export(AuroraGreenPinkRed510)
+asset.export(AuroraGreenPink511)
+asset.export(AuroraGreenRed513)
+asset.export(AuroraGreenRed517)
+asset.export(AuroraGreenPinkRedWhite518)
+asset.export(AuroraGreenRed519)
+asset.export(AuroraGreenPink520)
+asset.export(AuroraGreenWhite521)
+asset.export(AuroraGreenPink527)
+asset.export(AuroraPinkRedWhite533)
+asset.export(AuroraGreenRedWhite534)
+asset.export(AuroraRed537)
+asset.export(AuroraGreenPink539)
+asset.export(AuroraPink540)
+asset.export(AuroraGreenPink542)
+asset.export(AuroraGreenPinkRedWhite543)
+asset.export(AuroraGreenRedWhite544)
+asset.export(AuroraGreenPinkRed547)
+asset.export(AuroraGreenPinkRed548)
+asset.export(AuroraGreenPink552)
+asset.export(AuroraGreenPinkRedWhite553)
+asset.export(AuroraGreenPinkRed554)
+asset.export(AuroraGreenPink556)
+asset.export(AuroraGreenPink560)
+asset.export(AuroraGreenPinkRedWhite561)
+asset.export(AuroraGreenPinkWhite563)
+asset.export(AuroraGreenPinkRedWhite565)
+asset.export(AuroraGreenPinkRed568)
+asset.export(AuroraGreenPinkRedWhite569)
+asset.export(AuroraGreenPinkWhite570)
+asset.export(AuroraGreenPinkRedWhite571)
+asset.export(AuroraGreenPink573)
+asset.export(AuroraGreenPinkRedWhite574)
+asset.export(AuroraGreenPinkRedWhite575)
+asset.export(AuroraGreenPinkRed577)
+asset.export(AuroraGreenPinkWhite578)
+asset.export(AuroraGreenPinkRedWhite581)
+asset.export(AuroraRed583)
+asset.export(AuroraGreenPinkRed584)
+asset.export(AuroraGreenPink587)
+asset.export(AuroraGreenPinkRed590)
+asset.export(AuroraGreenPinkWhite592)
+asset.export(AuroraGreenPinkWhite594)
+asset.export(AuroraGreenRed595)
+asset.export(AuroraGreenPink598)
+asset.export(AuroraGreenPinkRed601)
+asset.export(AuroraGreen607)
+asset.export(AuroraRed608)
+asset.export(AuroraRed609)
+asset.export(AuroraGreenPinkRed613)
+asset.export(AuroraGreenPinkRedWhite614)
+asset.export(AuroraGreenPink615)
+asset.export(AuroraGreenRed616)
+asset.export(AuroraGreenPinkRedWhite617)
+asset.export(AuroraGreenRed620)
+asset.export(AuroraGreenPinkRedWhite622)
+asset.export(AuroraGreenPinkRedWhite623)
+asset.export(AuroraGreenPink625)
+asset.export(AuroraGreenPinkRedWhite626)
+asset.export(AuroraGreenPink627)
+asset.export(AuroraPinkRed628)
+asset.export(AuroraGreenPinkRed629)
+asset.export(AuroraGreenPinkRed630)
+asset.export(AuroraGreenPinkWhite632)
+asset.export(AuroraGreenPinkRed633)
+asset.export(AuroraGreenPinkRed634)
+asset.export(AuroraGreenPink637)
+asset.export(AuroraGreenPink638)
+asset.export(AuroraPinkRed640)
+asset.export(AuroraGreenPinkRed642)
+asset.export(AuroraGreenPinkRedWhite643)
+asset.export(AuroraPinkRed645)
+asset.export(AuroraGreenPink647)
+asset.export(AuroraGreenRedWhite648)
+asset.export(AuroraGreenPinkRed650)
+asset.export(AuroraPink651)
+asset.export(AuroraGreenPinkRedWhite656)
+asset.export(AuroraGreenPink657)
+asset.export(AuroraPink658)
+asset.export(AuroraGreenPinkRedWhite660)
+asset.export(AuroraRed662)
+asset.export(Aurora665)
+asset.export(AuroraGreenPinkRed672)
+asset.export(Aurora673)
+asset.export(AuroraGreenPink676)
+asset.export(AuroraGreenPinkRed678)
+asset.export(AuroraGreen679)
+asset.export(AuroraGreenWhite680)
+asset.export(AuroraGreenPinkRed681)
+asset.export(AuroraGreenPinkRedWhite689)
+asset.export(AuroraGreenRed692)
+asset.export(AuroraGreenWhite693)
+asset.export(AuroraGreenRed696)
+asset.export(AuroraGreenPink697)
+asset.export(AuroraGreenRed698)
+asset.export(AuroraPinkRedWhite700)
+asset.export(AuroraGreenPink701)
+asset.export(AuroraGreenRed702)
+asset.export(AuroraGreenPink704)
+asset.export(AuroraGreenPinkRed706)
+asset.export(AuroraGreenPinkRed709)
+asset.export(AuroraGreenPink711)
+asset.export(AuroraGreenPinkRedWhite715)
+asset.export(AuroraGreenPinkWhite716)
+asset.export(AuroraGreenPinkWhite718)
+asset.export(Aurora719)
+asset.export(AuroraGreenRed720)
+asset.export(AuroraGreenPink721)
+asset.export(AuroraGreenPink728)
+asset.export(AuroraGreenPink730)
+asset.export(AuroraGreenRedWhite734)
+asset.export(AuroraGreenPink736)
+asset.export(AuroraGreenPink737)
+asset.export(AuroraPink738)
+asset.export(AuroraGreenPink741)
+asset.export(AuroraGreenPink743)
+asset.export(AuroraPink744)
+asset.export(AuroraGreenRed746)
+asset.export(AuroraGreenPinkRedWhite747)
+asset.export(AuroraGreenPink748)
+asset.export(AuroraGreenPinkRed749)
+asset.export(AuroraGreen750)
+asset.export(AuroraPink752)
+asset.export(AuroraGreenPinkRed753)
+asset.export(AuroraGreenPink758)
+asset.export(AuroraGreenPinkRedWhite760)
+asset.export(AuroraGreenPinkRed762)
+asset.export(AuroraPink763)
+asset.export(AuroraGreenPink767)
+asset.export(AuroraGreenRed769)
+asset.export(AuroraGreenPinkRed771)
+asset.export(Aurora772)
+asset.export(AuroraGreenPink773)
+asset.export(AuroraPinkRedWhite774)
+asset.export(Aurora779)
+asset.export(AuroraGreenPink782)
+asset.export(AuroraGreenPink785)
+asset.export(AuroraGreenRed786)
+asset.export(AuroraGreenPinkRed788)
+asset.export(Aurora792)
+asset.export(AuroraGreenPinkRedWhite795)

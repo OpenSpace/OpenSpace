@@ -1,0 +1,1029 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local shapeAuroraGreen3881 = {
+  Identifier = "shapeAuroraGreen3881",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 00:45:00",
+    End = "2024 May 12 01:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.698587449806794,
+      Longitude = -74.02344489050604,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3881.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/green2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3881"
+  }
+}
+
+
+local shapeAuroraGreen3885 = {
+  Identifier = "shapeAuroraGreen3885",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 22:00:00",
+    End = "2024 May 11 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 56.47600352442462,
+      Longitude = -2.889226114859246,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3885.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/green2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3885"
+  }
+}
+
+
+local shapeIconWhite3889 = {
+  Identifier = "shapeIconWhite3889",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 02:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 35.33776192131368,
+      Longitude = -89.91994697226308,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/white2.png",
+      Opacity = 1.0,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Time Frame Icon White 3889"
+  }
+}
+
+
+local shapeIconGreen3894 = {
+  Identifier = "shapeIconGreen3894",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 21:30:00",
+    End = "2024 May 12 21:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.53441208139653,
+      Longitude = 0.7040015820661328,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/green2.png",
+      Opacity = 1.0,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Time Frame Icon Green 3894"
+  }
+}
+
+
+local shapeAuroraGreenPink3902 = {
+  Identifier = "shapeAuroraGreenPink3902",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 21:45:00",
+    End = "2024 May 10 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.57781332988295,
+      Longitude = -3.8548798241971274,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3902.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3902"
+  }
+}
+
+
+local shapeIconGreenPink3904 = {
+  Identifier = "shapeIconGreenPink3904",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 03:15:00",
+    End = "2024 May 11 04:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 49.88696182398918,
+      Longitude = -97.16306337647426,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/greenPink2.png",
+      Opacity = 1.0,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Time Frame Icon Green Pink 3904"
+  }
+}
+
+
+local shapeAuroraGreenPinkRedWhite3913 = {
+  Identifier = "shapeAuroraGreenPinkRedWhite3913",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 06:00:00",
+    End = "2024 May 11 07:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 47.555193200969846,
+      Longitude = -122.29248967213397,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3913.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/greenRedWhitePink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3913"
+  }
+}
+
+
+local shapeAuroraGreenRedWhite3921 = {
+  Identifier = "shapeAuroraGreenRedWhite3921",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 05:15:00",
+    End = "2024 May 12 06:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 40.66158385057587,
+      Longitude = -85.85851718220532,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3921.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/greenRedWhite2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3921"
+  }
+}
+
+
+local shapeAurora3925 = {
+  Identifier = "shapeAurora3925",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 22:15:00",
+    End = "2024 May 12 22:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.3891559026543,
+      Longitude = -3.1248769769681313,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3925.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/green2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3925"
+  }
+}
+
+
+local shapeAuroraWhite3928 = {
+  Identifier = "shapeAuroraWhite3928",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 22:00:00",
+    End = "2024 May 12 22:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.74261957228946,
+      Longitude = -0.3546115522741327,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3928.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/white2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3928"
+  }
+}
+
+
+local shapeAuroraGreenPink3931 = {
+  Identifier = "shapeAuroraGreenPink3931",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 10 22:15:00",
+    End = "2024 May 10 22:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.36917769890656,
+      Longitude = 0.4979965088671534,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3931.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3931"
+  }
+}
+
+
+local shapeAuroraGreenWhite3939 = {
+  Identifier = "shapeAuroraGreenWhite3939",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 22:30:00",
+    End = "2024 May 12 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.09329675227729,
+      Longitude = -2.9385526830739934,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3939.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/greenWhite2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3939"
+  }
+}
+
+
+local shapeIconGreenWhite3944 = {
+  Identifier = "shapeIconGreenWhite3944",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 22:30:00",
+    End = "2024 May 12 22:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.368879315220205,
+      Longitude = -1.2636962643680447,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/greenWhite2.png",
+      Opacity = 1.0,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Time Frame Icon Green White 3944"
+  }
+}
+
+
+local shapeAuroraGreenPink3960 = {
+  Identifier = "shapeAuroraGreenPink3960",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 22:45:00",
+    End = "2024 May 12 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.54117320872844,
+      Longitude = -2.0060939669854805,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3960.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3960"
+  }
+}
+
+
+local shapeIcon3961 = {
+  Identifier = "shapeIcon3961",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 22:45:00",
+    End = "2024 May 12 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 54.54311729668924,
+      Longitude = -1.2213393143846611,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/green2.png",
+      Opacity = 1.0,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Time Frame Icon  3961"
+  }
+}
+
+
+local shapeAuroraWhite3963 = {
+  Identifier = "shapeAuroraWhite3963",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 22:45:00",
+    End = "2024 May 12 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.32083447290766,
+      Longitude = -2.708598103194833,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3963.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/white2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3963"
+  }
+}
+
+
+local shapeIcon3964 = {
+  Identifier = "shapeIcon3964",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 22:45:00",
+    End = "2024 May 12 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.366369166465205,
+      Longitude = -4.160194790473679,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/green2.png",
+      Opacity = 1.0,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Time Frame Icon  3964"
+  }
+}
+
+
+local shapeIconPinkWhite3984 = {
+  Identifier = "shapeIconPinkWhite3984",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 23:00:00",
+    End = "2024 May 12 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.353591120917066,
+      Longitude = -3.6126398591140005,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/whitePink2.png",
+      Opacity = 1.0,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Time Frame Icon Pink White 3984"
+  }
+}
+
+
+local shapeIconPinkRed3986 = {
+  Identifier = "shapeIconPinkRed3986",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 22:00:00",
+    End = "2024 May 12 23:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 50.82465724008343,
+      Longitude = -0.1403484937258637,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/redPink2.png",
+      Opacity = 1.0,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Time Frame Icon Pink Red 3986"
+  }
+}
+
+
+local shapeIconGreen3989 = {
+  Identifier = "shapeIconGreen3989",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 23:15:00",
+    End = "2024 May 12 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.4140498149053,
+      Longitude = -2.726030018880059,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/green2.png",
+      Opacity = 1.0,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Time Frame Icon Green 3989"
+  }
+}
+
+
+local shapeAuroraGreenPink3991 = {
+  Identifier = "shapeAuroraGreenPink3991",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 23:15:00",
+    End = "2024 May 12 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.462397606977326,
+      Longitude = -2.281879483419031,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3991.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/greenPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3991"
+  }
+}
+
+
+local shapeIconPinkRed3995 = {
+  Identifier = "shapeIconPinkRed3995",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:30:00",
+    End = "2024 May 11 03:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 38.19495470704313,
+      Longitude = -79.08590384538998,
+      Altitude = 100000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+      Origin = "Center",
+      Billboard = true,
+      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/redPink2.png",
+      Opacity = 1.0,
+      Enabled = true
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Time Frame Icon Pink Red 3995"
+  }
+}
+
+
+local shapeAuroraGreenPinkRed3998 = {
+  Identifier = "shapeAuroraGreenPinkRed3998",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 04:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 34.62354389575096,
+      Longitude = -86.29359909040306,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3998.jpg",
+        Opacity = 1,
+        Enabled = true
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons3/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3998"
+  }
+}
+
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(shapeAuroraGreen3881)
+  openspace.addSceneGraphNode(shapeAuroraGreen3885)
+  openspace.addSceneGraphNode(shapeIconWhite3889)
+  openspace.addSceneGraphNode(shapeIconGreen3894)
+  openspace.addSceneGraphNode(shapeAuroraGreenPink3902)
+  openspace.addSceneGraphNode(shapeIconGreenPink3904)
+  openspace.addSceneGraphNode(shapeAuroraGreenPinkRedWhite3913)
+  openspace.addSceneGraphNode(shapeAuroraGreenRedWhite3921)
+  openspace.addSceneGraphNode(shapeAurora3925)
+  openspace.addSceneGraphNode(shapeAuroraWhite3928)
+  openspace.addSceneGraphNode(shapeAuroraGreenPink3931)
+  openspace.addSceneGraphNode(shapeAuroraGreenWhite3939)
+  openspace.addSceneGraphNode(shapeIconGreenWhite3944)
+  openspace.addSceneGraphNode(shapeAuroraGreenPink3960)
+  openspace.addSceneGraphNode(shapeIcon3961)
+  openspace.addSceneGraphNode(shapeAuroraWhite3963)
+  openspace.addSceneGraphNode(shapeIcon3964)
+  openspace.addSceneGraphNode(shapeIconPinkWhite3984)
+  openspace.addSceneGraphNode(shapeIconPinkRed3986)
+  openspace.addSceneGraphNode(shapeIconGreen3989)
+  openspace.addSceneGraphNode(shapeAuroraGreenPink3991)
+  openspace.addSceneGraphNode(shapeIconPinkRed3995)
+  openspace.addSceneGraphNode(shapeAuroraGreenPinkRed3998)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(shapeAuroraGreen3881)
+  openspace.removeSceneGraphNode(shapeAuroraGreen3885)
+  openspace.removeSceneGraphNode(shapeIconWhite3889)
+  openspace.removeSceneGraphNode(shapeIconGreen3894)
+  openspace.removeSceneGraphNode(shapeAuroraGreenPink3902)
+  openspace.removeSceneGraphNode(shapeIconGreenPink3904)
+  openspace.removeSceneGraphNode(shapeAuroraGreenPinkRedWhite3913)
+  openspace.removeSceneGraphNode(shapeAuroraGreenRedWhite3921)
+  openspace.removeSceneGraphNode(shapeAurora3925)
+  openspace.removeSceneGraphNode(shapeAuroraWhite3928)
+  openspace.removeSceneGraphNode(shapeAuroraGreenPink3931)
+  openspace.removeSceneGraphNode(shapeAuroraGreenWhite3939)
+  openspace.removeSceneGraphNode(shapeIconGreenWhite3944)
+  openspace.removeSceneGraphNode(shapeAuroraGreenPink3960)
+  openspace.removeSceneGraphNode(shapeIcon3961)
+  openspace.removeSceneGraphNode(shapeAuroraWhite3963)
+  openspace.removeSceneGraphNode(shapeIcon3964)
+  openspace.removeSceneGraphNode(shapeIconPinkWhite3984)
+  openspace.removeSceneGraphNode(shapeIconPinkRed3986)
+  openspace.removeSceneGraphNode(shapeIconGreen3989)
+  openspace.removeSceneGraphNode(shapeAuroraGreenPink3991)
+  openspace.removeSceneGraphNode(shapeIconPinkRed3995)
+  openspace.removeSceneGraphNode(shapeAuroraGreenPinkRed3998)
+end)
+
+asset.export(shapeAuroraGreen3881)
+asset.export(shapeAuroraGreen3885)
+asset.export(shapeIconWhite3889)
+asset.export(shapeIconGreen3894)
+asset.export(shapeAuroraGreenPink3902)
+asset.export(shapeIconGreenPink3904)
+asset.export(shapeAuroraGreenPinkRedWhite3913)
+asset.export(shapeAuroraGreenRedWhite3921)
+asset.export(shapeAurora3925)
+asset.export(shapeAuroraWhite3928)
+asset.export(shapeAuroraGreenPink3931)
+asset.export(shapeAuroraGreenWhite3939)
+asset.export(shapeIconGreenWhite3944)
+asset.export(shapeAuroraGreenPink3960)
+asset.export(shapeIcon3961)
+asset.export(shapeAuroraWhite3963)
+asset.export(shapeIcon3964)
+asset.export(shapeIconPinkWhite3984)
+asset.export(shapeIconPinkRed3986)
+asset.export(shapeIconGreen3989)
+asset.export(shapeAuroraGreenPink3991)
+asset.export(shapeIconPinkRed3995)
+asset.export(shapeAuroraGreenPinkRed3998)
