@@ -145,14 +145,6 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
         return std::vector<ExoplanetItem>();
     }
 
-    //auto isPositiveErrorCol = [](const std::string& c) {
-    //    return c.find("err1") != std::string::npos;
-    //};
-
-    //auto isNegativeErrorCol = [](const std::string& c) {
-    //    return c.find("err2") != std::string::npos;
-    //};
-
     // Write exoplanet records to file
     std::vector<std::string> columns = csvContent[0];
 
@@ -165,9 +157,6 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
 
     for (int row = 1; row < nRows; row++) {
         ExoplanetItem p;
-        std::string name;
-        std::string component;
-        std::string hostStar;
 
         p.id = row - 1;
 
@@ -197,14 +186,6 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
 
             // Parse data column values
 
-            // For now, ignore any empty, limit and error columns
-            if (hasEnding(column, "err1") ||
-                hasEnding(column, "err2") ||
-                hasEnding(column, "lim"))
-            {
-                continue;
-            }
-
             float parsedNumeric = data::parseFloatData(data);
             if (data.empty()) {
                 // All columns should have empty string for missing values
@@ -217,7 +198,6 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
                 // Non empty string value
                 p.dataColumns[column] = data;
             }
-
 
             // Molecules in atmosphere
             // Note that molecules are separated with '&' signs. We replace those
