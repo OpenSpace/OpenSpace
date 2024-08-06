@@ -164,10 +164,6 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     std::stable_sort(_subOwners.begin(), _subOwners.end(), compareZIndexSubOwners);
 
     _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
-
-    properties::PropertyOwner* layerGroup = ptr->owner();
-    properties::PropertyOwner* layerManager = layerGroup->owner();
-
     return ptr;
 }
 
