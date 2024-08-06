@@ -488,13 +488,13 @@ add_dependencies(openspace-core run_codegen)
 configure_file(
   ${PROJECT_SOURCE_DIR}/support/cmake/openspace_header.template
   ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h
-  @ONLY IMMEDIATE
+  @ONLY
 )
 
 configure_file(
   ${PROJECT_SOURCE_DIR}/support/cmake/commit.template
   ${PROJECT_SOURCE_DIR}/COMMIT.md
-  @ONLY IMMEDIATE
+  @ONLY
 )
 
 if (APPLE)

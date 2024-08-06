@@ -222,9 +222,9 @@ namespace {
     ghoul::Dictionary res;
 
     ghoul::Dictionary version;
-    version.setValue("Major", openspace::OPENSPACE_VERSION_MAJOR);
-    version.setValue("Minor", openspace::OPENSPACE_VERSION_MINOR);
-    version.setValue("Patch", openspace::OPENSPACE_VERSION_PATCH);
+    version.setValue("Major", static_cast<int>(openspace::OPENSPACE_VERSION_MAJOR));
+    version.setValue("Minor", static_cast<int>(openspace::OPENSPACE_VERSION_MINOR));
+    version.setValue("Patch", static_cast<int>(openspace::OPENSPACE_VERSION_PATCH));
     res.setValue("Version", std::move(version));
 
     res.setValue("Commit", std::string(openspace::OPENSPACE_GIT_COMMIT));

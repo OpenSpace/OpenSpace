@@ -27,10 +27,11 @@ cmake_policy(VERSION 3.25)
 
 project(OpenSpace)
 
-set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 20)
-set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "Beta-13")
+set(OPENSPACE_RELEASE_BUILD OFF)
+set(OPENSPACE_VERSION_MAJOR)
+set(OPENSPACE_VERSION_MINOR)
+set(OPENSPACE_VERSION_PATCH)
+set(OPENSPACE_VERSION_STRING)
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)

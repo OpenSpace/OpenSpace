@@ -465,22 +465,6 @@ void RenderEngine::initialize() {
     ghoul::io::ModelReader::ref().addReader(
         std::make_unique<ghoul::io::ModelReaderBinary>()
     );
-
-    _versionString = OPENSPACE_VERSION_STRING_FULL;
-    if (global::versionChecker->hasLatestVersionInfo()) {
-        VersionChecker::SemanticVersion latest = global::versionChecker->latestVersion();
-
-        const VersionChecker::SemanticVersion current {
-            OPENSPACE_VERSION_MAJOR,
-            OPENSPACE_VERSION_MINOR,
-            OPENSPACE_VERSION_PATCH
-        };
-        if (current < latest) {
-            _versionString += std::format(
-                " [Available: {}.{}.{}]", latest.major, latest.minor, latest.patch
-            );
-        }
-    }
 }
 
 void RenderEngine::initializeGL() {
@@ -1203,15 +1187,43 @@ void RenderEngine::renderVersionInformation() {
     }
 
     using FR = ghoul::fontrendering::FontRenderer;
-    const glm::vec2 versionBox = _fontVersionInfo->boundingBox(_versionString);
-    const glm::vec2 commitBox = _fontVersionInfo->boundingBox(OPENSPACE_GIT_FULL);
+    glm::vec2 versionBox = glm::vec2(0.f, 0.f);
+    if (OPENSPACE_IS_RELEASE_BUILD) {
+        if (global::versionChecker->hasLatestVersionInfo()) {
+            VersionChecker::SemanticVersion ver = global::versionChecker->latestVersion();
 
-    FR::defaultRenderer().render(
-        *_fontVersionInfo,
-        glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
-        _versionString,
-        glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
-    );
+            std::string versionString = std::string(OPENSPACE_VERSION_STRING_FULL);
+            const VersionChecker::SemanticVersion current {
+                OPENSPACE_VERSION_MAJOR,
+                OPENSPACE_VERSION_MINOR,
+                OPENSPACE_VERSION_PATCH
+            };
+            if (current < ver) {
+                versionString += std::format(
+                    " [Available: {}.{}.{}]", ver.major, ver.minor, ver.patch
+                );
+            }
+
+            versionBox = _fontVersionInfo->boundingBox(versionString);
+            FR::defaultRenderer().render(
+                *_fontVersionInfo,
+                glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
+                versionString,
+                glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
+            );
+        }
+        else {
+            versionBox = _fontVersionInfo->boundingBox(OPENSPACE_VERSION_STRING_FULL);
+            FR::defaultRenderer().render(
+                *_fontVersionInfo,
+                glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
+                OPENSPACE_VERSION_STRING_FULL,
+                glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
+            );
+        }
+    }
+
+    const glm::vec2 commitBox = _fontVersionInfo->boundingBox(OPENSPACE_GIT_FULL);
 
     // If a developer hasn't placed the Git command in the path, this variable will be
     // empty
