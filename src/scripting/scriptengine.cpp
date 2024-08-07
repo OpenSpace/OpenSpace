@@ -88,7 +88,9 @@ namespace {
 
 namespace openspace::scripting {
 
-ScriptEngine::ScriptEngine() {}
+ScriptEngine::ScriptEngine(bool sandboxedLua)
+    : _state(ghoul::lua::LuaState::Sandboxed(sandboxedLua))
+{}
 
 void ScriptEngine::initialize() {
     ZoneScoped;
