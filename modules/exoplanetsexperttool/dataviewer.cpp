@@ -85,7 +85,7 @@ namespace {
 
     bool caseInsensitiveLessThan(const char* lhs, const char* rhs) {
         int res = _stricmp(lhs, rhs);
-        return res < 0;
+        return res <= 0;
     }
 
     void queueScriptSynced(const std::string& script) {
