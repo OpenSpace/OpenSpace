@@ -394,6 +394,7 @@ void OpenSpaceEngine::initialize() {
         // we have to recreate it here.
         // @TODO (2024-08-07, abock) It's not pretty, but doing it differently would
         // require a bigger rewrite of how we handle the ScriptEngine
+        global::scriptEngine->~ScriptEngine();
         global::scriptEngine = new (global::scriptEngine) scripting::ScriptEngine(
             global::configuration->sandboxedLua
         );

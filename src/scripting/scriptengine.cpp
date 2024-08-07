@@ -80,9 +80,6 @@ namespace {
 
         return result;
     }
-
-
-
 #include "scriptengine_codegen.cpp"
 } // namespace
 
