@@ -92,8 +92,6 @@ private:
 
     void renderColumnValue(int columnIndex, const ExoplanetItem& item);
 
-    const char* columnName(const ColumnKey& key) const;
-
     std::variant<const char*, float> columnValue(const ColumnKey& key,
         const ExoplanetItem& item) const;
 
@@ -105,6 +103,7 @@ private:
     // Check if a column is numeric. If it isn't, then it is text based
     bool isNumericColumn(int index) const;
 
+    const char* columnName(const ColumnKey& key) const;
     const ColumnKey& nameColumn() const;
     bool isNameColumn(const ColumnKey& key) const;
 

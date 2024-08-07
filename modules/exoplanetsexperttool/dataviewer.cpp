@@ -1099,16 +1099,14 @@ void DataViewer::renderTable(const std::string& tableId,
 
                             ImGui::Text(item.referenceName.c_str());
                             ImGui::SameLine();
-                            ImGui::PushID(std::format("Planetreflink-{}", item.name).c_str());
 
+                            ImGui::PushID(std::format("Planetreflink-{}", item.name).c_str());
                             if (ImGui::Button("Link")) {
                                 system(std::format("start {}", item.referenceUrl).c_str());
                             }
                             ImGui::PopID();
 
                             ImGui::Separator();
-
-                            ImGui::PushID(std::format("ShowShystemView-{}", item.name).c_str());
 
                             bool isAlreadyOpen = std::find(
                                 _shownPlanetSystemWindows.begin(),
@@ -1117,10 +1115,12 @@ void DataViewer::renderTable(const std::string& tableId,
                             ) != _shownPlanetSystemWindows.end();
 
                             if (!isAlreadyOpen) {
+                                ImGui::PushID(std::format("ShowShystemView-{}", item.name).c_str());
                                 if (ImGui::Button("Show system view")) {
                                     _shownPlanetSystemWindows.push_back(item.hostName);
                                     ImGui::CloseCurrentPopup();
                                 }
+                                ImGui::PopID();
                             }
                             else {
                                 ImGui::TextDisabled("A system view is already opened for this system");
@@ -1139,7 +1139,6 @@ void DataViewer::renderTable(const std::string& tableId,
                             }
 
                             ImGui::EndPopup();
-                            ImGui::PopID();
                         }
                         ImGui::PopID();
 
@@ -1810,6 +1809,7 @@ void DataViewer::renderPlanetTooltip(int index) const {
     if (ImGui::Begin("##planetToolTip", NULL, flags)) {
         ImGui::Text(item.name.c_str());
     }
+    ImGui::End();
 }
 
 void DataViewer::handleDoubleClickHoveredPlanet(int index) {
@@ -2229,10 +2229,6 @@ void DataViewer::renderColumnValue(int columnIndex, const ExoplanetItem& item) {
     }
 }
 
-const char* DataViewer::columnName(const ColumnKey& key) const {
-    return _dataSettings.columnName(key);
-}
-
 bool DataViewer::compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
                                      const ExoplanetItem& right) const
 {
@@ -2278,13 +2274,16 @@ bool DataViewer::isNumericColumn(int index) const {
     return std::holds_alternative<float>(aValue);
 }
 
+const char* DataViewer::columnName(const ColumnKey& key) const {
+    return _dataSettings.columnName(key);
+}
+
 const ColumnKey& DataViewer::nameColumn() const {
     return _dataSettings.dataMapping.name;
 }
 
 bool DataViewer::isNameColumn(const ColumnKey& key) const {
-    const ColumnKey& nameColumn = _dataSettings.dataMapping.name;
-    return key == nameColumn;
+    return key == nameColumn();
 }
 
 glm::vec4 DataViewer::colorFromColormap(const ExoplanetItem& item,
