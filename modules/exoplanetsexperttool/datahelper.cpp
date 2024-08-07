@@ -83,4 +83,9 @@ bool compareValuesWithNan(float lhs, float rhs) {
     return lhs < rhs;
 }
 
+bool caseInsensitiveLessThan(const char* lhs, const char* rhs) {
+    int res = _stricmp(lhs, rhs);
+    return res <= 0;
+}
+
 } // namespace openspace::data

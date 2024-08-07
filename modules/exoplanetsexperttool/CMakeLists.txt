@@ -26,12 +26,14 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
     columnfilter.h
+    columnselectionview.h
     datahelper.h
     dataloader.h
     datastructures.h
     dataviewer.h
     exoplanetsexperttoolmodule.h
     gui.h
+    viewhelper.h
     rendering/renderableexoplanetglyphcloud.h
     rendering/renderablepointdata.h
 )
@@ -39,11 +41,13 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     columnfilter.cpp
+    columnselectionview.cpp
     datahelper.cpp
     dataloader.cpp
     dataviewer.cpp
     exoplanetsexperttoolmodule.cpp
     gui.cpp
+    viewhelper.cpp
     rendering/renderableexoplanetglyphcloud.cpp
     rendering/renderablepointdata.cpp
 )

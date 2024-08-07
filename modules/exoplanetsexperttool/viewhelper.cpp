@@ -22,21 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATAHELPER___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATAHELPER___H__
+#include <modules/exoplanetsexperttool/viewhelper.h>
 
-namespace openspace::data {
+namespace openspace::view {
 
-float parseFloatData(const std::string& str);
+namespace helper {
 
-double parseDoubleData(const std::string& str);
+ImVec4 toImVec4(const glm::vec4& v) {
+    return ImVec4(v.x, v.y, v.z, v.w);
+}
 
-int parseIntegerData(const std::string& str);
+void renderDescriptiveText(const char* text) {
+    ImGui::TextColored(toImVec4(colors::DescriptiveText), text);
+}
 
-bool compareValuesWithNan(float lhs, float rhs);
+void renderHelpMarker(const char* text) {
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(text);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
 
-bool caseInsensitiveLessThan(const char* lhs, const char* rhs);
+} // namespace helper
 
-} // namespace openspace::data
-
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATAHELPER___H__
+} // namespace openspace::view

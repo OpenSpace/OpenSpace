@@ -22,21 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATAHELPER___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATAHELPER___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
 
-namespace openspace::data {
+#include <modules/imgui/include/imgui_include.h>
+#include <ghoul/glm.h>
 
-float parseFloatData(const std::string& str);
+namespace openspace::view {
 
-double parseDoubleData(const std::string& str);
+namespace colors {
+    constexpr const glm::vec3 DefaultSelected = { 0.2f, 0.8f, 1.f };
+    constexpr const glm::vec4 DescriptiveText = { 0.6f, 0.6f, 0.6f, 1.f };
+    constexpr const glm::vec4 Error = { 1.f, 0.2f, 0.2f, 1.f };
+    constexpr const glm::vec4 DisabledButton = { 0.3f, 0.3f, 0.3f, 0.7f };
+} // namespace colors
 
-int parseIntegerData(const std::string& str);
+namespace helper {
+    ImVec4 toImVec4(const glm::vec4& v);
 
-bool compareValuesWithNan(float lhs, float rhs);
+    void renderDescriptiveText(const char* text);
+    void renderHelpMarker(const char* text);
 
-bool caseInsensitiveLessThan(const char* lhs, const char* rhs);
+} // namespace helper
 
-} // namespace openspace::data
+} // namespace openspace::view
 
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATAHELPER___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__

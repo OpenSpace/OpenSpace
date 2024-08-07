@@ -35,6 +35,8 @@
 
 namespace openspace::exoplanets {
 
+using ColumnKey = std::string;
+
 // Represent a data point with upper and lower uncertainty values
 struct DataPoint {
     float value = std::numeric_limits<float>::quiet_NaN();
@@ -72,7 +74,8 @@ struct DataPoint {
     };
 };
 
-// TODO: Automatically determine which columns have uncertainty and sould be represented with a datapoint.
+// TODO: Automatically determine which columns have uncertainty and should be
+// represented with a datapoint.
 
 struct ExoplanetItem {
     int id; // Id used for UI (same as row number in data file)
@@ -87,7 +90,7 @@ struct ExoplanetItem {
     std::string referenceUrl;
 
     // A map between column name and a string/float value
-    std::map<std::string, std::variant<std::string, float>> dataColumns;
+    std::map<ColumnKey, std::variant<std::string, float>> dataColumns;
 
     float sizeValue = 0.f;
 
@@ -100,14 +103,14 @@ struct DataSettings {
 
     // Column names for certain columns that we need for the tool to work
     struct {
-        std::string positionRa;
-        std::string positionDec;
-        std::string positionDistance;
+        ColumnKey positionRa;
+        ColumnKey positionDec;
+        ColumnKey positionDistance;
 
-        std::string name;
-        std::string hostName; // TODO: optional
-        std::string ringSize; // TODO: optional
-        std::string referenceLink; // TODO: optional
+        ColumnKey name;
+        ColumnKey hostName; // TODO: optional
+        ColumnKey ringSize; // TODO: optional
+        ColumnKey referenceLink; // TODO: optional
     } dataMapping;
 
     struct ColumnInfo {
@@ -119,7 +122,15 @@ struct DataSettings {
         // This allows us to control that
         std::optional<bool> isText;
     };
-    std::unordered_map<std::string, ColumnInfo> columnInfo; // Mapped by "column key"
+    std::unordered_map<ColumnKey, ColumnInfo> columnInfo;
+
+    ColumnKey nameColumn() const {
+        return dataMapping.name;
+    };
+
+    const char* columnName(const ColumnKey& key) const {
+        return columnInfo.contains(key) ? columnInfo.at(key).name.c_str() : key.c_str();
+    }
 };
 
 } // namespace openspace::exoplanets

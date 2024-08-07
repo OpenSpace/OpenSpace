@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/exoplanetsexperttool/columnfilter.h>
+#include <modules/exoplanetsexperttool/columnselectionview.h>
 #include <modules/exoplanetsexperttool/dataloader.h>
 #include <modules/exoplanetsexperttool/datastructures.h>
 #include <openspace/properties/list/intlistproperty.h>
@@ -39,8 +40,6 @@
 #include <vector>
 
 namespace openspace::exoplanets {
-
-using ColumnKey = std::string;
 
 class DataViewer : public properties::PropertyOwner {
 public:
@@ -63,7 +62,6 @@ private:
 
     void initializeRenderables();
     void initializeCallbacks();
-    void renderHelpMarker(const char* text);
 
     void renderTable(const std::string& tableId, std::vector<size_t>& planetRows,
         bool useFixedHeight, std::string_view search = "");
@@ -89,7 +87,6 @@ private:
         std::optional<std::vector<size_t>> customIndices = std::nullopt);
 
     void renderSettingsMenuContent();
-    void renderColumnSettingsModal();
 
     void renderSystemViewContent(const std::string& host);
 
@@ -129,6 +126,8 @@ private:
     void flyToStar(std::string_view hostIdentifier) const;
 
     DataSettings _dataSettings;
+    ColumnSelectionView _columnSelectionView;
+
     std::vector<ExoplanetItem> _data;
     std::vector<size_t> _filteredData;  // The indices of the items which will be rendered
     std::vector<size_t> _selection;     // Indices of selected data points
@@ -136,11 +135,6 @@ private:
     std::vector<size_t> _pinnedPlanets;
 
     std::unordered_map<std::string, std::vector<size_t>> _hostIdToPlanetsMap;
-
-    std::vector<ColumnKey> _namedColumns;
-    std::vector<ColumnKey> _otherColumns;
-    std::vector<bool> _selectedNamedColumns;
-    std::vector<bool> _selectedOtherColumns;
 
     std::vector<ColumnKey> _columns;
 

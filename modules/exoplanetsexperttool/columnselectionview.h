@@ -22,21 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATAHELPER___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATAHELPER___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNSELECTIONVIEW___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNSELECTIONVIEW___H__
 
-namespace openspace::data {
+#include <modules/exoplanetsexperttool/datastructures.h>
+#include <string>
+#include <vector>
 
-float parseFloatData(const std::string& str);
+namespace openspace::exoplanets {
 
-double parseDoubleData(const std::string& str);
+class ColumnSelectionView {
+public:
+    ColumnSelectionView() = default;
 
-int parseIntegerData(const std::string& str);
+    std::vector<ColumnKey> initializeColumnsFromData(
+        const std::vector<ExoplanetItem>& data, const DataSettings& dataSettings);
 
-bool compareValuesWithNan(float lhs, float rhs);
+    void renderColumnSettingsView(std::vector<ColumnKey>& columnsToEdit,
+        const DataSettings& dataSettings);
 
-bool caseInsensitiveLessThan(const char* lhs, const char* rhs);
+private:
+    std::vector<ColumnKey> _namedColumns;
+    std::vector<ColumnKey> _otherColumns;
+    std::vector<bool> _selectedNamedColumns;
+    std::vector<bool> _selectedOtherColumns;
+};
 
-} // namespace openspace::data
+} // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATAHELPER___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNSELECTIONVIEW___H__
