@@ -93,8 +93,7 @@ private:
 
     void renderSystemViewContent(const std::string& host);
 
-    void renderColumnValue(int columnIndex, std::optional<const char*> format,
-        const ExoplanetItem& item);
+    void renderColumnValue(int columnIndex, const ExoplanetItem& item);
 
     const char* columnName(const ColumnKey& key) const;
 
@@ -108,6 +107,9 @@ private:
 
     // Check if a column is numeric. If it isn't, then it is text based
     bool isNumericColumn(int index) const;
+
+    const ColumnKey& nameColumn() const;
+    bool isNameColumn(const ColumnKey& key) const;
 
     glm::vec4 colorFromColormap(const ExoplanetItem& item,
         const ColorMappedVariable& variable);

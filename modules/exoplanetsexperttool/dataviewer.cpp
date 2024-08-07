@@ -253,11 +253,15 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
         const auto& allDataColumns = _data.front().dataColumns;
         const auto& columnsWithSettings = _dataSettings.columnInfo;
 
+        // The name column is required and should be handled separately, to always be the
+        // first column
+        _columns.push_back(nameColumn());
+
         // The default column are the which info has been provided for, if they exist in
         // the dataset
         _namedColumns.reserve(columnsWithSettings.size());
         for (auto const& [key, _] : columnsWithSettings) {
-            if (allDataColumns.contains(key)) {
+            if (allDataColumns.contains(key) && !isNameColumn(key)) {
                 _namedColumns.push_back(key);
             }
         }
@@ -272,13 +276,13 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
             }
         );
 
-        _columns = _namedColumns;
+        _columns.insert(_columns.end(), _namedColumns.begin(), _namedColumns.end());
         _selectedNamedColumns.assign(_columns.size(), true);
 
         // Add other columns, if there are any. Assume all items have the same columns
         _otherColumns.reserve(allDataColumns.size());
         for (auto const& [key, _] : allDataColumns) {
-            if (!columnsWithSettings.contains(key)) {
+            if (!columnsWithSettings.contains(key) && !isNameColumn(key)) {
                 _otherColumns.push_back(key);
             }
         }
@@ -997,7 +1001,7 @@ void DataViewer::renderTable(const std::string& tableId,
         for (int colIdx = 0; colIdx < _columns.size(); colIdx++) {
             ImGuiTableColumnFlags colFlags = ImGuiTableColumnFlags_PreferSortDescending;
             const ColumnKey c = _columns[colIdx];
-            if (c == _dataSettings.dataMapping.name) {
+            if (isNameColumn(c)) {
                 colFlags |= ImGuiTableColumnFlags_DefaultSort;
             }
             ImGui::TableSetupColumn(columnName(c), colFlags, 0.f, colIdx);
@@ -1122,7 +1126,7 @@ void DataViewer::renderTable(const std::string& tableId,
                     const ColumnKey col = _columns[colIdx];
                     ImGui::TableNextColumn();
 
-                    if (col == _dataSettings.dataMapping.name) {
+                    if (isNameColumn(col)) {
                         bool changed = ImGui::Selectable(
                             item.name.c_str(),
                             itemIsSelected,
@@ -1240,17 +1244,7 @@ void DataViewer::renderTable(const std::string& tableId,
                         continue;
                     }
 
-                    std::optional<const char*> format = std::nullopt;
-
-                    if (_dataSettings.columnInfo.contains(_columns[colIdx])) {
-                        const DataSettings::ColumnInfo& colInfo =
-                            _dataSettings.columnInfo.at(_columns[colIdx]);
-
-                        if (colInfo.format.has_value()) {
-                            format = colInfo.format.value().c_str();
-                        }
-                    }
-                    renderColumnValue(colIdx, format, item);
+                    renderColumnValue(colIdx, item);
                 }
             }
         }
@@ -2028,7 +2022,7 @@ void DataViewer::renderColumnSettingsModal() {
         ImGui::OpenPopup("Set columns");
     }
 
-    constexpr const int nPerColumn = 20;
+    constexpr const int MaxItemsPerColumn = 20;
 
     std::vector<bool> prevSelectedDefault = _selectedNamedColumns;
     std::vector<bool> prevSelectedOther = _selectedOtherColumns;
@@ -2039,9 +2033,9 @@ void DataViewer::renderColumnSettingsModal() {
 
     auto applySelection = [this](size_t nSelected) {
         _columns.clear();
-        _columns.reserve(nSelected);
+        _columns.reserve(nSelected + 1);
 
-        // TODO: always add the name column
+        _columns.push_back(nameColumn());
 
         for (int i = 0; i < _namedColumns.size(); i++) {
             if (_selectedNamedColumns[i]) {
@@ -2073,6 +2067,52 @@ void DataViewer::renderColumnSettingsModal() {
 
         ImGui::Separator();
 
+        // Required columns
+        ImGui::BeginGroup();
+        {
+            ImGui::Text("Required columns:");
+            ImGui::SameLine();
+            renderHelpMarker(
+                "The name column, specified in the data mapping part the .json file with "
+                "data settings, is required."
+            );
+            ImGui::Spacing();
+
+            ImGui::Indent(8.f);
+            {
+                ImGui::Text("Object name: ");
+                ImGui::SameLine();
+
+                ImGui::TextColored(
+                    toImVec4(DescriptiveTextColor),
+                    columnName(nameColumn())
+                );
+
+                if (_dataSettings.columnInfo.contains(nameColumn())) {
+                    ImGui::SameLine();
+                    ImGui::TextColored(
+                        toImVec4(DescriptiveTextColor),
+                        std::format("({})", nameColumn()).c_str()
+                    );
+
+                    const DataSettings::ColumnInfo& colInfo =
+                        _dataSettings.columnInfo.at(nameColumn());
+
+                    if (colInfo.description.has_value()) {
+                        ImGui::SameLine();
+                        renderHelpMarker((*colInfo.description).c_str());
+                    }
+                }
+            }
+            ImGui::Unindent(8.f);
+
+            ImGui::Separator();
+
+            ImGui::EndGroup();
+        }
+
+        ImGui::Spacing();
+
         // Named columns
         ImGui::BeginGroup();
         {
@@ -2101,7 +2141,7 @@ void DataViewer::renderColumnSettingsModal() {
 
             ImGui::BeginGroup();
             for (int i = 0; i < _namedColumns.size(); i++) {
-                if (i % nPerColumn == 0) {
+                if (i % MaxItemsPerColumn == 0) {
                     ImGui::EndGroup();
                     ImGui::SameLine();
                     ImGui::BeginGroup();
@@ -2156,7 +2196,7 @@ void DataViewer::renderColumnSettingsModal() {
 
             ImGui::BeginGroup();
             for (int i = 0; i < _otherColumns.size(); i++) {
-                if (i % nPerColumn == 0) {
+                if (i % MaxItemsPerColumn == 0) {
                     ImGui::EndGroup();
                     ImGui::SameLine();
                     ImGui::BeginGroup();
@@ -2457,9 +2497,17 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
     }
 }
 
-void DataViewer::renderColumnValue(int columnIndex, std::optional<const char*> format,
-                                   const ExoplanetItem& item)
-{
+void DataViewer::renderColumnValue(int columnIndex, const ExoplanetItem& item) {
+    std::optional<const char*> format;
+
+    if (_dataSettings.columnInfo.contains(_columns[columnIndex])) {
+        const DataSettings::ColumnInfo& colInfo =
+            _dataSettings.columnInfo.at(_columns[columnIndex]);
+
+        if (colInfo.format.has_value()) {
+            format = colInfo.format.value().c_str();
+        }
+    }
 
     std::variant<const char*, float> value = columnValue(_columns[columnIndex], item);
 
@@ -2527,6 +2575,15 @@ bool DataViewer::isNumericColumn(int index) const {
     // Test type using the first data point
     std::variant<const char*, float> aValue = columnValue(_columns[index], _data.front());
     return std::holds_alternative<float>(aValue);
+}
+
+const ColumnKey& DataViewer::nameColumn() const {
+    return _dataSettings.dataMapping.name;
+}
+
+bool DataViewer::isNameColumn(const ColumnKey& key) const {
+    const ColumnKey& nameColumn = _dataSettings.dataMapping.name;
+    return key == nameColumn;
 }
 
 glm::vec4 DataViewer::colorFromColormap(const ExoplanetItem& item,
