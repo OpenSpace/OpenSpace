@@ -248,27 +248,39 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     }
     _filteredDataWithoutExternalSelection = _filteredData;
 
-    // The default column are the which info has been provided for, if they exist in the
-    // dataset
-    _defaultColumns.reserve(_dataSettings.columnInfo.size());
-    for (auto const& [key, value] : _dataSettings.columnInfo) {
-        if (_data.front().dataColumns.contains(key)) {
-            _defaultColumns.push_back(key);
+
+    if (!_data.empty()) {
+        // The default column are the which info has been provided for, if they exist in
+        // the dataset
+        _defaultColumns.reserve(_dataSettings.columnInfo.size());
+        for (auto const& [key, value] : _dataSettings.columnInfo) {
+            if (_data.front().dataColumns.contains(key)) {
+                _defaultColumns.push_back(key);
+            }
         }
-    }
+        _defaultColumns.shrink_to_fit();
 
-    _columns = _defaultColumns;
-    _selectedDefaultColumns.assign(_columns.size(), true);
+        // Sort the defauls columns based on provided name instead of key
+        std::sort(
+            _defaultColumns.begin(),
+            _defaultColumns.end(),
+            [this](const ColumnKey& lhs, const ColumnKey& rhs) {
+                return caseInsensitiveLessThan(columnName(lhs), columnName(rhs));
+            }
+        );
 
-    // Add other oclumns, if there are any. Assume all data items have the same columns
-    if (_data.size() > 0) {
+        _columns = _defaultColumns;
+        _selectedDefaultColumns.assign(_columns.size(), true);
+
+        // Add other columns, if there are any. Assume all items have the same columns
+        _otherColumns.reserve(_data.front().dataColumns.size());
         for (auto const& [key, value] : _data.front().dataColumns) {
             if (!_dataSettings.columnInfo.contains(key)) {
                 _otherColumns.push_back(key);
-                bool isSelected = false;
-                _selectedOtherColumns.push_back(isSelected);
             }
         }
+        _otherColumns.shrink_to_fit();
+        _selectedOtherColumns.assign(_otherColumns.size(), false);
     }
 
     // Must match names in implot and customly added ones
