@@ -99,15 +99,14 @@ private:
     void renderColumnValue(int columnIndex, std::optional<const char*> format,
         const ExoplanetItem& item);
 
-    int columnIndexFromKey(const ColumnKey& key) const;
-    const char* columnNameFromKey(const ColumnKey& key) const;
+    const char* columnName(const ColumnKey& key) const;
 
-    std::variant<const char*, float> valueFromColumn(int columnIndex,
+    std::variant<const char*, float> columnValue(const ColumnKey& key,
         const ExoplanetItem& item) const;
 
     // Compare the values of two Exoplanets items, given a specific column.
     // The comparison made is (left < right)
-    bool compareColumnValues(int columnIndex, const ExoplanetItem& left,
+    bool compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
         const ExoplanetItem& right) const ;
 
     // Check if a column is numeric. If it isn't, then it is text based
