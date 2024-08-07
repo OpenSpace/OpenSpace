@@ -654,6 +654,7 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::SetPathToken,
             codegen::lua::FileExists,
             codegen::lua::ReadFile,
+            codegen::lua::ReadFileLines,
             codegen::lua::DirectoryExists,
             codegen::lua::CreateDirectory,
             codegen::lua::WalkDirectory,
