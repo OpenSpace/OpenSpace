@@ -250,32 +250,35 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
 
 
     if (!_data.empty()) {
+        const auto& allDataColumns = _data.front().dataColumns;
+        const auto& columnsWithSettings = _dataSettings.columnInfo;
+
         // The default column are the which info has been provided for, if they exist in
         // the dataset
-        _defaultColumns.reserve(_dataSettings.columnInfo.size());
-        for (auto const& [key, value] : _dataSettings.columnInfo) {
-            if (_data.front().dataColumns.contains(key)) {
-                _defaultColumns.push_back(key);
+        _namedColumns.reserve(columnsWithSettings.size());
+        for (auto const& [key, _] : columnsWithSettings) {
+            if (allDataColumns.contains(key)) {
+                _namedColumns.push_back(key);
             }
         }
-        _defaultColumns.shrink_to_fit();
+        _namedColumns.shrink_to_fit();
 
         // Sort the defauls columns based on provided name instead of key
         std::sort(
-            _defaultColumns.begin(),
-            _defaultColumns.end(),
+            _namedColumns.begin(),
+            _namedColumns.end(),
             [this](const ColumnKey& lhs, const ColumnKey& rhs) {
                 return caseInsensitiveLessThan(columnName(lhs), columnName(rhs));
             }
         );
 
-        _columns = _defaultColumns;
-        _selectedDefaultColumns.assign(_columns.size(), true);
+        _columns = _namedColumns;
+        _selectedNamedColumns.assign(_columns.size(), true);
 
         // Add other columns, if there are any. Assume all items have the same columns
-        _otherColumns.reserve(_data.front().dataColumns.size());
-        for (auto const& [key, value] : _data.front().dataColumns) {
-            if (!_dataSettings.columnInfo.contains(key)) {
+        _otherColumns.reserve(allDataColumns.size());
+        for (auto const& [key, _] : allDataColumns) {
+            if (!columnsWithSettings.contains(key)) {
                 _otherColumns.push_back(key);
             }
         }
@@ -2027,11 +2030,30 @@ void DataViewer::renderColumnSettingsModal() {
 
     constexpr const int nPerColumn = 20;
 
-    std::deque<bool> prevSelectedDefault = _selectedDefaultColumns;
-    std::deque<bool> prevSelectedOther = _selectedOtherColumns;
+    std::vector<bool> prevSelectedDefault = _selectedNamedColumns;
+    std::vector<bool> prevSelectedOther = _selectedOtherColumns;
     auto resetSelection = [this, &prevSelectedDefault, &prevSelectedOther]() {
-        _selectedDefaultColumns = prevSelectedDefault;
+        _selectedNamedColumns = prevSelectedDefault;
         _selectedOtherColumns = prevSelectedOther;
+    };
+
+    auto applySelection = [this](size_t nSelected) {
+        _columns.clear();
+        _columns.reserve(nSelected);
+
+        // TODO: always add the name column
+
+        for (int i = 0; i < _namedColumns.size(); i++) {
+            if (_selectedNamedColumns[i]) {
+                _columns.push_back(_namedColumns[i]);
+            }
+        }
+
+        for (int i = 0; i < _otherColumns.size(); i++) {
+            if (_selectedOtherColumns[i]) {
+                _columns.push_back(_otherColumns[i]);
+            }
+        }
     };
 
     // Always center this window when appearing
@@ -2043,31 +2065,42 @@ void DataViewer::renderColumnSettingsModal() {
     ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
 
     if (ImGui::BeginPopupModal("Set columns", NULL, flags)) {
-        ImGui::Text(std::format(
-            "Select up to 64 columns to show in the tool, out of {} ({} default columns, {} other columns)",
-            _defaultColumns.size() + _otherColumns.size(),
-            _defaultColumns.size(),
-            _otherColumns.size()
-        ).c_str());
+        ImGui::Text(
+            "This view controls which data columns are exposed in the application. "
+            "Only the selected columns will be exposed in the table view, can be "
+            "used for color mapping, filtering, et cetera. "
+        );
 
         ImGui::Separator();
 
-        // TODO: Show required columns and make sure they are always selected (like name)
-
-        // Default columns
+        // Named columns
         ImGui::BeginGroup();
         {
-            ImGui::Text("Default columns:");
+            ImGui::Text("Named columns:");
+
+            ImGui::SameLine();
+            renderHelpMarker(
+                "This is the columns specified with column information and a given name in "
+                "the .json file with data settings."
+            );
+
             ImGui::SameLine();
 
             ImGui::PushID("clear_default");
             if (ImGui::Button("Clear selection")) {
-                _selectedDefaultColumns.assign(_defaultColumns.size(), false);
+                _selectedNamedColumns.assign(_namedColumns.size(), false);
+            }
+            ImGui::PopID();
+            ImGui::SameLine();
+
+            ImGui::PushID("select_all_default");
+            if (ImGui::Button("Select all")) {
+                _selectedNamedColumns.assign(_namedColumns.size(), true);
             }
             ImGui::PopID();
 
             ImGui::BeginGroup();
-            for (int i = 0; i < _defaultColumns.size(); i++) {
+            for (int i = 0; i < _namedColumns.size(); i++) {
                 if (i % nPerColumn == 0) {
                     ImGui::EndGroup();
                     ImGui::SameLine();
@@ -2078,11 +2111,26 @@ void DataViewer::renderColumnSettingsModal() {
                     canSelectMore = false;
                 }
 
-                const ColumnKey& c = _defaultColumns[i];
+                const ColumnKey& c = _namedColumns[i];
 
-                ImGui::Checkbox(columnName(c), &_selectedDefaultColumns[i]);
+                bool isSelected = _selectedNamedColumns[i];
+                ImGui::Checkbox(columnName(c), &isSelected);
+                _selectedNamedColumns[i] = isSelected;
 
-                nSelected += _selectedDefaultColumns[i] ? 1 : 0;
+                nSelected += _selectedNamedColumns[i] ? 1 : 0;
+
+                ImGui::SameLine();
+                ImGui::TextColored(
+                    toImVec4(DescriptiveTextColor),
+                    std::format("({})", c).c_str()
+                );
+
+                if (_dataSettings.columnInfo.contains(c) &&
+                    _dataSettings.columnInfo.at(c).description.has_value())
+                {
+                    ImGui::SameLine();
+                    renderHelpMarker(_dataSettings.columnInfo[c].description.value().c_str());
+                }
             }
             ImGui::EndGroup();
 
@@ -2094,6 +2142,10 @@ void DataViewer::renderColumnSettingsModal() {
         ImGui::BeginGroup();
         {
             ImGui::Text("Other columns:");
+
+            ImGui::SameLine();
+            renderHelpMarker("This is any other columns that may exist in the dataset.");
+
             ImGui::SameLine();
 
             ImGui::PushID("clear_other");
@@ -2115,7 +2167,11 @@ void DataViewer::renderColumnSettingsModal() {
                 }
 
                 const ColumnKey& c = _otherColumns[i];
-                ImGui::Checkbox(columnName(c), &_selectedOtherColumns[i]);
+
+                bool isSelected = _selectedOtherColumns[i];
+                ImGui::Checkbox(columnName(c), &isSelected);
+                _selectedOtherColumns[i] = isSelected;
+
                 nSelected += _selectedOtherColumns[i] ? 1 : 0;
             }
             ImGui::EndGroup();
@@ -2141,7 +2197,7 @@ void DataViewer::renderColumnSettingsModal() {
         }
 
         if (ImGui::Button("OK", ImVec2(120, 0)) && !isTooManyColumns) {
-            setUpSelectedColumns(nSelected);
+            applySelection(nSelected);
             ImGui::CloseCurrentPopup();
         }
 
@@ -2156,28 +2212,6 @@ void DataViewer::renderColumnSettingsModal() {
             ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();
-    }
-}
-
-void DataViewer::setUpSelectedColumns(int nSelected) {
-    ghoul_assert(
-        (_selectedDefaultColumns.size() == _defaultColumns.size()) &&
-        (_selectedOtherColumns.size() == _otherColumns.size()),
-        "Number of columns must match!"
-    );
-    _columns.clear();
-    _columns.reserve(nSelected);
-
-    for (int i = 0; i < _defaultColumns.size(); i++) {
-        if (_selectedDefaultColumns[i]) {
-            _columns.push_back(_defaultColumns[i]);
-        }
-    }
-
-    for (int i = 0; i < _otherColumns.size(); i++) {
-        if (_selectedOtherColumns[i]) {
-            _columns.push_back(_otherColumns[i]);
-        }
     }
 }
 

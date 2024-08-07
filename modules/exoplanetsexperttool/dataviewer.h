@@ -33,7 +33,6 @@
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <ghoul/glm.h>
-#include <deque>
 #include <optional>
 #include <unordered_map>
 #include <variant>
@@ -90,9 +89,7 @@ private:
         std::optional<std::vector<size_t>> customIndices = std::nullopt);
 
     void renderSettingsMenuContent();
-
     void renderColumnSettingsModal();
-    void setUpSelectedColumns(int nSelected);
 
     void renderSystemViewContent(const std::string& host);
 
@@ -138,11 +135,10 @@ private:
 
     std::unordered_map<std::string, std::vector<size_t>> _hostIdToPlanetsMap;
 
-    std::vector<ColumnKey> _defaultColumns;
+    std::vector<ColumnKey> _namedColumns;
     std::vector<ColumnKey> _otherColumns;
-
-    std::deque<bool> _selectedDefaultColumns;
-    std::deque<bool> _selectedOtherColumns;
+    std::vector<bool> _selectedNamedColumns;
+    std::vector<bool> _selectedOtherColumns;
 
     std::vector<ColumnKey> _columns;
 
