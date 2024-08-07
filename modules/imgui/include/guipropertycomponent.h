@@ -62,7 +62,6 @@ protected:
     std::function<std::vector<properties::PropertyOwner*>()> _propertyOwnerFunction;
 
     properties::BoolProperty _useTreeLayout;
-    properties::StringListProperty _treeOrdering;
 };
 
 } // namespace openspace::gui

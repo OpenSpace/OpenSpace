@@ -46,15 +46,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrderingInfo = {
-        "Ordering",
-        "Tree Ordering",
-        "This list determines the order of the first tree layer if it is used. Elements "
-        "present in this list will be shown first, with an alphabetical ordering for "
-        "elements not listed.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     int nVisibleProperties(const std::vector<openspace::properties::Property*>& props)
     {
         using namespace openspace;
@@ -185,10 +176,8 @@ GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string g
                                            UseTreeLayout useTree)
     : GuiComponent(std::move(identifier), std::move(guiName))
     , _useTreeLayout(UseTreeInfo, useTree)
-    , _treeOrdering(OrderingInfo)
 {
     addProperty(_useTreeLayout);
-    addProperty(_treeOrdering);
 }
 
 void GuiPropertyComponent::setPropertyOwners(
@@ -303,14 +292,11 @@ void GuiPropertyComponent::render() {
             (void)owner; // using [[maybe_unused]] in the for loop gives an error
         }
 
-        // Sort:
-        // if guigrouping, sort by name and shortest first, but respect the user specified
-        // ordering then all w/o guigroup
-        const std::vector<std::string>& ordering = _treeOrdering;
+        // Sort: by name and shortest first
         std::stable_sort(
             owners.begin(),
             owners.end(),
-            [&ordering](PropertyOwner* lhs, PropertyOwner* rhs) {
+            [](PropertyOwner* lhs, PropertyOwner* rhs) {
                 const std::string lhsGrp = dynamic_cast<SceneGraphNode*>(lhs)->guiPath();
                 const std::string rhsGrp = dynamic_cast<SceneGraphNode*>(rhs)->guiPath();
 
@@ -321,38 +307,7 @@ void GuiPropertyComponent::render() {
                     return true;
                 }
 
-                if (ordering.empty()) {
-                    return lhsGrp < rhsGrp;
-                }
-
-                std::vector<std::string> lhsToken = ghoul::tokenizeString(lhsGrp, '/');
-                // The first token is always empty
-                auto lhsIt = std::find(ordering.begin(), ordering.end(), lhsToken[1]);
-
-                std::vector<std::string> rhsToken = ghoul::tokenizeString(rhsGrp, '/');
-                // The first token is always empty
-                auto rhsIt = std::find(ordering.begin(), ordering.end(), rhsToken[1]);
-
-                if (lhsIt != ordering.end() && rhsIt != ordering.end()) {
-                    if (lhsToken[1] != rhsToken[1]) {
-                        // If both top-level groups are in the ordering list, the
-                        // order of the iterators gives us the order of the groups
-                        return lhsIt < rhsIt;
-                    }
-                    else {
-                        return lhsGrp < rhsGrp;
-                    }
-                }
-                else if (lhsIt != ordering.end() && rhsIt == ordering.end()) {
-                    // If only one of them is in the list, we have a sorting
-                    return true;
-                }
-                else if (lhsIt == ordering.end() && rhsIt != ordering.end()) {
-                    return false;
-                }
-                else {
-                    return lhsGrp < rhsGrp;
-                }
+                return lhsGrp < rhsGrp;
             }
         );
     }

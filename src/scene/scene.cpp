@@ -779,7 +779,7 @@ std::vector<properties::Property*> Scene::propertiesMatchingRegex(
     return findMatchesInAllProperties(propertyString, allProperties(), "");
 }
 
-std::vector<std::string> Scene::allTags() {
+std::vector<std::string> Scene::allTags() const {
     std::set<std::string> result;
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         const std::vector<std::string>& tags = node->tags();
@@ -787,6 +787,21 @@ std::vector<std::string> Scene::allTags() {
     }
 
     return std::vector<std::string>(result.begin(), result.end());
+}
+
+void Scene::setGuiTreeOrdering(const std::string& guiPath,
+                               const std::vector<std::string>& list)
+{
+    _guiTreeOrderingMap[guiPath] = list;
+    global::eventEngine->publishEvent<events::EventGuiTreeUpdated>();
+}
+
+ghoul::Dictionary Scene::guiTreeOrdering() const {
+    ghoul::Dictionary dict;
+    for (const auto& [key, list] : _guiTreeOrderingMap) {
+        dict.setValue(key, list);
+    }
+    return dict;
 }
 
 scripting::LuaLibrary Scene::luaLibrary() {
@@ -877,7 +892,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
             codegen::lua::SetParent,
             codegen::lua::BoundingSphere,
             codegen::lua::InteractionSphere,
-            codegen::lua::MakeIdentifier
+            codegen::lua::MakeIdentifier,
+            codegen::lua::SetGuiTreeOrdering,
+            codegen::lua::GuiTreeOrdering
         }
     };
 }

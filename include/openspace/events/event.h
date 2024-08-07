@@ -79,6 +79,7 @@ struct Event {
         CameraPathFinished,
         CameraMovedPosition,
         ScheduledScriptExecuted,
+        GuiTreeUpdated,
         Custom,
         Last // sentinel value
     };
@@ -536,6 +537,19 @@ struct EventScheduledScriptExecuted : public Event {
     EventScheduledScriptExecuted(std::string_view script_);
 
     const tstring script;
+};
+
+/**
+ * This event is created when the custom ordering for a specific branch in the Scene
+ * GUI tree is changed. It signals to the UI that the tree should be updated.
+ */
+struct EventGuiTreeUpdated : public Event {
+    static constexpr Type Type = Event::Type::GuiTreeUpdated;
+
+    /**
+     * Creates an instance of an EventGuiTreeUpdated event.
+     */
+    EventGuiTreeUpdated();
 };
 
 /**
