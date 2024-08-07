@@ -66,10 +66,14 @@ int parseIntegerData(const std::string& str) {
     return std::numeric_limits<int>::quiet_NaN();
 };
 
-bool compareValues(float lhs, float rhs) {
+bool compareValuesWithNan(float lhs, float rhs) {
     if (std::isnan(lhs)) {
-        // also includes rhs is nan, in which case the order does not matter
-        return true;
+        // nan should be considered smaller than non-nan values
+        if (!std::isnan(rhs)) {
+            return true;
+        }
+        // if both are nan, return false
+        return false;
     }
 
     // rhs is nan, but not lhs

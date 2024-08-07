@@ -2453,14 +2453,18 @@ bool DataViewer::compareColumnValues(int columnIndex, const ExoplanetItem& left,
 
     // TODO: make sure they are the same type
 
-    if (std::holds_alternative<const char*>(leftValue) && std::holds_alternative<const char*>(rightValue)) {
+    if (std::holds_alternative<const char*>(leftValue) &&
+        std::holds_alternative<const char*>(rightValue))
+    {
         return !caseInsensitiveLessThan(
             std::get<const char*>(leftValue),
             std::get<const char*>(rightValue)
         );
     }
-    else if (std::holds_alternative<float>(leftValue) && std::holds_alternative<float>(rightValue)) {
-        return data::compareValues(std::get<float>(leftValue), std::get<float>(rightValue));
+    else if (std::holds_alternative<float>(leftValue) &&
+             std::holds_alternative<float>(rightValue))
+    {
+        return data::compareValuesWithNan(std::get<float>(leftValue), std::get<float>(rightValue));
     }
     else {
         LERROR("Trying to compare mismatching column types");

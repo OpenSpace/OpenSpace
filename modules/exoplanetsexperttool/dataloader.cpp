@@ -297,7 +297,7 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
             [&planets](const size_t a, const size_t b) -> bool {
                 float v1 = planets[a].sizeValue;
                 float v2 = planets[b].sizeValue;
-                return data::compareValues(v1, v2);
+                return data::compareValuesWithNan(v1, v2);
             }
         );
         for (int i = 0; i < static_cast<int>(planetIds.size()); ++i) {
