@@ -80,15 +80,14 @@ namespace {
 
         return result;
     }
-
-
-
 #include "scriptengine_codegen.cpp"
 } // namespace
 
 namespace openspace::scripting {
 
-ScriptEngine::ScriptEngine() {}
+ScriptEngine::ScriptEngine(bool sandboxedLua)
+    : _state(ghoul::lua::LuaState::Sandboxed(sandboxedLua))
+{}
 
 void ScriptEngine::initialize() {
     ZoneScoped;

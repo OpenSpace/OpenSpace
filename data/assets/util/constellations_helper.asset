@@ -11,14 +11,10 @@ local data = asset.resource({
 -- If the file does not exist or if a match could not be found, it returns nil
 local function findFullName(abbreviation)
   local namesFile = data .. "constellations.dat"
-  local file = io.open(namesFile, "r")
   local fullName = ""
 
-  if file == nil then
-    return nil
-  end
-
-  for line in io.lines(namesFile) do
+  local lines = openspace.readFileLines(namesFile)
+  for _, line in ipairs(lines) do
     -- Try and find the identifier in the file
     local index, length = line:find(abbreviation)
     if index ~= nil and index < 4 then
@@ -37,7 +33,6 @@ local function findFullName(abbreviation)
     end
   end
 
-  file:close()
   if fullName == "" then
     openspace.printError(
       "Error when calling function 'findFullName' in file 'util/constellations_helper': " ..

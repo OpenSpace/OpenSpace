@@ -105,6 +105,8 @@ struct Configuration {
 
     bool shouldUseScreenshotDate = false;
 
+    bool sandboxedLua = true;
+
     std::string onScreenTextScaling = "window";
     bool usePerProfileCache = false;
 
