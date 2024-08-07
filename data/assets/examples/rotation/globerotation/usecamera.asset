@@ -1,0 +1,61 @@
+-- UseCamera
+-- This asset creates a rotation that places a coordinate axes on the surface of a
+-- planetary body. The rotation causes the coordinate axes to remain fixed to the surface
+-- of the globe. In this example, the rotation of the object will be updated based on the
+-- location of the camera. When loading this example, make sure to focus the camera on
+-- the Globe object for the follow-function to work.
+--
+-- In order for this feature to work properly, the coordinate axes need to be located at
+-- the same place as well, so this example also needs a `GlobeTranslation` applied, which
+-- in this case also updated based on the camera location.
+
+-- The example needs a `RenderableGlobe` as a parent to function
+local Globe = {
+  Identifier = "GlobeRotation_Example_UseCamera_Globe",
+  Renderable = {
+    Type = "RenderableGlobe"
+  },
+  GUI = {
+    Name = "GlobeRotation - UseCamera (Globe)",
+    Path = "/Examples"
+  }
+}
+
+local Node = {
+  Identifier = "GlobeRotation_Example_UseCamera",
+  Parent = "GlobeRotation_Example_UseCamera_Globe",
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = "GlobeRotation_Example_UseCamera_Globe",
+      Latitude = 20.0,
+      Longitude = -45.0,
+      UseCamera = true
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = "GlobeRotation_Example_UseCamera_Globe",
+      Latitude = 20.0,
+      Longitude = -45.0,
+      Angle = 45.0,
+      UseCamera = true
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GlobeRotation - UseCamera",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Globe)
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(Globe)
+end)

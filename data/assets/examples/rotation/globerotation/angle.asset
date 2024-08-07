@@ -1,0 +1,57 @@
+-- Angle
+-- This asset creates a rotation that places a coordinate axes on the surface of a
+-- planetary body. The rotation causes the coordinate axes to remain fixed to the surface
+-- of the globe. Additionally, the coordinate axes are rotated around the up-axis by a
+-- fixed amount.
+--
+-- In order for this feature to work properly, the coordinate axes need to be located at
+-- the same place as well, so this example also needs a `GlobeTranslation` applied.
+
+-- The example needs a `RenderableGlobe` as a parent to function
+local Globe = {
+  Identifier = "GlobeRotation_Example_Angle_Globe",
+  Renderable = {
+    Type = "RenderableGlobe"
+  },
+  GUI = {
+    Name = "GlobeRotation - Angle (Globe)",
+    Path = "/Examples"
+  }
+}
+
+local Node = {
+  Identifier = "GlobeRotation_Example_Angle",
+  Parent = "GlobeRotation_Example_Angle_Globe",
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = "GlobeRotation_Example_Angle_Globe",
+      Latitude = 20.0,
+      Longitude = -45.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = "GlobeRotation_Example_Angle_Globe",
+      Latitude = 20.0,
+      Longitude = -45.0,
+      Angle = 45.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GlobeRotation - Angle",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Globe)
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(Globe)
+end)
