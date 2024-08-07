@@ -224,7 +224,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
 
     qInstallMessageHandler(
         [](QtMsgType type, const QMessageLogContext&, const QString& msg) {
-            if (type == QtCriticalMsg || type == QtFatalMsg || type == QtSystemMsg) {
+            if (type == QtCriticalMsg || type == QtFatalMsg || type == QtCriticalMsg) {
                 std::cerr << msg.toStdString() << '\n';
             }
         }

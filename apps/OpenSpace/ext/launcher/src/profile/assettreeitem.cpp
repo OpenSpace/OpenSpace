@@ -151,7 +151,7 @@ bool AssetTreeItem::insertColumns(int position, int columns) {
         _itemData.insert(_itemData.begin() + position, QVariant());
     }
 
-    for (AssetTreeItem* child : qAsConst(_childItems)) {
+    for (AssetTreeItem* child : _childItems) {
         child->insertColumns(position, columns);
     }
 
