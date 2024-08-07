@@ -576,7 +576,7 @@ void Scene::updateInterpolations() {
 }
 
 void Scene::setPropertiesFromProfile(const Profile& p) {
-    ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+    ghoul::lua::LuaState L;
 
     for (const Profile::Property& prop : p.properties) {
         if (prop.name.empty()) {

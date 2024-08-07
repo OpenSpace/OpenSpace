@@ -1383,7 +1383,7 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
 }
 
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
-    const ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+    const ghoul::lua::LuaState s;
     const std::filesystem::path path = absPath("${SCRIPTS}/drag_drop_handler.lua");
     const std::string p = path.string();
     int status = luaL_loadfile(s, p.c_str());
