@@ -133,6 +133,11 @@ local RotationKeyframes = {
 local InsightParent = {
   Identifier = "InsightParent",
   Parent = mars.Mars.Identifier,
+  -- TimeFrame = {
+  --   Type = "TimeFrameInterval",
+  --   Start = EntryTimeStart,
+  --   End = SpiceRotationEndTime
+  -- },
   Transform = {
     Translation = {
       Type = "TimelineTranslation",
@@ -143,11 +148,6 @@ local InsightParent = {
       Keyframes = RotationKeyframes
     }
   },
-  -- TimeFrame = {
-  --   Type = "TimeFrameInterval",
-  --   Start = EntryTimeStart,
-  --   End = SpiceRotationEndTime
-  -- },
   GUI = {
     Name = "InsightParent",
     Path = "/Solar System/Missions/Insight",
