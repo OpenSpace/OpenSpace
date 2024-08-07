@@ -45,6 +45,7 @@ private:
     properties::StringProperty _observer;
     properties::StringProperty _frame;
     properties::StringProperty _fixedDate;
+    properties::BoolProperty _useLightTravelTime;
 
     // We are accessing these values every frame and when retrieving a string from the
     // StringProperty, it allocates some new memory, which we want to prevent. Until the
