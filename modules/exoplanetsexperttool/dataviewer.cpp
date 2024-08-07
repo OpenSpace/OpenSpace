@@ -956,12 +956,10 @@ void DataViewer::renderTable(const std::string& tableId,
             ImGui::PushID(colIdx);
             ImGui::TableHeader(columnName(c));
 
-            if (_dataSettings.columnInfo.contains(c) &&
-                _dataSettings.columnInfo[c].description.has_value())
-            {
+            if (_dataSettings.hasDescription(c)) {
                 const float TEXT_WIDTH = ImGui::CalcTextSize(columnName(c)).x;
                 ImGui::SameLine(0.0f, TEXT_WIDTH + 2.f);
-                view::helper::renderHelpMarker(_dataSettings.columnInfo[c].description.value().c_str());
+                view::helper::renderHelpMarker(_dataSettings.description(c).c_str());
             }
 
             ImGui::PopID();
@@ -1510,7 +1508,11 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
         }
 
         ImGui::SetNextItemWidth(100);
-        if (ImGui::BeginCombo("##RowLimitColumn", columnName(_columns[currentMetricChoiceIndex]))) {
+        if (ImGui::BeginCombo(
+                "##RowLimitColumn",
+                columnName(_columns[currentMetricChoiceIndex]))
+            )
+        {
             for (int i = 0; i < _columns.size(); ++i) {
                 // Ignore non-numeric columns
                 if (!isNumericColumn(i)) {
@@ -2221,10 +2223,7 @@ void DataViewer::renderColumnValue(int columnIndex, const ExoplanetItem& item) {
 }
 
 const char* DataViewer::columnName(const ColumnKey& key) const {
-    if (_dataSettings.columnInfo.contains(key)) {
-        return _dataSettings.columnInfo.at(key).name.c_str();
-    }
-    return key.c_str();
+    return _dataSettings.columnName(key);
 }
 
 bool DataViewer::compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,

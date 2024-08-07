@@ -161,22 +161,21 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
             ImGui::Text("Object name: ");
             ImGui::SameLine();
 
+            const ColumnKey nameColumn = dataSettings.nameColumn();
+
             view::helper::renderDescriptiveText(
-                dataSettings.columnName(dataSettings.nameColumn())
+                dataSettings.columnName(nameColumn)
             );
 
-            if (dataSettings.columnInfo.contains(dataSettings.nameColumn())) {
+            if (dataSettings.columnInfo.contains(nameColumn)) {
                 ImGui::SameLine();
                 view::helper::renderDescriptiveText(
-                    std::format("({})", dataSettings.nameColumn()).c_str()
+                    std::format("({})", nameColumn).c_str()
                 );
 
-                const DataSettings::ColumnInfo& colInfo =
-                    dataSettings.columnInfo.at(dataSettings.nameColumn());
-
-                if (colInfo.description.has_value()) {
+                if (dataSettings.hasDescription(nameColumn)) {
                     ImGui::SameLine();
-                    view::helper::renderHelpMarker((*colInfo.description).c_str());
+                    view::helper::renderHelpMarker(dataSettings.description(nameColumn).c_str());
                 }
             }
         }
@@ -236,17 +235,11 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
             nSelected += _selectedNamedColumns[i] ? 1 : 0;
 
             ImGui::SameLine();
-            view::helper::renderDescriptiveText(
-                std::format("({})", c).c_str()
-            );
+            view::helper::renderDescriptiveText(std::format("({})", c).c_str());
 
-            if (dataSettings.columnInfo.contains(c) &&
-                dataSettings.columnInfo.at(c).description.has_value())
-            {
+            if (dataSettings.hasDescription(c)) {
                 ImGui::SameLine();
-                view::helper::renderHelpMarker(
-                    dataSettings.columnInfo.at(c).description.value().c_str()
-                );
+                view::helper::renderHelpMarker(dataSettings.description(c).c_str());
             }
         }
         ImGui::EndGroup();

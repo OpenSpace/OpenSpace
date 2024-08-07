@@ -128,8 +128,27 @@ struct DataSettings {
         return dataMapping.name;
     };
 
+    // Returns the column name, if there is one. Otherwise just the key.
     const char* columnName(const ColumnKey& key) const {
         return columnInfo.contains(key) ? columnInfo.at(key).name.c_str() : key.c_str();
+    }
+
+    bool hasName(const ColumnKey& key) const {
+        return columnInfo.contains(key);
+    }
+
+    const std::string& description(const ColumnKey& key) const {
+        if (!hasDescription(key)) {
+            return "";
+        }
+        return *columnInfo.at(key).description;
+    }
+    bool hasDescription(const ColumnKey& key) const {
+        return columnInfo.contains(key) && columnInfo.at(key).description.has_value();
+    }
+
+    bool hasFormat(const ColumnKey& key) const {
+        return columnInfo.contains(key) && columnInfo.at(key).format.has_value();
     }
 };
 
