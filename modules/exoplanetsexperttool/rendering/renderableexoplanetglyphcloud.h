@@ -68,7 +68,7 @@ private:
     void createGlyphIdTexture(const glm::uvec3 dimensions);
     void mapVertexAttributes();
 
-    bool _isDirty = true;
+    bool _renderDataIsDirty = true;
     bool _selectionChanged = true;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
@@ -84,17 +84,18 @@ private:
     properties::BoolProperty _useFixedRingWidth;
 
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
+    bool _dataFileIsDirty = false;
 
     struct GlyphData {
         glm::vec3 position;
         float component;
-        int index;
+        size_t index;
         int nColors;
         glm::vec4 colors[MaxNumberColors];
     };
 
     std::vector<GlyphData> _fullGlyphData;
-    std::vector<int> _glyphIndices; // indices of the points in the dataviewer
+    std::vector<size_t> _glyphIndices; // indices of the points in the dataviewer
     int _maxIndex = -1;
     properties::IntProperty _currentlyHoveredIndex;
 

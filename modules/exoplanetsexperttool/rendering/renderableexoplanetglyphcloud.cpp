@@ -188,7 +188,7 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     }
 
     _dataFile = std::make_unique<ghoul::filesystem::File>(p.dataFile);
-    _dataFile->setCallback([&]() { updateDataFromFile(); });
+    _dataFile->setCallback([&]() { _dataFileIsDirty = true; });
 
     updateDataFromFile();
 
@@ -251,7 +251,6 @@ bool RenderableExoplanetGlyphCloud::isReady() const {
 void RenderableExoplanetGlyphCloud::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
@@ -439,7 +438,11 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
         );
     }
 
-    if (_isDirty) {
+    if (_dataFileIsDirty) {
+        updateDataFromFile();
+    }
+
+    if (_renderDataIsDirty) {
         if (_primaryPointsVAO == 0) {
             glGenVertexArrays(1, &_primaryPointsVAO);
             LDEBUG(std::format("Generating Vertex Array id '{}'", _primaryPointsVAO));
@@ -484,7 +487,7 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
 
         // For each of the selected indices, find the corresponding point
         for (int i : _selectedIndices.value()) {
-            std::vector<int>::iterator pos =
+            std::vector<size_t>::iterator pos =
                 std::find(_glyphIndices.begin(), _glyphIndices.end(), i);
 
             if (pos != _glyphIndices.end()) {
@@ -520,7 +523,7 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
         }
     }
 
-    _isDirty = false;
+    _renderDataIsDirty = false;
     _selectionChanged = false;
 }
 
@@ -635,16 +638,16 @@ void RenderableExoplanetGlyphCloud::updateDataFromFile() {
     _glyphIndices.clear();
 
     // Read number of data points
-    unsigned int nPoints;
-    file.read(reinterpret_cast<char*>(&nPoints), sizeof(unsigned int));
+    size_t nPoints;
+    file.read(reinterpret_cast<char*>(&nPoints), sizeof(size_t));
 
     _fullGlyphData.reserve(nPoints);
     _glyphIndices.reserve(nPoints);
 
-    int maxIndex = -1;
+    size_t maxIndex = -1;
 
     // OBS: this reading must match the writing in the dataviewer
-    for (unsigned int i = 0; i < nPoints; i++) {
+    for (size_t i = 0; i < nPoints; i++) {
         GlyphData d;
 
         size_t index;
@@ -677,19 +680,20 @@ void RenderableExoplanetGlyphCloud::updateDataFromFile() {
         file.read(reinterpret_cast<char*>(&indexInSystem), sizeof(int));
         d.component = static_cast<float>(indexInSystem + 1);
 
-        d.index = static_cast<int>(index) + 1;
+        d.index = index + 1;
 
         if (d.index > maxIndex) {
             maxIndex = d.index;
         }
 
         _fullGlyphData.push_back(std::move(d));
-        _glyphIndices.push_back(static_cast<int>(index));
+        _glyphIndices.push_back(index);
     }
 
-    _maxIndex = maxIndex;
+    _maxIndex = static_cast<int>(maxIndex);
 
-    _isDirty = true;
+    _dataFileIsDirty = false;
+    _renderDataIsDirty = true;
 }
 
 } // namespace openspace::exoplanets

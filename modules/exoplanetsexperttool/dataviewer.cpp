@@ -259,7 +259,7 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
 
     // Interaction callbacks. OBS! A bit ugly to handle this separately from ImGui io....
     global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier modifier, KeyAction action, bool) -> bool {
+        [&](Key key, KeyModifier, KeyAction action, bool) -> bool {
             bool isCtrl = key == Key::LeftControl;
             if (isCtrl && action == KeyAction::Press) {
                 _holdingCtrl = true;
@@ -878,12 +878,10 @@ void DataViewer::renderTableWindow(bool *open) {
     }
 
     ImGui::Separator();
-    view::helper::renderDescriptiveText(
-        std::format(
-            "Showing {} exoplanets out of a total {} ",
-            _filteredData.size(), _data.size()
-        ).c_str()
-    );
+    view::helper::renderDescriptiveText(std::format(
+        "Showing {} exoplanets out of a total {} ",
+        _filteredData.size(), _data.size()
+    ).c_str());
 
     // Search table
     static char searchString[128] = "";
@@ -1747,9 +1745,9 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     }
 
     if (_useExternalSelection && !_externalSelection.value().empty()) {
-        view::helper::renderDescriptiveText(
-            std::format("After applying external filtering: {}", _filteredData.size()).c_str()
-        );
+        view::helper::renderDescriptiveText(std::format(
+            "After applying external filtering: {}", _filteredData.size()
+        ).c_str());
     }
 
     ImGui::End(); // Filter settings window
@@ -1765,7 +1763,6 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     // Reset some state changed variables
     _externalSelectionChanged = false;
 }
-
 
 int DataViewer::getHoveredPlanetIndex() const {
     std::string sgnId = std::string(ExoplanetsExpertToolModule::GlyphCloudIdentifier);
@@ -2352,11 +2349,9 @@ void DataViewer::writeRenderDataToFile() {
     std::vector<std::string_view> hosts;
     hosts.reserve(_filteredData.size());
 
-    // TODO: use size_t instead of unsigned int
-
     // Write number of points
-    unsigned int nPoints = static_cast<unsigned int>(indicesWithPositions.size());
-    file.write(reinterpret_cast<const char*>(&nPoints), sizeof(unsigned int));
+    size_t nPoints = indicesWithPositions.size();
+    file.write(reinterpret_cast<const char*>(&nPoints), sizeof(size_t));
 
     for (size_t index : indicesWithPositions) {
         const ExoplanetItem& item = _data[index];
@@ -2396,6 +2391,7 @@ void DataViewer::writeRenderDataToFile() {
         }
     }
 
+    file.close();
 }
 
 void DataViewer::updateSelectionInRenderable() {
