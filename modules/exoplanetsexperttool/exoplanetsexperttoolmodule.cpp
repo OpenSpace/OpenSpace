@@ -25,7 +25,6 @@
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
-#include <modules/exoplanetsexperttool/rendering/renderablepointdata.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -216,15 +215,13 @@ void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dic
     fRenderable->registerClass<RenderableExoplanetGlyphCloud>(
         "RenderableExoplanetGlyphCloud"
     );
-    fRenderable->registerClass<RenderablePointData>("RenderablePointData");
 }
 
 std::vector<documentation::Documentation>
 ExoplanetsExpertToolModule::documentations() const
 {
     return {
-        RenderableExoplanetGlyphCloud::Documentation(),
-        RenderablePointData::Documentation()
+        RenderableExoplanetGlyphCloud::Documentation()
     };
 }
 

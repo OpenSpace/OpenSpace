@@ -163,10 +163,7 @@ private:
     // when interacting with glyphs
     bool _holdingCtrl = false;
 
-    // Some settings
     glm::vec4 _nanPointColor = { 0.3f, 0.3f, 0.3f, 1.f };
-
-    bool _useGlyphRendering = true;
 
     std::list<std::string> _shownPlanetSystemWindows;
 

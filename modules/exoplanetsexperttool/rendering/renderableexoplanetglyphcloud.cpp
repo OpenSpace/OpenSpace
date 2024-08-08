@@ -98,7 +98,7 @@ namespace {
         "The index of the currently hovered planet. Is -1 if no planet is being hovered."
     };
 
-    struct [[codegen::Dictionary(RenderablePointData)]] Parameters {
+    struct [[codegen::Dictionary(RenderableExoplanetGlyphCloud)]] Parameters {
         // [[codegen::verbatim(HighlightColorInfo.description)]]
         std::optional<glm::vec3> highlightColor [[codegen::color()]];
 

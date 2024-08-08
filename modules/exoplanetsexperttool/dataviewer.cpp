@@ -28,7 +28,6 @@
 #include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
-#include <modules/exoplanetsexperttool/rendering/renderablepointdata.h>
 #include <modules/exoplanetsexperttool/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
@@ -393,19 +392,11 @@ void DataViewer::initializeRenderables() {
     gui.setValue("Path", "/ExoplanetExplorer"s);
 
     ghoul::Dictionary renderable;
-
-    if (_useGlyphRendering) {
-        renderable.setValue("Type", "RenderableExoplanetGlyphCloud"s);
-        renderable.setValue("Size", 100.0);
-        renderable.setValue("BillboardMinMaxSize", glm::dvec2(DefaultGlyphSize));
-        renderable.setValue("UseFixedWidth", false);
-        renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
-    }
-    else {
-        renderable.setValue("Type", "RenderablePointData"s);
-        renderable.setValue("Size", 10.0);
-    }
-
+    renderable.setValue("Type", "RenderableExoplanetGlyphCloud"s);
+    renderable.setValue("Size", 100.0);
+    renderable.setValue("BillboardMinMaxSize", glm::dvec2(DefaultGlyphSize));
+    renderable.setValue("UseFixedWidth", false);
+    renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
     renderable.setValue("DataFile", dataFilePath.string());
     renderable.setValue("HighlightColor", glm::dvec3(
         view::colors::DefaultSelected
@@ -2380,10 +2371,6 @@ void DataViewer::writeRenderDataToFile() {
         file.write(reinterpret_cast<const char*>(&position.y), sizeof(double));
         file.write(reinterpret_cast<const char*>(&position.z), sizeof(double));
 
-        if (!_useGlyphRendering) {
-            nVariables = 1; // If not glyph, just use first variable
-        }
-
         for (int i = 0; i < nVariables; ++i) {
             const ImVec4 color = view::helper::toImVec4(
                 colorFromColormap(item, _variableSelection[i])
@@ -2394,11 +2381,8 @@ void DataViewer::writeRenderDataToFile() {
             file.write(reinterpret_cast<const char*>(&color.w), sizeof(float));
         }
 
-        // Other data used for rendering
-        if (_useGlyphRendering) {
-            // Get a number for the planet's index in system
-            file.write(reinterpret_cast<const char*>(&item.indexInSystem), sizeof(int));
-        }
+        // Get a number for the planet's index in system
+        file.write(reinterpret_cast<const char*>(&item.indexInSystem), sizeof(int));
 
         // Write label to file
         bool isAdded = std::find(hosts.begin(), hosts.end(), item.hostName) != hosts.end();

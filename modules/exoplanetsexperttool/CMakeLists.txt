@@ -35,7 +35,6 @@ set(HEADER_FILES
     gui.h
     viewhelper.h
     rendering/renderableexoplanetglyphcloud.h
-    rendering/renderablepointdata.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -49,7 +48,6 @@ set(SOURCE_FILES
     gui.cpp
     viewhelper.cpp
     rendering/renderableexoplanetglyphcloud.cpp
-    rendering/renderablepointdata.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
