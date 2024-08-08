@@ -7,7 +7,8 @@
         "name": "pl_name",
         "hostName": "hostname",
         "ring_size": "pl_orbsmax",
-        "reference_link": "pl_refname"
+        "reference_name": "pl_refname_name",
+        "reference_link": "pl_refname_url"
     },
     "column_info": {
         "pl_name": {
@@ -72,6 +73,9 @@
         },
         "pl_orbincl": {
             "name": "Inclination"
+        },
+        "pl_refname_name": {
+            "name": "Reference"
         },
         "st_teff": {
             "name": "Star Teff",

@@ -1100,11 +1100,13 @@ void DataViewer::renderTable(const std::string& tableId,
                             ImGui::Text(item.referenceName.c_str());
                             ImGui::SameLine();
 
-                            ImGui::PushID(std::format("Planetreflink-{}", item.name).c_str());
-                            if (ImGui::Button("Link")) {
-                                system(std::format("start {}", item.referenceUrl).c_str());
+                            if (ImGui::Button("Link (Chrome)")) {
+                                system(std::format("start chrome.exe {}", item.referenceUrl).c_str());
                             }
-                            ImGui::PopID();
+                            ImGui::SameLine();
+                            if (ImGui::Button("Link (Firefox)")) {
+                                system(std::format("start firefox {}", item.referenceUrl).c_str());
+                            }
 
                             ImGui::Separator();
 

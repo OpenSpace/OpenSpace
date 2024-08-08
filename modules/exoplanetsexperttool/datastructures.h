@@ -110,6 +110,7 @@ struct DataSettings {
         ColumnKey name;
         ColumnKey hostName; // TODO: optional
         ColumnKey ringSize; // TODO: optional
+        ColumnKey referenceName; // TODO: optional
         ColumnKey referenceLink; // TODO: optional
     } dataMapping;
 

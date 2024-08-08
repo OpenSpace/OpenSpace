@@ -79,6 +79,7 @@ namespace {
         dataMapping.at("name").get_to(s.dataMapping.name);
         dataMapping.at("hostName").get_to(s.dataMapping.hostName);
         dataMapping.at("ring_size").get_to(s.dataMapping.ringSize);
+        dataMapping.at("reference_name").get_to(s.dataMapping.referenceName);
         dataMapping.at("reference_link").get_to(s.dataMapping.referenceLink);
 
         const nlohmann::json columnInfo = j.at("column_info");
@@ -188,6 +189,12 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
             }
             else if (column == settings.dataMapping.positionDistance) {
                 distance.value = data::parseFloatData(data);
+            }
+            else if (column == settings.dataMapping.referenceName) {
+                p.referenceName = data;
+            }
+            else if (column == settings.dataMapping.referenceLink) {
+                p.referenceUrl= data;
             }
 
             // Parse data column values

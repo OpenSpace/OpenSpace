@@ -136,6 +136,10 @@ data_filter = (
     (df['pl_refname'] != '<a refstr=STASSUN_ET_AL__2017 href=https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract target=ref>Stassun et al. 2017</a>')
 )
 
+# Create separate columns with just the name and the url for the reference
+df['pl_refname_name'] = df['pl_refname'].str.extract('>(.*)<')
+df['pl_refname_url'] = df['pl_refname'].str.extract('href=(.*) target')
+
 # ## Group by planet name and grab the most recent record
 cols = df.columns.to_list()[1:]
 agg_dict = dict(zip(cols, ['first'] * len(cols)))
