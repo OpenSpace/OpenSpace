@@ -28,7 +28,7 @@
 #include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
-#include <modules/exoplanetsexperttool/viewhelper.h>
+#include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -233,29 +233,8 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
 
     _columns = _columnSelectionView.initializeColumnsFromData(_data, _dataSettings);
 
-    // Must match names in implot and customly added ones
-    _colormaps = {
-        "Viridis",
-        "Plasma",
-        "Hot",
-        "Cool",
-        "Autumn", // custom
-        "Spring", // custom
-        "Summer", // custom
-        "Winter", // custom
-        "Jet",
-        "Spectral",
-        "RdBu",
-        "BrBG",
-        "PiYG",
-        "Twilight",
-        "Deep",
-        "Dark",
-        "Paired",
-    };
-
-    // TODO: make sure that settings are preserved between sessions?
-    _variableSelection.push_back(ColorMappedVariable());
+    // The other views use the loaded data, so call this afterwards
+    _colorMappingView = std::make_unique<ColorMappingView>(*this, _dataSettings);
 
     // Interaction callbacks. OBS! A bit ugly to handle this separately from ImGui io....
     global::callback::keyboard->emplace_back(
@@ -277,58 +256,61 @@ void DataViewer::initializeGL() {
     initializeRenderables();
     initializeCallbacks();
 
-    //  TODO: These do not work when using multiple windows :(
-    // Probably has to do with contexts
+    _colorMappingView->initializeGL();
+}
 
-    // Intilize custom color maps (generated from matplotlib)
-    const ImVec4 autumn[] = {
-        ImVec4(1.f, 0.f,         0.f, 1.f),
-        ImVec4(1.f, 0.14117647f, 0.f, 1.f),
-        ImVec4(1.f, 0.28627451f, 0.f, 1.f),
-        ImVec4(1.f, 0.42745098f, 0.f, 1.f),
-        ImVec4(1.f, 0.57254902f, 0.f, 1.f),
-        ImVec4(1.f, 0.71372549f, 0.f, 1.f),
-        ImVec4(1.f, 0.85882353f, 0.f, 1.f),
-        ImVec4(1.f, 1.f,         0.f, 1.f)
-    };
+std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
+    const ExoplanetItem& item) const
+{
+    const std::variant<std::string, float>& value = item.dataColumns.at(key);
 
-    const ImVec4 spring[] = {
-        ImVec4(1.f, 0.f,         1.f,         1.f),
-        ImVec4(1.f, 0.14117647f, 0.85882353f, 1.f),
-        ImVec4(1.f, 0.28627451f, 0.71372549f, 1.f),
-        ImVec4(1.f, 0.42745098f, 0.57254902f, 1.f),
-        ImVec4(1.f, 0.57254902f, 0.42745098f, 1.f),
-        ImVec4(1.f, 0.71372549f, 0.28627451f, 1.f),
-        ImVec4(1.f, 0.85882353f, 0.14117647f, 1.f),
-        ImVec4(1.f, 1.f,         0.f,         1.f)
-    };
+    if (std::holds_alternative<std::string>(value)) {
+        return std::get<std::string>(value).c_str();
+    }
+    return std::get<float>(value);
+}
 
-    const ImVec4 summer[] = {
-        ImVec4(0.f,         0.5f,        0.4f, 1.f),
-        ImVec4(0.14117647f, 0.57058824f, 0.4f, 1.f),
-        ImVec4(0.28627451f, 0.64313725f, 0.4f, 1.f),
-        ImVec4(0.42745098f, 0.71372549f, 0.4f, 1.f),
-        ImVec4(0.57254902f, 0.78627451f, 0.4f, 1.f),
-        ImVec4(0.71372549f, 0.85686275f, 0.4f, 1.f),
-        ImVec4(0.85882353f, 0.92941176f, 0.4f, 1.f),
-        ImVec4(1.f,         1.f,         0.4f, 1.f)
-    };
+bool DataViewer::isNumericColumn(int index) const {
+    ghoul_assert(_data.size() > 0, "Data size cannot be zero");
+    // Test type using the first data point
+    std::variant<const char*, float> aValue = columnValue(_columns[index], _data.front());
+    return std::holds_alternative<float>(aValue);
+}
 
-    const ImVec4 winter[] = {
-        ImVec4(0.f, 0.f,         1.f,         1.f),
-        ImVec4(0.f, 0.14117647f, 0.92941176f, 1.f),
-        ImVec4(0.f, 0.28627451f, 0.85686275f, 1.f),
-        ImVec4(0.f, 0.42745098f, 0.78627451f, 1.f),
-        ImVec4(0.f, 0.57254902f, 0.71372549f, 1.f),
-        ImVec4(0.f, 0.71372549f, 0.64313725f, 1.f),
-        ImVec4(0.f, 0.85882353f, 0.57058824f, 1.f),
-        ImVec4(0.f, 1.f,         0.5f,        1.f)
-    };
+const char* DataViewer::columnName(const ColumnKey& key) const {
+    return _dataSettings.columnName(key);
+}
 
-    ImPlot::AddColormap("Autumn", autumn, 8, false);
-    ImPlot::AddColormap("Spring", spring, 8, false);
-    ImPlot::AddColormap("Summer", summer, 8, false);
-    ImPlot::AddColormap("Winter", winter, 8, false);
+const char* DataViewer::columnName(int columnIndex) const {
+    // TODO: validate index
+    return _dataSettings.columnName(_columns[columnIndex]);
+}
+
+const ColumnKey& DataViewer::nameColumn() const {
+    return _dataSettings.dataMapping.name;
+}
+
+bool DataViewer::isNameColumn(const ColumnKey& key) const {
+    return key == nameColumn();
+}
+
+const std::vector<ExoplanetItem>& DataViewer::data() const {
+    return _data;
+}
+
+const std::vector<size_t>& DataViewer::currentFiltering() const {
+    return _filteredData;
+}
+
+const std::vector<ColumnKey>& DataViewer::columns() const {
+    return _columns;
+}
+
+const std::vector<size_t>& DataViewer::planetsForHost(const std::string& hostIdentifier) const {
+    if (!_hostIdToPlanetsMap.contains(hostIdentifier)) {
+        return std::vector<size_t>();
+    }
+    return _hostIdToPlanetsMap.at(hostIdentifier);
 }
 
 void DataViewer::renderStartupInfo() {
@@ -576,7 +558,6 @@ void DataViewer::render() {
         renderFilterSettingsWindow(&showFilterSettingsWindow);
     }
 
-    _colormapWasChanged = false;
     if (showColormapWindow) {
         renderColormapWindow(&showColormapWindow);
     }
@@ -624,123 +605,9 @@ void DataViewer::render() {
 
     if (_filterChanged || _colormapWasChanged) {
         writeRenderDataToFile();
+        _colormapWasChanged = false;
+        _filterChanged = false;
     }
-}
-
-bool DataViewer::renderColormapEdit(ColorMappedVariable& variable,
-                                    std::string_view relevantSystem)
-{
-    constexpr const int InputWidth = 120;
-    bool wasChanged = false;
-
-    ImGui::BeginGroup();
-    {
-        ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::BeginCombo("Column", columnName(_columns[variable.columnIndex]))) {
-            for (int i = 0; i < _columns.size(); ++i) {
-                // Ignore non-numeric columns
-                if (!isNumericColumn(i)) {
-                    continue;
-                }
-
-                const char* name = columnName(_columns[i]);
-                if (ImGui::Selectable(name, variable.columnIndex == i)) {
-                    variable.columnIndex = i;
-                    wasChanged = true;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::BeginCombo("Colormap", _colormaps[variable.colormapIndex])) {
-            for (int i = 0; i < _colormaps.size(); ++i) {
-                const char* name = _colormaps[i];
-                ImPlot::ColormapIcon(ImPlot::GetColormapIndex(name));
-                ImGui::SameLine();
-                if (ImGui::Selectable(name, variable.colormapIndex == i)) {
-                    variable.colormapIndex = i;
-                    wasChanged = true;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        const int colormapColumn = variable.columnIndex;
-
-        // Min/max values for color range
-        ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::DragFloatRange2("Min / Max", &variable.colorScaleMin, &variable.colorScaleMax, 1.f)) {
-            wasChanged = true;
-        }
-
-        bool updateMinMax = false;
-
-        std::vector<size_t> relevantIndices;
-
-        if (!relevantSystem.empty() && ImGui::SmallButton("Set from planets in system")) {
-            relevantIndices =
-                _hostIdToPlanetsMap[makeIdentifier(std::string(relevantSystem))];
-            updateMinMax = true;
-        }
-        else if (ImGui::SmallButton("Set from current table data")) {
-            relevantIndices = _filteredData;
-            updateMinMax = true;
-        }
-        else if (ImGui::SmallButton("Set from full data")) {
-            std::vector<size_t> v(_data.size()); // same number of indices as data
-            std::iota(std::begin(v), std::end(v), 0);
-            relevantIndices = std::move(v);
-            updateMinMax = true;
-        }
-
-        if (updateMinMax && !relevantIndices.empty()) {
-            float newMin = std::numeric_limits<float>::max();
-            float newMax = std::numeric_limits<float>::lowest();
-
-            for (size_t i : relevantIndices) {
-                const ExoplanetItem& item = _data[i];
-                auto value = columnValue(_columns[colormapColumn], item);
-                if (!std::holds_alternative<float>(value)) {
-                    // Shouldn't be possible to try to use non numbers
-                    throw;
-                }
-
-                float val = std::get<float>(value);
-                if (std::isnan(val)) {
-                    continue;
-                }
-                newMax = std::max(val, newMax);
-                newMin = std::min(val, newMin);
-            }
-
-            variable.colorScaleMin = newMin;
-            variable.colorScaleMax = newMax;
-            wasChanged = true;
-        };
-
-        // Render an opacity slider
-        ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::SliderFloat("Opacity", &variable.opacity, 0.f, 1.f)) {
-            wasChanged = true;
-        }
-        ImGui::EndGroup();
-    }
-
-    constexpr const int ColorScaleHeight = 140;
-
-    // Render visuals for colormap
-    ImGui::SameLine();
-    ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
-    ImPlot::ColormapScale(
-        "##ColorScale",
-        variable.colorScaleMin,
-        variable.colorScaleMax,
-        ImVec2(0, ColorScaleHeight)
-    );
-    ImPlot::PopColormap();
-
-    return wasChanged;
 }
 
 void DataViewer::renderColormapWindow(bool* open) {
@@ -750,113 +617,7 @@ void DataViewer::renderColormapWindow(bool* open) {
         return;
     }
 
-    // Start variable group
-    ImGui::BeginGroup();
-
-    ImGui::BeginGroup();
-
-    // Colormap for each selected variable
-    if (ImGui::Button("+ Add variable")) {
-        if (_variableSelection.size() < 8) {
-            _variableSelection.push_back(ColorMappedVariable());
-            _colormapWasChanged = true;
-        }
-    };
-    ImGui::SameLine();
-
-    // NaNColor
-    ImGuiColorEditFlags nanColorFlags = ImGuiColorEditFlags_NoInputs |
-        ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreview |
-        ImGuiColorEditFlags_AlphaBar;
-    static ImVec4 c = view::helper::toImVec4(_nanPointColor);
-    if (ImGui::ColorEdit4("NanColor", (float*)&c, nanColorFlags)) {
-        _nanPointColor = { c.x, c.y, c.z, c.w };
-        _colormapWasChanged = true;
-    }
-    ImGui::SameLine();
-    ImGui::Text("No value color");
-
-    ImGui::EndGroup();
-
-    ImGui::Spacing();
-
-    ImGui::BeginGroup();
-
-    // Note the reverse ordering
-    for (int index = static_cast<int>(_variableSelection.size()) - 1; index >= 0; --index) {
-        ColorMappedVariable& variable = _variableSelection[index];
-
-        ImGui::PushID(std::format("##variable{}", index).c_str());
-
-        ImGui::Text(std::format("{}.", index + 1).c_str());
-        ImGui::SameLine();
-
-        // Entire variable group
-        _colormapWasChanged |= renderColormapEdit(variable);
-
-        ImGui::PopID();
-        ImGui::SameLine();
-
-        ImGui::PushID(std::format("##remove{}", index).c_str());
-        if (_variableSelection.size() > 1 && ImGui::Button("x")) {
-            _variableSelection.erase(_variableSelection.begin() + index);
-            _colormapWasChanged = true;
-        }
-        ImGui::PopID();
-
-        // Some spacing before the next group
-        ImGui::Spacing();
-    }
-
-    ImGui::EndGroup(); // all variable groups
-
-    // Circle plot to show which parameters map to which part of a glyph
-    ImGui::SameLine();
-    {
-        int nVariables = static_cast<int>(_variableSelection.size());
-        std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
-
-        // First build array with real strings. Note that this has to stay alive for
-        // the entire lifetime of the char * array
-        std::vector<std::string> labelStrings;
-        labelStrings.reserve(nVariables);
-        for (int i = 0; i < nVariables; ++i) {
-            std::string label = columnName(_columns[_variableSelection[i].columnIndex]);
-            label = label.substr(0, 10); // limit length
-            labelStrings.push_back(std::format(" {}. {}", i+1, label));
-        }
-
-        // Then build array with const char * from that array
-        std::vector<const char*> labels;
-        labels.reserve(nVariables);
-        for (int i = 0; i < nVariables; ++i) {
-            labels.push_back(labelStrings[i].data());
-        }
-
-        // Reverse vector to get the order its actually rendered
-        std::reverse(labels.begin(), labels.end());
-
-        constexpr const int ColorScaleHeight = 140;
-        ImVec2 plotSize = ImVec2(1.5 * ColorScaleHeight, ColorScaleHeight);
-        ImPlot::SetNextPlotLimits(0, 1.5, 0, 1, ImGuiCond_Always);
-
-        if (ImPlot::BeginPlot(
-                "##Pie",
-                NULL, NULL,
-                plotSize,
-                ImPlotFlags_Equal | ImPlotFlags_NoMousePos,
-                ImPlotAxisFlags_NoDecorations,
-                ImPlotAxisFlags_NoDecorations)
-            )
-        {
-            ImPlot::PlotPieChart(labels.data(), data.data(), nVariables, 1.1, 0.5, 0.3, true, NULL);
-            ImPlot::EndPlot();
-        }
-    }
-
-    ImGui::EndGroup(); // variables + plot group
-
-    ImGui::End();
+    _colormapWasChanged = _colorMappingView->renderViewContent();
 }
 
 void DataViewer::renderTableWindow(bool *open) {
@@ -2138,8 +1899,8 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
             };
 
             if (colorOrbits) {
-                static ColorMappedVariable variable;
-                bool colorEditChanged = renderColormapEdit(variable, host);
+                static ColorMappingView::ColorMappedVariable variable;
+                bool colorEditChanged = _colorMappingView->renderColormapEdit(variable, makeIdentifier(host));
                 if (colorOptionChanged || colorEditChanged) {
                     for (size_t planetIndex : planetIndices) {
                         const ExoplanetItem& p = _data[planetIndex];
@@ -2148,7 +1909,7 @@ void DataViewer::renderSystemViewContent(const std::string& host) {
                             setTrailThicknessAndFade(p, 20.f, 30.f);
                         }
 
-                        glm::vec3 color = glm::vec3(colorFromColormap(p, variable));
+                        glm::vec3 color = glm::vec3(_colorMappingView->colorFromColormap(p, variable));
                         colorTrail(p, color);
                     }
                 }
@@ -2246,77 +2007,6 @@ bool DataViewer::compareColumnValues(const ColumnKey& key, const ExoplanetItem& 
     }
 }
 
-std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
-                                                         const ExoplanetItem& item) const
-{
-    const std::variant<std::string, float>& value = item.dataColumns.at(key);
-
-    if (std::holds_alternative<std::string>(value)) {
-        return std::get<std::string>(value).c_str();
-    }
-    return std::get<float>(value);
-}
-
-bool DataViewer::isNumericColumn(int index) const {
-    ghoul_assert(_data.size() > 0, "Data size cannot be zero");
-    // Test type using the first data point
-    std::variant<const char*, float> aValue = columnValue(_columns[index], _data.front());
-    return std::holds_alternative<float>(aValue);
-}
-
-const char* DataViewer::columnName(const ColumnKey& key) const {
-    return _dataSettings.columnName(key);
-}
-
-const ColumnKey& DataViewer::nameColumn() const {
-    return _dataSettings.dataMapping.name;
-}
-
-bool DataViewer::isNameColumn(const ColumnKey& key) const {
-    return key == nameColumn();
-}
-
-glm::vec4 DataViewer::colorFromColormap(const ExoplanetItem& item,
-                                        const ColorMappedVariable& variable)
-{
-    const ColumnKey& colormapColumn = _columns[variable.columnIndex];
-
-    std::variant<const char*, float> value = columnValue(colormapColumn, item);
-    float fValue = 0.0;
-    if (std::holds_alternative<float>(value)) {
-        fValue = std::get<float>(value);
-    }
-    else {
-        // text column => cannot be mapped to colormap
-        // OBS! This should not happen
-        return _nanPointColor;
-    }
-
-    glm::vec4 pointColor;
-    if (std::isnan(fValue)) {
-        pointColor = _nanPointColor;
-    }
-    else {
-        // TODO: handle min > max
-        ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
-
-        float min = variable.colorScaleMin;
-        float max = variable.colorScaleMax;
-        float minMaxDiff = std::abs(max - min);
-        float t = minMaxDiff > std::numeric_limits<float>::epsilon() ?
-                 (fValue - min) / minMaxDiff : 0.f;
-
-        t = std::clamp(t, 0.f, 1.f);
-        ImVec4 c = ImPlot::SampleColormap(t);
-        ImPlot::PopColormap();
-        pointColor = { c.x, c.y, c.z, c.w };
-    }
-    // Apply opacity
-    pointColor.a *= variable.opacity;
-
-    return pointColor;
-}
-
 void DataViewer::writeRenderDataToFile() {
     std::ofstream file(absPath(RenderDataFile), std::ios::binary);
     if (!file) {
@@ -2358,7 +2048,7 @@ void DataViewer::writeRenderDataToFile() {
 
         file.write(reinterpret_cast<const char*>(&index), sizeof(size_t));
 
-        size_t nVariables = _variableSelection.size();
+        size_t nVariables = _colorMappingView->colorMapperVariables().size();
         file.write(reinterpret_cast<const char*>(&nVariables), sizeof(size_t));
 
         const glm::dvec3 position = *item.position;
@@ -2368,7 +2058,10 @@ void DataViewer::writeRenderDataToFile() {
 
         for (int i = 0; i < nVariables; ++i) {
             const ImVec4 color = view::helper::toImVec4(
-                colorFromColormap(item, _variableSelection[i])
+                _colorMappingView->colorFromColormap(
+                    item,
+                    _colorMappingView->colorMapperVariables()[i]
+                )
             );
             file.write(reinterpret_cast<const char*>(&color.x), sizeof(float));
             file.write(reinterpret_cast<const char*>(&color.y), sizeof(float));

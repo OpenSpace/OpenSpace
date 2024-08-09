@@ -28,12 +28,14 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/exoplanetsexperttool/columnfilter.h>
-#include <modules/exoplanetsexperttool/columnselectionview.h>
 #include <modules/exoplanetsexperttool/dataloader.h>
 #include <modules/exoplanetsexperttool/datastructures.h>
+#include <modules/exoplanetsexperttool/views/colormappingview.h>
+#include <modules/exoplanetsexperttool/views/columnselectionview.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <ghoul/glm.h>
+#include <memory>
 #include <optional>
 #include <unordered_map>
 #include <variant>
@@ -46,17 +48,28 @@ public:
     DataViewer(std::string identifier, std::string guiName = "");
 
     void initializeGL();
+
+    // Accessors and functions that are needed for the other views
+
+    // Check if a column is numeric. If it isn't, then it is text based
+    bool isNumericColumn(int index) const;
+
+    std::variant<const char*, float> columnValue(const ColumnKey& key,
+        const ExoplanetItem& item) const;
+    const char* columnName(const ColumnKey& key) const;
+    const char* columnName(int columnIndex) const;
+    const ColumnKey& nameColumn() const;
+    bool isNameColumn(const ColumnKey& key) const;
+
+    const std::vector<ExoplanetItem>& data() const;
+    const std::vector<size_t>& currentFiltering() const;
+    const std::vector<ColumnKey>& columns() const;
+
+    const std::vector<size_t>& planetsForHost(const std::string& hostStar) const;
+
     void render();
 
 private:
-    struct ColorMappedVariable {
-        int colormapIndex = 0;
-        int columnIndex = 0;
-        float colorScaleMin = 0.f;
-        float colorScaleMax = 100.f;
-        float opacity = 1.f;
-    };
-
     void renderStartupInfo();
     bool _shouldOpenInfoWindow = true;
 
@@ -67,11 +80,6 @@ private:
         bool useFixedHeight, std::string_view search = "");
 
     void renderTableWindow(bool* open);
-
-    // Returns true if value was changed. If relevantSystem given,
-    // also show a button to color based on planets in that system
-    bool renderColormapEdit(ColorMappedVariable& variable,
-        std::string_view relevantSystem = "");
 
     void renderColormapWindow(bool* open);
     void renderFilterSettingsWindow(bool* open);
@@ -87,28 +95,14 @@ private:
         std::optional<std::vector<size_t>> customIndices = std::nullopt);
 
     void renderSettingsMenuContent();
-
     void renderSystemViewContent(const std::string& host);
 
     void renderColumnValue(int columnIndex, const ExoplanetItem& item);
-
-    std::variant<const char*, float> columnValue(const ColumnKey& key,
-        const ExoplanetItem& item) const;
 
     // Compare the values of two Exoplanets items, given a specific column.
     // The comparison made is (left < right)
     bool compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
         const ExoplanetItem& right) const ;
-
-    // Check if a column is numeric. If it isn't, then it is text based
-    bool isNumericColumn(int index) const;
-
-    const char* columnName(const ColumnKey& key) const;
-    const ColumnKey& nameColumn() const;
-    bool isNameColumn(const ColumnKey& key) const;
-
-    glm::vec4 colorFromColormap(const ExoplanetItem& item,
-        const ColorMappedVariable& variable);
 
     // Write the information about the rendered points to a file
     void writeRenderDataToFile();
@@ -126,6 +120,7 @@ private:
 
     DataSettings _dataSettings;
     ColumnSelectionView _columnSelectionView;
+    std::unique_ptr<ColorMappingView> _colorMappingView;
 
     std::vector<ExoplanetItem> _data;
     std::vector<size_t> _filteredData;  // The indices of the items which will be rendered
@@ -137,10 +132,7 @@ private:
 
     std::vector<ColumnKey> _columns;
 
-    std::vector<const char*> _colormaps;
     bool _colormapWasChanged = true;
-
-    std::vector<ColorMappedVariable> _variableSelection;
 
     struct ColumnFilterEntry {
         int columnIndex;
@@ -162,8 +154,6 @@ private:
     // Keep track of whether ctrl is held, to prevent undesired interaction
     // when interacting with glyphs
     bool _holdingCtrl = false;
-
-    glm::vec4 _nanPointColor = { 0.3f, 0.3f, 0.3f, 1.f };
 
     std::list<std::string> _shownPlanetSystemWindows;
 

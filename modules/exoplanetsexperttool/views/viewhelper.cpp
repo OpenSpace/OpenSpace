@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/exoplanetsexperttool/viewhelper.h>
+#include <modules/exoplanetsexperttool/views/viewhelper.h>
 
 namespace openspace::view {
 

@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/exoplanetsexperttool/columnselectionview.h>
+#include <modules/exoplanetsexperttool/views/columnselectionview.h>
 
 #include <modules/exoplanetsexperttool/datahelper.h>
-#include <modules/exoplanetsexperttool/viewhelper.h>
+#include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 
 namespace openspace::exoplanets {
