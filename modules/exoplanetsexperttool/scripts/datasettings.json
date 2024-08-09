@@ -10,6 +10,11 @@
         "reference_name": "pl_refname_name",
         "reference_link": "pl_refname_url"
     },
+    "default_colormapping": {
+        "column": "ESM",
+        "min": 10,
+        "max": 200
+    },
     "column_info": {
         "pl_name": {
             "name": "Name",

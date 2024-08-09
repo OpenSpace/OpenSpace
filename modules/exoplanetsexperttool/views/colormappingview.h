@@ -37,7 +37,7 @@ class ColorMappingView {
 public:
     struct ColorMappedVariable {
         int colormapIndex = 0;
-        int columnIndex = 0;
+        size_t columnIndex = 0;
         float colorScaleMin = 0.f;
         float colorScaleMax = 100.f;
         float opacity = 1.f;
@@ -67,6 +67,8 @@ private:
     std::vector<const char*> _colormaps;
 
     std::vector<ColorMappedVariable> _variableSelection;
+
+    size_t _firstNumericColumnIndex = 0;
 
     const DataViewer& _dataViewer;
 };

@@ -82,6 +82,15 @@ namespace {
         dataMapping.at("reference_name").get_to(s.dataMapping.referenceName);
         dataMapping.at("reference_link").get_to(s.dataMapping.referenceLink);
 
+        if (j.contains("default_colormapping")) {
+            const nlohmann::json cmapping = j.at("default_colormapping");
+            openspace::exoplanets::DataSettings::CmapInfo cmap;
+            cmapping.at("column").get_to(cmap.column);
+            cmapping.at("min").get_to(cmap.min);
+            cmapping.at("max").get_to(cmap.max);
+            s.defaultColormapping = cmap;
+        }
+
         const nlohmann::json columnInfo = j.at("column_info");
         for (auto& [key, value] : columnInfo.items()) {
             openspace::exoplanets::DataSettings::ColumnInfo info;

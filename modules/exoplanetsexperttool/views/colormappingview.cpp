@@ -57,8 +57,25 @@ ColorMappingView::ColorMappingView(const DataViewer& dataViewer,
         "Paired",
     };
 
+    for (size_t i = 0; i < _dataViewer.columns().size(); ++i) {
+        if (_dataViewer.isNumericColumn(i)) {
+            _firstNumericColumnIndex = i;
+            break;
+        }
+    }
+
+    ColorMappedVariable newVariable = { .columnIndex = _firstNumericColumnIndex };
+    if (dataSettings.defaultColormapping.has_value()) {
+        DataSettings::CmapInfo info = *dataSettings.defaultColormapping;
+        newVariable = {
+            .columnIndex = _dataViewer.columnIndex(info.column),
+            .colorScaleMin = info.min,
+            .colorScaleMax = info.max
+        };
+    }
+    _variableSelection.push_back(newVariable);
+
     // TODO: make sure that settings are preserved between sessions?
-    _variableSelection.push_back(ColorMappedVariable());
 }
 
 void ColorMappingView::initializeGL() {
@@ -135,7 +152,8 @@ bool ColorMappingView::renderViewContent() {
     // Colormap for each selected variable
     if (ImGui::Button("+ Add variable")) {
         if (_variableSelection.size() < 8) {
-            _variableSelection.push_back(ColorMappedVariable());
+            ColorMappedVariable newVariable = { .columnIndex = _firstNumericColumnIndex };
+            _variableSelection.push_back(newVariable);
             cmapWasChanged = true;
         }
     };

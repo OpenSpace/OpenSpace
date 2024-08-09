@@ -270,11 +270,23 @@ std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
     return std::get<float>(value);
 }
 
-bool DataViewer::isNumericColumn(int index) const {
+bool DataViewer::isNumericColumn(size_t index) const {
     ghoul_assert(_data.size() > 0, "Data size cannot be zero");
     // Test type using the first data point
     std::variant<const char*, float> aValue = columnValue(_columns[index], _data.front());
     return std::holds_alternative<float>(aValue);
+}
+
+size_t DataViewer::columnIndex(const ColumnKey& key) const {
+    for (size_t i = 0; i < _columns.size(); ++i) {
+        if (_columns[i] == key) {
+            return i;
+        }
+    }
+    LWARNING(std::format(
+        "Tried to get index of non-selected column: '{}'", key
+    ));
+    return 0;
 }
 
 const char* DataViewer::columnName(const ColumnKey& key) const {
@@ -1025,13 +1037,13 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     if (showInternalFiltersSection) {
         // Per-column filtering
         {
-            static int filterColIndex = 0;
+            static size_t filterColIndex = 0;
 
             ImGui::Separator();
             ImGui::Text("Filter on column");
             ImGui::SetNextItemWidth(120);
             if (ImGui::BeginCombo("##Column", columnName(_columns[filterColIndex]))) {
-                for (int i = 0; i < _columns.size(); ++i) {
+                for (size_t i = 0; i < _columns.size(); ++i) {
                     if (ImGui::Selectable(columnName(_columns[i]), filterColIndex == i)) {
                         filterColIndex = i;
                     }
@@ -1253,10 +1265,10 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
         ImGui::SameLine();
 
-        static int currentMetricChoiceIndex = -1;
+        static size_t currentMetricChoiceIndex = 0;
         if (currentMetricChoiceIndex < 0) {
             // Find default column - first numeric
-            for (int i = 0; i < _columns.size(); ++i) {
+            for (size_t i = 0; i < _columns.size(); ++i) {
                 if (isNumericColumn(i)) {
                     currentMetricChoiceIndex = i;
                     rowLimitFilterChanged = true;
@@ -1271,7 +1283,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
                 columnName(_columns[currentMetricChoiceIndex]))
             )
         {
-            for (int i = 0; i < _columns.size(); ++i) {
+            for (size_t i = 0; i < _columns.size(); ++i) {
                 // Ignore non-numeric columns
                 if (!isNumericColumn(i)) {
                     continue;

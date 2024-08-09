@@ -114,6 +114,13 @@ struct DataSettings {
         ColumnKey referenceLink; // TODO: optional
     } dataMapping;
 
+    struct CmapInfo {
+        ColumnKey column;
+        float min; // TODO: optional (set from range if excluded?)
+        float max; // TODO: optional
+    };
+    std::optional<CmapInfo> defaultColormapping;
+
     struct ColumnInfo {
         std::string name;
         std::optional<std::string> format;

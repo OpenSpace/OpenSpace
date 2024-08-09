@@ -52,10 +52,11 @@ public:
     // Accessors and functions that are needed for the other views
 
     // Check if a column is numeric. If it isn't, then it is text based
-    bool isNumericColumn(int index) const;
+    bool isNumericColumn(size_t index) const;
 
     std::variant<const char*, float> columnValue(const ColumnKey& key,
         const ExoplanetItem& item) const;
+    size_t columnIndex(const ColumnKey& key) const;
     const char* columnName(const ColumnKey& key) const;
     const char* columnName(int columnIndex) const;
     const ColumnKey& nameColumn() const;
@@ -135,7 +136,7 @@ private:
     bool _colormapWasChanged = true;
 
     struct ColumnFilterEntry {
-        int columnIndex;
+        size_t columnIndex;
         ColumnFilter filter;
         bool enabled = true;
     };
