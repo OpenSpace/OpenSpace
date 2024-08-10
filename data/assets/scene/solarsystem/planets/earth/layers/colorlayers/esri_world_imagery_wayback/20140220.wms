@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerUrl>https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/wmts/1.0.0/default028mm/MapServer/tile/10/${z}/${y}/${x}</ServerUrl>
+    <ServerUrl>http://liu-se.wms.openspaceproject.com/Earth/Esri_Wayback_10/tile/${z}/${y}/${x}</ServerUrl>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>
@@ -12,7 +12,7 @@
     <TileCountY>1</TileCountY>
     <YOrigin>top</YOrigin>
   </DataWindow>
-  <Projection>EPSG:3857</Projection>
+  <Projection>EPSG:4326</Projection>
   <BlockSizeX>256</BlockSizeX>
   <BlockSizeY>256</BlockSizeY>
   <BandsCount>3</BandsCount>
