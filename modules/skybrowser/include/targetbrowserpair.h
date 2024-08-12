@@ -97,8 +97,6 @@ public:
     ScreenSpaceSkyBrowser* browser() const;
     std::vector<std::string> selectedImages() const;
 
-    nlohmann::json dataAsDictionary() const;
-
     // WorldWide Telescope image handling
     void setImageOrder(const std::string& imageUrl, int order);
     void selectImage(const ImageData& image);

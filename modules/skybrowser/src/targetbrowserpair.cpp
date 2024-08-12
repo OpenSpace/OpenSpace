@@ -373,62 +373,6 @@ std::vector<std::string> TargetBrowserPair::selectedImages() const {
     return _browser->selectedImages();
 }
 
-nlohmann::json TargetBrowserPair::dataAsDictionary() const {
-    const glm::dvec2 spherical = _equatorialAim;
-    const glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    std::vector<std::string> selectedImagesIndices;
-
-    for (const std::string& imageUrl : selectedImages()) {
-        const bool imageExists = module->wwtDataHandler().image(imageUrl).has_value();
-        ghoul_assert(imageExists, "Image doesn't exist in the wwt catalog!");
-        selectedImagesIndices.push_back(
-            module->wwtDataHandler().image(imageUrl)->identifier
-        );
-    }
-    glm::ivec3 color = borderColor();
-    std::vector<double> cartesianJson = { cartesian.x, cartesian.y, cartesian.z };
-    std::vector<int> colorJson= { color.r, color.g, color.b };
-
-    nlohmann::json result = {
-        { "id", _browser->identifier() },
-        { "targetId", _targetNode->identifier() },
-        { "name", _browser->guiName() },
-        { "fov", _verticalFov.value()},
-        { "ra", spherical.x },
-        { "dec", spherical.y },
-        { "roll", targetRoll() },
-        { "ratio", static_cast<double>(_browser->browserRatio()) },
-        { "isFacingCamera", isFacingCamera() },
-        { "isUsingRae", _browser->isUsingRaeCoords() },
-        { "selectedImages", selectedImagesIndices },
-        { "scale", static_cast<double>(_browser->scale()) },
-        { "opacities", _browser->opacities() },
-        { "borderRadius", _browser->borderRadius() },
-        { "cartesianDirection", cartesianJson },
-        { "color", colorJson }
-    };
-
-    std::vector<std::pair<std::string, glm::dvec3>> copies = displayCopies();
-    std::vector<std::pair<std::string, bool>> showCopies = _browser->showDisplayCopies();
-    nlohmann::json copiesData = nlohmann::json::object();
-    for (size_t i = 0; i < copies.size(); i++) {
-        nlohmann::json position = {
-            copies[i].second.x, copies[i].second.y, copies[i].second.z
-        };
-        nlohmann::json copy = {
-            { "position", position },
-            { "show", showCopies[i].second },
-            { "idShowProperty", showCopies[i].first }
-        };
-        copiesData[copies[i].first] = copy;
-    }
-    // Set table for the current target
-    result["displayCopies"] = copiesData;
-
-    return result;
-}
-
 void TargetBrowserPair::selectImage(const ImageData& image) {
     // Load image into browser
     _browser->selectImage(image.imageUrl);
