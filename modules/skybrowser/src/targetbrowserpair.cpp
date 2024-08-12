@@ -65,7 +65,7 @@ namespace {
         );
     }
 
-    glm::ivec3 randomBorderColor() {
+    glm::vec3 randomBorderColor() {
         // Generate a random border color with sufficient lightness and a n
         std::random_device rd;
         // Hue is in the unit degrees [0, 360]
@@ -75,8 +75,7 @@ namespace {
         constexpr float Value = 0.9f; // Brightness
         constexpr float Saturation = 0.5f;
         const glm::vec3 hsvColor = glm::vec3(hue(rd), Saturation, Value);
-        const glm::ivec3 rgbColor = glm::ivec3(glm::rgbColor(hsvColor) * 255.f);
-        return rgbColor;
+        return glm::rgbColor(hsvColor);
     }
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -246,14 +245,16 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
     addProperty(_stopAnimations);
     addProperty(_equatorialAim);
 
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+
     _borderRadius.onChange([this]() {
         _browser->property("BorderRadius")->set(_borderRadius.value());
         _targetRenderable->property("BorderRadius")->set(_borderRadius.value());
         });
 
     _color.onChange([this]() {
-        _browser->setBorderColor(glm::ivec3(_color.value() * 255.f));
-		_targetRenderable->setColor(_color.value());
+        _browser->property("BorderColor")->set(_color.value());
+        _targetRenderable->property("Color")->set(_color.value());
         });
 
     _verticalFov.onChange([this]() {
@@ -285,7 +286,7 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
         });
 
 	if (global::windowDelegate->isMaster()) {
-		_color = glm::vec3(randomBorderColor()) / 255.f;
+		_color = randomBorderColor();
 	}
     _browser->setAsPaired();
 }
@@ -330,10 +331,10 @@ bool TargetBrowserPair::isEnabled() const {
 }
 
 void TargetBrowserPair::initialize() {
-    _targetRenderable->setColor(_color.value());
     const glm::vec2 dim = _browser->screenSpaceDimensions();
     _targetRenderable->setRatio(dim.x / dim.y);
-    _browser->setBorderColor(_browser->borderColor());
+    _targetRenderable->property("Color")->set(_color.value());
+    _browser->property("BorderColor")->set(_color.value());
     _browser->hideChromeInterface();
     _browser->property("EquatorialAim")->set(_equatorialAim.value());
     _browser->setIsInitialized(true);
