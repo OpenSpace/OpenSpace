@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/list/stringlistproperty.h>
 #include <filesystem>
 
 namespace openspace {
@@ -107,11 +108,12 @@ private:
     properties::BoolProperty _synchronizeAim;
     properties::DoubleProperty _spaceCraftAnimationTime;
     properties::StringProperty _wwtImageCollectionUrl;
+    properties::StringProperty _selectedPairId;
+    properties::StringListProperty _allPairIds;
 
     // The browsers and targets
     std::vector<std::unique_ptr<TargetBrowserPair>> _targetsBrowsers;
     SceneGraphNode* _hoverCircle = nullptr;
-    std::string _selectedBrowser; // Currently selected browser
     int _uniqueIdentifierCounter = 0;
 
     // Flags

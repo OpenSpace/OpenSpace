@@ -122,6 +122,20 @@ namespace {
        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SelectedPairIdInfo = {
+       "SelectedPairId",
+       "Selected Pair Identifier",
+       "The identifier of the currently selected pair.",
+       openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo AllPairsInfo = {
+        "AllPairs",
+        "All Pairs",
+        "The list of identifiers of all skybrowser pairs.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
@@ -151,8 +165,14 @@ namespace {
         // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
         std::optional<double> spaceCraftAnimationTime;
 
-        // [[codegen::verbatim(SpaceCraftTimeInfo.description)]]
+        // [[codegen::verbatim(ImageCollectionInfo.description)]]
         std::optional<std::string> wwtImageCollectionUrl;
+
+        // [[codegen::verbatim(SelectedPairIdInfo.description)]]
+        std::optional<std::string> selectedPairId;
+
+        // [[codegen::verbatim(AllPairsInfo.description)]]
+        std::optional<std::vector<std::string>> allPairs;
     };
 
 #include "skybrowsermodule_codegen.cpp"
@@ -176,6 +196,8 @@ SkyBrowserModule::SkyBrowserModule()
         ImageCollectionInfo,
         "https://data.openspaceproject.com/wwt/1/imagecollection.wtml"
     )
+    , _selectedPairId(SelectedPairIdInfo)
+    , _allPairIds(AllPairsInfo)
 {
     addProperty(_enabled);
     addProperty(_showTitleInGuiBrowser);
@@ -188,6 +210,9 @@ SkyBrowserModule::SkyBrowserModule()
     addProperty(_spaceCraftAnimationTime);
     addProperty(_wwtImageCollectionUrl);
     addProperty(_synchronizeAim);
+    addProperty(_allPairIds);
+    addProperty(_selectedPairId);
+
     _wwtImageCollectionUrl.setReadOnly(true);
 
     // Set callback functions
@@ -286,8 +311,10 @@ void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
     }
 
     ghoul::Dictionary init;
+    std::string id = std::format("{}Pair", std::string(browserId));
     init.setValue("Target", std::string(targetId));
     init.setValue("Browser", std::string(browserId));
+    init.setValue("Identifier", id);
 
     std::unique_ptr<TargetBrowserPair> pair = std::make_unique<TargetBrowserPair>(init);
     // Ensure pair has both target and browser
@@ -296,6 +323,10 @@ void SkyBrowserModule::addTargetBrowserPair(const std::string& targetId,
     }
     _uniqueIdentifierCounter++;
     addPropertySubOwner(_targetsBrowsers.back().get());
+    std::vector<std::string> temp = _allPairIds.value();
+    temp.push_back(id);
+    _allPairIds.set(temp);
+    _selectedPairId = id;
 }
 
 void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
@@ -313,6 +344,11 @@ void SkyBrowserModule::removeTargetBrowserPair(const std::string& id) {
     );
 
     _targetsBrowsers.erase(it, _targetsBrowsers.end());
+
+    std::vector<std::string> temp = _allPairIds.value();
+    auto idIt = std::remove(temp.begin(), temp.end(), id);
+    temp.erase(idIt);
+    _allPairIds.set(temp);
 }
 
 void SkyBrowserModule::lookAtTarget(const std::string& id) {
@@ -429,7 +465,8 @@ TargetBrowserPair* SkyBrowserModule::pair(std::string_view id) const {
             const bool foundBrowser = pair->browserId() == id;
             const bool foundTarget = pair->targetRenderableId() == id;
             const bool foundTargetNode = pair->targetNodeId() == id;
-            return foundBrowser || foundTarget || foundTargetNode;
+            const bool foundPair = pair->identifier() == id;
+            return foundBrowser || foundTarget || foundTargetNode || foundPair;
         }
     );
     TargetBrowserPair* found = it != _targetsBrowsers.end() ? it->get() : nullptr;
@@ -516,16 +553,17 @@ nlohmann::json SkyBrowserModule::imageList() {
 void SkyBrowserModule::setSelectedBrowser(std::string_view id) {
     TargetBrowserPair* p = pair(id);
     if (p) {
-        _selectedBrowser = id;
+         _selectedPairId = pair(id)->identifier();
     }
 }
 
 std::string SkyBrowserModule::selectedBrowserId() const {
-    return _selectedBrowser;
+    TargetBrowserPair* found = pair(_selectedPairId);
+    return found ? found->browserId() : "";
 }
 
 std::string SkyBrowserModule::selectedTargetId() const {
-    TargetBrowserPair* found = pair(_selectedBrowser);
+    TargetBrowserPair* found = pair(_selectedPairId);
     return found ? found->targetRenderableId() : "";
 }
 
@@ -538,12 +576,12 @@ bool SkyBrowserModule::isCameraInSolarSystem() const {
 }
 
 bool SkyBrowserModule::isSelectedPairUsingRae() const {
-    TargetBrowserPair* found = pair(_selectedBrowser);
+    TargetBrowserPair* found = pair(_selectedPairId);
     return found ? found->isUsingRadiusAzimuthElevation() : false;
 }
 
 bool SkyBrowserModule::isSelectedPairFacingCamera() const {
-    TargetBrowserPair* found = pair(_selectedBrowser);
+    TargetBrowserPair* found = pair(_selectedPairId);
     return found ? found->isFacingCamera() : false;
 }
 
