@@ -206,6 +206,8 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     addProperty(_borderRadius);
     addProperty(_ratio);
 
+    addPropertySubOwner(_wwtCommunicator);
+
     _useRadiusAzimuthElevation.onChange(
         [this]() {
             std::for_each(
@@ -222,7 +224,7 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
                 });
         });
 
-    addPropertySubOwner(_wwtCommunicator);
+    
     _wwtCommunicator.property("Reload")->onChange([this]() {
         _isImageCollectionLoaded = false;
         _isInitialized = false;
