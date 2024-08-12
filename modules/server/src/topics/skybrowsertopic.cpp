@@ -135,29 +135,11 @@ void SkyBrowserTopic::sendBrowserData() {
 
     // Set general data
     nlohmann::json json = {
-        { "selectedBrowserId", module->selectedBrowserId() },
         { "cameraInSolarSystem", module->isCameraInSolarSystem() }
     };
-
-    // Pass data for all the browsers and the corresponding targets
-    if (module->isCameraInSolarSystem()) {
-        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
-        nlohmann::json targets;
-        for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
-            targets[pair->browserId()] = pair->dataAsDictionary();
-        }
-        json["browsers"] = targets;
-    }
-
-    // Only send message if data actually changed
-    nlohmann::json diff = nlohmann::json::diff(_lastUpdateJson, json);
-    if (!diff.empty()) {
-        nlohmann::json result = _lastUpdateJson.patch(diff);
-        _connection->sendJson(wrappedPayload({
+    _connection->sendJson(wrappedPayload({
             { "type", "browser_data" },
-            { "data", diff }
+            { "data", json }
         }));
-        _lastUpdateJson = result;   
-    }
 }
 } // namespace openspace
