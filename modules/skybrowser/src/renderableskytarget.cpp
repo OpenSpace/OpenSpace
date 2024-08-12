@@ -250,20 +250,13 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     );
 
     const glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - _worldPosition);
-    // There are two modes - 1) target rolls to have its up vector parallel to the
-    // cameras up vector or 2) it is decoupled from the camera, in which case it needs to
-    // be initialized once
-    if (!_isInitialized || _applyRoll) {
-        applyRoll();
-        _isInitialized = true;
-    }
-    else {
-        // Use last frames vector for right and don't apply any roll
-        _upVector = glm::cross(normal, _rightVector);
-        _rightVector = glm::normalize(
-            glm::cross(_upVector, normal)
-        );
-    }
+
+    constexpr glm::dvec3 NorthPole = glm::dvec3(0.0, 0.0, 1.0);
+    const glm::dvec3 north = glm::normalize(skybrowser::equatorialToGalactic(NorthPole));
+
+    // Project the north vector on to the view plane
+    _upVector = glm::normalize(north - (glm::dot(north, normal) * normal));
+    _rightVector = glm::normalize(glm::cross(_upVector, normal));
 
     glm::dmat4 cameraOrientedRotation = glm::dmat4(1.0);
     cameraOrientedRotation[0] = glm::dvec4(_rightVector, 0.0);
