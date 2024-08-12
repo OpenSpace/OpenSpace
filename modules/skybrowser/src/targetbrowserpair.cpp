@@ -123,6 +123,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo IdentifierInfo = {
+        "Identifier",
+        "Identifier",
+        "The identifier of the pair.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
         "VerticalFov",
         "Vertical Field Of View",
@@ -159,6 +166,28 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RollInfo = {
+        "Roll",
+        "Roll",
+        "The roll of the sky browser and target.",
+        openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ApplyRollInfo = {
+        "ApplyRoll",
+        "Apply Roll",
+        "If true, always rotate the target to have its up direction aligned with the up "
+        "direction of the camera.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo CartesianDirectionInfo = {
+        "CartesianDirection",
+        "Cartesian Direction",
+        "The direction of the target in cartesian equatorial coordinates.",
+        openspace::properties::Property::Visibility::Developer
+    };
+
     struct [[codegen::Dictionary(TargetBrowserPair)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -178,8 +207,14 @@ namespace {
         // [[codegen::verbatim(TargetInfo.description)]]
         std::string target;
 
+        // [[codegen::verbatim(IdentifierInfo.description)]]
+        std::string identifier;
+
         // [[codegen::verbatim(VerticalFovInfo.description)]]
         std::optional<double> verticalFov;
+
+        // [[codegen::verbatim(RollInfo.description)]]
+        std::optional<double> roll;
 
         // [[codegen::verbatim(BorderRadiusInfo.description)]]
         std::optional<double> borderRadius;
@@ -189,6 +224,12 @@ namespace {
 
         // [[codegen::verbatim(EquatorialAimInfo.description)]]
         std::optional<glm::dvec2> equatorialAim;
+
+        // [[codegen::verbatim(ApplyRollInfo.description)]]
+        std::optional<bool> applyRoll;
+
+        // [[codegen::verbatim(CartesianDirectionInfo.description)]]
+        std::optional<glm::dvec3> cartesianDirection;
     };
 
 #include "targetbrowserpair_codegen.cpp"
@@ -201,16 +242,19 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
 	, _targetId(TargetInfo)
 	, _browserId(BrowserInfo)
 	, _enabled(EnabledInfo, true)
+    , _roll(RollInfo)
     , _color(ColorInfo)
     , _borderRadius(BorderRadiusInfo, 0.0, 0.0, 1.0)
     , _isPointingSpacecraft(PointSpacecraftInfo, false)
     , _updateDuringTargetAnimation(UpdateDuringAnimationInfo, false)
     , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
     , _stopAnimations(StopAnimationsInfo)
-    , _ratio(RatioInfo)
+    , _ratio(RatioInfo, 1.f, 0.01, 5.f)
     , _equatorialAim(
         EquatorialAimInfo, glm::dvec2(0.0), glm::dvec2(0.0, -90.0), glm::dvec2(360.0, 90.0)
     )
+    , _applyRoll(ApplyRollInfo, true)
+    , _cartesianDirection(CartesianDirectionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -222,12 +266,16 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
     ghoul_assert(_browser, "Sky browser is null pointer");
     ghoul_assert(_targetNode, "Sky target is null pointer");
 
-    setIdentifier(std::format("{}Pair", _browser->identifier()));
+    setIdentifier(p.identifier);
 
+    _targetId = p.target;
+    _browserId = p.browser;
     _verticalFov = p.verticalFov.value_or(_verticalFov);
     _borderRadius = p.verticalFov.value_or(_borderRadius);
     _ratio = p.ratio.value_or(_ratio);
+    _roll = p.roll.value_or(_roll);
     _equatorialAim = p.equatorialAim.value_or(_equatorialAim);
+    _cartesianDirection = p.cartesianDirection.value_or(_cartesianDirection);
 
     _targetRenderable = dynamic_cast<RenderableSkyTarget*>(_targetNode->renderable());
     
@@ -235,6 +283,7 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
     _updateDuringTargetAnimation = p.updateDuringTargetAnimation.value_or(
         _updateDuringTargetAnimation
     );
+    _applyRoll = p.applyRoll.value_or(_applyRoll);
 
     addProperty(_isPointingSpacecraft);
     addProperty(_updateDuringTargetAnimation);
@@ -244,6 +293,17 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
     addProperty(_enabled);
     addProperty(_stopAnimations);
     addProperty(_equatorialAim);
+    addProperty(_roll);
+    addProperty(_verticalFov);
+    addProperty(_targetId);
+    addProperty(_browserId);
+    addProperty(_applyRoll);
+    addProperty(_cartesianDirection);
+
+    _roll.setReadOnly(true);
+    _targetId.setReadOnly(true);
+    _browserId.setReadOnly(true);
+    _cartesianDirection.setReadOnly(true);
 
     _color.setViewOption(properties::Property::ViewOptions::Color);
 
@@ -283,7 +343,14 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
         );
         aimTargetGalactic(_targetNode->identifier(), aimGalactic);
         _browser->property("EquatorialAim")->set(_equatorialAim.value());
+        _cartesianDirection = skybrowser::sphericalToCartesian(_equatorialAim.value());
         });
+    _roll.onChange([this]() {
+        if (_browser->isInitialized()) {
+            _browser->property("Roll")->set(_roll.value());
+            _targetRenderable->property("Roll")->set(_roll.value());
+        }
+    });
 
 	if (global::windowDelegate->isMaster()) {
 		_color = randomBorderColor();
@@ -314,11 +381,9 @@ void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
 }
 
 void TargetBrowserPair::synchronizeAim() {
-    const bool shouldUpdate =
-        _updateDuringTargetAnimation ||
-        !_targetAnimation.isAnimating();
-    if (shouldUpdate && _browser->isInitialized()) {
-        _browser->setTargetRoll(targetRoll());
+    bool shouldUpdate = _updateDuringTargetAnimation && !_targetAnimation.isAnimating();
+    if (_applyRoll) {
+        //_roll = targetRoll();
     }
 }
 
@@ -331,10 +396,12 @@ bool TargetBrowserPair::isEnabled() const {
 }
 
 void TargetBrowserPair::initialize() {
-    const glm::vec2 dim = _browser->screenSpaceDimensions();
-    _targetRenderable->setRatio(dim.x / dim.y);
     _targetRenderable->property("Color")->set(_color.value());
     _browser->property("BorderColor")->set(_color.value());
+
+    _targetRenderable->property("Ratio")->set(_ratio.value());
+    _browser->property("Ratio")->set(_ratio.value());
+
     _browser->hideChromeInterface();
     _browser->property("EquatorialAim")->set(_equatorialAim.value());
     _browser->setIsInitialized(true);
@@ -526,9 +593,7 @@ double TargetBrowserPair::targetRoll() const {
         _targetNode->worldPosition() -
         global::navigationHandler->camera()->positionVec3()
     );
-    const glm::dvec3 right = _targetRenderable->rightVector();
-    const glm::dvec3 up = glm::normalize(glm::cross(right, normal));
-    return skybrowser::targetRoll(up, normal);
+    return skybrowser::targetRoll(_targetRenderable->upVector(), normal);
 }
 
 bool TargetBrowserPair::isFacingCamera() const {

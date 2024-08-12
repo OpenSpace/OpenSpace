@@ -29,6 +29,7 @@
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/properties/vector/dvec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -111,12 +112,15 @@ private:
     properties::TriggerProperty _stopAnimations;
     properties::BoolProperty _isPointingSpacecraft;
     properties::BoolProperty _updateDuringTargetAnimation;
+    properties::BoolProperty _applyRoll;
+    properties::DVec3Property _cartesianDirection;
 
     // Properties that are the same in the target and the browser
     properties::BoolProperty _enabled;
     properties::Vec3Property _color;
     properties::DVec2Property _equatorialAim;
     properties::DoubleProperty _verticalFov;
+    properties::DoubleProperty _roll;
     properties::DoubleProperty _borderRadius;
     properties::FloatProperty _ratio;
 
