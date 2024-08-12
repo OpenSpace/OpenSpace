@@ -150,5 +150,130 @@
             "format": "%.0f",
             "desc": "Flag for whether water has been detected in the planet atmosphere (1 = yes, -1 = no, 0 = maybe/upper limit)"
         }
-    }
+    },
+    "quick_filters" : [
+        {
+            "name": "Hide null ESM",
+            "filter": {
+                "column": "ESM",
+                "query": ""
+            }
+        },
+        {
+            "name": "Hide null TSM",
+            "filter": {
+                "column": "TSM",
+                "query": ""
+            }
+        },
+        {
+            "name": "Must have 3D positional data",
+            "filter": [
+                {
+                    "column": "ra",
+                    "query": ""
+                },
+                {
+                    "column": "dec",
+                    "query": ""
+                },
+                {
+                    "column": "sy_dist",
+                    "query": ""
+                }
+            ],
+            "desc": "Only include data points that will show up in OpenSpace's 3D rendered view"
+        },
+        {
+            "name": "Terrestrial",
+            "filter": {
+                "column": "pl_rade",
+                "query": "<= 1.5"
+            },
+            "desc": "Rp <= 1.5  (Earth radii)"
+        },
+        {
+            "name": "Small Sub-Neptune",
+            "filter": [
+                {
+                    "column": "pl_rade",
+                    "query": "> 1.5"
+                },
+                {
+                    "column": "pl_rade",
+                    "query": "<= 2.75"
+                }
+            ],
+            "desc": "1.5 < Rp <= 2.75 (Earth radii)"
+        },
+        {
+            "name": "Large Sub-Neptune",
+            "filter": [
+                {
+                    "column": "pl_rade",
+                    "query": "> 2.75"
+                },
+                {
+                    "column": "pl_rade",
+                    "query": "<= 4.0"
+                }
+            ],
+            "desc": "2.75 < Rp <= 4.0 (Earth radii)"
+        },
+        {
+            "name": "Sub-Jovian",
+            "filter": [
+                {
+                    "column": "pl_rade",
+                    "query": "> 4.0"
+                },
+                {
+                    "column": "pl_rade",
+                    "query": "<= 10.0"
+                }
+            ],
+            "desc": "4.0 < Rp <= 10.0 (Earth radii)"
+        },
+        {
+            "name": "Larger",
+            "filter": [
+                {
+                    "column": "pl_rade",
+                    "query": "> 10.0"
+                }
+            ],
+            "desc": "Rp > 10.0 (Earth radii)"
+        },
+        {
+            "name": "Transit",
+            "filter": [
+                {
+                    "column": "discoverymethod",
+                    "query": "transit"
+                }
+            ]
+        },
+        {
+            "name": "Radial Velocity",
+            "filter": [
+                {
+                    "column": "discoverymethod",
+                    "query": "radial velocity"
+                }
+            ]
+        },
+        {
+            "name": "Other",
+            "filter": [
+                {
+                    "column": "discoverymethod",
+                    "query": "!transit"
+                },
+                {
+                    "column": "discoverymethod",
+                    "query": "!radial"
+                }
+            ]
+        }
+    ]
 }

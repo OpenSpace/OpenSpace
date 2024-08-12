@@ -100,6 +100,20 @@ bool ColumnFilter::isValid() const {
     return _valid;
 }
 
+bool ColumnFilter::passFilter(std::variant<const char*, float> value) const {
+    if (std::holds_alternative<float>(value) && _type == Type::Numeric) {
+        float val = std::get<float>(value);
+        return passFilter(val);
+    }
+    else if (std::holds_alternative<const char*>(value) && _type == Type::Text) {
+        const char* val = std::get<const char*>(value);
+        return passFilter(std::string(val));
+    }
+    else {
+        throw ghoul::RuntimeError("Mismatching value and filter type!");
+    }
+}
+
 bool ColumnFilter::passFilter(float value) const {
     if (_type != Type::Numeric) {
         throw ghoul::RuntimeError("Can only pass numbers to numeric filters");

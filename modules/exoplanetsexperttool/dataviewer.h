@@ -140,7 +140,9 @@ private:
         ColumnFilter filter;
         bool enabled = true;
     };
-    std::vector<ColumnFilterEntry> _appliedFilters;
+    std::vector<ColumnFilterEntry> _columnFilters;
+
+    std::vector<bool> _quickFilterFlags;
 
     // Filter selection from webpage
     properties::IntListProperty _externalSelection;

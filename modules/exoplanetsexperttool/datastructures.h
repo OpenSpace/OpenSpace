@@ -123,14 +123,27 @@ struct DataSettings {
 
     struct ColumnInfo {
         std::string name;
-        std::optional<std::string> format;
-        std::optional<std::string> description;
+        std::string format = "";
+        std::string description = "";
 
         // Sometimes, a seemingly numeric column should really be a text-based one.
         // This allows us to control that
         std::optional<bool> isText;
     };
     std::unordered_map<ColumnKey, ColumnInfo> columnInfo;
+
+    struct QuickFilter {
+        std::string name;
+
+        struct Filter {
+            ColumnKey column;
+            std::string query;
+        };
+        std::vector<Filter> filters;
+
+        std::string description = "";
+    };
+    std::vector<QuickFilter> quickFilters;
 
     ColumnKey nameColumn() const {
         return dataMapping.name;
@@ -146,17 +159,10 @@ struct DataSettings {
     }
 
     const std::string& description(const ColumnKey& key) const {
-        if (!hasDescription(key)) {
-            return "";
-        }
-        return *columnInfo.at(key).description;
+        return columnInfo.at(key).description;
     }
     bool hasDescription(const ColumnKey& key) const {
-        return columnInfo.contains(key) && columnInfo.at(key).description.has_value();
-    }
-
-    bool hasFormat(const ColumnKey& key) const {
-        return columnInfo.contains(key) && columnInfo.at(key).format.has_value();
+        return !columnInfo.contains(key) && columnInfo.at(key).description.empty();
     }
 };
 

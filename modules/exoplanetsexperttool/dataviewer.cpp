@@ -231,6 +231,9 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     }
     _filteredDataWithoutExternalSelection = _filteredData;
 
+    // Set all quick filters to false
+    _quickFilterFlags.assign(_dataSettings.quickFilters.size(), false);
+
     _columns = _columnSelectionView.initializeColumnsFromData(_data, _dataSettings);
 
     // The other views use the loaded data, so call this afterwards
@@ -320,7 +323,7 @@ const std::vector<ColumnKey>& DataViewer::columns() const {
 
 const std::vector<size_t>& DataViewer::planetsForHost(const std::string& hostIdentifier) const {
     if (!_hostIdToPlanetsMap.contains(hostIdentifier)) {
-        return std::vector<size_t>();
+        return std::vector<size_t>(); // TODO Do not return reference to local object
     }
     return _hostIdToPlanetsMap.at(hostIdentifier);
 }
@@ -966,51 +969,14 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
         return;
     }
 
-    // Some pre-defined filters
-    static bool hideNanTsm = false;
-    static bool hideNanEsm = false;
-    static bool showOnlyMultiPlanetSystems = false;
-    static bool showOnlyHasPosition = false;
-
-    // Planet bins
-    static bool showTerrestrial = false;
-    static bool showSmallSubNeptunes = false;
-    static bool showLargeSubNeptunes = false;
-    static bool showSubJovians = false;
-    static bool showLargerPlanets = false;
-
-    // Discovery methods
-    static bool showTransit = true;
-    static bool showRadialVelocity = true;
-    static bool showOther = true;
-
     // Row limit
     static int nRows = 100;
     static bool limitNumberOfRows = false;
     static int nItemsWithoutRowLimit = static_cast<int>(_filteredData.size());
 
     if (ImGui::Button("Reset internal")) {
-        // Reset to default values
-
-        _appliedFilters.clear(); // Column filters
-
-        hideNanTsm = false;
-        hideNanEsm = false;
-        showOnlyMultiPlanetSystems = false;
-        showOnlyHasPosition = false;
-
-        // Planet bins
-        showTerrestrial = false;
-        showSmallSubNeptunes = false;
-        showLargeSubNeptunes = false;
-        showSubJovians = false;
-        showLargerPlanets = false;
-
-        // Discovery methods
-        showTransit = true;
-        showRadialVelocity = true;
-        showOther = true;
-
+        _columnFilters.clear(); // Column filters
+        _quickFilterFlags.assign(_quickFilterFlags.size(), false);
         _filterChanged = true;
     }
 
@@ -1086,7 +1052,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
                     ColumnFilter(queryString, ColumnFilter::Type::Text);
 
                 if (filter.isValid()) {
-                    _appliedFilters.push_back({ filterColIndex , filter });
+                    _columnFilters.push_back({ filterColIndex , filter });
                     strcpy(queryString, "");
                     _filterChanged = true;
                 }
@@ -1104,9 +1070,9 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
         // Render list of column filters
         {
-            const std::string filtersHeader = _appliedFilters.empty() ?
+            const std::string filtersHeader = _columnFilters.empty() ?
                 "Added filters" :
-                std::format("Added filters ({})", _appliedFilters.size());
+                std::format("Added filters ({})", _columnFilters.size());
 
             // The ### operator overrides the ID, ignoring the preceding label
             // => Won't rerender when label changes
@@ -1115,7 +1081,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
             if (ImGui::CollapsingHeader(headerWithId.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
                 ImGui::Indent();
 
-                if (_appliedFilters.empty()) {
+                if (_columnFilters.empty()) {
                     ImGui::Text("No active filters");
                 }
 
@@ -1125,8 +1091,8 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
                 const ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg;
 
                 if (ImGui::BeginTable("filtersTable", nColumns, flags)) {
-                    for (int i = 0; i < _appliedFilters.size(); ++i) {
-                        ColumnFilterEntry &f = _appliedFilters[i];
+                    for (int i = 0; i < _columnFilters.size(); ++i) {
+                        ColumnFilterEntry &f = _columnFilters[i];
                         const std::string queryString = f.filter.query();
                         ImGui::TableNextRow();
 
@@ -1155,7 +1121,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
                     }
 
                     if (indexToErase != -1) {
-                        _appliedFilters.erase(_appliedFilters.begin() + indexToErase);
+                        _columnFilters.erase(_columnFilters.begin() + indexToErase);
                         _filterChanged = true;
                     }
 
@@ -1170,47 +1136,51 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
         // Pre-defined filters
         {
-            _filterChanged |= ImGui::Checkbox("Hide null TSM", &hideNanTsm);
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Hide null ESM", &hideNanEsm);
+            for (size_t i = 0; i < _quickFilterFlags.size(); ++i) {
+                const DataSettings::QuickFilter& filter = _dataSettings.quickFilters[i];
 
-            _filterChanged |= ImGui::Checkbox("Only multi-planet", &showOnlyMultiPlanetSystems);
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Must have 3D positional data", &showOnlyHasPosition);
-            ImGui::SameLine();
-            view::helper::renderHelpMarker(
-                "Only include data points that will show up in OpenSpace's 3D rendered view"
-            );
+                bool isSelected = _quickFilterFlags[i];
 
-            ImGui::Text("Planet bin");
-            _filterChanged |= ImGui::Checkbox("Terrestrial", &showTerrestrial);
-            ImGui::SameLine();
-            view::helper::renderHelpMarker("Rp < 1.5  (Earth radii)");
+                ImGui::PushID(std::format("quickFilter_{}", i).c_str());
+                _filterChanged |= ImGui::Checkbox(filter.name.c_str(), &isSelected);
+                ImGui::PopID();
 
-            _filterChanged |= ImGui::Checkbox("Small Sub-Neptune", &showSmallSubNeptunes);
-            ImGui::SameLine();
-            view::helper::renderHelpMarker("1.5 < Rp < 2.75  (Earth radii)");
+                _quickFilterFlags[i] = isSelected;
 
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Large Sub-Neptune", &showLargeSubNeptunes);
-            ImGui::SameLine();
-            view::helper::renderHelpMarker("2.75 < Rp < 4.0  (Earth radii)");
+                if (!filter.description.empty()) {
+                    ImGui::SameLine();
+                    view::helper::renderHelpMarker(filter.description.c_str());
+                }
+            }
 
-            _filterChanged |= ImGui::Checkbox("Sub-Jovian", &showSubJovians);
-            ImGui::SameLine();
-            view::helper::renderHelpMarker("4.0 < Rp < 10)  (Earth radii)");
+            // TODO: fix groupings according to below
+            //_filterChanged |= ImGui::Checkbox("Hide null TSM", &hideNanTsm);
+            //ImGui::SameLine();
+            //_filterChanged |= ImGui::Checkbox("Hide null ESM", &hideNanEsm);
 
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Larger", &showLargerPlanets);
-            ImGui::SameLine();
-            view::helper::renderHelpMarker("Rp > 10  (Earth radii)");
+            //_filterChanged |= ImGui::Checkbox("Only multi-planet", &showOnlyMultiPlanetSystems);
+            //ImGui::SameLine();
+            //_filterChanged |= ImGui::Checkbox("Must have 3D positional data", &showOnlyHasPosition);
 
-            ImGui::Text("Discovery method");
-            _filterChanged |= ImGui::Checkbox("Transit", &showTransit);
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Radial Velocity", &showRadialVelocity);
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Other", &showOther);
+            //ImGui::Text("Planet bin");
+            //_filterChanged |= ImGui::Checkbox("Terrestrial", &showTerrestrial);
+
+            //_filterChanged |= ImGui::Checkbox("Small Sub-Neptune", &showSmallSubNeptunes);
+
+            //ImGui::SameLine();
+            //_filterChanged |= ImGui::Checkbox("Large Sub-Neptune", &showLargeSubNeptunes);
+
+            //_filterChanged |= ImGui::Checkbox("Sub-Jovian", &showSubJovians);
+
+            //ImGui::SameLine();
+            //_filterChanged |= ImGui::Checkbox("Larger", &showLargerPlanets);
+
+            //ImGui::Text("Discovery method");
+            //_filterChanged |= ImGui::Checkbox("Transit", &showTransit);
+            //ImGui::SameLine();
+            //_filterChanged |= ImGui::Checkbox("Radial Velocity", &showRadialVelocity);
+            //ImGui::SameLine();
+            //_filterChanged |= ImGui::Checkbox("Other", &showOther);
         }
     }
 
@@ -1266,14 +1236,13 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
         ImGui::SameLine();
 
         static size_t currentMetricChoiceIndex = 0;
-        if (currentMetricChoiceIndex < 0) {
-            // Find default column - first numeric
-            for (size_t i = 0; i < _columns.size(); ++i) {
-                if (isNumericColumn(i)) {
-                    currentMetricChoiceIndex = i;
-                    rowLimitFilterChanged = true;
-                    break;
-                }
+
+        // Find default column - first numeric
+        for (size_t i = 0; i < _columns.size(); ++i) {
+            if (isNumericColumn(i)) {
+                currentMetricChoiceIndex = i;
+                rowLimitFilterChanged = true;
+                break;
             }
         }
 
@@ -1372,71 +1341,36 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
             bool filteredOut = false;
 
-            // TODO: add a way to configure these predefined filters
-
             // Pre-defined filters
-            //bool filteredOut = hideNanTsm && std::isnan(d.tsm);
-            //filteredOut |= hideNanEsm && std::isnan(d.esm);
-            //filteredOut |= showOnlyMultiPlanetSystems && !d.multiSystemFlag;
-            //filteredOut |= showOnlyHasPosition && !d.position.has_value();
+            for (size_t qIndex = 0; qIndex < _quickFilterFlags.size(); ++qIndex) {
+                const DataSettings::QuickFilter& q = _dataSettings.quickFilters[qIndex];
 
-            //bool hasBinFilter = showTerrestrial || showSmallSubNeptunes ||
-            //                    showLargeSubNeptunes || showSubJovians ||
-            //                    showLargerPlanets;
+                bool passedFilter = true;
+                for (const DataSettings::QuickFilter::Filter& filter : q.filters) {
 
-            //if (hasBinFilter) {
-            //    bool matchesBinFilter = false;
-            //    if (d.radius.hasValue()) {
-            //        float r = d.radius.value;
-            //        // TODO: make it possible to set these values
-            //        matchesBinFilter |= showTerrestrial && (r <= 1.5);
-            //        matchesBinFilter |= showSmallSubNeptunes && (r > 1.5 && r <= 2.75);
-            //        matchesBinFilter |= showLargeSubNeptunes && (r > 2.75 && r <= 4.0);
-            //        matchesBinFilter |= showSubJovians && (r > 4.0 && r <= 10.0);
-            //        matchesBinFilter |= showLargerPlanets && (r > 10.0);
-            //    }
-            //    filteredOut |= !matchesBinFilter;
-            //}
+                    if (_quickFilterFlags[qIndex] == true) {
+                        bool isNumeric = isNumericColumn(columnIndex(filter.column));
+                        ColumnFilter cf = ColumnFilter(
+                            filter.query,
+                            isNumeric ? ColumnFilter::Type::Numeric : ColumnFilter::Type::Text
+                        );
+                        passedFilter &= cf.passFilter(columnValue(filter.column, d));
+                    }
+                }
 
-            //// Shortcut filter for discovery method
-            //bool passDiscoveryMethod = false;
-
-            //bool isTransit = ColumnFilter(
-            //    "transit",
-            //    ColumnFilter::Type::Text
-            //).passFilter(d.discoveryMethod);
-
-            //bool isRV = ColumnFilter(
-            //    "radial velocity",
-            //    ColumnFilter::Type::Text
-            //).passFilter(d.discoveryMethod);
-
-            //if (showOther && !(isTransit || isRV)) {
-            //    passDiscoveryMethod = true;
-            //}
-            //else {
-            //    passDiscoveryMethod |= (showTransit && isTransit);
-            //    passDiscoveryMethod |= (showRadialVelocity && isRV);
-            //}
-            //filteredOut |= !passDiscoveryMethod;
+                filteredOut |= !passedFilter;
+            }
 
             // Other filters
-            for (const ColumnFilterEntry& f : _appliedFilters) {
+            for (const ColumnFilterEntry& f : _columnFilters) {
                 if (!f.enabled) {
                     continue;
                 }
 
-                std::variant<const char*, float> value =
-                    columnValue(_columns[f.columnIndex], d);
+                filteredOut |= !f.filter.passFilter(
+                    columnValue(_columns[f.columnIndex], d)
+                );
 
-                if (std::holds_alternative<float>(value)) {
-                    float val = std::get<float>(value);
-                    filteredOut |= !f.filter.passFilter(val);
-                }
-                else { // text
-                    const char* val = std::get<const char*>(value);
-                    filteredOut |= !f.filter.passFilter(val);
-                }
             }
 
             if (!filteredOut) {
@@ -1451,7 +1385,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     // Show how many values the filter corresponds to, without the limited rows
     view::helper::renderDescriptiveText(std::format(
         "Current internal filter corresponds to {} exoplanets and \n"
-        "has {} active column filters \n", nItemsWithoutRowLimit, _appliedFilters.size()
+        "has {} active column filters \n", nItemsWithoutRowLimit, _columnFilters.size()
     ).c_str());
 
     // Limit the number of rows by first sorting based on the chosen metric
@@ -1971,8 +1905,8 @@ void DataViewer::renderColumnValue(int columnIndex, const ExoplanetItem& item) {
         const DataSettings::ColumnInfo& colInfo =
             _dataSettings.columnInfo.at(_columns[columnIndex]);
 
-        if (colInfo.format.has_value()) {
-            format = colInfo.format.value().c_str();
+        if (!colInfo.format.empty()) {
+            format = colInfo.format.c_str();
         }
     }
 

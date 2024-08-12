@@ -47,6 +47,7 @@ public:
     std::string query() const;
     bool isValid() const;
 
+    bool passFilter(std::variant<const char*, float> value) const;
     bool passFilter(float value) const;
     bool passFilter(const std::string& value) const;
 

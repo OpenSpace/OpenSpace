@@ -70,6 +70,8 @@ namespace {
     }
 
     void from_json(const nlohmann::json& j, openspace::exoplanets::DataSettings& s) {
+        using namespace openspace::exoplanets;
+
         j.at("datafile").get_to(s.dataFile);
 
         const nlohmann::json dataMapping = j.at("data_mapping");
@@ -84,7 +86,7 @@ namespace {
 
         if (j.contains("default_colormapping")) {
             const nlohmann::json cmapping = j.at("default_colormapping");
-            openspace::exoplanets::DataSettings::CmapInfo cmap;
+            DataSettings::CmapInfo cmap;
             cmapping.at("column").get_to(cmap.column);
             cmapping.at("min").get_to(cmap.min);
             cmapping.at("max").get_to(cmap.max);
@@ -93,17 +95,13 @@ namespace {
 
         const nlohmann::json columnInfo = j.at("column_info");
         for (auto& [key, value] : columnInfo.items()) {
-            openspace::exoplanets::DataSettings::ColumnInfo info;
+            DataSettings::ColumnInfo info;
             value.at("name").get_to(info.name);
             if (value.contains("format")) {
-                std::string temp;
-                value.at("format").get_to(temp);
-                info.format = temp;
+                value.at("format").get_to(info.format);
             }
             if (value.contains("desc")) {
-                std::string temp;
-                value.at("desc").get_to(temp);
-                info.description = temp;
+                value.at("desc").get_to(info.description);
             }
             if (value.contains("isText")) {
                 bool temp = false;
@@ -111,6 +109,41 @@ namespace {
                 info.isText = temp;
             }
             s.columnInfo[key] = info;
+        }
+
+        const std::vector<nlohmann::json> quickFilters = j.at("quick_filters");
+        s.quickFilters.reserve(quickFilters.size());
+
+        for (const nlohmann::json& filterInfo : quickFilters) {
+            DataSettings::QuickFilter quickFilter;
+
+            filterInfo.at("name").get_to(quickFilter.name);
+
+            if (filterInfo.at("filter").is_array()) {
+                const std::vector<nlohmann::json>& filters = filterInfo.at("filter");
+                quickFilter.filters.reserve(filters.size());
+
+                for (const nlohmann::json& f : filters) {
+                    DataSettings::QuickFilter::Filter filter;
+                    f.at("column").get_to(filter.column);
+                    f.at("query").get_to(filter.query);
+                    quickFilter.filters.push_back(filter);
+                }
+            }
+            else if (filterInfo.at("filter").is_object()) {
+                const nlohmann::json f = filterInfo.at("filter");
+
+                DataSettings::QuickFilter::Filter filter;
+                f.at("column").get_to(filter.column);
+                f.at("query").get_to(filter.query);
+                quickFilter.filters.push_back(filter);
+            }
+
+            if (filterInfo.contains("desc")) {
+                filterInfo.at("desc").get_to(quickFilter.description);
+            }
+
+            s.quickFilters.push_back(quickFilter);
         }
     }
 
