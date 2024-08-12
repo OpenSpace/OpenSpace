@@ -78,14 +78,6 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyRollInfo = {
-        "ApplyRoll",
-        "Apply Roll",
-        "If true, always rotate the target to have its up direction aligned with the up "
-        "direction of the camera.",
-        openspace::properties::Property::Visibility::User
-    };
-
     constexpr openspace::properties::Property::PropertyInfo BorderRadiusInfo = {
         "BorderRadius",
         "Border Radius",
@@ -108,6 +100,13 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RollInfo = {
+        "Roll",
+        "Roll",
+        "The roll of the sky browser view.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
         // [[codegen::verbatim(crossHairSizeInfo.description)]]
         std::optional<float> crossHairSize;
@@ -121,9 +120,6 @@ namespace {
         // [[codegen::verbatim(VerticalFovInfo.description)]]
         std::optional<double> verticalFov;
 
-        // [[codegen::verbatim(ApplyRollInfo.description)]]
-        std::optional<bool> applyRoll;
-
         // [[codegen::verbatim(BorderRadiusInfo.description)]]
         std::optional<double> borderRadius;
 
@@ -132,6 +128,9 @@ namespace {
 
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
+
+        // [[codegen::verbatim(RollInfo.description)]]
+        std::optional<double> roll;
     };
 
 #include "renderableskytarget_codegen.cpp"
@@ -149,10 +148,10 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     , _showRectangleThreshold(RectangleThresholdInfo, 5.f, 0.1f, 70.f)
     , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
     , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
-    , _applyRoll(ApplyRollInfo, true)
     , _borderRadius(BorderRadiusInfo)
     , _color(ColorInfo, glm::vec3(1.0), glm::vec3(0.0), glm::vec3(1.0))
     , _ratio(RatioInfo, 1.f, 0.01f, 1.f)
+    , _roll(RollInfo, 0.0, 0.0, 180.0)
 {
     // Disable renderable plane inherited property
     _autoScale = false;
@@ -173,11 +172,17 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     _verticalFov.setReadOnly(true);
     addProperty(_verticalFov);
 
-    _applyRoll = p.applyRoll.value_or(_applyRoll);
-    addProperty(_applyRoll);
-
     _ratio = p.ratio.value_or(_ratio);
     addProperty(_ratio);
+
+    _color = p.color.value_or(_color);
+    addProperty(_color);
+    _color.setViewOption(properties::Property::ViewOptions::Color);
+
+    addProperty(_borderRadius);
+
+    _roll = p.roll.value_or(_roll);
+    addProperty(_roll);
 }
 
 void RenderableSkyTarget::bindTexture() {}
@@ -199,10 +204,6 @@ void RenderableSkyTarget::initializeGL() {
             );
         }
     );
-}
-
-void RenderableSkyTarget::setColor(glm::vec3 color) {
-    _color = std::move(color);
 }
 
 glm::dvec3 RenderableSkyTarget::rightVector() const {
@@ -298,17 +299,4 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 }
-
-void RenderableSkyTarget::setRatio(float ratio) {
-    _ratio = ratio;
-}
-
-void RenderableSkyTarget::setVerticalFov(double fov) {
-    _verticalFov = fov;
-}
-
-void RenderableSkyTarget::setBorderRadius(double radius) {
-    _borderRadius = radius;
-}
-
 } // namespace openspace

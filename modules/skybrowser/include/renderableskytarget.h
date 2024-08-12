@@ -45,11 +45,6 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void bindTexture() override;
 
-    void setRatio(float ratio);
-    void setColor(glm::vec3 color);
-    void setVerticalFov(double fov);
-    void setBorderRadius(double radius);
-
     static documentation::Documentation Documentation();
 
     void applyRoll();
@@ -63,7 +58,7 @@ private:
     // Properties that are the same in sky browser and pair
     properties::DoubleProperty _verticalFov;
     properties::DoubleProperty _borderRadius;
-    properties::BoolProperty _applyRoll;
+    properties::DoubleProperty _roll;
     properties::FloatProperty _ratio;
     properties::Vec3Property _color;
 
