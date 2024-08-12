@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerUrl>http://liu-se.wms.openspaceproject.com/Earth/Esri_Wayback_10/tile/${z}/${y}/${x}</ServerUrl>
+    <ServerUrl>http://liu-se.wms.openspaceproject.com/Earth/Esri_Wayback/tile/10/${z}/${y}/${x}</ServerUrl>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>
