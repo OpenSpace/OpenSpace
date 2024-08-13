@@ -70,10 +70,8 @@ public:
 
     // Look of browser window
     glm::ivec3 borderColor() const;
-    double borderRadius() const;
     void hideChromeInterface();
     void setBorderColor(glm::ivec3 color);
-    void setBorderRadius(double radius);
 
     void reload();
 
@@ -101,7 +99,6 @@ private:
 
     properties::StringListProperty _selectedImagesUrls;
     properties::DoubleListProperty _selectedImagesOpacities;
-    properties::DoubleProperty _borderRadius;
     properties::DoubleProperty _roll;
     properties::DVec2Property _equatorialAim;
     properties::DoubleProperty _verticalFov;
@@ -111,8 +108,6 @@ private:
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 
-    int _borderRadiusTimer = -1;
-    static constexpr int RadiusTimeOut = 25;
     float _lastTextureQuality = 1.f;
 
     // Flags

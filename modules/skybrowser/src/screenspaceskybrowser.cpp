@@ -91,13 +91,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BorderRadiusInfo = {
-        "BorderRadius",
-        "Border Radius",
-        "The border radius of this Sky Browser.",
-    openspace::properties::Property::Visibility::NoviceUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo RollInfo = {
         "Roll",
         "Roll",
@@ -144,9 +137,6 @@ namespace {
         // [[codegen::verbatim(SelectedImagesOpacitiesInfo.description)]]
         std::optional<std::vector<double>> selectedImagesOpacities;
 
-        // [[codegen::verbatim(BorderRadiusInfo.description)]]
-        std::optional<double> borderRadius;
-
         // [[codegen::verbatim(RollInfo.description)]]
         std::optional<double> roll;
 
@@ -171,7 +161,6 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     , _wwtCommunicator(dictionary)
     , _selectedImagesUrls(SelectedImagesUrlsInfo)
     , _selectedImagesOpacities(SelectedImagesOpacitiesInfo)
-    , _borderRadius(BorderRadiusInfo, 0.0, 0.0, 1.0)
     , _roll(RollInfo, 0.0, 0.0, 180.0)
     , _equatorialAim(EquatorialAimInfo,
         glm::dvec2(0.0), glm::dvec2(0.0, -90.0), glm::dvec2(360.0, 90.0)
@@ -193,7 +182,6 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     _roll = p.roll.value_or(_roll);
     _selectedImagesOpacities = p.selectedImagesOpacities.value_or(_selectedImagesOpacities);
     _selectedImagesUrls = p.selectedImagesUrls.value_or(_selectedImagesUrls);
-    _borderRadius = p.borderRadius.value_or(_borderRadius);
     _ratio = p.ratio.value_or(_ratio);
 
     addProperty(_isHidden);
@@ -203,7 +191,6 @@ ScreenSpaceSkyBrowser::ScreenSpaceSkyBrowser(const ghoul::Dictionary& dictionary
     addProperty(_roll);
     addProperty(_selectedImagesOpacities);
     addProperty(_selectedImagesUrls);
-    addProperty(_borderRadius);
     addProperty(_ratio);
 
     addPropertySubOwner(_wwtCommunicator);
@@ -289,10 +276,6 @@ void ScreenSpaceSkyBrowser::updateTextureResolution() {
     _wwtCommunicator.setBrowserDimensions(glm::ivec2(res));
     _lastTextureQuality = _textureQuality.value();
     _objectSize = glm::ivec3(_wwtCommunicator.browserDimensions(), 1);
-
-    // The radius has to be updated when the texture resolution has changed
-    _radiusIsDirty = true;
-    _borderRadiusTimer = 0;
 }
 
 void ScreenSpaceSkyBrowser::addDisplayCopy(const glm::vec3& raePosition, int nCopies) {
@@ -439,15 +422,6 @@ void ScreenSpaceSkyBrowser::selectImage(const std::string& url) {
 }
 
 void ScreenSpaceSkyBrowser::update() {
-    // After the texture has been updated, wait a little bit before updating the border
-    // radius so the browser has time to update its size
-    if (_radiusIsDirty && _isInitialized && _borderRadiusTimer == RadiusTimeOut) {
-        _wwtCommunicator.setBorderRadius(_borderRadius);
-        _radiusIsDirty = false;
-        _borderRadiusTimer = -1;
-    }
-    _borderRadiusTimer++;
-
     // Cap how messages are passed
     const std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     const std::chrono::system_clock::duration timeSinceLastUpdate = now - _lastUpdateTime;
@@ -497,7 +471,6 @@ void ScreenSpaceSkyBrowser::setAsPaired() {
     _borderColor.setReadOnly(true);
     _roll.setReadOnly(true);
     _equatorialAim.setReadOnly(true);
-    _borderRadius.setReadOnly(true);
     _selectedImagesOpacities.setReadOnly(true);
     _selectedImagesUrls.setReadOnly(true);
 }
@@ -527,12 +500,6 @@ void ScreenSpaceSkyBrowser::reload() {
     _wwtCommunicator.reload();
 }
 
-void ScreenSpaceSkyBrowser::setBorderRadius(double radius) {
-    _borderRadius = radius;
-    _radiusIsDirty = true;
-    _borderRadiusTimer = 0;
-}
-
 void ScreenSpaceSkyBrowser::setRatio(float ratio) {
     _wwtCommunicator.setRatio(ratio);
 }
@@ -547,10 +514,6 @@ std::vector<double> ScreenSpaceSkyBrowser::opacities() const {
         [](const std::pair<std::string, double>& image) { return image.second; }
     );
     return opacities;
-}
-
-double ScreenSpaceSkyBrowser::borderRadius() const {
-    return _borderRadius;
 }
 
 void ScreenSpaceSkyBrowser::setTargetRoll(double roll) {

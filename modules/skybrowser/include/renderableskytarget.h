@@ -57,7 +57,7 @@ private:
 
     // Properties that are the same in sky browser and pair
     properties::DoubleProperty _verticalFov;
-    properties::DoubleProperty _borderRadius;
+    properties::FloatProperty _borderRadius;
     properties::DoubleProperty _roll;
     properties::FloatProperty _ratio;
     properties::Vec3Property _color;

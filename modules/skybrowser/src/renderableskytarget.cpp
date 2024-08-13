@@ -121,7 +121,7 @@ namespace {
         std::optional<double> verticalFov;
 
         // [[codegen::verbatim(BorderRadiusInfo.description)]]
-        std::optional<double> borderRadius;
+        std::optional<float> borderRadius;
 
         // [[codegen::verbatim(RatioInfo.description)]]
         std::optional<double> ratio;
@@ -242,7 +242,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("ratio", _ratio);
     _shader->setUniform("lineColor", color);
     _shader->setUniform("fov", static_cast<float>(_verticalFov));
-    _shader->setUniform("borderRadius", static_cast<float>(_borderRadius));
+    _shader->setUniform("borderRadius", _borderRadius);
 
     _worldPosition = glm::dvec3(
         glm::translate(

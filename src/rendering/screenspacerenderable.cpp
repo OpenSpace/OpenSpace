@@ -162,6 +162,13 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BorderRadiusInfo = {
+        "BorderRadius",
+        "Border Radius",
+        "The radius of the border in the range [0, 1], where 1 is completely round.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BorderColorInfo = {
         "BorderColor",
         "Border Color",
@@ -218,6 +225,9 @@ namespace {
 
         // [[codegen::verbatim(BorderWidthInfo.description)]]
         std::optional<float> borderWidth [[codegen::greater(0.0)]];
+
+        // [[codegen::verbatim(BorderRadiusInfo.description)]]
+        std::optional<float> borderRadius [[codegen::inrange(0.0, 0.1)]];
 
         // [[codegen::verbatim(BorderColorInfo.description)]]
         std::optional<glm::vec3> borderColor [[codegen::color()]];
@@ -317,6 +327,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         glm::vec3(glm::pi<float>())
     )
     , _borderWidth(BorderWidthInfo, 0.f, 0.f, 1000.f)
+    , _borderRadius(BorderRadiusInfo, 0.f, 0.f, 1.f)
     , _borderColor(BorderColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
     , _gammaOffset(GammaOffsetInfo, 0.f, -1.f, 10.f)
@@ -368,8 +379,10 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     addProperty(_borderColor);
     addProperty(_borderWidth);
+    addProperty(_borderRadius);
 
     _borderWidth = p.borderWidth.value_or(_borderWidth);
+    _borderRadius = p.borderRadius.value_or(_borderRadius);
 
     _borderColor = p.borderColor.value_or(_borderColor);
     _borderColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -667,6 +680,7 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
     _shader->setUniform(_uniformCache.borderColor, _borderColor);
+    _shader->setUniform(_uniformCache.borderRadius, _borderRadius);
     _shader->setUniform(
         _uniformCache.mvpMatrix,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform

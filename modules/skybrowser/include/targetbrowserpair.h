@@ -121,7 +121,7 @@ private:
     properties::DVec2Property _equatorialAim;
     properties::DoubleProperty _verticalFov;
     properties::DoubleProperty _roll;
-    properties::DoubleProperty _borderRadius;
+    properties::FloatProperty _borderRadius;
     properties::FloatProperty _ratio;
 
     // Target and browser

@@ -140,6 +140,7 @@ protected:
     // Border
     properties::FloatProperty _borderWidth;
     properties::Vec3Property _borderColor;
+    properties::FloatProperty _borderRadius;
 
     properties::FloatProperty _scale;
     properties::FloatProperty _gammaOffset;
@@ -149,7 +150,7 @@ protected:
 
     glm::ivec2 _objectSize = glm::ivec2(0);
     UniformCache(color, opacity, blackoutFactor, hue, value, saturation, mvpMatrix, tex,
-        backgroundColor, gamma, borderColor, borderWidth) _uniformCache;
+        backgroundColor, gamma, borderWidth, borderColor, borderRadius) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 

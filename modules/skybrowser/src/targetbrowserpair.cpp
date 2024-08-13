@@ -217,7 +217,7 @@ namespace {
         std::optional<double> roll;
 
         // [[codegen::verbatim(BorderRadiusInfo.description)]]
-        std::optional<double> borderRadius;
+        std::optional<float> borderRadius;
 
         // [[codegen::verbatim(RatioInfo.description)]]
         std::optional<float> ratio;
@@ -244,7 +244,7 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
 	, _enabled(EnabledInfo, true)
     , _roll(RollInfo)
     , _color(ColorInfo)
-    , _borderRadius(BorderRadiusInfo, 0.0, 0.0, 1.0)
+    , _borderRadius(BorderRadiusInfo, 0.f, 0.f, 1.f)
     , _isPointingSpacecraft(PointSpacecraftInfo, false)
     , _updateDuringTargetAnimation(UpdateDuringAnimationInfo, false)
     , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
@@ -265,6 +265,11 @@ TargetBrowserPair::TargetBrowserPair(const ghoul::Dictionary& dictionary)
 
     ghoul_assert(_browser, "Sky browser is null pointer");
     ghoul_assert(_targetNode, "Sky target is null pointer");
+
+    if (!_browser || !_targetNode) {
+        LERROR("Error in specification of TargetBrowserPair");
+        return;
+    }
 
     setIdentifier(p.identifier);
 
