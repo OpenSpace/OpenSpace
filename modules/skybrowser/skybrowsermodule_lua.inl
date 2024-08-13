@@ -316,31 +316,6 @@ std::string prunedIdentifier(std::string identifier) {
 }
 
 /**
- * Returns the AAS WorldWide Telescope image collection url.
- */
-[[codegen::luawrap]] ghoul::Dictionary wwtImageCollectionUrl() {
-    using namespace openspace;
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    ghoul::Dictionary url;
-    url.setValue("url", module->wwtImageCollectionUrl());
-    return url;
-}
-
-/**
- * Deprecated in favor of 'wwtImageCollectionUrl'
- */
-[[codegen::luawrap("getWwtImageCollectionUrl")]]
-ghoul::Dictionary wwtImageCollectionUrlDeprecated()
-{
-    LWARNINGC(
-        "Deprecation",
-        "'getWwtImageCollectionUrl' function is deprecated and should be replaced with "
-        "'wwtImageCollectionUrl'"
-    );
-    return wwtImageCollectionUrl();
-}
-
-/**
  * Takes an identifier to a sky browser or sky target. Rotates the camera so that the
  * target is placed in the center of the view.
  */
@@ -381,16 +356,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     if (pair) {
         pair->centerTargetOnScreen();
     }
-}
-
-/**
- * Takes an identifier to a sky browser or target. Sets that sky browser currently
- * selected.
- */
-[[codegen::luawrap]] void setSelectedBrowser(std::string identifier) {
-    using namespace openspace;
-
-    global::moduleEngine->module<SkyBrowserModule>()->setSelectedBrowser(identifier);
 }
 
 /**
@@ -484,12 +449,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
         scripting::ScriptEngine::ShouldBeSynchronized::No,
         scripting::ScriptEngine::ShouldSendToRemote::No
     );
-
-    global::scriptEngine->queueScript(
-        "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
 }
 
 /**
@@ -562,39 +521,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
 }
 
 /**
- * Takes the identifier of a sky browser or a sky target and equatorial coordinates Right
- * Ascension and Declination. The target will animate to this coordinate and the browser
- * will display the coordinate.
- */
-[[codegen::luawrap]] void setEquatorialAim(std::string identifier, double rightAscension,
-                                           double declination)
-{
-    using namespace openspace;
-
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    if (pair) {
-        pair->setEquatorialAim(glm::dvec2(rightAscension, declination));
-    }
-}
-
-/**
- * Takes an identifier to a sky browser or a sky target and a vertical field of view.
- * Changes the field of view as specified by the input.
- */
-[[codegen::luawrap]] void setVerticalFov(std::string identifier,
-                                         float verticalFieldOfView)
-{
-    using namespace openspace;
-
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    if (pair) {
-        pair->setVerticalFov(verticalFieldOfView);
-    }
-}
-
-/**
  * Takes an identifier to a sky browser or a sky target and a vertical field of view.
  * Changes the field of view as specified by the input.
  */
@@ -605,52 +531,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
         pair->setVerticalFovWithScroll(scroll);
-    }
-}
-
-/**
- * Takes an identifier to a sky browser or a sky target and a rgb color in the ranges
- * [0, 255].
- */
-[[codegen::luawrap]] void setBorderColor(std::string identifier, int red, int green,
-                                         int blue)
-{
-    using namespace openspace;
-
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    if (pair) {
-        pair->setBorderColor(glm::ivec3(red, green, blue));
-    }
-}
-
-/**
- * Takes an identifier to a sky browser and a radius value between 0 and 1, where 0 is
- * rectangular and 1 is circular
- */
-[[codegen::luawrap]] void setBorderRadius(std::string identifier, double radius) {
-    using namespace openspace;
-
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    // Make sure the webpage has loaded properly before executing javascript on it
-    if (pair && pair->browser()->isInitialized()) {
-        pair->setBorderRadius(std::clamp(radius, 0.0, 1.0));
-    }
-}
-
-/**
- * Sets the screen space size of the sky browser to the numbers specified by the input
- * [x, y].
- */
-[[codegen::luawrap]] void setBrowserRatio(std::string identifier, float ratio)
-{
-    using namespace openspace;
-
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    if (pair) {
-        pair->setBrowserRatio(ratio);
     }
 }
 
@@ -727,16 +607,6 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
         pair->setEnabled(show);
     }
-}
-
-/**
- * Stop animations. Takes an identifier to a sky browser.
- */
-[[codegen::luawrap]] void stopAnimations(std::string identifier) {
-    using namespace openspace;
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    pair->stopAnimations();
 }
 
 #include "skybrowsermodule_lua_codegen.cpp"

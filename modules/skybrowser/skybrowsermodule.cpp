@@ -449,6 +449,10 @@ const WwtDataHandler& SkyBrowserModule::wwtDataHandler() const {
     return _dataHandler;
 }
 
+std::string SkyBrowserModule::selectedBrowserId() const {
+    return _selectedPairId;
+}
+
 std::vector<std::unique_ptr<TargetBrowserPair>>& SkyBrowserModule::pairs() {
     return _targetsBrowsers;
 }
@@ -550,18 +554,6 @@ nlohmann::json SkyBrowserModule::imageList() {
     return list;
 }
 
-void SkyBrowserModule::setSelectedBrowser(std::string_view id) {
-    TargetBrowserPair* p = pair(id);
-    if (p) {
-         _selectedPairId = pair(id)->identifier();
-    }
-}
-
-std::string SkyBrowserModule::selectedBrowserId() const {
-    TargetBrowserPair* found = pair(_selectedPairId);
-    return found ? found->browserId() : "";
-}
-
 std::string SkyBrowserModule::selectedTargetId() const {
     TargetBrowserPair* found = pair(_selectedPairId);
     return found ? found->targetRenderableId() : "";
@@ -606,27 +598,18 @@ scripting::LuaLibrary SkyBrowserModule::luaLibrary() const {
             codegen::lua::SelectImage,
             codegen::lua::RemoveSelectedImageInBrowser,
             codegen::lua::AdjustCamera,
-            codegen::lua::SetSelectedBrowser,
             codegen::lua::CreateTargetBrowserPair,
             codegen::lua::RemoveTargetBrowserPair,
             codegen::lua::SetOpacityOfImageLayer,
             codegen::lua::CenterTargetOnScreen,
             codegen::lua::SetImageLayerOrder,
             codegen::lua::AddPairToSkyBrowserModule,
-            codegen::lua::SetEquatorialAim,
-            codegen::lua::SetVerticalFov,
-            codegen::lua::SetBorderColor,
             codegen::lua::TranslateScreenSpaceRenderable,
             codegen::lua::AddDisplayCopy,
-            codegen::lua::SetBrowserRatio,
             codegen::lua::RemoveDisplayCopy,
             codegen::lua::ScrollOverBrowser,
             codegen::lua::LoadingImageCollectionComplete,
             codegen::lua::ShowAllTargetsAndBrowsers,
-            codegen::lua::WwtImageCollectionUrl,
-            codegen::lua::WwtImageCollectionUrlDeprecated,
-            codegen::lua::StopAnimations,
-            codegen::lua::SetBorderRadius,
             codegen::lua::ReloadDisplayCopyOnNode
         }
     };

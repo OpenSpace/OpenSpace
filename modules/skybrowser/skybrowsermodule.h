@@ -56,7 +56,6 @@ public:
     std::string selectedTargetId() const;
     int uniqueIdentifierCounter() const;
 
-    void setSelectedBrowser(std::string_view id);
     void setHoverCircle(SceneGraphNode* circle);
 
     // Rotation, animation, placement
