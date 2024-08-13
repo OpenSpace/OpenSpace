@@ -40,25 +40,15 @@ uniform float saturation;
 uniform float gamma = 1.0;
 uniform vec2 borderWidth = vec2(0.1);
 uniform vec3 borderColor = vec3(0.0);
-
+uniform float borderRadius = 0.0;
+uniform vec2 resolution = vec2(1000);
 
 Fragment getFragment() {
   Fragment frag;
 
   vec4 texColor = texture(tex, vs_st) * vec4(color, opacity);
-
   frag.color = texColor.a * texColor + (1.0 - texColor.a) * backgroundColor;
-
-  // Set border color
-  if (vs_st.x < borderWidth.x || vs_st.x > 1 - borderWidth.x ||
-      vs_st.y < borderWidth.y || vs_st.y > 1 - borderWidth.y)
-  {
-    frag.color = vec4(borderColor, opacity);
-  }
-
-  if (frag.color.a == 0.0) {
-    discard;
-  }
+  float softness = 0.005;
 
   frag.depth = vs_depth;
 
@@ -71,5 +61,21 @@ Fragment getFragment() {
   hsvColor.z = clamp(hsvColor.z * value, 0.0, 1.0);
 
   frag.color.rgb = gammaCorrection(hsv2rgb(hsvColor), gamma) * blackoutFactor;
+
+  // Calculate rounded border
+  vec2 mappedCoords = abs((vs_st * 2) - 1.0); // [-1, 1]
+  vec2 r0 = vec2(1.0 - borderRadius);
+  vec3 roundedEdges = vec3(1.0);
+  float alphaChannel = 1.0;
+  if (mappedCoords.x > r0.x && mappedCoords.y > r0.y) {
+    alphaChannel = 1.0 - smoothstep(borderRadius - softness, borderRadius, distance(mappedCoords, r0));
+    float border = 1.0 - smoothstep(borderRadius - softness - borderWidth.x, borderRadius - softness, distance(mappedCoords, r0));
+    frag.color.rgb = mix(borderColor, frag.color.rgb, border);
+  }
+  else {
+    alphaChannel = 1.0 - smoothstep(1.0 - softness, 1.0, max(mappedCoords.x, mappedCoords.y));
+  }
+
+  frag.color.a = alphaChannel;
   return frag;
 }
