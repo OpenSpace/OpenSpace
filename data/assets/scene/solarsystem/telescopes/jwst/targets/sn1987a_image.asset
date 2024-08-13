@@ -12,7 +12,6 @@ asset.export("image", image)
 
 asset.meta = {
   Name = "Supernova SN 1987a",
-  Version = "1.0",
   Description = "Supernova SN 1987a Image",
   Author = [[
     X-ray: NASA/CXC/PSU/S.Park & D.Burrows.

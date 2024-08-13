@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___SETTINGS___H__
 #define __OPENSPACE_CORE___SETTINGS___H__
 
+#include <openspace/engine/configuration.h>
 #include <openspace/properties/property.h>
 #include <filesystem>
 #include <optional>
@@ -42,6 +43,7 @@ struct Settings {
     std::optional<bool> rememberLastProfile;
     std::optional<properties::Property::Visibility> visibility;
     std::optional<bool> bypassLauncher;
+    std::optional<Configuration::LayerServer> layerServer;
 
     struct MRF {
         auto operator<=>(const MRF&) const = default;

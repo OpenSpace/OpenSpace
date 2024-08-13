@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "CTX_blended_01",
   Name = "CTX Blended beta01",
   Enabled = asset.enabled,
+  ZIndex = 60,
   FilePath = asset.resource("ctx_blended_beta01.vrt"),
   BlendMode = "Color",
   Settings = {
@@ -44,7 +45,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "CTX Blended beta01",
-  Version = "1.1",
   Description = [[New blended CTX map for Mars from CalTech Murray lab. This map is
     hosted by ESRI]],
   Author = "Caltech Murray Lab",

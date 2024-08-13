@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,12 +39,12 @@ TouchInput::TouchInput(size_t touchDeviceId_, size_t fingerId_, float x_, float 
     , timestamp(timestamp_)
 {}
 
-glm::vec2 TouchInput::screenCoordinates(glm::vec2 resolution) const {
+glm::vec2 TouchInput::screenCoordinates(const glm::vec2& resolution) const {
     return { std::floor(x * resolution.x + 0.5f), std::floor(y * resolution.y + 0.5f) };
 }
 
 glm::vec2 TouchInput::currentWindowCoordinates() const {
-    glm::vec2 res = global::windowDelegate->currentSubwindowSize();
+    const glm::vec2 res = global::windowDelegate->currentSubwindowSize();
     return { std::floor(x * res.x + 0.5f), std::floor(y * res.y + 0.5f) };
 }
 

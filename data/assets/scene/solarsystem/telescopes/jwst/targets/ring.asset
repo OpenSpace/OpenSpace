@@ -34,7 +34,6 @@ asset.export(RingImage)
 
 asset.meta = {
   Name = "Ring Nebula Image",
-  Version = "1.0",
   Description = "Screenspace image of the Ring Nebula",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
-local kernel = asset.require("./kernels")
+local kernels115 = asset.require("./kernels115")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,15 +10,13 @@ local Cordelia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CORDELIA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Cordelia,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 40000, 40000, 40000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 40000, 40000, 40000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -40,8 +39,8 @@ local CordeliaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CORDELIA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Cordelia,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.335034,
@@ -64,8 +63,8 @@ local CordeliaLabel = {
   Identifier = "CordeliaLabel",
   Parent = Cordelia.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Cordelia",
     FontSize = 70.0,
     Size = 5.5,
@@ -91,15 +90,13 @@ local Ophelia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OPHELIA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Ophelia,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 43000, 43000, 43000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 43000, 43000, 43000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -122,8 +119,8 @@ local OpheliaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "OPHELIA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Ophelia,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.3764,
@@ -146,8 +143,8 @@ local OpheliaLabel = {
   Identifier = "OpheliaLabel",
   Parent = Ophelia.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Ophelia",
     FontSize = 70.0,
     Size = 5.5,
@@ -173,15 +170,13 @@ local Bianca = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BIANCA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Bianca,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 64000, 46000, 46000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 64000, 46000, 46000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -204,8 +199,8 @@ local BiancaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BIANCA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Bianca,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.434579,
@@ -228,8 +223,8 @@ local BiancaLabel = {
   Identifier = "BiancaLabel",
   Parent = Bianca.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Bianca",
     FontSize = 70.0,
     Size = 5.5,
@@ -255,15 +250,13 @@ local Cressida = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CRESSIDA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Cressida,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 80000, 80000, 80000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 80000, 80000, 80000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -286,8 +279,8 @@ local CressidaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CRESSIDA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Cressida,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.463570,
@@ -310,8 +303,8 @@ local CressidaLabel = {
   Identifier = "CressidaLabel",
   Parent = Cressida.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Cressida",
     FontSize = 70.0,
     Size = 5.5,
@@ -337,15 +330,13 @@ local Desdemona = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DESDEMONA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Desdemona,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 64000, 64000, 64000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 64000, 64000, 64000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -368,8 +359,8 @@ local DesdemonaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DESDEMONA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Desdemona,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.473650,
@@ -392,8 +383,8 @@ local DesdemonaLabel = {
   Identifier = "DesdemonaLabel",
   Parent = Desdemona.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Desdemona",
     FontSize = 70.0,
     Size = 5.5,
@@ -419,15 +410,13 @@ local Juliet = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JULIET",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Juliet,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 94000, 94000, 94000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 94000, 94000, 94000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -450,8 +439,8 @@ local JulietTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JULIET",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Juliet,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.493065,
@@ -474,8 +463,8 @@ local JulietLabel = {
   Identifier = "JulietLabel",
   Parent = Juliet.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Juliet",
     FontSize = 70.0,
     Size = 5.5,
@@ -501,15 +490,13 @@ local Portia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PORTIA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Portia,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 135000, 135000, 135000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 135000, 135000, 135000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -532,8 +519,8 @@ local PortiaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PORTIA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Portia,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.513196,
@@ -556,8 +543,8 @@ local PortiaLabel = {
   Identifier = "PortiaLabel",
   Parent = Portia.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Portia",
     FontSize = 70.0,
     Size = 5.5,
@@ -583,15 +570,13 @@ local Rosalind = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ROSALIND",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Rosalind,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 72000, 72000, 72000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 72000, 72000, 72000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -614,8 +599,8 @@ local RosalindTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ROSALIND",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Rosalind,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.55846,
@@ -638,8 +623,8 @@ local RosalindLabel = {
   Identifier = "RosalindLabel",
   Parent = Rosalind.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Rosalind",
     FontSize = 70.0,
     Size = 5.5,
@@ -665,15 +650,13 @@ local Cupid = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CUPID",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Cupid,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 18000, 18000, 18000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 18000, 18000, 18000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -696,8 +679,8 @@ local CupidTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CUPID",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Cupid,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.618,
@@ -720,8 +703,8 @@ local CupidLabel = {
   Identifier = "CupidLabel",
   Parent = Cupid.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Cupid",
     FontSize = 70.0,
     Size = 5.5,
@@ -747,15 +730,13 @@ local Belinda = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BELINDA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Belinda,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 90000, 90000, 90000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 90000, 90000, 90000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -778,8 +759,8 @@ local BelindaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BELINDA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Belinda,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.623527,
@@ -802,8 +783,8 @@ local BelindaLabel = {
   Identifier = "BelindaLabel",
   Parent = Belinda.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Belinda",
     FontSize = 70.0,
     Size = 5.5,
@@ -829,15 +810,13 @@ local Perdita = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PERDITA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Perdita,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 30000, 30000, 30000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 30000, 30000, 30000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -860,8 +839,8 @@ local PerditaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PERDITA",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Perdita,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.638,
@@ -884,8 +863,8 @@ local PerditaLabel = {
   Identifier = "PerditaLabel",
   Parent = Perdita.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Perdita",
     FontSize = 70.0,
     Size = 5.5,
@@ -911,15 +890,13 @@ local Puck = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PUCK",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Puck,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 162000, 162000, 162000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 162000, 162000, 162000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -942,8 +919,8 @@ local PuckTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PUCK",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Puck,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.761833,
@@ -966,8 +943,8 @@ local PuckLabel = {
   Identifier = "PuckLabel",
   Parent = Puck.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Puck",
     FontSize = 70.0,
     Size = 5.5,
@@ -993,15 +970,13 @@ local Mab = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MAB",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Mab,
+      Observer = coreKernels.ID.UranusBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 25000, 25000, 25000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 25000, 25000, 25000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1024,8 +999,8 @@ local MabTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MAB",
-      Observer = "URANUS BARYCENTER"
+      Target = kernels115.ID.Mab,
+      Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
     Period = 0.923,
@@ -1048,8 +1023,8 @@ local MabLabel = {
   Identifier = "MabLabel",
   Parent = Mab.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Mab",
     FontSize = 70.0,
     Size = 5.5,
@@ -1070,9 +1045,6 @@ local MabLabel = {
 }
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.ura115)
-
-
   openspace.addSceneGraphNode(Cordelia)
   openspace.addSceneGraphNode(CordeliaTrail)
   openspace.addSceneGraphNode(CordeliaLabel)
@@ -1178,9 +1150,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MabLabel)
   openspace.removeSceneGraphNode(MabTrail)
   openspace.removeSceneGraphNode(Mab)
-
-
-  openspace.spice.unloadKernel(kernel.ura115)
 end)
 
 asset.export(Cordelia)
@@ -1227,7 +1196,6 @@ asset.export(MabLabel)
 
 asset.meta = {
   Name = "Uranus Irregular Retrograde Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Uranus' irregular retrograde moons:
     Cordelia, Ophelia, Bianca, Cressida, Desdemona, Juliet, Portia, Rosalind, Cupid,
     Belinda, Perdita, Puck and Mab. Blank globes and SPICE trails are generated for each

@@ -34,6 +34,7 @@ local LayerField = {
   Identifier = Identifier .. "-field",
   Name = Name .. " (Field)",
   Type = "TemporalTileProvider",
+  ZIndex = 100,
   Mode = "Folder",
   Folder = {
     Folder = fieldDestination,
@@ -48,6 +49,7 @@ local LayerObs = {
   Identifier = Identifier .. "-obs",
   Name = Name .. " (Observed)",
   Type = "TemporalTileProvider",
+  ZIndex = 100,
   Mode = "Folder",
   Folder = {
     Folder = obsDestination,
@@ -109,7 +111,6 @@ asset.export(Colorbar)
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

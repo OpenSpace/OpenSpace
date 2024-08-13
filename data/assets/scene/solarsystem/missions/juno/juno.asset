@@ -1,8 +1,9 @@
 asset.require("scene/solarsystem/missions/juno/mission")
 asset.require("scene/solarsystem/planets/jupiter/layers/colorlayers/jupiter_video")
 local transforms = asset.require("scene/solarsystem/planets/jupiter/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -31,13 +32,13 @@ local Juno = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JUNO",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels.ID.Juno,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "JUNO_SPACECRAFT",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Juno,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -65,8 +66,8 @@ local JunoTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JUNO",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels.ID.Juno,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "2016 JUL 01",
@@ -81,8 +82,6 @@ local JunoTrail = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(Juno)
   openspace.addSceneGraphNode(JunoTrail)
 end)
@@ -90,8 +89,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JunoTrail)
   openspace.removeSceneGraphNode(Juno)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Juno)

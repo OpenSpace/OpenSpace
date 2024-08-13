@@ -1,0 +1,33 @@
+local Layer = {
+  Identifier = "Temporal_NOAA20_VIIRS",
+  Name = "Temporal NOAA20 VIIRS",
+  Type = "TemporalTileProvider",
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2018-01-05",
+      End = "Today"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "VIIRS_NOAA20_CorrectedReflectance_TrueColor",
+      "250m",
+      "jpg"
+    )
+  },
+  PadTiles = false
+}
+
+
+asset.export("Layer", Layer)
+
+
+
+asset.meta = {
+  Name = "NOAA 20",
+  Description = [[A layer that sources its images from the NOAA-20 satellite that is part of the Joint Polar Satellite System.]],
+  Author = "OpenSpace Team",
+  URL = "http://www.openspaceproject.com",
+  License = "MIT License"
+}

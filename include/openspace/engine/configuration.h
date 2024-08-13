@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,9 @@ struct Configuration {
     Configuration& operator=(const Configuration&) = delete;
     Configuration& operator=(Configuration&&) = default;
 
-    std::string windowConfiguration = "${CONFIG}/single.xml";
+    ghoul::Dictionary createDictionary();
+
+    std::string windowConfiguration = "${CONFIG}/single.json";
     std::string asset;
     std::string profile;
 
@@ -76,6 +78,7 @@ struct Configuration {
     Logging logging;
 
     std::string scriptLog;
+    int scriptLogRotation = 3;
 
     struct DocumentationInfo {
         std::string path;
@@ -111,6 +114,15 @@ struct Configuration {
     glm::vec3 masterRotation = glm::vec3(0.0);
     bool isConsoleDisabled = false;
     bool bypassLauncher = false;
+
+    enum LayerServer {
+        All = 0,
+        NewYork,
+        Sweden,
+        Utah,
+        None
+    };
+    LayerServer layerServer = LayerServer::All;
 
     std::map<std::string, ghoul::Dictionary> moduleConfigurations;
 
@@ -150,6 +162,9 @@ std::filesystem::path findConfiguration(const std::string& filename = "openspace
 Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
     const std::filesystem::path& settingsFile,
     const glm::ivec2& primaryMonitorResolution);
+
+Configuration::LayerServer stringToLayerServer(std::string_view server);
+std::string layerServerToString(Configuration::LayerServer server);
 
 } // namespace openspace
 

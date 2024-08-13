@@ -1,0 +1,51 @@
+-- Lighting
+-- This example loads a model and load the Sun to illuminate it.
+
+-- Load the asset of the Sun to illuminate the model
+local sun = asset.require("scene/solarsystem/sun/transforms")
+
+-- Load the example model from OpenSpace servers
+-- If you want to use your own model, this block of code can be safely deleted
+local model = asset.resource({
+  Name = "Animated Box",
+  Type = "HttpSynchronization",
+  Identifier = "animated_box",
+  Version = 1
+})
+
+local Node = {
+  Identifier = "RenderableModel_Example_Lighting",
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "BoxAnimated.glb",
+    -- Use the line below insted of the one above if you want to use your own model
+    --GeometryFile = "C:/path/to/model.fbx",
+
+    -- Add the Sun as a light source to illuminate the model
+    LightSources = {
+      sun.LightSource
+    }
+  },
+  GUI = {
+    Name = "RenderableModel - Lighting",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
+
+
+-- Model credit
+--[[
+  Author = Cesium, https://cesium.com/
+  URL = https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/BoxAnimated
+  License =
+    Creative Commons Attribution 4.0 International License,
+    https://creativecommons.org/licenses/by/4.0/
+]]

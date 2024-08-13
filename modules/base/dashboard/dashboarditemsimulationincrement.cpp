@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,8 +41,7 @@ namespace {
         "Time Simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
-        "displayed in seconds",
-        // @VISIBILITY(2.33)
+        "displayed in seconds.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -50,8 +49,7 @@ namespace {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this time unit is used as a destination to "
-        "convert the seconds into",
-        // @VISIBILITY(2.33)
+        "convert the seconds into.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -63,7 +61,7 @@ namespace {
         "delta time. This format gets five parameters in this order:  The target delta "
         "time value, the target delta time unit, the string 'Paused' if the delta time "
         "is paused or the empty string otherwise, the current delta time value, and the "
-        "current delta time unit",
+        "current delta time unit.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -73,7 +71,7 @@ namespace {
         "The format string used to format the text if the target delta time is the same "
         "as the current delta time. This format gets three parameters in this order:  "
         "The target delta value, the target delta unit, and the string 'Paused' if the "
-        "delta time is paused or the empty string otherwise",
+        "delta time is paused or the empty string otherwise.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -138,12 +136,12 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     });
     addProperty(_doSimplification);
 
-    for (TimeUnit u : TimeUnits) {
+    for (const TimeUnit u : TimeUnits) {
         _requestedUnit.addOption(static_cast<int>(u), std::string(nameForTimeUnit(u)));
     }
     _requestedUnit = static_cast<int>(TimeUnit::Second);
     if (p.requestedUnit.has_value()) {
-        TimeUnit unit = timeUnitFromString(p.requestedUnit->c_str());
+        const TimeUnit unit = timeUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
     }
     _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
@@ -190,16 +188,20 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
     std::string pauseText = global::timeManager->isPaused() ? " (Paused)" : "";
 
     try {
+        penPosition.y -= _font->height();
         if (targetDt != currentDt && !global::timeManager->isPaused()) {
             // We are in the middle of a transition
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(
-                    fmt::runtime(_transitionFormat.value()),
-                    targetDeltaTime.first, targetDeltaTime.second,
-                    pauseText,
-                    currentDeltaTime.first, currentDeltaTime.second
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(
+                    _transitionFormat.value(),
+                    std::make_format_args(
+                        targetDeltaTime.first, targetDeltaTime.second,
+                        pauseText,
+                        currentDeltaTime.first, currentDeltaTime.second
+                    )
                 )
             );
         }
@@ -207,30 +209,34 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(
-                    fmt::runtime(_regularFormat.value()),
-                    targetDeltaTime.first, targetDeltaTime.second, pauseText
+                // @CPP26(abock): This can be replaced with std::runtime_format
+                std::vformat(
+                    _regularFormat.value(),
+                    std::make_format_args(
+                        targetDeltaTime.first,
+                        targetDeltaTime.second,
+                        pauseText
+                    )
                 )
             );
         }
     }
-    catch (const fmt::format_error&) {
+    catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
-    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemSimulationIncrement::size() const {
     ZoneScoped;
 
-    double t = global::timeManager->targetDeltaTime();
+    const double t = global::timeManager->targetDeltaTime();
     std::pair<double, std::string> deltaTime;
     if (_doSimplification) {
         deltaTime = simplifyTime(t);
     }
     else {
-        TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        double convertedT = convertTime(t, TimeUnit::Second, unit);
+        const TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
+        const double convertedT = convertTime(t, TimeUnit::Second, unit);
         deltaTime = std::pair(
             convertedT,
             std::string(nameForTimeUnit(unit, convertedT != 1.0))
@@ -238,7 +244,7 @@ glm::vec2 DashboardItemSimulationIncrement::size() const {
     }
 
     return _font->boundingBox(
-        fmt::format(
+        std::format(
             "Simulation increment: {:.1f} {:s} / second",
             deltaTime.first, deltaTime.second
         )

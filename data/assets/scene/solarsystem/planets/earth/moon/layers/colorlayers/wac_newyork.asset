@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "WAC_NewYork",
   Name = "WAC [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("wac_newyork.wms"),
   Settings = { Gamma = 0.84 },
   Description = [[Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera (WAC)
@@ -45,7 +46,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "WAC [New York]",
-  Version = "2.0",
   Description = [[Wide Angle Color map of the Moon. This map is hosted on the OpenSpace
     server in New York]],
   Author = "USGS",

@@ -1,6 +1,7 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -25,9 +26,9 @@ local Apollo8Launch = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = ApolloSpiceId,
-      Observer = "EARTH",
-      Frame = "IAU_EARTH"
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Earth
     }
   },
   GUI = {
@@ -60,16 +61,14 @@ local Apollo8LaunchModel = {
     PerformShading = true
   },
   GUI = {
-    Hidden = true,
     Name = "Apollo 8 Launch Model",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Hidden = true
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(Apollo8Launch)
   openspace.addSceneGraphNode(Apollo8LaunchModel)
 end)
@@ -77,8 +76,6 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo8LaunchModel)
   openspace.removeSceneGraphNode(Apollo8Launch)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo8Launch)

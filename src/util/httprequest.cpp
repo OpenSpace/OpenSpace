@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,9 @@
 
 #include <openspace/util/httprequest.h>
 
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <curl/curl.h>
 #include <filesystem>
@@ -72,7 +72,8 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         CURLOPT_HEADERFUNCTION,
         +[](char* ptr, size_t size, size_t nmemb, void* userData) {
             HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
-            bool shouldContinue = r->_onHeader ? r->_onHeader(ptr, size * nmemb) : true;
+            const bool shouldContinue =
+                r->_onHeader ? r->_onHeader(ptr, size * nmemb) : true;
             return shouldContinue ? size * nmemb : 0;
         }
     );
@@ -83,7 +84,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         CURLOPT_WRITEFUNCTION,
         +[](char* ptr, size_t size, size_t nmemb, void* userData) {
             HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
-            bool shouldContinue = r->_onData ? r->_onData(ptr, size * nmemb) : true;
+            const bool shouldContinue = r->_onData ? r->_onData(ptr, size * nmemb) : true;
             return shouldContinue ? size * nmemb : 0;
         }
     );
@@ -103,7 +104,8 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
                 totalBytes = nTotalDownloadBytes;
             }
 
-            bool shouldContinue = r->_onProgress ?
+            const bool shouldContinue =
+                r->_onProgress ?
                 r->_onProgress(nDownloadedBytes, totalBytes) :
                 true;
             return shouldContinue ? 0 : 1;
@@ -112,16 +114,16 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
 
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, static_cast<long>(timeout.count()));
 
-    CURLcode res = curl_easy_perform(curl);
+    const CURLcode res = curl_easy_perform(curl);
     bool success = false;
     if (res == CURLE_OK) {
-        long responseCode;
+        long responseCode = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
 
         if (responseCode >= 400) {
             LERRORC(
                 "HttpRequest",
-                fmt::format("Failed download {} with code {}", _url, responseCode)
+                std::format("Failed download '{}' with code {}", _url, responseCode)
             );
             success = false;
         }
@@ -132,8 +134,8 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
     else {
         LERRORC(
             "HttpRequest",
-            fmt::format(
-                "Failed download {} with error {}", _url, curl_easy_strerror(res)
+            std::format(
+                "Failed download '{}' with error {}", _url, curl_easy_strerror(res)
             )
         );
     }
@@ -156,8 +158,8 @@ HttpDownload::HttpDownload(std::string url)
     });
 
     _httpRequest.onProgress(
-        [this](int64_t downloadedBytes, std::optional<int64_t> totalBytes) {
-            bool cont = _onProgress ? _onProgress(downloadedBytes, totalBytes) : true;
+        [this](int64_t nDownloaded, std::optional<int64_t> nTotal) {
+            const bool cont =_onProgress ? _onProgress(nDownloaded, nTotal) : true;
             return cont && !_shouldCancel;
         }
     );
@@ -187,7 +189,7 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
     _isDownloading = true;
     _downloadThread = std::thread([this, timeout]() {
         _isFinished = false;
-        LTRACEC("HttpDownload", fmt::format("Start download '{}'", _httpRequest.url()));
+        LTRACEC("HttpDownload", std::format("Start download '{}'", _httpRequest.url()));
 
         const bool setupSuccess = setup();
         if (setupSuccess) {
@@ -204,13 +206,13 @@ void HttpDownload::start(std::chrono::milliseconds timeout) {
         if (_isSuccessful) {
             LTRACEC(
                 "HttpDownload",
-                fmt::format("Finished async download '{}'", _httpRequest.url())
+                std::format("Finished async download '{}'", _httpRequest.url())
             );
         }
         else {
             LTRACEC(
                 "HttpDownload",
-                fmt::format("Failed async download '{}'", _httpRequest.url())
+                std::format("Failed async download '{}'", _httpRequest.url())
             );
         }
 
@@ -256,14 +258,14 @@ HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destin
     , _destination(std::move(destination))
 {
     if (!overwrite && std::filesystem::is_regular_file(_destination)) {
-        throw ghoul::RuntimeError(fmt::format("File {} already exists", _destination));
+        throw ghoul::RuntimeError(std::format("File '{}' already exists", _destination));
     }
 }
 
 bool HttpFileDownload::setup() {
     {
-        std::lock_guard g(_directoryCreationMutex);
-        std::filesystem::path d = _destination.parent_path();
+        const std::lock_guard g(_directoryCreationMutex);
+        const std::filesystem::path d = _destination.parent_path();
         if (!std::filesystem::is_directory(d)) {
             std::filesystem::create_directories(d);
         }
@@ -286,7 +288,7 @@ bool HttpFileDownload::setup() {
     // GetLastError() gives more details than errno.
     DWORD errorId = GetLastError();
     if (errorId == 0) {
-        LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
+        LERRORC("HttpFileDownload", std::format("Cannot open file '{}'", _destination));
         return false;
     }
     std::array<char, 256> Buffer;
@@ -304,25 +306,26 @@ bool HttpFileDownload::setup() {
     std::string message(Buffer.data(), size);
     LERRORC(
         "HttpFileDownload",
-        fmt::format("Cannot open file {}: {}", _destination, message)
+        std::format("Cannot open file '{}': {}", _destination, message)
     );
     return false;
 #else // ^^^ WIN32 / !WIN32 vvv
     if (errno) {
 #ifdef __unix__
-        char buffer[256];
+        std::array<char, 256> buffer;
         LERRORC(
             "HttpFileDownload",
-            fmt::format(
+            std::format(
                 "Cannot open file '{}': {}",
-                _destination, std::string(strerror_r(errno, buffer, sizeof(buffer)))
+                _destination,
+                std::string(strerror_r(errno, buffer.data(), sizeof(buffer)))
             )
         );
         return false;
 #else // ^^^ __unix__ / !__unix__ vvv
         LERRORC(
             "HttpFileDownload",
-            fmt::format(
+            std::format(
                 "Cannot open file '{}': {}", _destination, std::string(strerror(errno))
             )
         );
@@ -330,7 +333,7 @@ bool HttpFileDownload::setup() {
 #endif // __unix__
     }
 
-    LERRORC("HttpFileDownload", fmt::format("Cannot open file {}", _destination));
+    LERRORC("HttpFileDownload", std::format("Cannot open file '{}'", _destination));
     return false;
 #endif // WIN32
 }

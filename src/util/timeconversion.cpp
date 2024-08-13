@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,9 +78,8 @@ namespace {
 namespace openspace {
 
 std::pair<double, std::string_view> simplifyTime(double seconds, bool forceSingularForm) {
-    std::pair<double, TimeUnit> p = extractUnit(seconds);
-
-    bool pluralForm = (p.first != 1.0 && !forceSingularForm);
+    const std::pair<double, TimeUnit> p = extractUnit(seconds);
+    const bool pluralForm = (p.first != 1.0 && !forceSingularForm);
     return { p.first, nameForTimeUnit(p.second, pluralForm) };
 }
 
@@ -92,21 +91,21 @@ std::vector<std::pair<double, std::string_view>> splitTime(double seconds,
     double secondsVal = std::abs(seconds);
 
     do {
-        std::pair<double, TimeUnit> p = extractUnit(secondsVal);
+        const std::pair<double, TimeUnit> p = extractUnit(secondsVal);
 
         if (p.second == TimeUnit::Nanosecond) {
             // We have reached the lowest supported time unit
 
-            bool pluralForm = (p.first != 1.0 && !forceSingularForm);
-            res.push_back({ p.first, nameForTimeUnit(p.second, pluralForm) });
+            const bool pluralForm = (p.first != 1.0 && !forceSingularForm);
+            res.emplace_back(p.first, nameForTimeUnit(p.second, pluralForm));
             break;
         }
 
-        double pt = std::floor(p.first);
+        const double pt = std::floor(p.first);
 
         // Add the unit the list
-        bool pluralForm = (p.first != 1.0 && !forceSingularForm);
-        res.push_back({ pt, nameForTimeUnit(p.second, pluralForm) });
+        const bool pluralForm = (p.first != 1.0 && !forceSingularForm);
+        res.emplace_back(pt, nameForTimeUnit(p.second, pluralForm));
 
         // Adjust the remaining time
         secondsVal -= convertTime(pt, p.second, TimeUnit::Second);

@@ -4,7 +4,7 @@ local guiCustomization = asset.require("customization/gui")
 
 
 -- Select which commit hashes to use for the frontend and backend
-local frontendHash = "d7bac0d84b0a17de7f822fa776a7298b3d4ef372"
+local frontendHash = "c607523e86ab29c573b157c956dcf0b0e4492395"
 
 local frontend = asset.resource({
   Identifier = "WebGuiFrontend",
@@ -33,6 +33,9 @@ asset.onInitialize(function()
   local directories = openspace.propertyValue("Modules.WebGui.Directories")
   directories[#directories + 1] = "frontend"
   directories[#directories + 1] = frontend .. "frontend"
+  -- Add user directory for webpanels
+  directories[#directories + 1] = "webpanels"
+  directories[#directories + 1] = openspace.absPath("${USER_WEBPANELS}")
 
   openspace.setPropertyValueSingle("Modules.WebGui.Directories", directories)
   openspace.setPropertyValueSingle("Modules.WebGui.DefaultEndpoint", "frontend")
@@ -91,7 +94,6 @@ asset.export("setCefRoute", setCefRoute)
 
 asset.meta = {
   Name = "WebGUI",
-  Version = "1.0",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

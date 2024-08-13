@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -103,7 +103,7 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
   vec3 S_Ri;
   vec3 S_Mi;
   integrand(r, mu, muSun, nu, 0.0, S_Ri, S_Mi);
-  for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; ++i) {
+  for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; i++) {
     float yj = float(i) * dy;
     vec3 S_Rj;
     vec3 S_Mj;

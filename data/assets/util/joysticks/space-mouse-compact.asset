@@ -69,3 +69,11 @@ asset.onInitialize(function()
     "Switch to global roll mode"
   )
 end)
+
+asset.meta = {
+  Name = "Joystick controller: SpaceMouse compact (wired)",
+  Description = "Joystick controller configuration for SpaceMouse compact (wired)",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -13,8 +13,8 @@ local Gala = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_GALA_RXT",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.Gala,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_GALA_RXT",
@@ -49,7 +49,6 @@ asset.export(Gala)
 
 asset.meta = {
   Name = "GALA",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Ganymede Laser Altimeter (GALA) instrument onboard Juice,
     measuring a 2.5D heightfield of Ganymede and Europa. See

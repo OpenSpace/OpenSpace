@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,8 +55,8 @@ public:
     void initialize(const ghoul::Dictionary& layerGroupsDict);
     void deinitialize();
 
-    Layer* addLayer(layers::Group::ID groupId, const ghoul::Dictionary& layerDict);
-    void deleteLayer(layers::Group::ID groupId, const std::string& layerName);
+    Layer* addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict);
+    void deleteLayer(layers::Group::ID id, const std::string& layerName);
 
     LayerGroup& layerGroup(layers::Group::ID groupId);
     const LayerGroup& layerGroup(layers::Group::ID groupId) const;
@@ -68,7 +68,7 @@ public:
     void update();
     void reset(bool includeDisabled = false);
 
-    void onChange(std::function<void(Layer* l)> callback);
+    void onChange(const std::function<void(Layer* l)>& callback);
 
     static documentation::Documentation Documentation();
 

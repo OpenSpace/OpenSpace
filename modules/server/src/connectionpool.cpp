@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,7 +65,7 @@ void ConnectionPool::updateConnections() {
 }
 
 void ConnectionPool::acceptNewSockets() {
-    for (std::shared_ptr<ghoul::io::SocketServer>& server : _socketServers) {
+    for (const std::shared_ptr<ghoul::io::SocketServer>& server : _socketServers) {
         std::unique_ptr<ghoul::io::Socket> socket;
         while ((socket = server->nextPendingSocket())) {
             _handleSocket(*socket);

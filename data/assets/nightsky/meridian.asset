@@ -24,7 +24,7 @@ local MeridianPosition = {
   },
   GUI = {
     Name = "Local Meridian Position",
-    Path = "/Other/Lines",
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth",
     Hidden = true
   }
 }
@@ -41,17 +41,16 @@ local MeridianPlane = {
   Renderable = {
     Type = "RenderableRadialGrid",
     Opacity = 0.8,
-    Color = { 1.0, 1.0, 1.0 },
-    LineWidth = 3.0,
+    Color = { 0.4, 0.8, 0.4 },
+    LineWidth = 6.0,
     GridSegments = { 1, 1 },
-    Radii = { 0.5, 0.5 },
     Enabled = asset.enabled,
     RenderBinMode = "PostDeferredTransparent"
   },
   GUI = {
     Name = "Local Meridian",
     Description = [[A line representation of the Local Meridian]],
-    Path = "/Other/Lines"
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth"
   }
 }
 
@@ -121,9 +120,9 @@ asset.export("HideMeridian", HideMeridian.Identifier)
 asset.export("ToggleMeridian", ToggleMeridian.Identifier)
 
 
+
 asset.meta = {
   Name = "Meridian",
-  Version = "1.0",
   Description = [[A line representation of the Local Meridian, including actions
     to toggle, hide and show it.]],
   Author = "OpenSpace Team",

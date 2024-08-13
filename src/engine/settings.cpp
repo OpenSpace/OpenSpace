@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <openspace/engine/settings.h>
 
 #include <openspace/engine/configuration.h>
+#include <sstream>
 
 namespace openspace {
 
@@ -67,12 +68,17 @@ namespace version1 {
                 settings.visibility = properties::Property::Visibility::Developer;
             }
             else {
-                throw ghoul::RuntimeError(fmt::format(
-                    "Unknown visibility value {}", *visibility
+                throw ghoul::RuntimeError(std::format(
+                    "Unknown visibility value '{}'", *visibility
                 ));
             }
         }
         settings.bypassLauncher = get_to<bool>(json, "bypass");
+
+        std::optional<std::string> layerServer = get_to<std::string>(json, "layerserver");
+        if (layerServer.has_value()) {
+            settings.layerServer = stringToLayerServer(*layerServer);
+        }
 
         if (auto it = json.find("mrf");  it != json.end()) {
             if (!it->is_object()) {
@@ -94,8 +100,8 @@ namespace version1 {
 std::filesystem::path findSettings(const std::string& filename) {
     // Right now the settings file lives next to the openspace.cfg file
 
-    std::filesystem::path path = findConfiguration();
-    std::filesystem::path result = path.parent_path() / filename;
+    const std::filesystem::path path = findConfiguration();
+    const std::filesystem::path result = path.parent_path() / filename;
     return result;
 }
 
@@ -104,10 +110,12 @@ Settings loadSettings(const std::filesystem::path& filename) {
         return Settings();
     }
 
-    std::ifstream f(filename);
     std::stringstream buffer;
-    buffer << f.rdbuf();
-    std::string contents = buffer.str();
+    {
+        const std::ifstream f = std::ifstream(filename);
+        buffer << f.rdbuf();
+    }
+    const std::string contents = buffer.str();
 
     nlohmann::json setting = nlohmann::json::parse(contents);
     if (setting.empty()) {
@@ -119,7 +127,7 @@ Settings loadSettings(const std::filesystem::path& filename) {
         return version1::parseSettings(setting);
     }
 
-    throw ghoul::RuntimeError(fmt::format(
+    throw ghoul::RuntimeError(std::format(
         "Unrecognized version for setting: {}", version
     ));
 }
@@ -158,11 +166,15 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
             case properties::Property::Visibility::Developer:
                 json["visibility"] = "Developer";
                 break;
-
+            default:
+                throw ghoul::MissingCaseException();
         }
     }
     if (settings.bypassLauncher.has_value()) {
         json["bypass"] = *settings.bypassLauncher;
+    }
+    if (settings.layerServer.has_value()) {
+        json["layerserver"] = layerServerToString(*settings.layerServer);
     }
     nlohmann::json mrf = nlohmann::json::object();
     if (settings.mrf.isEnabled.has_value()) {
@@ -176,8 +188,8 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
         json["mrf"] = mrf;
     }
 
-    std::string content = json.dump(2);
-    std::ofstream f(filename);
+    std::ofstream f = std::ofstream(filename);
+    const std::string content = json.dump(2);
     f << content;
 }
 

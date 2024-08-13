@@ -1,6 +1,7 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,8 +12,6 @@ local models = asset.resource({
   Version = 4
 })
 
-
-local ApolloSpiceId = -908
 
 local Apollo8 = {
   Identifier = "Apollo8",
@@ -25,14 +24,14 @@ local Apollo8 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = ApolloSpiceId,
-      Observer = "EARTH BARYCENTER",
-      Frame = "GALACTIC"
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.EarthBarycenter,
+      Frame = coreKernels.Frame.Galactic
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "A8_EARTHRISE",
-      DestinationFrame = "GALACTIC",
+      SourceFrame = kernels.Frame.Apollo8Earthrise,
+      DestinationFrame = coreKernels.Frame.Galactic,
       TimeFrame = {
         -- The orientation of Apollo 8 is only available during the few minutes
         -- when the Earthrise picture was taken.
@@ -72,9 +71,9 @@ local Apollo8Model = {
     PerformShading = true
   },
   GUI = {
-    Hidden = true,
     Name = "Apollo 8 Model",
-    Path = "/Solar System/Missions/Apollo/8"
+    Path = "/Solar System/Missions/Apollo/8",
+    Hidden = true
   }
 }
 
@@ -96,8 +95,6 @@ local Apollo8Pivot = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels.kernels)
-
   openspace.addSceneGraphNode(Apollo8)
   openspace.addSceneGraphNode(Apollo8Model)
   openspace.addSceneGraphNode(Apollo8Pivot)
@@ -107,8 +104,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(Apollo8Pivot)
   openspace.removeSceneGraphNode(Apollo8Model)
   openspace.removeSceneGraphNode(Apollo8)
-
-  openspace.spice.unloadKernel(kernels.kernels)
 end)
 
 asset.export(Apollo8)

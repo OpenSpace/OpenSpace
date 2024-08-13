@@ -2282,7 +2282,6 @@ end)
 
 asset.meta = {
   Name = "Eclipses Timeline",
-  Version = "1.0",
   Description = "A timeline that shows all of the eclipses in the past and next 100 years",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

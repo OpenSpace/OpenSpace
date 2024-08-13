@@ -32,7 +32,7 @@ local Mercury = {
     Name = "Night Sky Mercury",
     Description = [[A night sky version of the planet Mercury, making it visible as
       a bright object on the sky (textured representation).]],
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets"
   }
 }
 
@@ -54,7 +54,7 @@ local Venus = {
     Name = "Night Sky Venus",
     Description = [[A night sky version of the planet Venus, making it visible as
       a bright object on the sky (textured representation).]],
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets"
   }
 }
 
@@ -74,7 +74,7 @@ local Mars = {
   Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Mars",
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets"
   }
 }
 
@@ -96,7 +96,7 @@ local Jupiter = {
     Name = "Night Sky Jupiter",
     Description = [[A night sky version of the planet Jupiter, making it visible as
       a bright object on the sky (textured representation).]],
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets"
   }
 }
 
@@ -118,7 +118,7 @@ local Saturn = {
     Name = "Night Sky Saturn",
     Description = [[A night sky version of the planet Saturn, making it visible as
       a bright object on the sky (textured representation).]],
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets"
   }
 }
 
@@ -208,9 +208,9 @@ asset.export("HideNightSkyPlanets", HideNightSkyPlanets.Identifier)
 asset.export("ToggleNightSkyPlanets", ToggleNightSkyPlanets.Identifier)
 
 
+
 asset.meta = {
   Name = "Night Sky Planets",
-  Version = "1.0",
   Description = [[A collection of night sky versions of the planets Mercury, Venus,
     Mars, Jupiter and Saturn, including actions to toggle, hide and show them.]],
   Author = "OpenSpace Team",

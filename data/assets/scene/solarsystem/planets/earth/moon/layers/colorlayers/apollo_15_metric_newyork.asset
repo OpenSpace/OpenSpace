@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Apollo15Metric_NewYork",
   Name = "Apollo 15 Metric Cam [New York]",
   Enabled = asset.enabled,
+  ZIndex = 50,
   FilePath = asset.resource("apollo_15_metric_newyork.wms"),
   Description = [[
     The Apollo 15 Metric (Mapping) Camera obtained high-quality metric photographs, on
@@ -33,7 +34,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Kaguya [New York]",
-  Version = "1.1",
   Description = [[Moon SELENE Kaguya TC Global Orthomosaic 474m v2 layer for Moon globe.
     This map is hosted on the OpenSpace server in New York]],
   Author = "USGS",

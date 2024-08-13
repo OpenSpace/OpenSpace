@@ -13,6 +13,38 @@ local textures = asset.resource({
 })
 
 
+local COBE = {
+  Identifier = "COBE",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.pi }
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphereImageLocal",
+    Enabled = false,
+    Size = 3975.41417036064E23,
+    Segments = 80,
+    Opacity = 0.5,
+    Texture = textures .. "COBErect.png",
+    Orientation = "Both",
+    MirrorTexture = true,
+    FadeInThreshold = 0.4
+  },
+  GUI = {
+    Name = "1990 COBE CMB",
+    Path = "/Universe/Cosmic Microwave Background",
+    Description = [[In 1990, COBE, the Cosmic Background Explorer, took the first
+      detailed map of the cosmic microwave background light. The red areas are
+      relatively hotter areas of the CMB, while the blue areas are cooler than the
+      average. The lines of latitude and longitude are baked into this image, and
+      reflect galactic coordinates. Image resolution is 7 degrees. Census: 1
+      all-sky image.]]
+  }
+}
+
+
 local WMAP = {
   Identifier = "WMAP",
   Transform = {
@@ -33,35 +65,16 @@ local WMAP = {
     FadeInThreshold = 0.4
   },
   GUI = {
-    Name = "Wilkinson Microwave Anisotropy Probe (WMAP)",
-    Path = "/Universe/Cosmic Microwave Background"
+    Name = "2003 WMAP CMB",
+    Path = "/Universe/Cosmic Microwave Background",
+    Description = [[WMAP, the Wilkinson Microwave Anisotropy Probe, released this all-sky
+      image of the cosmic microwave background light in 2003. The blue colors are slightly
+      cooler than average and red is slightly warmer, with fluctuations of about a
+      100,000th of a degree above or below the average. The resolution on this image is
+      0.5 degrees. Census: 1 all-sky image.]]
   }
 }
 
-local CBE = {
-  Identifier = "CBE",
-  Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = { 0, 0, math.pi }
-    }
-  },
-  Renderable = {
-    Type = "RenderableSphereImageLocal",
-    Enabled = false,
-    Size = 3975.41417036064E23,
-    Segments = 80,
-    Opacity = 0.5,
-    Texture = textures .. "COBErect.png",
-    Orientation = "Both",
-    MirrorTexture = true,
-    FadeInThreshold = 0.4
-  },
-  GUI = {
-    Name = "Cosmic Background Explorer",
-    Path = "/Universe/Cosmic Microwave Background"
-  }
-}
 
 local Planck = {
   Identifier = "Planck",
@@ -83,68 +96,43 @@ local Planck = {
     FadeInThreshold = 0.4
   },
   GUI = {
-    Name = "Planck",
-    Path = "/Universe/Cosmic Microwave Background"
-  }
-}
-
-
-local HAlpha = {
-  Identifier = "HAlpha",
-  Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = { 0, 0, math.pi }
-    }
-  },
-  Renderable = {
-    Type = "RenderableSphereImageLocal",
-    Enabled = false,
-    Size = 9.2E21,
-    Segments = 40,
-    Opacity = 0.4,
-    Texture = textures .. "mwHalpha-f.png",
-    Orientation = "Inside",
-    MirrorTexture = true,
-    FadeOutThreshold = 0.025,
-    Background = true
-  },
-  GUI = {
-    Name = "H Alpha",
-    Path = "/Milky Way/All Sky Images"
+    Name = "2013 Planck CMB",
+    Path = "/Universe/Cosmic Microwave Background",
+    Description = [[The Planck mission's 2013 image of the cosmic microwave background
+      light release is the most detailed view of the CMB we have to date. The orange
+      areas represent the slightly hotter areas, and the blue areas show the areas that
+      are slightly cooler. The resolution on this image is 0.16 degrees. Census: 1
+      all-sky image.]]
   }
 }
 
 
 asset.onInitialize(function()
+  openspace.addSceneGraphNode(COBE)
   openspace.addSceneGraphNode(WMAP)
-  openspace.addSceneGraphNode(CBE)
   openspace.addSceneGraphNode(Planck)
-  openspace.addSceneGraphNode(HAlpha)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HAlpha)
   openspace.removeSceneGraphNode(Planck)
-  openspace.removeSceneGraphNode(CBE)
   openspace.removeSceneGraphNode(WMAP)
+  openspace.removeSceneGraphNode(COBE)
 end)
 
+asset.export(COBE)
 asset.export(WMAP)
-asset.export(CBE)
 asset.export(Planck)
-asset.export(HAlpha)
 
 
 
 asset.meta = {
-  Name = "Background Radiation",
-  Version = "2.1",
-  Description = [[Various AllSky images for the Milky Way and observable Universe.
-    Included: Wilkinson Microwave Anisotropy Probe (WMAP), Cosmic Background Explorer,
-    Planck, and H Alpha <br><br> Data Reference: Planck/ESA and the Planck
-    Collaboration, Wilkinson Microwave Anisotropy Probe/NASA, Doug
-    Finkbeiner (Princeton)]],
+  Name = "Cosmic Microwave Background",
+  Description = [[All-sky images of the Cosmic Microwave Background Light. The CMB has
+    been mapped by three main missions: COBE, WMAP, and Planck. The images are not true
+    all-sky images because the light from our own galaxy has been subtracted out of them.
+    From the discovery of the CMB in 1964, to the three space telescopes whose images we
+    see in this asset, we've gained a more detailed view of the CMB light, thereby telling
+    us more about the origin of the universe.]],
   Author = "Brian Abbott (AMNH), OpenSpace Team",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

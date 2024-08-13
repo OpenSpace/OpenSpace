@@ -13,8 +13,8 @@ local UVS = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_UVS",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.UVS,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_UVS",
@@ -47,7 +47,6 @@ asset.export(UVS)
 
 asset.meta = {
   Name = "UVS",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Ultraviolet Spectograph (UVS), which is measuring the
     composition, chemistry, structure, and variability of Europa's atmopshere. See

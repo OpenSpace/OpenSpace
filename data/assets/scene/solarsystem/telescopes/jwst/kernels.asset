@@ -1,0 +1,22 @@
+local kernels = asset.resource({
+  Name = "JWST Kernel",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_kernels",
+  Version = 2
+})
+
+
+local ID = {
+  JWST = 170
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "webb.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "webb.bsp")
+end)
+
+asset.export("ID", ID)

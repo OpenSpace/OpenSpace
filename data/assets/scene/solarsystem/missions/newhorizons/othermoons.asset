@@ -45,7 +45,7 @@ local HydraText = {
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 10.0^6.3,
+    Size = 1995262.315,
     Origin = "Center",
     Billboard = true,
     Texture = hydraTextures .. "Hydra-Text.png",

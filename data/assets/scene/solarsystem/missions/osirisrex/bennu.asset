@@ -1,5 +1,7 @@
 local transforms = asset.require("./transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -11,22 +13,19 @@ local models = asset.resource({
 })
 
 
-local BennuBodyId = "2101955"
-
 local Bennu = {
   Identifier = "Bennu",
   Parent = transforms.BennuBarycenter.Identifier,
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_BENNU",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Bennu,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
-    Enabled = false,
     Type = "RenderableModel",
-    Body = BennuBodyId,
+    Enabled = false,
     GeometryFile = models .. "Bennu_v20_200k_an.obj",
     LightSources = {
       sun.LightSource

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ struct RaycastData;
 class GalaxyRaycaster : public VolumeRaycaster {
 public:
     GalaxyRaycaster(ghoul::opengl::Texture& texture,
-        std::optional<std::filesystem::path> raycastingShader = std::nullopt);
+        const std::optional<std::filesystem::path>& raycastingShader = std::nullopt);
     ~GalaxyRaycaster() override = default;
 
     void initialize();
@@ -62,10 +62,10 @@ public:
     bool isCameraInside(const RenderData& data,
         glm::vec3& localPosition) override;
 
-    std::string boundsVertexShaderPath() const override;
-    std::string boundsFragmentShaderPath() const override;
-    std::string raycasterPath() const override;
-    std::string helperPath() const override;
+    std::filesystem::path boundsVertexShaderPath() const override;
+    std::filesystem::path boundsFragmentShaderPath() const override;
+    std::filesystem::path raycasterPath() const override;
+    std::filesystem::path helperPath() const override;
 
     void setAspect(const glm::vec3& aspect);
     void setModelTransform(glm::mat4 transform);

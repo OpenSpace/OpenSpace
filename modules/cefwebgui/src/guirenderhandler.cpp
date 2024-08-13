@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,11 +43,11 @@ GUIRenderHandler::GUIRenderHandler() {
         absPath("${MODULE_CEFWEBGUI}/shaders/gui_vs.glsl"),
         absPath("${MODULE_CEFWEBGUI}/shaders/gui_fs.glsl")
     );
-    float data[] = {
-        -1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f
+    constexpr std::array<float, 12> Vtx = {
+        -1.f, -1.f, -1.f,
+         1.f,  1.f, -1.f,
+         1.f, -1.f, -1.f,
+         1.f,  1.f,  1.f
     };
 
     glGenVertexArrays(1, &_vao);
@@ -55,7 +55,7 @@ GUIRenderHandler::GUIRenderHandler() {
     glGenBuffers(1, &_vbo);
     glGenTextures(1, &_texture);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, Vtx.size() * sizeof(float), Vtx.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glBindVertexArray(0);

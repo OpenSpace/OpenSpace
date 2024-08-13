@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,12 +73,12 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
     }
 
     // Generate a vao, vertex array object (keeping track of pointers to vbo)
-    GLuint _vaoID;
+    GLuint _vaoID = 0;
     glGenVertexArrays(1, &_vaoID);
     ghoul_assert(_vaoID != 0, "Could not generate vertex arrays");
 
     // Generate a vbo, vertex buffer object (storeing actual data)
-    GLuint _vertexBufferID;
+    GLuint _vertexBufferID = 0;
     glGenBuffers(1, &_vertexBufferID);
     ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
 
@@ -91,7 +91,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
     glBufferData(
         GL_ARRAY_BUFFER,
         clippingSpacePoints.size() * sizeof(clippingSpacePoints[0]),
-        &clippingSpacePoints[0],
+        clippingSpacePoints.data(),
         GL_STATIC_DRAW);
 
 

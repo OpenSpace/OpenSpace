@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,35 +40,35 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "This setting determines whether this server interface is enabled or not",
+        "This setting determines whether this server interface is enabled or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
-        "Whether the interface is using a Socket or a WebSocket",
+        "Whether the interface is using a Socket or a WebSocket.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The network port to use for this sevrer interface",
+        "The network port to use for this sevrer interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultAccessInfo = {
         "DefaultAccess",
         "Default Access",
-        "Sets the default access policy: Allow, RequirePassword or Deny",
+        "Sets the default access policy: Allow, RequirePassword or Deny.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AllowAddressesInfo = {
         "AllowAddresses",
         "Allow Addresses",
-        "IP addresses or domains that should always be allowed access to this interface",
+        "IP addresses or domains that should always be allowed access to this interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -77,21 +77,21 @@ namespace {
         "RequirePasswordAddresses",
         "Require Password Addresses",
         "IP addresses or domains that should be allowed access if they provide a "
-        "password",
+        "password.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DenyAddressesInfo = {
         "DenyAddresses",
         "Deny Addresses",
-        "IP addresses or domains that should never be allowed access to this interface",
+        "IP addresses or domains that should never be allowed access to this interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
         "Password",
         "Password",
-        "Password for connecting to this interface",
+        "Password for connecting to this interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
@@ -99,14 +99,14 @@ namespace {
 namespace openspace {
 
 std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
-                                                          const ghoul::Dictionary& config)
+                                                      const ghoul::Dictionary& dictionary)
 {
     // TODO: Use documentation to verify dictionary
-    auto si = std::make_unique<ServerInterface>(config);
+    auto si = std::make_unique<ServerInterface>(dictionary);
     return si;
 }
 
-ServerInterface::ServerInterface(const ghoul::Dictionary& config)
+ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "", "", "" })
     , _socketType(TypeInfo)
     , _port(PortInfo, 0)
@@ -140,8 +140,10 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
         std::string(AllowAccess)
     );
 
-    if (config.hasKey(DefaultAccessInfo.identifier)) {
-        std::string access = config.value<std::string>(DefaultAccessInfo.identifier);
+    if (dictionary.hasKey(DefaultAccessInfo.identifier)) {
+        const std::string access = dictionary.value<std::string>(
+            DefaultAccessInfo.identifier
+        );
         if (access == DenyAccess) {
             _defaultAccess.setValue(static_cast<int>(Access::Deny));
         }
@@ -153,17 +155,17 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
         }
     }
 
-    const std::string identifier = config.value<std::string>(KeyIdentifier);
+    const std::string identifier = dictionary.value<std::string>(KeyIdentifier);
 
     auto readList =
-        [config](const std::string& key, properties::StringListProperty& list) {
-            if (config.hasValue<ghoul::Dictionary>(key)) {
-                const ghoul::Dictionary& dict = config.value<ghoul::Dictionary>(key);
+        [dictionary](const std::string& key, properties::StringListProperty& list) {
+            if (dictionary.hasValue<ghoul::Dictionary>(key)) {
+                const ghoul::Dictionary& dict = dictionary.value<ghoul::Dictionary>(key);
                 std::vector<std::string> v;
-                for (std::string_view k : dict.keys()) {
+                for (const std::string_view k : dict.keys()) {
                     v.push_back(dict.value<std::string>(k));
                 }
-                list.set(v);
+                list = v;
             }
         };
 
@@ -175,7 +177,7 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     setGuiName(identifier);
     setDescription("Settings for server interface " + identifier);
 
-    const std::string type = config.value<std::string>(TypeInfo.identifier);
+    const std::string type = dictionary.value<std::string>(TypeInfo.identifier);
     if (type == TcpSocketType) {
         _socketType = static_cast<int>(InterfaceType::TcpSocket);
     }
@@ -183,12 +185,12 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
         _socketType = static_cast<int>(InterfaceType::WebSocket);
     }
 
-    if (config.hasValue<std::string>(PasswordInfo.identifier)) {
-        _password = config.value<std::string>(PasswordInfo.identifier);
+    if (dictionary.hasValue<std::string>(PasswordInfo.identifier)) {
+        _password = dictionary.value<std::string>(PasswordInfo.identifier);
     }
 
-    _port = static_cast<int>(config.value<double>(PortInfo.identifier));
-    _enabled = config.value<bool>(EnabledInfo.identifier);
+    _port = static_cast<int>(dictionary.value<double>(PortInfo.identifier));
+    _enabled = dictionary.value<bool>(EnabledInfo.identifier);
 
     auto reinitialize = [this]() {
         deinitialize();
@@ -212,8 +214,6 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& config)
     addProperty(_denyAddresses);
     addProperty(_password);
 }
-
-ServerInterface::~ServerInterface() {}
 
 void ServerInterface::initialize() {
     if (!_enabled) {
@@ -258,7 +258,7 @@ bool ServerInterface::clientHasAccessWithoutPassword(
             return true;
         }
     }
-    Access access = static_cast<Access>(_defaultAccess.value());
+    const Access access = static_cast<Access>(_defaultAccess.value());
     if (access == Access::Allow) {
         for (const std::string& address : _denyAddresses.value()) {
             if (clientAddress == address) {
@@ -276,7 +276,7 @@ bool ServerInterface::clientIsBlocked(const std::string& clientAddress) const {
             return true;
         }
     }
-    Access access = static_cast<Access>(_defaultAccess.value());
+    const Access access = static_cast<Access>(_defaultAccess.value());
     if (access == Access::Deny) {
         for (const std::string& address : _allowAddresses.value()) {
             if (clientAddress == address) {
@@ -297,5 +297,4 @@ ghoul::io::SocketServer* ServerInterface::server() {
     return _socketServer.get();
 }
 
-
-}
+} // namespace openspace

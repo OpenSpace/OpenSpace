@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -105,7 +105,7 @@ const std::string& ResourceSynchronization::name() const {
     return _name;
 }
 
-void ResourceSynchronization::createSyncFile(bool isFullySynchronized) const {
+void ResourceSynchronization::createSyncFile(bool) const {
     std::filesystem::path dir = directory();
     std::filesystem::create_directories(dir);
 

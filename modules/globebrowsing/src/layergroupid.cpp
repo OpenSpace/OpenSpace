@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,18 +55,16 @@ static_assert(
         Groups.begin(),
         Groups.end(),
         [](const Group& gi) {
-            auto it = std::find_if(
+            const auto it = std::find_if(
                 Groups.begin(),
                 Groups.end(),
                 [gi](const Group& g) { return g.id == gi.id; }
             );
-            std::ptrdiff_t pos = std::distance(Groups.begin(), it);
+            const std::ptrdiff_t pos = std::distance(Groups.begin(), it);
             return static_cast<int>(pos) == static_cast<int>(gi.id);
         }
     )
 );
-
-
 
 static_assert(
     std::is_sorted(
@@ -87,12 +85,12 @@ static_assert(
         Layers.begin(),
         Layers.end(),
         [](const Layer& li) {
-            auto it = std::find_if(
+            const auto it = std::find_if(
                 Layers.begin(),
                 Layers.end(),
                 [li](const Layer& l) { return l.id == li.id; }
             );
-            std::ptrdiff_t pos = std::distance(Layers.begin(), it);
+            const std::ptrdiff_t pos = std::distance(Layers.begin(), it);
             return static_cast<int>(pos) == static_cast<int>(li.id);
         }
     )
@@ -121,12 +119,12 @@ static_assert(
         Adjustments.begin(),
         Adjustments.end(),
         [](const Adjustment& ai) {
-            auto it = std::find_if(
+            const auto it = std::find_if(
                 Adjustments.begin(),
                 Adjustments.end(),
                 [ai](const Adjustment& a) { return a.id == ai.id; }
             );
-            std::ptrdiff_t pos = std::distance(Adjustments.begin(), it);
+            const std::ptrdiff_t pos = std::distance(Adjustments.begin(), it);
             return static_cast<int>(pos) == static_cast<int>(ai.id);
         }
     )
@@ -155,12 +153,12 @@ static_assert(
         Blends.begin(),
         Blends.end(),
         [](const Blend& bi) {
-            auto it = std::find_if(
+            const auto it = std::find_if(
                 Blends.begin(),
                 Blends.end(),
                 [bi](const Blend& b) { return b.id == bi.id; }
             );
-            std::ptrdiff_t pos = std::distance(Blends.begin(), it);
+            const std::ptrdiff_t pos = std::distance(Blends.begin(), it);
             return static_cast<int>(pos) == static_cast<int>(bi.id);
         }
     )

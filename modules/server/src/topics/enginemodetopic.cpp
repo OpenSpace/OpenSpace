@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,11 +75,10 @@ void EngineModeTopic::handleJson(const nlohmann::json& json) {
     if (event == SubscribeEvent) {
         _modeCallbackHandle = global::openSpaceEngine->addModeChangeCallback(
             [this]() {
-                OpenSpaceEngine::Mode currentMode =
-                    global::openSpaceEngine->currentMode();
-                if (currentMode != _lastMode) {
+                const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+                if (mode != _lastMode) {
                     sendJsonData();
-                    _lastMode = currentMode;
+                    _lastMode = mode;
                 }
             }
         );
@@ -87,9 +86,7 @@ void EngineModeTopic::handleJson(const nlohmann::json& json) {
 }
 
 void EngineModeTopic::sendJsonData() {
-    json stateJson;
-
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     std::string modeString;
     switch (mode) {
         case OpenSpaceEngine::Mode::UserControl:
@@ -102,6 +99,8 @@ void EngineModeTopic::sendJsonData() {
             modeString = "camera_path";
             break;
     }
+
+    json stateJson;
     stateJson["mode"] = modeString;
 
     if (!stateJson.empty()) {

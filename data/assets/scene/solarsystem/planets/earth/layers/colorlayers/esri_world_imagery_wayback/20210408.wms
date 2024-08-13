@@ -1,0 +1,21 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>http://liu-se.wms.openspaceproject.com/Earth/Esri_Wayback/tile/6863/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90</UpperLeftY>
+    <LowerRightX>180</LowerRightX>
+    <LowerRightY>-90</LowerRightY>
+    <TileLevel>19</TileLevel>
+    <TileCountX>2</TileCountX>
+    <TileCountY>1</TileCountY>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>EPSG:4326</Projection>
+  <BlockSizeX>256</BlockSizeX>
+  <BlockSizeY>256</BlockSizeY>
+  <BandsCount>3</BandsCount>
+  <MaxConnections>5</MaxConnections>
+  <Timeout>5</Timeout>
+</GDAL_WMS>

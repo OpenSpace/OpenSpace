@@ -98,7 +98,6 @@ end)
 
 asset.meta = {
   Name = "Joystick example",
-  Version = "1.0",
   Description = [[Example asset that binds a joystick to use for input and navigation.
     More info on the OpenSpace wiki page.]],
   Author = "OpenSpace Team",

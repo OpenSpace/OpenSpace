@@ -1,5 +1,6 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels344 = asset.require("../kernels344")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,15 +10,13 @@ local Themisto = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "THEMISTO",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Themisto,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -40,8 +39,8 @@ local ThemistoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "THEMISTO",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Themisto,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 129.87,
@@ -51,6 +50,7 @@ local ThemistoTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_themisto",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -64,8 +64,8 @@ local ThemistoLabel = {
   Identifier = "ThemistoLabel",
   Parent = Themisto.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Themisto",
     FontSize = 70.0,
     Size = 7.1,
@@ -77,7 +77,13 @@ local ThemistoLabel = {
     FadeDistances = { 1.5, 120.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_themisto"
+  },
   GUI = {
     Name = "Themisto Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto",
@@ -87,9 +93,6 @@ local ThemistoLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-
-
   openspace.addSceneGraphNode(Themisto)
   openspace.addSceneGraphNode(ThemistoTrail)
   openspace.addSceneGraphNode(ThemistoLabel)
@@ -99,9 +102,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ThemistoLabel)
   openspace.removeSceneGraphNode(ThemistoTrail)
   openspace.removeSceneGraphNode(Themisto)
-
-
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Themisto)
@@ -112,7 +112,6 @@ asset.export(ThemistoLabel)
 
 asset.meta = {
   Name = "Jupiter Themisto Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Themisto Group moons:
     Themisto. Blank globes and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",

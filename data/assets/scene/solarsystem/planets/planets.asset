@@ -33,7 +33,6 @@ asset.require("./neptune/major_moons")
 
 asset.meta = {
   Name = "Planets",
-  Version = "1.0",
   Description = "Collection of planets in the solar system",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

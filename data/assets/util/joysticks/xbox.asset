@@ -206,3 +206,11 @@ asset.onInitialize(function()
     ""  -- <-- Description of your custom script here (optional)
   )
 end)
+
+asset.meta = {
+  Name = "Joystick controller: Xbox (wired)",
+  Description = "Joystick controller configuration for Xbox (wired)",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_HIW_NewYork",
   Name = "Messenger HIW [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("messenger_hiw_newyork.wms")
 }
 
@@ -24,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger HIW [New York]",
-  Version = "1.0",
   Description = [[Messenger HIW layer for Mercury globe. This map is hosted on the
     OpenSpace server in New York]],
   Author = "USGS",

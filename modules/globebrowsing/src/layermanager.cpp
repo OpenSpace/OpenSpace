@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,21 +58,21 @@ void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
     ZoneScoped;
 
     // First create empty layer groups in case not all are specified
-    for (size_t i = 0; i < _layerGroups.size(); ++i) {
+    for (size_t i = 0; i < _layerGroups.size(); i++) {
         _layerGroups[i] = std::make_unique<LayerGroup>(layers::Groups[i]);
     }
 
     // Create all the layer groups
-    for (std::string_view groupName : layerGroupsDict.keys()) {
+    for (std::string_view group : layerGroupsDict.keys()) {
         using namespace layers;
-        Group::ID id = ghoul::from_string<Group::ID>(groupName);
+        const Group::ID id = ghoul::from_string<Group::ID>(group);
 
         if (id != Group::ID::Unknown) {
-            ghoul::Dictionary d = layerGroupsDict.value<ghoul::Dictionary>(groupName);
+            const ghoul::Dictionary d = layerGroupsDict.value<ghoul::Dictionary>(group);
             _layerGroups[static_cast<int>(id)]->setLayersFromDict(d);
         }
         else {
-            LWARNINGC("LayerManager", fmt::format("Unknown layer group: {}", groupName));
+            LWARNINGC("LayerManager", std::format("Unknown layer group '{}'", group));
         }
     }
 
@@ -140,7 +140,7 @@ std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups(
     ZoneScoped;
 
     std::array<LayerGroup*, NumLayerGroups> res = {};
-    for (size_t i = 0; i < NumLayerGroups; ++i) {
+    for (size_t i = 0; i < NumLayerGroups; i++) {
         res[i] = _layerGroups[i].get();
     }
     return res;
@@ -166,7 +166,7 @@ void LayerManager::reset(bool includeDisabled) {
     }
 }
 
-void LayerManager::onChange(std::function<void(Layer*)> callback) {
+void LayerManager::onChange(const std::function<void(Layer*)>& callback) {
     ZoneScoped;
 
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {

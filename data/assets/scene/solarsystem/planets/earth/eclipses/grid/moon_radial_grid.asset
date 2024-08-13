@@ -41,7 +41,6 @@ asset.export(orbitalPlaneGrid)
 
 asset.meta = {
   Name = "Moon Orbital Plane",
-  Version = "1.0",
   Description = "A grid that shows the orbital plane of the Moon",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

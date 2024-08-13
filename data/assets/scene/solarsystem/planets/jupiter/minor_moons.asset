@@ -87,7 +87,6 @@ asset.export("JupiterMinorMoonsOff", JupiterMinorMoonsOff.Identifier)
 
 asset.meta = {
   Name = "Jupiter Minor Moons",
-  Version = "1.1",
   Description = [[Meta asset containing eight moon groups: Ananke, Carme, Carpo, Himalia,
     Pasiphae, Themisto, Inner, and Other]],
   Author = "OpenSpace Team",

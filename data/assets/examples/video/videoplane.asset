@@ -41,7 +41,6 @@ asset.export(Plane)
 
 asset.meta = {
   Name = "Video Plane Example",
-  Version = "1.0",
   Description = "An example asset that shows how to include a video on a plane.",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,11 +56,16 @@ struct TestResult {
     struct Offense {
         /// The Reason for the offense
         enum class Reason {
-            Unknown,          ///< Unknown reason
-            MissingKey,       ///< The offending key that was requested was not found
-            WrongType,        ///< The key's value was not of the expected type
-            Verification,     ///< The value did not pass a necessary non-type verifier
-            UnknownIdentifier ///< The identifier for a ReferencingVerifier did not exist
+            /// Unknown reason
+            Unknown,
+            /// The offending key that was requested was not found
+            MissingKey,
+            /// The key's value was not of the expected type
+            WrongType,
+            /// The value did not pass a necessary non-type verifier
+            Verification,
+            /// The identifier for a ReferencingVerifier did not exist
+            UnknownIdentifier
         };
         /// The offending key that caused the Offense. In the case of a nested table,
         /// this value will be the fully qualified name of the key
@@ -80,7 +85,8 @@ struct TestResult {
     struct Warning {
         /// The reason for the warning
         enum class Reason {
-            Deprecated ///< The value is marked as deprecated and should not used
+            /// The value is marked as deprecated and should not used
+            Deprecated
         };
 
         /// The offending key that caused the Warning. In the case of a nested table,
@@ -89,7 +95,6 @@ struct TestResult {
         /// The Reason that caused this Warning
         Reason reason;
     };
-
 
     /// Is `true` if the TestResult is positive, `false` otherwise
     bool success = false;
@@ -130,10 +135,10 @@ void logError(const SpecificationError& error, std::string component = "");
  * DocumentationEntry::Wildcard, any key in the containing Documentation will be tested
  * against the provided verifier. The most convenient way of creating DocumentationEntry%s
  * is by using an inline initializer list such as:
- *\verbatim
-DocumentationEntry e = { "key", new IntVerifier, "Documentation text", Optional::Yes };
-\endverbatim
-
+ * ```
+ * DocumentationEntry e = { "key", new IntVerifier, "Documentation text", Optional::Yes };
+ * ```
+ *
  * Furthermore, these initializer lists can be crated all at once for a Documentation.
  * Even if the Verifier%s are specified using the `new` operators, they will not leak
  * memory as the DocumentationEntry takes ownership of them in the constructor.
@@ -190,8 +195,7 @@ struct DocumentationEntry {
      * \pre \p k must not be empty
      * \pre \p v must not be nullptr
      */
-    DocumentationEntry(std::string k, Verifier* v, Optional opt,
-        std::string doc = "");
+    DocumentationEntry(std::string k, Verifier* v, Optional opt, std::string doc = "");
 
     /// The key that is described by this DocumentationEntry
     std::string key;
@@ -203,7 +207,6 @@ struct DocumentationEntry {
     std::string documentation;
 };
 
-
 /**
  * This struct contains the documentation and specification for a ghoul::Dictionary. It is
  * used to impose restrictions on keys and values and determine whether a given
@@ -211,16 +214,16 @@ struct DocumentationEntry {
  * #testSpecificationAndThrow methods). Each Documentation consists of a human-readable
  * `name`, and a list of DocumentationEntry%s that each describe a single key value. The
  * most convenient way of creating a Documentation is by using nested initializer lists:
- *\verbatim
-Documentation doc = {
-    "Documentation for an arbitrary dictionary",
-    { // A list of DocumentationEntry%s; also specified using initializer lists
-        { "key1", new IntVerifier, "Documentation key1", Optional::Yes },
-        { "key2", new FloatVerifier, "Documentation key2" },
-        { "key3", new StringVerifier }
-    }
-};
-\endverbatim
+ * ```
+ * Documentation doc = {
+ *     "Documentation for an arbitrary dictionary",
+ *     { // A list of DocumentationEntry%s; also specified using initializer lists
+ *         { "key1", new IntVerifier, "Documentation key1", Optional::Yes },
+ *         { "key2", new FloatVerifier, "Documentation key2" },
+ *         { "key3", new StringVerifier }
+ *     }
+ * };
+ * ```
  *
  * If multiple DocumentationEntries cover the same key, they are all evaluated for that
  * specific key. The same holds true if there is a DocumentationEntry with a

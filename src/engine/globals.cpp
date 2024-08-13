@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -93,6 +93,7 @@ namespace {
         sizeof(Configuration) +
         sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionMonitor) +
+        sizeof(interaction::JoystickInputStates) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::KeyframeRecording) +

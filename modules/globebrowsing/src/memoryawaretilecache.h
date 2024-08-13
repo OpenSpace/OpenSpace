@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,7 +57,7 @@ struct ProviderTileHasher {
      * Creates a hash which can be used as key in hash maps.
      * First set the bits to be unique for all tiles.
      * +-------+------------+-------+------------+
-     * | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
+     * | USAGE | BIT RANGE  |  BITS | MAX VALUE  |
      * +-------+------------+-------+------------+
      * | level |   0 -  5   |   5   |         31 |
      * |     x |   5 - 35   |  30   | 1073741824 |
@@ -107,8 +107,8 @@ private:
     class TextureContainer {
     public:
         /**
-         * \param initData is the description of the texture type.
-         * \param numTextures is the number of textures to allocate.
+         * \param initData is the description of the texture type
+         * \param numTextures is the number of textures to allocate
          */
         TextureContainer(TileTextureInitData initData, size_t numTextures);
 

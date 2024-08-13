@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <scn/scn.h>
+#include <scn/scan.h>
 
 namespace {
 constexpr std::string_view _loggerCat = "SkyBrowserModule";
@@ -111,8 +111,8 @@ std::string prunedIdentifier(std::string identifier) {
                 imageUrl
             );
             if (!found.has_value()) {
-                LINFO(fmt::format(
-                    "No image with identifier {} was found in the collection.", imageUrl
+                LINFO(std::format(
+                    "No image with identifier '{}' was found in the collection.", imageUrl
                 ));
                 return;
             }
@@ -160,8 +160,8 @@ std::string prunedIdentifier(std::string identifier) {
 
     SceneGraphNode* circle = global::renderEngine->scene()->sceneGraphNode(identifier);
     if (!circle) {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Could not find node to set as hover circle: '{}'", identifier
+        throw ghoul::lua::LuaError(std::format(
+            "Could not find node to set as hover circle: {}", identifier
         ));
     }
 
@@ -242,7 +242,7 @@ std::string prunedIdentifier(std::string identifier) {
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
             std::string id = pair->browserId();
             glm::ivec3 color = pair->borderColor();
-            std::string script = fmt::format(
+            std::string script = std::format(
                 "openspace.skybrowser.setBorderColor('{}', {}, {}, {})",
                 id, color.r, color.g, color.b
             );

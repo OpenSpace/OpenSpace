@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,12 +72,12 @@ GPTranslation::GPTranslation(const ghoul::Dictionary& dictionary) {
     );
 
     if (element > static_cast<int>(parameters.size())) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Requested element {} but only {} are available", element, parameters.size()
         ));
     }
 
-    kepler::Parameters param = parameters[element - 1];
+    const kepler::Parameters& param = parameters[element - 1];
     setKeplerElements(
         param.eccentricity,
         param.semiMajorAxis,

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if this module should be enabled"
+        "Decides if this module should be enabled."
     };
 
     struct [[codegen::Dictionary(VideoModule)]] Parameters {
@@ -85,8 +85,7 @@ std::vector<documentation::Documentation> VideoModule::documentations() const {
         RenderableVideoPlane::Documentation(),
         RenderableVideoSphere::Documentation(),
         ScreenSpaceVideo::Documentation(),
-        globebrowsing::VideoTileProvider::Documentation(),
-        VideoPlayer::Documentation()
+        globebrowsing::VideoTileProvider::Documentation()
     };
 }
 

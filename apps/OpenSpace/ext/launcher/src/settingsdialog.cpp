@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,14 +35,13 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-SettingsDialog::SettingsDialog(openspace::Settings settings,
-                               QWidget* parent)
+SettingsDialog::SettingsDialog(openspace::Settings settings, QWidget* parent)
     : QDialog(parent)
-    , _currentEdit(settings)
+    , _currentEdit(std::move(settings))
 {
     setWindowTitle("Settings");
     createWidgets();
-    loadFromSettings(settings);
+    loadFromSettings(_currentEdit);
 
     // Setting the startup values for the control will have caused the Save button to be
     // enabled, so we need to manually disable it again here
@@ -63,15 +62,16 @@ void SettingsDialog::createWidgets() {
     // | Property Visibility        | DDDDDDDDDDDDDDDDDDDDD> |
     // | [] Bypass Launcher                                  |
     // | Informational text about undoing the bypass setting |
-    // | MRF Caching                                         |
-    // | [] Enable caching                                   |
-    // | Cache location             | [oooooooooooooooooooo] |
+    // | Layer Settings                                      |
+    // | Layer Server               | DDDDDDDDDDDDDDDDDDDDD> |
+    // | [] Enable MRF caching                               |
+    // | MRF Cache Location         | [oooooooooooooooooooo] |
     // |                            | <Save>        <Cancel> |
     // -------------------------------------------------------
 
     QGridLayout* layout = new QGridLayout(this);
     layout->setSizeConstraint(QLayout::SetFixedSize);
-    
+
     {
         QLabel* label = new QLabel("Profile");
         label->setObjectName("heading");
@@ -90,7 +90,7 @@ void SettingsDialog::createWidgets() {
             _profile,
             &QLineEdit::textChanged,
             [this]() {
-                std::string v = _profile->text().toStdString();
+                const std::string v = _profile->text().toStdString();
                 if (v.empty()) {
                     _currentEdit.profile = std::nullopt;
                 }
@@ -146,7 +146,7 @@ void SettingsDialog::createWidgets() {
             _configuration,
             &QLineEdit::textChanged,
             [this]() {
-                std::string v = _configuration->text().toStdString();
+                const std::string v = _configuration->text().toStdString();
                 if (v.empty()) {
                     _currentEdit.configuration = std::nullopt;
                 }
@@ -269,11 +269,39 @@ void SettingsDialog::createWidgets() {
     layout->addWidget(new Line(), 12, 0, 1, 2);
 
     {
-        QLabel* label = new QLabel("MRF Caching");
+        QLabel* label = new QLabel("Layer Settings");
         label->setObjectName("heading");
         layout->addWidget(label, 13, 0, 1, 2);
 
-        _mrf.isEnabled = new QCheckBox("Enable Caching");
+        QLabel* conf = new QLabel("Layer Server");
+        conf->setToolTip(
+            "This setting sets the default server to be used for the layers that "
+            "are hosted by the OpenSpace team"
+        );
+        layout->addWidget(conf, 14, 0);
+
+        _layerServer = new QComboBox;
+        _layerServer->setToolTip(conf->toolTip());
+        _layerServer->addItems({
+            "All",
+            "NewYork",
+            "Sweden",
+            "Utah",
+            "None"
+        });
+        _layerServer->setCurrentText("All");
+        connect(
+            _layerServer,
+            &QComboBox::textActivated,
+            [this](const QString& value) {
+                _currentEdit.layerServer =
+                    openspace::stringToLayerServer(value.toStdString());
+                updateSaveButton();
+            }
+        );
+        layout->addWidget(_layerServer, 14, 1);
+
+        _mrf.isEnabled = new QCheckBox("Enable MRF Caching");
         _mrf.isEnabled->setToolTip(
             "If this setting is checked, the MRF caching for globe layers will be "
             "enabled. This means that all planetary images that are loaded over the "
@@ -296,9 +324,9 @@ void SettingsDialog::createWidgets() {
                 updateSaveButton();
             }
         );
-        layout->addWidget(_mrf.isEnabled, 14, 0, 1, 2);
+        layout->addWidget(_mrf.isEnabled, 16, 0, 1, 2);
 
-        QLabel* conf = new QLabel("Cache Location");
+        QLabel* mrfConf = new QLabel("MRF Cache Location");
         conf->setToolTip(
             "This is the place where the MRF cache files are located. Please note that "
             "these files can potentially become quite large when using OpenSpace for a "
@@ -306,10 +334,10 @@ void SettingsDialog::createWidgets() {
             "blank, the cached files will be stored in the 'mrf_cache' folder in the "
             "OpenSpace base folder."
         );
-        layout->addWidget(conf, 15, 0);
+        layout->addWidget(mrfConf, 17, 0);
 
         _mrf.location = new QLineEdit;
-        _mrf.location->setToolTip(conf->toolTip());
+        _mrf.location->setToolTip(mrfConf->toolTip());
         _mrf.location->setDisabled(true);
         connect(
             _mrf.location,
@@ -324,10 +352,10 @@ void SettingsDialog::createWidgets() {
                 updateSaveButton();
             }
         );
-        layout->addWidget(_mrf.location, 15, 1);
+        layout->addWidget(_mrf.location, 17, 1);
     }
 
-    layout->addWidget(new Line(), 16, 0, 1, 2);
+    layout->addWidget(new Line(), 18, 0, 1, 2);
 
     _dialogButtons = new QDialogButtonBox;
     _dialogButtons->setStandardButtons(
@@ -341,7 +369,7 @@ void SettingsDialog::createWidgets() {
         _dialogButtons, &QDialogButtonBox::rejected,
         this, &SettingsDialog::reject
     );
-    layout->addWidget(_dialogButtons, 17, 1, 1, 1, Qt::AlignRight);
+    layout->addWidget(_dialogButtons, 19, 1, 1, 1, Qt::AlignRight);
 }
 
 void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
@@ -363,7 +391,7 @@ void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
 
     if (settings.visibility.has_value()) {
         using Visibility = openspace::properties::Property::Visibility;
-        Visibility vis = *settings.visibility;
+        const Visibility vis = *settings.visibility;
         switch (vis) {
             case Visibility::NoviceUser:
                 _propertyVisibility->setCurrentText("Novice User");
@@ -385,6 +413,13 @@ void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
 
     if (settings.bypassLauncher.has_value()) {
         _bypassLauncher->setChecked(*settings.bypassLauncher);
+    }
+
+    if (settings.layerServer.has_value()) {
+        Configuration::LayerServer server = *settings.layerServer;
+        _layerServer->setCurrentText(
+            QString::fromStdString(openspace::layerServerToString(std::move(server)))
+        );
     }
 
     if (settings.mrf.isEnabled.has_value()) {

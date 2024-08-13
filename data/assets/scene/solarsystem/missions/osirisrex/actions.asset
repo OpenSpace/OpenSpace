@@ -177,7 +177,6 @@ asset.export("LookImageCapture", LookImageCapture.Identifier)
 
 asset.meta = {
   Name = "OsirisRex Actions",
-  Version = "1.0",
   Description = "Actions related to the OsirisRex mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

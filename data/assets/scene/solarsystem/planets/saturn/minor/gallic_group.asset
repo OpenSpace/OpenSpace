@@ -1,5 +1,6 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels452 = asset.require("../kernels452")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,15 +10,13 @@ local Albiorix = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ALBIORIX",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Albiorix,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 32000, 32000, 32000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 32000, 32000, 32000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -40,8 +39,8 @@ local AlbiorixTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ALBIORIX",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Albiorix,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 774.58,
@@ -51,6 +50,7 @@ local AlbiorixTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_gallic",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -64,8 +64,8 @@ local AlbiorixLabel = {
   Identifier = "AlbiorixLabel",
   Parent = Albiorix.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Albiorix",
     FontSize = 70.0,
     Size = 7.1,
@@ -77,7 +77,13 @@ local AlbiorixLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
   GUI = {
     Name = "Albiorix Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix",
@@ -91,15 +97,13 @@ local Bebhionn = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BEBHIONN",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Bebhionn,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -122,8 +126,8 @@ local BebhionnTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "BEBHIONN",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Bebhionn,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 838.77,
@@ -133,6 +137,7 @@ local BebhionnTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_gallic",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -146,8 +151,8 @@ local BebhionnLabel = {
   Identifier = "BebhionnLabel",
   Parent = Bebhionn.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Bebhionn",
     FontSize = 70.0,
     Size = 7.1,
@@ -159,7 +164,13 @@ local BebhionnLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
   GUI = {
     Name = "Bebhionn Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn",
@@ -173,15 +184,13 @@ local Erriapus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ERRIAPUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Erriapus,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 10000, 10000, 10000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 10000, 10000, 10000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -204,8 +213,8 @@ local ErriapusTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ERRIAPUS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Erriapus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 844.89,
@@ -215,6 +224,7 @@ local ErriapusTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_gallic",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -228,8 +238,8 @@ local ErriapusLabel = {
   Identifier = "ErriapusLabel",
   Parent = Erriapus.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Erriapus",
     FontSize = 70.0,
     Size = 7.1,
@@ -241,7 +251,13 @@ local ErriapusLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
   GUI = {
     Name = "Erriapus Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus",
@@ -255,15 +271,13 @@ local Tarvos = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TARVOS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Tarvos,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 15000, 15000, 15000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 15000, 15000, 15000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -286,8 +300,8 @@ local TarvosTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "TARVOS",
-      Observer = "SATURN BARYCENTER"
+      Target = kernels452.ID.Tarvos,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 944.23,
@@ -297,6 +311,7 @@ local TarvosTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_gallic",
     "moonTrail_minor",
     "moonTrail_minor_saturn"
   },
@@ -310,8 +325,8 @@ local TarvosLabel = {
   Identifier = "TarvosLabel",
   Parent = Tarvos.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Tarvos",
     FontSize = 70.0,
     Size = 7.1,
@@ -323,7 +338,13 @@ local TarvosLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
   GUI = {
     Name = "Tarvos Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos",
@@ -333,9 +354,6 @@ local TarvosLabel = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.sat452)
-
-
   openspace.addSceneGraphNode(Albiorix)
   openspace.addSceneGraphNode(AlbiorixTrail)
   openspace.addSceneGraphNode(AlbiorixLabel)
@@ -369,9 +387,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(AlbiorixLabel)
   openspace.removeSceneGraphNode(AlbiorixTrail)
   openspace.removeSceneGraphNode(Albiorix)
-
-
-  openspace.spice.unloadKernel(kernel.sat452)
 end)
 
 asset.export(Albiorix)
@@ -394,7 +409,6 @@ asset.export(TarvosLabel)
 
 asset.meta = {
   Name = "Saturn Gallic Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Gallic Group moons: Albiorix,
     Bebhionn, Erriapus, and Tarvos. Blank globes and SPICE trails are generated for each
     moon]],

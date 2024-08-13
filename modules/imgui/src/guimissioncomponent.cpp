@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,13 +37,13 @@ namespace {
     void renderMission(const openspace::Mission& mission) {
         // The hashname is necessary since ImGui computes a hash based off the name of the
         // elements.  This does not play well with using %s as the name
-        std::string missionHashname = "##" + mission.name();
+        const std::string missionHashname = "##" + mission.name();
 
 
         const double currentTime = openspace::global::timeManager->time().j2000Seconds();
-        openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
+        const openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
-        int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
+        const int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
         if (ImGui::TreeNodeEx(
                 ("%s" + missionHashname).c_str(),
                 treeOption,
@@ -55,9 +55,9 @@ namespace {
                 ImGui::Text("%s", mission.description().c_str());
             }
 
-            openspace::TimeRange range = mission.timeRange();
-            openspace::Time startTime = openspace::Time(range.start);
-            openspace::Time endTime  = openspace::Time(range.end);
+            const openspace::TimeRange range = mission.timeRange();
+            const openspace::Time startTime = openspace::Time(range.start);
+            const openspace::Time endTime  = openspace::Time(range.end);
 
             openspace::CaptionText("Mission Progress");
 
@@ -118,4 +118,4 @@ void GuiMissionComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace gui
+} // namespace openspace::gui

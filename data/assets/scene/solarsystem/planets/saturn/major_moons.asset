@@ -88,7 +88,6 @@ asset.export("SaturnMajorMoonsOff", SaturnMajorMoonsOff.Identifier)
 
 asset.meta = {
   Name = "Saturn Major Moons",
-  Version = "1.1",
   Description = [[Meta asset containing Saturn's major moons: Dione, Enceladus, Hyperion,
     Iapetus, Mimas, Rhea, Tethys, and Titan]],
   Author = "OpenSpace Team",

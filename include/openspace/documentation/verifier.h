@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,7 +58,7 @@ public:
      * \return A TestResult struct that contains information about whether the key adheres
      *         to the demands of the specific Verifier. If it does not,
      *         TestResult::offenders will either contain \p key or, in the case of a
-     *         TableVerifier, a list of all offending subkeys as fully qualified names.
+     *         TableVerifier, a list of all offending subkeys as fully qualified names
      *
      * \post If the return values' TestResult::success is `true`, its
      *      TestResult::offenders is empty
@@ -98,6 +98,7 @@ public:
  * The base class Verifier for all Verifier%s that have to test against a specific value
  * type. This Verifier tests whether a given key exists and whether it has the same type
  * as the template parameter `T`.
+ *
  * \tparam T The type against which the key's value is tested
  */
 template <typename T>
@@ -112,7 +113,7 @@ public:
      * \param dictionary The ghoul::Dictionary that contains the \p key to be tested
      * \param key The key inside the \p dictinoary that is to be tested
      * \return A TestResult that contains the information whether the \p key exists in the
-     *         \p dictionary and whether the key's value's type agrees with `T`.
+     *         \p dictionary and whether the key's value's type agrees with `T`
      *
      * \post The return values' TestResult::success is either `true` and
      *       TestResult::offenders is empty, or it is `false` and TestResult::offenders
@@ -220,7 +221,7 @@ public:
 
 /**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
- * a valid date time
+ * a valid date time.
  */
 class DateTimeVerifier : public StringVerifier {
 public:
@@ -252,8 +253,11 @@ public:
      * \param documentationEntries The DocumentationEntry%s that are used to recursively
      *        test the ghoul::Dictionary that is contained inside. If this list is empty,
      *        only a type check is performed
+     * \param nEntries The exact number of entries that should be in the table. If the
+     *        value is not provided, any number (including 0) is allowed
      */
-    TableVerifier(std::vector<DocumentationEntry> documentationEntries = {});
+    TableVerifier(std::vector<DocumentationEntry> documentationEntries = {},
+        std::optional<int> nEntries = std::nullopt);
 
     /**
      * Checks whether the \p key%'s value is a table (= ghoul::Dictionary) and (if
@@ -276,6 +280,7 @@ public:
 
     /// The documentations passed in the constructor
     std::vector<DocumentationEntry> documentations;
+    std::optional<int> count;
 };
 
 /**
@@ -312,21 +317,27 @@ public:
 // Vector verifiers
 //----------------------------------------------------------------------------------------
 
-/// This Verifier checks whether the value is of type `glm::tvec2<T>`
+/**
+ * This Verifier checks whether the value is of type `glm::tvec2<T>`.
+ */
 template <typename T>
 class Vector2Verifier : public TemplateVerifier<glm::tvec2<T>> {
 public:
     std::string type() const override;
 };
 
-/// This Verifier checks whether the value is of type `glm::tvec3<T>`
+/**
+ * This Verifier checks whether the value is of type `glm::tvec3<T>`.
+ */
 template <typename T>
 class Vector3Verifier : public TemplateVerifier<glm::tvec3<T>> {
 public:
     std::string type() const override;
 };
 
-/// This Verifier checks whether the value is of type `glm::tvec4<T>`
+/**
+ * This Verifier checks whether the value is of type `glm::tvec4<T>`.
+ */
 template <typename T>
 class Vector4Verifier : public TemplateVerifier<glm::tvec4<T>> {
 public:
@@ -351,7 +362,7 @@ public:
 
 /**
  * A Verifier that checks whether all values contained in a Table are of
- * type `glm::tvec2<T>`
+ * type `glm::tvec2<T>`.
  */
 template <typename T>
 class Vector2ListVerifier : public TableVerifier {
@@ -369,7 +380,7 @@ public:
 
 /**
  * A Verifier that checks whether all values contained in a Table are of
- * type `glm::tvec3<T>`
+ * type `glm::tvec3<T>`.
  */
 template <typename T>
 class Vector3ListVerifier : public TableVerifier {
@@ -387,7 +398,7 @@ public:
 
 /**
  * A Verifier that checks whether all values contained in a Table are of
- * type `glm::tvec4<T>`
+ * type `glm::tvec4<T>`.
  */
 template <typename T>
 class Vector4ListVerifier : public TableVerifier {
@@ -408,7 +419,7 @@ public:
 //----------------------------------------------------------------------------------------
 
 /**
- * This Verifier checks whether the value is of type `glm::mat2x2<T>`
+ * This Verifier checks whether the value is of type `glm::mat2x2<T>`.
  */
 template <typename T>
 class Matrix2x2Verifier : public TemplateVerifier<glm::tmat2x2<T>> {
@@ -417,7 +428,7 @@ public:
 };
 
 /**
- * This Verifier checks whether the value is of type `glm::mat2x3<T>`
+ * This Verifier checks whether the value is of type `glm::mat2x3<T>`.
  */
 template <typename T>
 class Matrix2x3Verifier : public TemplateVerifier<glm::tmat2x3<T>> {
@@ -426,7 +437,7 @@ public:
 };
 
 /**
- * This Verifier checks whether the value is of type `glm::mat2x4<T>`
+ * This Verifier checks whether the value is of type `glm::mat2x4<T>`.
  */
 template <typename T>
 class Matrix2x4Verifier : public TemplateVerifier<glm::tmat2x4<T>> {
@@ -435,7 +446,7 @@ public:
 };
 
 /**
- * This Verifier checks whether the value is of type `glm::mat3x2<T>`
+ * This Verifier checks whether the value is of type `glm::mat3x2<T>`.
  */
 template <typename T>
 class Matrix3x2Verifier : public TemplateVerifier<glm::tmat3x2<T>> {
@@ -444,7 +455,7 @@ public:
 };
 
 /**
- * This Verifier checks whether the value is of type `glm::mat3x3<T>`
+ * This Verifier checks whether the value is of type `glm::mat3x3<T>`.
  */
 template <typename T>
 class Matrix3x3Verifier : public TemplateVerifier<glm::tmat3x3<T>> {
@@ -453,7 +464,7 @@ public:
 };
 
 /**
- * This Verifier checks whether the value is of type `glm::mat3x4<T>`
+ * This Verifier checks whether the value is of type `glm::mat3x4<T>`.
  */
 template <typename T>
 class Matrix3x4Verifier : public TemplateVerifier<glm::tmat3x4<T>> {
@@ -462,7 +473,7 @@ public:
 };
 
 /**
- * This Verifier checks whether the value is of type `glm::mat4x2<T>`
+ * This Verifier checks whether the value is of type `glm::mat4x2<T>`.
  */
 template <typename T>
 class Matrix4x2Verifier : public TemplateVerifier<glm::tmat4x2<T>> {
@@ -471,7 +482,7 @@ public:
 };
 
 /**
- * This Verifier checks whether the value is of type `glm::mat4x3<T>`
+ * This Verifier checks whether the value is of type `glm::mat4x3<T>`.
  */
 template <typename T>
 class Matrix4x3Verifier : public TemplateVerifier<glm::tmat4x3<T>> {
@@ -480,7 +491,7 @@ public:
 };
 
 /**
- * This Verifier checks whether the value is of type `glm::mat4x4<T>`
+ * This Verifier checks whether the value is of type `glm::mat4x4<T>`.
  */
 template <typename T>
 class Matrix4x4Verifier : public TemplateVerifier<glm::tmat4x4<T>> {
@@ -497,7 +508,7 @@ public:
  * takes two template parameters. The first is the Verifier that one would use to only
  * check for the type of the object, for example IntVerifier. The second argument is a
  * function object that has its `operator()` function overloaded and returns a boolean
- * value. In these cases, the `std` function objects `std::less`, `std::equal_to, etc are
+ * value. In these cases, the `std` function objects `std::less`, `std::equal_to`, etc are
  * used.
  *
  * This verifier will apply the `Operator` to the stored value and the incoming value
@@ -513,6 +524,7 @@ public:
     /**
      * Constructor for an OperatorVerifier. As all operators need to compare the incoming
      * value to a stored value, we require the comparison \p value to be passed in here.
+     *
      * \param value The value against which the tested value is compared using the
      *        `Operator`
      */
@@ -530,7 +542,7 @@ public:
      *         \p key%'s value has the wrong type, it will be added to the TestResult's
      *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
      *         `Operator` returns false, it will be added with the reason
-     *         TestResult::Offense::Verification instead.
+     *         TestResult::Offense::Verification instead
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -683,7 +695,7 @@ public:
      *         \p key%'s value has the wrong type, it will be added to the TestResult's
      *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
      *         value is not in the list, it will be added with the reason
-     *         TestResult::Offense::Verification instead.
+     *         TestResult::Offense::Verification instead
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -725,7 +737,7 @@ public:
      *         \p key%'s value has the wrong type, it will be added to the TestResult's
      *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
      *         value is in the list, it will be added with the reason
-     *         TestResult::Offense::Verification instead.
+     *         TestResult::Offense::Verification instead
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -777,7 +789,7 @@ public:
      *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
      *         value is outside the range defined by the lower and upper limits passed to
      *         the constructor, it will be added with the reason
-     *         TestResult::Offense::Verification instead.
+     *         TestResult::Offense::Verification instead
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -827,7 +839,7 @@ public:
      *         offense list with the reason TestResult::Offense::Reason::WrongType; if the
      *         value is greater or equal to the lower limit and less or equal to the upper
      *         limit, it will be added with the reason TestResult::Offense::Verification
-     *         instead.
+     *         instead
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -863,7 +875,7 @@ public:
      * passed to the user when a documentation is requested.
      *
      * \param annotation The annotation that is stored and returned to the user when it
-     *        is requested.
+     *        is requested
      *
      * \pre annotation must not be empty
      */
@@ -946,7 +958,7 @@ public:
      *       necessary to make the codegen work in all cases without complications there
      */
     OrVerifier(const std::vector<std::variant<Verifier*,
-        std::shared_ptr<Verifier>>> values);
+        std::shared_ptr<Verifier>>>& values);
 
     /**
      * Checks whether the \p dictionary contains the \p key and whether this key passes
@@ -961,7 +973,7 @@ public:
      *         TestResult::offenses list contains \p with a reason of
      *         TestResult::Offense::Reason::Verification. If \p key%'s value passes either
      *         of the two Verifier%s, the result's TestResult::success is `true` and the
-     *         TestResult::offenses is empty.
+     *         TestResult::offenses is empty
      */
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -972,118 +984,271 @@ public:
     std::vector<std::shared_ptr<Verifier>> values;
 };
 
-/// A short-hand definition for a Verifier checking for `glm::bvec2`
+/**
+ * A short-hand definition for a Verifier checking for `glm::bvec2`.
+ */
 using BoolVector2Verifier = Vector2Verifier<bool>;
-/// A short-hand definition for a Verifier checking for `glm::ivec2`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::ivec2`.
+ */
 using IntVector2Verifier = Vector2Verifier<int>;
-/// A short-hand definition for a Verifier checking for `glm::dvec2`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dvec2`.
+ */
 using DoubleVector2Verifier = Vector2Verifier<double>;
-/// A short-hand definition for a Verifier checking for `glm::bvec3`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::bvec3`.
+ */
 using BoolVector3Verifier = Vector3Verifier<bool>;
-/// A short-hand definition for a Verifier checking for `glm::ivec3`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::ivec3`.
+ */
 using IntVector3Verifier = Vector3Verifier<int>;
-/// A short-hand definition for a Verifier checking for `glm::dvec3`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dvec3`.
+ */
 using DoubleVector3Verifier = Vector3Verifier<double>;
-/// A short-hand definition for a Verifier checking for `glm::bvec4`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::bvec4`.
+ */
 using BoolVector4Verifier = Vector4Verifier<bool>;
-/// A short-hand definition for a Verifier checking for `glm::ivec4`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::ivec4`.
+ */
 using IntVector4Verifier = Vector4Verifier<int>;
-/// A short-hand definition for a Verifier checking for `glm::dvec4`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dvec4`.
+ */
 using DoubleVector4Verifier = Vector4Verifier<double>;
 
-/// A short-hand definition for a Verifier checking for `glm::dmat2x2`
+/**
+ * A short-hand definition for a Verifier checking for `glm::dmat2x2`.
+ */
 using DoubleMatrix2x2Verifier = Matrix2x2Verifier<double>;
+
 using DoubleMatrix2Verifier = DoubleMatrix2x2Verifier;
-/// A short-hand definition for a Verifier checking for `glm::dmat2x3`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dmat2x3`.
+ */
 using DoubleMatrix2x3Verifier = Matrix2x3Verifier<double>;
-/// A short-hand definition for a Verifier checking for `glm::dmat2x4`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dmat2x4`.
+ */
 using DoubleMatrix2x4Verifier = Matrix2x4Verifier<double>;
-/// A short-hand definition for a Verifier checking for `glm::dmat3x2`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dmat3x2`.
+ */
 using DoubleMatrix3x2Verifier = Matrix3x2Verifier<double>;
-/// A short-hand definition for a Verifier checking for `glm::dmat3x3`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dmat3x3`.
+ */
 using DoubleMatrix3x3Verifier = Matrix3x3Verifier<double>;
+
 using DoubleMatrix3Verifier = DoubleMatrix3x3Verifier;
-/// A short-hand definition for a Verifier checking for `glm::dmat3x4`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dmat3x4`.
+ */
 using DoubleMatrix3x4Verifier = Matrix3x4Verifier<double>;
-/// A short-hand definition for a Verifier checking for `glm::dmat4x2`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dmat4x2`.
+ */
 using DoubleMatrix4x2Verifier = Matrix4x2Verifier<double>;
-/// A short-hand definition for a Verifier checking for `glm::dmat4x3`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dmat4x3`.
+ */
 using DoubleMatrix4x3Verifier = Matrix4x3Verifier<double>;
-/// A short-hand definition for a Verifier checking for `glm::dmat4x4`
+
+/**
+ * A short-hand definition for a Verifier checking for `glm::dmat4x4`.
+ */
 using DoubleMatrix4x4Verifier = Matrix4x4Verifier<double>;
+
 using DoubleMatrix4Verifier = DoubleMatrix4x4Verifier;
 
-/// A short-hand definition for a LessVerifier with a type check for `int`
+/**
+ * A short-hand definition for a LessVerifier with a type check for `int`.
+ */
 using IntLessVerifier = LessVerifier<IntVerifier>;
-/// A short-hand definition for a LessVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a LessVerifier with a type check for `double`.
+ */
 using DoubleLessVerifier = LessVerifier<DoubleVerifier>;
-/// A short-hand definition for a LessEqualVerifier with a type check for `int`
+
+/**
+ * A short-hand definition for a LessEqualVerifier with a type check for `int`.
+ */
 using IntLessEqualVerifier = LessEqualVerifier<IntVerifier>;
-/// A short-hand definition for a LessEqualVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a LessEqualVerifier with a type check for `double`.
+ */
 using DoubleLessEqualVerifier = LessEqualVerifier<DoubleVerifier>;
-/// A short-hand definition for a GreaterVerifier with a type check for `int`
+
+/**
+ * A short-hand definition for a GreaterVerifier with a type check for `int`.
+ */
 using IntGreaterVerifier = GreaterVerifier<IntVerifier>;
-/// A short-hand definition for a GreaterVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a GreaterVerifier with a type check for `double`.
+ */
 using DoubleGreaterVerifier = GreaterVerifier<DoubleVerifier>;
-/// A short-hand definition for a GreaterEqualVerifier with a type check for `int`
+
+/**
+ * A short-hand definition for a GreaterEqualVerifier with a type check for `int`.
+ */
 using IntGreaterEqualVerifier = GreaterEqualVerifier<IntVerifier>;
-/// A short-hand definition for a GreaterEqualVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a GreaterEqualVerifier with a type check for `double`.
+ */
 using DoubleGreaterEqualVerifier = GreaterEqualVerifier<DoubleVerifier>;
-/// A short-hand definition for a EqualVerifier with a type check for `bool`
+
+/**
+ * A short-hand definition for a EqualVerifier with a type check for `bool`.
+ */
 using BoolEqualVerifier = EqualVerifier<BoolVerifier>;
-/// A short-hand definition for a EqualVerifier with a type check for `int`
+
+/**
+ * A short-hand definition for a EqualVerifier with a type check for `int`.
+ */
 using IntEqualVerifier = EqualVerifier<IntVerifier>;
-/// A short-hand definition for a EqualVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a EqualVerifier with a type check for `double`.
+ */
 using DoubleEqualVerifier = EqualVerifier<DoubleVerifier>;
-/// A short-hand definition for a EqualVerifier with a type check for `string`
+
+/**
+ * A short-hand definition for a EqualVerifier with a type check for `string`.
+ */
 using StringEqualVerifier = EqualVerifier<StringVerifier>;
-/// A short-hand definition for a UnequalVerifier with a type check for `bool`
+
+/**
+ * A short-hand definition for a UnequalVerifier with a type check for `bool`.
+ */
 using BoolUnequalVerifier = UnequalVerifier<BoolVerifier>;
-/// A short-hand definition for a UnequalVerifier with a type check for `int`
+
+/**
+ * A short-hand definition for a UnequalVerifier with a type check for `int`.
+ */
 using IntUnequalVerifier = UnequalVerifier<IntVerifier>;
-/// A short-hand definition for a UnequalVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a UnequalVerifier with a type check for `double`.
+ */
 using DoubleUnequalVerifier = UnequalVerifier<DoubleVerifier>;
-/// A short-hand definition for a UnequalVerifier with a type check for `string`
+
+/**
+ * A short-hand definition for a UnequalVerifier with a type check for `string`.
+ */
 using StringUnequalVerifier = UnequalVerifier<StringVerifier>;
 
-/// A short-hand definition for a InListVerifier with a type check for `bool`
+/**
+ * A short-hand definition for a InListVerifier with a type check for `bool`.
+ */
 using BoolInListVerifier = InListVerifier<BoolVerifier>;
-/// A short-hand definition for a InListVerifier with a type check for `int`
+
+/**
+ * A short-hand definition for a InListVerifier with a type check for `int`.
+ */
 using IntInListVerifier = InListVerifier<IntVerifier>;
-/// A short-hand definition for a InListVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a InListVerifier with a type check for `double`.
+ */
 using DoubleInListVerifier = InListVerifier<DoubleVerifier>;
-/// A short-hand definition for a InListVerifier with a type check for `string`
+
+/**
+ * A short-hand definition for a InListVerifier with a type check for `string`.
+ */
 using StringInListVerifier = InListVerifier<StringVerifier>;
-/// A short-hand definition for a NotInListVerifier with a type check for `bool`
+
+/**
+ * A short-hand definition for a NotInListVerifier with a type check for `bool`.
+ */
 using BoolNotInListVerifier = NotInListVerifier<BoolVerifier>;
-/// A short-hand definition for a NotInListVerifier with a type check for `int`
+
+/**
+ * A short-hand definition for a NotInListVerifier with a type check for `int`.
+ */
 using IntNotInListVerifier = NotInListVerifier<IntVerifier>;
-/// A short-hand definition for a NotInListVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a NotInListVerifier with a type check for `double`.
+ */
 using DoubleNotInListVerifier = NotInListVerifier<DoubleVerifier>;
-/// A short-hand definition for a NotInListVerifier with a type check for `string`
+
+/**
+ * A short-hand definition for a NotInListVerifier with a type check for `string`.
+ */
 using StringNotInListVerifier = NotInListVerifier<StringVerifier>;
 
-/// A short-hand definition for a InRangeVerifier with a type check for `int`
+/**
+ * A short-hand definition for a InRangeVerifier with a type check for `int`.
+ */
 using IntInRangeVerifier = InRangeVerifier<IntVerifier>;
-/// A short-hand definition for a InRangeVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a InRangeVerifier with a type check for `double`.
+ */
 using DoubleInRangeVerifier = InRangeVerifier<DoubleVerifier>;
-/// A short-hand definition for a InRangeVerifier with a type check for `vec2`
+
+/**
+ * A short-hand definition for a InRangeVerifier with a type check for `vec2`.
+ */
 using Vec2InRangeVerifier = InRangeVerifier<DoubleVector2Verifier>;
-/// A short-hand definition for a NotInRangeVerifier with a type check for `int`
+
+/**
+ * A short-hand definition for a NotInRangeVerifier with a type check for `int`.
+ */
 using IntNotInRangeVerifier = NotInRangeVerifier<IntVerifier>;
-/// A short-hand definition for a NotInRangeVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a NotInRangeVerifier with a type check for `double`.
+ */
 using DoubleNotInRangeVerifier = NotInRangeVerifier<DoubleVerifier>;
 
-/// A short-hand definition for a AnnotationVerifier with a type check for `bool`
+/**
+ * A short-hand definition for a AnnotationVerifier with a type check for `bool`.
+ */
 using BoolAnnotationVerifier = AnnotationVerifier<BoolVerifier>;
-/// A short-hand definition for a AnnotationVerifier with a type check for `int`
+
+/**
+ * A short-hand definition for a AnnotationVerifier with a type check for `int`.
+ */
 using IntAnnotationVerifier = AnnotationVerifier<IntVerifier>;
-/// A short-hand definition for a AnnotationVerifier with a type check for `double`
+
+/**
+ * A short-hand definition for a AnnotationVerifier with a type check for `double`.
+ */
 using DoubleAnnotationVerifier = AnnotationVerifier<DoubleVerifier>;
-/// A short-hand definition for a AnnotationVerifier with a type check for `string`
+
+/**
+ * A short-hand definition for a AnnotationVerifier with a type check for `string`.
+ */
 using StringAnnotationVerifier = AnnotationVerifier<StringVerifier>;
-/// A short-hand definition for a AnnotationVerifier with a type check for
-/// `ghoul::Dictionary`
+
+/**
+ * A short-hand definition for a AnnotationVerifier with a type check for
+ * `ghoul::Dictionary`
+ */
 using TableAnnotationVerifier = AnnotationVerifier<TableVerifier>;
 
 // Definitions of external templates that are instantiated in the cpp file

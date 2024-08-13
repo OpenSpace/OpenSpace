@@ -1,0 +1,30 @@
+{
+  "profile": "apollo",
+  "commands": [
+    { "type": "action", "value": "os.apollo11.setup.LandingSite" },
+    { "type": "wait", "value": 10 },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Apollo11LemPosition",
+        "pitch": -0.275871E-1,
+        "position": [ -329.1966, 726.2499, -767.1269 ],
+        "referenceFrame": "Root",
+        "up": [ -0.833341, -0.532887, -0.146881 ],
+        "yaw": -0.000141130
+      }
+    },
+    { "type": "wait", "value": 10 },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Apollo11LemPosition",
+        "position": [ 6.249130, 25.76497, -14.35499 ],
+        "up": [ -0.860897, -0.0718231, -0.503684 ],
+        "yaw": -0.000141143
+      }
+    },
+    { "type": "wait", "value": 45 },
+    { "type": "screenshot" }
+  ]
+}

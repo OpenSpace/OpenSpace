@@ -4,7 +4,6 @@ asset.require("./layers/colorlayers/ganymede_texture", true)
 
 asset.meta = {
   Name = "Default Ganymede Layers",
-  Version = "1.0",
   Description = "Default Ganymede layers are: Ganymede Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

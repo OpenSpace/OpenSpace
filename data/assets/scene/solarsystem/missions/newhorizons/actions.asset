@@ -300,7 +300,6 @@ asset.export("ToggleNewHorizonsTrail", ToggleNewHorizonsTrail.Identifier)
 
 asset.meta = {
   Name = "New Horizons actions",
-  Version = "1.0",
   Description = "Actions for the New Horizons mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

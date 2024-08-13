@@ -9,43 +9,45 @@ local speck = asset.resource({
   Name = "Exoplanets Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_speck",
-  Version = 3
+  Version = 4
 })
 
 
 local Object = {
   Identifier = "Exoplanets",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "expl.speck",
     Labels = {
       File = speck .. "expl.label",
       Color = { 0.3, 0.3, 0.8 },
-      Size = 14.8,
+      Size = 13.75,
       MinMaxSize = { 10, 100 },
       Unit = "pc"
     },
-    Color = { 1.0, 1.0, 1.0 },
     Opacity = 1.0,
-    Texture = textures .. "target-blue.png",
-    File = speck .. "expl.speck",
+    Texture = {
+      File = textures .. "target-blue.png",
+    },
     Unit = "pc",
-    ScaleFactor = 388.67923,
-    CorrectionSizeEndDistance = 15.23,
-    CorrectionSizeFactor = 13.3,
-    BillboardMinMaxSize = { 0.0, 75.0 },
-    EnablePixelSizeControl = true
+    SizeSettings = {
+      ScaleExponent = 16.9,
+      MaxSize = 2.8,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Exoplanets",
     Path = "/Milky Way/Exoplanets",
-    Description = [[Census: 5,361 planets in 3,982 systems. DU Version 20.12. <br>
-      Extrasolar planets, or exoplanets, are a relatively new phenomenon in
-      astronomy. While many astronomers believed in their existence, no
-      observational evidence was available until 1995. Since that time, scientists
-      have discovered thousands of systems consisting of one or more planets around
-      a host star.(Description from URL) <br><br> Data Reference: NASA Exoplanet
-      Archive (CalTech/NASA)]]
+    Description = [[Extrasolar planets, or exoplanets, are a relatively new phenomenon in
+      astronomy - no observational evidence was available until 1995. To the eye,
+      exoplanets are lost in the glare of their host star. Unconventional techniques are
+      required to infer or observe them. Here, exoplanet systems are represented by a blue
+      ring centered on each host star. The ring is not intended to signify an orbit, but
+      serve only as a marker. The labels list the host star name, and if there is more
+      than one planet, will list the number of planets in parentheses. Census: 5,589
+      planets in 4,139 systems.]]
   }
 }
 
@@ -64,9 +66,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Exoplanets",
-  Version = "1.1",
-  Description = "Digital Universe asset for Exoplanets",
-  Author = "Brian Abbott (AMNH)",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }
