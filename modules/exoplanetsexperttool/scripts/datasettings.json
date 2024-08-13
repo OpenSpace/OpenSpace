@@ -153,125 +153,142 @@
     },
     "quick_filters" : [
         {
-            "name": "Hide null ESM",
-            "filter": {
-                "column": "ESM",
-                "query": ""
-            }
-        },
-        {
-            "name": "Hide null TSM",
-            "filter": {
-                "column": "TSM",
-                "query": ""
-            }
-        },
-        {
-            "name": "Must have 3D positional data",
-            "filter": [
+            "group_title": "",
+            "type": "AND",
+            "same_line": true,
+            "filters": [
                 {
-                    "column": "ra",
-                    "query": ""
+                    "name": "Hide null ESM",
+                    "filter": {
+                        "column": "ESM",
+                        "query": ""
+                    }
                 },
                 {
-                    "column": "dec",
-                    "query": ""
+                    "name": "Hide null TSM",
+                    "filter": {
+                        "column": "TSM",
+                        "query": ""
+                    }
                 },
                 {
-                    "column": "sy_dist",
-                    "query": ""
-                }
-            ],
-            "desc": "Only include data points that will show up in OpenSpace's 3D rendered view"
-        },
-        {
-            "name": "Terrestrial",
-            "filter": {
-                "column": "pl_rade",
-                "query": "<= 1.5"
-            },
-            "desc": "Rp <= 1.5  (Earth radii)"
-        },
-        {
-            "name": "Small Sub-Neptune",
-            "filter": [
-                {
-                    "column": "pl_rade",
-                    "query": "> 1.5"
-                },
-                {
-                    "column": "pl_rade",
-                    "query": "<= 2.75"
-                }
-            ],
-            "desc": "1.5 < Rp <= 2.75 (Earth radii)"
-        },
-        {
-            "name": "Large Sub-Neptune",
-            "filter": [
-                {
-                    "column": "pl_rade",
-                    "query": "> 2.75"
-                },
-                {
-                    "column": "pl_rade",
-                    "query": "<= 4.0"
-                }
-            ],
-            "desc": "2.75 < Rp <= 4.0 (Earth radii)"
-        },
-        {
-            "name": "Sub-Jovian",
-            "filter": [
-                {
-                    "column": "pl_rade",
-                    "query": "> 4.0"
-                },
-                {
-                    "column": "pl_rade",
-                    "query": "<= 10.0"
-                }
-            ],
-            "desc": "4.0 < Rp <= 10.0 (Earth radii)"
-        },
-        {
-            "name": "Larger",
-            "filter": [
-                {
-                    "column": "pl_rade",
-                    "query": "> 10.0"
-                }
-            ],
-            "desc": "Rp > 10.0 (Earth radii)"
-        },
-        {
-            "name": "Transit",
-            "filter": [
-                {
-                    "column": "discoverymethod",
-                    "query": "transit"
+                    "name": "Must have 3D positional data",
+                    "filter": [
+                        {
+                            "column": "ra",
+                            "query": ""
+                        },
+                        {
+                            "column": "dec",
+                            "query": ""
+                        },
+                        {
+                            "column": "sy_dist",
+                            "query": ""
+                        }
+                    ],
+                    "desc": "Only include data points that will show up in OpenSpace's 3D rendered view"
                 }
             ]
         },
         {
-            "name": "Radial Velocity",
-            "filter": [
+            "group_title": "Planet bin",
+            "type": "OR",
+            "same_line": false,
+            "filters": [
                 {
-                    "column": "discoverymethod",
-                    "query": "radial velocity"
+                    "name": "Terrestrial",
+                    "filter": {
+                        "column": "pl_rade",
+                        "query": "<= 1.5"
+                    },
+                    "desc": "Rp <= 1.5  (Earth radii)"
+                },
+                {
+                    "name": "Small Sub-Neptune",
+                    "filter": [
+                        {
+                            "column": "pl_rade",
+                            "query": "> 1.5"
+                        },
+                        {
+                            "column": "pl_rade",
+                            "query": "<= 2.75"
+                        }
+                    ],
+                    "desc": "1.5 < Rp <= 2.75 (Earth radii)"
+                },
+                {
+                    "name": "Large Sub-Neptune",
+                    "filter": [
+                        {
+                            "column": "pl_rade",
+                            "query": "> 2.75"
+                        },
+                        {
+                            "column": "pl_rade",
+                            "query": "<= 4.0"
+                        }
+                    ],
+                    "desc": "2.75 < Rp <= 4.0 (Earth radii)"
+                },
+                {
+                    "name": "Sub-Jovian",
+                    "filter": [
+                        {
+                            "column": "pl_rade",
+                            "query": "> 4.0"
+                        },
+                        {
+                            "column": "pl_rade",
+                            "query": "<= 10.0"
+                        }
+                    ],
+                    "desc": "4.0 < Rp <= 10.0 (Earth radii)"
+                },
+                {
+                    "name": "Larger",
+                    "filter": [
+                        {
+                            "column": "pl_rade",
+                            "query": "> 10.0"
+                        }
+                    ],
+                    "desc": "Rp > 10.0 (Earth radii)"
                 }
             ]
         },
         {
-            "name": "Other",
-            "filter": [
+            "group_title": "Discovery method",
+            "type": "OR",
+            "same_line": true,
+            "filters": [
                 {
-                    "column": "discoverymethod",
-                    "query": "!transit"
+                    "name": "Transit",
+                    "filter": [
+                        {
+                            "column": "discoverymethod",
+                            "query": "transit"
+                        }
+                    ]
                 },
                 {
-                    "column": "discoverymethod",
-                    "query": "!radial"
+                    "name": "Radial Velocity",
+                    "filter": [
+                        {
+                            "column": "discoverymethod",
+                            "query": "radial velocity"
+                        }
+                    ]
+                },
+                {
+                    "name": "Other",
+                    "filter": [
+                        {
+                            "column": "discoverymethod",
+                            "query": "-transit, -radial"
+                        }
+                    ]
                 }
             ]
         }

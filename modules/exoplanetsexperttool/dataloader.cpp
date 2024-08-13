@@ -111,39 +111,63 @@ namespace {
             s.columnInfo[key] = info;
         }
 
-        const std::vector<nlohmann::json> quickFilters = j.at("quick_filters");
-        s.quickFilters.reserve(quickFilters.size());
+        const std::vector<nlohmann::json> quickFilterGroups = j.at("quick_filters");
+        s.quickFilterGroups.reserve(quickFilterGroups.size());
 
-        for (const nlohmann::json& filterInfo : quickFilters) {
-            DataSettings::QuickFilter quickFilter;
+        for (const nlohmann::json& groupInfo : quickFilterGroups) {
+            DataSettings::QuickFilterGroup group;
 
-            filterInfo.at("name").get_to(quickFilter.name);
+            groupInfo.at("group_title").get_to(group.title);
 
-            if (filterInfo.at("filter").is_array()) {
-                const std::vector<nlohmann::json>& filters = filterInfo.at("filter");
-                quickFilter.filters.reserve(filters.size());
+            if (groupInfo.contains("type")) {
+                if (ghoul::toUpperCase(groupInfo.at("type")) == "OR") {
+                    group.type = DataSettings::QuickFilterGroup::Type::Or;
+                }
+                else if (ghoul::toUpperCase(groupInfo.at("type")) == "AND") {
+                    group.type = DataSettings::QuickFilterGroup::Type::And;
+                }
+                else {
+                    LERROR("Invalid quick filter group type. Expected 'AND' or 'OR'");
+                }
 
-                for (const nlohmann::json& f : filters) {
+            }
+            groupInfo.at("same_line").get_to(group.showOnSameLine);
+
+            const std::vector<nlohmann::json> quickFilters= groupInfo.at("filters");
+
+            for (const nlohmann::json& filterInfo : quickFilters) {
+                DataSettings::QuickFilter quickFilter;
+
+                filterInfo.at("name").get_to(quickFilter.name);
+
+                if (filterInfo.at("filter").is_array()) {
+                    const std::vector<nlohmann::json>& filters = filterInfo.at("filter");
+                    quickFilter.filters.reserve(filters.size());
+
+                    for (const nlohmann::json& f : filters) {
+                        DataSettings::QuickFilter::Filter filter;
+                        f.at("column").get_to(filter.column);
+                        f.at("query").get_to(filter.query);
+                        quickFilter.filters.push_back(filter);
+                    }
+                }
+                else if (filterInfo.at("filter").is_object()) {
+                    const nlohmann::json f = filterInfo.at("filter");
+
                     DataSettings::QuickFilter::Filter filter;
                     f.at("column").get_to(filter.column);
                     f.at("query").get_to(filter.query);
                     quickFilter.filters.push_back(filter);
                 }
-            }
-            else if (filterInfo.at("filter").is_object()) {
-                const nlohmann::json f = filterInfo.at("filter");
 
-                DataSettings::QuickFilter::Filter filter;
-                f.at("column").get_to(filter.column);
-                f.at("query").get_to(filter.query);
-                quickFilter.filters.push_back(filter);
+                if (filterInfo.contains("desc")) {
+                    filterInfo.at("desc").get_to(quickFilter.description);
+                }
+
+                group.quickFilters.push_back(quickFilter);
             }
 
-            if (filterInfo.contains("desc")) {
-                filterInfo.at("desc").get_to(quickFilter.description);
-            }
-
-            s.quickFilters.push_back(quickFilter);
+            s.quickFilterGroups.push_back(group);
         }
     }
 

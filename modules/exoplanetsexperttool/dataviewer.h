@@ -142,7 +142,7 @@ private:
     };
     std::vector<ColumnFilterEntry> _columnFilters;
 
-    std::vector<bool> _quickFilterFlags;
+    std::vector<std::vector<bool>> _quickFilterFlags;
 
     // Filter selection from webpage
     properties::IntListProperty _externalSelection;

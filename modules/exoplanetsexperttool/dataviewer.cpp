@@ -232,7 +232,16 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     _filteredDataWithoutExternalSelection = _filteredData;
 
     // Set all quick filters to false
-    _quickFilterFlags.assign(_dataSettings.quickFilters.size(), false);
+    const size_t nQuickFilterGroups = _dataSettings.quickFilterGroups.size();
+    _quickFilterFlags.reserve(nQuickFilterGroups);
+    for (size_t groupId = 0; groupId < nQuickFilterGroups; ++groupId) {
+        const DataSettings::QuickFilterGroup& group =
+            _dataSettings.quickFilterGroups[groupId];
+
+        std::vector<bool> flags;
+        flags.assign(group.quickFilters.size(), false);
+        _quickFilterFlags.push_back(flags);
+    }
 
     _columns = _columnSelectionView.initializeColumnsFromData(_data, _dataSettings);
 
@@ -976,7 +985,13 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
     if (ImGui::Button("Reset internal")) {
         _columnFilters.clear(); // Column filters
-        _quickFilterFlags.assign(_quickFilterFlags.size(), false);
+
+        const size_t nQuickFilterGroups = _dataSettings.quickFilterGroups.size();
+        _quickFilterFlags.reserve(nQuickFilterGroups);
+        for (size_t i = 0; i < _dataSettings.quickFilterGroups.size(); ++i) {
+            _quickFilterFlags[i].assign(_quickFilterFlags[i].size(), false);
+        }
+
         _filterChanged = true;
     }
 
@@ -1136,51 +1151,36 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
         // Pre-defined filters
         {
-            for (size_t i = 0; i < _quickFilterFlags.size(); ++i) {
-                const DataSettings::QuickFilter& filter = _dataSettings.quickFilters[i];
+            const size_t nGroups = _dataSettings.quickFilterGroups.size();
+            for (size_t groupId = 0; groupId < nGroups; ++groupId) {
+                const DataSettings::QuickFilterGroup& group =
+                    _dataSettings.quickFilterGroups[groupId];
 
-                bool isSelected = _quickFilterFlags[i];
+                if (!group.title.empty()) {
+                    ImGui::Text(group.title.c_str());
+                }
 
-                ImGui::PushID(std::format("quickFilter_{}", i).c_str());
-                _filterChanged |= ImGui::Checkbox(filter.name.c_str(), &isSelected);
-                ImGui::PopID();
+                for (size_t i = 0; i < group.quickFilters.size(); ++i) {
+                    const DataSettings::QuickFilter& filter = group.quickFilters[i];
 
-                _quickFilterFlags[i] = isSelected;
+                    bool isSelected = _quickFilterFlags[groupId][i];
 
-                if (!filter.description.empty()) {
-                    ImGui::SameLine();
-                    view::helper::renderHelpMarker(filter.description.c_str());
+                    ImGui::PushID(std::format("quickFilter_{}", i).c_str());
+                    _filterChanged |= ImGui::Checkbox(filter.name.c_str(), &isSelected);
+                    ImGui::PopID();
+
+                    _quickFilterFlags[groupId][i] = isSelected;
+
+                    if (!filter.description.empty()) {
+                        ImGui::SameLine();
+                        view::helper::renderHelpMarker(filter.description.c_str());
+                    }
+
+                    if (group.showOnSameLine && (i != group.quickFilters.size() - 1)) {
+                        ImGui::SameLine();
+                    }
                 }
             }
-
-            // TODO: fix groupings according to below
-            //_filterChanged |= ImGui::Checkbox("Hide null TSM", &hideNanTsm);
-            //ImGui::SameLine();
-            //_filterChanged |= ImGui::Checkbox("Hide null ESM", &hideNanEsm);
-
-            //_filterChanged |= ImGui::Checkbox("Only multi-planet", &showOnlyMultiPlanetSystems);
-            //ImGui::SameLine();
-            //_filterChanged |= ImGui::Checkbox("Must have 3D positional data", &showOnlyHasPosition);
-
-            //ImGui::Text("Planet bin");
-            //_filterChanged |= ImGui::Checkbox("Terrestrial", &showTerrestrial);
-
-            //_filterChanged |= ImGui::Checkbox("Small Sub-Neptune", &showSmallSubNeptunes);
-
-            //ImGui::SameLine();
-            //_filterChanged |= ImGui::Checkbox("Large Sub-Neptune", &showLargeSubNeptunes);
-
-            //_filterChanged |= ImGui::Checkbox("Sub-Jovian", &showSubJovians);
-
-            //ImGui::SameLine();
-            //_filterChanged |= ImGui::Checkbox("Larger", &showLargerPlanets);
-
-            //ImGui::Text("Discovery method");
-            //_filterChanged |= ImGui::Checkbox("Transit", &showTransit);
-            //ImGui::SameLine();
-            //_filterChanged |= ImGui::Checkbox("Radial Velocity", &showRadialVelocity);
-            //ImGui::SameLine();
-            //_filterChanged |= ImGui::Checkbox("Other", &showOther);
         }
     }
 
@@ -1337,28 +1337,64 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
         _filteredData.reserve(_data.size());
 
         for (int i = 0; i < _data.size(); i++) {
-            const ExoplanetItem& d = _data[i];
+            const ExoplanetItem& item = _data[i];
 
             bool filteredOut = false;
 
             // Pre-defined filters
-            for (size_t qIndex = 0; qIndex < _quickFilterFlags.size(); ++qIndex) {
-                const DataSettings::QuickFilter& q = _dataSettings.quickFilters[qIndex];
+            for (size_t groupId = 0; groupId < _quickFilterFlags.size(); ++groupId) {
+                const DataSettings::QuickFilterGroup& group = _dataSettings.quickFilterGroups[groupId];
 
-                bool passedFilter = true;
-                for (const DataSettings::QuickFilter::Filter& filter : q.filters) {
+                bool hasAnyEnabled = false;
+                for (bool isChecked : _quickFilterFlags[groupId]) {
+                    if (isChecked) {
+                        hasAnyEnabled = true;
+                        break;
+                    }
+                }
 
-                    if (_quickFilterFlags[qIndex] == true) {
+                if (!hasAnyEnabled) {
+                    continue;
+                }
+
+                auto passesQuickFilter = [this](const DataSettings::QuickFilter& q,
+                                                const ExoplanetItem& item)
+                {
+                    bool passedFilter = true;
+                    // Sub-filters in a quick filter are applied with AND, always
+                    for (const DataSettings::QuickFilter::Filter& filter : q.filters) {
                         bool isNumeric = isNumericColumn(columnIndex(filter.column));
                         ColumnFilter cf = ColumnFilter(
                             filter.query,
                             isNumeric ? ColumnFilter::Type::Numeric : ColumnFilter::Type::Text
                         );
-                        passedFilter &= cf.passFilter(columnValue(filter.column, d));
+                        passedFilter &= cf.passFilter(columnValue(filter.column, item));
+                    }
+                    return passedFilter;
+                };
+
+                bool passedAnyGroupFilter = false; // only used for OR
+
+                for (size_t qIndex = 0; qIndex < _quickFilterFlags[groupId].size(); ++qIndex) {
+                    const DataSettings::QuickFilter& q = group.quickFilters[qIndex];
+                    bool shouldMatchFilter = _quickFilterFlags[groupId][qIndex];
+
+                    switch (group.type) {
+                        case DataSettings::QuickFilterGroup::Type::And:
+                            if (shouldMatchFilter) {
+                                filteredOut |= !passesQuickFilter(q, item);
+                            }
+                            break;
+                        case DataSettings::QuickFilterGroup::Type::Or:
+                            passedAnyGroupFilter |= shouldMatchFilter && passesQuickFilter(q, item);
+                            break;
+                        default: break;
                     }
                 }
 
-                filteredOut |= !passedFilter;
+                if (group.type == DataSettings::QuickFilterGroup::Type::Or) {
+                    filteredOut |= !passedAnyGroupFilter;
+                }
             }
 
             // Other filters
@@ -1368,7 +1404,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
                 }
 
                 filteredOut |= !f.filter.passFilter(
-                    columnValue(_columns[f.columnIndex], d)
+                    columnValue(_columns[f.columnIndex], item)
                 );
 
             }

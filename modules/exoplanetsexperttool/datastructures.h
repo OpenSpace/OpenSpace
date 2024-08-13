@@ -143,7 +143,22 @@ struct DataSettings {
 
         std::string description = "";
     };
-    std::vector<QuickFilter> quickFilters;
+
+    struct QuickFilterGroup {
+        std::string title = "";
+
+        enum class Type {
+            And = 0,
+            Or
+        } type;
+
+        bool showOnSameLine = false;
+
+        std::vector<QuickFilter> quickFilters;
+    };
+
+    std::vector<QuickFilterGroup> quickFilterGroups;
+
 
     ColumnKey nameColumn() const {
         return dataMapping.name;
