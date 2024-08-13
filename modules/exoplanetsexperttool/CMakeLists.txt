@@ -59,8 +59,6 @@ set(SHADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/glyphs_vs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_fs.glsl
   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gui_vs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_fs.glsl
-  ${CMAKE_CURRENT_SOURCE_DIR}/shaders/points_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
