@@ -170,8 +170,9 @@ bool ScriptEngine::runScript(const std::string& script, const ScriptCallback& ca
 
     ghoul_assert(!script.empty(), "Script must not be empty");
 
-    if (_logScripts) {
-        // Write command to log before it's executed
+    if (_logScripts && script[0] != '\x1b') {
+        // \x1b = A byte in the beginning that Lua uses to represent whether a string is
+        // an ASCII or a binary blob. We don't want to print binary blobs into the log
         writeLog(script);
     }
 
