@@ -5,6 +5,7 @@
 -- are approximate and need fixing
 
 local Mission = {
+  Identifier = "JWST",
   Name = "James Webb Space Telescope",
   Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2016/12/jwst_mission_logo/16561412-4-eng-GB/JWST_mission_logo_pillars.png",
   Description = "The James Webb Space Telescope (sometimes called JWST or Webb) is an orbiting infrared observatory that will complement and extend the discoveries of the Hubble Space Telescope, with longer wavelength coverage and greatly improved sensitivity. The longer wavelengths enable Webb to look much closer to the beginning of time and to hunt for the unobserved formation of the first galaxies, as well as to look inside dust clouds where stars and planetary systems are forming today.",
@@ -96,5 +97,5 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)
