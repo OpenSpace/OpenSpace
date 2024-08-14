@@ -219,6 +219,7 @@ else()
 endif ()
 
 set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "Helper")
+set_openspace_compile_settings(${CEF_HELPER_TARGET})
 
 ##########################################################################################
 # Create OpenSpace module.
@@ -266,6 +267,7 @@ target_precompile_headers(${webbrowser_module} PRIVATE
 )
 
 set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "Helper")
+set_openspace_compile_settings(libcef_dll_wrapper)
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()
