@@ -48,7 +48,7 @@ set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 cmake_policy(SET CMP0074 NEW)
 
 # Specify the CEF distribution version.
-set(CEF_VERSION "102.0.10+gf249b2e+chromium-102.0.5005.115")
+set(CEF_VERSION "127.3.4+ge9e2e14+chromium-127.0.6533.100")
 
 # CEF Sandbox is not working with the latest Visual Studio, so we disable it for now.
 if (WIN32 OR UNIX)
