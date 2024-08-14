@@ -34,21 +34,27 @@ class DataViewer;
 
 class FilteringView {
 public:
-    FilteringView(const DataViewer& dataViewer, const DataSettings& dataSettings);
+    FilteringView(DataViewer& dataViewer, const DataSettings& dataSettings);
+
+    bool isUsingRowFiltering() const;
+    bool isUsingExternalFiltering() const;
 
     // Return true if filtering was changed
     bool renderFilterSettings();
 
     // Return the rows matching the current filtering
-    std::vector<size_t> applyFiltering(const std::vector<ExoplanetItem>& data);
-
-    std::vector<size_t> applyExternalSelection(const std::vector<int>& externalSelection,
-        const std::vector<size_t>& prefilteredData);
+    std::vector<size_t> applyFiltering(const std::vector<ExoplanetItem>& data,
+        const std::vector<int>& externalSelection);
 
 private:
     bool renderColumnFilterSettings();
     bool renderRowLimitFilterSettings();
     bool renderExternalFilterSettings();
+
+    void applyRowLimit(const std::vector<ExoplanetItem>& data,
+        std::vector<size_t>& prefilteredData);
+    void applyExternalSelection(const std::vector<int>& externalSelection,
+        std::vector<size_t>& prefilteredData);
 
     struct ColumnFilterEntry {
         size_t columnIndex;
@@ -67,7 +73,7 @@ private:
     bool _useExternalSelection = false;
     bool _overrideInternalSelection = false;
 
-    const DataViewer& _dataViewer;
+    DataViewer& _dataViewer;
     const std::vector<DataSettings::QuickFilterGroup>& _quickFilterGroups;
 };
 

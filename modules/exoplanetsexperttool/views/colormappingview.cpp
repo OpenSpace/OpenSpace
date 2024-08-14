@@ -32,7 +32,7 @@
 
 namespace openspace::exoplanets {
 
-ColorMappingView::ColorMappingView(const DataViewer& dataViewer,
+ColorMappingView::ColorMappingView(DataViewer& dataViewer,
                                    const DataSettings& dataSettings)
     : _dataViewer(dataViewer)
 {
@@ -301,7 +301,7 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
             ImGui::EndCombo();
         }
 
-        const int colormapColumn = variable.columnIndex;
+        size_t colormapColumn = variable.columnIndex;
 
         // Min/max values for color range
         ImGui::SetNextItemWidth(InputWidth);
@@ -419,6 +419,5 @@ glm::vec4 ColorMappingView::colorFromColormap(const ExoplanetItem& item,
 
     return pointColor;
 }
-
 
 } // namespace openspace::exoplanets

@@ -44,7 +44,7 @@ public:
         float opacity = 1.f;
     };
 
-    ColorMappingView(const DataViewer& dataViewer,
+    ColorMappingView(DataViewer& dataViewer,
         const DataSettings& dataSettings);
 
     void initializeGL();
@@ -71,7 +71,7 @@ private:
 
     size_t _firstNumericColumnIndex = 0;
 
-    const DataViewer& _dataViewer;
+    DataViewer& _dataViewer;
 };
 
 } // namespace openspace::exoplanets

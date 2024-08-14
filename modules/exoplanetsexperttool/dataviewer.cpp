@@ -320,11 +320,23 @@ const std::vector<ColumnKey>& DataViewer::columns() const {
 }
 
 const std::vector<size_t>& DataViewer::planetsForHost(const std::string& hostIdentifier) const {
-    if (!_hostIdToPlanetsMap.contains(hostIdentifier)) {
-        return std::vector<size_t>(); // TODO Do not return reference to local object
-    }
+    ghoul_assert(_hostIdToPlanetsMap.contains(hostIdentifier), "Map must contain the host");
     return _hostIdToPlanetsMap.at(hostIdentifier);
 }
+
+size_t DataViewer::externalSelectionSize() const {
+    return _externalSelection.value().size();
+}
+
+const std::string& DataViewer::lastExternalSelectionTimestamp() const {
+    return _lastExternalSelectionTimeStamp;
+}
+
+void DataViewer::clearExternalSelection() {
+    // TODO: This should be done though Lua to be synced across all nodes
+    _externalSelection = {};
+    LINFO("Cleared external selection");
+};
 
 bool DataViewer::compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
                                      const ExoplanetItem& right) const
@@ -999,49 +1011,19 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
     _filterChanged = _filteringView->renderFilterSettings();
 
-    // Some extra information about the external selection
-    ImGui::Text("External Selection: ");
-    if (!_externalSelection.value().empty()) {
-        ImGui::SameLine();
-        ImGui::TextColored(
-            ImColor(200, 200, 200),
-            std::format("{} items", _externalSelection.value().size()).c_str()
-        );
-
-        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 100);
-        if (ImGui::Button("Delete", ImVec2(100, 0))) {
-            LINFO("Deleted external selection");
-            _externalSelection = {};
-            _filterChanged = true;
-        }
-    }
-
-    ImGui::Text("Last updated: ");
-    ImGui::SameLine();
-    ImGui::TextColored(ImColor(200, 200, 200), _lastExternalSelectionTimeStamp.c_str());
-
-    static size_t filteredDataSizeBeforeExternal = 0;
-
     // Update the filtered data
     if (_filterChanged) {
-        _filteredData = _filteringView->applyFiltering(_data);
-        filteredDataSizeBeforeExternal = _filteredData.size(),
-
-        _filteredData = _filteringView->applyExternalSelection(
-            _externalSelection.value(),
-            _filteredData
+        _filteredData = _filteringView->applyFiltering(
+            _data,
+            _externalSelection.value()
         );
     }
 
     ImGui::Separator();
 
     view::helper::renderDescriptiveText(std::format(
-        "Number items after internal and row-limit filtering: {} / {}",
-        filteredDataSizeBeforeExternal, _data.size()
-    ).c_str());
-
-    view::helper::renderDescriptiveText(std::format(
-        "After applying external filtering: {}", _filteredData.size()
+        "Number items after filtering: {} / {}",
+        _filteredData.size(), _data.size()
     ).c_str());
 
     ImGui::End(); // Filter settings window

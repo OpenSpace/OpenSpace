@@ -32,9 +32,10 @@
 
 namespace openspace::exoplanets {
 
-FilteringView::FilteringView(const DataViewer& dataViewer,
+FilteringView::FilteringView(DataViewer& dataViewer,
     const DataSettings& dataSettings)
-    : _dataViewer(dataViewer), _quickFilterGroups(dataSettings.quickFilterGroups)
+    : _dataViewer(dataViewer)
+    , _quickFilterGroups(dataSettings.quickFilterGroups)
 {
     // Set all quick filters to false
     const size_t nQuickFilterGroups = _quickFilterGroups.size();
@@ -55,6 +56,14 @@ FilteringView::FilteringView(const DataViewer& dataViewer,
             break;
         }
     }
+}
+
+bool FilteringView::isUsingRowFiltering() const {
+    return _limitNumberOfRows;
+}
+
+bool FilteringView::isUsingExternalFiltering() const {
+    return _useExternalSelection;
 }
 
 bool FilteringView::renderFilterSettings() {
@@ -91,7 +100,9 @@ bool FilteringView::renderFilterSettings() {
     return filterWasChanged;
 }
 
-std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetItem>& data) {
+std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetItem>& data,
+                                               const std::vector<int>& externalSelection)
+{
     std::vector<size_t> filteredData;
     filteredData.reserve(data.size());
 
@@ -178,10 +189,22 @@ std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetIte
     }
     filteredData.shrink_to_fit();
 
-    static int nRowsAfterLimit = 0;
+    applyRowLimit(data, filteredData);
+    applyExternalSelection(externalSelection, filteredData);
+
+    return filteredData;
+}
+
+void FilteringView::applyRowLimit(const std::vector<ExoplanetItem>& data,
+                                  std::vector<size_t>& filteredData)
+{
+    if (!_limitNumberOfRows) {
+        return;
+    }
+
     ColumnKey rowLimitCol = _dataViewer.columns()[_rowLimitColumnIndex];
 
-    if (_limitNumberOfRows && filteredData.size() > _nRows) {
+    if (filteredData.size() > _nRows) {
         auto compare = [&rowLimitCol, &data, this](const size_t& lhs, const size_t& rhs) {
             // We are interested in the largest, so flip the order
             const ExoplanetItem& l = data[_useHighestValue ? rhs : lhs];
@@ -191,43 +214,30 @@ std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetIte
 
         std::sort(filteredData.begin(), filteredData.end(), compare);
         filteredData.erase(filteredData.begin() + _nRows, filteredData.end());
-        nRowsAfterLimit = static_cast<int>(filteredData.size());
     }
-
-    if (_limitNumberOfRows) {
-        ImGui::TextColored(
-            view::helper::toImVec4(view::colors::DescriptiveText),
-            std::format("After row limit : {}", nRowsAfterLimit).c_str()
-        );
-    }
-
-    return filteredData;
 }
 
-std::vector<size_t> FilteringView::applyExternalSelection(
-                                                   const std::vector<int>& externalSelection,
-                                                   const std::vector<size_t>& prefilteredData)
+void FilteringView::applyExternalSelection(const std::vector<int>& externalSelection,
+                                           std::vector<size_t>& prefilteredData)
 {
     if (!_useExternalSelection) {
-        return prefilteredData;
+        return;
     }
-
-    std::vector<size_t> filteredData = prefilteredData;
 
     if (_overrideInternalSelection) {
         // Just use the external seleciton, out of the box
-        filteredData.clear();
-        filteredData.reserve(externalSelection.size());
+        prefilteredData.clear();
+        prefilteredData.reserve(externalSelection.size());
         for (int i : externalSelection) {
-            filteredData.push_back(static_cast<size_t>(i));
+            prefilteredData.push_back(static_cast<size_t>(i));
         }
     }
     else {
         // Do an intersection, i.e. check if the filtered out items are in the selection
         std::vector<size_t> newFilteredData;
-        newFilteredData.reserve(filteredData.size());
+        newFilteredData.reserve(prefilteredData.size());
 
-        for (size_t index : filteredData) {
+        for (size_t index : prefilteredData) {
             bool isFound = std::find(
                 externalSelection.begin(),
                 externalSelection.end(),
@@ -238,10 +248,8 @@ std::vector<size_t> FilteringView::applyExternalSelection(
             }
         }
         newFilteredData.shrink_to_fit();
-        filteredData = std::move(newFilteredData);
+        prefilteredData = std::move(newFilteredData);
     }
-
-    return filteredData;
 }
 
 bool FilteringView::renderColumnFilterSettings() {
@@ -530,6 +538,27 @@ bool FilteringView::renderExternalFilterSettings() {
     view::helper::renderHelpMarker(
         "If set to true, only the selection from the webpage will be shown. "
         "Meaning that the above internal filtering will be ignored."
+    );
+
+    ImGui::Text("External Selection: ");
+    size_t nItems = _dataViewer.externalSelectionSize();
+    if (nItems > 0) {
+        ImGui::SameLine();
+        view::helper::renderDescriptiveText(
+            std::format("{} items", nItems).c_str()
+        );
+
+        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 100);
+        if (ImGui::Button("Delete", ImVec2(100, 0))) {
+            _dataViewer.clearExternalSelection();
+            filterWasChanged = true;
+        }
+    }
+
+    ImGui::Text("Last updated: ");
+    ImGui::SameLine();
+    view::helper::renderDescriptiveText(
+        _dataViewer.lastExternalSelectionTimestamp().c_str()
     );
 
     ImGui::Spacing();

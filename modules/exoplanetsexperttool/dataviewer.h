@@ -68,6 +68,10 @@ public:
 
     const std::vector<size_t>& planetsForHost(const std::string& hostStar) const;
 
+    size_t externalSelectionSize() const;
+    const std::string& lastExternalSelectionTimestamp() const;
+    void clearExternalSelection();
+
     // Compare the values of two Exoplanets items, given a specific column.
     // The comparison made is (left < right)
     bool compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
