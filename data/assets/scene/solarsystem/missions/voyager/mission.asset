@@ -108,7 +108,7 @@ local Mission = {
         {
           Name = "Voyager 2 Neptune Encounter",
           TimeRange = { Start = "1989 AUG 25 00:00:00", End = "1989 AUG 25 00:00:00" }
-        }            
+        }
       }
     }
   }

@@ -17,8 +17,7 @@ local SerenaElena = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Serena Elena",

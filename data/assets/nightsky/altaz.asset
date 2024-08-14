@@ -62,7 +62,6 @@ local AltAzGrid = {
   }
 }
 
-
 local ShowAltaz = {
   Identifier = "os.nightsky.ShowAltaz",
   Name = "Show Alt/Az grid",
@@ -101,6 +100,7 @@ local ToggleAltaz = {
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(AltAzGridPosition)

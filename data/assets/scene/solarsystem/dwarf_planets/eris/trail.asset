@@ -18,8 +18,7 @@ local Trail = {
   Tag = { "planetTrail_dwarf" },
   GUI = {
     Name = "Eris Trail",
-    Path = "/Solar System/Dwarf Planets/Eris",
-    Description = "Trail of Eris"
+    Path = "/Solar System/Dwarf Planets/Eris"
   }
 }
 

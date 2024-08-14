@@ -4,7 +4,6 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local AU = 1.496e+8
 
-
 local PlutoKeplerianTrail = {
   Identifier = "PlutoKeplerianTrail",
   Parent = transforms.SunEclipJ2000.Identifier,

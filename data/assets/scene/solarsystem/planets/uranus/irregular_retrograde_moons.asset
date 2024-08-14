@@ -79,8 +79,7 @@ local FranciscoLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Francisco Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco",
-    Description = "Label for Uranus' moon Francisco (Irregular Retrograde Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco"
   }
 }
 
@@ -159,8 +158,7 @@ local CalibanLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Caliban Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban",
-    Description = "Label for Uranus' moon Caliban (Irregular Retrograde Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban"
   }
 }
 
@@ -239,8 +237,7 @@ local StephanoLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Stephano Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano",
-    Description = "Label for Uranus' moon Stephano (Irregular Retrograde Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano"
   }
 }
 
@@ -319,8 +316,7 @@ local TrinculoLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Trinculo Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo",
-    Description = "Label for Uranus' moon Trinculo (Irregular Retrograde Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo"
   }
 }
 
@@ -399,8 +395,7 @@ local SycoraxLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Sycorax Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax",
-    Description = "Label for Uranus' moon Sycorax (Irregular Retrograde Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax"
   }
 }
 
@@ -479,8 +474,7 @@ local ProsperoLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Prospero Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero",
-    Description = "Label for Uranus' moon Prospero (Irregular Retrograde Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero"
   }
 }
 
@@ -559,8 +553,7 @@ local SetebosLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Setebos Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos",
-    Description = "Label for Uranus' moon Setebos (Irregular Retrograde Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos"
   }
 }
 
@@ -639,8 +632,7 @@ local FerdinandLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Ferdinand Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand",
-    Description = "Label for Uranus' moon Ferdinand (Irregular Retrograde Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand"
   }
 }
 
@@ -744,6 +736,7 @@ asset.export(SetebosLabel)
 asset.export(Ferdinand)
 asset.export(FerdinandTrail)
 asset.export(FerdinandLabel)
+
 
 
 asset.meta = {

@@ -97,7 +97,6 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
   return genConstellations
 end
 
-
 local ShowArt = {
   Identifier = "os.constellation_art.ShowArt",
   Name = "Show all",
@@ -191,6 +190,8 @@ asset.export("HideArtAction", HideArt.Identifier)
 asset.export("DisableArtAction", DisableArt.Identifier)
 asset.export("ShowZodiacArt", ShowZodiacArt.Identifier)
 asset.export("HideZodiacArt", HideZodiacArt.Identifier)
+
+
 
 asset.meta = {
   Name = "Constellation Images",

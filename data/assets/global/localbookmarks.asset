@@ -4,6 +4,8 @@ local bookmarkHelper = asset.require("util/generate_bookmarks")
 -- ensure that it is loaded first
 asset.require("scene/solarsystem/planets/earth/earth")
 
+
+
 local localBookmarks = openspace.absPath("${USER}/bookmarks/localbookmarks.csv")
 local bookmarksDirectory = openspace.absPath("${USER}/bookmarks")
 
@@ -28,6 +30,7 @@ local nodes = bookmarkHelper.loadBookmarks(
   "Local Bookmarks",
   "${USER}/bookmarks/localbookmarks.csv"
 )
+
 
 asset.onInitialize(function()
   for _, n in ipairs(nodes) do

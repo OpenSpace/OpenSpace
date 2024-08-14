@@ -207,6 +207,8 @@ asset.onInitialize(function()
   )
 end)
 
+
+
 asset.meta = {
   Name = "Joystick controller: Microsoft X-Box 360 pad",
   Description = "Joystick controller configuration for Microsoft X-Box 360 pad",

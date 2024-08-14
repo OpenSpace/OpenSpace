@@ -72,6 +72,7 @@ local Apollo15Trail = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo15)
   openspace.addSceneGraphNode(Apollo15Trail)

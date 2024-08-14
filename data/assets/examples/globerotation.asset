@@ -58,6 +58,7 @@ end)
 asset.export(ExampleGlobeRotation)
 
 
+
 asset.meta = {
   Name = "GlobeRotation Example",
   Description = [[An example that demonstrates how to load a 3D model from a geometry

@@ -18,7 +18,12 @@ local HyperionTrail = {
     Period = 21.276,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn", "moonTrail_major_saturn" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_major_saturn"
+  },
   GUI = {
     Name = "Hyperion Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Hyperion"

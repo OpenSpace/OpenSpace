@@ -18,8 +18,7 @@ local Trail = {
   Tag = { "planetTrail_dwarf" },
   GUI = {
     Name = "Makemake Trail",
-    Path = "/Solar System/Dwarf Planets/Makemake",
-    Description = "Trail of Makemake"
+    Path = "/Solar System/Dwarf Planets/Makemake"
   }
 }
 

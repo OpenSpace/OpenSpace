@@ -47,8 +47,7 @@ local Venus = {
   Tag = { "planet_solarSystem", "planet_terrestrial" },
   GUI = {
     Name = "Venus",
-    Path = "/Solar System/Planets/Venus",
-    Description = "Venus globe with labels and map layers"
+    Path = "/Solar System/Planets/Venus"
   }
 }
 
@@ -72,8 +71,7 @@ local VenusLabel = {
   Tag = { "solarsystem_labels" },
   GUI = {
       Name = "Venus Label",
-      Path = "/Solar System/Planets/Venus",
-      Description = "Label for Venus, viewable within the solar system"
+      Path = "/Solar System/Planets/Venus"
   }
 }
 

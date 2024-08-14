@@ -1745,6 +1745,7 @@ local S2003J12Label = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(S2010J2)
   openspace.addSceneGraphNode(S2010J2Trail)
