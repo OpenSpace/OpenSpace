@@ -35,6 +35,7 @@ set(HEADER_FILES
     rendering/renderableexoplanetglyphcloud.h
     views/colormappingview.h
     views/columnselectionview.h
+    views/filteringview.h
     views/viewhelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -49,6 +50,7 @@ set(SOURCE_FILES
     rendering/renderableexoplanetglyphcloud.cpp
     views/colormappingview.cpp
     views/columnselectionview.cpp
+    views/filteringview.cpp
     views/viewhelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

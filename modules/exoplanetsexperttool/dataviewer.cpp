@@ -25,6 +25,7 @@
 #include <modules/exoplanetsexperttool/dataviewer.h>
 
 #include <modules/exoplanets/exoplanetshelper.h>
+#include <modules/exoplanetsexperttool/columnfilter.h>
 #include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
@@ -206,17 +207,17 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     _externalSelection.setReadOnly(true);
     addProperty(_externalSelection);
 
-    _externalSelection.onChange([this]() {
-        if (_externalSelection.value().empty()) {
-            // Selection was cleared. Clear timestamp
-            _lastExternalSelectionTimeStamp = "";
-        }
-        else {
-            LINFO("Updated selection from webpage");
-            _lastExternalSelectionTimeStamp = timeString();
-        }
-        _externalSelectionChanged = true;
-    });
+    //_externalSelection.onChange([this]() {
+    //    if (_externalSelection.value().empty()) {
+    //        // Selection was cleared. Clear timestamp
+    //        _lastExternalSelectionTimeStamp = "";
+    //    }
+    //    else {
+    //        LINFO("Updated selection from webpage");
+    //        _lastExternalSelectionTimeStamp = timeString();
+    //    }
+    //    _externalSelectionChanged = true;
+    //});
 
     _dataSettings = DataLoader::loadDataSettingsFromJson();
 
@@ -229,24 +230,12 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
         _filteredData.push_back(i);
         _hostIdToPlanetsMap[makeIdentifier(_data[i].hostName)].push_back(i);
     }
-    _filteredDataWithoutExternalSelection = _filteredData;
-
-    // Set all quick filters to false
-    const size_t nQuickFilterGroups = _dataSettings.quickFilterGroups.size();
-    _quickFilterFlags.reserve(nQuickFilterGroups);
-    for (size_t groupId = 0; groupId < nQuickFilterGroups; ++groupId) {
-        const DataSettings::QuickFilterGroup& group =
-            _dataSettings.quickFilterGroups[groupId];
-
-        std::vector<bool> flags;
-        flags.assign(group.quickFilters.size(), false);
-        _quickFilterFlags.push_back(flags);
-    }
 
     _columns = _columnSelectionView.initializeColumnsFromData(_data, _dataSettings);
 
     // The other views use the loaded data, so call this afterwards
     _colorMappingView = std::make_unique<ColorMappingView>(*this, _dataSettings);
+    _filteringView = std::make_unique<FilteringView>(*this, _dataSettings);
 
     // Interaction callbacks. OBS! A bit ugly to handle this separately from ImGui io....
     global::callback::keyboard->emplace_back(
@@ -305,7 +294,7 @@ const char* DataViewer::columnName(const ColumnKey& key) const {
     return _dataSettings.columnName(key);
 }
 
-const char* DataViewer::columnName(int columnIndex) const {
+const char* DataViewer::columnName(size_t columnIndex) const {
     // TODO: validate index
     return _dataSettings.columnName(_columns[columnIndex]);
 }
@@ -335,6 +324,33 @@ const std::vector<size_t>& DataViewer::planetsForHost(const std::string& hostIde
         return std::vector<size_t>(); // TODO Do not return reference to local object
     }
     return _hostIdToPlanetsMap.at(hostIdentifier);
+}
+
+bool DataViewer::compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
+                                     const ExoplanetItem& right) const
+{
+    std::variant<const char*, float> leftValue = columnValue(key, left);
+    std::variant<const char*, float> rightValue = columnValue(key, right);
+
+    // TODO: make sure they are the same type
+
+    if (std::holds_alternative<const char*>(leftValue) &&
+        std::holds_alternative<const char*>(rightValue))
+    {
+        return !data::caseInsensitiveLessThan(
+            std::get<const char*>(leftValue),
+            std::get<const char*>(rightValue)
+        );
+    }
+    else if (std::holds_alternative<float>(leftValue) &&
+        std::holds_alternative<float>(rightValue))
+    {
+        return data::compareValuesWithNan(std::get<float>(leftValue), std::get<float>(rightValue));
+    }
+    else {
+        LERROR("Trying to compare mismatching column types");
+        return false;
+    }
 }
 
 void DataViewer::renderStartupInfo() {
@@ -978,520 +994,60 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
         return;
     }
 
-    // Row limit
-    static int nRows = 100;
-    static bool limitNumberOfRows = false;
-    static int nItemsWithoutRowLimit = static_cast<int>(_filteredData.size());
-
-    if (ImGui::Button("Reset internal")) {
-        _columnFilters.clear(); // Column filters
-
-        const size_t nQuickFilterGroups = _dataSettings.quickFilterGroups.size();
-        _quickFilterFlags.reserve(nQuickFilterGroups);
-        for (size_t i = 0; i < _dataSettings.quickFilterGroups.size(); ++i) {
-            _quickFilterFlags[i].assign(_quickFilterFlags[i].size(), false);
-        }
-
-        _filterChanged = true;
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("Reset row limit")) {
-        limitNumberOfRows = false;
-        _filterChanged = true;
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("Reset external")) {
-        _externalSelection = {};
-        _filterChanged = true;
-    }
-
-    // Internal filters group
-    bool showInternalFiltersSection =
-        ImGui::CollapsingHeader("Internal filters", ImGuiTreeNodeFlags_DefaultOpen);
-    ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Filter the data internally, within the OpenSpace application"
-    );
-
-    if (showInternalFiltersSection) {
-        // Per-column filtering
-        {
-            static size_t filterColIndex = 0;
-
-            ImGui::Separator();
-            ImGui::Text("Filter on column");
-            ImGui::SetNextItemWidth(120);
-            if (ImGui::BeginCombo("##Column", columnName(_columns[filterColIndex]))) {
-                for (size_t i = 0; i < _columns.size(); ++i) {
-                    if (ImGui::Selectable(columnName(_columns[i]), filterColIndex == i)) {
-                        filterColIndex = i;
-                    }
-                }
-                ImGui::EndCombo();
-            }
-
-            ImGui::SameLine();
-
-            static char queryString[128] = "";
-
-            bool numeric = isNumericColumn(filterColIndex);
-
-            ImGui::SetNextItemWidth(numeric ? ImGui::GetContentRegionAvail().x * 0.3f : -150);
-            bool inputEntered = ImGui::InputTextWithHint(
-                "##Query",
-                "has value",
-                queryString,
-                IM_ARRAYSIZE(queryString),
-                ImGuiInputTextFlags_EnterReturnsTrue
-            );
-
-            // Short description
-            ImGui::SameLine();
-            ImGui::TextUnformatted(numeric ?
-                ColumnFilter::NumericFilterDescriptionShort :
-                ColumnFilter::TextFilterDescriptionShort
-            );
-
-            // Help marker
-            ImGui::SameLine();
-            view::helper::renderHelpMarker(numeric ?
-                ColumnFilter::NumericFilterDescription :
-                ColumnFilter::TextFilterDescription
-            );
-
-            if (ImGui::Button("Add filter") || inputEntered) {
-                ColumnFilter filter = numeric ?
-                    ColumnFilter(queryString, ColumnFilter::Type::Numeric) :
-                    ColumnFilter(queryString, ColumnFilter::Type::Text);
-
-                if (filter.isValid()) {
-                    _columnFilters.push_back({ filterColIndex , filter });
-                    strcpy(queryString, "");
-                    _filterChanged = true;
-                }
-            }
-
-            // Clear the text field
-            ImGui::SameLine();
-            if (ImGui::Button("Clear text field")) {
-                strcpy(queryString, "");
-            }
-
-        }
-
-        ImGui::Spacing();
-
-        // Render list of column filters
-        {
-            const std::string filtersHeader = _columnFilters.empty() ?
-                "Added filters" :
-                std::format("Added filters ({})", _columnFilters.size());
-
-            // The ### operator overrides the ID, ignoring the preceding label
-            // => Won't rerender when label changes
-            const std::string headerWithId = std::format("{}###FiltersHeader", filtersHeader);
-
-            if (ImGui::CollapsingHeader(headerWithId.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::Indent();
-
-                if (_columnFilters.empty()) {
-                    ImGui::Text("No active filters");
-                }
-
-                int indexToErase = -1;
-                constexpr const int nColumns = 5;
-
-                const ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg;
-
-                if (ImGui::BeginTable("filtersTable", nColumns, flags)) {
-                    for (int i = 0; i < _columnFilters.size(); ++i) {
-                        ColumnFilterEntry &f = _columnFilters[i];
-                        const std::string queryString = f.filter.query();
-                        ImGui::TableNextRow();
-
-                        ImGui::PushID(std::format("FilterColEnabled-{}", i).c_str());
-                        ImGui::TableNextColumn();
-                        if (ImGui::Checkbox("##Enabled", &f.enabled)) {
-                            _filterChanged = true;
-                        }
-                        ImGui::PopID();
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text(columnName(_columns[f.columnIndex]));
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text("    ");
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text(queryString.empty() ? "has value" : queryString.c_str());
-
-                        ImGui::TableNextColumn();
-                        ImGui::PushID(i);
-                        if (ImGui::SmallButton("Delete")) {
-                            indexToErase = i;
-                        }
-                        ImGui::PopID();
-                    }
-
-                    if (indexToErase != -1) {
-                        _columnFilters.erase(_columnFilters.begin() + indexToErase);
-                        _filterChanged = true;
-                    }
-
-                    ImGui::EndTable();
-                }
-                ImGui::Unindent();
-            }
-        }
-
-        ImGui::Separator();
-        ImGui::Spacing();
-
-        // Pre-defined filters
-        {
-            const size_t nGroups = _dataSettings.quickFilterGroups.size();
-            for (size_t groupId = 0; groupId < nGroups; ++groupId) {
-                const DataSettings::QuickFilterGroup& group =
-                    _dataSettings.quickFilterGroups[groupId];
-
-                if (!group.title.empty()) {
-                    ImGui::Text(group.title.c_str());
-                }
-
-                for (size_t i = 0; i < group.quickFilters.size(); ++i) {
-                    const DataSettings::QuickFilter& filter = group.quickFilters[i];
-
-                    bool isSelected = _quickFilterFlags[groupId][i];
-
-                    ImGui::PushID(std::format("quickFilter_{}", i).c_str());
-                    _filterChanged |= ImGui::Checkbox(filter.name.c_str(), &isSelected);
-                    ImGui::PopID();
-
-                    _quickFilterFlags[groupId][i] = isSelected;
-
-                    if (!filter.description.empty()) {
-                        ImGui::SameLine();
-                        view::helper::renderHelpMarker(filter.description.c_str());
-                    }
-
-                    if (group.showOnSameLine && (i != group.quickFilters.size() - 1)) {
-                        ImGui::SameLine();
-                    }
-                }
-            }
-        }
-    }
-
-    ImGui::Spacing();
-    ImGui::Separator();
-
-    // Row limit group
-    bool showRowLimitSection = ImGui::CollapsingHeader("Row limit");
-    ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Limit the number of filtered rows (internal) based on which "
-        "have the highest TSM/ESM value"
-    );
-
-    static bool overrideInternalSelection = false;
-    bool useHighestValue = true;  // This default value does not matter
-    ColumnKey rowLimitCol = _columns.front(); // This default value does not matter
-    bool rowLimitFilterChanged = false;
-    if (showRowLimitSection) {
-        rowLimitFilterChanged |= ImGui::Checkbox("##RowLimit", &limitNumberOfRows);
-        ImGui::SameLine();
-        ImGui::Text("Limit number of rows");
-        ImGui::SameLine();
-        view::helper::renderHelpMarker(
-            "Enable to only show the top X resulting rows with highest or lowest value "
-            "for the given column"
-        );
-
-
-        ImGui::Text("Show");
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(85);
-        rowLimitFilterChanged |= ImGui::InputInt("##nRows", &nRows);
-        ImGui::SameLine();
-        ImGui::Text("rows with");
-        ImGui::SameLine();
-
-        const char* highOrLowChoices[] = { "highest", "lowest" };
-        static int highOrLowIndex = 0; // highest
-        ImGui::SetNextItemWidth(80);
-        bool highLowChanged = ImGui::Combo(
-            "##HighOrLowCombo",
-            &highOrLowIndex,
-            highOrLowChoices,
-            IM_ARRAYSIZE(highOrLowChoices)
-        );
-        if (highLowChanged) {
-            rowLimitFilterChanged = true;
-        };
-
-        useHighestValue = std::string(highOrLowChoices[highOrLowIndex]) == "highest";
-
-        ImGui::SameLine();
-
-        static size_t currentMetricChoiceIndex = 0;
-
-        // Find default column - first numeric
-        for (size_t i = 0; i < _columns.size(); ++i) {
-            if (isNumericColumn(i)) {
-                currentMetricChoiceIndex = i;
-                rowLimitFilterChanged = true;
-                break;
-            }
-        }
-
-        ImGui::SetNextItemWidth(100);
-        if (ImGui::BeginCombo(
-                "##RowLimitColumn",
-                columnName(_columns[currentMetricChoiceIndex]))
-            )
-        {
-            for (size_t i = 0; i < _columns.size(); ++i) {
-                // Ignore non-numeric columns
-                if (!isNumericColumn(i)) {
-                    continue;
-                }
-
-                const char* name = columnName(_columns[i]);
-                if (ImGui::Selectable(name, currentMetricChoiceIndex == i)) {
-                    currentMetricChoiceIndex = i;
-                    rowLimitFilterChanged = true;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        rowLimitCol = _columns[currentMetricChoiceIndex];
-    }
-    _filterChanged |= rowLimitFilterChanged;
-
-    ImGui::Spacing();
-    ImGui::Separator();
-
-    // External filter
-    bool showExternalFiltersSection = ImGui::CollapsingHeader("External filters");
-    ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Control filtering/selection coming from the external webpage. \n \n"
-        "Note that it is ignored by default. Set the 'Use selection from webpage' "
-        "to true to apply the selection. "
-    );
-
-    bool externalSelectionSettingsChanged = false;
-    if (showExternalFiltersSection) {
-        // Filter from webpage
-        {
-            if (ImGui::Checkbox("Use selection from website", &_useExternalSelection)) {
-                externalSelectionSettingsChanged = true;
-            }
-            if (!_externalSelection.value().empty()) {
-                ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 100);
-                if (ImGui::Button("Delete", ImVec2(100, 0))) {
-                    LINFO("Deleted external selection");
-                    _externalSelection = {};
-                    externalSelectionSettingsChanged = true;
-                }
-            }
-
-            ImGui::Text("Selection: ");
-            if (!_externalSelection.value().empty()) {
-                ImGui::SameLine();
-                ImGui::TextColored(
-                    ImColor(200, 200, 200),
-                    std::format("{} items", _externalSelection.value().size()).c_str()
-                );
-            }
-
-            ImGui::Text("Last updated: ");
-            ImGui::SameLine();
-            ImGui::TextColored(ImColor(200, 200, 200), _lastExternalSelectionTimeStamp.c_str());
-
-            if (ImGui::Checkbox("Override internal selection", &overrideInternalSelection)) {
-                externalSelectionSettingsChanged = true;
-            }
-            ImGui::SameLine();
-            view::helper::renderHelpMarker(
-                "If set to true, only the selection from the webpage will be shown. "
-                "Meaning that the above internal filtering will be ignored."
-            );
-        }
-
-        _filterChanged |= externalSelectionSettingsChanged;
-
-        // Also check if a new selection was sent from the webpage
-        _filterChanged |= (_useExternalSelection && _externalSelectionChanged);
-    }
-
-    ImGui::Separator();
+    _filterChanged = _filteringView->renderFilterSettings();
 
     // Filter the data
     // Update the filtered data
     if (_filterChanged) {
-        _filteredData.clear();
-        _filteredData.reserve(_data.size());
-
-        for (int i = 0; i < _data.size(); i++) {
-            const ExoplanetItem& item = _data[i];
-
-            bool filteredOut = false;
-
-            // Pre-defined filters
-            for (size_t groupId = 0; groupId < _quickFilterFlags.size(); ++groupId) {
-                const DataSettings::QuickFilterGroup& group = _dataSettings.quickFilterGroups[groupId];
-
-                bool hasAnyEnabled = false;
-                for (bool isChecked : _quickFilterFlags[groupId]) {
-                    if (isChecked) {
-                        hasAnyEnabled = true;
-                        break;
-                    }
-                }
-
-                if (!hasAnyEnabled) {
-                    continue;
-                }
-
-                auto passesQuickFilter = [this](const DataSettings::QuickFilter& q,
-                                                const ExoplanetItem& item)
-                {
-                    bool passedFilter = true;
-                    // Sub-filters in a quick filter are applied with AND, always
-                    for (const DataSettings::QuickFilter::Filter& filter : q.filters) {
-                        bool isNumeric = isNumericColumn(columnIndex(filter.column));
-                        ColumnFilter cf = ColumnFilter(
-                            filter.query,
-                            isNumeric ? ColumnFilter::Type::Numeric : ColumnFilter::Type::Text
-                        );
-                        passedFilter &= cf.passFilter(columnValue(filter.column, item));
-                    }
-                    return passedFilter;
-                };
-
-                bool passedAnyGroupFilter = false; // only used for OR
-
-                for (size_t qIndex = 0; qIndex < _quickFilterFlags[groupId].size(); ++qIndex) {
-                    const DataSettings::QuickFilter& q = group.quickFilters[qIndex];
-                    bool shouldMatchFilter = _quickFilterFlags[groupId][qIndex];
-
-                    switch (group.type) {
-                        case DataSettings::QuickFilterGroup::Type::And:
-                            if (shouldMatchFilter) {
-                                filteredOut |= !passesQuickFilter(q, item);
-                            }
-                            break;
-                        case DataSettings::QuickFilterGroup::Type::Or:
-                            passedAnyGroupFilter |= shouldMatchFilter && passesQuickFilter(q, item);
-                            break;
-                        default: break;
-                    }
-                }
-
-                if (group.type == DataSettings::QuickFilterGroup::Type::Or) {
-                    filteredOut |= !passedAnyGroupFilter;
-                }
-            }
-
-            // Other filters
-            for (const ColumnFilterEntry& f : _columnFilters) {
-                if (!f.enabled) {
-                    continue;
-                }
-
-                filteredOut |= !f.filter.passFilter(
-                    columnValue(_columns[f.columnIndex], item)
-                );
-
-            }
-
-            if (!filteredOut) {
-                _filteredData.push_back(i);
-            }
-        }
-        _filteredData.shrink_to_fit();
-
-        nItemsWithoutRowLimit = static_cast<int>(_filteredData.size());
+        _filteredData = _filteringView->applyFiltering(_data);
     }
 
-    // Show how many values the filter corresponds to, without the limited rows
-    view::helper::renderDescriptiveText(std::format(
-        "Current internal filter corresponds to {} exoplanets and \n"
-        "has {} active column filters \n", nItemsWithoutRowLimit, _columnFilters.size()
-    ).c_str());
+    //// OBS! This is a little nasty. Should be some better way to do it
+    //bool shouldUpdateBasedOnExternalSelection = false;
+    //shouldUpdateBasedOnExternalSelection |= externalSelectionSettingsChanged;
+    //shouldUpdateBasedOnExternalSelection |= _externalSelectionChanged;
+    //shouldUpdateBasedOnExternalSelection |= (_filterChanged && _useExternalSelection);
+    //shouldUpdateBasedOnExternalSelection &= (_useExternalSelection && !_externalSelection.value().empty());
 
-    // Limit the number of rows by first sorting based on the chosen metric
-    static int nRowsAfterLimit = 0;
-    if (limitNumberOfRows && _filteredData.size() > nRows) {
-        auto compare = [&rowLimitCol, &useHighestValue, this](const size_t& lhs, const size_t& rhs) {
-            // We are interested in the largest, so flip the order
-            const ExoplanetItem& l = _data[useHighestValue ? rhs : lhs];
-            const ExoplanetItem& r = _data[useHighestValue ? lhs : rhs];
-            return compareColumnValues(rowLimitCol, l, r);
-        };
+    //if (shouldUpdateBasedOnExternalSelection) {
+    //    if (overrideInternalSelection) {
+    //        // Just use the external seleciton, out of the box
+    //        std::vector<size_t> newFilteredData;
+    //        newFilteredData.reserve(_externalSelection.value().size());
 
-        std::sort(_filteredData.begin(), _filteredData.end(), compare);
-        _filteredData.erase(_filteredData.begin() + nRows, _filteredData.end());
-        nRowsAfterLimit = static_cast<int>(_filteredData.size());
-    }
+    //        for (int i : _externalSelection.value()) {
+    //            newFilteredData.push_back(static_cast<size_t>(i));
+    //        }
 
-    if (limitNumberOfRows) {
-        ImGui::TextColored(
-            view::helper::toImVec4(view::colors::DescriptiveText),
-            std::format("After row limit : {}", nRowsAfterLimit).c_str()
-        );
-    }
+    //        _filterChanged = true; // Update filter changed flag, to always trigger resorting
+    //        _filteredData = std::move(newFilteredData);
+    //    }
+    //    else {
+    //        // Do an intersection, i.e. check if the filtered out items are in the selection
+    //        std::vector<size_t> newFilteredData;
+    //        newFilteredData.reserve(_filteredData.size());
+    //        std::vector<int> searchList = _externalSelection.value();
 
-    // OBS! This is a little nasty. Should be some better way to do it
-    bool shouldUpdateBasedOnExternalSelection = false;
-    shouldUpdateBasedOnExternalSelection |= externalSelectionSettingsChanged;
-    shouldUpdateBasedOnExternalSelection |= _externalSelectionChanged;
-    shouldUpdateBasedOnExternalSelection |= (_filterChanged && _useExternalSelection);
-    shouldUpdateBasedOnExternalSelection &= (_useExternalSelection && !_externalSelection.value().empty());
+    //        for (size_t index : _filteredData) {
+    //            bool isFound = std::find(
+    //                searchList.begin(),
+    //                searchList.end(),
+    //                static_cast<int>(index)
+    //            ) != searchList.end();
+    //            if (isFound) {
+    //                newFilteredData.push_back(index);
+    //            }
+    //        }
+    //        newFilteredData.shrink_to_fit();
+    //        _filteredData = std::move(newFilteredData);
+    //    }
+    //}
 
-    if (shouldUpdateBasedOnExternalSelection) {
-        if (overrideInternalSelection) {
-            // Just use the external seleciton, out of the box
-            std::vector<size_t> newFilteredData;
-            newFilteredData.reserve(_externalSelection.value().size());
-
-            for (int i : _externalSelection.value()) {
-                newFilteredData.push_back(static_cast<size_t>(i));
-            }
-
-            _filterChanged = true; // Update filter changed flag, to always trigger resorting
-            _filteredData = std::move(newFilteredData);
-        }
-        else {
-            // Do an intersection, i.e. check if the filtered out items are in the selection
-            std::vector<size_t> newFilteredData;
-            newFilteredData.reserve(_filteredData.size());
-            std::vector<int> searchList = _externalSelection.value();
-
-            for (size_t index : _filteredData) {
-                bool isFound = std::find(
-                    searchList.begin(),
-                    searchList.end(),
-                    static_cast<int>(index)
-                ) != searchList.end();
-                if (isFound) {
-                    newFilteredData.push_back(index);
-                }
-            }
-            newFilteredData.shrink_to_fit();
-            _filteredData = std::move(newFilteredData);
-        }
-    }
-
-    if (_useExternalSelection && !_externalSelection.value().empty()) {
-        view::helper::renderDescriptiveText(std::format(
-            "After applying external filtering: {}", _filteredData.size()
-        ).c_str());
-    }
+    //if (_useExternalSelection && !_externalSelection.value().empty()) {
+    //    view::helper::renderDescriptiveText(std::format(
+    //        "After applying external filtering: {}", _filteredData.size()
+    //    ).c_str());
+    //}
 
     ImGui::End(); // Filter settings window
 
@@ -1504,7 +1060,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     }
 
     // Reset some state changed variables
-    _externalSelectionChanged = false;
+    //_externalSelectionChanged = false;
 }
 
 int DataViewer::getHoveredPlanetIndex() const {
@@ -1959,33 +1515,6 @@ void DataViewer::renderColumnValue(int columnIndex, const ExoplanetItem& item) {
     }
     else if (std::holds_alternative<const char*>(value)) {
         ImGui::Text("%s", std::get<const char*>(value));
-    }
-}
-
-bool DataViewer::compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
-                                     const ExoplanetItem& right) const
-{
-    std::variant<const char*, float> leftValue = columnValue(key, left);
-    std::variant<const char*, float> rightValue = columnValue(key, right);
-
-    // TODO: make sure they are the same type
-
-    if (std::holds_alternative<const char*>(leftValue) &&
-        std::holds_alternative<const char*>(rightValue))
-    {
-        return !data::caseInsensitiveLessThan(
-            std::get<const char*>(leftValue),
-            std::get<const char*>(rightValue)
-        );
-    }
-    else if (std::holds_alternative<float>(leftValue) &&
-             std::holds_alternative<float>(rightValue))
-    {
-        return data::compareValuesWithNan(std::get<float>(leftValue), std::get<float>(rightValue));
-    }
-    else {
-        LERROR("Trying to compare mismatching column types");
-        return false;
     }
 }
 

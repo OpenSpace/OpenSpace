@@ -27,11 +27,11 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/exoplanetsexperttool/columnfilter.h>
 #include <modules/exoplanetsexperttool/dataloader.h>
 #include <modules/exoplanetsexperttool/datastructures.h>
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 #include <modules/exoplanetsexperttool/views/columnselectionview.h>
+#include <modules/exoplanetsexperttool/views/filteringview.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <ghoul/glm.h>
@@ -58,7 +58,7 @@ public:
         const ExoplanetItem& item) const;
     size_t columnIndex(const ColumnKey& key) const;
     const char* columnName(const ColumnKey& key) const;
-    const char* columnName(int columnIndex) const;
+    const char* columnName(size_t columnIndex) const;
     const ColumnKey& nameColumn() const;
     bool isNameColumn(const ColumnKey& key) const;
 
@@ -67,6 +67,11 @@ public:
     const std::vector<ColumnKey>& columns() const;
 
     const std::vector<size_t>& planetsForHost(const std::string& hostStar) const;
+
+    // Compare the values of two Exoplanets items, given a specific column.
+    // The comparison made is (left < right)
+    bool compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
+        const ExoplanetItem& right) const;
 
     void render();
 
@@ -100,11 +105,6 @@ private:
 
     void renderColumnValue(int columnIndex, const ExoplanetItem& item);
 
-    // Compare the values of two Exoplanets items, given a specific column.
-    // The comparison made is (left < right)
-    bool compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
-        const ExoplanetItem& right) const ;
-
     // Write the information about the rendered points to a file
     void writeRenderDataToFile();
 
@@ -122,6 +122,7 @@ private:
     DataSettings _dataSettings;
     ColumnSelectionView _columnSelectionView;
     std::unique_ptr<ColorMappingView> _colorMappingView;
+    std::unique_ptr<FilteringView> _filteringView;
 
     std::vector<ExoplanetItem> _data;
     std::vector<size_t> _filteredData;  // The indices of the items which will be rendered
@@ -134,25 +135,11 @@ private:
     std::vector<ColumnKey> _columns;
 
     bool _colormapWasChanged = true;
-
-    struct ColumnFilterEntry {
-        size_t columnIndex;
-        ColumnFilter filter;
-        bool enabled = true;
-    };
-    std::vector<ColumnFilterEntry> _columnFilters;
-
-    std::vector<std::vector<bool>> _quickFilterFlags;
-
-    // Filter selection from webpage
-    properties::IntListProperty _externalSelection;
-    std::vector<size_t> _filteredDataWithoutExternalSelection;
-    std::string _lastExternalSelectionTimeStamp;
-    bool _useExternalSelection = false;
-    bool _externalSelectionChanged = false;
-
     bool _filterChanged = false;
     bool _selectionChanged = false;
+
+    // TODO: This should live in the module instead?
+    properties::IntListProperty _externalSelection;
 
     // Keep track of whether ctrl is held, to prevent undesired interaction
     // when interacting with glyphs

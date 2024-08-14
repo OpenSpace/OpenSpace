@@ -22,58 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLORMAPPINGVIEW___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLORMAPPINGVIEW___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___FILTERINGVIEW___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___FILTERINGVIEW___H__
 
+#include <modules/exoplanetsexperttool/columnfilter.h>
 #include <modules/exoplanetsexperttool/datastructures.h>
-#include <string>
-#include <vector>
 
 namespace openspace::exoplanets {
 
 class DataViewer;
-struct DataSettings;
 
-class ColorMappingView {
+class FilteringView {
 public:
-    struct ColorMappedVariable {
-        int colormapIndex = 0;
-        size_t columnIndex = 0;
-        float colorScaleMin = 0.f;
-        float colorScaleMax = 100.f;
-        float opacity = 1.f;
-    };
-
-    ColorMappingView(const DataViewer& dataViewer,
+    FilteringView(const DataViewer& dataViewer,
         const DataSettings& dataSettings);
 
-    void initializeGL();
+    // Return true if filtering was changed
+    bool renderFilterSettings();
 
-    const std::vector<ColorMappedVariable>& colorMapperVariables() const;
-
-    // Return true if the color map was changed
-    bool renderViewContent();
-
-    // Render an edit view for one individual color mapped value.
-    // Returns true if value was changed. If relevantSystem given,
-    // also show a button to color based on planets in that system
-    bool renderColormapEdit(ColorMappedVariable& variable,
-        std::string_view relevantSystem = "");
-
-    glm::vec4 colorFromColormap(const ExoplanetItem& item,
-        const ColorMappedVariable& variable);
+    // Return the rows matching the current filtering
+    std::vector<size_t> applyFiltering(const std::vector<ExoplanetItem>& data);
 
 private:
-    glm::vec4 _nanPointColor = { 0.3f, 0.3f, 0.3f, 1.f };
-    std::vector<const char*> _colormaps;
+    bool renderColumnFilterSettings();
+    bool renderRowLimitFilterSettings();
+    bool renderExternalFilterSettings();
 
-    std::vector<ColorMappedVariable> _variableSelection;
+    struct ColumnFilterEntry {
+        size_t columnIndex;
+        ColumnFilter filter;
+        bool enabled = true;
+    };
+    std::vector<ColumnFilterEntry> _columnFilters;
+    std::vector<std::vector<bool>> _quickFilterFlags;
 
-    size_t _firstNumericColumnIndex = 0;
+    bool _limitNumberOfRows = false;
+    int _nRows = 100;
+    bool _useHighestValue = true;
+    size_t _rowLimitColumnIndex = 0;
+
+    // Filter selection from webpage
+    std::string _lastExternalSelectionTimeStamp;
+    bool _useExternalSelection = false;
+    bool _externalSelectionChanged = false;
 
     const DataViewer& _dataViewer;
+    const std::vector<DataSettings::QuickFilterGroup>& _quickFilterGroups;
 };
 
 } // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLORMAPPINGVIEW___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___FILTERINGVIEW___H__
