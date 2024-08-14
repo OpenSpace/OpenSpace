@@ -53,11 +53,6 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     settings.windowless_rendering_enabled = true;
     attachDebugSettings(settings);
 
-#ifdef WIN32
-    // Enable High-DPI support on Windows 7 or newer
-    CefEnableHighDPISupport();
-#endif // WIN32
-
 #ifdef __APPLE__
     // Load the CEF framework library at runtime instead of linking directly as required
     // by the macOS sandbox implementation
