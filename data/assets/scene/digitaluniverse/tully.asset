@@ -1,3 +1,7 @@
+local transforms = asset.require("./transforms")
+
+
+
 local textures = asset.resource({
   Name = "Tully Textures",
   Type = "HttpSynchronization",
@@ -13,13 +17,6 @@ local speck = asset.resource({
 })
 
 
-local TransformMatrix = {
-  -0.7357425748,    0.67726129641,  0.0,           0.0,
-  -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-  0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-  0.0,              0.0,            0.0,           1.0
-}
-
 local TullyGalaxies = {
   Identifier = "TullyGalaxies",
   Renderable = {
@@ -31,7 +28,7 @@ local TullyGalaxies = {
       Size = 19.36,
       MinMaxSize = { 8, 20 },
       Unit = "Mpc",
-      TransformationMatrix = TransformMatrix
+      TransformationMatrix = transforms.Supergalactic
     },
     Opacity = 0.99,
     File = speck .. "tully.speck",
@@ -49,7 +46,7 @@ local TullyGalaxies = {
       }
     },
     Unit = "Mpc",
-    TransformationMatrix = TransformMatrix,
+    TransformationMatrix = transforms.Supergalactic,
     Fading = {
       FadeInDistances = { 0.001, 1.0 } -- Fade in value in the same unit as "Unit"
     },
@@ -86,7 +83,7 @@ local TullyGalaxiesImages = {
     Texture = {
       Folder = textures
     },
-    TransformationMatrix = TransformMatrix,
+    TransformationMatrix = transforms.Supergalactic,
     -- Use fixed orientation, and rotate planes based on orientation information in
     -- the dataset
     OrientationRenderOption = "Fixed Rotation",
