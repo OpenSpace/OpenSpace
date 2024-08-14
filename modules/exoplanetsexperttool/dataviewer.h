@@ -138,7 +138,8 @@ private:
     bool _filterChanged = false;
     bool _selectionChanged = false;
 
-    // TODO: This should live in the module instead?
+    bool _externalSelectionChanged = false;
+    std::string _lastExternalSelectionTimeStamp;
     properties::IntListProperty _externalSelection;
 
     // Keep track of whether ctrl is held, to prevent undesired interaction

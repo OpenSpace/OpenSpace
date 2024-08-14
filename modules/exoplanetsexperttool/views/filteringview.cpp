@@ -55,7 +55,6 @@ FilteringView::FilteringView(const DataViewer& dataViewer,
             break;
         }
     }
-
 }
 
 bool FilteringView::renderFilterSettings() {
@@ -78,77 +77,16 @@ bool FilteringView::renderFilterSettings() {
         filterWasChanged = true;
     }
 
-    //ImGui::SameLine();
-    //if (ImGui::Button("Reset external")) {
-    //    _externalSelection = {};
-    //    filterWasChanged = true;
-    //}
-
-    filterWasChanged |= renderColumnFilterSettings();
-
-    ImGui::Spacing();
-    ImGui::Separator();
-
-    filterWasChanged |= renderRowLimitFilterSettings();
-
-    ImGui::Spacing();
-    ImGui::Separator();
-
-    // External filter
-    bool showExternalFiltersSection = ImGui::CollapsingHeader("External filters");
     ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Control filtering/selection coming from the external webpage. \n \n"
-        "Note that it is ignored by default. Set the 'Use selection from webpage' "
-        "to true to apply the selection. "
-    );
-
-    bool externalSelectionSettingsChanged = false;
-    if (showExternalFiltersSection) {
-        //// Filter from webpage
-        //{
-        //    if (ImGui::Checkbox("Use selection from website", &_useExternalSelection)) {
-        //        externalSelectionSettingsChanged = true;
-        //    }
-        //    if (!_externalSelection.value().empty()) {
-        //        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 100);
-        //        if (ImGui::Button("Delete", ImVec2(100, 0))) {
-        //            LINFO("Deleted external selection");
-        //            _externalSelection = {};
-        //            externalSelectionSettingsChanged = true;
-        //        }
-        //    }
-
-        //    ImGui::Text("Selection: ");
-        //    if (!_externalSelection.value().empty()) {
-        //        ImGui::SameLine();
-        //        ImGui::TextColored(
-        //            ImColor(200, 200, 200),
-        //            std::format("{} items", _externalSelection.value().size()).c_str()
-        //        );
-        //    }
-
-        //    ImGui::Text("Last updated: ");
-        //    ImGui::SameLine();
-        //    ImGui::TextColored(ImColor(200, 200, 200), _lastExternalSelectionTimeStamp.c_str());
-
-        //    if (ImGui::Checkbox("Override internal selection", &overrideInternalSelection)) {
-        //        externalSelectionSettingsChanged = true;
-        //    }
-        //    ImGui::SameLine();
-        //    view::helper::renderHelpMarker(
-        //        "If set to true, only the selection from the webpage will be shown. "
-        //        "Meaning that the above internal filtering will be ignored."
-        //    );
-        //}
-
-        //filterWasChanged |= externalSelectionSettingsChanged;
-
-        //// Also check if a new selection was sent from the webpage
-        //filterWasChanged |= (_useExternalSelection && _externalSelectionChanged);
+    if (ImGui::Button("Reset external")) {
+        _useExternalSelection = false;
+        _overrideInternalSelection = false;
+        filterWasChanged = true;
     }
 
-    //ImGui::Separator();
+    filterWasChanged |= renderColumnFilterSettings();
+    filterWasChanged |= renderRowLimitFilterSettings();
+    filterWasChanged |= renderExternalFilterSettings();
 
     return filterWasChanged;
 }
@@ -232,7 +170,6 @@ std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetIte
             filteredOut |= !f.filter.passFilter(
                 _dataViewer.columnValue(_dataViewer.columns()[f.columnIndex], item)
             );
-
         }
 
         if (!filteredOut) {
@@ -267,17 +204,62 @@ std::vector<size_t> FilteringView::applyFiltering(const std::vector<ExoplanetIte
     return filteredData;
 }
 
+std::vector<size_t> FilteringView::applyExternalSelection(
+                                                   const std::vector<int>& externalSelection,
+                                                   const std::vector<size_t>& prefilteredData)
+{
+    if (!_useExternalSelection) {
+        return prefilteredData;
+    }
+
+    std::vector<size_t> filteredData = prefilteredData;
+
+    if (_overrideInternalSelection) {
+        // Just use the external seleciton, out of the box
+        filteredData.clear();
+        filteredData.reserve(externalSelection.size());
+        for (int i : externalSelection) {
+            filteredData.push_back(static_cast<size_t>(i));
+        }
+    }
+    else {
+        // Do an intersection, i.e. check if the filtered out items are in the selection
+        std::vector<size_t> newFilteredData;
+        newFilteredData.reserve(filteredData.size());
+
+        for (size_t index : filteredData) {
+            bool isFound = std::find(
+                externalSelection.begin(),
+                externalSelection.end(),
+                static_cast<int>(index)
+            ) != externalSelection.end();
+            if (isFound) {
+                newFilteredData.push_back(index);
+            }
+        }
+        newFilteredData.shrink_to_fit();
+        filteredData = std::move(newFilteredData);
+    }
+
+    return filteredData;
+}
+
 bool FilteringView::renderColumnFilterSettings() {
     bool filterWasChanged = false;
 
-    if (!ImGui::CollapsingHeader("Internal filters", ImGuiTreeNodeFlags_DefaultOpen)) {
-        return false;
-    }
+    bool headerIsOpen = ImGui::CollapsingHeader(
+        "Internal filters",
+        ImGuiTreeNodeFlags_DefaultOpen
+    );
 
     ImGui::SameLine();
     view::helper::renderHelpMarker(
         "Filter the data internally, within the OpenSpace application"
     );
+
+    if (!headerIsOpen) {
+        return filterWasChanged;
+    }
 
     // Per-column filtering
     {
@@ -345,7 +327,7 @@ bool FilteringView::renderColumnFilterSettings() {
 
     ImGui::Spacing();
 
-    // Render list of column filters
+    // List of column filters
     {
         const std::string filtersHeader = _columnFilters.empty() ?
             "Added filters" :
@@ -411,7 +393,7 @@ bool FilteringView::renderColumnFilterSettings() {
     ImGui::Separator();
     ImGui::Spacing();
 
-    // Pre-defined filters
+    // Pre-defined quick filters
     {
         const size_t nGroups = _quickFilterGroups.size();
         for (size_t groupId = 0; groupId < nGroups; ++groupId) {
@@ -444,26 +426,26 @@ bool FilteringView::renderColumnFilterSettings() {
         }
     }
 
+    ImGui::Spacing();
+
     return filterWasChanged;
 }
 
 bool FilteringView::renderRowLimitFilterSettings() {
     bool filterWasChanged = false;
 
-    static bool overrideInternalSelection = false; // TODO: move
-
-    if (!ImGui::CollapsingHeader("Row limit")) {
-        return false;
-    }
-
+    bool headerIsOpen = ImGui::CollapsingHeader("Row limit");
     ImGui::SameLine();
     view::helper::renderHelpMarker(
         "Limit the number of filtered rows (internal) based on which "
         "have the highest TSM/ESM value"
     );
 
-    bool rowLimitFilterChanged = false;
-    rowLimitFilterChanged |= ImGui::Checkbox("##RowLimit", &_limitNumberOfRows);
+    if (!headerIsOpen) {
+        return filterWasChanged;
+    }
+
+    filterWasChanged |= ImGui::Checkbox("##RowLimit", &_limitNumberOfRows);
     ImGui::SameLine();
     ImGui::Text("Limit number of rows");
     ImGui::SameLine();
@@ -472,11 +454,10 @@ bool FilteringView::renderRowLimitFilterSettings() {
         "for the given column"
     );
 
-
     ImGui::Text("Show");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(85);
-    rowLimitFilterChanged |= ImGui::InputInt("##nRows", &_nRows);
+    filterWasChanged |= ImGui::InputInt("##nRows", &_nRows);
     ImGui::SameLine();
     ImGui::Text("rows with");
     ImGui::SameLine();
@@ -492,7 +473,7 @@ bool FilteringView::renderRowLimitFilterSettings() {
         IM_ARRAYSIZE(highOrLowChoices)
     );
     if (highLowChanged) {
-        rowLimitFilterChanged = true;
+        filterWasChanged = true;
     };
 
     _useHighestValue = std::string(highOrLowChoices[highOrLowIndex]) == "highest";
@@ -511,19 +492,47 @@ bool FilteringView::renderRowLimitFilterSettings() {
             const char* name = _dataViewer.columnName(i);
             if (ImGui::Selectable(name, _rowLimitColumnIndex == i)) {
                 _rowLimitColumnIndex = i;
-                rowLimitFilterChanged = true;
+                filterWasChanged = true;
             }
         }
         ImGui::EndCombo();
     }
 
-    filterWasChanged |= rowLimitFilterChanged;
+    ImGui::Spacing();
 
     return filterWasChanged;
 }
 
 bool FilteringView::renderExternalFilterSettings() {
     bool filterWasChanged = false;
+
+    bool headerIsOpen = ImGui::CollapsingHeader("External filters");
+    ImGui::SameLine();
+    view::helper::renderHelpMarker(
+        "Control filtering/selection coming from the external webpage. \n \n"
+        "Note that it is ignored by default. Set the 'Use selection from webpage' "
+        "to true to apply the selection. "
+    );
+
+    if (!headerIsOpen) {
+        return filterWasChanged;
+    }
+
+    // Filter from webpage
+    if (ImGui::Checkbox("Use selection from website", &_useExternalSelection)) {
+        filterWasChanged = true;
+    }
+
+    if (ImGui::Checkbox("Override internal selection", &_overrideInternalSelection)) {
+        filterWasChanged = true;
+    }
+    ImGui::SameLine();
+    view::helper::renderHelpMarker(
+        "If set to true, only the selection from the webpage will be shown. "
+        "Meaning that the above internal filtering will be ignored."
+    );
+
+    ImGui::Spacing();
 
     return filterWasChanged;
 }

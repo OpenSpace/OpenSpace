@@ -207,17 +207,17 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     _externalSelection.setReadOnly(true);
     addProperty(_externalSelection);
 
-    //_externalSelection.onChange([this]() {
-    //    if (_externalSelection.value().empty()) {
-    //        // Selection was cleared. Clear timestamp
-    //        _lastExternalSelectionTimeStamp = "";
-    //    }
-    //    else {
-    //        LINFO("Updated selection from webpage");
-    //        _lastExternalSelectionTimeStamp = timeString();
-    //    }
-    //    _externalSelectionChanged = true;
-    //});
+    _externalSelection.onChange([this]() {
+        if (_externalSelection.value().empty()) {
+            // Selection was cleared. Clear timestamp
+            _lastExternalSelectionTimeStamp = "";
+        }
+        else {
+            LINFO("Updated selection from webpage");
+            _lastExternalSelectionTimeStamp = timeString();
+        }
+        _externalSelectionChanged = true;
+    });
 
     _dataSettings = DataLoader::loadDataSettingsFromJson();
 
@@ -593,7 +593,6 @@ void DataViewer::render() {
     }
 
     // Windows
-    _filterChanged = false;
     if (showFilterSettingsWindow) {
         renderFilterSettingsWindow(&showFilterSettingsWindow);
     }
@@ -988,6 +987,10 @@ void DataViewer::renderTable(const std::string& tableId,
 }
 
 void DataViewer::renderFilterSettingsWindow(bool* open) {
+    // Reset some state changed variables
+    _filterChanged = false;
+    _externalSelectionChanged = false;
+
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Filters", open)) {
         ImGui::End();
@@ -996,71 +999,60 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
 
     _filterChanged = _filteringView->renderFilterSettings();
 
-    // Filter the data
+    // Some extra information about the external selection
+    ImGui::Text("External Selection: ");
+    if (!_externalSelection.value().empty()) {
+        ImGui::SameLine();
+        ImGui::TextColored(
+            ImColor(200, 200, 200),
+            std::format("{} items", _externalSelection.value().size()).c_str()
+        );
+
+        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 100);
+        if (ImGui::Button("Delete", ImVec2(100, 0))) {
+            LINFO("Deleted external selection");
+            _externalSelection = {};
+            _filterChanged = true;
+        }
+    }
+
+    ImGui::Text("Last updated: ");
+    ImGui::SameLine();
+    ImGui::TextColored(ImColor(200, 200, 200), _lastExternalSelectionTimeStamp.c_str());
+
+    static size_t filteredDataSizeBeforeExternal = 0;
+
     // Update the filtered data
     if (_filterChanged) {
         _filteredData = _filteringView->applyFiltering(_data);
+        filteredDataSizeBeforeExternal = _filteredData.size(),
+
+        _filteredData = _filteringView->applyExternalSelection(
+            _externalSelection.value(),
+            _filteredData
+        );
     }
 
-    //// OBS! This is a little nasty. Should be some better way to do it
-    //bool shouldUpdateBasedOnExternalSelection = false;
-    //shouldUpdateBasedOnExternalSelection |= externalSelectionSettingsChanged;
-    //shouldUpdateBasedOnExternalSelection |= _externalSelectionChanged;
-    //shouldUpdateBasedOnExternalSelection |= (_filterChanged && _useExternalSelection);
-    //shouldUpdateBasedOnExternalSelection &= (_useExternalSelection && !_externalSelection.value().empty());
+    ImGui::Separator();
 
-    //if (shouldUpdateBasedOnExternalSelection) {
-    //    if (overrideInternalSelection) {
-    //        // Just use the external seleciton, out of the box
-    //        std::vector<size_t> newFilteredData;
-    //        newFilteredData.reserve(_externalSelection.value().size());
+    view::helper::renderDescriptiveText(std::format(
+        "Number items after internal and row-limit filtering: {} / {}",
+        filteredDataSizeBeforeExternal, _data.size()
+    ).c_str());
 
-    //        for (int i : _externalSelection.value()) {
-    //            newFilteredData.push_back(static_cast<size_t>(i));
-    //        }
-
-    //        _filterChanged = true; // Update filter changed flag, to always trigger resorting
-    //        _filteredData = std::move(newFilteredData);
-    //    }
-    //    else {
-    //        // Do an intersection, i.e. check if the filtered out items are in the selection
-    //        std::vector<size_t> newFilteredData;
-    //        newFilteredData.reserve(_filteredData.size());
-    //        std::vector<int> searchList = _externalSelection.value();
-
-    //        for (size_t index : _filteredData) {
-    //            bool isFound = std::find(
-    //                searchList.begin(),
-    //                searchList.end(),
-    //                static_cast<int>(index)
-    //            ) != searchList.end();
-    //            if (isFound) {
-    //                newFilteredData.push_back(index);
-    //            }
-    //        }
-    //        newFilteredData.shrink_to_fit();
-    //        _filteredData = std::move(newFilteredData);
-    //    }
-    //}
-
-    //if (_useExternalSelection && !_externalSelection.value().empty()) {
-    //    view::helper::renderDescriptiveText(std::format(
-    //        "After applying external filtering: {}", _filteredData.size()
-    //    ).c_str());
-    //}
+    view::helper::renderDescriptiveText(std::format(
+        "After applying external filtering: {}", _filteredData.size()
+    ).c_str());
 
     ImGui::End(); // Filter settings window
 
     updateFilteredRowsProperty();
 
-    // Handle selection
+    // Clear selection
     if (_filterChanged) {
         _selection.clear();
         updateSelectionInRenderable();
     }
-
-    // Reset some state changed variables
-    //_externalSelectionChanged = false;
 }
 
 int DataViewer::getHoveredPlanetIndex() const {

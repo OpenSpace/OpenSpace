@@ -34,14 +34,16 @@ class DataViewer;
 
 class FilteringView {
 public:
-    FilteringView(const DataViewer& dataViewer,
-        const DataSettings& dataSettings);
+    FilteringView(const DataViewer& dataViewer, const DataSettings& dataSettings);
 
     // Return true if filtering was changed
     bool renderFilterSettings();
 
     // Return the rows matching the current filtering
     std::vector<size_t> applyFiltering(const std::vector<ExoplanetItem>& data);
+
+    std::vector<size_t> applyExternalSelection(const std::vector<int>& externalSelection,
+        const std::vector<size_t>& prefilteredData);
 
 private:
     bool renderColumnFilterSettings();
@@ -62,9 +64,8 @@ private:
     size_t _rowLimitColumnIndex = 0;
 
     // Filter selection from webpage
-    std::string _lastExternalSelectionTimeStamp;
     bool _useExternalSelection = false;
-    bool _externalSelectionChanged = false;
+    bool _overrideInternalSelection = false;
 
     const DataViewer& _dataViewer;
     const std::vector<DataSettings::QuickFilterGroup>& _quickFilterGroups;
