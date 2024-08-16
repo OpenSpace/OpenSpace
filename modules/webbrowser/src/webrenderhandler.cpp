@@ -143,7 +143,7 @@ void WebRenderHandler::OnAcceleratedPaint(
 
 void WebRenderHandler::updateTexture() {
     if (_acceleratedRendering) {
-        LERROR("Tried to update texture when it was rendering with accelerated rendering");
+        LERROR("Tried to update texture while rendering with accelerated rendering");
         return;
     }
     if (_needsRepaint) {
@@ -208,7 +208,10 @@ bool WebRenderHandler::hasContent(int x, int y) {
         glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 
         // Allocate memory for the PBO (width * height * 4 bytes for RGBA)
-        glBufferData(GL_PIXEL_PACK_BUFFER, _windowSize.x * _windowSize .y * 4, nullptr, GL_STREAM_READ);
+        glBufferData(
+            GL_PIXEL_PACK_BUFFER, _windowSize.x * _windowSize .y * 4, nullptr,
+            GL_STREAM_READ
+        );
 
         glBindTexture(GL_TEXTURE_2D, _texture);
 
