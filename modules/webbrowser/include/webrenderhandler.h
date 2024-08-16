@@ -50,6 +50,7 @@ namespace openspace {
 
 class WebRenderHandler : public CefRenderHandler {
 public:
+    WebRenderHandler();
     using Pixel = glm::tvec4<char>;
 
     virtual void draw(void) = 0;
@@ -67,16 +68,17 @@ public:
 
 protected:
     GLuint _texture = 0;
+    bool _needsRepaint = true;
+    glm::ivec2 _windowSize = glm::ivec2(0);
+    const bool _acceleratedRendering;
 
 private:
-    glm::ivec2 _windowSize = glm::ivec2(0);
     glm::ivec2 _browserBufferSize = glm::ivec2(0);
 
     /**
      * RGBA buffer from browser
      */
     std::vector<Pixel> _browserBuffer;
-    bool _needsRepaint = true;
     bool _textureSizeIsDirty = true;
     bool _textureIsDirty = true;
     glm::ivec2 _lowerDirtyRectBound = glm::ivec2(0);

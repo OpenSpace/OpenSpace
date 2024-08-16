@@ -23,11 +23,20 @@
  ****************************************************************************************/
 
 #include <modules/webbrowser/include/webrenderhandler.h>
-
+#include <modules/webbrowser/webbrowsermodule.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 
+namespace {
+    constexpr std::string_view _loggerCat = "WebRenderHandler";
+} // namespace
+
+
 namespace openspace {
+
+WebRenderHandler::WebRenderHandler()
+    : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering())
+{}
 
 void WebRenderHandler::reshape(int w, int h) {
     if (w == _windowSize.x && h == _windowSize.y) {
