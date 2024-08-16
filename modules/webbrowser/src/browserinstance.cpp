@@ -36,6 +36,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <filesystem>
+#include <modules/webbrowser/webbrowsermodule.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "CEF BrowserInstance";
@@ -53,6 +54,11 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     // On Windows and MacOS this function takes a pointer as a parameter, but Linux
     // requires this to be a long unsigned int, so we can't use nullptr here
     windowInfo.SetAsWindowless(0);
+
+    if (WebBrowserModule::canUseAcceleratedRendering()) {
+        windowInfo.shared_texture_enabled = true;
+        LINFO("Enabling shared texture mode for CEF");
+    }
 
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;

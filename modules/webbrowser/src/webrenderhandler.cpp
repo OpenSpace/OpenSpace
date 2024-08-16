@@ -54,6 +54,8 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
                                const CefRenderHandler::RectList& dirtyRects,
                                const void* buffer, int w, int h)
 {
+    ghoul_assert(!_acceleratedRendering, "Accelerated rendering flag is turned on");
+
     const size_t bufferSize = static_cast<size_t>(w * h);
 
     glm::ivec2 upperUpdatingRectBound = glm::ivec2(0, 0);
@@ -103,7 +105,47 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
     _needsRepaint = false;
 }
 
+void WebRenderHandler::OnAcceleratedPaint(
+    CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList& dirtyRects,
+    const CefAcceleratedPaintInfo& info
+) {
+    ghoul_assert(_acceleratedRendering, "Accelerated rendering flag is turned off");
+
+    GLuint sharedTexture, memObj;
+    // Create new texture that we can copy the shared texture into. Unfortunately
+    // textures are immutable so we have to create a new one
+    glCreateTextures(GL_TEXTURE_2D, 1, &sharedTexture);
+    // Create the memory object handle
+    glCreateMemoryObjectsEXT(1, &memObj);
+
+    // The size of the texture we get from CEF. It has 8 bytes per pixel
+    int size = _windowSize.x * _windowSize.y * 8;
+
+    // Cef uses the GL_HANDLE_TYPE_D3D11_IMAGE_EXT handle for their shared texture
+    // Import the shared texture to the memory object
+    glImportMemoryWin32HandleEXT(
+        memObj, size, GL_HANDLE_TYPE_D3D11_IMAGE_EXT, (void*)info.shared_texture_handle
+    );
+    // Allocate immutable storage for the texture for the data from the memory object
+    glTextureStorageMem2DEXT(
+        sharedTexture, 1, GL_RGBA8, _windowSize.x, _windowSize.y, memObj, 0
+    );
+
+    // Clean up the temporary allocations
+    glDeleteTextures(1, &_texture);
+    glDeleteMemoryObjectsEXT(1, &memObj);
+
+    // Set the update stexture
+    _texture = sharedTexture;
+
+    _needsRepaint = false;
+}
+
 void WebRenderHandler::updateTexture() {
+    if (_acceleratedRendering) {
+        LERROR("Tried to update texture when it was rendering with accelerated rendering");
+        return;
+    }
     if (_needsRepaint) {
         return;
     }
