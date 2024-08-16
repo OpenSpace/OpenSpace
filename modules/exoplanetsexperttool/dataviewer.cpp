@@ -228,7 +228,10 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     _filteredData.reserve(_data.size());
     for (size_t i = 0; i < _data.size(); i++) {
         _filteredData.push_back(i);
-        _hostIdToPlanetsMap[makeIdentifier(_data[i].hostName)].push_back(i);
+
+        if (!_dataSettings.dataMapping.hostName.empty()) {
+            _hostIdToPlanetsMap[makeIdentifier(_data[i].hostName)].push_back(i);
+        }
     }
 
     _columns = _columnSelectionView.initializeColumnsFromData(_data, _dataSettings);
@@ -261,7 +264,7 @@ void DataViewer::initializeGL() {
 }
 
 std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
-    const ExoplanetItem& item) const
+                                                         const ExoplanetItem& item) const
 {
     const std::variant<std::string, float>& value = item.dataColumns.at(key);
 
@@ -680,18 +683,18 @@ void DataViewer::renderTableWindow(bool *open) {
     }
 
     // @TODO: Maybe do a more sophisticated comparison view
-    bool showPinnedTable = ImGui::CollapsingHeader("Pinned planets");
+    bool showPinnedTable = ImGui::CollapsingHeader("Pinned items");
     ImGui::SameLine();
     view::helper::renderDescriptiveText(
         std::format("({})", _pinnedPlanets.size()).c_str()
     );
     if (showPinnedTable) {
-        renderTable("pinned_exoplanets_table", _pinnedPlanets, true);
+        renderTable("pinned_items_table", _pinnedPlanets, true);
     }
 
     ImGui::Separator();
     view::helper::renderDescriptiveText(std::format(
-        "Showing {} exoplanets out of a total {} ",
+        "Showing {} items out of a total {} ",
         _filteredData.size(), _data.size()
     ).c_str());
 
@@ -699,7 +702,7 @@ void DataViewer::renderTableWindow(bool *open) {
     static char searchString[128] = "";
    ImGui::InputTextWithHint(
         "##Query",
-        "Search for a planet here...",
+        "Search for an item by name here...",
         searchString,
         IM_ARRAYSIZE(searchString)
     );

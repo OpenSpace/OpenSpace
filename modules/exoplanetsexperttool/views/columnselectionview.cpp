@@ -49,7 +49,8 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
 
     // The name column is required and should be handled separately, to always be the
     // first column
-    result.push_back(dataSettings.nameColumn());
+    bool hasNameColumn = !dataSettings.nameColumn().empty();
+    result.push_back(hasNameColumn ? dataSettings.nameColumn() : "name");
 
     // The default column are the which info has been provided for, if they exist in
     // the dataset
@@ -85,6 +86,16 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
     }
     _otherColumns.shrink_to_fit();
     _selectedOtherColumns.assign(_otherColumns.size(), false);
+
+    // Fill up with other columns
+    for (size_t i = 0; i < _otherColumns.size(); ++i) {
+        if (!(result.size() < IMGUI_TABLE_MAX_COLUMNS)) {
+            break;
+        }
+        const ColumnKey& key = _otherColumns[i];
+        result.push_back(key);
+        _selectedOtherColumns[i] = true;
+    }
 
     return result;
 }
@@ -122,7 +133,8 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
         columnsToEdit.clear();
         columnsToEdit.reserve(nSelected + 1);
 
-        columnsToEdit.push_back(dataSettings.nameColumn());
+        bool hasNameColumn = !dataSettings.nameColumn().empty();
+        columnsToEdit.push_back(hasNameColumn ? dataSettings.nameColumn() : "name");
 
         for (int i = 0; i < _namedColumns.size(); i++) {
             if (_selectedNamedColumns[i]) {
@@ -161,7 +173,8 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
             ImGui::Text("Object name: ");
             ImGui::SameLine();
 
-            const ColumnKey nameColumn = dataSettings.nameColumn();
+            bool hasNameColumn = !dataSettings.nameColumn().empty();
+            const ColumnKey nameColumn = hasNameColumn ? dataSettings.nameColumn() : "name";
 
             view::helper::renderDescriptiveText(
                 dataSettings.columnName(nameColumn)
@@ -291,9 +304,9 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
         ImGui::EndGroup();
     }
 
-    bool isTooManyColumns = nSelected > IMGUI_TABLE_MAX_COLUMNS;
+    bool isInvalidColumnNr = nSelected > IMGUI_TABLE_MAX_COLUMNS || nSelected == 0;
     glm::vec4 textColor =
-        isTooManyColumns ? view::colors::Error : view::colors::DescriptiveText;
+        isInvalidColumnNr ? view::colors::Error : view::colors::DescriptiveText;
 
     ImGui::TextColored(
         view::helper::toImVec4(textColor),
@@ -303,7 +316,7 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
     );
 
     // Ok / Cancel
-    if (isTooManyColumns) {
+    if (isInvalidColumnNr) {
         ImGui::PushStyleColor(
             ImGuiCol_Button,
             view::helper::toImVec4(view::colors::DisabledButton)
@@ -318,12 +331,12 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
         );
     }
 
-    if (ImGui::Button("OK", ImVec2(120, 0)) && !isTooManyColumns) {
+    if (ImGui::Button("OK", ImVec2(120, 0)) && !isInvalidColumnNr) {
         applySelection(nSelected);
         ImGui::CloseCurrentPopup();
     }
 
-    if (isTooManyColumns) {
+    if (isInvalidColumnNr) {
         ImGui::PopStyleColor(3);
     }
 

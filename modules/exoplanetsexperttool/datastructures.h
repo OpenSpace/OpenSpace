@@ -107,17 +107,17 @@ struct DataSettings {
         ColumnKey positionDec;
         ColumnKey positionDistance;
 
-        ColumnKey name;
-        ColumnKey hostName; // TODO: optional
-        ColumnKey ringSize; // TODO: optional
-        ColumnKey referenceName; // TODO: optional
-        ColumnKey referenceLink; // TODO: optional
+        ColumnKey name = "";
+        ColumnKey hostName = "";
+        ColumnKey ringSize = "";
+        ColumnKey referenceName = "";
+        ColumnKey referenceLink = "";
     } dataMapping;
 
     struct CmapInfo {
         ColumnKey column;
-        float min; // TODO: optional (set from range if excluded?)
-        float max; // TODO: optional
+        float min = 0.f; // TODO: optional (set from range if excluded?)
+        float max = 100.f; // TODO: optional
     };
     std::optional<CmapInfo> defaultColormapping;
 
@@ -176,8 +176,9 @@ struct DataSettings {
     const std::string& description(const ColumnKey& key) const {
         return columnInfo.at(key).description;
     }
+
     bool hasDescription(const ColumnKey& key) const {
-        return !columnInfo.contains(key) && columnInfo.at(key).description.empty();
+        return columnInfo.contains(key) && !columnInfo.at(key).description.empty();
     }
 };
 

@@ -29,6 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/coordinateconversion.h>
+#include <openspace/util/progressbar.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/dictionary.h>
@@ -47,7 +48,7 @@ namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataLoader";
 
     // @TODO: naturally, this path should not be hardcoded
-    constexpr std::string_view DataSettingsPath = "scripts/datasettings.json";
+    constexpr std::string_view DataSettingsPath = "scripts/datasettings_galah.json";
     constexpr std::string_view BasePath = "${MODULES}/exoplanetsexperttool";
 
     bool hasEnding(std::string const& fullString, std::string const& ending) {
@@ -69,105 +70,131 @@ namespace {
             s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
     }
 
+    bool isNan(const std::string& s) {
+        if (s.empty()) {
+            return true;
+        }
+        std::string lc = ghoul::toLowerCase(s);
+        return (lc == "null") || (lc == "nan");
+    }
+
     void from_json(const nlohmann::json& j, openspace::exoplanets::DataSettings& s) {
         using namespace openspace::exoplanets;
 
-        j.at("datafile").get_to(s.dataFile);
+        try {
+            j.at("datafile").get_to(s.dataFile);
 
-        const nlohmann::json dataMapping = j.at("data_mapping");
-        dataMapping.at("position_ra").get_to(s.dataMapping.positionRa);
-        dataMapping.at("position_dec").get_to(s.dataMapping.positionDec);
-        dataMapping.at("position_distance").get_to(s.dataMapping.positionDistance);
-        dataMapping.at("name").get_to(s.dataMapping.name);
-        dataMapping.at("hostName").get_to(s.dataMapping.hostName);
-        dataMapping.at("ring_size").get_to(s.dataMapping.ringSize);
-        dataMapping.at("reference_name").get_to(s.dataMapping.referenceName);
-        dataMapping.at("reference_link").get_to(s.dataMapping.referenceLink);
+            const nlohmann::json dataMapping = j.at("data_mapping");
+            dataMapping.at("position_ra").get_to(s.dataMapping.positionRa);
+            dataMapping.at("position_dec").get_to(s.dataMapping.positionDec);
+            dataMapping.at("position_distance").get_to(s.dataMapping.positionDistance);
 
-        if (j.contains("default_colormapping")) {
-            const nlohmann::json cmapping = j.at("default_colormapping");
-            DataSettings::CmapInfo cmap;
-            cmapping.at("column").get_to(cmap.column);
-            cmapping.at("min").get_to(cmap.min);
-            cmapping.at("max").get_to(cmap.max);
-            s.defaultColormapping = cmap;
-        }
-
-        const nlohmann::json columnInfo = j.at("column_info");
-        for (auto& [key, value] : columnInfo.items()) {
-            DataSettings::ColumnInfo info;
-            value.at("name").get_to(info.name);
-            if (value.contains("format")) {
-                value.at("format").get_to(info.format);
+            if (dataMapping.contains("name")) {
+                dataMapping.at("name").get_to(s.dataMapping.name);
             }
-            if (value.contains("desc")) {
-                value.at("desc").get_to(info.description);
+            if (dataMapping.contains("hostName")) {
+               dataMapping.at("hostName").get_to(s.dataMapping.hostName);
             }
-            if (value.contains("isText")) {
-                bool temp = false;
-                value.at("isText").get_to(temp);
-                info.isText = temp;
+            if (dataMapping.contains("ring_size")) {
+                dataMapping.at("ring_size").get_to(s.dataMapping.ringSize);
             }
-            s.columnInfo[key] = info;
-        }
+            if (dataMapping.contains("reference_name")) {
+                dataMapping.at("reference_name").get_to(s.dataMapping.referenceName);
+            }
+            if (dataMapping.contains("reference_link")) {
+                dataMapping.at("reference_link").get_to(s.dataMapping.referenceLink);
+            }
 
-        const std::vector<nlohmann::json> quickFilterGroups = j.at("quick_filters");
-        s.quickFilterGroups.reserve(quickFilterGroups.size());
-
-        for (const nlohmann::json& groupInfo : quickFilterGroups) {
-            DataSettings::QuickFilterGroup group;
-
-            groupInfo.at("group_title").get_to(group.title);
-
-            if (groupInfo.contains("type")) {
-                if (ghoul::toUpperCase(groupInfo.at("type")) == "OR") {
-                    group.type = DataSettings::QuickFilterGroup::Type::Or;
+            if (j.contains("default_colormapping")) {
+                const nlohmann::json cmapping = j.at("default_colormapping");
+                if (!cmapping.empty()) {
+                    DataSettings::CmapInfo cmap;
+                    cmapping.at("column").get_to(cmap.column);
+                    cmapping.at("min").get_to(cmap.min);
+                    cmapping.at("max").get_to(cmap.max);
+                    s.defaultColormapping = cmap;
                 }
-                else if (ghoul::toUpperCase(groupInfo.at("type")) == "AND") {
-                    group.type = DataSettings::QuickFilterGroup::Type::And;
-                }
-                else {
-                    LERROR("Invalid quick filter group type. Expected 'AND' or 'OR'");
-                }
-
             }
-            groupInfo.at("same_line").get_to(group.showOnSameLine);
 
-            const std::vector<nlohmann::json> quickFilters= groupInfo.at("filters");
+            const nlohmann::json columnInfo = j.at("column_info");
+            for (auto& [key, value] : columnInfo.items()) {
+                DataSettings::ColumnInfo info;
+                value.at("name").get_to(info.name);
+                if (value.contains("format")) {
+                    value.at("format").get_to(info.format);
+                }
+                if (value.contains("desc")) {
+                    value.at("desc").get_to(info.description);
+                }
+                if (value.contains("isText")) {
+                    bool temp = false;
+                    value.at("isText").get_to(temp);
+                    info.isText = temp;
+                }
+                s.columnInfo[key] = info;
+            }
 
-            for (const nlohmann::json& filterInfo : quickFilters) {
-                DataSettings::QuickFilter quickFilter;
+            const std::vector<nlohmann::json> quickFilterGroups = j.at("quick_filters");
+            s.quickFilterGroups.reserve(quickFilterGroups.size());
 
-                filterInfo.at("name").get_to(quickFilter.name);
+            for (const nlohmann::json& groupInfo : quickFilterGroups) {
+                DataSettings::QuickFilterGroup group;
 
-                if (filterInfo.at("filter").is_array()) {
-                    const std::vector<nlohmann::json>& filters = filterInfo.at("filter");
-                    quickFilter.filters.reserve(filters.size());
+                groupInfo.at("group_title").get_to(group.title);
 
-                    for (const nlohmann::json& f : filters) {
+                if (groupInfo.contains("type")) {
+                    if (ghoul::toUpperCase(groupInfo.at("type")) == "OR") {
+                        group.type = DataSettings::QuickFilterGroup::Type::Or;
+                    }
+                    else if (ghoul::toUpperCase(groupInfo.at("type")) == "AND") {
+                        group.type = DataSettings::QuickFilterGroup::Type::And;
+                    }
+                    else {
+                        LERROR("Invalid quick filter group type. Expected 'AND' or 'OR'");
+                    }
+
+                }
+                groupInfo.at("same_line").get_to(group.showOnSameLine);
+
+                const std::vector<nlohmann::json> quickFilters = groupInfo.at("filters");
+
+                for (const nlohmann::json& filterInfo : quickFilters) {
+                    DataSettings::QuickFilter quickFilter;
+
+                    filterInfo.at("name").get_to(quickFilter.name);
+
+                    if (filterInfo.at("filter").is_array()) {
+                        const std::vector<nlohmann::json>& filters = filterInfo.at("filter");
+                        quickFilter.filters.reserve(filters.size());
+
+                        for (const nlohmann::json& f : filters) {
+                            DataSettings::QuickFilter::Filter filter;
+                            f.at("column").get_to(filter.column);
+                            f.at("query").get_to(filter.query);
+                            quickFilter.filters.push_back(filter);
+                        }
+                    }
+                    else if (filterInfo.at("filter").is_object()) {
+                        const nlohmann::json f = filterInfo.at("filter");
+
                         DataSettings::QuickFilter::Filter filter;
                         f.at("column").get_to(filter.column);
                         f.at("query").get_to(filter.query);
                         quickFilter.filters.push_back(filter);
                     }
-                }
-                else if (filterInfo.at("filter").is_object()) {
-                    const nlohmann::json f = filterInfo.at("filter");
 
-                    DataSettings::QuickFilter::Filter filter;
-                    f.at("column").get_to(filter.column);
-                    f.at("query").get_to(filter.query);
-                    quickFilter.filters.push_back(filter);
+                    if (filterInfo.contains("desc")) {
+                        filterInfo.at("desc").get_to(quickFilter.description);
+                    }
+
+                    group.quickFilters.push_back(quickFilter);
                 }
 
-                if (filterInfo.contains("desc")) {
-                    filterInfo.at("desc").get_to(quickFilter.description);
-                }
-
-                group.quickFilters.push_back(quickFilter);
+                s.quickFilterGroups.push_back(group);
             }
-
-            s.quickFilterGroups.push_back(group);
+        }
+        catch (const nlohmann::json::out_of_range& e) {
+            LERROR(std::format("When reading data settings .json: {}", e.what()));
         }
     }
 
@@ -193,14 +220,19 @@ DataSettings DataLoader::loadDataSettingsFromJson() {
 
 std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
     std::filesystem::path csvFilePath = absPath(BasePath) / settings.dataFile;
-    std::ifstream exoplanetsCsvFile(csvFilePath);
 
-    if (!exoplanetsCsvFile.good()) {
+    if (!std::filesystem::exists(csvFilePath)) {
+        LERROR(std::format("Could not find input file '{}'", csvFilePath));
+        return std::vector<ExoplanetItem>();
+    }
+
+    std::ifstream csvFile(csvFilePath);
+    if (!csvFile.good()) {
         LERROR(std::format("Failed to open input file '{}'", csvFilePath));
         return std::vector<ExoplanetItem>();
     }
 
-    LINFO("Reading Exoplanets CSV");
+    LINFO(std::format("Reading CSV file: '{}'", csvFilePath));
 
     std::vector<std::vector<std::string>> csvContent = ghoul::loadCSVFile(
         csvFilePath,
@@ -214,6 +246,8 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
         return std::vector<ExoplanetItem>();
     }
 
+    LINFO("Parsing content of CSV file");
+
     // Write exoplanet records to file
     std::vector<std::string> columns = csvContent[0];
 
@@ -222,7 +256,14 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
     std::vector<ExoplanetItem> planets;
     planets.reserve(nRows);
 
+    ProgressBar progressBar(100);
+    auto printProgress = [&progressBar](float progress) {
+        progressBar.print(static_cast<int>(progress * 100.f));
+    };
+
     int nDataColumns = -1;
+
+    printProgress(0.f);
 
     for (int row = 1; row < nRows; row++) {
         ExoplanetItem p;
@@ -232,6 +273,11 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
         DataPoint ra;
         DataPoint dec;
         DataPoint distance;
+
+        if (settings.dataMapping.name.empty()) {
+            p.name = std::format("Item {}", row);
+            p.dataColumns["name"] = p.name;
+        }
 
         for (int col = 0; col < columns.size(); col++) {
             const std::string& column = columns[col];
@@ -273,7 +319,7 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
             bool shouldEnforceString =
                 hasIsTextInfo ? *settings.columnInfo.at(column).isText : false;
 
-            if (data.empty()) {
+            if (data.empty() && isNan(data)) {
                 // All columns should have empty string for missing values
                 p.dataColumns[column] = "";
             }
@@ -282,7 +328,7 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
             }
             else {
                 // Non empty string value
-                p.dataColumns[column] = data;
+                p.dataColumns[column] = isNan(data) ? "" : data;
             }
         }
 
@@ -304,8 +350,11 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
         }
 
         planets.push_back(p);
+
+        printProgress(static_cast<float>(row) / static_cast<float>(nRows));
     }
     planets.shrink_to_fit();
+    printProgress(1.f);
 
     if (planets.empty()) {
         return planets;
@@ -313,11 +362,13 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
 
     // Handle missing values
 
+    LINFO("Modifing data based on missing values and detecting column data types...");
+
     std::map<std::string, bool> colIsNumeric;
     auto firstDataValues = planets.front().dataColumns;
 
     // Determine the type of all other columns
-    for (const auto& [key, value] : firstDataValues) {
+    for (const auto& [key, _] : firstDataValues) {
         // Default is text
         colIsNumeric[key] = false;
 
@@ -337,7 +388,7 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
     }
 
     // Replace all the missing values in the numeric columns with NaN values
-    for (const auto& [key, value] : firstDataValues) {
+    for (const auto& [key, _] : firstDataValues) {
         if (!colIsNumeric[key]) {
             continue;
         }
@@ -354,29 +405,33 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
     }
     // At this stage all values in the data columns should have the correct type
 
-    std::map<std::string, std::vector<size_t>> hostIdToPlanetsMap;
-    for (int i = 0; i < planets.size(); i++) {
-        hostIdToPlanetsMap[makeIdentifier(planets[i].hostName)].push_back(i);
-    }
+    if (!settings.dataMapping.hostName.empty()) {
+        std::map<std::string, std::vector<size_t>> hostIdToPlanetsMap;
+        for (int i = 0; i < planets.size(); i++) {
+            hostIdToPlanetsMap[makeIdentifier(planets[i].hostName)].push_back(i);
+        }
 
-    // Fill planets internal indices in system (based on whatever column is used for size)
-    std::map<std::string, std::vector<size_t>>::iterator it;
-    for (it = hostIdToPlanetsMap.begin(); it != hostIdToPlanetsMap.end(); it++) {
-        std::vector<size_t> planetIds = it->second;
+        // Fill planets internal indices in system (based on whatever column is used for size)
+        std::map<std::string, std::vector<size_t>>::iterator it;
+        for (it = hostIdToPlanetsMap.begin(); it != hostIdToPlanetsMap.end(); it++) {
+            std::vector<size_t> planetIds = it->second;
 
-        std::sort(
-            planetIds.begin(),
-            planetIds.end(),
-            [&planets](const size_t a, const size_t b) -> bool {
-                float v1 = planets[a].sizeValue;
-                float v2 = planets[b].sizeValue;
-                return data::compareValuesWithNan(v1, v2);
+            std::sort(
+                planetIds.begin(),
+                planetIds.end(),
+                [&planets](const size_t a, const size_t b) -> bool {
+                    float v1 = planets[a].sizeValue;
+                    float v2 = planets[b].sizeValue;
+                    return data::compareValuesWithNan(v1, v2);
+                }
+            );
+            for (int i = 0; i < static_cast<int>(planetIds.size()); ++i) {
+                planets[planetIds[i]].indexInSystem = i;
             }
-        );
-        for (int i = 0; i < static_cast<int>(planetIds.size()); ++i) {
-            planets[planetIds[i]].indexInSystem = i;
         }
     }
+
+    LINFO("Done loading dataset!");
 
     return planets;
 }
