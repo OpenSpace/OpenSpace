@@ -200,12 +200,49 @@ void WebRenderHandler::updateTexture() {
 }
 
 bool WebRenderHandler::hasContent(int x, int y) {
-    if (_browserBuffer.empty()) {
+    if (_acceleratedRendering) {
+        // To see the alpha value of the pixel we first have to get it from the GPU.
+        // We use a pbo for better performance
+        GLuint pbo;
+        glGenBuffers(1, &pbo);
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+
+        // Allocate memory for the PBO (width * height * 4 bytes for RGBA)
+        glBufferData(GL_PIXEL_PACK_BUFFER, _windowSize.x * _windowSize .y * 4, nullptr, GL_STREAM_READ);
+
+        glBindTexture(GL_TEXTURE_2D, _texture);
+
+        // Read the texture data into the PBO
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+        // Map the PBO to the CPU memory space
+        GLubyte* pixels = (GLubyte*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+
+        ghoul_assert(pixels, "Could not read pixels from the GPU for the cef gui.");
+        if (pixels) {
+            // Access the specific pixel data
+            int index = (y * _windowSize.x + x) * 4;
+            // The alpha value is at the fourth place (rgba)
+            GLubyte a = pixels[index + 3];
+
+            // Unmap the buffer
+            glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+            return a > 0;
+        }
+
+        // Unbind and delete the PBO
+        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        glDeleteBuffers(1, &pbo);
         return false;
     }
-    int index = x + _browserBufferSize.x * (_browserBufferSize.y - y - 1);
-    index = glm::clamp(index, 0, static_cast<int>(_browserBuffer.size() - 1));
-    return _browserBuffer[index].a;
+    else {
+        if (_browserBuffer.empty()) {
+            return false;
+        }
+        int index = x + _browserBufferSize.x * (_browserBufferSize.y - y - 1);
+        index = glm::clamp(index, 0, static_cast<int>(_browserBuffer.size() - 1));
+        return _browserBuffer[index].a;
+    }
 }
 
 bool WebRenderHandler::isTextureReady() const {

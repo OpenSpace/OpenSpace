@@ -69,6 +69,8 @@ public:
     // better performance. Needs OpenGl 4.5 or higher
     void OnAcceleratedPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
         const RectList& dirtyRects, const CefAcceleratedPaintInfo& info) override;
+
+    // Determines if there is content in the gui at the specified pixel coordinates
     bool hasContent(int x, int y);
 
     bool isTextureReady() const;
