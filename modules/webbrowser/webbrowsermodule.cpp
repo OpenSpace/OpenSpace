@@ -39,6 +39,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <filesystem>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "WebBrowser";
@@ -223,6 +224,12 @@ void WebBrowserModule::detachEventHandler() {
 
 bool WebBrowserModule::isEnabled() const {
     return _enabled;
+}
+
+bool WebBrowserModule::canUseAcceleratedRendering() {
+    ghoul::systemcapabilities::Version acceleratedVersion = { .major = 4, .minor = 5, .release = 0 };
+    auto it = std::find(OpenGLCap.extensions().begin(), OpenGLCap.extensions().end(), "GL_EXT_memory_object_win32");
+    return OpenGLCap.openGLVersion() >= acceleratedVersion && it != OpenGLCap.extensions().end();
 }
 
 std::vector<documentation::Documentation> WebBrowserModule::documentations() const {
