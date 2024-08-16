@@ -97,6 +97,9 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
         _selectedOtherColumns[i] = true;
     }
 
+    _savedSelectedNamedColumns = _selectedNamedColumns;
+    _savedSelectedOtherColumns = _selectedOtherColumns;
+
     return result;
 }
 
@@ -119,14 +122,10 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
 
     constexpr const int MaxItemsPerColumn = 20;
     int nSelected = 0;
-    bool canSelectMore = true;
 
-    std::vector<bool> prevSelectedDefault = _selectedNamedColumns;
-    std::vector<bool> prevSelectedOther = _selectedOtherColumns;
-
-    auto resetSelection = [this, &prevSelectedDefault, &prevSelectedOther]() {
-        _selectedNamedColumns = prevSelectedDefault;
-        _selectedOtherColumns = prevSelectedOther;
+    auto resetSelection = [this]() {
+        _selectedNamedColumns = _savedSelectedNamedColumns;
+        _selectedOtherColumns = _savedSelectedOtherColumns;
     };
 
     auto applySelection = [&columnsToEdit, &dataSettings, this](size_t nSelected) {
@@ -147,6 +146,9 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
                 columnsToEdit.push_back(_otherColumns[i]);
             }
         }
+
+        _savedSelectedNamedColumns = _selectedNamedColumns;
+        _savedSelectedOtherColumns = _selectedOtherColumns;
     };
 
     ImGui::Text(
@@ -235,10 +237,6 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
                 ImGui::BeginGroup();
             }
 
-            if (nSelected > IMGUI_TABLE_MAX_COLUMNS) {
-                canSelectMore = false;
-            }
-
             const ColumnKey& c = _namedColumns[i];
 
             bool isSelected = _selectedNamedColumns[i];
@@ -285,10 +283,6 @@ void ColumnSelectionView::renderColumnSettingsView(std::vector<ColumnKey>& colum
                 ImGui::EndGroup();
                 ImGui::SameLine();
                 ImGui::BeginGroup();
-            }
-
-            if (nSelected > IMGUI_TABLE_MAX_COLUMNS) {
-                canSelectMore = false;
             }
 
             const ColumnKey& c = _otherColumns[i];

@@ -46,6 +46,9 @@ private:
     std::vector<ColumnKey> _otherColumns;
     std::vector<bool> _selectedNamedColumns;
     std::vector<bool> _selectedOtherColumns;
+
+    std::vector<bool> _savedSelectedNamedColumns;
+    std::vector<bool> _savedSelectedOtherColumns;
 };
 
 } // namespace openspace::exoplanets
