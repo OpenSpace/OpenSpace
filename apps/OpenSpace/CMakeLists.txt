@@ -190,7 +190,7 @@ endif ()
 
 if (WIN32)
   add_custom_command(TARGET OpenSpace POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:OpenSpace> $<TARGET_FILE_DIR:OpenSpace>
+    COMMAND ${CMAKE_COMMAND} -E copy -t $<TARGET_FILE_DIR:OpenSpace> $<TARGET_RUNTIME_DLLS:OpenSpace>
     COMMAND_EXPAND_LISTS
   )
 endif ()
