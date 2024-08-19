@@ -1,6 +1,6 @@
 -- Basic
--- This asset creates a set of coordinate axes that are offset from their origin
--- by a fixed and static amount. In this specific example, the axes are offset
+-- This asset creates a set of coordinate axes that are offset from their original
+-- position by a fixed and static amount. In this specific example, the axes are offset
 -- by 50 meters along the y-axis and 10 meters along the negative z-axis.
 
 local Node = {
