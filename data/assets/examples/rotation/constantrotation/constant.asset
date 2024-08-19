@@ -1,6 +1,6 @@
 -- Basic
--- This asset creates a rotation that places a set of coordinate axes that will
--- rotate at a constant rate of one revolution every 2 seconds.
+-- This asset applies a rotation to a set of coordinate axes that makes them rotate at a 
+-- constant rate of one revolution around the z-axis every 2 seconds.
 
 local Node = {
   Identifier = "ConstantRotation_Example",
