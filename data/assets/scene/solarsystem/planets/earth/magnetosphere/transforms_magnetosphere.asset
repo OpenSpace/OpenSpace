@@ -1,10 +1,31 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 
+local GSEKernel = asset.resource("../kernels/GSE.tf")
 local GSMKernel = asset.resource("../kernels/GSM.tf")
+local SMKernel = asset.resource("../kernels/SM.tf")
 
 local Frame = {
-  GSM = "GSM" -- Geocentric Solar Magnetospheric
+  GSE = "GSE",
+  GSM = "GSM", -- Geocentric Solar Magnetospheric
+  SM = "SM"
+}
+
+local GSEReferenceFrame = {
+  Identifier = "GSEReferenceFrame",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = Frame.GSE,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "GSM Reference Frame",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
 }
 
 local GSMReferenceFrame = {
@@ -26,19 +47,22 @@ local GSMReferenceFrame = {
 local SMReferenceFrame = {
   Identifier = "SMReferenceFrame",
   Parent = GSMReferenceFrame.Identifier,
-  --Transform = {
-    --Rotation = {
-      --Type = "StaticRotation",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
       --http://jsoc.stanford.edu/~jsoc/keywords/Chris_Russel/Geophysical%20Coordinate%20Transformations.htm
       --((cos u, 0, -sin u)(0, 1, 0)(sin u, 0, cos u))
       --u being dipole tilt 9.6deg https://en.wikipedia.org/wiki/Geomagnetic_pole
-      -- Rotation = {
-      --   0.985996037, 0.0, -0.166768747,
-      --   0.0,         1.0, 0.0,
-      --   0.166768747, 0.0, 0.985996037
-      -- }
-    --}
-  --},
+      Rotation = {
+         0.985996037, 0.0, -0.166768747,
+         0.0,         1.0, 0.0,
+         0.166768747, 0.0, 0.985996037
+      }
+      --Type = "SpiceRotation",
+      --SourceFrame = Frame.SM,
+      --DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
   GUI = {
     Name = "SM Reference Frame",
     Path = "/Solar System/Planets/Earth",
@@ -48,8 +72,11 @@ local SMReferenceFrame = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(GSEKernel)
   openspace.spice.loadKernel(GSMKernel)
+  openspace.spice.loadKernel(SMKernel)
 
+  openspace.addSceneGraphNode(GSEReferenceFrame)
   openspace.addSceneGraphNode(GSMReferenceFrame)
   openspace.addSceneGraphNode(SMReferenceFrame)
 end)
@@ -57,11 +84,15 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(SMReferenceFrame)
   openspace.removeSceneGraphNode(GSMReferenceFrame)
+  openspace.removeSceneGraphNode(GSEReferenceFrame)
 
+  openspace.spice.unloadKernel(SMKernel)
   openspace.spice.unloadKernel(GSMKernel)
+  openspace.spice.unloadKernel(GSEKernel)
 end)
 
 asset.export("Frame", Frame)
+asset.export(GSEReferenceFrame)
 asset.export(GSMReferenceFrame)
 asset.export(SMReferenceFrame)
 

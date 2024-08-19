@@ -1,10 +1,65 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local magnetosphereTransforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
 local SunRadius = 6.957E8
 local EarthRadius = 6.371E6
+
+local GSEAxes = {
+  Identifier = "GSECoordinateAxes",
+  Parent = magnetosphereTransforms.GSEReferenceFrame.Identifier,
+  Transform = {
+    Scale ={
+      Type = "StaticScale",
+      Scale = EarthRadius * 3.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GSE Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local GSMAxes = {
+  Identifier = "GSMCoordinateAxes",
+  Parent = magnetosphereTransforms.GSMReferenceFrame.Identifier,
+  Transform = {
+    Scale ={
+      Type = "StaticScale",
+      Scale = EarthRadius * 3.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GSM Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local SMAxes = {
+  Identifier = "SMCoordinateAxes",
+  Parent = magnetosphereTransforms.SMReferenceFrame.Identifier,
+  Transform = {
+    Scale ={
+      Type = "StaticScale",
+      Scale = EarthRadius * 3.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "SM Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
 
 local EarthBarycenterAxes = {
   Identifier = "EarthBarycenterAxes",
@@ -103,10 +158,15 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthIAUAxes)
   openspace.addSceneGraphNode(SunIAUAxes)
   openspace.addSceneGraphNode(SolarSystemBarycenterAxes)
-
+  openspace.addSceneGraphNode(GSEAxes)
+  openspace.addSceneGraphNode(GSMAxes)
+  openspace.addSceneGraphNode(SMAxes)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SMAxes)
+  openspace.removeSceneGraphNode(GSMAxes)
+  openspace.removeSceneGraphNode(GSEAxes)
   openspace.removeSceneGraphNode(SolarSystemBarycenterAxes)
   openspace.removeSceneGraphNode(SunIAUAxes)
   openspace.removeSceneGraphNode(EarthIAUAxes)
@@ -119,6 +179,9 @@ asset.export(EarthInertialAxes)
 asset.export(EarthIAUAxes)
 asset.export(SunIAUAxes)
 asset.export(SolarSystemBarycenterAxes)
+asset.export(GSEAxes)
+asset.export(GSMAxes)
+asset.export(SMAxes)
 
 
 asset.meta = {
