@@ -45,7 +45,7 @@ namespace {
 namespace openspace {
 
 BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
-                                 WebKeyboardHandler* keyboardHandler)
+                                 WebKeyboardHandler* keyboardHandler, bool isGui)
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
     , _client(new BrowserClient(_renderHandler.get(), _keyboardHandler.get()))
@@ -55,7 +55,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     // requires this to be a long unsigned int, so we can't use nullptr here
     windowInfo.SetAsWindowless(0);
 
-    if (WebBrowserModule::canUseAcceleratedRendering()) {
+    if (WebBrowserModule::canUseAcceleratedRendering() && isGui) {
         windowInfo.shared_texture_enabled = true;
         LINFO("Enabling shared texture mode for CEF");
     }

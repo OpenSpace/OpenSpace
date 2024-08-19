@@ -58,7 +58,8 @@ class BrowserInstance {
 public:
     static constexpr int SingleClick = 1;
 
-    BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
+    BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler,
+        bool isGui = false);
     ~BrowserInstance();
 
     void loadUrl(const std::string& url);

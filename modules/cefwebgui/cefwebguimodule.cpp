@@ -104,7 +104,8 @@ void CefWebGuiModule::startOrStopGui() {
         if (!_instance) {
             _instance = std::make_unique<BrowserInstance>(
                 new GUIRenderHandler,
-                new GUIKeyboardHandler
+                new GUIKeyboardHandler,
+                true
             );
             _instance->initialize();
             _instance->reshape(static_cast<glm::ivec2>(
@@ -216,6 +217,16 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         startOrStopGui();
     });
 
+    global::callback::postDraw->emplace_back([this]() {
+        if (_instance && (global::windowDelegate->windowHasResized() || _instance->_shouldReshape)) {
+            const glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
+            _instance->reshape(static_cast<glm::ivec2>(
+                static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
+                ));
+            _instance->_shouldReshape = false;
+        }
+    });
+
     global::callback::draw2D->emplace_back([this](){
         ZoneScopedN("CefWebGuiModule");
 
@@ -227,13 +238,6 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         const bool isMaster = global::windowDelegate->isMaster();
 
         if (isGuiWindow && isMaster && _instance) {
-            if (global::windowDelegate->windowHasResized() || _instance->_shouldReshape) {
-                const glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
-                _instance->reshape(static_cast<glm::ivec2>(
-                    static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
-                ));
-                _instance->_shouldReshape = false;
-            }
             if (_visible) {
                 _instance->draw();
             }

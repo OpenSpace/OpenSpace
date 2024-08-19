@@ -66,7 +66,7 @@ public:
 
     // Used when the "shared_texture" flag is set to true for CEF. Uses a shared texture
     // from CEF that is allocated on another part of the GPU. Skip CPU allocationn for
-    // better performance. Needs OpenGl 4.5 or higher
+    // better performance. Needs OpenGl 4.5 or higher. Currently only used for the GUI
     void OnAcceleratedPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
         const RectList& dirtyRects, const CefAcceleratedPaintInfo& info) override;
 
@@ -80,7 +80,7 @@ protected:
     GLuint _texture = 0;
     bool _needsRepaint = true;
     glm::ivec2 _windowSize = glm::ivec2(0);
-    const bool _acceleratedRendering;
+    bool _acceleratedRendering;
 
 private:
     glm::ivec2 _browserBufferSize = glm::ivec2(0);

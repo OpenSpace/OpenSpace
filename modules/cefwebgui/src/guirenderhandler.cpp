@@ -29,6 +29,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <modules/webbrowser/webbrowsermodule.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "WebGUI:RenderHandler";
@@ -37,6 +38,8 @@ namespace {
 namespace openspace {
 
 GUIRenderHandler::GUIRenderHandler() {
+    _acceleratedRendering = WebBrowserModule::canUseAcceleratedRendering();
+
     LDEBUG("Initializing CEF GL environment...");
     ghoul::Dictionary define;
     define.setValue("useAcceleratedRendering", _acceleratedRendering);

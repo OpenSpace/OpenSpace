@@ -35,7 +35,7 @@ namespace {
 namespace openspace {
 
 WebRenderHandler::WebRenderHandler()
-    : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering())
+    : _acceleratedRendering(false)
 {}
 
 void WebRenderHandler::reshape(int w, int h) {
