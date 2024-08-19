@@ -90,7 +90,7 @@ asset.onInitialize(function()
 
   openspace.setGuiTreeOrdering(
     "/",
-    { "Solar System", "Milky Way", "Universe", "Night Sky" }
+    { "Solar System", "Milky Way", "Universe", "Night Sky", "Examples" }
   )
   openspace.setGuiTreeOrdering(
     "/Solar System",
