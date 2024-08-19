@@ -22,8 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.26 FATAL_ERROR)
-cmake_policy(VERSION 3.26)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
+cmake_policy(VERSION 3.25)
 
 project(OpenSpace)
 
