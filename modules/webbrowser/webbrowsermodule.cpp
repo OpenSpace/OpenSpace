@@ -227,9 +227,17 @@ bool WebBrowserModule::isEnabled() const {
 }
 
 bool WebBrowserModule::canUseAcceleratedRendering() {
-    ghoul::systemcapabilities::Version acceleratedVersion = { .major = 4, .minor = 5, .release = 0 };
-    auto it = std::find(OpenGLCap.extensions().begin(), OpenGLCap.extensions().end(), "GL_EXT_memory_object_win32");
-    return OpenGLCap.openGLVersion() >= acceleratedVersion && it != OpenGLCap.extensions().end();
+    ghoul::systemcapabilities::Version acceleratedVersion = {
+        .major = 4, .minor = 5, .release = 0
+    };
+    auto it = std::find(
+        OpenGLCap.extensions().begin(),
+        OpenGLCap.extensions().end(),
+        "GL_EXT_memory_object_win32"
+    );
+    bool isVersionOk = OpenGLCap.openGLVersion() >= acceleratedVersion;
+    bool isExtensionsOk = it != OpenGLCap.extensions().end();
+    return isVersionOk && isExtensionsOk;
 }
 
 std::vector<documentation::Documentation> WebBrowserModule::documentations() const {
