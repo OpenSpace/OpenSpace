@@ -49,6 +49,7 @@ namespace {
         // [[codegen::verbatim(RotationInfo.description)]]
         std::optional<glm::dvec3> rotationAxis
             [[codegen::inrange(glm::dvec3(-1.0), glm::dvec3(1.0))]];
+            
         // [[codegen::verbatim(RotationRateInfo.description)]]
         std::optional<float> rotationRate;
     };
