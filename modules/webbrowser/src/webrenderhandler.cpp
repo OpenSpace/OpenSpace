@@ -121,29 +121,32 @@ void WebRenderHandler::OnAcceleratedPaint(
     // Create new texture that we can copy the shared texture into. Unfortunately
     // textures are immutable so we have to create a new one
     glCreateTextures(GL_TEXTURE_2D, 1, &sharedTexture);
+
     // Create the memory object handle
     glCreateMemoryObjectsEXT(1, &memObj);
 
-    // The size of the texture we get from CEF. It has 8 bytes per pixel
-    int size = _windowSize.x * _windowSize.y * 8;
+    // The size of the texture we get from CEF. The CEF format is CEF_COLOR_TYPE_BGRA_8888
+    // It has 4 bytes per pixel. The mem object requires this to be multiplied with 2
+    int size = newWidth * newHeight * 8;
 
     // Cef uses the GL_HANDLE_TYPE_D3D11_IMAGE_EXT handle for their shared texture
     // Import the shared texture to the memory object
     glImportMemoryWin32HandleEXT(
         memObj, size, GL_HANDLE_TYPE_D3D11_IMAGE_EXT, (void*)info.shared_texture_handle
     );
+
     // Allocate immutable storage for the texture for the data from the memory object
+    // Use GL_RGBA8 since it is 4 bytes
     glTextureStorageMem2DEXT(
         sharedTexture, 1, GL_RGBA8, newWidth, newHeight, memObj, 0
     );
 
     // Clean up the temporary allocations
     glDeleteTextures(1, &_texture);
+
     glDeleteMemoryObjectsEXT(1, &memObj);
-
-    // Set the update stexture
+    // Set the updated texture
     _texture = sharedTexture;
-
     _needsRepaint = false;
 }
 
