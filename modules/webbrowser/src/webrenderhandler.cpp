@@ -109,6 +109,12 @@ void WebRenderHandler::OnAcceleratedPaint(
     CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList& dirtyRects,
     const CefAcceleratedPaintInfo& info
 ) {
+    int newWidth = dirtyRects[0].width;
+    int newHeight = dirtyRects[0].height;
+    if (newWidth != _windowSize.x || newHeight != _windowSize.y) {
+        LERROR("Size doesnt match");
+        return;
+    }
     ghoul_assert(_acceleratedRendering, "Accelerated rendering flag is turned off");
 
     GLuint sharedTexture, memObj;
@@ -128,7 +134,7 @@ void WebRenderHandler::OnAcceleratedPaint(
     );
     // Allocate immutable storage for the texture for the data from the memory object
     glTextureStorageMem2DEXT(
-        sharedTexture, 1, GL_RGBA8, _windowSize.x, _windowSize.y, memObj, 0
+        sharedTexture, 1, GL_RGBA8, newWidth, newHeight, memObj, 0
     );
 
     // Clean up the temporary allocations
