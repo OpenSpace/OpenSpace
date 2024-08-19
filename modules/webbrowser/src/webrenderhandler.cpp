@@ -35,7 +35,7 @@ namespace {
 namespace openspace {
 
 WebRenderHandler::WebRenderHandler()
-    : _acceleratedRendering(false)
+    : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering())
 {}
 
 void WebRenderHandler::reshape(int w, int h) {
@@ -152,7 +152,6 @@ void WebRenderHandler::OnAcceleratedPaint(
 
 void WebRenderHandler::updateTexture() {
     if (_acceleratedRendering) {
-        LERROR("Tried to update texture while rendering with accelerated rendering");
         return;
     }
     if (_needsRepaint) {
@@ -260,6 +259,10 @@ bool WebRenderHandler::hasContent(int x, int y) {
 
 bool WebRenderHandler::isTextureReady() const {
     return !_needsRepaint;
+}
+
+void WebRenderHandler::bindTexture() {
+    glBindTexture(GL_TEXTURE_2D, _texture);
 }
 
 } // namespace openspace

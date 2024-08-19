@@ -38,8 +38,6 @@ namespace {
 namespace openspace {
 
 GUIRenderHandler::GUIRenderHandler() {
-    _acceleratedRendering = WebBrowserModule::canUseAcceleratedRendering();
-
     LDEBUG("Initializing CEF GL environment...");
     ghoul::Dictionary define;
     define.setValue("useAcceleratedRendering", _acceleratedRendering);

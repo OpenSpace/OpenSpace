@@ -74,13 +74,14 @@ public:
     bool hasContent(int x, int y);
 
     bool isTextureReady() const;
-    void updateTexture();
+    void updateTexture(); 
+    void bindTexture();
 
 protected:
     GLuint _texture = 0;
     bool _needsRepaint = true;
     glm::ivec2 _windowSize = glm::ivec2(0);
-    bool _acceleratedRendering;
+    const bool _acceleratedRendering;
 
 private:
     glm::ivec2 _browserBufferSize = glm::ivec2(0);

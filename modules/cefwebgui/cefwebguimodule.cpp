@@ -104,8 +104,7 @@ void CefWebGuiModule::startOrStopGui() {
         if (!_instance) {
             _instance = std::make_unique<BrowserInstance>(
                 new GUIRenderHandler,
-                new GUIKeyboardHandler,
-                true
+                new GUIKeyboardHandler
             );
             _instance->initialize();
             _instance->reshape(static_cast<glm::ivec2>(

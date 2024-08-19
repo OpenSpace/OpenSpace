@@ -81,7 +81,8 @@ namespace {
 
 namespace openspace {
 
-void ScreenSpaceBrowser::ScreenSpaceRenderHandler::draw() {}
+void ScreenSpaceBrowser::ScreenSpaceRenderHandler::draw() {
+}
 
 void ScreenSpaceBrowser::ScreenSpaceRenderHandler::render() {}
 
@@ -96,9 +97,9 @@ documentation::Documentation ScreenSpaceBrowser::Documentation() {
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
-    , _renderHandler(new ScreenSpaceRenderHandler)
     , _url(UrlInfo)
     , _reload(ReloadInfo)
+    , _renderHandler(new ScreenSpaceRenderHandler)
     , _keyboardHandler(new WebKeyboardHandler)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -109,8 +110,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 
     _url = p.url.value_or(_url);
 
-    const glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
-    _dimensions = p.dimensions.value_or(windowDimensions);
+    _dimensions = p.dimensions.value_or(global::windowDelegate->currentSubwindowSize());
 
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),
@@ -132,13 +132,6 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 }
 
 bool ScreenSpaceBrowser::initializeGL() {
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(_dimensions.value(), 1),
-        GL_TEXTURE_2D
-    );
-
-    _renderHandler->setTexture(*_texture);
-
     createShaders();
 
     _browserInstance->initialize();
@@ -147,9 +140,6 @@ bool ScreenSpaceBrowser::initializeGL() {
 }
 
 bool ScreenSpaceBrowser::deinitializeGL() {
-    _renderHandler->setTexture(0);
-    _texture = nullptr;
-
     LDEBUG(std::format("Deinitializing ScreenSpaceBrowser: {}", _url.value()));
 
     _browserInstance->close(true);
@@ -172,6 +162,7 @@ void ScreenSpaceBrowser::render(const RenderData& renderData) {
     }
 
     _renderHandler->updateTexture();
+
     const glm::mat4 mat =
         globalRotationMatrix() *
         translationMatrix() *
@@ -181,7 +172,7 @@ void ScreenSpaceBrowser::render(const RenderData& renderData) {
 }
 
 void ScreenSpaceBrowser::update() {
-    _objectSize = _texture->dimensions();
+    _objectSize = _dimensions.value();
 
     if (_isUrlDirty) {
         _browserInstance->loadUrl(_url);
@@ -195,11 +186,11 @@ void ScreenSpaceBrowser::update() {
 }
 
 bool ScreenSpaceBrowser::isReady() const {
-    return _shader && _texture;
+    return _shader.get();
 }
 
 void ScreenSpaceBrowser::bindTexture() {
-    _texture->bind();
+    _renderHandler->bindTexture();
 }
 
 } // namespace openspace
