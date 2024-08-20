@@ -64,6 +64,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
 
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;
+    browserSettings.webgl = cef_state_t::STATE_ENABLED;
 
     _browser = CefBrowserHost::CreateBrowserSync(
         windowInfo,
