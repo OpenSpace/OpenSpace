@@ -29,7 +29,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <modules/webbrowser/webbrowsermodule.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "WebGUI:RenderHandler";
@@ -86,9 +85,7 @@ void GUIRenderHandler::draw() {
         _programObject->rebuildFromFile();
     }
 
-    if (!_acceleratedRendering) {
-        updateTexture();
-    }
+    updateTexture();
 
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);

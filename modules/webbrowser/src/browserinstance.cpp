@@ -27,6 +27,7 @@
 #include <modules/webbrowser/include/browserclient.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
+#include <modules/webbrowser/webbrowsermodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/filesystem/file.h>
@@ -36,7 +37,6 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <filesystem>
-#include <modules/webbrowser/webbrowsermodule.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "CEF BrowserInstance";

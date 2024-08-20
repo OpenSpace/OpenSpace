@@ -38,8 +38,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
-#include <filesystem>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <filesystem>
 
 namespace {
     constexpr std::string_view _loggerCat = "WebBrowser";
