@@ -57,6 +57,8 @@ public:
     void initializeGL();
     void deinitializeGL();
 
+    void initializeDataset();
+
     bool mouseButtonCallback(MouseButton button, MouseAction action);
     bool mouseWheelCallback(double position);
     bool keyCallback(Key key, KeyModifier modifier, KeyAction action);

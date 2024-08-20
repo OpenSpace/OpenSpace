@@ -219,10 +219,35 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
         _externalSelectionChanged = true;
     });
 
+    // Interaction callbacks. OBS! A bit ugly to handle this separately from ImGui io....
+    global::callback::keyboard->emplace_back(
+        [&](Key key, KeyModifier, KeyAction action, bool) -> bool {
+            bool isCtrl = key == Key::LeftControl;
+            if (isCtrl && action == KeyAction::Press) {
+                _holdingCtrl = true;
+            }
+            else if (isCtrl && action == KeyAction::Release) {
+                _holdingCtrl = false;
+            }
+            // Do not capture
+            return false;
+        }
+    );
+}
+
+void DataViewer::initialize() {
+    LDEBUG("Initializing dataset from files specified in module");
+
+    // Load things related to the dataset. We need to do this on initialize rather than
+    // construction since we need the module to exist first (to access its settings)
     _dataSettings = DataLoader::loadDataSettingsFromJson();
 
     // Load the dataset
     _data = DataLoader::loadData(_dataSettings);
+
+    if (_data.empty()) {
+        LERROR("No data was loaded!");
+    }
 
     // Initialize filtered data index list and map of host star to planet indices
     _filteredData.reserve(_data.size());
@@ -240,20 +265,7 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     _colorMappingView = std::make_unique<ColorMappingView>(*this, _dataSettings);
     _filteringView = std::make_unique<FilteringView>(*this, _dataSettings);
 
-    // Interaction callbacks. OBS! A bit ugly to handle this separately from ImGui io....
-    global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier, KeyAction action, bool) -> bool {
-            bool isCtrl = key == Key::LeftControl;
-            if (isCtrl && action == KeyAction::Press) {
-                _holdingCtrl = true;
-            }
-            else if (isCtrl && action == KeyAction::Release) {
-                _holdingCtrl = false;
-            }
-            // Do not capture
-            return false;
-        }
-    );
+    LDEBUG("Finished initializing based on dataset");
 }
 
 void DataViewer::initializeGL() {

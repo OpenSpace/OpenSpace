@@ -189,6 +189,10 @@ void Gui::deinitializeGL() {
     glDeleteBuffers(1, &vboElements);
 }
 
+void Gui::initializeDataset() {
+    _dataViewer.initialize();
+}
+
 void Gui::startFrame(float deltaTime, const glm::vec2& windowSize,
                      const glm::vec2& dpiScaling, const glm::vec2& mousePos,
                      uint32_t mouseButtonsPressed)

@@ -25,8 +25,11 @@
 #include <modules/exoplanetsexperttool/dataloader.h>
 
 #include <modules/exoplanetsexperttool/datahelper.h>
+#include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/coordinateconversion.h>
 #include <openspace/util/progressbar.h>
@@ -46,10 +49,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataLoader";
-
-    // @TODO: naturally, this path should not be hardcoded
-    constexpr std::string_view DataSettingsPath = "scripts/datasettings_galah.json";
-    constexpr std::string_view BasePath = "${MODULES}/exoplanetsexperttool";
 
     bool hasEnding(std::string const& fullString, std::string const& ending) {
         if (fullString.length() >= ending.length()) {
@@ -82,7 +81,9 @@ namespace {
         using namespace openspace::exoplanets;
 
         try {
-            j.at("datafile").get_to(s.dataFile);
+            std::string file;
+            j.at("datafile").get_to(file);
+            s.dataFile = file;
 
             const nlohmann::json dataMapping = j.at("data_mapping");
             dataMapping.at("position_ra").get_to(s.dataMapping.positionRa);
@@ -205,30 +206,54 @@ namespace openspace::exoplanets {
 DataLoader::DataLoader() {}
 
 DataSettings DataLoader::loadDataSettingsFromJson() {
-    // For some reason, this token does not exist yet.
-    //std::filesystem::path basePath = absPath("${MODULE_EXOPLANETSEXPERTTOOL}");
-    std::filesystem::path basePath = absPath(BasePath);
-    std::filesystem::path settingsPath = basePath / std::filesystem::path(DataSettingsPath);
+    auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
+    std::filesystem::path settingsPath = absPath(mod->dataConfigFile());
+
+    if (settingsPath.empty()) {
+        LERROR("No dataset settings (.json) file was provided.");
+        return DataSettings();
+    }
+    else if (!std::filesystem::is_regular_file(settingsPath)) {
+        LERROR(std::format(
+            "Could not find dataset settings (.json) file: '{}'", settingsPath
+        ));
+        return DataSettings();
+    }
 
     std::ifstream datasetConfigFile(settingsPath);
-    const nlohmann::json j = nlohmann::json::parse(datasetConfigFile);
 
-    DataSettings settings;
-    from_json(j, settings);
-    return settings;
+    if (!datasetConfigFile.good()) {
+        LERROR(std::format(
+            "Failed reading dataset settings file: '{}'", settingsPath
+        ));
+        return DataSettings();
+    }
+
+    try {
+        const nlohmann::json j = nlohmann::json::parse(datasetConfigFile);
+        DataSettings settings;
+        from_json(j, settings);
+        return settings;
+    }
+    catch (...) {
+        LERROR(std::format(
+            "Failed parsing dataset settings file: '{}'", settingsPath
+        ));
+        return DataSettings();
+    }
 }
 
 std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
-    std::filesystem::path csvFilePath = absPath(BasePath) / settings.dataFile;
+    std::filesystem::path csvFilePath = absPath("${MODULE_EXOPLANETSEXPERTTOOL}") / settings.dataFile;
 
-    if (!std::filesystem::exists(csvFilePath)) {
-        LERROR(std::format("Could not find input file '{}'", csvFilePath));
+    if (!std::filesystem::is_regular_file(csvFilePath)) {
+        LERROR(std::format("Could not find input data file '{}'", csvFilePath));
         return std::vector<ExoplanetItem>();
     }
 
     std::ifstream csvFile(csvFilePath);
     if (!csvFile.good()) {
-        LERROR(std::format("Failed to open input file '{}'", csvFilePath));
+        LERROR(std::format("Failed to open input data file '{}'", csvFilePath));
         return std::vector<ExoplanetItem>();
     }
 

@@ -31,6 +31,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <string_view>
 
 namespace openspace {
@@ -47,6 +48,7 @@ public:
 
     bool enabled() const;
     bool showInfoWindowAtStartup() const;
+    std::filesystem::path dataConfigFile() const;
 
     std::vector<documentation::Documentation> documentations() const override;
 
@@ -56,6 +58,7 @@ protected:
     properties::BoolProperty _enabled;
     properties::BoolProperty _showInfoWindowAtStartup;
     properties::IntListProperty _filteredRows;
+    properties::StringProperty _dataConfigFile;
 
     exoplanets::gui::Gui _gui;
     glm::vec2 _mousePosition = glm::vec2(0.f);
