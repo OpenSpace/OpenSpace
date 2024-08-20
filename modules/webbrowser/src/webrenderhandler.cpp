@@ -34,9 +34,16 @@ namespace {
 
 namespace openspace {
 
-WebRenderHandler::WebRenderHandler()
-    : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering())
-{}
+WebRenderHandler::WebRenderHandler(bool accelerate)
+    : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering() && accelerate)
+{
+    if (_acceleratedRendering) {
+        glCreateTextures(GL_TEXTURE_2D, 1, &_texture);
+    }
+    else {
+        glGenTextures(1, &_texture);
+    }
+}
 
 void WebRenderHandler::reshape(int w, int h) {
     if (w == _windowSize.x && h == _windowSize.y) {

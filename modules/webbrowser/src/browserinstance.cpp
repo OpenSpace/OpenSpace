@@ -45,7 +45,8 @@ namespace {
 namespace openspace {
 
 BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
-                                 WebKeyboardHandler* keyboardHandler)
+                                 WebKeyboardHandler* keyboardHandler,
+                                 bool accelerateRendering)
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
     , _client(new BrowserClient(_renderHandler.get(), _keyboardHandler.get()))
@@ -56,7 +57,7 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     windowInfo.SetAsWindowless(0);
 
     // Use accelerated rendering if possible
-    if (WebBrowserModule::canUseAcceleratedRendering()) {
+    if (WebBrowserModule::canUseAcceleratedRendering() && accelerateRendering) {
         windowInfo.shared_texture_enabled = true;
         LINFO("Enabling shared texture mode for CEF");
     }
