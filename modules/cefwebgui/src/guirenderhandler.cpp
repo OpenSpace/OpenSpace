@@ -58,12 +58,6 @@ GUIRenderHandler::GUIRenderHandler() {
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
     glGenBuffers(1, &_vbo);
-    if (_acceleratedRendering) {
-        glCreateTextures(GL_TEXTURE_2D, 1, &_texture);
-    }
-    else {
-        glGenTextures(1, &_texture);
-    }
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(GL_ARRAY_BUFFER, Vtx.size() * sizeof(float), Vtx.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
