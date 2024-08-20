@@ -1244,19 +1244,18 @@ enum class [[codegen::enum]] CustomPropertyType {
  *             all items in the given GUI path. Any excluded items will be placed after
  *             the ones in the list.
  */
-[[codegen::luawrap]] void setGuiTreeOrdering(std::string guiPath,
-                                             std::vector<std::string> list)
+[[codegen::luawrap]] void setGuiOrder(std::string guiPath, std::vector<std::string> list)
 {
-    return openspace::global::renderEngine->scene()->setGuiTreeOrdering(guiPath, list);
+    return openspace::global::renderEngine->scene()->setGuiTreeOrder(guiPath, list);
 }
 
 /**
- * Get a dictionary containing the current map with custom orderings for the GUI tree.
- * Each key in the dictionary corresponds to a branch in the tree, i.e. a specific GUI
- * path.
+ * Get a dictionary containing the current map with custom orderings for the Scene GUI
+ * tree. Each key in the dictionary corresponds to a branch in the tree, i.e. a specific
+ * GUI path.
  */
-[[codegen::luawrap]] ghoul::Dictionary guiTreeOrdering() {
-    return openspace::global::renderEngine->scene()->guiTreeOrdering();
+[[codegen::luawrap]] ghoul::Dictionary guiOrder() {
+    return openspace::global::renderEngine->scene()->guiTreeOrder();
 }
 
 } // namespace

@@ -31,7 +31,7 @@ asset.require("./neptune/major_moons")
 
 
 asset.onInitialize(function()
-  openspace.setGuiTreeOrdering(
+  openspace.setGuiOrder(
     "/Solar System/Planets",
     { "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune" }
   )

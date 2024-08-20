@@ -88,11 +88,11 @@ asset.onInitialize(function()
     openspace.absPath("${DATA}/globebrowsing_servers.lua")
   )
 
-  openspace.setGuiTreeOrdering(
+  openspace.setGuiOrder(
     "/",
     { "Solar System", "Milky Way", "Universe", "Night Sky", "Examples" }
   )
-  openspace.setGuiTreeOrdering(
+  openspace.setGuiOrder(
     "/Solar System",
     { "Planets", "Dwarf Planets", "Sun", "Solar System Barycenter" }
   )

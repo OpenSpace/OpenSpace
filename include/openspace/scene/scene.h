@@ -257,7 +257,7 @@ public:
      * \param list A list of names of scene graph nodes or subgroups in the GUI, in the
      *             order of which they should appear in the tree.
      */
-    void setGuiTreeOrdering(const std::string& guiPath,
+    void setGuiTreeOrder(const std::string& guiPath,
         const std::vector<std::string>& list);
 
     /**
@@ -267,7 +267,7 @@ public:
      * \return A dictionary containing key value pairs with custom item orderings for
      *         specific paths in the Scene GUI tree
      */
-    ghoul::Dictionary guiTreeOrdering() const;
+    ghoul::Dictionary guiTreeOrder() const;
 
 private:
     /**
@@ -353,7 +353,7 @@ private:
 
     ghoul::MemoryPool<4096> _memoryPool;
 
-    std::unordered_map<std::string, std::vector<std::string>> _guiTreeOrderingMap;
+    std::unordered_map<std::string, std::vector<std::string>> _guiTreeOrderMap;
 };
 
 // Convert the input string to a format that is valid as an identifier
