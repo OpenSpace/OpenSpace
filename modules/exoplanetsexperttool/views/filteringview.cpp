@@ -353,14 +353,18 @@ bool FilteringView::renderColumnFilterSettings() {
             }
 
             int indexToErase = -1;
-            constexpr const int nColumns = 5;
+            constexpr const int nColumns = 6;
 
             const ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg;
+
+            static int editingColumn = -1;
+            static char editingColumnText[128] = "";
 
             if (ImGui::BeginTable("filtersTable", nColumns, flags)) {
                 for (int i = 0; i < _columnFilters.size(); ++i) {
                     ColumnFilterEntry& f = _columnFilters[i];
                     const std::string queryString = f.filter.query();
+                    bool isEditingColumn = (editingColumn == i);
                     ImGui::TableNextRow();
 
                     ImGui::PushID(std::format("FilterColEnabled-{}", i).c_str());
@@ -377,10 +381,48 @@ bool FilteringView::renderColumnFilterSettings() {
                     ImGui::Text("    ");
 
                     ImGui::TableNextColumn();
-                    ImGui::Text(queryString.empty() ? "has value" : queryString.c_str());
+                    if (isEditingColumn) {
+                        ImGui::SetNextItemWidth(100);
+                        bool wasChanged = ImGui::InputText(
+                            "##EditQuery",
+                            editingColumnText,
+                            IM_ARRAYSIZE(editingColumnText),
+                            ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll
+                        );
+                        if (wasChanged) {
+                            ColumnFilter filter = f.filter.isNumeric() ?
+                                ColumnFilter(editingColumnText, ColumnFilter::Type::Numeric) :
+                                ColumnFilter(editingColumnText, ColumnFilter::Type::Text);
+
+                            if (filter.isValid()) {
+                                editingColumn = -1;
+                                f.filter = filter;
+                                filterWasChanged = true;
+                            }
+                        }
+                    }
+                    else {
+                        ImGui::Text(queryString.empty() ? "has value" : queryString.c_str());
+                    }
 
                     ImGui::TableNextColumn();
-                    ImGui::PushID(i);
+                    ImGui::PushID(std::format("EditFilter_{}", i).c_str());
+                    if (!isEditingColumn) {
+                        if (ImGui::SmallButton("Edit")) {
+                            editingColumn = i;
+                            strcpy(editingColumnText, queryString.data());
+                        }
+                    }
+                    else {
+                        if (ImGui::SmallButton("Abort Edit")) {
+                            editingColumn = -1;
+                        }
+                    }
+                    ImGui::PopID();
+
+
+                    ImGui::TableNextColumn();
+                    ImGui::PushID(std::format("DeleteFilter_{}", i).c_str());
                     if (ImGui::SmallButton("Delete")) {
                         indexToErase = i;
                     }
