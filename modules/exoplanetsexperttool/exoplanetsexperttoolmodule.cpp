@@ -96,7 +96,6 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
 {
     addProperty(_enabled);
     addProperty(_showInfoWindowAtStartup);
-    _dataConfigFile.setReadOnly(true);
     addProperty(_dataConfigFile);
 
     _dataConfigFile.onChange([this]() {

@@ -235,7 +235,7 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     );
 }
 
-void DataViewer::initialize() {
+void DataViewer::initializeData() {
     LDEBUG("Initializing dataset from files specified in module");
 
     // Load things related to the dataset. We need to do this on initialize rather than
@@ -250,6 +250,7 @@ void DataViewer::initialize() {
     }
 
     // Initialize filtered data index list and map of host star to planet indices
+    _filteredData.clear();
     _filteredData.reserve(_data.size());
     for (size_t i = 0; i < _data.size(); i++) {
         _filteredData.push_back(i);
@@ -266,6 +267,8 @@ void DataViewer::initialize() {
     _filteringView = std::make_unique<FilteringView>(*this, _dataSettings);
 
     LDEBUG("Finished initializing based on dataset");
+
+    _filterChanged = true;
 }
 
 void DataViewer::initializeGL() {

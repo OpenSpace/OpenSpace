@@ -101,7 +101,7 @@
     {
       "name": "Modules.ExoplanetsExpertTool.DataConfigFile",
       "type": "setPropertyValueSingle",
-      "value": "${MODULE_EXOPLANETSEXPERTTOOL}/scripts/datasettings_galah.json"
+      "value": "${MODULE_EXOPLANETSEXPERTTOOL}/scripts/datasettings_exoplanets.json"
     }
   ],
   "time": {

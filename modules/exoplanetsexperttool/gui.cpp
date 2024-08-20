@@ -190,7 +190,7 @@ void Gui::deinitializeGL() {
 }
 
 void Gui::initializeDataset() {
-    _dataViewer.initialize();
+    _dataViewer.initializeData();
 }
 
 void Gui::startFrame(float deltaTime, const glm::vec2& windowSize,

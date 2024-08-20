@@ -47,7 +47,8 @@ class DataViewer : public properties::PropertyOwner {
 public:
     DataViewer(std::string identifier, std::string guiName = "");
 
-    void initialize();
+    void initializeData();
+
     void initializeGL();
 
     // Accessors and functions that are needed for the other views

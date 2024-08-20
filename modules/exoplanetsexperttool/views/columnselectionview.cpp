@@ -54,6 +54,7 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
 
     // The default column are the which info has been provided for, if they exist in
     // the dataset
+    _namedColumns.clear();
     _namedColumns.reserve(columnsWithSettings.size());
     for (auto const& [key, _] : columnsWithSettings) {
         if (allDataColumns.contains(key) && !isNameColumn(key)) {
@@ -78,6 +79,7 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
     _selectedNamedColumns.assign(result.size(), true);
 
     // Add other columns, if there are any. Assume all items have the same columns
+    _otherColumns.clear();
     _otherColumns.reserve(allDataColumns.size());
     for (auto const& [key, _] : allDataColumns) {
         if (!columnsWithSettings.contains(key) && !isNameColumn(key)) {
@@ -89,7 +91,7 @@ std::vector<ColumnKey> ColumnSelectionView::initializeColumnsFromData(
 
     // Fill up with other columns
     for (size_t i = 0; i < _otherColumns.size(); ++i) {
-        if (!(result.size() < IMGUI_TABLE_MAX_COLUMNS)) {
+        if (result.size() == (IMGUI_TABLE_MAX_COLUMNS - 1)) {
             break;
         }
         const ColumnKey& key = _otherColumns[i];
