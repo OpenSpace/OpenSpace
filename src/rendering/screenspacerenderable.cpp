@@ -700,7 +700,9 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     unbindTexture();
 }
 
-void ScreenSpaceRenderable::unbindTexture() {}
+void ScreenSpaceRenderable::unbindTexture() {
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 glm::vec3 ScreenSpaceRenderable::sanitizeSphericalCoordinates(glm::vec3 spherical) const {
     const float r = spherical.x;
