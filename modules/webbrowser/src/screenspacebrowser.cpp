@@ -132,7 +132,13 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 }
 
 bool ScreenSpaceBrowser::initializeGL() {
-    createShaders();
+    ghoul::Dictionary dict = ghoul::Dictionary();
+
+    dict.setValue(
+        "useAcceleratedRendering",
+        WebBrowserModule::canUseAcceleratedRendering()
+    );
+    createShaders(dict);
 
     _browserInstance->initialize();
     _browserInstance->loadUrl(_url);

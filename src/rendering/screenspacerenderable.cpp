@@ -510,9 +510,10 @@ float ScreenSpaceRenderable::scale() const {
     return _scale;
 }
 
-void ScreenSpaceRenderable::createShaders() {
-    ghoul::Dictionary dict = ghoul::Dictionary();
-
+void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
+    if (!dict.hasKey("useAcceleratedRendering")) {
+        dict.setValue("useAcceleratedRendering", false);
+    }
     auto res = global::windowDelegate->currentDrawBufferResolution();
     ghoul::Dictionary rendererData;
     rendererData.setValue(
