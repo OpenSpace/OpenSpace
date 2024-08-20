@@ -50,9 +50,8 @@ namespace openspace {
 
 class WebRenderHandler : public CefRenderHandler {
 public:
-    /* TODO ylvse 2024-08-20: Remove this argument when the skybrowser rewrite is done.
-    * It is necessary atm for making the skybrowser work.
-    */
+    // TODO ylvse 2024-08-20: Remove this argument when the skybrowser rewrite is done.
+    // It is necessary atm for making the skybrowser work.
     WebRenderHandler(bool accelerate = true);
     using Pixel = glm::tvec4<char>;
 
@@ -86,7 +85,6 @@ protected:
     const bool _acceleratedRendering;
 
 private:
-    bool _needsRepaint = true;
     glm::ivec2 _windowSize = glm::ivec2(0);
     glm::ivec2 _browserBufferSize = glm::ivec2(0);
 
@@ -94,6 +92,7 @@ private:
      * RGBA buffer from browser
      */
     std::vector<Pixel> _browserBuffer;
+    bool _needsRepaint = true;
     bool _textureSizeIsDirty = true;
     bool _textureIsDirty = true;
     glm::ivec2 _lowerDirtyRectBound = glm::ivec2(0);

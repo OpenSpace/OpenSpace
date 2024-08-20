@@ -217,11 +217,12 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
     });
 
     global::callback::postDraw->emplace_back([this]() {
-        if (_instance && (global::windowDelegate->windowHasResized() || _instance->_shouldReshape)) {
-            const glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
+        bool windowChanged = global::windowDelegate->windowHasResized(); 
+        if (_instance && (windowChanged || _instance->_shouldReshape)){
+            const glm::ivec2 res = global::windowDelegate->guiWindowResolution();
             _instance->reshape(static_cast<glm::ivec2>(
-                static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
-                ));
+                glm::vec2(res) * global::windowDelegate->dpiScaling()
+            ));
             _instance->_shouldReshape = false;
         }
     });

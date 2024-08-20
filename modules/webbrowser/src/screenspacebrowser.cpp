@@ -81,8 +81,7 @@ namespace {
 
 namespace openspace {
 
-void ScreenSpaceBrowser::ScreenSpaceRenderHandler::draw() {
-}
+void ScreenSpaceBrowser::ScreenSpaceRenderHandler::draw() {}
 
 void ScreenSpaceBrowser::ScreenSpaceRenderHandler::render() {}
 
@@ -192,7 +191,7 @@ void ScreenSpaceBrowser::update() {
 }
 
 bool ScreenSpaceBrowser::isReady() const {
-    return _shader.get();
+    return _shader != nullptr;
 }
 
 void ScreenSpaceBrowser::bindTexture() {

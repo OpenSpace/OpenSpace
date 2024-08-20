@@ -116,10 +116,11 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
     _needsRepaint = false;
 }
 
-void WebRenderHandler::OnAcceleratedPaint(
-    CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList& dirtyRects,
-    const CefAcceleratedPaintInfo& info
-) {
+void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
+                                          PaintElementType type,
+                                          const RectList& dirtyRects,
+                                          const CefAcceleratedPaintInfo& info)
+{
     // This should never happen - if accelerated rendering is off the OnPaint method
     // should be called. But we instatiate the web render handler and the browser instance
     // in different places so room for error
@@ -145,7 +146,8 @@ void WebRenderHandler::OnAcceleratedPaint(
         return;
     }
 
-    GLuint sharedTexture, memObj;
+    GLuint sharedTexture;
+    GLuint memObj;
     // Create new texture that we can copy the shared texture into. Unfortunately
     // textures are immutable so we have to create a new one
     glCreateTextures(GL_TEXTURE_2D, 1, &sharedTexture);
@@ -160,14 +162,12 @@ void WebRenderHandler::OnAcceleratedPaint(
     // Cef uses the GL_HANDLE_TYPE_D3D11_IMAGE_EXT handle for their shared texture
     // Import the shared texture to the memory object
     glImportMemoryWin32HandleEXT(
-        memObj, size, GL_HANDLE_TYPE_D3D11_IMAGE_EXT, (void*)info.shared_texture_handle
+        memObj, size, GL_HANDLE_TYPE_D3D11_IMAGE_EXT, info.shared_texture_handle
     );
 
     // Allocate immutable storage for the texture for the data from the memory object
     // Use GL_RGBA8 since it is 4 bytes
-    glTextureStorageMem2DEXT(
-        sharedTexture, 1, GL_RGBA8, newWidth, newHeight, memObj, 0
-    );
+    glTextureStorageMem2DEXT(sharedTexture, 1, GL_RGBA8, newWidth, newHeight, memObj, 0);
 
     // Clean up the temporary allocations
     glDeleteTextures(1, &_texture);
@@ -179,10 +179,7 @@ void WebRenderHandler::OnAcceleratedPaint(
 }
 
 void WebRenderHandler::updateTexture() {
-    if (_acceleratedRendering) {
-        return;
-    }
-    if (_needsRepaint) {
+    if (_acceleratedRendering || _needsRepaint) {
         return;
     }
 
@@ -240,13 +237,15 @@ bool WebRenderHandler::hasContent(int x, int y) {
         // To see the alpha value of the pixel we first have to get the texture from the
         // GPU. Use a pbo for better performance
         bool hasContent = false;
-        GLuint pbo;
+        GLuint pbo = 0;
         glGenBuffers(1, &pbo);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 
         // Allocate memory for the PBO (width * height * 4 bytes for RGBA)
         glBufferData(
-            GL_PIXEL_PACK_BUFFER, _windowSize.x * _windowSize.y * 4, nullptr,
+            GL_PIXEL_PACK_BUFFER,
+            _windowSize.x * _windowSize.y * 4,
+            nullptr,
             GL_STREAM_READ
         );
 
@@ -256,7 +255,10 @@ bool WebRenderHandler::hasContent(int x, int y) {
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
         // Map the PBO to the CPU memory space
-        GLubyte* pixels = (GLubyte*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+        GLubyte* pixels = reinterpret_cast<GLubyte*>(
+            glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY)
+        );
+
         ghoul_assert(pixels, "Could not read pixels from the GPU for the cef gui.");
         if (pixels) {
             // Access the specific pixel data

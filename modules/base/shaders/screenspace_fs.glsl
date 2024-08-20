@@ -42,6 +42,7 @@ uniform vec2 borderWidth = vec2(0.1);
 uniform vec3 borderColor = vec3(0.0);
 uniform int borderFeather = 0;
 
+// Accelerated rendering can be used for the CEF browser
 #define USE_ACCELERATED_RENDERING #{useAcceleratedRendering}
 
 Fragment getFragment() {
