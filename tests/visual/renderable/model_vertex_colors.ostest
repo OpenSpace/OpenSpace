@@ -1,0 +1,25 @@
+{
+  "profile": "empty",
+  "commands": [
+    { "type": "time", "value": "2024-07-11T12:00:00.00" },
+    {
+      "type": "property",
+      "value": { "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnabledMinimumAllowedDistance", "value": false }
+    },
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablemodel/model_vertex_colors.asset"
+    },
+    { "type": "wait", "value": 5 },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableModel_Example_Vertex_Colors",
+        "up": [ -0.008132849760983194, 0.9986021710677091, 0.0522260537818345 ],
+        "position": [0.10334103813188818, -0.20823861895763798, 3.9977746547860167 ]
+      }
+    },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

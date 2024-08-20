@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_Diviner_STN_Avg_Clr_Global_32ppd = {
   Identifier = "LRO_Diviner_STN_Avg_Clr_Global_32ppd",
   Name = [[LRO Diviner Surface Temp Normal Avg, Color]],
@@ -13,6 +15,7 @@ local treks_LRO_Diviner_STN_Avg_Clr_Global_32ppd = {
   FilePath = asset.resource("LRO_Diviner_Surface_Temp_Normal_Avg/Color.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_Diviner_STN_Avg_Clr_Global_32ppd)
@@ -23,6 +26,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("LRO_Diviner_STN_Avg_Clr_Global_32ppd", treks_LRO_Diviner_STN_Avg_Clr_Global_32ppd)
+
 
 
 asset.meta = {

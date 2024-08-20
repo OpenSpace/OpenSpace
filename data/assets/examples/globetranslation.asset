@@ -76,6 +76,7 @@ asset.export(ExampleFixedHeight)
 asset.export(ExampleAdaptiveHeight)
 
 
+
 asset.meta = {
   Name = "GlobeTranslation Example",
   Description = [[An example that demonstrates how to place an object on a planet surface

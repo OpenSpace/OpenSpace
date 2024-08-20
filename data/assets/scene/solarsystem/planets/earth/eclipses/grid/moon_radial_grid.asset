@@ -21,7 +21,7 @@ local orbitalPlaneGrid = {
   },
   GUI = {
     Name = "Moon Ecliptic Grid",
-    Path = "/Solar System/Planets/Earth/Moon",
+    Path = "/Solar System/Planets/Earth/Moon"
   }
 }
 

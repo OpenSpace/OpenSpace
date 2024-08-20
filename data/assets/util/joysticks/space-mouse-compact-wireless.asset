@@ -70,6 +70,8 @@ asset.onInitialize(function()
   )
 end)
 
+
+
 asset.meta = {
   Name = "Joystick controller: SpaceMouse compact wireless",
   Description = "Joystick controller configuration for SpaceMouse compact wireless",

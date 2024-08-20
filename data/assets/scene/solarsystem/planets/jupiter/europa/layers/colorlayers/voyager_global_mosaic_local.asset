@@ -19,6 +19,7 @@ local Layer = {
   BlendMode = "Color"
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Europa.Identifier, "ColorLayers", Layer)
 end)

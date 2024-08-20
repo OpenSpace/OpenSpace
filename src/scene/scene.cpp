@@ -166,7 +166,6 @@ void Scene::registerNode(SceneGraphNode* node) {
     _nodesByIdentifier[node->identifier()] = node;
     addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
-    global::eventEngine->publishEvent<events::EventSceneGraphNodeAdded>(node);
 }
 
 void Scene::unregisterNode(SceneGraphNode* node) {
@@ -186,7 +185,6 @@ void Scene::unregisterNode(SceneGraphNode* node) {
     }
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
-    global::eventEngine->publishEvent<events::EventSceneGraphNodeRemoved>(node);
 }
 
 void Scene::markNodeRegistryDirty() {
@@ -578,7 +576,7 @@ void Scene::updateInterpolations() {
 }
 
 void Scene::setPropertiesFromProfile(const Profile& p) {
-    ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+    ghoul::lua::LuaState L;
 
     for (const Profile::Property& prop : p.properties) {
         if (prop.name.empty()) {

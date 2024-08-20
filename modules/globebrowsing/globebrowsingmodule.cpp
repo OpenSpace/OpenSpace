@@ -48,6 +48,7 @@
 #include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileproviderbydate.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
 #include <openspace/camera/camera.h>
@@ -310,6 +311,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     fTileProvider->registerClass<TemporalTileProvider>("TemporalTileProvider");
     fTileProvider->registerClass<TileIndexTileProvider>("TileIndexTileProvider");
     fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileProvider");
+    fTileProvider->registerClass<TileProviderByDate>("TileProviderByDate");
     fTileProvider->registerClass<TileProviderByLevel>("TileProviderByLevel");
     fTileProvider->registerClass<TileProviderByIndex>("TileProviderByIndex");
 
@@ -338,6 +340,7 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::SizeReferenceTileProvider::Documentation(),
         globebrowsing::TemporalTileProvider::Documentation(),
         globebrowsing::TileIndexTileProvider::Documentation(),
+        globebrowsing::TileProviderByDate::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
         globebrowsing::GeoJsonManager::Documentation(),

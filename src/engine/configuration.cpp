@@ -191,6 +191,12 @@ namespace {
         // pass beyond local midnight
         std::optional<bool> screenshotUseDate;
 
+        // Toggles whether the Lua states used inside OpenSpace are sandboxed which
+        // prevents potentially unsafe malicious code to run on the system. Only turn this
+        // setting to `false` if you are sure that no external code from asset files,
+        // session recordings, or parallel connections can be executed on this machine.
+        std::optional<bool> sandboxedLua;
+
         struct HttpProxy {
             // Determines whether the proxy is being used
             std::optional<bool> activate;
@@ -405,6 +411,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     res.setValue("ConsoleKey", ghoul::to_string(consoleKey));
     res.setValue("ShutdownCountdown", static_cast<double>(shutdownCountdown));
     res.setValue("shouldUseScreenshotDate", shouldUseScreenshotDate);
+    res.setValue("sandboxedLua", sandboxedLua);
     res.setValue("OnScreenTextScaling", onScreenTextScaling);
     res.setValue("UsePerProfileCache", usePerProfileCache);
     res.setValue("IsRenderingOnMasterDisabled", isRenderingOnMasterDisabled);
@@ -562,6 +569,7 @@ void parseLuaState(Configuration& configuration) {
 
     c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
     c.shouldUseScreenshotDate = p.screenshotUseDate.value_or(c.shouldUseScreenshotDate);
+    c.sandboxedLua = p.sandboxedLua.value_or(c.sandboxedLua);
     c.onScreenTextScaling = p.onScreenTextScaling.value_or(c.onScreenTextScaling);
     c.usePerProfileCache = p.perProfileCache.value_or(c.usePerProfileCache);
     c.isRenderingOnMasterDisabled =
@@ -705,6 +713,9 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     ghoul_assert(std::filesystem::is_regular_file(configurationFile), "File must exist");
 
     Configuration result;
+    // Having the configuration not sandboxed is safe as there is no way for a third-party
+    // file to have any input this early in the loading phase
+    result.state = ghoul::lua::LuaState(ghoul::lua::LuaState::Sandboxed::No);
 
     // Injecting the resolution of the primary screen into the Lua state
     const std::string script = std::format(

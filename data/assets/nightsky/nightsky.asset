@@ -11,6 +11,7 @@ asset.require("actions/nightsky/camera", false)
 asset.require("actions/nightsky/daytime", false)
 
 
+
 asset.meta = {
   Name = "Night Sky Assets",
   Description = [[A collection of assets useful for studying the night sky.]],

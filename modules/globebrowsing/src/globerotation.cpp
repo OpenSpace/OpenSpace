@@ -49,7 +49,7 @@ namespace {
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
-        "globe. The default value is 0.0.",
+        "globe.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -58,15 +58,15 @@ namespace {
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
-        "globe. The default value is 0.0.",
+        "globe.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AngleInfo = {
         "Angle",
         "Angle",
-        "A rotation angle that can be used to rotate the object around its own y-axis, "
-        "which will be pointing out of the globe's surface.",
+        "A rotation angle (in degrees) that can be used to rotate the object around its "
+        "own y-axis, which will be pointing out of the globe's surface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -82,7 +82,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseCameraInfo = {
         "UseCamera",
         "Use Camera",
-        "If this value is 'true', the lat and lon are updated to match the camera.",
+        "If this value is 'true', the latitute and longitude are updated each frame "
+        "to match the location of the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -92,10 +93,10 @@ namespace {
             [[codegen::annotation("A valid scene graph node with a RenderableGlobe")]];
 
         // [[codegen::verbatim(LatitudeInfo.description)]]
-        std::optional<double> latitude;
+        double latitude [[codegen::inrange(-90.0, 90.0)]];
 
         // [[codegen::verbatim(LongitudeInfo.description)]]
-        std::optional<double> longitude;
+        double longitude [[codegen::inrange(-180.0, 180.0)]];
 
         // [[codegen::verbatim(AngleInfo.description)]]
         std::optional<double> angle;
@@ -132,11 +133,11 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     });
     addProperty(_globe);
 
-    _latitude = p.latitude.value_or(_latitude);
+    _latitude = p.latitude;
     _latitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_latitude);
 
-    _longitude = p.longitude.value_or(_longitude);
+    _longitude = p.longitude;
     _longitude.onChange([this]() { setUpdateVariables(); });
     addProperty(_longitude);
 
@@ -151,7 +152,6 @@ GlobeRotation::GlobeRotation(const ghoul::Dictionary& dictionary)
     _useCamera = p.useCamera.value_or(_useCamera);
     _useCamera.onChange([this]() { setUpdateVariables(); });
     addProperty(_useCamera);
-
 }
 
 void GlobeRotation::findGlobe() {

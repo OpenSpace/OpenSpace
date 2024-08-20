@@ -20,8 +20,7 @@ local VenusTrail = {
   Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
   GUI = {
     Name = "Venus Trail",
-    Path = "/Solar System/Planets/Venus",
-    Description = "Main trail for Venus"
+    Path = "/Solar System/Planets/Venus"
   }
 }
 

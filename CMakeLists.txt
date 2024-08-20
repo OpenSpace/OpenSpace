@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2024                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -27,10 +27,11 @@ cmake_policy(VERSION 3.25)
 
 project(OpenSpace)
 
-set(OPENSPACE_VERSION_MAJOR 0)
-set(OPENSPACE_VERSION_MINOR 20)
-set(OPENSPACE_VERSION_PATCH 0)
-set(OPENSPACE_VERSION_STRING "Beta-13")
+set(OPENSPACE_RELEASE_BUILD OFF)
+set(OPENSPACE_VERSION_MAJOR)
+set(OPENSPACE_VERSION_MINOR)
+set(OPENSPACE_VERSION_PATCH)
+set(OPENSPACE_VERSION_STRING)
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
@@ -87,18 +88,6 @@ execute_process(
   OUTPUT_VARIABLE OPENSPACE_GIT_COMMIT
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-
-# See if working directory is clean or not
-execute_process(
-  COMMAND git diff-index --quiet HEAD --
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  RESULT_VARIABLE OPENSPACE_GIT_STATUS_RETURN
-)
-if (NOT OPENSPACE_GIT_STATUS_RETURN EQUAL 0)
-  set(OPENSPACE_GIT_STATUS "uncommitted changes")
-else ()
-  set(OPENSPACE_GIT_STATUS "")
-endif ()
 
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)

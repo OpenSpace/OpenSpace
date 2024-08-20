@@ -33,6 +33,11 @@ local imagesDestination = images .. "images"
 local Barycenter = {
   Identifier = "67PBarycenter",
   Parent = transforms.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2014 JAN 01 00:00:00.000",
+    End = "2017 JAN 01 00:00:00.000"
+  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -132,7 +137,6 @@ local Trail67P = {
   }
 }
 
--- actions
 local Focus67p = {
   Identifier = "os.rosetta.Focus67p",
   Name = "Focus on 67P",

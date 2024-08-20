@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_LrocKaguya_Shade_60N60S_512ppd = {
   Identifier = "LRO_LrocKaguya_Shade_60N60S_512ppd",
   Name = [[LOLA and TC Stereo DEM Merge 512ppd, Shade]],
@@ -13,6 +15,7 @@ local treks_LRO_LrocKaguya_Shade_60N60S_512ppd = {
   FilePath = asset.resource("LOLA_and_TC_Stereo_DEM_Merge_512ppd/Shade.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_LrocKaguya_Shade_60N60S_512ppd)
@@ -23,6 +26,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("LRO_LrocKaguya_Shade_60N60S_512ppd", treks_LRO_LrocKaguya_Shade_60N60S_512ppd)
+
 
 
 asset.meta = {

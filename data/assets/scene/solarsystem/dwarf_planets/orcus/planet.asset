@@ -19,8 +19,7 @@ local Planet = {
   },
   GUI = {
     Name = "Orcus",
-    Path = "/Solar System/Dwarf Planets/Orcus",
-    Description = "Globe of Orcus"
+    Path = "/Solar System/Dwarf Planets/Orcus"
   }
 }
 
