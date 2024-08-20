@@ -49,6 +49,7 @@ void WebRenderHandler::reshape(int w, int h) {
     if (w == _windowSize.x && h == _windowSize.y) {
         return;
     }
+    ghoul_assert(w > 0 && h > 0, std::format("Reshaped browser to {} x {}", w, h));
     _windowSize = glm::ivec2(w, h);
     _needsRepaint = true;
 }
@@ -61,6 +62,9 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
                                const CefRenderHandler::RectList& dirtyRects,
                                const void* buffer, int w, int h)
 {
+    // This should never happen - if accelerated rendering is on the OnAcceleratePaint
+    // method should be called. But we instatiate the web render handler and the browser
+    // instance in different places so room for error
     ghoul_assert(!_acceleratedRendering, "Accelerated rendering flag is turned on");
 
     const size_t bufferSize = static_cast<size_t>(w * h);
@@ -116,13 +120,30 @@ void WebRenderHandler::OnAcceleratedPaint(
     CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList& dirtyRects,
     const CefAcceleratedPaintInfo& info
 ) {
+    // This should never happen - if accelerated rendering is off the OnPaint method
+    // should be called. But we instatiate the web render handler and the browser instance
+    // in different places so room for error
+    ghoul_assert(_acceleratedRendering, "Accelerated rendering flag is turned off");
+
+    if (dirtyRects.empty()) {
+        return;
+    }
+    // When the window is minimized the texture is 1x1.
+    // This prevents a hard crash when minimizing the window or when you resize the window
+    // so that only the top bar is visible.
+    // TODO ylvse 2024-08-20: minimizing window should be handled with the appropriate
+    // function in the CefBrowser called WasHidden
+    if (dirtyRects[0].height <= 1 || dirtyRects[0].width <= 1) {
+        return; 
+    }
+    // This function is called asynchronously after a reshape which means we have to check
+    // for what we request. Validate the size. This prevents rendering a texture with the
+    // wrong size (the look will be deformed)
     int newWidth = dirtyRects[0].width;
     int newHeight = dirtyRects[0].height;
     if (newWidth != _windowSize.x || newHeight != _windowSize.y) {
-        LERROR("Size doesnt match");
         return;
     }
-    ghoul_assert(_acceleratedRendering, "Accelerated rendering flag is turned off");
 
     GLuint sharedTexture, memObj;
     // Create new texture that we can copy the shared texture into. Unfortunately
@@ -216,8 +237,8 @@ void WebRenderHandler::updateTexture() {
 
 bool WebRenderHandler::hasContent(int x, int y) {
     if (_acceleratedRendering) {
-        // To see the alpha value of the pixel we first have to get it from the GPU.
-        // We use a pbo for better performance
+        // To see the alpha value of the pixel we first have to get the texture from the
+        // GPU. Use a pbo for better performance
         bool hasContent = false;
         GLuint pbo;
         glGenBuffers(1, &pbo);
