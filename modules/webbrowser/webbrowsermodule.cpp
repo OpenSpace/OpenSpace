@@ -227,6 +227,8 @@ bool WebBrowserModule::isEnabled() const {
 }
 
 bool WebBrowserModule::canUseAcceleratedRendering() {
+// Linux doesn't have a problem with the rendering, Apple doesn't support OpenGL 4.5
+#ifdef WIN32
     ghoul::systemcapabilities::Version acceleratedVersion = {
         .major = 4, .minor = 5, .release = 0
     };
@@ -238,6 +240,9 @@ bool WebBrowserModule::canUseAcceleratedRendering() {
     bool isVersionOk = OpenGLCap.openGLVersion() >= acceleratedVersion;
     bool isExtensionsOk = it != OpenGLCap.extensions().end();
     return isVersionOk && isExtensionsOk;
+#else
+    return false;
+#endif
 }
 
 std::vector<documentation::Documentation> WebBrowserModule::documentations() const {
