@@ -348,11 +348,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
             "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);",
             id
         );
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript({ script });
     }
     else {
         Renderable* renderable = _hoverCircle->renderable();
@@ -372,11 +368,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
         "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
         id, ghoul::to_string(pos)
     );
-    global::scriptEngine->queueScript(
-        script,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript({ script });
 }
 
 void SkyBrowserModule::disableHoverCircle(bool useScript) {
@@ -386,11 +378,7 @@ void SkyBrowserModule::disableHoverCircle(bool useScript) {
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
                 _hoverCircle->identifier()
             );
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript({ script });
         }
         else {
             _hoverCircle->renderable()->property("Fade")->set(0.f);

@@ -249,21 +249,21 @@ std::string prunedIdentifier(std::string identifier) {
 
             // No sync or send because this is already inside a Lua script, therefor it
             // has already been synced and sent to the connected nodes and peers
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::No,
-                scripting::ScriptEngine::ShouldSendToRemote::No
-            );
+            global::scriptEngine->queueScript({
+                .code = script,
+                .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+                .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+            });
         }
     }
     // To ensure each node in a cluster calls its own instance of the wwt application
     // Do not send this script to the other nodes. (Note malej 2023-AUG-23: Due to this
     // already being inside a Lua function that have already been synced out)
-    global::scriptEngine->queueScript(
-        "openspace.skybrowser.sendOutIdsToBrowsers()",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    global::scriptEngine->queueScript({
+        .code = "openspace.skybrowser.sendOutIdsToBrowsers()",
+        .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+    });
 }
 
 /**
@@ -607,30 +607,18 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
 
     // No sync or send because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
-    global::scriptEngine->queueScript(
-        "openspace.addScreenSpaceRenderable(" + browser + ");",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
+    const std::string script = std::format(
+        "openspace.addScreenSpaceRenderable({0});"
+        "openspace.addSceneGraphNode({1});"
+        "openspace.skybrowser.addPairToSkyBrowserModule('{2}','{3}');"
+        "openspace.skybrowser.setSelectedBrowser('{3}')",
+        browser, target, idTarget, idBrowser
     );
-
-    global::scriptEngine->queueScript(
-        "openspace.addSceneGraphNode(" + target + ");",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
-
-    global::scriptEngine->queueScript(
-        "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
-        + idBrowser + "');",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
-
-    global::scriptEngine->queueScript(
-        "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    global::scriptEngine->queueScript({
+        .code = script,
+        .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+    });
 }
 
 /**
@@ -650,17 +638,17 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
         // Remove from engine.
         // No sync or send because this is already inside a Lua script, therefor it has
         // already been synced and sent to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.removeScreenSpaceRenderable('" + browser + "');",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.removeScreenSpaceRenderable('" + browser + "');",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
 
-        global::scriptEngine->queueScript(
-            "openspace.removeSceneGraphNode('" + target + "');",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.removeSceneGraphNode('" + target + "');",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
 }
 

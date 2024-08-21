@@ -187,11 +187,11 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
         );
         // No syncing, as this was triggered from a property change (which happened
         // based on an already synced script)
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = script,
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     };
 
     interpolateToEnd.onChange([triggerInterpolation, this]() {

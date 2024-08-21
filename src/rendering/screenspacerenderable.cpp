@@ -434,11 +434,11 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         // No sync or send because this is already inside a Lua script that was triggered
         // when this triggerProperty was pressed in the gui, therefor it has already been
         // synced and sent to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            std::move(script),
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = std::move(script),
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     });
     addProperty(_delete);
 }

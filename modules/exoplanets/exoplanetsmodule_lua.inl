@@ -109,11 +109,11 @@ void queueAddSceneGraphNodeScript(const std::string& sgnTableAsString) {
     using namespace openspace;
     // No sync or send because this will already be called inside a Lua script,
     // therefor it has already been synced and sent to the connected nodes and peers
-    global::scriptEngine->queueScript(
-        std::format("openspace.addSceneGraphNode({})", sgnTableAsString),
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    global::scriptEngine->queueScript({
+        .code = std::format("openspace.addSceneGraphNode({})", sgnTableAsString),
+        .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+    });
 }
 
 void createExoplanetSystem(const std::string& starName,
@@ -680,11 +680,11 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     // No sync or send because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
-    global::scriptEngine->queueScript(
-        "openspace.removeSceneGraphNode('" + starIdentifier + "');",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    global::scriptEngine->queueScript({
+        .code = "openspace.removeSceneGraphNode('" + starIdentifier + "');",
+        .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+    });
 }
 
 /**

@@ -53,10 +53,10 @@ public:
     BooleanType(ShouldBeSynchronized);
     BooleanType(ShouldSendToRemote);
 
-    struct QueueItem {
-        std::string script;
-        ShouldBeSynchronized shouldBeSynchronized;
-        ShouldSendToRemote shouldSendToRemote;
+    struct Script {
+        std::string code;
+        ShouldBeSynchronized synchronized = ShouldBeSynchronized::Yes;
+        ShouldSendToRemote sendToRemote = ShouldSendToRemote::Yes;
         ScriptCallback callback;
     };
 
@@ -92,9 +92,7 @@ public:
     virtual void decode(SyncBuffer* syncBuffer) override;
     virtual void postSync(bool isMaster) override;
 
-    void queueScript(std::string script, ShouldBeSynchronized shouldBeSynchronized,
-        ShouldSendToRemote shouldSendToRemote,
-        ScriptCallback callback = ScriptCallback());
+    void queueScript(Script script);
 
     std::vector<std::string> allLuaFunctions() const;
     const std::vector<LuaLibrary>& allLuaLibraries() const;
@@ -114,13 +112,13 @@ private:
     ghoul::lua::LuaState _state;
     std::vector<LuaLibrary> _registeredLibraries;
 
-    std::queue<QueueItem> _incomingScripts;
+    std::queue<Script> _incomingScripts;
 
     // Client scripts are mutex protected since decode and rendering may happen
     // asynchronously
     std::mutex _clientScriptsMutex;
     std::queue<std::string> _clientScriptQueue;
-    std::queue<QueueItem> _masterScriptQueue;
+    std::queue<Script> _masterScriptQueue;
 
     std::vector<std::string> _scriptsToSync;
 

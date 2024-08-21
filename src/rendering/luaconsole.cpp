@@ -455,11 +455,12 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     if (key == Key::Enter || key == Key::KeypadEnter) {
         const std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
-            global::scriptEngine->queueScript(
-                cmd,
-                scripting::ScriptEngine::ShouldBeSynchronized(_shouldBeSynchronized),
-                scripting::ScriptEngine::ShouldSendToRemote(_shouldSendToRemote)
-            );
+            using namespace scripting;
+            global::scriptEngine->queueScript({
+                .code = cmd,
+                .synchronized = ScriptEngine::ShouldBeSynchronized(_shouldBeSynchronized),
+                .sendToRemote = ScriptEngine::ShouldSendToRemote(_shouldSendToRemote)
+            });
 
             // Only add the current command to the history if it hasn't been
             // executed before. We don't want two of the same commands in a row

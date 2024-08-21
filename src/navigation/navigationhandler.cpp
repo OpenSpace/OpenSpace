@@ -218,11 +218,11 @@ void NavigationHandler::triggerFadeToTransition(const std::string& transitionScr
     }
 
     // No syncing, as this was called from a script that should have been synced already
-    global::scriptEngine->queueScript(
-        std::move(script),
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    global::scriptEngine->queueScript({
+        .code = std::move(script),
+        .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+    });
 }
 
 void NavigationHandler::updateCamera(double deltaTime) {

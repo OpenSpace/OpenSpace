@@ -69,11 +69,7 @@ void Transition::performAction() const {
     if (_action.empty()) {
         return;
     }
-    global::scriptEngine->queueScript(
-        _action,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript({ _action });
 }
 
 } // namespace openspace

@@ -105,19 +105,12 @@ void GuiSpaceTimeComponent::render() {
             const bool pressed = ImGui::Button(n->guiName().c_str());
             ImGui::SameLine();
             if (pressed) {
-                global::scriptEngine->queueScript(
-                    "openspace.setPropertyValue('" +
-                    std::string(AnchorProperty) + "', '" +
-                    n->identifier() + "');",
-                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                    scripting::ScriptEngine::ShouldSendToRemote::Yes
+                const std::string script = std::format(
+                    "openspace.setPropertyValue('{}', '{}');"
+                    "openspace.setPropertyValue('{}', nil);",
+                    AnchorProperty, n->identifier(), RetargetAnchorProperty
                 );
-                global::scriptEngine->queueScript(
-                    "openspace.setPropertyValue('" +
-                    std::string(RetargetAnchorProperty) + "', nil);",
-                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                    scripting::ScriptEngine::ShouldSendToRemote::Yes
-                );
+                global::scriptEngine->queueScript({ script });
             }
         }
     }
@@ -143,29 +136,21 @@ void GuiSpaceTimeComponent::render() {
 
     const bool hasChanged = ImGui::Combo("", &currentPosition, nodeNames.c_str());
     if (hasChanged) {
-        global::scriptEngine->queueScript(
-            "openspace.setPropertyValue('" + std::string(AnchorProperty) + "', '" +
-            nodes[currentPosition]->identifier() + "');",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+        const std::string script = std::format(
+            "openspace.setPropertyValue('{}', '{}');"
+            "openspace.setPropertyValue('{}', nil);",
+            AnchorProperty, nodes[currentPosition]->identifier(), RetargetAnchorProperty
         );
-        global::scriptEngine->queueScript(
-            "openspace.setPropertyValue('" +
-            std::string(RetargetAnchorProperty) + "', nil);",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript({ script });
     }
 
     ImGui::SameLine();
     const bool pressed = ImGui::Button("Refocus");
     if (pressed) {
-        global::scriptEngine->queueScript(
-            "openspace.setPropertyValue('" +
-            std::string(RetargetAnchorProperty) + "', nil);",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+        const std::string script = std::format(
+            "openspace.setPropertyValue('{}', nil);", RetargetAnchorProperty
         );
+        global::scriptEngine->queueScript({ script });
     }
 
     float interpolationTime = global::navigationHandler->interpolationTime();
@@ -210,11 +195,14 @@ void GuiSpaceTimeComponent::render() {
     if (dateChanged) {
         // No sync or send because time settings are always synced and sent to the
         // connected nodes and peers
-        global::scriptEngine->queueScript(
-            std::format("openspace.time.setTime([[{}]])", std::string_view(Buffer)),
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
+        const std::string script = std::format(
+            "openspace.time.setTime([[{}]])", std::string_view(Buffer)
         );
+        global::scriptEngine->queueScript({
+            .code = script,
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
 
     showTooltip(
@@ -239,29 +227,29 @@ void GuiSpaceTimeComponent::render() {
             std::chrono::hours(24) * std::abs(days)
         ).count();
 
-        const double newTime = days < 0 ?
-            j2000 - seconds :
-            j2000 + seconds;
+        const double newTime = days < 0.f ? j2000 - seconds : j2000 + seconds;
 
         if (shift) {
             // If any shift key is pressed we want to always jump to the time.
             // No sync or send because time settings are always synced and sent
             // to the connected nodes and peers
-            global::scriptEngine->queueScript(
-                "openspace.time.setTime(" + std::to_string(newTime) + ")",
-                scripting::ScriptEngine::ShouldBeSynchronized::No,
-                scripting::ScriptEngine::ShouldSendToRemote::No
-            );
+            global::scriptEngine->queueScript({
+                .code = "openspace.time.setTime(" + std::to_string(newTime) + ")",
+                .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+                .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+            });
         }
         else {
             // No sync or send because time settings are always synced and sent
             // to the connected nodes and peers
-            global::scriptEngine->queueScript(
-                "openspace.time.interpolateTime(" + std::to_string(newTime) + ", " +
-                std::to_string(duration) + ")",
-                scripting::ScriptEngine::ShouldBeSynchronized::No,
-                scripting::ScriptEngine::ShouldSendToRemote::No
+            const std::string script = std::format(
+                "openspace.time.interpolateTime({}, {})", newTime, duration
             );
+            global::scriptEngine->queueScript({
+                .code = script,
+                .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+                .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+            });
         }
     };
 
@@ -299,11 +287,11 @@ void GuiSpaceTimeComponent::render() {
 
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.setTime(\"" + nowTime + "\")",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.time.setTime(\"" + nowTime + "\")",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
 
     }
     ImGui::SameLine();
@@ -386,11 +374,11 @@ void GuiSpaceTimeComponent::render() {
 
             // No sync or send because time settings are always synced and sent
             // to the connected nodes and peers
-            global::scriptEngine->queueScript(
+            global::scriptEngine->queueScript({
                 "openspace.time.interpolateDeltaTime(" + std::to_string(newDt) + ")",
                 scripting::ScriptEngine::ShouldBeSynchronized::No,
                 scripting::ScriptEngine::ShouldSendToRemote::No
-            );
+            });
         }
         if (unitChanged) {
             // If only the unit changes, we keep the delta time, but need to convert the
@@ -437,21 +425,28 @@ void GuiSpaceTimeComponent::render() {
 
             // No sync or send because time settings are always synced and sent
             // to the connected nodes and peers
-            global::scriptEngine->queueScript(
-                "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
-                scripting::ScriptEngine::ShouldBeSynchronized::No,
-                scripting::ScriptEngine::ShouldSendToRemote::No
+            const std::string s = std::format(
+                "openspace.time.setDeltaTime({})", newDeltaTime
             );
+            global::scriptEngine->queueScript({
+                .code = s,
+                .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+                .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+            });
         }
         if (!ImGui::IsItemActive() && !ImGui::IsItemClicked()) {
             if (_slidingDelta != 0.f) {
                 // No sync or send because time settings are always synced and sent
                 // to the connected nodes and peers
-                global::scriptEngine->queueScript(
-                    "openspace.time.setDeltaTime(" + std::to_string(_oldDeltaTime) + ")",
-                    scripting::ScriptEngine::ShouldBeSynchronized::No,
-                    scripting::ScriptEngine::ShouldSendToRemote::No
+                const std::string script = std::format(
+                    "openspace.time.setDeltaTime({})", _oldDeltaTime
                 );
+
+                global::scriptEngine->queueScript({
+                    .code = script,
+                    .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+                    .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+                });
 
             }
             _slidingDelta = 0.f;
@@ -477,11 +472,14 @@ void GuiSpaceTimeComponent::render() {
 
             // No sync or send because time settings are always synced and sent
             // to the connected nodes and peers
-            global::scriptEngine->queueScript(
-                "openspace.time.setDeltaTime(" + std::to_string(newDeltaTime) + ")",
-                scripting::ScriptEngine::ShouldBeSynchronized::No,
-                scripting::ScriptEngine::ShouldSendToRemote::No
+            const std::string script = std::format(
+                "openspace.time.setDeltaTime({})", newDeltaTime
             );
+            global::scriptEngine->queueScript({
+                .code = script,
+                .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+                .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+            });
         }
         else {
             _accelerationDelta = 0.f;
@@ -496,11 +494,7 @@ void GuiSpaceTimeComponent::render() {
         { ImGui::GetWindowWidth() / 2 - 7.5f, 0.f }
     );
     if (pauseChanged) {
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateTogglePause()",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript({ "openspace.time.interpolateTogglePause()" });
     }
     ImGui::SameLine();
     const bool invert = ImGui::Button(
@@ -510,22 +504,24 @@ void GuiSpaceTimeComponent::render() {
     if (invert) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateDeltaTime(-1 * openspace.time.deltaTime());",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        const std::string script =
+            "openspace.time.interpolateDeltaTime(-1 * openspace.time.deltaTime());";
+        global::scriptEngine->queueScript({
+            .code = script,
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
 
     const bool minusDs = ImGui::Button("-1d/s");
     if (minusDs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(-24 * 60 * 60) + ")",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.time.interpolateDeltaTime(-86400)",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
     ImGui::SameLine();
 
@@ -533,11 +529,11 @@ void GuiSpaceTimeComponent::render() {
     if (minusHs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(-60 * 60) + ")",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.time.interpolateDeltaTime(-3600)",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
     ImGui::SameLine();
 
@@ -545,11 +541,12 @@ void GuiSpaceTimeComponent::render() {
     if (minusMs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(-60) + ")",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        const std::string script = "openspace.time.interpolateDeltaTime(-60)";
+        global::scriptEngine->queueScript({
+            .code = script,
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
     ImGui::SameLine();
 
@@ -557,11 +554,11 @@ void GuiSpaceTimeComponent::render() {
     if (minusSs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(-1) + ")",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.time.interpolateDeltaTime(-1)",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
     ImGui::SameLine();
 
@@ -569,11 +566,11 @@ void GuiSpaceTimeComponent::render() {
     if (zero) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(0) + ")",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.time.interpolateDeltaTime(0)",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
     ImGui::SameLine();
 
@@ -582,11 +579,11 @@ void GuiSpaceTimeComponent::render() {
     if (plusSs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(1) + ")",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.time.interpolateDeltaTime(1)",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
     ImGui::SameLine();
 
@@ -594,11 +591,11 @@ void GuiSpaceTimeComponent::render() {
     if (plusMs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(60) + ")",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.time.interpolateDeltaTime(60)",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
     ImGui::SameLine();
 
@@ -606,11 +603,11 @@ void GuiSpaceTimeComponent::render() {
     if (plusHs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(60 * 60) + ")",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.time.interpolateDeltaTime(3600)",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
     ImGui::SameLine();
 
@@ -618,11 +615,11 @@ void GuiSpaceTimeComponent::render() {
     if (plusDs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.time.interpolateDeltaTime(" + std::to_string(24 * 60 * 60) + ")",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.time.interpolateDeltaTime(86400)",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
 
     ImGui::End();

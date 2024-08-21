@@ -85,12 +85,11 @@ namespace {
     }
 
     void createScreenSpace(int id) {
+        using namespace openspace;
         std::string idStr = std::to_string(id);
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript({
             "openspace.iswa.addScreenSpaceCygnet({CygnetId =" + idStr + "});",
-            openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        });
     }
 } // namespace
 
@@ -546,11 +545,7 @@ void IswaManager::createPlane(MetadataFuture& data) {
     std::string luaTable = jsonPlaneToLuaTable(data);
     if (!luaTable.empty()) {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript({ script });
     }
 }
 
@@ -580,11 +575,7 @@ void IswaManager::createSphere(MetadataFuture& data) {
     std::string luaTable = jsonSphereToLuaTable(data);
     if (luaTable != "") {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript({ script });
     }
 }
 
@@ -614,11 +605,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
         std::string luaTable = parseKWToLuaTable(info, cut);
         if (!luaTable.empty()) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript({ script });
         }
     }
     else {
@@ -656,11 +643,7 @@ void IswaManager::createFieldline(std::string name, std::filesystem::path cdfPat
         "}";
         if (!luaTable.empty()) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript({ script });
         }
     }
     else {

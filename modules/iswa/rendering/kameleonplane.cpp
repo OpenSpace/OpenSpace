@@ -290,11 +290,10 @@ void KameleonPlane::updateFieldlineSeeds() {
             }
 
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
-            global::scriptEngine->queueScript(
-                "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+            const std::string script = std::format(
+                "openspace.removeSceneGraphNode('{}')", std::get<0>(seedPath.second)
             );
+            global::scriptEngine->queueScript({ script });
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
         }

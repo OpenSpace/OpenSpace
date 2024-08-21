@@ -190,7 +190,9 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
 void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
                                bool shouldBeSynchronized)
 {
-    scripting::ScriptEngine::ScriptCallback callback;
+    using namespace scripting;
+
+    ScriptEngine::ScriptCallback callback;
     if (shouldReturn) {
         callback = [this](const ghoul::Dictionary& data) {
             if (_connection) {
@@ -205,12 +207,12 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
         _waitingForReturnValue = false;
     }
 
-    global::scriptEngine->queueScript(
-        std::move(script),
-        scripting::ScriptEngine::ShouldBeSynchronized(shouldBeSynchronized),
-        scripting::ScriptEngine::ShouldSendToRemote(shouldBeSynchronized),
-        callback
-    );
+    global::scriptEngine->queueScript({
+        .code = std::move(script),
+        .synchronized = ScriptEngine::ShouldBeSynchronized(shouldBeSynchronized),
+        .sendToRemote = ScriptEngine::ShouldSendToRemote(shouldBeSynchronized),
+        .callback = callback
+    });
 }
 
 bool LuaScriptTopic::isDone() const {

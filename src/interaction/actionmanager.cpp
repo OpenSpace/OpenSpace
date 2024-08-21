@@ -108,18 +108,14 @@ void ActionManager::triggerAction(const std::string& identifier,
         std::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
 
     if (!shouldBeSynchronized || a.isLocal) {
-        global::scriptEngine->queueScript(
-            std::move(script),
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = std::move(script),
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
     else {
-        global::scriptEngine->queueScript(
-            std::move(script),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript({ std::move(script) });
     }
 }
 

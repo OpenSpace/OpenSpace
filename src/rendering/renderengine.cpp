@@ -725,11 +725,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
-        global::scriptEngine->queueScript(
-            std::string(ToggleRotationFrictionScript),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript({ std::string(ToggleRotationFrictionScript) });
         return true;
     }
 
@@ -738,11 +734,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
-        global::scriptEngine->queueScript(
-            std::string(ToggleZoomFrictionScript),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript({ std::string(ToggleZoomFrictionScript) });
         return true;
     }
 
@@ -751,11 +743,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
-        global::scriptEngine->queueScript(
-            std::string(ToggleRollFrictionScript),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript({ std::string(ToggleRollFrictionScript) });
         return true;
     }
 
