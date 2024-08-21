@@ -102,37 +102,6 @@ namespace {
         ));
     };
 
-    void setDefaultValueOrbitVisuals(bool shouldShowIfDefault) {
-        const std::string appearanceUri = "{defaultvalues_shape}.Renderable";
-        if (shouldShowIfDefault) {
-            // Draw using points
-            queueScriptSynced(std::format(
-                "openspace.setPropertyValue('{0}.Appearance.Rendering', 1.0);"
-                "openspace.setPropertyValue('{0}.Appearance.PointSize', 64.0);"
-                "openspace.setPropertyValue('{0}.Appearance.EnableFade', false);"
-                "openspace.setPropertyValue('{0}.Resolution', 100);",
-                appearanceUri
-            ));
-        }
-        else {
-            // Draw using lines
-            queueScriptSynced(std::format(
-                "openspace.setPropertyValue('{0}.Appearance.Rendering', 0.0);"
-                "openspace.setPropertyValue('{0}.Appearance.EnableFade', true);",
-                appearanceUri
-            ));
-        }
-    };
-
-    // Set increased reach factors of all exoplanet renderables, to trigger fading out of
-    // glyph cloud
-    void setIncreasedReachfactors() {
-        queueScriptSynced(
-            "openspace.setPropertyValue('{exoplanet}.ApproachFactor', 15000000.0)"
-            "openspace.setPropertyValue('{exoplanet_system}.ApproachFactor', 15000000.0)"
-        );
-    }
-
     bool hasTag(const openspace::SceneGraphNode* node, std::string_view tag) {
         if (!node) {
             return false;
@@ -141,12 +110,6 @@ namespace {
 
         return std::find(tags.begin(), tags.end(), tag) != std::end(tags);
     };
-
-    // This should match the implementation in the exoplanet module
-    std::string planetIdentifier(const openspace::exoplanets::ExoplanetItem& p) {
-        using namespace openspace::exoplanets;
-        return openspace::makeIdentifier(p.name);
-    }
 
     const ImVec2 DefaultWindowSize = ImVec2(350, 350);
     constexpr const float DefaultGlyphSize = 22.f;
@@ -181,11 +144,6 @@ namespace {
             "{:0>2}:{:0>2}:{:0>2}.{:0<3}", m->tm_hour, m->tm_min, m->tm_sec, t.tv_usec / 1000
         );
 #endif
-    }
-
-    // Format string for system window name
-    std::string systemWindowName(std::string_view host) {
-        return std::format("System: {}", host);
     }
 
     constexpr const openspace::properties::Property::PropertyInfo ExternalSelectionInfo =
@@ -265,6 +223,7 @@ void DataViewer::initializeData() {
     // The other views use the loaded data, so call this afterwards
     _colorMappingView = std::make_unique<ColorMappingView>(*this, _dataSettings);
     _filteringView = std::make_unique<FilteringView>(*this, _dataSettings);
+    _systemViewer = std::make_unique<SystemViewer>(*this);
 
     LDEBUG("Finished initializing based on dataset");
 
@@ -335,6 +294,10 @@ const std::vector<size_t>& DataViewer::currentFiltering() const {
 
 const std::vector<ColumnKey>& DataViewer::columns() const {
     return _columns;
+}
+
+ColorMappingView* DataViewer::colorMappingView() {
+    return _colorMappingView.get();
 }
 
 const std::vector<size_t>& DataViewer::planetsForHost(const std::string& hostIdentifier) const {
@@ -606,15 +569,7 @@ void DataViewer::render() {
         if (_currentlyTargettedSystem.has_value()) {
             std::string system = (*_currentlyTargettedSystem);
             if (ImGui::BeginMenu(std::format("System: {}", system.c_str()).c_str())) {
-                bool isAlreadyOpen = std::find(
-                    _shownPlanetSystemWindows.begin(),
-                    _shownPlanetSystemWindows.end(),
-                    system
-                ) != _shownPlanetSystemWindows.end();
-
-                if (!isAlreadyOpen) {
-                    _shownPlanetSystemWindows.push_back(system);
-                }
+                _systemViewer->showSystemView(system);
                 ImGui::EndMenu();
             }
         }
@@ -635,28 +590,7 @@ void DataViewer::render() {
         renderTableWindow(&showTable);
     }
 
-    // Render any detail windows that the user has requested
-    if (!_shownPlanetSystemWindows.empty()) {
-        std::list<std::string> hostsToRemove;
-        for (const std::string& host : _shownPlanetSystemWindows) {
-            bool isOpen = true;
-
-            ImGui::SetNextWindowSize(ImVec2(500.f, 0.f), ImGuiCond_Appearing);
-            if (ImGui::Begin(systemWindowName(host).c_str(), &isOpen)) {
-                renderSystemViewContent(host);
-            }
-            ImGui::End();
-
-            if (!isOpen) {
-                // was closed => remove from list
-                hostsToRemove.push_back(host);
-            }
-        }
-
-        for (const std::string& host : hostsToRemove) {
-            _shownPlanetSystemWindows.remove(host);
-        }
-    }
+    _systemViewer->renderAllSystemViews();
 
 #ifdef SHOW_IMGUI_HELPERS
     if (showHelpers) {
@@ -701,10 +635,10 @@ void DataViewer::renderTableWindow(bool *open) {
     bool showPinnedTable = ImGui::CollapsingHeader("Pinned items");
     ImGui::SameLine();
     view::helper::renderDescriptiveText(
-        std::format("({})", _pinnedPlanets.size()).c_str()
+        std::format("({})", _pinnedItems.size()).c_str()
     );
     if (showPinnedTable) {
-        renderTable("pinned_items_table", _pinnedPlanets, true);
+        renderTable("pinned_items_table", _pinnedItems, true);
     }
 
     ImGui::Separator();
@@ -732,7 +666,7 @@ void DataViewer::renderTableWindow(bool *open) {
 }
 
 void DataViewer::renderTable(const std::string& tableId,
-                             std::vector<size_t>& planetRows, bool useFixedHeight,
+                             std::vector<size_t>& dataRows, bool useFixedHeight,
                              std::string_view search)
 {
     static ImGuiTableFlags flags =
@@ -747,7 +681,7 @@ void DataViewer::renderTable(const std::string& tableId,
     // Some size variables
     const float RowHeight = ImGui::GetTextLineHeightWithSpacing(); // Inner height
     const float TableHeight =
-        (planetRows.size() + 1) * 1.2f * RowHeight + ImGui::GetStyle().ScrollbarSize;
+        (dataRows.size() + 1) * 1.2f * RowHeight + ImGui::GetStyle().ScrollbarSize;
     const ImVec2 TableSize = ImVec2(0.f, useFixedHeight ? TableHeight : 0.f);
 
     if (ImGui::BeginTable(tableId.c_str(), nColumns + 1, flags, TableSize)) {
@@ -809,17 +743,17 @@ void DataViewer::renderTable(const std::string& tableId,
                     return compareColumnValues(key, l, r);
                 };
 
-                std::sort(planetRows.begin(), planetRows.end(), compare);
+                std::sort(dataRows.begin(), dataRows.end(), compare);
                 sortSpecs->SpecsDirty = false;
             }
         }
 
         std::vector<size_t> displayedRows;
         if (search.empty()) {
-            displayedRows = planetRows;
+            displayedRows = dataRows;
         }
         else {
-            for (size_t r : planetRows) {
+            for (size_t r : dataRows) {
                 bool passSearch = ColumnFilter(
                     std::string(search),
                     ColumnFilter::Type::Text
@@ -848,10 +782,10 @@ void DataViewer::renderTable(const std::string& tableId,
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, RowHeight);
 
                 ImGui::TableNextColumn();
-                if (systemCanBeAdded(item.hostName)) {
+                if (_systemViewer->systemCanBeAdded(item.hostName)) {
                     ImGui::PushID(std::format("addbutton{}", row).c_str());
                     if (ImGui::Button("+", ImVec2(20, RowHeight))) {
-                        addExoplanetSystem(item.hostName);
+                        _systemViewer->addExoplanetSystem(item.hostName);
                     }
                     ImGui::PopID();
                 }
@@ -873,7 +807,7 @@ void DataViewer::renderTable(const std::string& tableId,
                     }
 
                     if (ImGui::Button("->", ImVec2(20, RowHeight))) {
-                        addOrTargetPlanet(item);
+                        _systemViewer->addOrTargetPlanet(item);
                     }
                     ImGui::PopStyleColor(2);
 
@@ -897,20 +831,20 @@ void DataViewer::renderTable(const std::string& tableId,
                             ImGui::Text(item.name.c_str());
 
                             auto foundIndex = std::find(
-                                _pinnedPlanets.begin(),
-                                _pinnedPlanets.end(),
+                                _pinnedItems.begin(),
+                                _pinnedItems.end(),
                                 index
                             );
-                            bool isPinned = foundIndex != _pinnedPlanets.end();
+                            bool isPinned = foundIndex != _pinnedItems.end();
 
                             ImGui::SameLine();
                             ImGui::SetNextItemWidth(-10);
                             if (ImGui::Button(isPinned ? "Unpin" : "Pin")) {
                                 if (isPinned) {
-                                    _pinnedPlanets.erase(foundIndex);
+                                    _pinnedItems.erase(foundIndex);
                                 }
                                 else {
-                                    _pinnedPlanets.push_back(index);
+                                    _pinnedItems.push_back(index);
                                 }
                             }
 
@@ -928,36 +862,7 @@ void DataViewer::renderTable(const std::string& tableId,
                             }
 
                             ImGui::Separator();
-
-                            bool isAlreadyOpen = std::find(
-                                _shownPlanetSystemWindows.begin(),
-                                _shownPlanetSystemWindows.end(),
-                                item.hostName
-                            ) != _shownPlanetSystemWindows.end();
-
-                            if (!isAlreadyOpen) {
-                                ImGui::PushID(std::format("ShowShystemView-{}", item.name).c_str());
-                                if (ImGui::Button("Show system view")) {
-                                    _shownPlanetSystemWindows.push_back(item.hostName);
-                                    ImGui::CloseCurrentPopup();
-                                }
-                                ImGui::PopID();
-                            }
-                            else {
-                                ImGui::TextDisabled("A system view is already opened for this system");
-                            }
-
-                            bool systemIsAdded = !systemCanBeAdded(item.hostName);
-                            if (systemIsAdded) {
-                                if (ImGui::Button("Zoom to star")) {
-                                    flyToStar(makeIdentifier(item.hostName));
-                                }
-                            }
-                            else {
-                                if (ImGui::Button("+ Add system")) {
-                                    addExoplanetSystem(item.hostName);
-                                }
-                            }
+                            _systemViewer->renderSystemViewQuickControls(item.hostName);
 
                             ImGui::EndPopup();
                         }
@@ -966,22 +871,8 @@ void DataViewer::renderTable(const std::string& tableId,
                         // Check double click, left mouse button
                         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
                             LINFO(std::format("Double click: {}", item.name));
-                            addOrTargetPlanet(item);
-
-                            // Also open the system view for that system
-                            bool isAlreadyOpen = std::find(
-                                _shownPlanetSystemWindows.begin(),
-                                _shownPlanetSystemWindows.end(),
-                                item.hostName
-                            ) != _shownPlanetSystemWindows.end();
-
-                            if (!isAlreadyOpen) {
-                                _shownPlanetSystemWindows.push_back(item.hostName);
-                            }
-                            else {
-                                // Bring window to front
-                                ImGui::SetWindowFocus(systemWindowName(item.hostName).c_str());
-                            }
+                            _systemViewer->addOrTargetPlanet(item);
+                            _systemViewer->showSystemView(item.hostName);
                         }
 
                         if (changed) {
@@ -1115,20 +1006,7 @@ void DataViewer::handleDoubleClickHoveredPlanet(int index) {
     const ExoplanetItem& item = _data[index];
 
     if (ImGui::IsMouseDoubleClicked(0)) {
-        // Open system window
-        bool isAlreadyOpen = std::find(
-            _shownPlanetSystemWindows.begin(),
-            _shownPlanetSystemWindows.end(),
-            item.hostName
-        ) != _shownPlanetSystemWindows.end();
-
-        if (!isAlreadyOpen) {
-            _shownPlanetSystemWindows.push_back(item.hostName);
-        }
-        else {
-            // Bring window to front
-            ImGui::SetWindowFocus(systemWindowName(item.hostName).c_str());
-        }
+        _systemViewer->showSystemView(item.hostName);
 
         // Select planet, if not already selected
         auto found = std::find(_selection.begin(), _selection.end(), index);
@@ -1237,248 +1115,6 @@ void DataViewer::renderSettingsMenuContent() {
                 ghoul::to_string(glm::dvec2(DefaultGlyphSize * glyphSizeScale))
             ));
         }
-    }
-}
-
-void DataViewer::renderSystemViewContent(const std::string& host) {
-    const std::string hostIdentifier = makeIdentifier(host);
-    bool systemIsAdded = !systemCanBeAdded(host);
-
-    std::vector<size_t>& planetIndices = _hostIdToPlanetsMap[makeIdentifier(host)];
-
-    static bool changeDefaultValueOrbitAppearance = false;
-
-    ImGui::BeginGroup();
-    {
-        if (!systemIsAdded) {
-            if (ImGui::Button("Add system")) {
-                addExoplanetSystem(host);
-                setDefaultValueOrbitVisuals(changeDefaultValueOrbitAppearance);
-            }
-        }
-        else {
-            // Button to focus Star
-            if (ImGui::Button("Focus star")) {
-                // Ugly: Always set reach factors when targetting object;
-                // we can't do it until the system is added to the scene
-                setIncreasedReachfactors();
-
-                queueScriptSynced(std::format(
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '{}');"
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
-                    hostIdentifier
-                ));
-            }
-
-            ImGui::SameLine();
-            if (ImGui::Button("Zoom to star")) {
-                flyToStar(hostIdentifier);
-            }
-
-            // Buttons to enable/disable helper renderables
-            const std::string sizeRingId = hostIdentifier + "_1AU_Circle";
-            const Renderable* sizeRing = renderable(sizeRingId);
-            if (sizeRing) {
-                bool enabled = sizeRing->isEnabled();
-                if (ImGui::Checkbox("Show 1 AU Ring ", &enabled)) {
-                    setRenderableEnabled(sizeRingId, enabled);
-                }
-                ImGui::SameLine();
-                view::helper::renderHelpMarker(
-                    "Show a ring with a radius of 1 AU around the star of the system"
-                );
-            }
-
-            const std::string inclinationPlaneId = hostIdentifier + "_EdgeOnInclinationPlane";
-            const Renderable* inclinationPlane = renderable(inclinationPlaneId);
-            if (inclinationPlane) {
-                bool enabled = inclinationPlane->isEnabled();
-                if (ImGui::Checkbox("Show 90 degree inclination plane", &enabled)) {
-                    setRenderableEnabled(inclinationPlaneId, enabled);
-                }
-                ImGui::SameLine();
-                view::helper::renderHelpMarker(
-                    "Show a grid plane that represents 90 degree inclinaiton, "
-                    "i.e. orbits in this plane are visible \"edge-on\" from Earth"
-                );
-            }
-
-            const std::string arrowId = hostIdentifier + "_EarthDirectionArrow";
-            const Renderable* arrow = renderable(arrowId);
-            if (arrow) {
-                bool enabled = arrow->isEnabled();
-                if (ImGui::Checkbox("Show direction to Earth", &enabled)) {
-                    setRenderableEnabled(arrowId, enabled);
-                }
-                ImGui::SameLine();
-                view::helper::renderHelpMarker(
-                    "Show an arrow pointing in the direction from the host star "
-                    "to Earth"
-                );
-            }
-
-            const std::string habitableZoneId = hostIdentifier + "_HZ_Disc";
-            const Renderable* habitableZone = renderable(habitableZoneId);
-            if (habitableZone) {
-                bool enabled = habitableZone->isEnabled();
-                if (ImGui::Checkbox("Show habitable zone", &enabled)) {
-                    setRenderableEnabled(habitableZoneId, enabled);
-                }
-            }
-
-            if (planetIndices.size() > 0) {
-                // Assume that if first one we find is enabled/disabled, all are
-                std::string planetDiscId;
-                for (size_t i : planetIndices) {
-                    const std::string discId = planetIdentifier(_data[i]) + "_Disc";
-                    if (renderable(discId)) {
-                        planetDiscId = discId;
-                        break;
-                    }
-                }
-
-                const Renderable* planetOrbitDisc = renderable(planetDiscId);
-                if (planetOrbitDisc) {
-                    bool enabled = planetOrbitDisc->isEnabled();
-
-                    if (ImGui::Checkbox("Show orbit uncertainty", &enabled)) {
-                        for (size_t i : planetIndices) {
-                            const ExoplanetItem& p = _data[i];
-                            const std::string discId = planetIdentifier(p) + "_Disc";
-                            if (renderable(discId)) {
-                                setRenderableEnabled(discId, enabled);
-                            }
-                        }
-                    }
-                    ImGui::SameLine();
-                    view::helper::renderHelpMarker(
-                        "Show/hide the disc overlayed on planet orbits that visualizes the "
-                        "uncertainty of the orbit's semi-major axis"
-                    );
-                }
-            }
-
-            if (ImGui::Checkbox(
-                    "Point orbit for default values",
-                    &changeDefaultValueOrbitAppearance
-                ))
-            {
-                setDefaultValueOrbitVisuals(changeDefaultValueOrbitAppearance);
-            }
-            ImGui::SameLine();
-            view::helper::renderHelpMarker(
-                "Orbits whose shape/inclination is set using default values will be "
-                "rendered as points instead of lines. This setting is applied globally "
-                "across all rendered systems"
-            );
-        }
-
-        ImGui::EndGroup();
-    }
-
-    ImGui::SameLine();
-    ImGui::BeginGroup();
-    {
-        if (systemIsAdded) {
-            static bool colorOrbits = false;
-            bool colorOptionChanged = ImGui::Checkbox("Color planet orbits", &colorOrbits);
-
-            auto colorTrail = [](const ExoplanetItem& p, const glm::vec3& color) {
-                const std::string planetTrailId = planetIdentifier(p) + "_Trail";
-                const std::string planetDiscId = planetIdentifier(p) + "_Disc";
-
-                if (renderable(planetTrailId)) {
-                    std::string propertyId = std::format(
-                        "Scene.{}.Renderable.Appearance.Color", planetTrailId
-                    );
-                    queueScriptSynced(std::format(
-                        "openspace.setPropertyValueSingle('{}', {});",
-                        propertyId, ghoul::to_string(color)
-                    ));
-                }
-
-                if (renderable(planetDiscId)) {
-                    std::string propertyId = std::format(
-                        "Scene.{}.Renderable.MultiplyColor", planetDiscId
-                    );
-                    queueScriptSynced(std::format(
-                        "openspace.setPropertyValueSingle('{}', {});",
-                        propertyId, ghoul::to_string(color)
-                    ));
-                }
-            };
-
-            auto setTrailThicknessAndFade = [](const ExoplanetItem& p, float width, float fade) {
-                const std::string id = planetIdentifier(p) + "_Trail";
-                if (!renderable(id)) {
-                    return;
-                }
-                std::string appearance =
-                    std::format("Scene.{}.Renderable.Appearance", id);
-
-                queueScriptSynced(std::format(
-                    "openspace.setPropertyValueSingle('{0}.LineWidth', {1});"
-                    "openspace.setPropertyValueSingle('{0}.Fade', {2});",
-                    appearance, width, fade
-                ));
-            };
-
-            auto resetTrailWidth = [&setTrailThicknessAndFade](const ExoplanetItem& p) {
-                setTrailThicknessAndFade(p, 10.f, 1.f);
-            };
-
-            if (colorOrbits) {
-                static ColorMappingView::ColorMappedVariable variable;
-                bool colorEditChanged = _colorMappingView->renderColormapEdit(variable, makeIdentifier(host));
-                if (colorOptionChanged || colorEditChanged) {
-                    for (size_t planetIndex : planetIndices) {
-                        const ExoplanetItem& p = _data[planetIndex];
-                        if (colorOptionChanged) {
-                            // First time we change color
-                            setTrailThicknessAndFade(p, 20.f, 30.f);
-                        }
-
-                        glm::vec3 color = glm::vec3(_colorMappingView->colorFromColormap(p, variable));
-                        colorTrail(p, color);
-                    }
-                }
-            }
-            else if (colorOptionChanged) {
-                // Reset rendering
-                for (size_t planetIndex : planetIndices) {
-                    const ExoplanetItem& p = _data[planetIndex];
-                    colorTrail(p, glm::vec3(1.f, 1.f, 1.f));
-                    resetTrailWidth(p);
-                }
-            }
-
-        }
-        ImGui::EndGroup();
-    }
-
-    ImGui::Text("Planets:");
-
-    // OBS! Push an overrided id to make the column settings sync across multiple
-    // windows. This is not possible just using the same id in the BeginTable call,
-    // since the id is connected to the ImGuiwindow instance
-    ImGui::PushOverrideID(ImHashStr("systemTable"));
-    renderTable("systemTable", planetIndices, true);
-    ImGui::PopID();
-
-    // Quickly set external selection to webpage
-    if (ImGui::Button("Send planets to external webpage")) {
-        updateFilteredRowsProperty(planetIndices);
-    }
-    ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Send just the planets in this planet system to the ExoplanetExplorer analysis "
-        "webpage. Note that this overrides any other filtering. To bring back the filter "
-        "selection, update the filtering in any way or press the next button."
-    );
-    ImGui::SameLine();
-    if (ImGui::Button("Reset webpage to filtered")) {
-        updateFilteredRowsProperty();
     }
 }
 
@@ -1602,45 +1238,6 @@ void DataViewer::updateSelectionInRenderable() {
     );
 }
 
-void DataViewer::addOrTargetPlanet(const ExoplanetItem& item) {
-    const std::string identifier = makeIdentifier(item.hostName);
-
-    if (systemCanBeAdded(item.hostName)) {
-        LINFO("Adding system. Click again to target");
-        addExoplanetSystem(item.hostName);
-    }
-    else {
-        // Ugly: Always set reach factors when targetting object;
-        // we can't do it until the system is added to the scene
-        setIncreasedReachfactors();
-
-        queueScriptSynced(
-            "openspace.setPropertyValueSingle("
-                "'NavigationHandler.OrbitalNavigator.Anchor',"
-                "'" + planetIdentifier(item) + "'"
-            ");"
-            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
-            "openspace.setPropertyValueSingle("
-                "'NavigationHandler.OrbitalNavigator.RetargetAnchor', "
-                "nil"
-            ");"
-        );
-    }
-}
-
-bool DataViewer::systemCanBeAdded(const std::string& host) const {
-    const std::string identifier = makeIdentifier(host);
-
-    // Check if it does not already exist
-    return sceneGraphNode(identifier) == nullptr;
-
-    // TODO: also check against exoplanet list
-}
-
-void DataViewer::addExoplanetSystem(const std::string& host) const {
-    queueScriptSynced("openspace.exoplanets.addExoplanetSystem('" + host + "')");
-}
-
 void DataViewer::refocusView() const {
     queueScriptSynced(
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');"
@@ -1672,20 +1269,6 @@ void DataViewer::flyToInsideView() const {
             "Duration = 4, "
             "PathType = 'Linear'"
         "});"
-    );
-}
-
-void DataViewer::flyToStar(std::string_view hostIdentifier) const {
-    // Ugly: Always set reach factors when targetting object;
-    // we can't do it until the system is added to the scene
-    setIncreasedReachfactors();
-
-    queueScriptSynced(
-        "openspace.setPropertyValueSingle("
-            "'NavigationHandler.OrbitalNavigator.Anchor',"
-            "'" + std::string(hostIdentifier) +
-        "')"
-        "openspace.pathnavigation.zoomToDistanceRelative(100.0, 5.0);"
     );
 }
 

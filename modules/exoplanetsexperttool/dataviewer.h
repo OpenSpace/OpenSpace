@@ -32,6 +32,7 @@
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 #include <modules/exoplanetsexperttool/views/columnselectionview.h>
 #include <modules/exoplanetsexperttool/views/filteringview.h>
+#include <modules/exoplanetsexperttool/views/systemview.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <ghoul/glm.h>
@@ -68,6 +69,8 @@ public:
     const std::vector<size_t>& currentFiltering() const;
     const std::vector<ColumnKey>& columns() const;
 
+    ColorMappingView* colorMappingView();
+
     const std::vector<size_t>& planetsForHost(const std::string& hostStar) const;
 
     size_t externalSelectionSize() const;
@@ -79,7 +82,16 @@ public:
     bool compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
         const ExoplanetItem& right) const;
 
+    // Updates the property in the module so that it matches the filtered rows in the UI,
+    // unless a specific list of indices is specified. This property is used by the
+    // external webpage to decide what planets to show.
+    void updateFilteredRowsProperty(
+        std::optional<std::vector<size_t>> customIndices = std::nullopt);
+
     void render();
+
+    void renderTable(const std::string& tableId, std::vector<size_t>& dataRows,
+        bool useFixedHeight, std::string_view search = "");
 
 private:
     void renderStartupInfo();
@@ -87,9 +99,6 @@ private:
 
     void initializeRenderables();
     void initializeCallbacks();
-
-    void renderTable(const std::string& tableId, std::vector<size_t>& planetRows,
-        bool useFixedHeight, std::string_view search = "");
 
     void renderTableWindow(bool* open);
 
@@ -100,14 +109,7 @@ private:
     void renderPlanetTooltip(int index) const;
     void handleDoubleClickHoveredPlanet(int index);
 
-    // Updates the property in the module so that it matches the filtered rows in the UI,
-    // unless a specific list of indices is specified. This property is used by the
-    // external webpage to decide what planets to show.
-    void updateFilteredRowsProperty(
-        std::optional<std::vector<size_t>> customIndices = std::nullopt);
-
     void renderSettingsMenuContent();
-    void renderSystemViewContent(const std::string& host);
 
     void renderColumnValue(int columnIndex, const ExoplanetItem& item);
 
@@ -116,25 +118,21 @@ private:
 
     void updateSelectionInRenderable();
 
-    void addOrTargetPlanet(const ExoplanetItem& item);
-
-    bool systemCanBeAdded(const std::string& host) const;
-    void addExoplanetSystem(const std::string& host) const;
     void refocusView() const;
     void flyToOverview() const;
     void flyToInsideView() const;
-    void flyToStar(std::string_view hostIdentifier) const;
 
     DataSettings _dataSettings;
     ColumnSelectionView _columnSelectionView;
     std::unique_ptr<ColorMappingView> _colorMappingView;
     std::unique_ptr<FilteringView> _filteringView;
+    std::unique_ptr<SystemViewer> _systemViewer;
 
     std::vector<ExoplanetItem> _data;
     std::vector<size_t> _filteredData;  // The indices of the items which will be rendered
     std::vector<size_t> _selection;     // Indices of selected data points
 
-    std::vector<size_t> _pinnedPlanets;
+    std::vector<size_t> _pinnedItems;
 
     std::unordered_map<std::string, std::vector<size_t>> _hostIdToPlanetsMap;
 
@@ -151,8 +149,6 @@ private:
     // Keep track of whether ctrl is held, to prevent undesired interaction
     // when interacting with glyphs
     bool _holdingCtrl = false;
-
-    std::list<std::string> _shownPlanetSystemWindows;
 
     std::optional<std::string> _currentlyTargettedSystem = std::nullopt;
 };

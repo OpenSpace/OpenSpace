@@ -100,6 +100,10 @@ bool ColumnFilter::isValid() const {
     return _valid;
 }
 
+bool ColumnFilter::isNumeric() const {
+    return _type == Type::Numeric;
+}
+
 bool ColumnFilter::passFilter(std::variant<const char*, float> value) const {
     if (std::holds_alternative<float>(value) && _type == Type::Numeric) {
         float val = std::get<float>(value);

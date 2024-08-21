@@ -22,44 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNFILTER___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNFILTER___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SYSTEMVIEW___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SYSTEMVIEW___H__
 
-#include <string>
-#include <vector>
+#include <modules/exoplanetsexperttool/datastructures.h>
 
 namespace openspace::exoplanets {
 
-class ColumnFilter {
+class DataViewer;
+
+class SystemViewer {
 public:
-    enum class Type {
-        Numeric,
-        Text
-    };
+    SystemViewer(DataViewer& dataViewer);
 
-    static const char* TextFilterDescriptionShort;
-    static const char* TextFilterDescription;
-    static const char* NumericFilterDescriptionShort;
-    static const char* NumericFilterDescription;
+    void renderAllSystemViews();
+    void renderSystemViewQuickControls(const std::string& host);
 
-    ColumnFilter(std::string query, Type type);
+    const std::list<std::string>& showSystemViews() const;
+    void showSystemView(const std::string& host);
 
-    std::string query() const;
-    bool isValid() const;
-    bool isNumeric() const;
+    bool systemCanBeAdded(const std::string& host) const;
 
-    bool passFilter(std::variant<const char*, float> value) const;
-    bool passFilter(float value) const;
-    bool passFilter(const std::string& value) const;
+    void addExoplanetSystem(const std::string& host) const;
+    void addOrTargetPlanet(const ExoplanetItem& item) const;
+    void flyToStar(std::string_view hostIdentifier) const;
 
 private:
-    Type _type;
-    std::string _query;
-    std::vector<std::string> _subqueries;
+    void renderSystemViewContent(const std::string& host);
 
-    bool _valid = true;
+    DataViewer& _dataViewer;
+
+    std::list<std::string> _shownPlanetSystemWindows;
 };
 
 } // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNFILTER___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SYSTEMVIEW___H__

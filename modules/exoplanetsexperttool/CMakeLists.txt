@@ -36,6 +36,7 @@ set(HEADER_FILES
     views/colormappingview.h
     views/columnselectionview.h
     views/filteringview.h
+    views/systemview.h
     views/viewhelper.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -51,6 +52,7 @@ set(SOURCE_FILES
     views/colormappingview.cpp
     views/columnselectionview.cpp
     views/filteringview.cpp
+    views/systemview.cpp
     views/viewhelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
