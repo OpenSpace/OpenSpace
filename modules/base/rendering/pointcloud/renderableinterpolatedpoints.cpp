@@ -189,8 +189,8 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
         // based on an already synced script)
         global::scriptEngine->queueScript({
             .code = script,
-            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
         });
     };
 

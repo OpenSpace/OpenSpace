@@ -251,8 +251,8 @@ std::string prunedIdentifier(std::string identifier) {
             // has already been synced and sent to the connected nodes and peers
             global::scriptEngine->queueScript({
                 .code = script,
-                .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-                .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+                .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+                .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
             });
         }
     }
@@ -261,8 +261,8 @@ std::string prunedIdentifier(std::string identifier) {
     // already being inside a Lua function that have already been synced out)
     global::scriptEngine->queueScript({
         .code = "openspace.skybrowser.sendOutIdsToBrowsers()",
-        .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-        .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
     });
 }
 
@@ -616,8 +616,8 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
     );
     global::scriptEngine->queueScript({
         .code = script,
-        .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-        .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
     });
 }
 
@@ -640,14 +640,14 @@ ghoul::Dictionary wwtImageCollectionUrlDeprecated()
         // already been synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript({
             .code = "openspace.removeScreenSpaceRenderable('" + browser + "');",
-            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
         });
 
         global::scriptEngine->queueScript({
             .code = "openspace.removeSceneGraphNode('" + target + "');",
-            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
         });
     }
 }

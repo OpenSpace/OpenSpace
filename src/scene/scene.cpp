@@ -554,10 +554,11 @@ void Scene::updateInterpolations() {
                 // triggered when the interpolation of the property was triggered,
                 // therefore it has already been synced and sent to the connected nodes
                 // and peers
+                using Script = scripting::ScriptEngine::Script;
                 global::scriptEngine->queueScript({
                     .code = std::move(i.postScript),
-                    .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-                    .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+                    .synchronized = Script::ShouldBeSynchronized::No,
+                    .sendToRemote = Script::ShouldSendToRemote::No
                 });
             }
 

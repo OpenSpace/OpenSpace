@@ -167,11 +167,11 @@ void JoystickCameraStates::updateStateFromInput(
                         t.propertyUri, value
                     );
 
-                    using namespace scripting;
+                    using Script = scripting::ScriptEngine::Script;
                     global::scriptEngine->queueScript({
                         .code = script,
-                        .synchronized = ScriptEngine::ShouldBeSynchronized(t.isRemote),
-                        .sendToRemote = ScriptEngine::ShouldSendToRemote(t.isRemote)
+                        .synchronized = Script::ShouldBeSynchronized(t.isRemote),
+                        .sendToRemote = Script::ShouldSendToRemote(t.isRemote)
                     });
                     break;
             }
@@ -188,12 +188,13 @@ void JoystickCameraStates::updateStateFromInput(
                 );
 
                 if (active) {
+                    using Script = scripting::ScriptEngine::Script;
                     global::scriptEngine->queueScript({
                         .code = it->second.command,
-                        .synchronized = scripting::ScriptEngine::ShouldBeSynchronized(
+                        .synchronized = Script::ShouldBeSynchronized(
                             it->second.synchronization
                         ),
-                        .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote(
+                        .sendToRemote = Script::ShouldSendToRemote(
                             it->second.synchronization
                         )
                     });

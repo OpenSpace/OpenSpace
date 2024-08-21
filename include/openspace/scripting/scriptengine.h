@@ -50,10 +50,11 @@ namespace openspace::scripting {
 class ScriptEngine : public Syncable {
 public:
     using ScriptCallback = std::function<void(ghoul::Dictionary)>;
-    BooleanType(ShouldBeSynchronized);
-    BooleanType(ShouldSendToRemote);
 
     struct Script {
+        BooleanType(ShouldBeSynchronized);
+        BooleanType(ShouldSendToRemote);
+
         std::string code;
         ShouldBeSynchronized synchronized = ShouldBeSynchronized::Yes;
         ShouldSendToRemote sendToRemote = ShouldSendToRemote::Yes;

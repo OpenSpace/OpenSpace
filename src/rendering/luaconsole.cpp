@@ -455,11 +455,11 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     if (key == Key::Enter || key == Key::KeypadEnter) {
         const std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
-            using namespace scripting;
+            using Script = scripting::ScriptEngine::Script;
             global::scriptEngine->queueScript({
                 .code = cmd,
-                .synchronized = ScriptEngine::ShouldBeSynchronized(_shouldBeSynchronized),
-                .sendToRemote = ScriptEngine::ShouldSendToRemote(_shouldSendToRemote)
+                .synchronized = Script::ShouldBeSynchronized(_shouldBeSynchronized),
+                .sendToRemote = Script::ShouldSendToRemote(_shouldSendToRemote)
             });
 
             // Only add the current command to the history if it hasn't been

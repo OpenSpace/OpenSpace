@@ -417,8 +417,8 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
             // don't send it back again
             global::scriptEngine->queueScript({
                 .code = sm._script,
-                .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-                .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+                .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+                .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
             });
             break;
         }

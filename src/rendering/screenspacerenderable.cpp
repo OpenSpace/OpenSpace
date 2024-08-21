@@ -436,8 +436,8 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         // synced and sent to the connected nodes and peers
         global::scriptEngine->queueScript({
             .code = std::move(script),
-            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
         });
     });
     addProperty(_delete);

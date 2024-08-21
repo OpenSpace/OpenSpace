@@ -111,8 +111,8 @@ void queueAddSceneGraphNodeScript(const std::string& sgnTableAsString) {
     // therefor it has already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript({
         .code = std::format("openspace.addSceneGraphNode({})", sgnTableAsString),
-        .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-        .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
     });
 }
 
@@ -682,8 +682,8 @@ std::vector<std::string> hostStarsWithSufficientData() {
     // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript({
         .code = "openspace.removeSceneGraphNode('" + starIdentifier + "');",
-        .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
-        .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
     });
 }
 
