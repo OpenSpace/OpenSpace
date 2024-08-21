@@ -163,78 +163,71 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
     return (it != _registeredLibraries.end());
 }
 
-bool ScriptEngine::runScript(const std::string& script, const ScriptCallback& callback) {
+bool ScriptEngine::runScript(const Script& script) {
     ZoneScoped;
-    ZoneText(script.c_str(), script.size());
+    ZoneText(script.code.c_str(), script.code.size());
 
-    ghoul_assert(!script.empty(), "Script must not be empty");
+    ghoul_assert(!script.code.empty(), "Script must not be empty");
+    ghoul_assert(
+        !(script.addToLog && ghoul::lua::isScriptBinary(script.code)),
+        "Shouldn't try to add a script to a log that is a binary blob"
+    );
 
-    if (_logScripts && script[0] != '\x1b') {
-        // \x1b = A byte in the beginning that Lua uses to represent whether a string is
-        // an ASCII or a binary blob. We don't want to print binary blobs into the log
-        writeLog(script);
+    // Binary scripts should never be logged
+    if (_logScripts && !ghoul::lua::isScriptBinary(script.code)) {
+        if (script.addToLog && !global::configuration->verboseScriptLog) {
+            writeLog(script.code);
+        }
+        else if (global::configuration->verboseScriptLog) {
+            // Even if the script doesn't want to get logged, it will get anyway if
+            // verbose logging is enabled
+            writeLog(std::format(
+                "{}{}{}{}",
+                script.addToLog ? "" : "--[[generated]]",
+                script.synchronized ? "--[[sync]]" : "--[[!sync]]",
+                script.sendToRemote ? "--[[sendRemote]]" : "--[[!sendRemote]]",
+                script.code
+            ));
+        }
     }
 
     try {
-        if (callback) {
+        if (script.callback) {
             ghoul::Dictionary returnValue =
-                ghoul::lua::loadArrayDictionaryFromString(script, _state);
-            callback(std::move(returnValue));
+                ghoul::lua::loadArrayDictionaryFromString(script.code, _state);
+            script.callback(std::move(returnValue));
         }
         else {
-            ghoul::lua::runScript(_state, script);
+            ghoul::lua::runScript(_state, script.code);
         }
     }
     catch (const ghoul::lua::LuaLoadingException& e) {
         LERRORC(e.component, e.message);
-        if (callback) {
-            callback(ghoul::Dictionary());
+        if (script.callback) {
+            script.callback(ghoul::Dictionary());
         }
         return false;
     }
     catch (const ghoul::lua::LuaExecutionException& e) {
         LERRORC(e.component, e.message);
-        if (callback) {
-            callback(ghoul::Dictionary());
+        if (script.callback) {
+            script.callback(ghoul::Dictionary());
         }
         return false;
     }
     catch (const documentation::SpecificationError& e) {
         LERRORC(e.component, e.message);
         documentation::logError(e, e.component);
-        if (callback) {
-            callback(ghoul::Dictionary());
+        if (script.callback) {
+            script.callback(ghoul::Dictionary());
         }
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
-        if (callback) {
-            callback(ghoul::Dictionary());
+        if (script.callback) {
+            script.callback(ghoul::Dictionary());
         }
-        return false;
-    }
-
-    return true;
-}
-
-bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
-    ZoneScoped;
-
-    if (!std::filesystem::is_regular_file(filename)) {
-        LERROR(std::format("Script with name {} did not exist", filename));
-        return false;
-    }
-
-    try {
-        ghoul::lua::runScriptFile(_state, filename);
-    }
-    catch (const ghoul::lua::LuaLoadingException& e) {
-        LERRORC(e.component, e.message);
-        return false;
-    }
-    catch (const ghoul::lua::LuaExecutionException& e) {
-        LERRORC(e.component, e.message);
         return false;
     }
 
@@ -451,7 +444,6 @@ void ScriptEngine::writeLog(const std::string& script) {
                 LERROR(std::format(
                     "Could not open file '{}' for logging scripts", _logFilename
                 ));
-
                 return;
             }
         }
@@ -538,11 +530,10 @@ void ScriptEngine::postSync(bool isMaster) {
 
     if (isMaster) {
         while (!_masterScriptQueue.empty()) {
-            std::string script = std::move(_masterScriptQueue.front().code);
-            ScriptCallback callback = std::move(_masterScriptQueue.front().callback);
+            Script script = std::move(_masterScriptQueue.front());
             _masterScriptQueue.pop();
             try {
-                runScript(script, callback);
+                runScript(script);
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
@@ -554,7 +545,7 @@ void ScriptEngine::postSync(bool isMaster) {
         std::lock_guard guard(_clientScriptsMutex);
         while (!_clientScriptQueue.empty()) {
             try {
-                runScript(_clientScriptQueue.front());
+                runScript({ _clientScriptQueue.front() });
                 _clientScriptQueue.pop();
             }
             catch (const ghoul::RuntimeError& e) {
@@ -572,7 +563,6 @@ void ScriptEngine::queueScript(Script script) {
     }
     _incomingScripts.push(std::move(script));
 }
-
 
 void ScriptEngine::addBaseLibrary() {
     ZoneScoped;

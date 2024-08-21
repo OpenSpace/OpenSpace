@@ -49,16 +49,17 @@ namespace openspace::scripting {
  */
 class ScriptEngine : public Syncable {
 public:
-    using ScriptCallback = std::function<void(ghoul::Dictionary)>;
-
     struct Script {
         BooleanType(ShouldBeSynchronized);
         BooleanType(ShouldSendToRemote);
+        BooleanType(ShouldBeLogged);
+        using Callback = std::function<void(ghoul::Dictionary)>;
 
         std::string code;
         ShouldBeSynchronized synchronized = ShouldBeSynchronized::Yes;
         ShouldSendToRemote sendToRemote = ShouldSendToRemote::Yes;
-        ScriptCallback callback;
+        ShouldBeLogged addToLog = ShouldBeLogged::Yes;
+        Callback callback;
     };
 
     static constexpr std::string_view OpenSpaceLibraryName = "openspace";
@@ -84,9 +85,6 @@ public:
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
 
-    bool runScript(const std::string& script,
-        const ScriptCallback& callback = ScriptCallback());
-    bool runScriptFile(const std::filesystem::path& filename);
 
     virtual void preSync(bool isMaster) override;
     virtual void encode(SyncBuffer* syncBuffer) override;
@@ -109,6 +107,8 @@ private:
     bool isLibraryNameAllowed(lua_State* state, const std::string& name);
 
     void addBaseLibrary();
+
+    bool runScript(const Script& script);
 
     ghoul::lua::LuaState _state;
     std::vector<LuaLibrary> _registeredLibraries;

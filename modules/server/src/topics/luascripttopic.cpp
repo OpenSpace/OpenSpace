@@ -192,7 +192,7 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
 {
     using namespace scripting;
 
-    ScriptEngine::ScriptCallback callback;
+    ScriptEngine::Script::Callback callback;
     if (shouldReturn) {
         callback = [this](const ghoul::Dictionary& data) {
             if (_connection) {

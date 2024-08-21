@@ -134,6 +134,11 @@ namespace {
         // from previous runs) will be silently overwritten
         std::optional<std::string> scriptLog;
 
+        // If this value is set to `true`, the script log will contain scripts that have
+        // been triggered by the system itself. If it is `false` (the default), only user-
+        // initiated scripts will be listed in the scriptlog
+        std::optional<bool> verboseScriptLog;
+
         // If this value is specified, this many number of script log files are being
         // retained before overwriting any
         std::optional<int> scriptLogRotation;
@@ -378,6 +383,7 @@ ghoul::Dictionary Configuration::createDictionary() {
     }
 
     res.setValue("ScriptLog", scriptLog);
+    res.setValue("VerboseScriptLog", verboseScriptLog);
     res.setValue("ScriptLogRotation", scriptLogRotation);
 
     {
@@ -547,6 +553,7 @@ void parseLuaState(Configuration& configuration) {
     c.fontSize.cameraInfo = p.fontSize.cameraInfo;
     c.fontSize.versionInfo = p.fontSize.versionInfo;
     c.scriptLog = p.scriptLog.value_or(c.scriptLog);
+    c.verboseScriptLog = p.verboseScriptLog.value_or(c.verboseScriptLog);
     c.scriptLogRotation = p.scriptLogRotation.value_or(3);
     c.versionCheckUrl = p.versionCheckUrl.value_or(c.versionCheckUrl);
     c.useMultithreadedInitialization =
