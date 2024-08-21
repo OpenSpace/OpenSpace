@@ -27,6 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -145,6 +147,9 @@ void AssetManager::deinitialize() {
 void AssetManager::update() {
     ZoneScoped;
 
+    // Flag to keep track of when to emit synchronization event
+    const bool isLoadingAssets = _toBeInitialized.size() > 0;
+
     // Delete all the assets that have been marked for deletion in the previous frame
     {
         ZoneScopedN("Deleting assets");
@@ -257,7 +262,6 @@ void AssetManager::update() {
     }
     _assetRemoveQueue.clear();
 
-
     // Change state based on synchronizations. If any of the unfinished synchronizations
     // has finished since the last call of this function, we should notify the assets and
     // remove the synchronization from the list of unfinished ones so that we don't need
@@ -284,6 +288,11 @@ void AssetManager::update() {
         else {
             it++;
         }
+    }
+
+    // If the _toBeInitialized state has changed in this update call we emit the event
+    if (isLoadingAssets && (_toBeInitialized.size() == 0)) {
+        global::eventEngine->publishEvent<events::EventAssetLoadingFinished>();
     }
 }
 
