@@ -43,6 +43,7 @@ BrowserClient::BrowserClient(WebRenderHandler* handler,
     _lifeSpanHandler = browserLauncher;
     _requestHandler = browserLauncher;
     _contextMenuHandler = new BrowserClient::NoContextMenuHandler;
+    _displayHandler = new BrowserClient::DisplayHandler;
 }
 
 CefRefPtr<CefContextMenuHandler> BrowserClient::GetContextMenuHandler() {
@@ -65,6 +66,10 @@ CefRefPtr<CefKeyboardHandler> BrowserClient::GetKeyboardHandler() {
     return _keyboardHandler;
 }
 
+CefRefPtr<CefDisplayHandler> BrowserClient::GetDisplayHandler() {
+    return _displayHandler;
+}
+
 bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
                                                          CefRefPtr<CefFrame>,
                                                          CefRefPtr<CefContextMenuParams>,
@@ -75,4 +80,11 @@ bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
     return true;
 }
 
+bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
+    CefCursorHandle cursor,
+    cef_cursor_type_t type,
+    const CefCursorInfo& custom_cursor_info) {
+    
+    return false;
+}
 } // namespace openspace
