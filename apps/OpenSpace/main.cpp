@@ -995,6 +995,57 @@ void setSgctDelegateFunctions() {
     sgctDelegate.setStatisticsGraphScale = [](float scale) {
         sgct::Engine::instance().setStatsGraphScale(scale);
     };
+    sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
+        GLFWwindow* w = glfwGetCurrentContext();
+        GLFWcursor* cursor;
+        switch (mouse) {
+        case WindowDelegate::Cursor::Arrow: {
+            cursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            break;
+        }
+        case WindowDelegate::Cursor::IBeam: {
+            cursor = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+            break;
+        }
+        case WindowDelegate::Cursor::CrossHair: {
+            cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
+            break;
+        }
+        case WindowDelegate::Cursor::PointingHand: {
+            cursor = glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR);
+            break;
+        }
+        case WindowDelegate::Cursor::ResizeEW: {
+            cursor = glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR);
+            break;
+        }
+        case WindowDelegate::Cursor::ResizeNS: {
+            cursor = glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR);
+            break;
+        }
+        case WindowDelegate::Cursor::ResizeNWSE: {
+            cursor = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
+            break;
+        }
+        case WindowDelegate::Cursor::ResizeNESW: {
+            cursor = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
+            break;
+        }
+        case WindowDelegate::Cursor::ResizeAll: {
+            cursor = glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR);
+            break;
+        }
+        case WindowDelegate::Cursor::NotAllowed: {
+            cursor = glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR);
+            break;
+        }
+        default: {
+            cursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
+            break;
+        }
+        }
+        glfwSetCursor(w, cursor);
+    };
 }
 
 std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,
