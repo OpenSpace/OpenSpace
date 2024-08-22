@@ -39,6 +39,11 @@ namespace {
     openspace::global::keyframeRecording->addKeyframe(sequenceTime);
 }
 
+// Removes a keyframe at the specified 0-based index
+[[codegen::luawrap]] void removeKeyframe(int index) {
+    openspace::global::keyframeRecording->removeKeyframe(index);
+}
+
 //
 [[codegen::luawrap]] void updateKeyframe(int index) {
     openspace::global::keyframeRecording->updateKeyframe(index);

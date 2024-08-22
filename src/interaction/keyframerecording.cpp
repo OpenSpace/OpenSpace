@@ -123,6 +123,15 @@ void KeyframeRecording::addKeyframe(double sequenceTime) {
     _keyframes.insert(it, keyframe);
 }
 
+void KeyframeRecording::removeKeyframe(int index)
+{
+    if (index < 0 || static_cast<size_t>(index) >(_keyframes.size() - 1)) {
+        LERROR(std::format("Index {} out of range", index));
+        return;
+    }
+    _keyframes.erase(_keyframes.begin() + index);
+}
+
 void KeyframeRecording::updateKeyframe(int index) {
     if (index < 0 || static_cast<size_t>(index) > (_keyframes.size() - 1)) {
         LERROR(std::format("Index {} out of range", index));
@@ -258,6 +267,7 @@ scripting::LuaLibrary KeyframeRecording::luaLibrary() {
         {
             codegen::lua::NewSequence,
             codegen::lua::AddKeyframe,
+            codegen::lua::RemoveKeyframe,
             codegen::lua::UpdateKeyframe,
             codegen::lua::MoveKeyframe,
             codegen::lua::SaveSequence,

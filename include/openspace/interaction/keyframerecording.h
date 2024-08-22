@@ -50,25 +50,16 @@ struct Keyframe {
     KeyframeRecording();
 
     void newSequence();
-
     void addKeyframe(double sequenceTime);
-
+    void removeKeyframe(int index);
     void updateKeyframe(int index);
-
     void moveKeyframe(int index, double sequenceTime);
-
     bool saveSequence(std::optional<std::string> filename);
-
     void loadSequence(std::string filename);
-
     void preSynchronization(double dt);
-
     void play();
-
     void pause();
-
     void setSequenceTime(double sequenceTime);
-
     bool hasKeyframeRecording() const;
 
     /**
