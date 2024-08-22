@@ -30,11 +30,11 @@ local Position = {
 
 
 asset.onInitialize(function()
-    openspace.addSceneGraphNode(Position)
+  openspace.addSceneGraphNode(Position)
 end)
 
 asset.onDeinitialize(function()
-    openspace.removeSceneGraphNode(Position)
+  openspace.removeSceneGraphNode(Position)
 end)
 
 asset.export("Translation", Translation)

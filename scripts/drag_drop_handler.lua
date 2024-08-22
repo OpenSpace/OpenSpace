@@ -47,28 +47,43 @@ local is_geojson_file = function(extension)
   return extension == ".geojson"
 end
 
+local is_wms_file = function(extension)
+  return extension == ".wms"
+end
+
 if is_image_file(extension) then
   return [[
   openspace.addScreenSpaceRenderable({
     Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
     Type = "ScreenSpaceImageLocal",
     TexturePath = "]] .. filename .. [["
-  });]] 
+  });]]
 elseif is_video_file(extension) then
   return [[
     openspace.addScreenSpaceRenderable({
       Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
       Type = "ScreenSpaceVideo",
       Video = "]] .. filename .. [["
-    });]] 
+    });]]
 elseif is_asset_file(extension) then
   return [[
     if openspace.asset.isLoaded("]] .. filename .. [[") ~= true then
       openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
     end
-    openspace.asset.add("]] .. filename .. '");' 
+    openspace.asset.add("]] .. filename .. '");'
 elseif is_recording_file(extension) then
   return 'openspace.sessionRecording.startPlayback("' .. filename .. '")'
 elseif is_geojson_file(extension) then
-  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. filename .. '")'  
+  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. filename .. '")'
+elseif is_wms_file(extension) then
+  return [[
+    openspace.globebrowsing.addLayer(
+      openspace.navigation.getNavigationState().Anchor,
+      "ColorLayers",
+      {
+        Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
+        FilePath = ']] .. filename .. [['
+      }
+    )
+  ]]
 end

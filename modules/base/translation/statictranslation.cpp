@@ -33,7 +33,6 @@ namespace {
         "Position",
         "This value is used as a static offset (in meters) that is applied to the scene "
         "graph node that this transformation is attached to relative to its parent.",
-        // @VISIBILITY(2.25)
         openspace::properties::Property::Visibility::User
     };
 

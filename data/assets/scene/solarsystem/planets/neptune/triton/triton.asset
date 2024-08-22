@@ -51,7 +51,12 @@ local TritonTrail = {
     Period = 5.875,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune", "moonTrail_major_neptune" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_major_neptune"
+  },
   GUI = {
     Name = "Triton Trail",
     Path = "/Solar System/Planets/Neptune/Major Moons/Triton"

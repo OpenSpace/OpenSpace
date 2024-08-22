@@ -68,8 +68,6 @@ local Station6Frag1Model = {
   }
 }
 
-
-
 local Station6Frag23Holder = {
   Identifier = "Station_6_Fragments_2_3",
   Parent = moonAsset.Moon.Identifier,
@@ -78,7 +76,6 @@ local Station6Frag23Holder = {
     Path = "/Solar System/Missions/Apollo/17/Station 6"
   }
 }
-
 
 local Station6Frag2Model = {
   Identifier = "A17S6F5",

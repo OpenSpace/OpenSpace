@@ -1,0 +1,19 @@
+local Supergalactic = {
+  -0.7357425748,    0.67726129641,  0.0,           0.0,
+  -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
+  0.67314530211,    0.73127116582,  0.11008126223, 0.0,
+  0.0,              0.0,            0.0,           1.0
+}
+
+asset.export("Supergalactic", Supergalactic)
+
+
+
+asset.meta = {
+  Name = "Supergalactic Transformation",
+  Description = [[This asset defines the transformation matrix to convert supergalactic
+    coordinates into galactic coordinates.]],
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT license"
+}

@@ -22,8 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/downloadmanager.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/openspace.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/glm.h>
+#include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/misc/csvreader.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/texture.h>
+#include <filesystem>
 
 namespace {
 
@@ -136,40 +150,50 @@ namespace {
         );
     }
 
-    std::filesystem::path fileName = FileSys.cacheManager()->cachedFilename(
-        name + ".ppm",
-        ""
-    );
+    const std::string namePng = std::format("{}.png", name);
+    std::filesystem::path fileName = FileSys.cacheManager()->cachedFilename(namePng, "");
+
     const bool hasCachedFile = std::filesystem::is_regular_file(fileName);
     if (hasCachedFile) {
         LDEBUGC("OpenSpaceEngine", std::format("Cached file '{}' used", fileName));
         return fileName;
     }
     else {
-        // Write the color to a ppm file
-        static std::mutex fileMutex;
-        std::lock_guard guard(fileMutex);
-        std::ofstream ppmFile(fileName, std::ofstream::binary | std::ofstream::trunc);
+        // Write the color to a new file
+        constexpr unsigned int Width = 1;
+        constexpr unsigned int Height = 1;
+        constexpr unsigned int Size = Width * Height;
+        std::array<GLubyte, Size * 3> img = {
+            static_cast<GLubyte>(255 * color.r),
+            static_cast<GLubyte>(255 * color.g),
+            static_cast<GLubyte>(255 * color.b)
+        };
 
-        unsigned int width = 1;
-        unsigned int height = 1;
-        unsigned int size = width * height;
-        std::vector<unsigned char> img(size * 3);
-        img[0] = static_cast<unsigned char>(255 * color.r);
-        img[1] = static_cast<unsigned char>(255 * color.g);
-        img[2] = static_cast<unsigned char>(255 * color.b);
+        using Texture = ghoul::opengl::Texture;
+        Texture textureFromData = Texture(
+            reinterpret_cast<void*>(img.data()),
+            glm::uvec3(Width, Height, 1),
+            GL_TEXTURE_2D,
+            Texture::Format::RGB
+        );
+        textureFromData.setDataOwnership(Texture::TakeOwnership::No);
 
-        if (!ppmFile.is_open()) {
-            throw ghoul::lua::LuaError("Could not open ppm file for writing");
+        try {
+            ghoul::io::TextureWriter::ref().saveTexture(
+                textureFromData,
+                fileName.string()
+            );
         }
-
-        ppmFile << "P6" << std::endl;
-        ppmFile << width << " " << height << std::endl;
-        ppmFile << 255 << std::endl;
-        ppmFile.write(reinterpret_cast<char*>(img.data()), size * 3);
-        ppmFile.close();
-        return fileName;
+        catch (const ghoul::io::TextureWriter::MissingWriterException& e) {
+            // This should not happen, as we know .png is a supported format
+            throw ghoul::lua::LuaError(e.message);
+        }
+        catch (const std::filesystem::filesystem_error& e) {
+            LERRORC("Exception: {}", e.what());
+        }
     }
+
+    return fileName;
 }
 
 /**
@@ -198,9 +222,9 @@ namespace {
     ghoul::Dictionary res;
 
     ghoul::Dictionary version;
-    version.setValue("Major", openspace::OPENSPACE_VERSION_MAJOR);
-    version.setValue("Minor", openspace::OPENSPACE_VERSION_MINOR);
-    version.setValue("Patch", openspace::OPENSPACE_VERSION_PATCH);
+    version.setValue("Major", static_cast<int>(openspace::OPENSPACE_VERSION_MAJOR));
+    version.setValue("Minor", static_cast<int>(openspace::OPENSPACE_VERSION_MINOR));
+    version.setValue("Patch", static_cast<int>(openspace::OPENSPACE_VERSION_PATCH));
     res.setValue("Version", std::move(version));
 
     res.setValue("Commit", std::string(openspace::OPENSPACE_GIT_COMMIT));

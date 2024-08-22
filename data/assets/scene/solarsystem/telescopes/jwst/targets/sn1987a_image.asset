@@ -13,10 +13,7 @@ asset.export("image", image)
 asset.meta = {
   Name = "Supernova SN 1987a",
   Description = "Supernova SN 1987a Image",
-  Author = [[
-    X-ray: NASA/CXC/PSU/S.Park & D.Burrows.
-    Optical: NASA/STScI/CfA/P.Challis
-  ]],
+  Author = "X-ray: NASA/CXC/PSU/S.Park & D.Burrows. Optical: NASA/STScI/CfA/P.Challis",
   URL = "https://chandra.harvard.edu/photo/2007/sn87a/",
   License = "https://chandra.harvard.edu/photo/image_use.html"
 }

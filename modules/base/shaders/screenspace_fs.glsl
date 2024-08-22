@@ -40,6 +40,7 @@ uniform float saturation;
 uniform float gamma = 1.0;
 uniform vec2 borderWidth = vec2(0.1);
 uniform vec3 borderColor = vec3(0.0);
+uniform int borderFeather = 0;
 
 
 Fragment getFragment() {
@@ -54,6 +55,13 @@ Fragment getFragment() {
       vs_st.y < borderWidth.y || vs_st.y > 1 - borderWidth.y)
   {
     frag.color = vec4(borderColor, opacity);
+    if (borderFeather == 1) {
+      vec2 f1 = vs_st / borderWidth;
+      float g1 = min(f1.x, f1.y);
+      vec2 f2 = (vec2(1) - vs_st) / borderWidth;
+      float g2 = min(f2.x, f2.y);
+      frag.color *= min(g1, g2);
+    }
   }
 
   if (frag.color.a == 0.0) {

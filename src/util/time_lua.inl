@@ -394,14 +394,14 @@ namespace {
  * Returns the number of seconds per day where a day in this case is exactly 24 hours.
  * The total number of seconds is equal to 86400.
  */
-[[codegen::luawrap]] int secondsPerDay() {
+[[codegen::luawrap]] double secondsPerDay() {
     return openspace::SecondsPerDay;
 }
 
 /**
  * Returns the number of seconds in a Julian year, which is equal to 31557600.
  */
-[[codegen::luawrap]] int secondsPerYear() {
+[[codegen::luawrap]] double secondsPerYear() {
     // We could use a call to SPICE here, but the value is a constant anyway
     return openspace::SecondsPerYear;
 }

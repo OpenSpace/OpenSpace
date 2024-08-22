@@ -86,8 +86,7 @@ local KiviuqLabel = {
   },
   GUI = {
     Name = "Kiviuq Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq",
-    Description = "Label for Saturn's moon Kiviuq (Inuit group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq"
   }
 }
 
@@ -173,8 +172,7 @@ local IjiraqLabel = {
   },
   GUI = {
     Name = "Ijiraq Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq",
-    Description = "Label for Saturn's moon Ijiraq (Inuit group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq"
   }
 }
 
@@ -260,8 +258,7 @@ local PaaliaqLabel = {
   },
   GUI = {
     Name = "Paaliaq Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq",
-    Description = "Label for Saturn's moon Paaliaq (Inuit group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq"
   }
 }
 
@@ -347,8 +344,7 @@ local SiarnaqLabel = {
   },
   GUI = {
     Name = "Siarnaq Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq",
-    Description = "Label for Saturn's moon Siarnaq (Inuit group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq"
   }
 }
 
@@ -434,8 +430,7 @@ local TarqeqLabel = {
   },
   GUI = {
     Name = "Tarqeq Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq",
-    Description = "Label for Saturn's moon Tarqeq (Inuit group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq"
   }
 }
 
@@ -521,8 +516,7 @@ local S2004S29Label = {
   },
   GUI = {
     Name = "S/2004 S 29 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29",
-    Description = "Label for Saturn's moon S/2004 S 29 (Inuit group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29"
   }
 }
 
@@ -608,8 +602,7 @@ local S2004S31Label = {
   },
   GUI = {
     Name = "S/2004 S 31 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31",
-    Description = "Label for Saturn's moon S/2004 S 31 (Inuit group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31"
   }
 }
 
@@ -695,8 +688,7 @@ local S2019S01Label = {
   },
   GUI = {
     Name = "S/2019 S 01 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01",
-    Description = "Label for Saturn's moon S/2019 S 01 (Inuit group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01"
   }
 }
 

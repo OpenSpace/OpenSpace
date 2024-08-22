@@ -18,7 +18,7 @@ local FlipUpsideDown = {
       Up = {0.0, 0.0, -1.0}
     }
     -- Set the navigation state with the new navigation state variable
-    openspace.navigation.setNavigationState(newNavState) 
+    openspace.navigation.setNavigationState(newNavState)
   ]],
   GUI = {
     Name = "Basic",

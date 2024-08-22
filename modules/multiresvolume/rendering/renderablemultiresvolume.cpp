@@ -79,7 +79,6 @@ namespace {
         "CurrentTime",
         "Current Time",
         "", // @TODO Missing documentation
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -87,7 +86,6 @@ namespace {
         "MemoryBudget",
         "Memory Budget",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -95,7 +93,6 @@ namespace {
         "StreamingBudget",
         "Streaming Budget",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -103,7 +100,6 @@ namespace {
         "UseGlobalTime",
         "Global Time",
         "", // @TODO Missing documentation
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -118,7 +114,6 @@ namespace {
         "Selector",
         "Brick Selector",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

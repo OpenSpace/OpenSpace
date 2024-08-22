@@ -226,8 +226,6 @@ private:
         glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
 
-    std::string _versionString;
-
     properties::Vec4Property _enabledFontColor;
     properties::Vec4Property _disabledFontColor;
 };

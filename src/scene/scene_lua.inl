@@ -141,7 +141,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
     // of the loop, the property name regex was probably misspelled.
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
-        const std::string id = prop->fullyQualifiedIdentifier();
+        const std::string id = prop->uri();
 
         if (isLiteral && id != propertyName) {
             continue;
@@ -227,7 +227,7 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
                 std::format(
                     "{}: Property '{}' does not accept input of type '{}'. Requested "
                     "type: {}",
-                    errorLocation(L), prop->fullyQualifiedIdentifier(),
+                    errorLocation(L), prop->uri(),
                     luaTypeToString(type), luaTypeToString(prop->typeLua())
                 )
             );
@@ -544,7 +544,7 @@ namespace {
     std::vector<std::string> res;
     for (properties::Property* prop : props) {
         // Check the regular expression for all properties
-        const std::string& id = prop->fullyQualifiedIdentifier();
+        const std::string& id = prop->uri();
 
         if (isLiteral && id != propertyName) {
             continue;

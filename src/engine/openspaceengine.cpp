@@ -389,6 +389,17 @@ void OpenSpaceEngine::initialize() {
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
 
+    if (!global::configuration->sandboxedLua) {
+        // The Lua state is sandboxed by default, so if the user wants an unsandboxed one,
+        // we have to recreate it here.
+        // @TODO (2024-08-07, abock) It's not pretty, but doing it differently would
+        // require a bigger rewrite of how we handle the ScriptEngine
+        global::scriptEngine->~ScriptEngine();
+        global::scriptEngine = new (global::scriptEngine) scripting::ScriptEngine(
+            global::configuration->sandboxedLua
+        );
+    }
+
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(*global::scriptEngine);
@@ -906,7 +917,9 @@ void OpenSpaceEngine::runGlobalCustomizationScripts() {
     ZoneScoped;
 
     LINFO("Running Global initialization scripts");
-    const ghoul::lua::LuaState state;
+    const ghoul::lua::LuaState state = ghoul::lua::LuaState(
+        ghoul::lua::LuaState::Sandboxed::No
+    );
     global::scriptEngine->initializeLuaState(state);
 
     for (const std::string& script : global::configuration->globalCustomizationScripts) {
@@ -1383,7 +1396,7 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
 }
 
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
-    const ghoul::lua::LuaState s(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+    const ghoul::lua::LuaState s;
     const std::filesystem::path path = absPath("${SCRIPTS}/drag_drop_handler.lua");
     const std::string p = path.string();
     int status = luaL_loadfile(s, p.c_str());

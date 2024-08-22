@@ -1,3 +1,7 @@
+local transforms = asset.require("./transforms")
+
+
+
 local textures = asset.resource({
   Name = "Point Textures",
   Type = "HttpSynchronization",
@@ -13,13 +17,6 @@ local speck = asset.resource({
 })
 
 
-local TransformMatrix = {
-  -0.7357425748,    0.67726129641,  0.0,           0.0,
-  -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-  0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-  0.0,              0.0,            0.0,           1.0
-}
-
 local Object = {
   Identifier = "Abell",
   Renderable = {
@@ -33,7 +30,7 @@ local Object = {
       Size = 21.2,
       MinMaxSize = { 10, 12 },
       Unit = "Mpc",
-      TransformationMatrix = TransformMatrix
+      TransformationMatrix = transforms.Supergalactic
     },
     Opacity = 1.0,
     Coloring = {
@@ -44,7 +41,7 @@ local Object = {
       File = textures .. "point3A.png",
     },
     Unit = "Mpc",
-    TransformationMatrix = TransformMatrix,
+    TransformationMatrix = transforms.Supergalactic,
     SizeSettings = {
       ScaleExponent = 23.2,
       MaxSize = 0.27,

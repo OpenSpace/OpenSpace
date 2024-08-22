@@ -1,4 +1,5 @@
 local Mission = {
+  Identifier = "Euclid",
   Name = "Euclid",
   Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2013/01/euclid_logo/12493233-3-eng-GB/Euclid_logo_pillars.png",
   Description = [[Euclid is designed to explore the evolution of the dark universe. It will make a 3D-map of the universe (with time as the third dimension) by observing billions of galaxies out to 10 billion light-years, across more than a third of the sky.
@@ -74,7 +75,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)
 
 

@@ -1,0 +1,154 @@
+local globe = asset.require("../../earth")
+
+
+
+local WaybackLayer20140220 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20140220",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20140220.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2014 FEB 20. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20150430 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20150430",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20150430.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2015 APR 30. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20160613 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20160613",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20160613.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2016 JUN 13. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20180108 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20180108",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20180108.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2018 JAN 08. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20180627 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20180627",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20180627.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2018 JUN 27. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20190626 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20190626",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20190626.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2019 JUN 26. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20200610 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20200610",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20200610.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2020 JUN 10. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20210408 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20210408",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20210408.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2021 APR 08. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20211221 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20211221",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20211221.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2021 DEC 21. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20221012 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20221012",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20221012.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2022 OCT 12. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20230613 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20230613",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20230613.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2023 JUN 13. https://livingatlas.arcgis.com/wayback]]
+}
+
+local WaybackLayer20231207 = {
+  Identifier = "ESRI_World_Imagery_Wayback_20231207",
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_wayback/20231207.wms"),
+  Description = [[The ESRI World Imagery dataset from the wayback feature showing the
+    Earth how it looked like in 2023 DEC 07. https://livingatlas.arcgis.com/wayback]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20140220)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20150430)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20160613)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20180108)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20180627)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20190626)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20200610)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20210408)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20211221)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20221012)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20230613)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20231207)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20231207)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20230613)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20221012)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20211221)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20210408)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20200610)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20190626)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20180627)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20180108)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20160613)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20150430)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20140220)
+end)
+
+asset.export("layer20140220", WaybackLayer20140220)
+asset.export("layer20150430", WaybackLayer20150430)
+asset.export("layer20160613", WaybackLayer20160613)
+asset.export("layer20180108", WaybackLayer20180108)
+asset.export("layer20180627", WaybackLayer20180627)
+asset.export("layer20190626", WaybackLayer20190626)
+asset.export("layer20200610", WaybackLayer20200610)
+asset.export("layer20210408", WaybackLayer20210408)
+asset.export("layer20211221", WaybackLayer20211221)
+asset.export("layer20221012", WaybackLayer20221012)
+asset.export("layer20230613", WaybackLayer20230613)
+asset.export("layer20231207", WaybackLayer20231207)
+
+
+
+asset.meta = {
+  Name = "ESRI World Imagery Wayback machine",
+  Description = [[Access to the ESRI World Imagery Wayback machine layers ranging from
+    2014 to 2023]],
+  Author = "ESRI",
+  URL = "https://livingatlas.arcgis.com/wayback",
+  License = "Esri Master License Agreement"
+}

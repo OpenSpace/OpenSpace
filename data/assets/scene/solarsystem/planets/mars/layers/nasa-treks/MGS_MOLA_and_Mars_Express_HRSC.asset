@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
 
+
+
 local treks_Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw = {
   Identifier = "Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw",
   Name = [[MGS MOLA and Mars Express HRSC, Color Hillshade Blend]],
@@ -34,6 +36,7 @@ HRSC, the only dedicated stereo camera orbiting Mars, is a multi-sensor push bro
 R. Jaumann, et al. (2007), The high-resolution stereo camera (HRSC) experiment on Mars Express: instrument aspects and experiment conduct from interplanetary cruise through the nominal mission, Planet. Space Sci., 55 (7-8) (2007), pp. 928-952]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Mars_MOLA_blend200ppx_HRSC_Shade_clon0dd_200mpp_lzw)
@@ -46,6 +49,7 @@ end)
 
 asset.export("Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw", treks_Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw)
 asset.export("Mars_MOLA_blend200ppx_HRSC_Shade_clon0dd_200mpp_lzw", treks_Mars_MOLA_blend200ppx_HRSC_Shade_clon0dd_200mpp_lzw)
+
 
 
 asset.meta = {

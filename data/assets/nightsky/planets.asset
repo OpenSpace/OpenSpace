@@ -159,7 +159,6 @@ local HideNightSkyPlanets = {
   IsLocal = false
 }
 
-
 local ToggleNightSkyPlanets = {
   Identifier = "os.nightsky.ToggleNightSkyPlanets",
   Name = "Toggle night sky planets",
@@ -180,6 +179,7 @@ local ToggleNightSkyPlanets = {
   GuiPath = "/Night Sky/Planets",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mercury)
