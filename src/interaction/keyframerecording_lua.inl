@@ -29,11 +29,9 @@
 namespace {
 
 // Starts a new sequence of keyframes with the specified filename.
-[[codegen::luawrap]] void newSequence(std::string filename) {
-    if (filename.empty()) {
-        throw ghoul::lua::LuaError("Filename string is empty");
-    }
-    openspace::global::keyframeRecording->newSequence(std::move(filename));
+[[codegen::luawrap]] void newSequence() {
+
+    openspace::global::keyframeRecording->newSequence();
 }
 
 // Adds a keyframe at the specified sequence-time.
@@ -53,8 +51,8 @@ namespace {
 
 // Saves the current sequence of keyframes to disk under the last filename supplied to
 // 'newSequence'.
-[[codegen::luawrap]] void saveSequence() {
-    openspace::global::keyframeRecording->saveSequence();
+[[codegen::luawrap]] void saveSequence(std::optional<std::string> filename) {
+    openspace::global::keyframeRecording->saveSequence(filename);
 }
 
 // Loads a sequence from the supplied file.
@@ -81,6 +79,9 @@ namespace {
     openspace::global::keyframeRecording->setSequenceTime(sequenceTime);
 }
 
+[[codegen::luawrap]] bool hasKeyframeRecording() {
+    return openspace::global::keyframeRecording->hasKeyframeRecording();
+}
 
 #include "keyframerecording_lua_codegen.cpp"
 

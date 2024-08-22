@@ -45,44 +45,111 @@ namespace {
 
 namespace openspace::interaction {
 
+void to_json(nlohmann::json& j, const KeyframeRecording::Keyframe& keyframe) {
+    j = {
+        { "camera", {
+                { "position", {
+                        { "x", keyframe.camera.position.x },
+                        { "y", keyframe.camera.position.y },
+                        { "z", keyframe.camera.position.z },
+                    }
+                },
+                { "rotation", {
+                        { "x", keyframe.camera.rotation.x },
+                        { "y", keyframe.camera.rotation.y },
+                        { "z", keyframe.camera.rotation.z },
+                        { "w", keyframe.camera.rotation.w },
+                    }
+                },
+                { "scale", keyframe.camera.scale },
+                { "followFocusNodeRotation", keyframe.camera.followFocusNodeRotation },
+                { "focusNode", keyframe.camera.focusNode }
+            },
+        },
+        { "timestamp", {
+                { "application", keyframe.timestamp.application },
+                { "sequence", keyframe.timestamp.sequenceTime },
+                { "simulation", keyframe.timestamp.simulation }
+            }
+        }
+    };
+}
+
+void from_json(const nlohmann::json& j, KeyframeRecording::Keyframe::TimeStamp& ts) {
+    j.at("application").get_to(ts.application);
+    j.at("sequence").get_to(ts.sequenceTime);
+    j.at("simulation").get_to(ts.simulation);
+}
+
+void from_json(const nlohmann::json& j, KeyframeNavigator::CameraPose& pose) {
+    j.at("position").at("x").get_to(pose.position.x);
+    j.at("position").at("y").get_to(pose.position.y);
+    j.at("position").at("z").get_to(pose.position.z);
+
+    j.at("rotation").at("x").get_to(pose.rotation.x);
+    j.at("rotation").at("y").get_to(pose.rotation.y);
+    j.at("rotation").at("z").get_to(pose.rotation.z);
+    j.at("rotation").at("w").get_to(pose.rotation.w);
+
+    j.at("focusNode").get_to(pose.focusNode);
+    j.at("scale").get_to(pose.scale);
+    j.at("followFocusNodeRotation").get_to(pose.followFocusNodeRotation);
+}
+
+void from_json(const nlohmann::json& j, KeyframeRecording::Keyframe& keyframe) {
+    j.at("camera").get_to(keyframe.camera);
+    j.at("timestamp").get_to(keyframe.timestamp);
+}
+
 KeyframeRecording::KeyframeRecording()
     : properties::PropertyOwner({ "KeyframeRecording", "Keyframe Recording" })
 {}
 
-void KeyframeRecording::newSequence(std::string filename) {
-    saveSequence();
-
+void KeyframeRecording::newSequence() {
     _keyframes.clear();
-    _filename = std::move(filename);
+    _filename.clear();
 }
 
 void KeyframeRecording::addKeyframe(double sequenceTime) {
-    nlohmann::json keyframe = newKeyframe(sequenceTime);
+    Keyframe keyframe = newKeyframe(sequenceTime);
 
     auto it = std::find_if(
         _keyframes.begin(),
         _keyframes.end(),
-        [sequenceTime](const nlohmann::json& entry) {
-            return sequenceTime < static_cast<double>(entry["timestamp"]["sequence"]);
+        [sequenceTime](const Keyframe& entry) {
+            return sequenceTime < entry.timestamp.sequenceTime;
         }
     );
     _keyframes.insert(it, keyframe);
 }
 
 void KeyframeRecording::updateKeyframe(int index) {
-    nlohmann::json old = _keyframes.at(index);
-    _keyframes[index] = newKeyframe(static_cast<double>(old["timestamp"]["sequence"]));
+    if (index < 0 || static_cast<size_t>(index) > (_keyframes.size() - 1)) {
+        LERROR(std::format("Index {} out of range", index));
+        return;
+    }
+    Keyframe old = _keyframes[index];
+    _keyframes[index] = newKeyframe(old.timestamp.sequenceTime);
 }
 
 void KeyframeRecording::moveKeyframe(int index, double sequenceTime) {
-    _keyframes[index]["timestamp"]["sequence"] = sequenceTime;
+    if (index < 0 || static_cast<size_t>(index) >(_keyframes.size() - 1)) {
+        LERROR(std::format("Index {} out of range", index));
+        return;
+    }
+
+    _keyframes[index].timestamp.sequenceTime = sequenceTime;
     sortKeyframes();
 }
 
-bool KeyframeRecording::saveSequence() {
+bool KeyframeRecording::saveSequence(std::optional<std::string> filename) {
+    // If we didn't specify any filename we save the one we currently have stored
+    if (filename.has_value()) {
+        _filename = filename.value();
+    }
+
     if (_filename.empty()) {
-        // @TODO(jockekilby) Throw some error about having to create sequence with a valid
-        // filename first
+        LERROR("Failed to save file, reason: Invalid empty file name");
         return false;
     }
 
@@ -95,8 +162,19 @@ bool KeyframeRecording::saveSequence() {
 
 void KeyframeRecording::loadSequence(std::string filename) {
     std::filesystem::path path = absPath("${RECORDINGS}/" + filename + ".json");
+    if (!std::filesystem::exists(path)) {
+        LERROR(std::format("File '{}' does not exist", path));
+        return;
+    }
+
+    _keyframes.clear();
     std::ifstream file(path);
-    _keyframes = nlohmann::json::parse(file).get<std::vector<nlohmann::json>>();
+    std::vector<nlohmann::json> jsonKeyframes =
+        nlohmann::json::parse(file).get<std::vector<nlohmann::json>>();
+    for (const nlohmann::json& keyframeJson : jsonKeyframes) {
+        Keyframe keyframe = keyframeJson;
+        _keyframes.push_back(keyframe);
+    }
     _filename = filename;
 }
 
@@ -113,18 +191,23 @@ void KeyframeRecording::setSequenceTime(double sequenceTime) {
     _hasStateChanged = true;
 }
 
+bool KeyframeRecording::hasKeyframeRecording() const
+{
+    return !_keyframes.empty();
+}
+
 void KeyframeRecording::preSynchronization(double dt) {
     if (_hasStateChanged) {
         auto it = std::find_if(
             _keyframes.rbegin(),
             _keyframes.rend(),
-            [timestamp = _sequenceTime](const nlohmann::json& entry) {
-                return timestamp >= static_cast<double>(entry["timestamp"]["sequence"]);
+            [timestamp = _sequenceTime](const Keyframe& entry) {
+                return timestamp >= entry.timestamp.sequenceTime;
             }
         );
 
-        nlohmann::json currKeyframe;
-        nlohmann::json nextKeyframe;
+        Keyframe currKeyframe;
+        Keyframe nextKeyframe;
         double factor = 0.0;
 
         // Before first keyframe
@@ -139,13 +222,13 @@ void KeyframeRecording::preSynchronization(double dt) {
         else {
             currKeyframe = *it;
             nextKeyframe = *(--it);
-            double t0 = currKeyframe["timestamp"]["sequence"];
-            double t1 = nextKeyframe["timestamp"]["sequence"];
+            double t0 = currKeyframe.timestamp.sequenceTime;
+            double t1 = nextKeyframe.timestamp.sequenceTime;
             factor = (_sequenceTime - t0) / (t1 - t0);
         }
 
-        interaction::KeyframeNavigator::CameraPose curr = keyframeToPose(currKeyframe);
-        interaction::KeyframeNavigator::CameraPose next = keyframeToPose(nextKeyframe);
+        interaction::KeyframeNavigator::CameraPose curr = currKeyframe.camera;
+        interaction::KeyframeNavigator::CameraPose next = nextKeyframe.camera;
 
         Camera* camera = global::navigationHandler->camera();
         Scene* scene = camera->parent()->scene();
@@ -190,21 +273,16 @@ void KeyframeRecording::sortKeyframes() {
     std::sort(
         _keyframes.begin(),
         _keyframes.end(),
-        [](nlohmann::json lhs, nlohmann::json rhs) {
-            return static_cast<double>(lhs["timestamp"]["sequence"]) <
-                static_cast<double>(rhs["timestamp"]["sequence"]);
+        [](Keyframe lhs, Keyframe rhs) {
+            return lhs.timestamp.sequenceTime < rhs.timestamp.sequenceTime;
         }
     );
 }
 
-nlohmann::json KeyframeRecording::newKeyframe(double sequenceTime) {
+KeyframeRecording::Keyframe KeyframeRecording::newKeyframe(double sequenceTime) {
     interaction::NavigationHandler& handler = *global::navigationHandler;
     interaction::OrbitalNavigator& navigator = handler.orbitalNavigator();
     const SceneGraphNode* node = navigator.anchorNode();
-    if (!node) {
-        // @TODO(jockekilby) Display error about erraneous state
-        return false;
-    }
 
     glm::dvec3 position = navigator.anchorNodeToCameraVector();
     glm::dquat rotation = handler.camera()->rotationQuaternion();
@@ -216,54 +294,18 @@ nlohmann::json KeyframeRecording::newKeyframe(double sequenceTime) {
         rotation = navigator.anchorNodeToCameraRotation();
     }
 
-    nlohmann::json keyframe = {
-        { "camera", {
-                { "position", {
-                        { "x", position.x },
-                        { "y", position.y },
-                        { "z", position.z },
-                    }
-                },
-                { "rotation", {
-                        { "x", rotation.x },
-                        { "y", rotation.y },
-                        { "z", rotation.z },
-                        { "w", rotation.w },
-                    }
-                },
-                { "scale", scale },
-                { "followFocusNodeRotation", followNodeRotation },
-                { "focusNode", navigator.anchorNode()->identifier() }
-            },
-        },
-        { "timestamp", {
-                { "application", global::windowDelegate->applicationTime() },
-                { "sequence", sequenceTime },
-                { "simulation", global::timeManager->time().j2000Seconds() }
-            }
-        }
-    };
+    Keyframe keyframe;
+    keyframe.camera.position = position;
+    keyframe.camera.rotation = rotation;
+    keyframe.camera.focusNode = navigator.anchorNode()->identifier();
+    keyframe.camera.scale = scale;
+    keyframe.camera.followFocusNodeRotation = followNodeRotation;
+
+    keyframe.timestamp.application = global::windowDelegate->applicationTime();
+    keyframe.timestamp.sequenceTime = sequenceTime;
+    keyframe.timestamp.simulation = global::timeManager->time().j2000Seconds();
 
     return keyframe;
-}
-
-KeyframeNavigator::CameraPose KeyframeRecording::keyframeToPose(
-                                                   const nlohmann::json& keyframe) const {
-    KeyframeNavigator::CameraPose pose;
-
-    pose.position.x = keyframe["camera"]["position"]["x"];
-    pose.position.y = keyframe["camera"]["position"]["y"];
-    pose.position.z = keyframe["camera"]["position"]["z"];
-
-    pose.rotation.x = keyframe["camera"]["rotation"]["x"];
-    pose.rotation.y = keyframe["camera"]["rotation"]["y"];
-    pose.rotation.z = keyframe["camera"]["rotation"]["z"];
-    pose.rotation.w = keyframe["camera"]["rotation"]["w"];
-
-    pose.followFocusNodeRotation = keyframe["camera"]["followFocusNodeRotation"];
-    pose.scale = keyframe["camera"]["scale"];
-    pose.focusNode = keyframe["camera"]["focusNode"];
-    return pose;
 }
 
 } // namespace openspace::interaction

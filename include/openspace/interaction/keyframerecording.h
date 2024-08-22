@@ -25,9 +25,8 @@
 #ifndef __OPENSPACE_CORE___KEYFRAMERECORDING___H__
 #define __OPENSPACE_CORE___KEYFRAMERECORDING___H__
 
-#include <openspace/properties/propertyowner.h>
-
 #include <openspace/navigation/keyframenavigator.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/scripting/lualibrary.h>
 #include <json/json.hpp>
 #include <string>
@@ -37,9 +36,20 @@ namespace openspace::interaction {
 
 class KeyframeRecording : public properties::PropertyOwner {
 public:
+struct Keyframe {
+    struct TimeStamp {
+        double application;
+        double sequenceTime;
+        double simulation;
+    };
+
+    KeyframeNavigator::CameraPose camera;
+    TimeStamp timestamp;
+};
+
     KeyframeRecording();
 
-    void newSequence(std::string filename);
+    void newSequence();
 
     void addKeyframe(double sequenceTime);
 
@@ -47,7 +57,7 @@ public:
 
     void moveKeyframe(int index, double sequenceTime);
 
-    bool saveSequence();
+    bool saveSequence(std::optional<std::string> filename);
 
     void loadSequence(std::string filename);
 
@@ -59,6 +69,8 @@ public:
 
     void setSequenceTime(double sequenceTime);
 
+    bool hasKeyframeRecording() const;
+
     /**
      * \return The Lua library that contains all Lua functions available to affect the
      * interaction
@@ -68,11 +80,9 @@ public:
 private:
     void sortKeyframes();
 
-    nlohmann::json newKeyframe(double sequenceTime);
+    Keyframe newKeyframe(double sequenceTime);
 
-    KeyframeNavigator::CameraPose keyframeToPose(const nlohmann::json& keyframe) const;
-
-    std::vector<nlohmann::json> _keyframes;
+    std::vector<Keyframe> _keyframes;
     std::string _filename;
     bool _isPlaying = false;
     bool _hasStateChanged = false;
