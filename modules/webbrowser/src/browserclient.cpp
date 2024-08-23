@@ -90,60 +90,49 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser
 
     WindowDelegate::Cursor newCursor;
     switch (type) {
-    case cef_cursor_type_t::CT_POINTER: {
-        newCursor = WindowDelegate::Cursor::Arrow;
-        break;
-    }
-    case cef_cursor_type_t::CT_IBEAM: {
-        newCursor = WindowDelegate::Cursor::IBeam;
-        break;
-    }
-    case cef_cursor_type_t::CT_CROSS: {
-        newCursor = WindowDelegate::Cursor::CrossHair;
-        break;
-    }
-    case cef_cursor_type_t::CT_HAND: {
-        newCursor = WindowDelegate::Cursor::PointingHand;
-        break;
-    }
-    case cef_cursor_type_t::CT_EASTWESTRESIZE: 
-    case cef_cursor_type_t::CT_COLUMNRESIZE:
-    case cef_cursor_type_t::CT_EASTRESIZE:
-    case cef_cursor_type_t::CT_WESTRESIZE: {
-        newCursor = WindowDelegate::Cursor::ResizeEW;
-        break;
-    }
-    case cef_cursor_type_t::CT_NORTHSOUTHRESIZE: 
-    case cef_cursor_type_t::CT_ROWRESIZE:
-    case cef_cursor_type_t::CT_NORTHRESIZE:
-    case cef_cursor_type_t::CT_SOUTHRESIZE: {
-        newCursor = WindowDelegate::Cursor::ResizeNS;
-        break;
-    }
-    case cef_cursor_type_t::CT_NORTHWESTSOUTHEASTRESIZE:
-    case cef_cursor_type_t::CT_SOUTHEASTRESIZE:
-    case cef_cursor_type_t::CT_NORTHWESTRESIZE: {
-        newCursor = WindowDelegate::Cursor::ResizeNWSE;
-        break;
-    }
-    case cef_cursor_type_t::CT_NORTHEASTSOUTHWESTRESIZE:
-    case cef_cursor_type_t::CT_SOUTHWESTRESIZE:
-    case cef_cursor_type_t::CT_NORTHEASTRESIZE: {
-        newCursor = WindowDelegate::Cursor::ResizeNESW;
-        break;
-    }
-    case cef_cursor_type_t::CT_MOVE: {
-        newCursor = WindowDelegate::Cursor::ResizeAll;
-        break;
-    }
-    case cef_cursor_type_t::CT_NOTALLOWED: {
-        newCursor = WindowDelegate::Cursor::NotAllowed;
-        break;
-    }
-    default: {
-        newCursor = WindowDelegate::Cursor::Arrow;
-        break;
-    }
+        case cef_cursor_type_t::CT_POINTER:
+            newCursor = WindowDelegate::Cursor::Arrow;
+            break;
+        case cef_cursor_type_t::CT_IBEAM:
+            newCursor = WindowDelegate::Cursor::IBeam;
+            break;
+        case cef_cursor_type_t::CT_CROSS:
+            newCursor = WindowDelegate::Cursor::CrossHair;
+            break;
+        case cef_cursor_type_t::CT_HAND:
+            newCursor = WindowDelegate::Cursor::PointingHand;
+            break;
+        case cef_cursor_type_t::CT_EASTWESTRESIZE: 
+        case cef_cursor_type_t::CT_COLUMNRESIZE:
+        case cef_cursor_type_t::CT_EASTRESIZE:
+        case cef_cursor_type_t::CT_WESTRESIZE:
+            newCursor = WindowDelegate::Cursor::ResizeEW;
+            break;
+        case cef_cursor_type_t::CT_NORTHSOUTHRESIZE: 
+        case cef_cursor_type_t::CT_ROWRESIZE:
+        case cef_cursor_type_t::CT_NORTHRESIZE:
+        case cef_cursor_type_t::CT_SOUTHRESIZE:
+            newCursor = WindowDelegate::Cursor::ResizeNS;
+            break;
+        case cef_cursor_type_t::CT_NORTHWESTSOUTHEASTRESIZE:
+        case cef_cursor_type_t::CT_SOUTHEASTRESIZE:
+        case cef_cursor_type_t::CT_NORTHWESTRESIZE:
+            newCursor = WindowDelegate::Cursor::ResizeNWSE;
+            break;
+        case cef_cursor_type_t::CT_NORTHEASTSOUTHWESTRESIZE:
+        case cef_cursor_type_t::CT_SOUTHWESTRESIZE:
+        case cef_cursor_type_t::CT_NORTHEASTRESIZE:
+            newCursor = WindowDelegate::Cursor::ResizeNESW;
+            break;
+        case cef_cursor_type_t::CT_MOVE:
+            newCursor = WindowDelegate::Cursor::ResizeAll;
+            break;
+        case cef_cursor_type_t::CT_NOTALLOWED:
+            newCursor = WindowDelegate::Cursor::NotAllowed;
+            break;
+        default:
+            newCursor = WindowDelegate::Cursor::Arrow;
+            break;
     }
     global::windowDelegate->setMouseCursor(newCursor);
     return false;
