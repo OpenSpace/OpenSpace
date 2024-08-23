@@ -29,33 +29,59 @@ namespace {
 
 // Starts a new sequence of keyframes, any previously loaded sequence is discarded
 [[codegen::luawrap]] void newSequence() {
-
     openspace::global::keyframeRecording->newSequence();
 }
 
 // Adds a keyframe at the specified sequence-time
 [[codegen::luawrap]] void addKeyframe(double sequenceTime) {
+    if (sequenceTime < 0) {
+        throw ghoul::lua::LuaError("Error can't add keyframe with negative time value");
+    }
     openspace::global::keyframeRecording->addKeyframe(sequenceTime);
 }
 
 // Removes a keyframe at the specified 0-based index
 [[codegen::luawrap]] void removeKeyframe(int index) {
+    if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
+        throw ghoul::lua::LuaError("Can't remove keyframe on empty sequence");
+    }
+    if (index < 0) {
+        throw ghoul::lua::LuaError("Index value must be positive");
+    }
     openspace::global::keyframeRecording->removeKeyframe(index);
 }
 
 // Update the camera position at keyframe specified by the 0-based index
 [[codegen::luawrap]] void updateKeyframe(int index) {
+    if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
+        throw ghoul::lua::LuaError("Can't update keyframe on empty sequence");
+    }
+    if (index < 0) {
+        throw ghoul::lua::LuaError("Index value must be positive");
+    }
     openspace::global::keyframeRecording->updateKeyframe(index);
 }
 
 // Move keyframe of `index` to the new specified `sequenceTime`
 [[codegen::luawrap]] void moveKeyframe(int index, double sequenceTime) {
+    if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
+        throw ghoul::lua::LuaError("Can't move keyframe on empty sequence");
+    }
+    if (index < 0) {
+        throw ghoul::lua::LuaError("Index value must be positive");
+    }
+    if (sequenceTime < 0) {
+        throw ghoul::lua::LuaError("Error can't add keyframe with negative time value");
+    }
     openspace::global::keyframeRecording->moveKeyframe(index, sequenceTime);
 }
 
 // Saves the current sequence of keyframes to disk by the optionally specified `filename`.
 // `filename` can be omitted if the sequence was previously saved or loaded from file
 [[codegen::luawrap]] void saveSequence(std::optional<std::string> filename) {
+    if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
+        throw ghoul::lua::LuaError("No keyframe sequence to save");
+    }
     openspace::global::keyframeRecording->saveSequence(filename);
 }
 
@@ -65,12 +91,12 @@ namespace {
 }
 
 // Playback sequence optionally from the specified `sequenceTime` or if not specified
-// starts playing from the current time set within the sequence
+// starts playing from the beginning
 [[codegen::luawrap]] void play(std::optional<double> sequenceTime) {
-    if (sequenceTime.has_value()) {
-        openspace::global::keyframeRecording->setSequenceTime(*sequenceTime);
+    if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
+        throw ghoul::lua::LuaError("No keyframe sequence to play");
     }
-
+    openspace::global::keyframeRecording->setSequenceTime(sequenceTime.value_or(0.0));
     openspace::global::keyframeRecording->play();
 }
 
@@ -79,8 +105,16 @@ namespace {
     openspace::global::keyframeRecording->pause();
 }
 
+// Resumes playing sequence from
+[[codegen::luawrap]] void resume() {
+    openspace::global::keyframeRecording->play();
+}
+
 // Jumps to a specified time within the sequence
 [[codegen::luawrap]] void setTime(double sequenceTime) {
+    if (sequenceTime < 0) {
+        throw ghoul::lua::LuaError("Sequence time must be greater or equal than 0");
+    }
     openspace::global::keyframeRecording->setSequenceTime(sequenceTime);
 }
 
@@ -90,8 +124,8 @@ namespace {
 }
 
 // Fetches the sequence keyframes as a JSON object
-[[codegen::luawrap]] std::vector<ghoul::Dictionary> getKeyframes() {
-    return openspace::global::keyframeRecording->getKeyframes();
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> keyframes() {
+    return openspace::global::keyframeRecording->keyframes();
 }
 
 #include "keyframerecording_lua_codegen.cpp"

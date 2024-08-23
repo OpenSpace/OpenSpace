@@ -127,9 +127,12 @@ KeyframeRecording::KeyframeRecording()
 void KeyframeRecording::newSequence() {
     _keyframes.clear();
     _filename.clear();
+    LINFO("Created new sequence");
 }
 
 void KeyframeRecording::addKeyframe(double sequenceTime) {
+    ghoul_assert(sequenceTime >= 0, "Sequence time must be positive");
+
     Keyframe keyframe = newKeyframe(sequenceTime);
 
     auto it = std::find_if(
@@ -140,37 +143,53 @@ void KeyframeRecording::addKeyframe(double sequenceTime) {
         }
     );
     _keyframes.insert(it, keyframe);
+    LINFO(std::format(
+        "Added new keyframe {} at time: {}",
+        _keyframes.size() - 1 , sequenceTime
+    ));
 }
 
-void KeyframeRecording::removeKeyframe(int index)
-{
-    if (index < 0 || static_cast<size_t>(index) >(_keyframes.size() - 1)) {
+void KeyframeRecording::removeKeyframe(int index) {
+    ghoul_assert(hasKeyframeRecording(), "Can't remove keyframe on empty sequence");
+
+    if (!isInRange(index)) {
         LERROR(std::format("Index {} out of range", index));
         return;
     }
     _keyframes.erase(_keyframes.begin() + index);
+    LINFO(std::format("Removed keyframe with index {}", index));
 }
 
 void KeyframeRecording::updateKeyframe(int index) {
-    if (index < 0 || static_cast<size_t>(index) > (_keyframes.size() - 1)) {
+    ghoul_assert(hasKeyframeRecording(), "Can't update keyframe on empty sequence");
+
+    if (!isInRange(index)) {
         LERROR(std::format("Index {} out of range", index));
         return;
     }
     Keyframe old = _keyframes[index];
     _keyframes[index] = newKeyframe(old.timestamp.sequenceTime);
+     LINFO(std::format("Update camera position of keyframe {}", index));
 }
 
 void KeyframeRecording::moveKeyframe(int index, double sequenceTime) {
-    if (index < 0 || static_cast<size_t>(index) >(_keyframes.size() - 1)) {
+    ghoul_assert(hasKeyframeRecording(), "can't move keyframe on empty sequence");
+    ghoul_assert(sequenceTime >= 0, "Sequence time must be positive");
+
+    if (!isInRange(index)) {
         LERROR(std::format("Index {} out of range", index));
         return;
     }
-
+    double oldSequenceTime = _keyframes[index].timestamp.sequenceTime;
     _keyframes[index].timestamp.sequenceTime = sequenceTime;
     sortKeyframes();
+    LINFO(std::format("Moved keyframe {} from sequence time: {} to {}",
+        index, oldSequenceTime, sequenceTime));
 }
 
 bool KeyframeRecording::saveSequence(std::optional<std::string> filename) {
+    ghoul_assert(hasKeyframeRecording(), "Keyframe sequence can't be empty");
+
     // If we didn't specify any filename we save the one we currently have stored
     if (filename.has_value()) {
         _filename = filename.value();
@@ -182,23 +201,30 @@ bool KeyframeRecording::saveSequence(std::optional<std::string> filename) {
     }
 
     nlohmann::json sequence = _keyframes;
-    std::filesystem::path path = absPath("${RECORDINGS}/" + _filename + ".json");
+    std::filesystem::path path = absPath(std::format(
+        "${{RECORDINGS}}/{}.json", _filename
+    ));
     std::ofstream ofs(path);
     ofs << sequence.dump(2);
+    LINFO(std::format("Saved keyframe sequence to '{}'", path.string()));
     return true;
 }
 
 void KeyframeRecording::loadSequence(std::string filename) {
-    std::filesystem::path path = absPath("${RECORDINGS}/" + filename + ".json");
+    std::filesystem::path path = absPath(
+        std::format("${{RECORDINGS}}/{}.json", filename
+    ));
     if (!std::filesystem::exists(path)) {
         LERROR(std::format("File '{}' does not exist", path));
         return;
     }
 
+    LINFO(std::format("Loading keyframe sequence from '{}'", path));
     _keyframes.clear();
     std::ifstream file(path);
     std::vector<nlohmann::json> jsonKeyframes =
         nlohmann::json::parse(file).get<std::vector<nlohmann::json>>();
+
     for (const nlohmann::json& keyframeJson : jsonKeyframes) {
         Keyframe keyframe = keyframeJson;
         _keyframes.push_back(keyframe);
@@ -207,25 +233,30 @@ void KeyframeRecording::loadSequence(std::string filename) {
 }
 
 void KeyframeRecording::play() {
+    ghoul_assert(hasKeyframeRecording(), "Keyframe sequence can't be empty")
+
+    LINFO("Keyframe sequence playing");
     _isPlaying = true;
 }
 
 void KeyframeRecording::pause() {
+    LINFO("Keyframe sequence paused");
     _isPlaying = false;
 }
 
 void KeyframeRecording::setSequenceTime(double sequenceTime) {
+    ghoul_assert(sequenceTime >= 0, "Sequence time must be positive");
+
     _sequenceTime = sequenceTime;
     _hasStateChanged = true;
+    LINFO(std::format("Set sequence time to {}", sequenceTime));
 }
 
-bool KeyframeRecording::hasKeyframeRecording() const
-{
+bool KeyframeRecording::hasKeyframeRecording() const {
     return !_keyframes.empty();
 }
 
-std::vector<ghoul::Dictionary> KeyframeRecording::getKeyframes() const
-{
+std::vector<ghoul::Dictionary> KeyframeRecording::keyframes() const {
     std::vector<ghoul::Dictionary> result;
     for (const auto& keyframe : _keyframes) {
         ghoul::Dictionary camera;
@@ -330,8 +361,10 @@ scripting::LuaLibrary KeyframeRecording::luaLibrary() {
             codegen::lua::LoadSequence,
             codegen::lua::Play,
             codegen::lua::Pause,
+            codegen::lua::Resume,
             codegen::lua::SetTime,
-            codegen::lua::GetKeyframes
+            codegen::lua::HasKeyframeRecording,
+            codegen::lua::Keyframes
         }
     };
 }
@@ -373,6 +406,10 @@ KeyframeRecording::Keyframe KeyframeRecording::newKeyframe(double sequenceTime) 
     keyframe.timestamp.simulation = global::timeManager->time().j2000Seconds();
 
     return keyframe;
+}
+
+bool KeyframeRecording::isInRange(int index) const {
+    return index > 0 && index < _keyframes.size();
 }
 
 } // namespace openspace::interaction
