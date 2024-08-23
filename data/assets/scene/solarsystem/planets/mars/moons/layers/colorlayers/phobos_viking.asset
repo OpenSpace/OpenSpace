@@ -24,6 +24,9 @@ local Layer = {
     this affects the appearance only and not the map geometry. This global mosaic has a
     pixel resolution of five meters per pixel (m).
 
+    This image was further color-enhanced based on data from the Mars Reconnaissance
+    Orbiter: https://www.planetary.org/space-images/color-view-of-phobos-from-mars-reconnaissance-orbiter#:~:text=The%20color%20view%20shows%20that
+
     References:
     Stooke, P. (2012). Stooke Small Bodies Maps V2.0. MULTI-SA-MULTI-6-STOOKEMAPS-V2.0.
     NASA Planetary Data System. https://sbn.psi.edu/pds/resource/stookemaps.html
