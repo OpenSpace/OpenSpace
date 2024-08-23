@@ -57,7 +57,7 @@ class WebKeyboardHandler;
 class BrowserInstance {
 public:
     static constexpr int SingleClick = 1;
-    // TODO: ylvse 2024-08-20: remove third argument when the sky browser rewrite is done.
+    // @TODO (ylvse 2024-08-20): remove third argument when the sky browser rewrite is done.
     //   The browser instance should always accelerate the rendering if possible but for
     //   now the skybrowser is not accelerated. Will be when the rewrite is done.
     BrowserInstance(WebRenderHandler* renderer,
