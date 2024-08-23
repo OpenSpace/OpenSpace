@@ -98,7 +98,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    void createShaders();
+    void createShaders(ghoul::Dictionary dict = ghoul::Dictionary());
     std::string makeUniqueIdentifier(std::string name);
 
     virtual glm::mat4 scaleMatrix();

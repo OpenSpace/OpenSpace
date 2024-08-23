@@ -406,7 +406,7 @@ bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     keyEvent.windows_key_code = mapFromGlfwToWindows(Key(charCode));
     keyEvent.character = mapFromGlfwToCharacter(Key(charCode));
     keyEvent.native_key_code = mapFromGlfwToNative(Key(charCode));
-    keyEvent.modifiers = static_cast<uint32>(modifier);
+    keyEvent.modifiers = static_cast<uint32_t>(modifier);
     keyEvent.type = KEYEVENT_CHAR;
 
     return _browserInstance->sendKeyEvent(keyEvent);
@@ -443,7 +443,7 @@ bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
                 keyEvent.windows_key_code = mapFromGlfwToWindows(Key(45));
                 keyEvent.character = mapFromGlfwToCharacter(Key(45));
                 keyEvent.native_key_code = mapFromGlfwToNative(Key(45));
-                keyEvent.modifiers = static_cast<uint32>(mod);
+                keyEvent.modifiers = static_cast<uint32_t>(mod);
                 keyEvent.type = keyEventType(action);
                 _browserInstance->sendKeyEvent(keyEvent);
                 return true;
@@ -454,7 +454,7 @@ bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
             keyEvent.windows_key_code = mapFromGlfwToWindows(Key::KeypadDecimal);
             keyEvent.character = mapFromGlfwToCharacter(Key::KeypadDecimal);
             keyEvent.native_key_code = mapFromGlfwToNative(Key::KeypadDecimal);
-            keyEvent.modifiers = static_cast<uint32>(mod);
+            keyEvent.modifiers = static_cast<uint32_t>(mod);
             keyEvent.type = keyEventType(action);
             _browserInstance->sendKeyEvent(keyEvent);
             return true;

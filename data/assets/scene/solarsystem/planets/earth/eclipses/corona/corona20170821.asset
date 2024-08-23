@@ -31,12 +31,12 @@ local Plane = {
     Video = videos .. "corona20170821_0171.mp4",
     PlaybackMode = "MapToSimulationTime",
     StartTime = "2017 08 21 00:00:00",
-    EndTime = "2017 08 21 23:59:59",
+    EndTime = "2017 08 21 23:59:59"
   },
   GUI = {
     Name = "Sun Corona",
     Path = "/Solar System/Sun"
-  },
+  }
 }
 
 

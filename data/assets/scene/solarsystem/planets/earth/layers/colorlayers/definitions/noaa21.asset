@@ -19,7 +19,6 @@ local Layer = {
   PadTiles = false
 }
 
-
 asset.export("Layer", Layer)
 
 

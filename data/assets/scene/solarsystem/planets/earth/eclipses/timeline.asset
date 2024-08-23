@@ -1,4 +1,5 @@
 local Timeline = {
+  Identifier = "Eclipses",
   Name = "Eclipses",
   Image = "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2019/07/stages_of_a_total_solar_eclipse/19468511-1-eng-GB/Stages_of_a_total_solar_eclipse_pillars.jpg",
   Description = "An eclipse is an awe-inspiring celestial event that drastically changes the appearance of the two biggest objects we see in our sky: our Sun and Moon. On Earth, people can experience solar eclipses when Earth, the Moon, and the Sun line up. There are four types of solar eclipses: total, partial, hybrid, and annular. The type of eclipse that people get to see depends on how the Moon aligns with Earth and the Sun, and how far away the Moon is from Earth. In addition to inspiring artists and musicians, eclipses have driven numerous scientific discoveries. For over a century, solar eclipses helped scientists decipher the Sun's structure and explosive events, find evidence for the theory of general relativity, discover a new element, and much more. Scientists still study eclipses to make new discoveries about the Sun, Earth, and our space environment. Total solar eclipses are particularly important because they allow scientists to see a part of the Sun's atmosphere - known as the corona - which is too faint to see except when the bright light of the Sun's surface is blocked.",
@@ -2275,7 +2276,7 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Timeline.Name)
+  openspace.unloadMission(Timeline)
 end)
 
 

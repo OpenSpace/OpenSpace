@@ -254,6 +254,7 @@ asset.export("SetLightPollutionLevel9", SetLightPollutionLevel9.Identifier)
 asset.export("UndoLightPollution", UndoLightPollution.Identifier)
 
 
+
 asset.meta = {
   Name = "Light Pollution",
   Description = [[Includes a sphere used to simulate the effect of light pollution on

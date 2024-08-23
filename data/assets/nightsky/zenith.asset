@@ -106,6 +106,7 @@ local ToggleZenith = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ZenithPosition)
   openspace.addSceneGraphNode(ZenithDot)

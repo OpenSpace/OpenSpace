@@ -51,6 +51,7 @@ for _, n in ipairs(spheres) do
 end
 
 
+
 asset.meta = {
   Name = "Spheres Example",
   Description = [[Example showing how to render textured spheres in 3D space. Some

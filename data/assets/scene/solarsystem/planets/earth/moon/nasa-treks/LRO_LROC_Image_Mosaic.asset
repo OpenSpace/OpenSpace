@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_NAC_Mosaic_17S173E_50cmp = {
   Identifier = "LRO_NAC_Mosaic_17S173E_50cmp",
   Name = [[LRO LROC Image Mosaic, Aitken Crater]],
@@ -278,6 +280,7 @@ local treks_LRO_NAC_Mosaic_43S349E_50cmp = {
   Description = [[]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Mosaic_17S173E_50cmp)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Mosaic_13S358E_50cmp)
@@ -386,6 +389,7 @@ asset.export("LRO_NAC_Mosaic_02S167E_50cmp", treks_LRO_NAC_Mosaic_02S167E_50cmp)
 asset.export("LRO_NAC_Mosaic_20N010E_60cmp", treks_LRO_NAC_Mosaic_20N010E_60cmp)
 asset.export("LRO_NAC_Mosaic_19S129E_50cmp", treks_LRO_NAC_Mosaic_19S129E_50cmp)
 asset.export("LRO_NAC_Mosaic_43S349E_50cmp", treks_LRO_NAC_Mosaic_43S349E_50cmp)
+
 
 
 asset.meta = {

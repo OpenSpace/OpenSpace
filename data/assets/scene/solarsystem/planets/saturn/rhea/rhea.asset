@@ -72,8 +72,7 @@ local RheaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels", "moon_major_saturn" },
   GUI = {
     Name = "Rhea Label",
-    Path = "/Solar System/Planets/Saturn/Major Moons/Rhea",
-    Description = "Label for Saturn's moon Rhea"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Rhea"
   }
 }
 

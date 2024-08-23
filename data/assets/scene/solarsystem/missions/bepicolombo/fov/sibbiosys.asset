@@ -17,8 +17,7 @@ local SimbioSys_HRIC_FPA = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys HRIC FPA",
@@ -40,8 +39,7 @@ local SimbioSys_HRIC_F550 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys HRIC F550",
@@ -63,8 +61,7 @@ local SimbioSys_HRIC_FPAN = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys HRIC FPAN",
@@ -86,8 +83,7 @@ local SimbioSys_HRIC_F750 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys HRIC F750",
@@ -109,8 +105,7 @@ local SimbioSys_HRIC_F880 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys HRIC F880",
@@ -132,8 +127,7 @@ local SimbioSys_STC_L = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys STC L",
@@ -155,8 +149,7 @@ local SimbioSys_STC_H = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys STC H",
@@ -178,8 +171,7 @@ local SimbioSys_STC_L_F920 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys STC L F920",
@@ -201,8 +193,7 @@ local SimbioSys_STC_L_F550 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys STC L F550",
@@ -224,8 +215,7 @@ local SimbioSys_STC_L_P700 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys STC L P700",
@@ -247,8 +237,7 @@ local SimbioSys_STC_H_P700 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys STC H P700",
@@ -270,8 +259,7 @@ local SimbioSys_STC_H_F420 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys STC H F420",
@@ -293,8 +281,7 @@ local SimbioSys_STC_H_F750 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys STC H F750",
@@ -316,8 +303,7 @@ local SimbioSys_VIHI = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Simbio-Sys VIHI",

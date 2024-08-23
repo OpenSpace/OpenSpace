@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_NAC_CratDenHaz_17S173E_150cmp = {
   Identifier = "LRO_NAC_CratDenHaz_17S173E_150cmp",
   Name = [[LRO LROC Crater Density Hazard, Aitken Crater]],
@@ -190,6 +192,7 @@ local treks_LRO_NAC_CratDenHaz_43S349E_150cmp = {
   Description = [[]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratDenHaz_17S173E_150cmp)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratDenHaz_13S358E_2mp)
@@ -265,6 +268,7 @@ asset.export("LRO_NAC_CratDenHaz_60S200E_150cmp", treks_LRO_NAC_CratDenHaz_60S20
 asset.export("LRO_NAC_CratDenHaz_02S167E_150cmp", treks_LRO_NAC_CratDenHaz_02S167E_150cmp)
 asset.export("LRO_NAC_CratDenHaz_20N010E_2mp", treks_LRO_NAC_CratDenHaz_20N010E_2mp)
 asset.export("LRO_NAC_CratDenHaz_43S349E_150cmp", treks_LRO_NAC_CratDenHaz_43S349E_150cmp)
+
 
 
 asset.meta = {
