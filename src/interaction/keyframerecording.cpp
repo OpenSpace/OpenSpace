@@ -43,62 +43,81 @@ namespace {
     constexpr std::string_view _loggerCat = "KeyframeRecording";
 } // namespace
 
+namespace openspace::interaction::keys {
+    // These keys are const char* since nlohmann::json do not support string_view in .at()
+    constexpr const char* Camera = "camera";
+    constexpr const char* Position = "position";
+    constexpr const char* Rotation = "rotation";
+    constexpr const char* Scale = "scale";
+    constexpr const char* FollowFocusNodeRotation = "followFocusNodeRotation";
+    constexpr const char* FocusNode = "focusNode";
+
+    constexpr const char* Timestamp = "timestamp";
+    constexpr const char* Application = "application";
+    constexpr const char* Sequence = "sequence";
+    constexpr const char* Simulation = "simulation";
+    constexpr const char* X = "x";
+    constexpr const char* Y = "y";
+    constexpr const char* Z = "z";
+    constexpr const char* W = "w";
+}
+
 namespace openspace::interaction {
 
 void to_json(nlohmann::json& j, const KeyframeRecording::Keyframe& keyframe) {
     j = {
-        { "camera", {
-                { "position", {
-                        { "x", keyframe.camera.position.x },
-                        { "y", keyframe.camera.position.y },
-                        { "z", keyframe.camera.position.z },
+        { keys::Camera, {
+                { keys::Position, {
+                        { keys::X, keyframe.camera.position.x },
+                        { keys::Y, keyframe.camera.position.y },
+                        { keys::Z, keyframe.camera.position.z },
                     }
                 },
-                { "rotation", {
-                        { "x", keyframe.camera.rotation.x },
-                        { "y", keyframe.camera.rotation.y },
-                        { "z", keyframe.camera.rotation.z },
-                        { "w", keyframe.camera.rotation.w },
+                { keys::Rotation, {
+                        { keys::X, keyframe.camera.rotation.x },
+                        { keys::Y, keyframe.camera.rotation.y },
+                        { keys::Z, keyframe.camera.rotation.z },
+                        { keys::W, keyframe.camera.rotation.w },
                     }
                 },
-                { "scale", keyframe.camera.scale },
-                { "followFocusNodeRotation", keyframe.camera.followFocusNodeRotation },
-                { "focusNode", keyframe.camera.focusNode }
+                { keys::Scale, keyframe.camera.scale },
+                { keys::FollowFocusNodeRotation, keyframe.camera.followFocusNodeRotation },
+                { keys::FocusNode, keyframe.camera.focusNode }
             },
         },
-        { "timestamp", {
-                { "application", keyframe.timestamp.application },
-                { "sequence", keyframe.timestamp.sequenceTime },
-                { "simulation", keyframe.timestamp.simulation }
+        { keys::Timestamp, {
+                { keys::Application, keyframe.timestamp.application },
+                { keys::Sequence, keyframe.timestamp.sequenceTime },
+                { keys::Simulation, keyframe.timestamp.simulation }
             }
         }
     };
 }
 
 void from_json(const nlohmann::json& j, KeyframeRecording::Keyframe::TimeStamp& ts) {
-    j.at("application").get_to(ts.application);
-    j.at("sequence").get_to(ts.sequenceTime);
-    j.at("simulation").get_to(ts.simulation);
+    j.at(keys::Application).get_to(ts.application);
+    j.at(keys::Sequence).get_to(ts.sequenceTime);
+    j.at(keys::Simulation).get_to(ts.simulation);
 }
 
 void from_json(const nlohmann::json& j, KeyframeNavigator::CameraPose& pose) {
-    j.at("position").at("x").get_to(pose.position.x);
-    j.at("position").at("y").get_to(pose.position.y);
-    j.at("position").at("z").get_to(pose.position.z);
+    j.at(keys::Position).at(keys::X).get_to(pose.position.x);
+    j.at(keys::Position).at(keys::Y).get_to(pose.position.y);
+    j.at(keys::Position).at(keys::Z).get_to(pose.position.z);
 
-    j.at("rotation").at("x").get_to(pose.rotation.x);
-    j.at("rotation").at("y").get_to(pose.rotation.y);
-    j.at("rotation").at("z").get_to(pose.rotation.z);
-    j.at("rotation").at("w").get_to(pose.rotation.w);
+    j.at(keys::Rotation).at(keys::X).get_to(pose.rotation.x);
+    j.at(keys::Rotation).at(keys::Y).get_to(pose.rotation.y);
+    j.at(keys::Rotation).at(keys::Z).get_to(pose.rotation.z);
+    j.at(keys::Rotation).at(keys::W).get_to(pose.rotation.w);
 
-    j.at("focusNode").get_to(pose.focusNode);
-    j.at("scale").get_to(pose.scale);
-    j.at("followFocusNodeRotation").get_to(pose.followFocusNodeRotation);
+    j.at(keys::FocusNode).get_to(pose.focusNode);
+    j.at(keys::Scale).get_to(pose.scale);
+    j.at(keys::FollowFocusNodeRotation).get_to(pose.followFocusNodeRotation);
 }
 
 void from_json(const nlohmann::json& j, KeyframeRecording::Keyframe& keyframe) {
-    j.at("camera").get_to(keyframe.camera);
-    j.at("timestamp").get_to(keyframe.timestamp);
+    j.at(keys::Camera).get_to(keyframe.camera);
+    j.at(keys::Timestamp).get_to(keyframe.timestamp);
 }
 
 KeyframeRecording::KeyframeRecording()
@@ -216,27 +235,27 @@ std::vector<ghoul::Dictionary> KeyframeRecording::getKeyframes() const
         ghoul::Dictionary rotation;
 
         // Add each entry to position & rotation to avoid ambiguity on the client side
-        position.setValue("x", keyframe.camera.position.x);
-        position.setValue("y", keyframe.camera.position.y);
-        position.setValue("z", keyframe.camera.position.z);
-        camera.setValue("position", position);
+        position.setValue(keys::X, keyframe.camera.position.x);
+        position.setValue(keys::Y, keyframe.camera.position.y);
+        position.setValue(keys::Z, keyframe.camera.position.z);
+        camera.setValue(keys::Position, position);
 
-        rotation.setValue("x", static_cast<double>(keyframe.camera.rotation.x));
-        rotation.setValue("y", static_cast<double>(keyframe.camera.rotation.y));
-        rotation.setValue("z", static_cast<double>(keyframe.camera.rotation.z));
-        rotation.setValue("w", static_cast<double>(keyframe.camera.rotation.w));
-        camera.setValue("rotation", rotation);
+        rotation.setValue(keys::X, static_cast<double>(keyframe.camera.rotation.x));
+        rotation.setValue(keys::Y, static_cast<double>(keyframe.camera.rotation.y));
+        rotation.setValue(keys::Z, static_cast<double>(keyframe.camera.rotation.z));
+        rotation.setValue(keys::W, static_cast<double>(keyframe.camera.rotation.w));
+        camera.setValue(keys::Rotation, rotation);
 
-        camera.setValue("scale", static_cast<double>(keyframe.camera.scale));
-        camera.setValue("focusNode", keyframe.camera.focusNode);
-        camera.setValue("followFocusNodeRotation", keyframe.camera.followFocusNodeRotation);
+        camera.setValue(keys::Scale, static_cast<double>(keyframe.camera.scale));
+        camera.setValue(keys::FocusNode, keyframe.camera.focusNode);
+        camera.setValue(keys::FollowFocusNodeRotation, keyframe.camera.followFocusNodeRotation);
 
-        timestamp.setValue("application", keyframe.timestamp.application);
-        timestamp.setValue("sequence", keyframe.timestamp.sequenceTime);
-        timestamp.setValue("simulation", keyframe.timestamp.simulation);
+        timestamp.setValue(keys::Application, keyframe.timestamp.application);
+        timestamp.setValue(keys::Sequence, keyframe.timestamp.sequenceTime);
+        timestamp.setValue(keys::Simulation, keyframe.timestamp.simulation);
 
-        entry.setValue("camera", camera);
-        entry.setValue("timestamp", timestamp);
+        entry.setValue(keys::Camera, camera);
+        entry.setValue(keys::Timestamp, timestamp);
         result.push_back(entry);
     }
     return result;
