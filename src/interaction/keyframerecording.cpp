@@ -205,6 +205,43 @@ bool KeyframeRecording::hasKeyframeRecording() const
     return !_keyframes.empty();
 }
 
+std::vector<ghoul::Dictionary> KeyframeRecording::getKeyframes() const
+{
+    std::vector<ghoul::Dictionary> result;
+    for (const auto& keyframe : _keyframes) {
+        ghoul::Dictionary camera;
+        ghoul::Dictionary timestamp;
+        ghoul::Dictionary entry;
+        ghoul::Dictionary position;
+        ghoul::Dictionary rotation;
+
+        // Add each entry to position & rotation to avoid ambiguity on the client side
+        position.setValue("x", keyframe.camera.position.x);
+        position.setValue("y", keyframe.camera.position.y);
+        position.setValue("z", keyframe.camera.position.z);
+        camera.setValue("position", position);
+
+        rotation.setValue("x", static_cast<double>(keyframe.camera.rotation.x));
+        rotation.setValue("y", static_cast<double>(keyframe.camera.rotation.y));
+        rotation.setValue("z", static_cast<double>(keyframe.camera.rotation.z));
+        rotation.setValue("w", static_cast<double>(keyframe.camera.rotation.w));
+        camera.setValue("rotation", rotation);
+
+        camera.setValue("scale", static_cast<double>(keyframe.camera.scale));
+        camera.setValue("focusNode", keyframe.camera.focusNode);
+        camera.setValue("followFocusNodeRotation", keyframe.camera.followFocusNodeRotation);
+
+        timestamp.setValue("application", keyframe.timestamp.application);
+        timestamp.setValue("sequence", keyframe.timestamp.sequenceTime);
+        timestamp.setValue("simulation", keyframe.timestamp.simulation);
+
+        entry.setValue("camera", camera);
+        entry.setValue("timestamp", timestamp);
+        result.push_back(entry);
+    }
+    return result;
+}
+
 void KeyframeRecording::preSynchronization(double dt) {
     if (_hasStateChanged) {
         auto it = std::find_if(
@@ -274,7 +311,8 @@ scripting::LuaLibrary KeyframeRecording::luaLibrary() {
             codegen::lua::LoadSequence,
             codegen::lua::Play,
             codegen::lua::Pause,
-            codegen::lua::SetTime
+            codegen::lua::SetTime,
+            codegen::lua::GetKeyframes
         }
     };
 }

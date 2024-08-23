@@ -61,6 +61,7 @@ struct Keyframe {
     void pause();
     void setSequenceTime(double sequenceTime);
     bool hasKeyframeRecording() const;
+    std::vector<ghoul::Dictionary> getKeyframes() const;
 
     /**
      * \return The Lua library that contains all Lua functions available to affect the

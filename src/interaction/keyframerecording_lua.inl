@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
-
 #include <optional>
 
 namespace {
@@ -86,6 +85,10 @@ namespace {
 
 [[codegen::luawrap]] bool hasKeyframeRecording() {
     return openspace::global::keyframeRecording->hasKeyframeRecording();
+}
+
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> getKeyframes() {
+    return openspace::global::keyframeRecording->getKeyframes();
 }
 
 #include "keyframerecording_lua_codegen.cpp"
