@@ -996,55 +996,22 @@ void setSgctDelegateFunctions() {
         sgct::Engine::instance().setStatsGraphScale(scale);
     };
     sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
-        GLFWwindow* w = glfwGetCurrentContext();
-        GLFWcursor* cursor;
-        switch (mouse) {
-        case WindowDelegate::Cursor::Arrow: {
-            cursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
-            break;
-        }
-        case WindowDelegate::Cursor::IBeam: {
-            cursor = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
-            break;
-        }
-        case WindowDelegate::Cursor::CrossHair: {
-            cursor = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
-            break;
-        }
-        case WindowDelegate::Cursor::PointingHand: {
-            cursor = glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR);
-            break;
-        }
-        case WindowDelegate::Cursor::ResizeEW: {
-            cursor = glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR);
-            break;
-        }
-        case WindowDelegate::Cursor::ResizeNS: {
-            cursor = glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR);
-            break;
-        }
-        case WindowDelegate::Cursor::ResizeNWSE: {
-            cursor = glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR);
-            break;
-        }
-        case WindowDelegate::Cursor::ResizeNESW: {
-            cursor = glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR);
-            break;
-        }
-        case WindowDelegate::Cursor::ResizeAll: {
-            cursor = glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR);
-            break;
-        }
-        case WindowDelegate::Cursor::NotAllowed: {
-            cursor = glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR);
-            break;
-        }
-        default: {
-            cursor = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
-            break;
-        }
-        }
-        glfwSetCursor(w, cursor);
+        const std::function create = &glfwCreateStandardCursor;
+        static std::unordered_map<WindowDelegate::Cursor, GLFWcursor*> Cursors = {
+            { WindowDelegate::Cursor::Arrow, create(GLFW_ARROW_CURSOR) },
+            { WindowDelegate::Cursor::IBeam, create(GLFW_IBEAM_CURSOR) },
+            { WindowDelegate::Cursor::CrossHair, create(GLFW_CROSSHAIR_CURSOR) },
+            { WindowDelegate::Cursor::PointingHand, create(GLFW_POINTING_HAND_CURSOR) },
+            { WindowDelegate::Cursor::ResizeEW, create(GLFW_RESIZE_EW_CURSOR) },
+            { WindowDelegate::Cursor::ResizeNS, create(GLFW_RESIZE_NS_CURSOR) },
+            { WindowDelegate::Cursor::ResizeNWSE, create(GLFW_RESIZE_NWSE_CURSOR) },
+            { WindowDelegate::Cursor::ResizeNESW, create(GLFW_RESIZE_NESW_CURSOR) },
+            { WindowDelegate::Cursor::ResizeAll, create(GLFW_RESIZE_ALL_CURSOR) },
+            { WindowDelegate::Cursor::NotAllowed, create(GLFW_NOT_ALLOWED_CURSOR) },
+        };
+        // Since we already have mapped the CEF mouse pointers to the Cursor enum, we
+        // know that we will always get one of the cursor values for mouse
+        glfwSetCursor(glfwGetCurrentContext(), Cursors[mouse]);
     };
 }
 
