@@ -293,4 +293,19 @@ namespace {
     return openspace::jsonToDictionary(json);
 }
 
+/**
+ * Returns the target path for a Windows shortcut file. This function will produce an
+ * error on non-Windows operating systems. The `path` has to be a valid Windows Shell link
+ * file.
+ */
+[[codegen::luawrap]] std::filesystem::path resolveShortcut(std::filesystem::path path) {
+#ifdef WIN32
+    return FileSys.resolveShellLink(std::move(path));
+#else // ^^^^ WIN32 // !WIN32 vvvv
+    throw ghoul::lua::LuaError(std::format(
+        "Tried to resolve shortcut file '{}' on unsupported non-Windows platform", path
+    ));
+#endif // WIN32
+}
+
 #include "openspaceengine_lua_codegen.cpp"

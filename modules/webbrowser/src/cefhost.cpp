@@ -44,9 +44,10 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     LDEBUG("Initializing CEF...");
 
     CefSettings settings;
-    const std::string root = helperLocation.substr(0, helperLocation.rfind("\\"));
-    const std::string cefcache = std::format("{}\\{}", root, "cefcache");
-    CefString(&settings.root_cache_path).FromString(cefcache);
+    const std::filesystem::path root =
+        std::filesystem::path(helperLocation).parent_path();
+    const std::filesystem::path cefcache = std::format("{}/cefcache", root);
+    CefString(&settings.root_cache_path).FromString(cefcache.string());
 
 #ifndef __APPLE__
     // Apple will always look for helper in a fixed location

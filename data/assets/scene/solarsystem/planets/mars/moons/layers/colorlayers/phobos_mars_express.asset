@@ -1,0 +1,52 @@
+local globe = asset.require("../../phobos_globe")
+
+
+
+local maps = asset.resource({
+  Name = "Phobos Maps",
+  Type = "HttpSynchronization",
+  Identifier = "phobos_maps",
+  Version = 1
+})
+
+
+local Layer = {
+  Identifier = "Mars_Express_HRSC_100m",
+  Name = "Mars Express HRCS 100m",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = maps .. "mex_hrsc_100m_dem.vrt",
+  Description = [[Images from the European Space Agency's High Resolution Stereo Camera
+    (HRSC) aboard the Mars Express were used to obtain 3-dimensional coordinates of
+    surface points of Phobos. As currently the HRSC could not gain global coverage yet,
+    the data was complimented by Viking orbiter image data to be able to provide the
+    digital elevation model (DEM) globally (Willner et al., 2010).  Resolution of this DEM
+    is 100 meters per pixel (m).
+
+    The research leading to the data products has received funding from the European
+    Community's Seventh Framework Programme ([FP7/2007-2013]) under grant agreement number
+    263466 for the FP7-ESPaCE program.
+
+    Willner, K., Oberst, J., Hussmann, H., Giese, B., Hoffman, H., Matz, K.-D.,
+    Roatsch, T., & Duxbury, T. (2010). Phobos control point network, rotation, and shape.
+    Earth and Planetary Science Letters, 294(3â4), 541-546.
+    https://doi.org/10.1016/j.epsl.2009.07.033]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Phobos_Globe.Identifier, "HeightLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Phobos_Globe.Identifier, "HeightLayers", Layer)
+end)
+
+
+
+asset.meta = {
+  Name = "Phobos Mars Express HRSC DEM Global 100m",
+  Author = "OpenSpace Team",
+  URL = "https://astrogeology.usgs.gov/search/map/phobos_mars_express_hrsc_dem_global_100m",
+  License = "Please cite authors"
+}

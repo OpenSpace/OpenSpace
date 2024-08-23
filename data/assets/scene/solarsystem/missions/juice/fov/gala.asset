@@ -22,8 +22,7 @@ local Gala = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Gala FOV",
@@ -31,7 +30,6 @@ local Gala = {
     Description = "The field-of-view for the Ganymede Laster Altimeter (GALA) instrument"
   }
 }
-
 
 
 asset.onInitialize(function()

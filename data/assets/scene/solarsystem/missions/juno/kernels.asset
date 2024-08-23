@@ -115,7 +115,6 @@ local Kernels = {
   data .. "juno_sc_prl_230228_230407_jm0490rp_v01.bc"
 }
 
-
 local ID = {
   Juno = "JUNO"
 }
@@ -124,6 +123,7 @@ local Frame = {
   Juno = "JUNO_SPACECRAFT"
 }
 
+
 asset.onInitialize(function()
   openspace.spice.loadKernel(Kernels)
 end)
@@ -131,7 +131,6 @@ end)
 asset.onDeinitialize(function()
   openspace.spice.unloadKernel(Kernels)
 end)
-
 
 asset.export("ID", ID)
 asset.export("Frame", Frame)

@@ -14,9 +14,9 @@ local Layer = {
   This edition, version 1, was released May 6, 2016 to the Planetary Data System (PDS)
   MESSENGER archive. It is compiled using NAC or WAC 750-nm images from any campaign that
   best fit the intended illumination geometry or low emission angle and incidence angle
-  near 74 degrees. It is controlled and projected onto a global digital elevation model. It uses
-  a Kasseleinin-Shkuratov photometric model, whose parameters are the same for any given
-  wavelength band across all MESSENGER end-of-mission map data products]]
+  near 74 degrees. It is controlled and projected onto a global digital elevation model.
+  It uses a Kasseleinin-Shkuratov photometric model, whose parameters are the same for any
+  given wavelength band across all MESSENGER end-of-mission map data products]]
 }
 
 

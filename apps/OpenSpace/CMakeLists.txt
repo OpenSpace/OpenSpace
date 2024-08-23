@@ -149,7 +149,7 @@ if (WIN32)
   get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
   add_custom_command(
     TARGET OpenSpace POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${_qt_bin_dir}/windeployqt6.exe" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
+    COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
     COMMENT "Deploying Qt libraries"
   )
 endif ()

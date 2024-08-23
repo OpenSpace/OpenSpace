@@ -32,6 +32,7 @@ local OtherCommunicationSatellites = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OtherCommunicationSatellites)
 end)

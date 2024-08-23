@@ -1234,6 +1234,30 @@ enum class [[codegen::enum]] CustomPropertyType {
     return openspace::makeIdentifier(input);
 }
 
+/**
+ * Set a custom ordering of the items in a specific branch in the Scene GUI tree, i.e.
+ * for a specific GUI path.
+ *
+ * \param guiPath The GUI path for which the order should be set.
+ * \param list A list of names of scene graph nodes or subgroups in the GUI, in the order
+ *             of which they should appear in the tree. The list does not have to include
+ *             all items in the given GUI path. Any excluded items will be placed after
+ *             the ones in the list.
+ */
+[[codegen::luawrap]] void setGuiOrder(std::string guiPath, std::vector<std::string> list)
+{
+    return openspace::global::renderEngine->scene()->setGuiTreeOrder(guiPath, list);
+}
+
+/**
+ * Get a dictionary containing the current map with custom orderings for the Scene GUI
+ * tree. Each key in the dictionary corresponds to a branch in the tree, i.e. a specific
+ * GUI path.
+ */
+[[codegen::luawrap]] ghoul::Dictionary guiOrder() {
+    return openspace::global::renderEngine->scene()->guiTreeOrder();
+}
+
 } // namespace
 
 #include "scene_lua_codegen.cpp"

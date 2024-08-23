@@ -3,27 +3,27 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 local GalacticLine = {
-    Identifier = "GalacticLine",
-    Parent = transforms.SolarSystemBarycenter.Name,
-    Transform = {
-        Scale = {
-          Type = "StaticScale",
-          Scale = 9.46377307652E18
-        }
-    },
-    Renderable = {
-        Type = "RenderableRadialGrid",
-        Opacity = 0.8,
-        Color = { 0.08, 0.40, 0.40 },
-        LineWidth = 4.0,
-        GridSegments = { 1, 1 },
-        Enabled = asset.enabled
-    },
-    GUI = {
-        Name = "Galactic Equator",
-        Description = "A line representation of the Galactic Equator plane.",
-        Path = "/Night Sky/Coordinate Systems/Galactic"
+  Identifier = "GalacticLine",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 9.46377307652E18
     }
+  },
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    Opacity = 0.8,
+    Color = { 0.08, 0.40, 0.40 },
+    LineWidth = 4.0,
+    GridSegments = { 1, 1 },
+    Enabled = asset.enabled
+  },
+  GUI = {
+    Name = "Galactic Equator",
+    Description = "A line representation of the Galactic Equator plane.",
+    Path = "/Night Sky/Coordinate Systems/Galactic"
+  }
 }
 
 
@@ -57,6 +57,7 @@ local ToggleGalacticBand = {
   GuiPath = "/Night Sky/Lines and Grids",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(GalacticLine)

@@ -129,6 +129,7 @@ local HideNesw = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CardinalDirectionsPosition)
   openspace.addSceneGraphNode(CardinalDirectionSphere)

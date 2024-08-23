@@ -17,8 +17,7 @@ local PhebusSlit75 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Phebus Slit 75",
@@ -40,8 +39,7 @@ local PhebusSlit100 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Phebus Slit 100",
@@ -63,8 +61,7 @@ local Phebus75 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Phebus 75",
@@ -86,8 +83,7 @@ local Phebus100 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO Phebus 100",

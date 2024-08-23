@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_Apollo15_MetricCam_Mosaic_Global_4096ppd = {
   Identifier = "Apollo15_MetricCam_Mosaic_Global_4096ppd",
   Name = [[Apollo 15 Metric Cam Image Mosaic]],
@@ -164,6 +166,7 @@ local treks_LRO_LOLA_Illumination_SPole65S_240m_EQ = {
   Description = [[This data product is a map of the permanently shadowed regions (PSRs) in the lunar South Pole. The map resolution is 240m/pix by 240m/pix, true at the pole in polar stereographic (spherical) projection. The calculations are based on the LOLA elevation map LDEM_75S_240M and are described in. The values are binary, indicating whether a pixel is in permanent shadow (1) or not (0, NoDATA).]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_MetricCam_Mosaic_Global_4096ppd)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo17_MetricCam_Mosaic_Global_3033ppd)
@@ -227,6 +230,7 @@ asset.export("LRO_LOLAKaguya_Hillshade_60N60S_512ppd", treks_LRO_LOLAKaguya_Hill
 asset.export("Lunar_Clementine_UVVIS_Warp_ClrRatio_Global_200m", treks_Lunar_Clementine_UVVIS_Warp_ClrRatio_Global_200m)
 asset.export("LRO_LOLA_Illumination_NPole65N_240m_EQ", treks_LRO_LOLA_Illumination_NPole65N_240m_EQ)
 asset.export("LRO_LOLA_Illumination_SPole65S_240m_EQ", treks_LRO_LOLA_Illumination_SPole65S_240m_EQ)
+
 
 
 asset.meta = {

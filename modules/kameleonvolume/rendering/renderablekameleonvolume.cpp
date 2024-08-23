@@ -104,7 +104,6 @@ namespace {
         "LowerValueBound",
         "Lower Value Bound",
         "", // @TODO Missing documentation
-        // @VISIBILITY(?)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -112,7 +111,6 @@ namespace {
         "UpperValueBound",
         "Upper Value Bound",
         "", // @TODO Missing documentation
-        // @VISIBILITY(?)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 

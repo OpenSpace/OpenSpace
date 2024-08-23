@@ -18,8 +18,7 @@ local Planet = {
   },
   GUI = {
     Name = "Gonggong",
-    Path = "/Solar System/Dwarf Planets/Gonggong",
-    Description = "Globe of Gonggong"
+    Path = "/Solar System/Dwarf Planets/Gonggong"
   }
 }
 

@@ -1,6 +1,7 @@
 -- Source:  https://solarsystem.nasa.gov/missions/rosetta-philae/in-depth/
 
 local Mission = {
+  Identifier = "Artemis",
   Name = "Artemis",
   TimeRange = { Start = "2022 NOV 16 06:47:00", End = "2022 DEC 11 17:40:30" },
   Image = "https://www.nasa.gov/sites/default/files/thumbnails/image/em1_patch_final.png",
@@ -74,5 +75,5 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)
