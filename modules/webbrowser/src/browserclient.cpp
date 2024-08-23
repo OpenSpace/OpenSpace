@@ -87,7 +87,6 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser
                                                   cef_cursor_type_t type,
                                                   const CefCursorInfo& custom_cursor_info)
 {
-
     WindowDelegate::Cursor newCursor;
     switch (type) {
         case cef_cursor_type_t::CT_POINTER:
