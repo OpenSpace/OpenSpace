@@ -56,7 +56,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
         const std::string script = std::format(
             "openspace.iswa.removeScreenSpaceCygnet({});", _cygnetId
         );
-        global::scriptEngine->queueScript({ script });
+        global::scriptEngine->queueScript(script);
     });
 }
 

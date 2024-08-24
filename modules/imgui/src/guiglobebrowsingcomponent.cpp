@@ -346,7 +346,7 @@ void GuiGlobeBrowsingComponent::render() {
                 l.name,
                 l.url
             );
-            global::scriptEngine->queueScript({ script });
+            global::scriptEngine->queueScript(script);
         };
 
         if (addColor) {

@@ -43,7 +43,7 @@ void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
         const std::string script = std::format(
             "openspace.setPropertyValueSingle(\"{}\", nil)", propertyKey
         );
-        global::scriptEngine->queueScript({ script });
+        global::scriptEngine->queueScript(script);
     }
     catch (const std::out_of_range& e) {
         LERROR("Could not trigger property -- key or value is missing in payload");

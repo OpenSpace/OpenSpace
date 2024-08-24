@@ -145,7 +145,7 @@ void GuiGIBSComponent::render() {
             "openspace.globebrowsing.addLayer('Earth', 'ColorLayers', {})",
             layerScript
         );
-        global::scriptEngine->queueScript({ std::move(script) });
+        global::scriptEngine->queueScript(std::move(script));
     }
 
     ImGui::End();

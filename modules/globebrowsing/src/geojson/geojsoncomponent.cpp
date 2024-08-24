@@ -838,7 +838,7 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
         "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
         _globeNode.owner()->identifier(), lat, lon, d
     );
-    global::scriptEngine->queueScript({ script });
+    global::scriptEngine->queueScript(script);
 }
 
 void GeoJsonComponent::triggerDeletion() const {
@@ -846,7 +846,7 @@ void GeoJsonComponent::triggerDeletion() const {
         "openspace.globebrowsing.deleteGeoJson([[{}]], [[{}]])",
         _globeNode.owner()->identifier(), _identifier
     );
-    global::scriptEngine->queueScript({ script });
+    global::scriptEngine->queueScript(script);
 }
 
 } // namespace openspace::globebrowsing

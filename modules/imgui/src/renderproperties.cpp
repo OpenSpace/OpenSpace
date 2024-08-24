@@ -72,9 +72,9 @@ void renderTooltip(Property* prop, double delay) {
 }
 
 void executeSetPropertyScript(const std::string& id, const std::string& value) {
-    global::scriptEngine->queueScript({
+    global::scriptEngine->queueScript(
         std::format("openspace.setPropertyValueSingle('{}', {});", id, value)
-    });
+    );
 }
 
 void renderBoolProperty(Property* prop, const std::string& ownerName,

@@ -293,7 +293,7 @@ void KameleonPlane::updateFieldlineSeeds() {
             const std::string script = std::format(
                 "openspace.removeSceneGraphNode('{}')", std::get<0>(seedPath.second)
             );
-            global::scriptEngine->queueScript({ script });
+            global::scriptEngine->queueScript(script);
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
         }

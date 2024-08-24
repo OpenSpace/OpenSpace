@@ -68,9 +68,9 @@ namespace {
 
 // Remove a Cygnets.
 [[codegen::luawrap]] void removeCygnet(std::string name) {
-    openspace::global::scriptEngine->queueScript({
+    openspace::global::scriptEngine->queueScript(
         "openspace.removeSceneGraphNode('" + name + "')"
-    });
+    );
 }
 
 // Remove a Screen Space Cygnets.
@@ -91,8 +91,7 @@ namespace {
     std::string script = std::format(
         "openspace.unregisterScreenSpaceRenderable('{}');", cygnetInformation[id]->name
     );
-
-    global::scriptEngine->queueScript({ script });
+    global::scriptEngine->queueScript(script);
 }
 
 // Remove a group of Cygnets.

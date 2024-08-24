@@ -87,9 +87,9 @@ namespace {
     void createScreenSpace(int id) {
         using namespace openspace;
         std::string idStr = std::to_string(id);
-        global::scriptEngine->queueScript({
-            "openspace.iswa.addScreenSpaceCygnet({CygnetId =" + idStr + "});",
-        });
+        global::scriptEngine->queueScript(
+            "openspace.iswa.addScreenSpaceCygnet({CygnetId =" + idStr + "});"
+        );
     }
 } // namespace
 
@@ -545,7 +545,7 @@ void IswaManager::createPlane(MetadataFuture& data) {
     std::string luaTable = jsonPlaneToLuaTable(data);
     if (!luaTable.empty()) {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        global::scriptEngine->queueScript({ script });
+        global::scriptEngine->queueScript(script);
     }
 }
 
@@ -575,7 +575,7 @@ void IswaManager::createSphere(MetadataFuture& data) {
     std::string luaTable = jsonSphereToLuaTable(data);
     if (luaTable != "") {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        global::scriptEngine->queueScript({ script });
+        global::scriptEngine->queueScript(script);
     }
 }
 
@@ -605,7 +605,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
         std::string luaTable = parseKWToLuaTable(info, cut);
         if (!luaTable.empty()) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            global::scriptEngine->queueScript({ script });
+            global::scriptEngine->queueScript(script);
         }
     }
     else {
@@ -643,7 +643,7 @@ void IswaManager::createFieldline(std::string name, std::filesystem::path cdfPat
         "}";
         if (!luaTable.empty()) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            global::scriptEngine->queueScript({ script });
+            global::scriptEngine->queueScript(script);
         }
     }
     else {

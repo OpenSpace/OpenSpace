@@ -60,11 +60,11 @@ State::State(const ghoul::Dictionary& dictionary) {
 }
 
 void State::enter() const {
-    global::scriptEngine->queueScript({ _enter });
+    global::scriptEngine->queueScript(_enter);
 }
 
 void State::exit() const {
-    global::scriptEngine->queueScript({ _exit });
+    global::scriptEngine->queueScript(_exit);
 }
 
 std::string State::name() const {

@@ -564,6 +564,10 @@ void ScriptEngine::queueScript(Script script) {
     _incomingScripts.push(std::move(script));
 }
 
+void ScriptEngine::queueScript(std::string script) {
+    queueScript({ std::move(script) });
+}
+
 void ScriptEngine::addBaseLibrary() {
     ZoneScoped;
 

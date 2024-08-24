@@ -69,7 +69,7 @@ void Transition::performAction() const {
     if (_action.empty()) {
         return;
     }
-    global::scriptEngine->queueScript({ _action });
+    global::scriptEngine->queueScript(_action);
 }
 
 } // namespace openspace

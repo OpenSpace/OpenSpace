@@ -345,10 +345,9 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
     // Show the circle
     if (useScript) {
         const std::string script = std::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);",
-            id
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);", id
         );
-        global::scriptEngine->queueScript({ script });
+        global::scriptEngine->queueScript(script);
     }
     else {
         Renderable* renderable = _hoverCircle->renderable();
@@ -368,7 +367,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
         "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
         id, ghoul::to_string(pos)
     );
-    global::scriptEngine->queueScript({ script });
+    global::scriptEngine->queueScript(script);
 }
 
 void SkyBrowserModule::disableHoverCircle(bool useScript) {
@@ -378,7 +377,7 @@ void SkyBrowserModule::disableHoverCircle(bool useScript) {
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
                 _hoverCircle->identifier()
             );
-            global::scriptEngine->queueScript({ script });
+            global::scriptEngine->queueScript(script);
         }
         else {
             _hoverCircle->renderable()->property("Fade")->set(0.f);

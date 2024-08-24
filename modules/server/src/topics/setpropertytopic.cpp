@@ -125,7 +125,7 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
             const std::string script = std::format(
                 "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
             );
-            global::scriptEngine->queueScript({ script });
+            global::scriptEngine->queueScript(script);
         }
     }
     catch (const std::out_of_range& e) {

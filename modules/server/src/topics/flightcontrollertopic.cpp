@@ -446,7 +446,7 @@ void FlightControllerTopic::processInputState(const nlohmann::json& json) {
 
 void FlightControllerTopic::processLua(const nlohmann::json &json) {
     const std::string script = json[LuaScript];
-    global::scriptEngine->queueScript({ script });
+    global::scriptEngine->queueScript(script);
 }
 
 } // namespace openspace

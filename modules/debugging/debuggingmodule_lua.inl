@@ -64,7 +64,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
         RenderedPathIdentifier
     );
 
-    global::scriptEngine->queueScript({ addParentScript });
+    global::scriptEngine->queueScript(addParentScript);
 
     // Get the poses along the path
     std::vector<CameraPose> poses;
@@ -93,9 +93,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
             "}"
         "}";
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(
             std::format("openspace.addSceneGraphNode({})", pointNode)
-        });
+        );
     };
 
     auto addLineBetweenPoints = [](const std::string& id1, const std::string& id2,
@@ -114,9 +114,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
             "}"
         "}";
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(
             std::format("openspace.addSceneGraphNode({})", lineNode)
-        });
+        );
     };
 
     auto addDirectionLine = [addPoint, addLineBetweenPoints]
@@ -153,7 +153,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
     const std::string script = std::format(
         "openspace.removeSceneGraphNode('{}');", RenderedPathIdentifier
     );
-    global::scriptEngine->queueScript({ script });
+    global::scriptEngine->queueScript(script);
 }
 
 /**
@@ -182,7 +182,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
         RenderedPointsIdentifier
     );
 
-    global::scriptEngine->queueScript({ addParentScript });
+    global::scriptEngine->queueScript(addParentScript);
 
     const std::vector<glm::dvec3> points = currentPath->controlPoints();
 
@@ -216,9 +216,9 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
             "}"
         "}";
 
-        global::scriptEngine->queueScript({
+        global::scriptEngine->queueScript(
             std::format("openspace.addSceneGraphNode({})", node)
-        });
+        );
     }
 }
 
@@ -228,7 +228,7 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
     const std::string script = std::format(
         "openspace.removeSceneGraphNode('{}');", RenderedPointsIdentifier
     );
-    global::scriptEngine->queueScript({ script });
+    global::scriptEngine->queueScript(script);
 }
 
 #include "debuggingmodule_lua_codegen.cpp"

@@ -49,7 +49,7 @@ namespace {
             "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
             id, ghoul::to_string(positionCelestial)
         );
-        openspace::global::scriptEngine->queueScript({ script });
+        openspace::global::scriptEngine->queueScript(script);
     }
 } // namespace
 
@@ -324,7 +324,7 @@ void TargetBrowserPair::startFading(float goal, float fadeTime) {
         _targetNode->identifier(), _browser->identifier(), goal, fadeTime
     );
 
-    global::scriptEngine->queueScript({ script });
+    global::scriptEngine->queueScript(script);
 }
 
 void TargetBrowserPair::stopAnimations() {
