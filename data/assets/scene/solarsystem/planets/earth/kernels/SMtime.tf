@@ -1,7 +1,8 @@
 Solar Magnetospheric (SM) frame:
 Used by the LFM or GAMERA model of the magnetosphere
  +Z is parallel to the north centered geomagnetic dipole.
- +X axis is normalized component of the geometric earth-sun position vector orthogonal to the Z axis.
+ +X axis is normalized component of the geometric earth-sun position vector
+      orthogonal to the Z axis.
  +Y completes the right-handed frame.
   -  the origin of this frame is the center of mass of the Earth.
 

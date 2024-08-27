@@ -1,6 +1,7 @@
 Geocentric Solar Magnetospheric (GSM) frame:
  +X is parallel to the geometric earth-sun position vector.
- +Z axis is normalized component of north centered geomagnetic dipole vector orthogonal to GSM +X axis.
+ +Z axis is normalized component of north centered geomagnetic dipole vector
+      orthogonal to GSM +X axis.
  +Y completes the right-handed frame.
 
 For the _IGRF frames, the Earth's magnetic dipole axis direction is time-
