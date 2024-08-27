@@ -98,7 +98,6 @@ public:
     using CallbackHandle = int;
     using StateChangeCallback = std::function<void()>;
 
-    SessionRecording();
     SessionRecording(bool isGlobal);
 
     ~SessionRecording() override = default;
@@ -845,7 +844,7 @@ protected:
 
 class SessionRecording_legacy_0085 : public SessionRecording {
 public:
-    SessionRecording_legacy_0085() : SessionRecording() {}
+    SessionRecording_legacy_0085() : SessionRecording(false) {}
     ~SessionRecording_legacy_0085() override {}
     char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
     char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";

@@ -100,15 +100,11 @@ ConversionError::ConversionError(std::string msg)
     : ghoul::RuntimeError(std::move(msg), "conversionError")
 {}
 
-SessionRecording::SessionRecording()
+SessionRecording::SessionRecording(bool isGlobal)
     : properties::PropertyOwner({ "SessionRecording", "Session Recording" })
     , _renderPlaybackInformation(RenderPlaybackInfo, false)
     , _ignoreRecordedScale(IgnoreRecordedScaleInfo, false)
     , _addModelMatrixinAscii(AddModelMatrixinAsciiInfo, false)
-{}
-
-SessionRecording::SessionRecording(bool isGlobal)
-    : SessionRecording()
 {
     if (isGlobal) {
         ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
