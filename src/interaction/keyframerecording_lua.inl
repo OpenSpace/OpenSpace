@@ -27,12 +27,19 @@
 
 namespace {
 
-// Starts a new sequence of keyframes, any previously loaded sequence is discarded
+/**
+ * Starts a new sequence of keyframes, any previously loaded sequence is discarded
+ */
 [[codegen::luawrap]] void newSequence() {
     openspace::global::keyframeRecording->newSequence();
 }
 
-// Adds a keyframe at the specified sequence-time
+/**
+ * Adds a keyframe at the specified sequence time
+ *
+ * \param sequenceTime The time at which to add the new keyframe in the sequence given in
+ * seconds
+ */
 [[codegen::luawrap]] void addKeyframe(double sequenceTime) {
     if (sequenceTime < 0) {
         throw ghoul::lua::LuaError("Error can't add keyframe with negative time value");
@@ -40,7 +47,11 @@ namespace {
     openspace::global::keyframeRecording->addKeyframe(sequenceTime);
 }
 
-// Removes a keyframe at the specified 0-based index
+/**
+ * Removes a keyframe at the specified index
+ *
+ * \param index The 0-based index of the keyframe
+ */
 [[codegen::luawrap]] void removeKeyframe(int index) {
     if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
         throw ghoul::lua::LuaError("Can't remove keyframe on empty sequence");
@@ -51,7 +62,11 @@ namespace {
     openspace::global::keyframeRecording->removeKeyframe(index);
 }
 
-// Update the camera position at keyframe specified by the 0-based index
+/**
+ * Update the camera position of a keyframe
+ *
+ * \param index The 0-based index of e keyframe to update
+ */
 [[codegen::luawrap]] void updateKeyframe(int index) {
     if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
         throw ghoul::lua::LuaError("Can't update keyframe on empty sequence");
@@ -62,7 +77,12 @@ namespace {
     openspace::global::keyframeRecording->updateKeyframe(index);
 }
 
-// Move keyframe of `index` to the new specified `sequenceTime`
+/**
+ * Move an existing keyframe in time
+ *
+ * \param index The index of the keyframe to move
+ * \param sequenceTime The new time in seconds to update the keyframe to
+ */
 [[codegen::luawrap]] void moveKeyframe(int index, double sequenceTime) {
     if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
         throw ghoul::lua::LuaError("Can't move keyframe on empty sequence");
@@ -76,8 +96,12 @@ namespace {
     openspace::global::keyframeRecording->moveKeyframe(index, sequenceTime);
 }
 
-// Saves the current sequence of keyframes to disk by the optionally specified `filename`.
-// `filename` can be omitted if the sequence was previously saved or loaded from file
+/**
+ * Saves the current sequence of keyframes to disk by the optionally specified `filename`.
+ * `filename` can be omitted if the sequence was previously saved or loaded from file
+ *
+ * \param filename The name of the file to save
+ */
 [[codegen::luawrap]] void saveSequence(std::optional<std::string> filename) {
     if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
         throw ghoul::lua::LuaError("No keyframe sequence to save");
@@ -85,13 +109,22 @@ namespace {
     openspace::global::keyframeRecording->saveSequence(filename);
 }
 
-// Loads a sequence from the specified file
+/**
+ * Loads a sequence from the specified file
+ *
+ * \param filename The name of the file to load
+ */
 [[codegen::luawrap]] void loadSequence(std::string filename) {
     openspace::global::keyframeRecording->loadSequence(std::move(filename));
 }
 
-// Playback sequence optionally from the specified `sequenceTime` or if not specified
-// starts playing from the beginning
+/**
+ * Playback sequence optionally from the specified `sequenceTime` or if not specified
+ *  starts playing from the beginning
+ *
+ * \param sequenceTime The time in seconds at which to start playing the sequence, or
+ * beginning if omitted
+ */
 [[codegen::luawrap]] void play(std::optional<double> sequenceTime) {
     if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
         throw ghoul::lua::LuaError("No keyframe sequence to play");
@@ -100,17 +133,25 @@ namespace {
     openspace::global::keyframeRecording->play();
 }
 
-// Pauses a playing sequence
+/**
+ * Pauses a playing sequence
+ */
 [[codegen::luawrap]] void pause() {
     openspace::global::keyframeRecording->pause();
 }
 
-// Resumes playing sequence from
+/**
+ * Resume playing a sequence from where its paused
+ */
 [[codegen::luawrap]] void resume() {
     openspace::global::keyframeRecording->play();
 }
 
-// Jumps to a specified time within the sequence
+/**
+ * Jumps to a specified time within the sequence
+ *
+ * \param sequenceTime The time in seconds to jump to
+ */
 [[codegen::luawrap]] void setTime(double sequenceTime) {
     if (sequenceTime < 0) {
         throw ghoul::lua::LuaError("Sequence time must be greater or equal than 0");
@@ -118,13 +159,17 @@ namespace {
     openspace::global::keyframeRecording->setSequenceTime(sequenceTime);
 }
 
-// Returns `true` if there currently is a sequence loaded, otherwise `false`
+/**
+ * Returns `true` if there currently is a sequence loaded, otherwise `false`
+ */
 [[codegen::luawrap]] bool hasKeyframeRecording() {
     return openspace::global::keyframeRecording->hasKeyframeRecording();
 }
 
-// Fetches the sequence keyframes as a JSON object
-[[codegen::luawrap]] std::vector<ghoul::Dictionary> keyframes() {
+/**
+ * Fetches the sequence keyframes as a JSON object
+ */
+ [[codegen::luawrap]] std::vector<ghoul::Dictionary> keyframes() {
     return openspace::global::keyframeRecording->keyframes();
 }
 
