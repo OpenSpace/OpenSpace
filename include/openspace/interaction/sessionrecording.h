@@ -527,8 +527,8 @@ public:
      * \param filename The name of the file to record to
      * \param extension The file extension to check for
      */
-    static bool hasFileExtension(const std::string& filename,
-        const std::string& extension);
+    //static bool hasFileExtension(const std::string& filename,
+    //    const std::string& extension);
 
     /**
      * Converts file format of a session recording file to the current format version
@@ -620,7 +620,6 @@ protected:
     void recordCurrentTimePauseState();
     void recordCurrentTimeRate();
     bool handleRecordingFile(std::string filenameIn);
-    static bool isPath(std::string& filename);
     void removeTrailingPathSlashes(std::string& filename) const;
     bool playbackCamera();
     bool playbackTimeChange();

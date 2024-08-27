@@ -126,22 +126,12 @@ void SessionRecording::setRecordDataFormat(DataMode dataMode) {
     _recordingDataMode = dataMode;
 }
 
-bool SessionRecording::hasFileExtension(const std::string& filename,
-                                        const std::string& extension)
-{
-    if (filename.length() <= extension.length()) {
-        return false;
-    }
-    else {
-        return (filename.substr(filename.length() - extension.length()) == extension);
-    }
-}
-
-bool SessionRecording::isPath(std::string& filename) {
-    const size_t unixDelimiter = filename.find('/');
-    const size_t windowsDelimiter = filename.find('\\');
-    return (unixDelimiter != std::string::npos || windowsDelimiter != std::string::npos);
-}
+// TODO: should this be rewritten using the filesystem like below?
+//bool SessionRecording::hasFileExtension(const std::string& filename,
+//                                        const std::string& extension)
+//{
+//    return std::filesystem::path(filename).extension() == extension;
+//}
 
 void SessionRecording::removeTrailingPathSlashes(std::string& filename) const {
     while (filename.substr(filename.length() - 1, 1) == "/") {
@@ -152,29 +142,33 @@ void SessionRecording::removeTrailingPathSlashes(std::string& filename) const {
     }
 }
 
+// TODO: take a std::filesystem::path rather than string?
 bool SessionRecording::handleRecordingFile(std::string filenameIn) {
+    std::filesystem::path filename(filenameIn);
+    auto extension = filename.extension();
+
     if (_recordingDataMode == DataMode::Binary) {
-        if (hasFileExtension(filenameIn, FileExtensionAscii)) {
+        if (extension == FileExtensionAscii) {
             LERROR("Specified filename for binary recording has ascii file extension");
             return false;
         }
-        else if (!hasFileExtension(filenameIn, FileExtensionBinary)) {
-            filenameIn += FileExtensionBinary;
+        else if (extension != FileExtensionBinary) {
+            filename.replace_extension(FileExtensionBinary);
         }
     }
     else if (_recordingDataMode == DataMode::Ascii) {
-        if (hasFileExtension(filenameIn, FileExtensionBinary)) {
+        if (extension == FileExtensionBinary) {
             LERROR("Specified filename for ascii recording has binary file extension");
             return false;
         }
-        else if (!hasFileExtension(filenameIn, FileExtensionAscii)) {
-            filenameIn += FileExtensionAscii;
+        else if (extension != FileExtensionAscii) {
+            filename.replace_extension(FileExtensionAscii);
         }
     }
 
-    std::filesystem::path absFilename = filenameIn;
+    std::filesystem::path absFilename = filename;
     if (absFilename.parent_path().empty() || absFilename.parent_path() == absFilename) {
-        absFilename = absPath("${RECORDINGS}/" + filenameIn);
+        absFilename = absPath("${RECORDINGS}/" + filename.string());
     }
     else if (absFilename.parent_path().is_relative()) {
         LERROR("If path is provided with the filename, then it must be an absolute path");

@@ -78,14 +78,10 @@ void ConvertRecFileVersionTask::perform(const Task::ProgressCallback&) {
 }
 
 void ConvertRecFileVersionTask::convert() {
-    const bool hasBinaryFileExtension = SessionRecording::hasFileExtension(
-        _inFilename,
-        SessionRecording::FileExtensionBinary
-    );
-    const bool hasAsciiFileExtension = SessionRecording::hasFileExtension(
-        _inFilename,
-        SessionRecording::FileExtensionAscii
-    );
+    auto extension = std::filesystem::path(_inFilename).extension();
+    const bool hasBinaryFileExtension = extension == SessionRecording::FileExtensionBinary;
+    const bool hasAsciiFileExtension = extension == SessionRecording::FileExtensionAscii;
+
     if (!hasBinaryFileExtension && !hasAsciiFileExtension) {
         LERROR(std::format(
             "Input filename does not have expected '{}' or '{}' extension",
