@@ -1,0 +1,74 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+local GSM_Kernel = asset.resource("kernels/GSM.tf")
+local SM_Kernel = asset.resource("kernels/SM.tf")
+
+local Frame = {
+  GSM = "EARTH_GSM_IGRF2000", -- Geocentric Solar Magnetospheric
+  SM = "EARTH_SM_IGRF2000",
+}
+
+local GSMReferenceFrame = {
+  Identifier = "GSMReferenceFrame",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = Frame.GSM,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "GSM Reference Frame",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
+
+local SMReferenceFrame = {
+  Identifier = "SMReferenceFrame",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = Frame.SM,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "SM Reference Frame",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(GSM_Kernel)
+  openspace.spice.loadKernel(SM_Kernel)
+  openspace.addSceneGraphNode(GSMReferenceFrame)
+  openspace.addSceneGraphNode(SMReferenceFrame)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SMReferenceFrame)
+  openspace.removeSceneGraphNode(GSMReferenceFrame)
+  openspace.spice.unloadKernel(SM_Kernel)
+  openspace.spice.unloadKernel(GSM_Kernel)
+end)
+
+asset.export("Frame", Frame)
+asset.export(GSMReferenceFrame)
+asset.export(SMReferenceFrame)
+
+
+
+asset.meta = {
+Name = "Earth GSM and SM transforms",
+Version = "1.0",
+Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric, SMReferenceFrame, Solar Magnetic",
+Author = "CCMC",
+URL = "http://openspaceproject.com",
+License = "MIT license"
+}

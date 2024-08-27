@@ -1,5 +1,5 @@
 asset.require("scene/solarsystem/heliosphere/2012/reset_loop_action")
-local transforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms_GSM_SM")
 
 
 

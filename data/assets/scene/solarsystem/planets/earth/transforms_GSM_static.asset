@@ -1,0 +1,52 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+local GSM_Static_Kernel = asset.resource("kernels/GSM_static.tf")
+
+
+local Frame = {
+  GSM_static = "GSM_STATIC" -- Geocentric Solar Magnetospheric
+}
+
+local GSMStaticReferenceFrame = {
+  Identifier = "GSMStaticReferenceFrame",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = Frame.GSM_static,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Static GSM Reference Frame",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
+
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(GSM_Static_Kernel)
+  openspace.addSceneGraphNode(GSMStaticReferenceFrame)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GSMStaticReferenceFrame)
+  openspace.spice.unloadKernel(GSM_Static_Kernel)
+end)
+
+asset.export("Frame", Frame)
+asset.export(GSMStaticReferenceFrame)
+
+
+
+asset.meta = {
+Name = "Earth static GSM transforms",
+Version = "1.0",
+Description = "A static version of Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric",
+Author = "CCMC",
+URL = "http://openspaceproject.com",
+License = "MIT license"
+}

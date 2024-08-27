@@ -1,0 +1,51 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+local Eclipdate = asset.resource("kernels/ECLIPDATE.tf")
+local GSEKernel = asset.resource("kernels/GSE.tf")
+
+local Frame = {
+  GSE = "GSE"
+}
+local GSEReferenceFrame = {
+  Identifier = "GSEReferenceFrame",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = Frame.GSE,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "GSE Reference Frame",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(Eclipdate)
+  openspace.spice.loadKernel(GSEKernel)
+  openspace.addSceneGraphNode(GSEReferenceFrame)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GSEReferenceFrame)
+  openspace.spice.unloadKernel(GSEKernel)
+  openspace.spice.unloadKernel(Eclipdate)
+end)
+
+asset.export("Frame", Frame)
+asset.export(GSEReferenceFrame)
+
+
+
+asset.meta = {
+  Name = "Geocentric Solar Ecliptic (GSE) frame Transform",
+  Version = "1.0",
+  Description = "Earth transforms: GSE ReferenceFrame",
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

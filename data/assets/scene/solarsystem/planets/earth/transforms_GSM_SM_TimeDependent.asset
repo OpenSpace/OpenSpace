@@ -1,0 +1,91 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+local GSM_Kernel = asset.resource("kernels/GSMtime.tf")
+local SM_Kernel = asset.resource("kernels/SMtime.tf")
+local TimeDependentMagneticNorth = "C:/Users/eolsson/Downloads/earthnpole_19500101_20251231_v01.bsp"
+local kernels = "C:/Users/eolsson/Downloads/kernels/"
+
+HighResPredKernels = kernels .. "earth_200101_990825_predict.bpc"
+HighResTo2023Kernels = kernels .. "earth_720101_230601.bpc"
+HighResLatestKernels = kernels .. "earth_latest_high_prec.bpc"
+
+
+local Frame = {
+  GSM_time = "EARTH_GSM_IGRF",
+  SM_time = "EARTH_SM_IGRF"
+}
+
+local GSMTimeReferenceFrame = {
+  Identifier = "GSMTimeReferenceFrame",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = Frame.GSM_time,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "GSM-Time Reference Frame",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
+
+--like the other SM reference frame but with a time variant magnetic north pole. Update every 5years :
+-- 20251231, 20301231 etc...
+local SMTimeReferenceFrame = {
+  Identifier = "SMTimeReferenceFrame",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Rotation ={
+      Type = "SpiceRotation",
+      SourceFrame = Frame.SM_time,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "SM-Time Reference Frame",
+    Path = "/Solar System/Planets/Earth",
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(TimeDependentMagneticNorth)
+  openspace.spice.loadKernel(HighResPredKernels)
+  openspace.spice.loadKernel(HighResTo2023Kernels)
+  openspace.spice.loadKernel(HighResLatestKernels)
+  openspace.spice.loadKernel(GSM_Kernel)
+  openspace.spice.loadKernel(SM_Kernel)
+  openspace.addSceneGraphNode(GSMTimeReferenceFrame)
+  openspace.addSceneGraphNode(SMTimeReferenceFrame)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SMTimeReferenceFrame)
+  openspace.removeSceneGraphNode(GSMTimeReferenceFrame)
+  openspace.spice.unloadKernel(SM_Kernel)
+  openspace.spice.unloadKernel(GSM_Kernel)
+  openspace.spice.unloadKernel(HighResLatestKernels)
+  openspace.spice.unloadKernel(HighResTo2023Kernels)
+  openspace.spice.unloadKernel(HighResPredKernels)
+  openspace.spice.unloadKernel(TimeDependentMagneticNorth)
+end)
+
+asset.export("Frame", Frame)
+asset.export(GSMTimeReferenceFrame)
+asset.export(SMTimeReferenceFrame)
+
+
+
+asset.meta = {
+  Name = "Earth's time dependent magnetic northpole GSM and SM transforms",
+  Version = "1.0",
+  Description = "Earth transforms: Earth's time dependent magnetic northpole GSM, Geocentric Solar Magnetospheric and SM, Solar Magnetic transforms",
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
