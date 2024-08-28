@@ -94,10 +94,7 @@ local VoyagerTrailCruiseEarthJupiter = {
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977 SEP 05",
-    EndTime = "1979 MAR 04",
-    -- 1 sample every 2d
-    SampleInterval = openspace.time.duration("1977 SEP 05", "1979 MAR 04") /
-                     openspace.time.secondsPerYear() * 2
+    EndTime = "1979 MAR 04"
   },
   Tag = { "voyager1_trail" },
   GUI = {
@@ -145,10 +142,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1979 MAR 09",
-    EndTime = "1980 NOV 11",
-    -- 1 sample every 2d
-    SampleInterval = openspace.time.duration("1979 MAR 09", "1980 NOV 11") /
-                     openspace.time.secondsPerYear() * 2
+    EndTime = "1980 NOV 11"
   },
   Tag = { "voyager1_trail" },
   GUI = {
@@ -196,11 +190,7 @@ local VoyagerTrailCruiseSaturnInf = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1980 NOV 16",
-    EndTime = "2100 JAN 01",
-    -- 1 sample every 2d
-    SampleInterval = openspace.time.duration("1980 NOV 16", "2100 JAN 01") /
-                     openspace.time.secondsPerYear() * 2
-
+    EndTime = "2100 JAN 01"
   },
   Tag = { "voyager1_trail" },
   GUI = {

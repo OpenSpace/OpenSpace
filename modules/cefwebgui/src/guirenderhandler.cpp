@@ -38,10 +38,14 @@ namespace openspace {
 
 GUIRenderHandler::GUIRenderHandler() {
     LDEBUG("Initializing CEF GL environment...");
+    ghoul::Dictionary define;
+    define.setValue("useAcceleratedRendering", _acceleratedRendering);
+
     _programObject = ghoul::opengl::ProgramObject::Build(
         "WebGUICEFProgram",
         absPath("${MODULE_CEFWEBGUI}/shaders/gui_vs.glsl"),
-        absPath("${MODULE_CEFWEBGUI}/shaders/gui_fs.glsl")
+        absPath("${MODULE_CEFWEBGUI}/shaders/gui_fs.glsl"),
+        define
     );
     constexpr std::array<float, 12> Vtx = {
         -1.f, -1.f, -1.f,
@@ -53,7 +57,6 @@ GUIRenderHandler::GUIRenderHandler() {
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
     glGenBuffers(1, &_vbo);
-    glGenTextures(1, &_texture);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(GL_ARRAY_BUFFER, Vtx.size() * sizeof(float), Vtx.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);

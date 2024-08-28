@@ -96,6 +96,7 @@ asset.onInitialize(function()
 end)
 
 
+
 asset.meta = {
   Name = "Joystick example",
   Description = [[Example asset that binds a joystick to use for input and navigation.

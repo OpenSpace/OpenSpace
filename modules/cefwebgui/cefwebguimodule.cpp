@@ -216,6 +216,17 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         startOrStopGui();
     });
 
+    global::callback::postDraw->emplace_back([this]() {
+        bool windowChanged = global::windowDelegate->windowHasResized(); 
+        if (_instance && (windowChanged || _instance->_shouldReshape)){
+            const glm::ivec2 res = global::windowDelegate->guiWindowResolution();
+            _instance->reshape(static_cast<glm::ivec2>(
+                glm::vec2(res) * global::windowDelegate->dpiScaling()
+            ));
+            _instance->_shouldReshape = false;
+        }
+    });
+
     global::callback::draw2D->emplace_back([this](){
         ZoneScopedN("CefWebGuiModule");
 
@@ -227,13 +238,6 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         const bool isMaster = global::windowDelegate->isMaster();
 
         if (isGuiWindow && isMaster && _instance) {
-            if (global::windowDelegate->windowHasResized() || _instance->_shouldReshape) {
-                const glm::ivec2 csws = global::windowDelegate->guiWindowResolution();
-                _instance->reshape(static_cast<glm::ivec2>(
-                    static_cast<glm::vec2>(csws) * global::windowDelegate->dpiScaling()
-                ));
-                _instance->_shouldReshape = false;
-            }
             if (_visible) {
                 _instance->draw();
             }

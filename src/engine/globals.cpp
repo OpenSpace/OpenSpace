@@ -92,6 +92,7 @@ namespace {
         sizeof(Configuration) +
         sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionMonitor) +
+        sizeof(interaction::JoystickInputStates) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::NavigationHandler) +

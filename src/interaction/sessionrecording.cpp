@@ -976,7 +976,7 @@ void SessionRecording::saveScriptKeyframeAscii(Timestamps& times,
 }
 
 void SessionRecording::savePropertyBaseline(properties::Property& prop) {
-    const std::string propIdentifier = prop.fullyQualifiedIdentifier();
+    const std::string propIdentifier = prop.uri();
     if (isPropertyAllowedForBaseline(propIdentifier)) {
         const bool isPropAlreadySaved = (
             std::find(

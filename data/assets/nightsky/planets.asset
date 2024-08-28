@@ -32,7 +32,8 @@ local Mercury = {
     Name = "Night Sky Mercury",
     Description = [[A night sky version of the planet Mercury, making it visible as
       a bright object on the sky (textured representation).]],
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets",
+    OrderingNumber = 1
   }
 }
 
@@ -54,7 +55,8 @@ local Venus = {
     Name = "Night Sky Venus",
     Description = [[A night sky version of the planet Venus, making it visible as
       a bright object on the sky (textured representation).]],
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets",
+    OrderingNumber = 2
   }
 }
 
@@ -74,7 +76,8 @@ local Mars = {
   Tag = { "nightsky_billboard" },
   GUI = {
     Name = "Night Sky Mars",
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets",
+    OrderingNumber = 4
   }
 }
 
@@ -96,7 +99,8 @@ local Jupiter = {
     Name = "Night Sky Jupiter",
     Description = [[A night sky version of the planet Jupiter, making it visible as
       a bright object on the sky (textured representation).]],
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets",
+    OrderingNumber = 5
   }
 }
 
@@ -118,7 +122,8 @@ local Saturn = {
     Name = "Night Sky Saturn",
     Description = [[A night sky version of the planet Saturn, making it visible as
       a bright object on the sky (textured representation).]],
-    Path = "/Other/Night Sky/Planets"
+    Path = "/Night Sky/Planets",
+    OrderingNumber = 6
   }
 }
 
@@ -154,7 +159,6 @@ local HideNightSkyPlanets = {
   IsLocal = false
 }
 
-
 local ToggleNightSkyPlanets = {
   Identifier = "os.nightsky.ToggleNightSkyPlanets",
   Name = "Toggle night sky planets",
@@ -175,6 +179,7 @@ local ToggleNightSkyPlanets = {
   GuiPath = "/Night Sky/Planets",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mercury)
@@ -206,6 +211,7 @@ asset.export(Saturn)
 asset.export("ShowNightSkyPlanets", ShowNightSkyPlanets.Identifier)
 asset.export("HideNightSkyPlanets", HideNightSkyPlanets.Identifier)
 asset.export("ToggleNightSkyPlanets", ToggleNightSkyPlanets.Identifier)
+
 
 
 asset.meta = {

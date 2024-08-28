@@ -105,6 +105,17 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
     return system;
 }
 
+void queueAddSceneGraphNodeScript(const std::string& sgnTableAsString) {
+    using namespace openspace;
+    // No sync or send because this will already be called inside a Lua script,
+    // therefor it has already been synced and sent to the connected nodes and peers
+    global::scriptEngine->queueScript(
+        std::format("openspace.addSceneGraphNode({})", sgnTableAsString),
+        scripting::ScriptEngine::ShouldBeSynchronized::No,
+        scripting::ScriptEngine::ShouldSendToRemote::No
+    );
+}
+
 void createExoplanetSystem(const std::string& starName,
                            openspace::exoplanets::ExoplanetSystem system)
 {
@@ -155,6 +166,14 @@ void createExoplanetSystem(const std::string& starName,
     if (!std::isnan(bv)) {
         starColor = computeStarColor(bv);
         const std::filesystem::path starTexture = module->starTexturePath();
+
+        if (!starTexture.empty() && !std::filesystem::is_regular_file(starTexture)) {
+            LWARNING(std::format(
+                "Could not find specified star texture set in {} module: '{}'",
+                module->guiName(), starTexture
+            ));
+        }
+
         colorLayers =
             "{"
                 "Identifier = 'StarColor',"
@@ -211,15 +230,44 @@ void createExoplanetSystem(const std::string& starName,
         "}"
     "}";
 
-    // No sync or send because this is already inside a Lua script, therefor it has
-    // already been synced and sent to the connected nodes and peers
-    global::scriptEngine->queueScript(
-        "openspace.addSceneGraphNode(" + starParent + ");",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    queueAddSceneGraphNodeScript(starParent);
+
+    // Add a label for the star.
+    // The fade values are set based on the values for the Sun label
+    const std::string starLabel = "{"
+        "Identifier = '" + starIdentifier + "_Label',"
+        "Parent = '" + starIdentifier + "',"
+        "Renderable = {"
+          "Type = 'RenderableLabel',"
+          "Enabled = false,"
+          "Text = '" + sanitizedStarName + "',"
+          "FontSize = 70.0,"
+          "Size = 14.17,"
+          "MinMaxSize = { 1, 50 },"
+          "EnableFading = true,"
+          "FadeUnit = 'pc',"
+          "FadeDistances = { 1.33, 15.0 },"
+          "FadeWidths = {1.0, 20.0}"
+        "},"
+        "Tag = {'exoplanet_system_labels'},"
+        "GUI = {"
+            "Name = '" + sanitizedStarName + " Label',"
+            "Path = '" + guiPath + "'"
+        "}"
+    "}";
+
+    queueAddSceneGraphNodeScript(starLabel);
 
     // Planets
+
+    const std::filesystem::path planetTexture = module->planetDefaultTexturePath();
+    if (!planetTexture.empty() && !std::filesystem::is_regular_file(planetTexture)) {
+        LWARNING(std::format(
+            "Could not find specified planet default texture set in {} module: '{}'",
+            module->guiName(), planetTexture
+        ));
+    }
+
     for (size_t i = 0; i < system.planetNames.size(); i++) {
         // Note that we are here overriding some invalid parameters in the planet data.
         // Use a reference, so that it is changed down the line
@@ -295,6 +343,16 @@ void createExoplanetSystem(const std::string& starName,
             "Period = " + std::to_string(periodInSeconds) + ""
         "}";
 
+        std::string planetLayers = "";
+        if (!planetTexture.empty()) {
+            planetLayers = "{"
+                "Identifier = 'PlanetTexture',"
+                "FilePath = openspace.absPath('" + formatPathToLua(planetTexture) + "'),"
+                "BlendMode = 'Color',"
+                "Enabled = true"
+            "}";
+        }
+
         const std::string planetNode = "{"
             "Identifier = '" + planetIdentifier + "',"
             "Parent = '" + starIdentifier + "',"
@@ -303,7 +361,9 @@ void createExoplanetSystem(const std::string& starName,
                 "Enabled = " + enabled + ","
                 "Radii = " + std::to_string(planetRadius) + "," // in meters
                 "PerformShading = true,"
-                "Layers = {},"
+                "Layers = {"
+                    "ColorLayers = {" + planetLayers + "}"
+                "},"
                 "LightSourceNode = '" + starIdentifier + "'"
             "},"
             "Transform = { "
@@ -349,14 +409,8 @@ void createExoplanetSystem(const std::string& starName,
             "}"
         "}";
 
-        // No sync or send because this is already inside a Lua script, therefor it has
-        // already been synced and sent to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.addSceneGraphNode(" + planetTrailNode + ");"
-            "openspace.addSceneGraphNode(" + planetNode + ");",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        queueAddSceneGraphNodeScript(planetTrailNode);
+        queueAddSceneGraphNodeScript(planetNode);
 
         bool hasUpperAUncertainty = !std::isnan(planet.aUpper);
         bool hasLowerAUncertainty = !std::isnan(planet.aLower);
@@ -406,13 +460,7 @@ void createExoplanetSystem(const std::string& starName,
                 "}"
             "}";
 
-            // No sync or send because this is already inside a Lua script, therefor it
-            // has already been synced and sent to the connected nodes and peers
-            global::scriptEngine->queueScript(
-                "openspace.addSceneGraphNode(" + discNode + ");",
-                scripting::ScriptEngine::ShouldBeSynchronized::No,
-                scripting::ScriptEngine::ShouldSendToRemote::No
-            );
+            queueAddSceneGraphNodeScript(discNode);
         }
     }
 
@@ -456,13 +504,7 @@ void createExoplanetSystem(const std::string& starName,
         "}"
     "}";
 
-    // No sync or send because this is already inside a Lua script, therefor it has
-    // already been synced and sent to the connected nodes and peers
-    global::scriptEngine->queueScript(
-        "openspace.addSceneGraphNode(" + circle + ");",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    queueAddSceneGraphNodeScript(circle);
 
     float meanSemimajorAxisInAu = 0.f;
     float maxSemimajorAxisInAu = 0.f;
@@ -582,13 +624,7 @@ void createExoplanetSystem(const std::string& starName,
             "}"
         "}";
 
-        // No sync or send because this is already inside a Lua script, therefor it has
-        // already been synced and sent to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            "openspace.addSceneGraphNode(" + zoneDiscNode + ");",
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        queueAddSceneGraphNodeScript(zoneDiscNode);
 
         // Star glare
         if (starColor.has_value()) {
@@ -626,13 +662,7 @@ void createExoplanetSystem(const std::string& starName,
                 "}"
             "}";
 
-            // No sync or send because this is already inside a Lua script, therefor it
-            // has already been synced and sent to the connected nodes and peers
-            global::scriptEngine->queueScript(
-                "openspace.addSceneGraphNode(" + starGlare + ");",
-                scripting::ScriptEngine::ShouldBeSynchronized::No,
-                scripting::ScriptEngine::ShouldSendToRemote::No
-            );
+            queueAddSceneGraphNodeScript(starGlare);
         }
     }
 }

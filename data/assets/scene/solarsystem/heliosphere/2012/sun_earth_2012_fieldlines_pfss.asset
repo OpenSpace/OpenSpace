@@ -78,14 +78,7 @@ local PFSS = {
 
 asset.onInitialize(function()
   openspace.action.registerAction(DarkSun)
-
   openspace.addSceneGraphNode(PFSS)
-
-  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.FlowEnabled", true)
-  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.Reversed", true)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSize", 5)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSpacing", 250)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.speed", 75.0)
 end)
 
 asset.onDeinitialize(function()

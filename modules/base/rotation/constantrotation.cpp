@@ -47,7 +47,9 @@ namespace {
 
     struct [[codegen::Dictionary(ConstantRotation)]] Parameters {
         // [[codegen::verbatim(RotationInfo.description)]]
-        std::optional<glm::dvec3> rotationAxis;
+        std::optional<glm::dvec3> rotationAxis
+            [[codegen::inrange(glm::dvec3(-1.0), glm::dvec3(1.0))]];
+            
         // [[codegen::verbatim(RotationRateInfo.description)]]
         std::optional<float> rotationRate;
     };
@@ -100,7 +102,10 @@ glm::dmat3 ConstantRotation::matrix(const UpdateData& data) const {
         _accumulatedRotation += glm::tau<double>();
     }
 
-    const glm::dquat q = glm::angleAxis(_accumulatedRotation, _rotationAxis.value());
+    const glm::dquat q = glm::angleAxis(
+        _accumulatedRotation,
+        glm::normalize(_rotationAxis.value())
+    );
     return glm::toMat3(q);
 }
 

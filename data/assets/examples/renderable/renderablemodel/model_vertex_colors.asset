@@ -1,0 +1,43 @@
+-- Vertex Colors
+-- This example loads a model with vertex colors as material.
+
+-- Load the example model from OpenSpace servers
+-- If you want to use your own model, this block of code can be safely deleted
+local model = asset.resource({
+  Name = "Vertex Colors Test Model",
+  Type = "HttpSynchronization",
+  Identifier = "model_vertex_color_test",
+  Version = 1
+})
+
+local Node = {
+  Identifier = "RenderableModel_Example_Vertex_Colors",
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "VertexColorTest.glb",
+    -- Use the line below insted of the one above if you want to use your own model
+    --GeometryFile = "C:/path/to/model.fbx",
+  },
+  GUI = {
+    Name = "RenderableModel - Vertex Colors",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
+
+
+-- Model credit
+--[[
+  Author = Ed Mackey
+  URL = "https://github.com/KhronosGroup/glTF-Sample-Models/tree/main/2.0/VertexColorTest"
+  License =
+    Creative Commons Attribution 4.0 International License,
+    https://creativecommons.org/licenses/by/4.0/
+]]

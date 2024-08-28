@@ -3,6 +3,7 @@
 -- are approximate and need fixing
 
 local Mission = {
+  Identifier = "NewHorizons",
   Name = "New Horizons",
   Phases = {
     {
@@ -126,5 +127,5 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)

@@ -82,6 +82,8 @@ const glm::dmat3& Rotation::matrix() const {
 }
 
 void Rotation::update(const UpdateData& data) {
+    ZoneScoped;
+
     if (!_needsUpdate && (data.time.j2000Seconds() == _cachedTime)) {
         return;
     }
