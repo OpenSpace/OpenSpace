@@ -1,0 +1,11 @@
+{
+    "datafile": "data/downloaded/GALAH_AMNH_smaller.csv",
+    "data_mapping": {
+        "position_ra": "ra",
+        "position_dec": "dec",
+        "position_distance": "distance"
+    },
+    "default_colormapping": {},
+    "column_info": {},
+    "quick_filters" : []
+}

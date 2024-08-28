@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,11 @@
 #include <modules/exoplanetsexperttool/dataviewer.h>
 
 #include <modules/exoplanets/exoplanetshelper.h>
+#include <modules/exoplanetsexperttool/columnfilter.h>
+#include <modules/exoplanetsexperttool/datahelper.h>
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
-#include <modules/exoplanetsexperttool/rendering/renderablepointdata.h>
+#include <modules/exoplanetsexperttool/views/viewhelper.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -82,24 +84,6 @@ namespace {
     constexpr char GetInTouchLink[] =
         "https://data.openspaceproject.com/release/ExoplanetExplorer/misc/get_in_touch";
 
-    bool caseInsensitiveLessThan(const char* lhs, const char* rhs) {
-        int res = _stricmp(lhs, rhs);
-        return res < 0;
-    }
-
-    bool compareValues(float lhs, float rhs) {
-        if (std::isnan(lhs)) {
-            // also includes rhs is nan, in which case the order does not matter
-            return true;
-        }
-
-        // rhs is nan, but not lhs
-        if (std::isnan(rhs)) {
-            return false;
-        }
-        return lhs < rhs;
-    }
-
     void queueScriptSynced(const std::string& script) {
         using namespace openspace;
         global::scriptEngine->queueScript(
@@ -118,37 +102,6 @@ namespace {
         ));
     };
 
-    void setDefaultValueOrbitVisuals(bool shouldShowIfDefault) {
-        const std::string appearanceUri = "{defaultvalues_shape}.Renderable";
-        if (shouldShowIfDefault) {
-            // Draw using points
-            queueScriptSynced(std::format(
-                "openspace.setPropertyValue('{0}.Appearance.Rendering', 1.0);"
-                "openspace.setPropertyValue('{0}.Appearance.PointSize', 64.0);"
-                "openspace.setPropertyValue('{0}.Appearance.EnableFade', false);"
-                "openspace.setPropertyValue('{0}.Resolution', 100);",
-                appearanceUri
-            ));
-        }
-        else {
-            // Draw using lines
-            queueScriptSynced(std::format(
-                "openspace.setPropertyValue('{0}.Appearance.Rendering', 0.0);"
-                "openspace.setPropertyValue('{0}.Appearance.EnableFade', true);",
-                appearanceUri
-            ));
-        }
-    };
-
-    // Set increased reach factors of all exoplanet renderables, to trigger fading out of
-    // glyph cloud
-    void setIncreasedReachfactors() {
-        queueScriptSynced(
-            "openspace.setPropertyValue('{exoplanet}.ApproachFactor', 15000000.0)"
-            "openspace.setPropertyValue('{exoplanet_system}.ApproachFactor', 15000000.0)"
-        );
-    }
-
     bool hasTag(const openspace::SceneGraphNode* node, std::string_view tag) {
         if (!node) {
             return false;
@@ -158,26 +111,8 @@ namespace {
         return std::find(tags.begin(), tags.end(), tag) != std::end(tags);
     };
 
-    // This should match the implementation in the exoplanet module
-    std::string planetIdentifier(const openspace::exoplanets::ExoplanetItem& p) {
-        using namespace openspace::exoplanets;
-        return std::format("{}_{}", openspace::makeIdentifier(p.hostName), p.component);
-    }
-
-    constexpr const glm::vec3 DefaultSelectedColor = { 0.2f, 0.8f, 1.f };
-    constexpr const glm::vec4 DescriptiveTextColor = { 0.6f, 0.6f, 0.6f, 1.f };
-    constexpr const glm::vec4 ErrorColor = { 1.f, 0.2f, 0.2f, 1.f };
-
-    constexpr const glm::vec4 DisabledButtonColor = { 0.3f, 0.3f, 0.3f, 0.7f };
-
     const ImVec2 DefaultWindowSize = ImVec2(350, 350);
-
     constexpr const float DefaultGlyphSize = 22.f;
-
-    // @TODO This can be implemented as a constructor in imconfig.h to enable conversion
-    ImVec4 toImVec4(const glm::vec4& v) {
-        return ImVec4(v.x, v.y, v.z, v.w);
-    }
 
     // @TODO this could be a templated helper function for lists. Used a lot
     std::string formatIndicesList(const std::vector<size_t>& indices) {
@@ -211,11 +146,6 @@ namespace {
 #endif
     }
 
-    // Format stirng for system window name
-    std::string systemWindowName(std::string_view host) {
-        return std::format("System: {}", host);
-    }
-
     constexpr const openspace::properties::Property::PropertyInfo ExternalSelectionInfo =
     {
         "ExternalSelection",
@@ -247,150 +177,9 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
         _externalSelectionChanged = true;
     });
 
-    // Load the dataset
-    _data = _dataLoader.loadData();
-
-    // Initialize filtered data index list and map of host star to planet indices
-    _filteredData.reserve(_data.size());
-    for (size_t i = 0; i < _data.size(); i++) {
-        _filteredData.push_back(i);
-        _hostIdToPlanetsMap[makeIdentifier(_data[i].hostName)].push_back(i);
-    }
-    _filteredDataWithoutExternalSelection = _filteredData;
-
-    // Fill planets internal indices in system (based on semimajor axis)
-    std::map<std::string, std::vector<size_t>>::iterator it;
-    for (it = _hostIdToPlanetsMap.begin(); it != _hostIdToPlanetsMap.end(); it++) {
-        std::vector<size_t> planetIds = it->second;
-        std::sort(
-            planetIds.begin(),
-            planetIds.end(),
-            [&data = _data](const size_t a, const size_t b) -> bool {
-                float v1 = data[a].semiMajorAxis.value;
-                float v2 = data[b].semiMajorAxis.value;
-                return compareValues(v1, v2);
-            }
-        );
-        for (int i = 0; i < static_cast<int>(planetIds.size()); ++i) {
-            _data[planetIds[i]].indexInSystem = i;
-        }
-    }
-
-    _defaultColumns = {
-        { "Name", ColumnID::Name },
-        { "Host", ColumnID::Host },
-        { "Year", ColumnID::DiscoveryYear, "%.0f", "Discovery year"},
-        { "Planets", ColumnID::NPlanets, "%.0f" },
-        { "Stars ", ColumnID::NStars, "%.0f" },
-        { "ESM", ColumnID::ESM, "%.2f" },
-        { "TSM", ColumnID::TSM, "%.2f" },
-        {
-            "Radius",
-            ColumnID::PlanetRadius,
-            "%.2f",
-            "Planet radius in Earth radii"
-        },
-        {
-            "Teq",
-            ColumnID::PlanetTemperature,
-            "%.0f",
-            "Planet equilibrium temperature (K)"
-        },
-        { "Mass", ColumnID::PlanetMass, "%.2f", "in Earth masses" },
-        { "Mass Err (%)", ColumnID::PlanetMassError, "%.2f", "Mass uncertainty"},
-        { "Surface gravity", ColumnID::SurfaceGravity, "%.2f", "(m/s^2)"},
-        // Orbits
-        { "Semi-major axis", ColumnID::SemiMajorAxis, "%.2f", "(AU)"},
-        { "Eccentricity", ColumnID::Eccentricity, "%.2f" },
-        { "Orbit period", ColumnID::Period, "%.2f" },
-        { "Inclination", ColumnID::Inclination, "%.2f" },
-        // Star
-        {
-            "Star Teff",
-            ColumnID::StarTemperature,
-            "%.0f",
-            "Star effective temperature (K)"
-        },
-        { "Star radius ", ColumnID::StarRadius, "%.2f", "(Solar)"},
-        { "Star age", ColumnID::StarAge, "%.2f", "(Gyr)"},
-        { "MagJ", ColumnID::MagnitudeJ, "%.2f" },
-        { "MagK", ColumnID::MagnitudeK, "%.2f" },
-        { "Distance ", ColumnID::Distance, "%.2f", "(pc)"},
-        { "Ra", ColumnID::Ra, "%.2f" },
-        { "Dec", ColumnID::Dec, "%.2f" },
-        { "Metallicity (dex)", ColumnID::Metallicity, "%.2f" },
-        { "Metallicity ratio", ColumnID::MetallicityRatio },
-        // Discovery
-        { "Discovery method", ColumnID::DiscoveryMethod },
-        { "Telescope", ColumnID::DiscoveryTelescope },
-        { "Instrument", ColumnID::DiscoveryInstrument },
-        // Detected molecules
-        {
-            "Detected",
-            ColumnID::MoleculesDetection,
-            std::nullopt,
-            "Detected molecules from IAC ExoAtmospheres dataset"
-        },
-        {
-            "Upper limit",
-            ColumnID::MoleculesUpperLimit,
-            std::nullopt,
-            "Upper limit detection of molecules from IAC ExoAtmospheres dataset"
-        },
-        {
-            "No detection",
-            ColumnID::MoleculesNoDetection,
-            std::nullopt,
-            "No detection molecules from IAC ExoAtmospheres dataset"
-        },
-        {
-            "Water detection",
-            ColumnID::WaterDetection,
-            "%.0f",
-            "Flag for whether water has been detected in the planet atmosphere "
-            "(1 = yes, -1 = no, 0 = maybe/upper limit)"
-        }
-    };
-
-    _columns = _defaultColumns;
-    _selectedDefaultColumns.assign(_defaultColumns.size(), true);
-    // Add other oclumns, if there are any. Assume all data items have the same columns
-    if (_data.size() > 0 && _data.front().otherColumns.size() > 0) {
-        for (auto col : _data.front().otherColumns) {
-            Column c = { col.first, ColumnID::Other };
-            _otherColumns.push_back(c);
-            bool isSelected = false;
-            _selectedOtherColumns.push_back(isSelected);
-        }
-    }
-
-    // Must match names in implot and customly added ones
-    _colormaps = {
-        "Viridis",
-        "Plasma",
-        "Hot",
-        "Cool",
-        "Autumn", // custom
-        "Spring", // custom
-        "Summer", // custom
-        "Winter", // custom
-        "Jet",
-        "Spectral",
-        "RdBu",
-        "BrBG",
-        "PiYG",
-        "Twilight",
-        "Deep",
-        "Dark",
-        "Paired",
-    };
-
-    // TODO: make sure that settings are preserved between sessions?
-    _variableSelection.push_back(ColorMappedVariable());
-
     // Interaction callbacks. OBS! A bit ugly to handle this separately from ImGui io....
     global::callback::keyboard->emplace_back(
-        [&](Key key, KeyModifier modifier, KeyAction action, bool) -> bool {
+        [&](Key key, KeyModifier, KeyAction action, bool) -> bool {
             bool isCtrl = key == Key::LeftControl;
             if (isCtrl && action == KeyAction::Press) {
                 _holdingCtrl = true;
@@ -404,62 +193,161 @@ DataViewer::DataViewer(std::string identifier, std::string guiName)
     );
 }
 
+void DataViewer::initializeData() {
+    LDEBUG("Initializing dataset from files specified in module");
+
+    // Load things related to the dataset. We need to do this on initialize rather than
+    // construction since we need the module to exist first (to access its settings)
+    _dataSettings = DataLoader::loadDataSettingsFromJson();
+
+    // Load the dataset
+    _data = DataLoader::loadData(_dataSettings);
+
+    if (_data.empty()) {
+        LERROR("No data was loaded!");
+    }
+
+    // Initialize filtered data index list and map of host star to planet indices
+    _filteredData.clear();
+    _filteredData.reserve(_data.size());
+    for (size_t i = 0; i < _data.size(); i++) {
+        _filteredData.push_back(i);
+
+        if (!_dataSettings.dataMapping.hostName.empty()) {
+            _hostIdToPlanetsMap[makeIdentifier(_data[i].hostName)].push_back(i);
+        }
+    }
+
+    _columns = _columnSelectionView.initializeColumnsFromData(_data, _dataSettings);
+
+    // The other views use the loaded data, so call this afterwards
+    _colorMappingView = std::make_unique<ColorMappingView>(*this, _dataSettings);
+    _filteringView = std::make_unique<FilteringView>(*this, _dataSettings);
+    _systemViewer = std::make_unique<SystemViewer>(*this);
+
+    LDEBUG("Finished initializing based on dataset");
+
+    _filterChanged = true;
+}
+
 void DataViewer::initializeGL() {
     initializeRenderables();
     initializeCallbacks();
 
-    //  TODO: These do not work when using multiple windows :(
-    // Probably has to do with contexts
+    _colorMappingView->initializeGL();
+}
 
-    // Intilize custom color maps (generated from matplotlib)
-    const ImVec4 autumn[] = {
-        ImVec4(1.f, 0.f,         0.f, 1.f),
-        ImVec4(1.f, 0.14117647f, 0.f, 1.f),
-        ImVec4(1.f, 0.28627451f, 0.f, 1.f),
-        ImVec4(1.f, 0.42745098f, 0.f, 1.f),
-        ImVec4(1.f, 0.57254902f, 0.f, 1.f),
-        ImVec4(1.f, 0.71372549f, 0.f, 1.f),
-        ImVec4(1.f, 0.85882353f, 0.f, 1.f),
-        ImVec4(1.f, 1.f,         0.f, 1.f)
-    };
+std::variant<const char*, float> DataViewer::columnValue(const ColumnKey& key,
+                                                         const ExoplanetItem& item) const
+{
+    const std::variant<std::string, float>& value = item.dataColumns.at(key);
 
-    const ImVec4 spring[] = {
-        ImVec4(1.f, 0.f,         1.f,         1.f),
-        ImVec4(1.f, 0.14117647f, 0.85882353f, 1.f),
-        ImVec4(1.f, 0.28627451f, 0.71372549f, 1.f),
-        ImVec4(1.f, 0.42745098f, 0.57254902f, 1.f),
-        ImVec4(1.f, 0.57254902f, 0.42745098f, 1.f),
-        ImVec4(1.f, 0.71372549f, 0.28627451f, 1.f),
-        ImVec4(1.f, 0.85882353f, 0.14117647f, 1.f),
-        ImVec4(1.f, 1.f,         0.f,         1.f)
-    };
+    if (std::holds_alternative<std::string>(value)) {
+        return std::get<std::string>(value).c_str();
+    }
+    return std::get<float>(value);
+}
 
-    const ImVec4 summer[] = {
-        ImVec4(0.f,         0.5f,        0.4f, 1.f),
-        ImVec4(0.14117647f, 0.57058824f, 0.4f, 1.f),
-        ImVec4(0.28627451f, 0.64313725f, 0.4f, 1.f),
-        ImVec4(0.42745098f, 0.71372549f, 0.4f, 1.f),
-        ImVec4(0.57254902f, 0.78627451f, 0.4f, 1.f),
-        ImVec4(0.71372549f, 0.85686275f, 0.4f, 1.f),
-        ImVec4(0.85882353f, 0.92941176f, 0.4f, 1.f),
-        ImVec4(1.f,         1.f,         0.4f, 1.f)
-    };
+bool DataViewer::isNumericColumn(size_t index) const {
+    ghoul_assert(_data.size() > 0, "Data size cannot be zero");
+    // Test type using the first data point
+    std::variant<const char*, float> aValue = columnValue(_columns[index], _data.front());
+    return std::holds_alternative<float>(aValue);
+}
 
-    const ImVec4 winter[] = {
-        ImVec4(0.f, 0.f,         1.f,         1.f),
-        ImVec4(0.f, 0.14117647f, 0.92941176f, 1.f),
-        ImVec4(0.f, 0.28627451f, 0.85686275f, 1.f),
-        ImVec4(0.f, 0.42745098f, 0.78627451f, 1.f),
-        ImVec4(0.f, 0.57254902f, 0.71372549f, 1.f),
-        ImVec4(0.f, 0.71372549f, 0.64313725f, 1.f),
-        ImVec4(0.f, 0.85882353f, 0.57058824f, 1.f),
-        ImVec4(0.f, 1.f,         0.5f,        1.f)
-    };
+size_t DataViewer::columnIndex(const ColumnKey& key) const {
+    for (size_t i = 0; i < _columns.size(); ++i) {
+        if (_columns[i] == key) {
+            return i;
+        }
+    }
+    LWARNING(std::format(
+        "Tried to get index of non-selected column: '{}'", key
+    ));
+    return 0;
+}
 
-    ImPlot::AddColormap("Autumn", autumn, 8, false);
-    ImPlot::AddColormap("Spring", spring, 8, false);
-    ImPlot::AddColormap("Summer", summer, 8, false);
-    ImPlot::AddColormap("Winter", winter, 8, false);
+const char* DataViewer::columnName(const ColumnKey& key) const {
+    return _dataSettings.columnName(key);
+}
+
+const char* DataViewer::columnName(size_t columnIndex) const {
+    // TODO: validate index
+    return _dataSettings.columnName(_columns[columnIndex]);
+}
+
+const ColumnKey& DataViewer::nameColumn() const {
+    return _dataSettings.dataMapping.name;
+}
+
+bool DataViewer::isNameColumn(const ColumnKey& key) const {
+    const ColumnKey& mappedNameColumn = _dataSettings.dataMapping.name;
+    const ColumnKey nameColumn = mappedNameColumn.empty() ? "name" : mappedNameColumn;
+    return key == nameColumn;
+}
+
+const std::vector<ExoplanetItem>& DataViewer::data() const {
+    return _data;
+}
+
+const std::vector<size_t>& DataViewer::currentFiltering() const {
+    return _filteredData;
+}
+
+const std::vector<ColumnKey>& DataViewer::columns() const {
+    return _columns;
+}
+
+ColorMappingView* DataViewer::colorMappingView() {
+    return _colorMappingView.get();
+}
+
+std::vector<size_t> DataViewer::planetsForHost(const std::string& hostIdentifier) const {
+    if (!_hostIdToPlanetsMap.contains(hostIdentifier)) {
+        return {};
+    }
+    return _hostIdToPlanetsMap.at(hostIdentifier);
+}
+
+size_t DataViewer::externalSelectionSize() const {
+    return _externalSelection.value().size();
+}
+
+const std::string& DataViewer::lastExternalSelectionTimestamp() const {
+    return _lastExternalSelectionTimeStamp;
+}
+
+void DataViewer::clearExternalSelection() {
+    // TODO: This should be done though Lua to be synced across all nodes
+    _externalSelection = {};
+    LINFO("Cleared external selection");
+};
+
+bool DataViewer::compareColumnValues(const ColumnKey& key, const ExoplanetItem& left,
+                                     const ExoplanetItem& right) const
+{
+    std::variant<const char*, float> leftValue = columnValue(key, left);
+    std::variant<const char*, float> rightValue = columnValue(key, right);
+
+    // TODO: make sure they are the same type
+
+    if (std::holds_alternative<const char*>(leftValue) &&
+        std::holds_alternative<const char*>(rightValue))
+    {
+        return !data::caseInsensitiveLessThan(
+            std::get<const char*>(leftValue),
+            std::get<const char*>(rightValue)
+        );
+    }
+    else if (std::holds_alternative<float>(leftValue) &&
+        std::holds_alternative<float>(rightValue))
+    {
+        return data::compareValuesWithNan(std::get<float>(leftValue), std::get<float>(rightValue));
+    }
+    else {
+        LERROR("Trying to compare mismatching column types");
+        return false;
+    }
 }
 
 void DataViewer::renderStartupInfo() {
@@ -523,21 +411,15 @@ void DataViewer::initializeRenderables() {
     gui.setValue("Path", "/ExoplanetExplorer"s);
 
     ghoul::Dictionary renderable;
-
-    if (_useGlyphRendering) {
-        renderable.setValue("Type", "RenderableExoplanetGlyphCloud"s);
-        renderable.setValue("Size", 100.0);
-        renderable.setValue("BillboardMinMaxSize", glm::dvec2(DefaultGlyphSize));
-        renderable.setValue("UseFixedWidth", false);
-        renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
-    }
-    else {
-        renderable.setValue("Type", "RenderablePointData"s);
-        renderable.setValue("Size", 10.0);
-    }
-
+    renderable.setValue("Type", "RenderableExoplanetGlyphCloud"s);
+    renderable.setValue("Size", 100.0);
+    renderable.setValue("BillboardMinMaxSize", glm::dvec2(DefaultGlyphSize));
+    renderable.setValue("UseFixedWidth", false);
+    renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
     renderable.setValue("DataFile", dataFilePath.string());
-    renderable.setValue("HighlightColor", glm::dvec3(DefaultSelectedColor));
+    renderable.setValue("HighlightColor", glm::dvec3(
+        view::colors::DefaultSelected
+    ));
 
     ghoul::Dictionary labels;
     labels.setValue("File", labelsFilePath.string());
@@ -594,7 +476,6 @@ void DataViewer::render() {
     static bool showTable = true;
     static bool showFilterSettingsWindow = false;
     static bool showColormapWindow = false;
-    static bool showScatterPlotWindow = false;
     static bool showHelpers = false;
 
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
@@ -613,7 +494,6 @@ void DataViewer::render() {
             ImGui::MenuItem("Table", NULL, &showTable);
             ImGui::MenuItem("Filters", NULL, &showFilterSettingsWindow);
             ImGui::MenuItem("Color mapping", NULL, &showColormapWindow);
-            ImGui::MenuItem("Scatter plot", NULL, &showScatterPlotWindow);
             if (mod->showInfoWindowAtStartup()) {
                 ImGui::Separator();
                 ImGui::MenuItem("Start-up info", NULL, &_shouldOpenInfoWindow);
@@ -636,7 +516,7 @@ void DataViewer::render() {
                 refocusView();
             }
             ImGui::SameLine();
-            renderHelpMarker(
+            view::helper::renderHelpMarker(
                 "Reset the camera to focus on Earth. Useful for example when you have "
                 "focused on another planet system, or just moved the camera around."
             );
@@ -644,7 +524,7 @@ void DataViewer::render() {
                 flyToOverview();
             }
             ImGui::SameLine();
-            renderHelpMarker(
+            view::helper::renderHelpMarker(
                 "Fly to an overview of the exoplanets. This means viewing the planets "
                 "from the ouside in, from a position far out in our galaxy"
             );
@@ -652,14 +532,14 @@ void DataViewer::render() {
                 flyToInsideView();
             }
             ImGui::SameLine();
-            renderHelpMarker(
+            view::helper::renderHelpMarker(
                 "Fly to a view close to our solar system. The planets will be placed "
                 "on their position on the night sky"
             );
 
             ImGui::Text("Tips for manual navigation");
             ImGui::SameLine();
-            renderHelpMarker(
+            view::helper::renderHelpMarker(
                 "Hold CTRL while rotating to change where the camera is focusing. "
                 "Reset using the \"Refocus on Earth\" button. \n"
                 "\n"
@@ -693,15 +573,7 @@ void DataViewer::render() {
         if (_currentlyTargettedSystem.has_value()) {
             std::string system = (*_currentlyTargettedSystem);
             if (ImGui::BeginMenu(std::format("System: {}", system.c_str()).c_str())) {
-                bool isAlreadyOpen = std::find(
-                    _shownPlanetSystemWindows.begin(),
-                    _shownPlanetSystemWindows.end(),
-                    system
-                ) != _shownPlanetSystemWindows.end();
-
-                if (!isAlreadyOpen) {
-                    _shownPlanetSystemWindows.push_back(system);
-                }
+                _systemViewer->showSystemView(system);
                 ImGui::EndMenu();
             }
         }
@@ -710,46 +582,19 @@ void DataViewer::render() {
     }
 
     // Windows
-    _filterChanged = false;
     if (showFilterSettingsWindow) {
         renderFilterSettingsWindow(&showFilterSettingsWindow);
     }
 
-    _colormapWasChanged = false;
     if (showColormapWindow) {
         renderColormapWindow(&showColormapWindow);
-    }
-
-    if (showScatterPlotWindow) {
-        renderScatterPlotWindow(&showScatterPlotWindow);
     }
 
     if (showTable) {
         renderTableWindow(&showTable);
     }
 
-    // Render any detail windows that the user has requested
-    if (!_shownPlanetSystemWindows.empty()) {
-        std::list<std::string> hostsToRemove;
-        for (const std::string& host : _shownPlanetSystemWindows) {
-            bool isOpen = true;
-
-            ImGui::SetNextWindowSize(ImVec2(500.f, 0.f), ImGuiCond_Appearing);
-            if (ImGui::Begin(systemWindowName(host).c_str(), &isOpen)) {
-                renderSystemViewContent(host);
-            }
-            ImGui::End();
-
-            if (!isOpen) {
-                // was closed => remove from list
-                hostsToRemove.push_back(host);
-            }
-        }
-
-        for (const std::string& host : hostsToRemove) {
-            _shownPlanetSystemWindows.remove(host);
-        }
-    }
+    _systemViewer->renderAllSystemViews();
 
 #ifdef SHOW_IMGUI_HELPERS
     if (showHelpers) {
@@ -767,134 +612,9 @@ void DataViewer::render() {
 
     if (_filterChanged || _colormapWasChanged) {
         writeRenderDataToFile();
+        _colormapWasChanged = false;
+        _filterChanged = false;
     }
-}
-
-void DataViewer::renderHelpMarker(const char* text) {
-    ImGui::TextDisabled("(?)");
-    if (ImGui::IsItemHovered()) {
-        ImGui::BeginTooltip();
-        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(text);
-        ImGui::PopTextWrapPos();
-        ImGui::EndTooltip();
-    }
-}
-
-bool DataViewer::renderColormapEdit(ColorMappedVariable& variable,
-                                    std::string_view relevantSystem)
-{
-    constexpr const int InputWidth = 120;
-    bool wasChanged = false;
-
-    ImGui::BeginGroup();
-    {
-        ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::BeginCombo("Column", _columns[variable.columnIndex].name.c_str())) {
-            for (int i = 0; i < _columns.size(); ++i) {
-                // Ignore non-numeric columns
-                if (!isNumericColumn(i)) {
-                    continue;
-                }
-
-                const char* name = _columns[i].name.c_str();
-                if (ImGui::Selectable(name, variable.columnIndex == i)) {
-                    variable.columnIndex = i;
-                    wasChanged = true;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::BeginCombo("Colormap", _colormaps[variable.colormapIndex])) {
-            for (int i = 0; i < _colormaps.size(); ++i) {
-                const char* name = _colormaps[i];
-                ImPlot::ColormapIcon(ImPlot::GetColormapIndex(name));
-                ImGui::SameLine();
-                if (ImGui::Selectable(name, variable.colormapIndex == i)) {
-                    variable.colormapIndex = i;
-                    wasChanged = true;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        const int colormapColumn = variable.columnIndex;
-
-        // Min/max values for color range
-        ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::DragFloatRange2("Min / Max", &variable.colorScaleMin, &variable.colorScaleMax, 1.f)) {
-            wasChanged = true;
-        }
-
-        bool updateMinMax = false;
-
-        std::vector<size_t> relevantIndices;
-
-        if (!relevantSystem.empty() && ImGui::SmallButton("Set from planets in system")) {
-            relevantIndices =
-                _hostIdToPlanetsMap[makeIdentifier(std::string(relevantSystem))];
-            updateMinMax = true;
-        }
-        else if (ImGui::SmallButton("Set from current table data")) {
-            relevantIndices = _filteredData;
-            updateMinMax = true;
-        }
-        else if (ImGui::SmallButton("Set from full data")) {
-            std::vector<size_t> v(_data.size()); // same number of indices as data
-            std::iota(std::begin(v), std::end(v), 0);
-            relevantIndices = std::move(v);
-            updateMinMax = true;
-        }
-
-        if (updateMinMax && !relevantIndices.empty()) {
-            float newMin = std::numeric_limits<float>::max();
-            float newMax = std::numeric_limits<float>::lowest();
-
-            for (size_t i : relevantIndices) {
-                const ExoplanetItem& item = _data[i];
-                auto value = valueFromColumn(colormapColumn, item);
-                if (!std::holds_alternative<float>(value)) {
-                    // Shouldn't be possible to try to use non numbers
-                    throw;
-                }
-
-                float val = std::get<float>(value);
-                if (std::isnan(val)) {
-                    continue;
-                }
-                newMax = std::max(val, newMax);
-                newMin = std::min(val, newMin);
-            }
-
-            variable.colorScaleMin = newMin;
-            variable.colorScaleMax = newMax;
-            wasChanged = true;
-        };
-
-        // Render an opacity slider
-        ImGui::SetNextItemWidth(InputWidth);
-        if (ImGui::SliderFloat("Opacity", &variable.opacity, 0.f, 1.f)) {
-            wasChanged = true;
-        }
-        ImGui::EndGroup();
-    }
-
-    constexpr const int ColorScaleHeight = 140;
-
-    // Render visuals for colormap
-    ImGui::SameLine();
-    ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
-    ImPlot::ColormapScale(
-        "##ColorScale",
-        variable.colorScaleMin,
-        variable.colorScaleMax,
-        ImVec2(0, ColorScaleHeight)
-    );
-    ImPlot::PopColormap();
-
-    return wasChanged;
 }
 
 void DataViewer::renderColormapWindow(bool* open) {
@@ -904,208 +624,7 @@ void DataViewer::renderColormapWindow(bool* open) {
         return;
     }
 
-    // Start variable group
-    ImGui::BeginGroup();
-
-    ImGui::BeginGroup();
-
-    // Colormap for each selected variable
-    if (ImGui::Button("+ Add variable")) {
-        if (_variableSelection.size() < 8) {
-            _variableSelection.push_back(ColorMappedVariable());
-            _colormapWasChanged = true;
-        }
-    };
-    ImGui::SameLine();
-
-    // NaNColor
-    ImGuiColorEditFlags nanColorFlags = ImGuiColorEditFlags_NoInputs |
-        ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_AlphaBar;
-    static ImVec4 c = toImVec4(_nanPointColor);
-    if (ImGui::ColorEdit4("NanColor", (float*)&c, nanColorFlags)) {
-        _nanPointColor = { c.x, c.y, c.z, c.w };
-        _colormapWasChanged = true;
-    }
-    ImGui::SameLine();
-    ImGui::Text("No value color");
-
-    ImGui::EndGroup();
-
-    ImGui::Spacing();
-
-    ImGui::BeginGroup();
-
-    // Note the reverse ordering
-    for (int index = static_cast<int>(_variableSelection.size()) - 1; index >= 0; --index) {
-        ColorMappedVariable& variable = _variableSelection[index];
-
-        ImGui::PushID(std::format("##variable{}", index).c_str());
-
-        ImGui::Text(std::format("{}.", index + 1).c_str());
-        ImGui::SameLine();
-
-        // Entire variable group
-        _colormapWasChanged |= renderColormapEdit(variable);
-
-        ImGui::PopID();
-        ImGui::SameLine();
-
-        ImGui::PushID(std::format("##remove{}", index).c_str());
-        if (_variableSelection.size() > 1 && ImGui::Button("x")) {
-            _variableSelection.erase(_variableSelection.begin() + index);
-            _colormapWasChanged = true;
-        }
-        ImGui::PopID();
-
-        // Some spacing before the next group
-        ImGui::Spacing();
-    }
-
-    ImGui::EndGroup(); // all variable groups
-
-    // Circle plot to show which parameters map to which part of a glyph
-    ImGui::SameLine();
-    {
-        int nVariables = static_cast<int>(_variableSelection.size());
-        std::vector<float> data(nVariables, 1.f / static_cast<float>(nVariables));
-
-        // First build array with real strings. Note that this has to stay alive for
-        // the netire lifetime of the char * array
-        std::vector<std::string> labelStrings;
-        labelStrings.reserve(nVariables);
-        for (int i = 0; i < nVariables; ++i) {
-            std::string label = _columns[_variableSelection[i].columnIndex].name;
-            label = label.substr(0, 10); // limit length
-            labelStrings.push_back(std::format(" {}. {}", i+1, label));
-        }
-
-        // Then build array with const char * from that array
-        std::vector<const char*> labels;
-        labels.reserve(nVariables);
-        for (int i = 0; i < nVariables; ++i) {
-            labels.push_back(labelStrings[i].data());
-        }
-
-        // Reverse vector to get the order its actually rendered
-        std::reverse(labels.begin(), labels.end());
-
-        constexpr const int ColorScaleHeight = 140;
-        ImVec2 plotSize = ImVec2(1.5 * ColorScaleHeight, ColorScaleHeight);
-        ImPlot::SetNextPlotLimits(0, 1.5, 0, 1, ImGuiCond_Always);
-        if (ImPlot::BeginPlot("##Pie", NULL, NULL, plotSize, ImPlotFlags_Equal | ImPlotFlags_NoMousePos, ImPlotAxisFlags_NoDecorations, ImPlotAxisFlags_NoDecorations)) {
-            ImPlot::PlotPieChart(labels.data(), data.data(), nVariables, 1.1, 0.5, 0.3, true, NULL);
-            ImPlot::EndPlot();
-        }
-    }
-
-    ImGui::EndGroup(); // variables + plot group
-
-    ImGui::End();
-}
-
-void DataViewer::renderScatterPlotWindow(bool* open) {
-    ImGui::SetNextWindowSize(ImVec2(450, 400), ImGuiCond_FirstUseEver);
-    if (!ImGui::Begin("Scatter plots", open)) {
-        ImGui::End();
-        return;
-    }
-
-    std::vector<float> ra, dec;
-    ra.reserve(_filteredData.size());
-    dec.reserve(_filteredData.size());
-
-    for (size_t i : _filteredData) {
-        const ExoplanetItem& item = _data[i];
-        if (item.ra.hasValue() && item.dec.hasValue()) {
-            ra.push_back(item.ra.value);
-            dec.push_back(item.dec.value);
-        }
-    }
-
-    std::vector<float> ra_selected, dec_selected;
-    ra_selected.reserve(_selection.size());
-    dec_selected.reserve(_selection.size());
-
-    for (size_t i : _selection) {
-        const ExoplanetItem& item = _data[i];
-        if (item.ra.hasValue() && item.dec.hasValue()) {
-            ra_selected.push_back(item.ra.value);
-            dec_selected.push_back(item.dec.value);
-        }
-    }
-
-    // Ra dec plot
-    ImGui::BeginGroup();
-
-    ImVec4 selectedColor =
-    { DefaultSelectedColor.x, DefaultSelectedColor.y, DefaultSelectedColor.z, 1.f };
-
-    ImGui::Spacing();
-
-    const ColorMappedVariable& first = _variableSelection.front();
-
-    // Scatterplot
-    static const ImVec2 plotSize = { 400, 300 };
-    ImPlotFlags plotFlags = ImPlotFlags_NoLegend;
-    ImPlotAxisFlags axisFlags = ImPlotAxisFlags_None;
-
-    static float pointSize = 1.5f;
-    ImPlot::PushColormap(_colormaps[first.colormapIndex]);
-    ImPlot::SetNextPlotLimits(0.0, 360.0, -90.0, 90.0, ImGuiCond_Always);
-    if (ImPlot::BeginPlot("Star Coordinate", "Ra", "Dec", plotSize, plotFlags, axisFlags)) {
-        ImPlot::PushStyleVar(ImPlotStyleVar_MarkerSize, pointSize);
-
-        for (size_t i : _filteredData) {
-            const ExoplanetItem& item = _data[i];
-
-            if (!item.ra.hasValue() || !item.dec.hasValue()) {
-                continue;
-            }
-
-            const ImVec4 pointColor = toImVec4(colorFromColormap(
-                item,
-                _variableSelection.front()
-            )); // from first map
-
-            const ImPlotPoint point = { item.ra.value, item.dec.value };
-            const char* label = "Data " + i;
-            ImPlot::PushStyleColor(ImPlotCol_MarkerFill, pointColor);
-            ImPlot::PushStyleColor(ImPlotCol_MarkerOutline, pointColor);
-            ImPlot::PlotScatter(label, &point.x, &point.y, 1);
-            ImPlot::PopStyleColor();
-            ImPlot::PopStyleColor();
-        }
-        ImPlot::PopStyleVar();
-
-        ImPlot::PushStyleVar(ImPlotStyleVar_MarkerSize, 3.f * pointSize);
-        ImPlot::PushStyleColor(ImPlotCol_MarkerFill, selectedColor);
-        ImPlot::PushStyleColor(ImPlotCol_MarkerOutline, selectedColor);
-        ImPlot::PlotScatter(
-            "Selected",
-            ra_selected.data(),
-            dec_selected.data(),
-            static_cast<int>(ra_selected.size())
-        );
-        ImPlot::PopStyleColor();
-        ImPlot::PopStyleColor();
-        ImPlot::PopStyleVar();
-        ImPlot::EndPlot();
-
-        ImGui::SameLine();
-        ImPlot::ColormapScale(
-            "##ColorScale",
-            first.colorScaleMin,
-            first.colorScaleMax,
-            ImVec2(60, plotSize.y)
-        );
-
-        ImGui::SetNextItemWidth(70);
-        ImGui::DragFloat("Point size", &pointSize, 0.1f, 0.f, 5.f);
-        ImPlot::PopColormap();
-    }
-    ImGui::EndGroup(); // ra dec plot group
-
-    ImGui::End();
+    _colormapWasChanged = _colorMappingView->renderViewContent();
 }
 
 void DataViewer::renderTableWindow(bool *open) {
@@ -1117,30 +636,26 @@ void DataViewer::renderTableWindow(bool *open) {
     }
 
     // @TODO: Maybe do a more sophisticated comparison view
-    bool showPinnedTable = ImGui::CollapsingHeader("Pinned planets");
+    bool showPinnedTable = ImGui::CollapsingHeader("Pinned items");
     ImGui::SameLine();
-    ImGui::TextColored(
-        toImVec4(DescriptiveTextColor),
-        std::format("({})", _pinnedPlanets.size()).c_str()
+    view::helper::renderDescriptiveText(
+        std::format("({})", _pinnedItems.size()).c_str()
     );
     if (showPinnedTable) {
-        renderTable("pinned_exoplanets_table", _pinnedPlanets, true);
+        renderTable("pinned_items_table", _pinnedItems, true);
     }
 
     ImGui::Separator();
-    ImGui::TextColored(
-        toImVec4(DescriptiveTextColor),
-        std::format(
-            "Showing {} exoplanets out of a total {} ",
-            _filteredData.size(), _data.size()
-        ).c_str()
-    );
+    view::helper::renderDescriptiveText(std::format(
+        "Showing {} items out of a total {} ",
+        _filteredData.size(), _data.size()
+    ).c_str());
 
     // Search table
     static char searchString[128] = "";
    ImGui::InputTextWithHint(
         "##Query",
-        "Search for a planet here...",
+        "Search for an item by name here...",
         searchString,
         IM_ARRAYSIZE(searchString)
     );
@@ -1155,7 +670,7 @@ void DataViewer::renderTableWindow(bool *open) {
 }
 
 void DataViewer::renderTable(const std::string& tableId,
-                             std::vector<size_t>& planetRows, bool useFixedHeight,
+                             std::vector<size_t>& dataRows, bool useFixedHeight,
                              std::string_view search)
 {
     static ImGuiTableFlags flags =
@@ -1170,7 +685,7 @@ void DataViewer::renderTable(const std::string& tableId,
     // Some size variables
     const float RowHeight = ImGui::GetTextLineHeightWithSpacing(); // Inner height
     const float TableHeight =
-        (planetRows.size() + 1) * 1.2f * RowHeight + ImGui::GetStyle().ScrollbarSize;
+        (dataRows.size() + 1) * 1.2f * RowHeight + ImGui::GetStyle().ScrollbarSize;
     const ImVec2 TableSize = ImVec2(0.f, useFixedHeight ? TableHeight : 0.f);
 
     if (ImGui::BeginTable(tableId.c_str(), nColumns + 1, flags, TableSize)) {
@@ -1183,11 +698,11 @@ void DataViewer::renderTable(const std::string& tableId,
         // Columns
         for (int colIdx = 0; colIdx < _columns.size(); colIdx++) {
             ImGuiTableColumnFlags colFlags = ImGuiTableColumnFlags_PreferSortDescending;
-            const Column c = _columns[colIdx];
-            if (c.id == ColumnID::Name) {
+            const ColumnKey c = _columns[colIdx];
+            if (isNameColumn(c)) {
                 colFlags |= ImGuiTableColumnFlags_DefaultSort;
             }
-            ImGui::TableSetupColumn(c.name.c_str(), colFlags, 0.f, colIdx);
+            ImGui::TableSetupColumn(columnName(c), colFlags, 0.f, colIdx);
         }
 
         // Make header and first column (name) always visible
@@ -1200,17 +715,15 @@ void DataViewer::renderTable(const std::string& tableId,
         ImGui::TableHeader("");
 
         for (int colIdx = 0; colIdx < _columns.size(); colIdx++) {
-            const Column c = _columns[colIdx];
+            const ColumnKey c = _columns[colIdx];
             ImGui::TableSetColumnIndex(colIdx + 1);
             ImGui::PushID(colIdx);
-            ImGui::TableHeader(c.name.c_str());
+            ImGui::TableHeader(columnName(c));
 
-            if (colIdx >= 0) {
-                if (c.description.has_value()) {
-                    const float TEXT_WIDTH = ImGui::CalcTextSize(c.name.c_str()).x;
-                    ImGui::SameLine(0.0f, TEXT_WIDTH + 2.f);
-                    renderHelpMarker(*c.description);
-                }
+            if (_dataSettings.hasDescription(c)) {
+                const float TEXT_WIDTH = ImGui::CalcTextSize(columnName(c)).x;
+                ImGui::SameLine(0.0f, TEXT_WIDTH + 2.f);
+                view::helper::renderHelpMarker(_dataSettings.description(c).c_str());
             }
 
             ImGui::PopID();
@@ -1228,26 +741,27 @@ void DataViewer::renderTable(const std::string& tableId,
                     const ExoplanetItem& l = flip ? _data[rhs] : _data[lhs];
                     const ExoplanetItem& r = flip ? _data[lhs] : _data[rhs];
 
-                    int col = static_cast<int>(sortSpecs->Specs->ColumnUserID);
+                    int colIndex = static_cast<int>(sortSpecs->Specs->ColumnUserID);
+                    ColumnKey key = _columns[colIndex];
 
-                    return compareColumnValues(col, l, r);
+                    return compareColumnValues(key, l, r);
                 };
 
-                std::sort(planetRows.begin(), planetRows.end(), compare);
+                std::sort(dataRows.begin(), dataRows.end(), compare);
                 sortSpecs->SpecsDirty = false;
             }
         }
 
         std::vector<size_t> displayedRows;
         if (search.empty()) {
-            displayedRows = planetRows;
+            displayedRows = dataRows;
         }
         else {
-            for (size_t r : planetRows) {
+            for (size_t r : dataRows) {
                 bool passSearch = ColumnFilter(
                     std::string(search),
                     ColumnFilter::Type::Text
-                ).passFilter(_data[r].planetName);
+                ).passFilter(_data[r].name);
 
                 if (passSearch) {
                     displayedRows.push_back(r); // Go to next
@@ -1272,69 +786,39 @@ void DataViewer::renderTable(const std::string& tableId,
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, RowHeight);
 
                 ImGui::TableNextColumn();
-                if (systemCanBeAdded(item.hostName)) {
-                    ImGui::PushID(std::format("addbutton{}", row).c_str());
-                    if (ImGui::Button("+", ImVec2(20, RowHeight))) {
-                        addExoplanetSystem(item.hostName);
-                    }
-                    ImGui::PopID();
-                }
-                else {
-                    // Add a target button instead
-                    ImGui::PushID(std::format("targetbutton{}", row).c_str());
-
-                    // Check if is target item. The GUI name should be set from the planet name
-                    const SceneGraphNode* node = global::navigationHandler->anchorNode();
-                    bool isCurrentAnchor = node && node->guiName() == item.planetName;
-                    if (isCurrentAnchor) {
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0, 153, 112).Value);
-                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(0, 204, 150).Value);
-                    }
-                    else {
-                        // A slightly darker blue color
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImColor(23, 43, 71).Value);
-                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(71, 135, 223).Value);
-                    }
-
-                    if (ImGui::Button("->", ImVec2(20, RowHeight))) {
-                        addOrTargetPlanet(item);
-                    }
-                    ImGui::PopStyleColor(2);
-
-                    ImGui::PopID();
-                }
+                renderFirstTableColumn(item, row);
 
                 for (int colIdx = 0; colIdx < _columns.size(); colIdx++) {
-                    const Column col = _columns[colIdx];
+                    const ColumnKey col = _columns[colIdx];
                     ImGui::TableNextColumn();
 
-                    if (col.id == ColumnID::Name) {
+                    if (isNameColumn(col)) {
                         bool changed = ImGui::Selectable(
-                            item.planetName.c_str(),
+                            item.name.c_str(),
                             itemIsSelected,
                             selectableFlags
                         );
 
                         // Context menu
-                        ImGui::PushID(std::format("context-{}", item.planetName).c_str());
+                        ImGui::PushID(std::format("context-{}", item.name).c_str());
                         if (ImGui::BeginPopupContextItem("item context menu")) {
-                            ImGui::Text(item.planetName.c_str());
+                            ImGui::Text(item.name.c_str());
 
                             auto foundIndex = std::find(
-                                _pinnedPlanets.begin(),
-                                _pinnedPlanets.end(),
+                                _pinnedItems.begin(),
+                                _pinnedItems.end(),
                                 index
                             );
-                            bool isPinned = foundIndex != _pinnedPlanets.end();
+                            bool isPinned = foundIndex != _pinnedItems.end();
 
                             ImGui::SameLine();
                             ImGui::SetNextItemWidth(-10);
                             if (ImGui::Button(isPinned ? "Unpin" : "Pin")) {
                                 if (isPinned) {
-                                    _pinnedPlanets.erase(foundIndex);
+                                    _pinnedItems.erase(foundIndex);
                                 }
                                 else {
-                                    _pinnedPlanets.push_back(index);
+                                    _pinnedItems.push_back(index);
                                 }
                             }
 
@@ -1342,68 +826,33 @@ void DataViewer::renderTable(const std::string& tableId,
 
                             ImGui::Text(item.referenceName.c_str());
                             ImGui::SameLine();
-                            ImGui::PushID(std::format("Planetreflink-{}", item.planetName).c_str());
 
-                            if (ImGui::Button("Link")) {
-                                system(std::format("start {}", item.referenceUrl).c_str());
+                            if (ImGui::Button("Link (Chrome)")) {
+                                system(std::format("start chrome.exe {}", item.referenceUrl).c_str());
                             }
-                            ImGui::PopID();
+                            ImGui::SameLine();
+                            if (ImGui::Button("Link (Firefox)")) {
+                                system(std::format("start firefox {}", item.referenceUrl).c_str());
+                            }
 
                             ImGui::Separator();
-
-                            ImGui::PushID(std::format("ShowShystemView-{}", item.planetName).c_str());
-
-                            bool isAlreadyOpen = std::find(
-                                _shownPlanetSystemWindows.begin(),
-                                _shownPlanetSystemWindows.end(),
-                                item.hostName
-                            ) != _shownPlanetSystemWindows.end();
-
-                            if (!isAlreadyOpen) {
-                                if (ImGui::Button("Show system view")) {
-                                    _shownPlanetSystemWindows.push_back(item.hostName);
-                                    ImGui::CloseCurrentPopup();
-                                }
-                            }
-                            else {
-                                ImGui::TextDisabled("A system view is already opened for this system");
-                            }
-
-                            bool systemIsAdded = !systemCanBeAdded(item.hostName);
-                            if (systemIsAdded) {
-                                if (ImGui::Button("Zoom to star")) {
-                                    flyToStar(makeIdentifier(item.hostName));
-                                }
-                            }
-                            else {
-                                if (ImGui::Button("+ Add system")) {
-                                    addExoplanetSystem(item.hostName);
-                                }
-                            }
+                            _systemViewer->renderSystemViewQuickControls(item.hostName);
 
                             ImGui::EndPopup();
-                            ImGui::PopID();
                         }
                         ImGui::PopID();
 
                         // Check double click, left mouse button
                         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
-                            LINFO(std::format("Double click: {}", item.planetName));
-                            addOrTargetPlanet(item);
+                            LINFO(std::format("Double click: {}", item.name));
+                            bool isPlanetSystem = !item.hostName.empty();
 
-                            // Also open the system view for that system
-                            bool isAlreadyOpen = std::find(
-                                _shownPlanetSystemWindows.begin(),
-                                _shownPlanetSystemWindows.end(),
-                                item.hostName
-                            ) != _shownPlanetSystemWindows.end();
-
-                            if (!isAlreadyOpen) {
-                                _shownPlanetSystemWindows.push_back(item.hostName);
+                            if (isPlanetSystem) {
+                                _systemViewer->addOrTargetPlanet(item);
+                                _systemViewer->showSystemView(item.hostName);
                             }
                             else {
-                                // Bring window to front
-                                ImGui::SetWindowFocus(systemWindowName(item.hostName).c_str());
+                                LINFO("Can't add a non-exoplanet object, yet!");
                             }
                         }
 
@@ -1426,7 +875,7 @@ void DataViewer::renderTable(const std::string& tableId,
                         continue;
                     }
 
-                    renderColumnValue(colIdx, col.format, item);
+                    renderColumnValue(colIdx, item);
                 }
             }
         }
@@ -1439,578 +888,94 @@ void DataViewer::renderTable(const std::string& tableId,
     }
 }
 
+void DataViewer::renderFirstTableColumn(const ExoplanetItem& item, size_t row) {
+    const float RowHeight = ImGui::GetTextLineHeightWithSpacing(); // Inner height
+
+    bool isPlanetSystem = !item.hostName.empty();
+
+    if (_systemViewer->systemCanBeAdded(item.hostName)) {
+        ImGui::PushID(std::format("addbutton{}", row).c_str());
+        if (ImGui::Button("+", ImVec2(20, RowHeight))) {
+
+            if (isPlanetSystem) {
+                _systemViewer->addExoplanetSystem(item.hostName);
+            }
+            else {
+                LINFO("Can't add a non-exoplanet object, yet!");
+            }
+        }
+        ImGui::PopID();
+    }
+    else {
+        // Add a target button instead
+        ImGui::PushID(std::format("targetbutton{}", row).c_str());
+
+        // Check if is target item. The GUI name should be set from the planet name
+        const SceneGraphNode* node = global::navigationHandler->anchorNode();
+        bool isCurrentAnchor = node && node->guiName() == item.name;
+        if (isCurrentAnchor) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0, 153, 112).Value);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(0, 204, 150).Value);
+        }
+        else {
+            // A slightly darker blue color
+            ImGui::PushStyleColor(ImGuiCol_Button, ImColor(23, 43, 71).Value);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(71, 135, 223).Value);
+        }
+
+        if (ImGui::Button("->", ImVec2(20, RowHeight))) {
+            if (isPlanetSystem) {
+                _systemViewer->addOrTargetPlanet(item);
+            }
+            else {
+                // TODO: use the samae function to target
+                LINFO("Can't target a non-exoplanet object, yet!");
+            }
+        }
+        ImGui::PopStyleColor(2);
+
+        ImGui::PopID();
+    }
+}
+
 void DataViewer::renderFilterSettingsWindow(bool* open) {
+    // Reset some state changed variables
+    _filterChanged = false;
+    _externalSelectionChanged = false;
+
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Filters", open)) {
         ImGui::End();
         return;
     }
 
-    // Some pre-defined filters
-    static bool hideNanTsm = false;
-    static bool hideNanEsm = false;
-    static bool showOnlyMultiPlanetSystems = false;
-    static bool showOnlyHasPosition = false;
+    _filterChanged = _filteringView->renderFilterSettings();
 
-    // Planet bins
-    static bool showTerrestrial = false;
-    static bool showSmallSubNeptunes = false;
-    static bool showLargeSubNeptunes = false;
-    static bool showSubJovians = false;
-    static bool showLargerPlanets = false;
-
-    // Discovery methods
-    static bool showTransit = true;
-    static bool showRadialVelocity = true;
-    static bool showOther = true;
-
-    // Row limit
-    static int nRows = 100;
-    static bool limitNumberOfRows = false;
-    static int nItemsWithoutRowLimit = static_cast<int>(_filteredData.size());
-
-    if (ImGui::Button("Reset internal")) {
-        // Reset to default values
-
-        _appliedFilters.clear(); // Column filters
-
-        hideNanTsm = false;
-        hideNanEsm = false;
-        showOnlyMultiPlanetSystems = false;
-        showOnlyHasPosition = false;
-
-        // Planet bins
-        showTerrestrial = false;
-        showSmallSubNeptunes = false;
-        showLargeSubNeptunes = false;
-        showSubJovians = false;
-        showLargerPlanets = false;
-
-        // Discovery methods
-        showTransit = true;
-        showRadialVelocity = true;
-        showOther = true;
-
-        _filterChanged = true;
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("Reset row limit")) {
-        limitNumberOfRows = false;
-        _filterChanged = true;
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("Reset external")) {
-        _externalSelection = {};
-        _filterChanged = true;
-    }
-
-    // Internal filters group
-    bool showInternalFiltersSection =
-        ImGui::CollapsingHeader("Internal filters", ImGuiTreeNodeFlags_DefaultOpen);
-    ImGui::SameLine();
-    renderHelpMarker("Filter the data internally, within the OpenSpace application");
-
-    if (showInternalFiltersSection) {
-        // Per-column filtering
-        {
-            static int filterColIndex = 0;
-
-            ImGui::Separator();
-            ImGui::Text("Filter on column");
-            ImGui::SetNextItemWidth(120);
-            if (ImGui::BeginCombo("##Column", _columns[filterColIndex].name.c_str())) {
-                for (int i = 0; i < _columns.size(); ++i) {
-                    if (ImGui::Selectable(_columns[i].name.c_str(), filterColIndex == i)) {
-                        filterColIndex = i;
-                    }
-                }
-                ImGui::EndCombo();
-            }
-
-            ImGui::SameLine();
-
-            static char queryString[128] = "";
-
-            bool numeric = isNumericColumn(filterColIndex);
-
-            ImGui::SetNextItemWidth(numeric ? ImGui::GetContentRegionAvail().x * 0.3f : -150);
-            bool inputEntered = ImGui::InputTextWithHint(
-                "##Query",
-                "has value",
-                queryString,
-                IM_ARRAYSIZE(queryString),
-                ImGuiInputTextFlags_EnterReturnsTrue
-            );
-
-            // Short description
-            ImGui::SameLine();
-            ImGui::TextUnformatted(numeric ?
-                ColumnFilter::NumericFilterDescriptionShort :
-                ColumnFilter::TextFilterDescriptionShort
-            );
-
-            // Help marker
-            ImGui::SameLine();
-            renderHelpMarker(numeric ?
-                ColumnFilter::NumericFilterDescription :
-                ColumnFilter::TextFilterDescription
-            );
-
-            if (ImGui::Button("Add filter") || inputEntered) {
-                ColumnFilter filter = numeric ?
-                    ColumnFilter(queryString, ColumnFilter::Type::Numeric) :
-                    ColumnFilter(queryString, ColumnFilter::Type::Text);
-
-                if (filter.isValid()) {
-                    _appliedFilters.push_back({ filterColIndex , filter });
-                    strcpy(queryString, "");
-                    _filterChanged = true;
-                }
-            }
-
-            // Clear the text field
-            ImGui::SameLine();
-            if (ImGui::Button("Clear text field")) {
-                strcpy(queryString, "");
-            }
-
-        }
-
-        ImGui::Spacing();
-
-        // Render list of column filters
-        {
-            const std::string filtersHeader = _appliedFilters.empty() ?
-                "Added filters" :
-                std::format("Added filters ({})", _appliedFilters.size());
-
-            // The ### operator overrides the ID, ignoring the preceding label
-            // => Won't rerender when label changes
-            const std::string headerWithId = std::format("{}###FiltersHeader", filtersHeader);
-
-            if (ImGui::CollapsingHeader(headerWithId.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                ImGui::Indent();
-
-                if (_appliedFilters.empty()) {
-                    ImGui::Text("No active filters");
-                }
-
-                int indexToErase = -1;
-                constexpr const int nColumns = 5;
-
-                const ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg;
-
-                if (ImGui::BeginTable("filtersTable", nColumns, flags)) {
-                    for (int i = 0; i < _appliedFilters.size(); ++i) {
-                        ColumnFilterEntry &f = _appliedFilters[i];
-                        const std::string queryString = f.filter.query();
-                        ImGui::TableNextRow();
-
-                        ImGui::PushID(std::format("FilterColEnabled-{}", i).c_str());
-                        ImGui::TableNextColumn();
-                        if (ImGui::Checkbox("##Enabled", &f.enabled)) {
-                            _filterChanged = true;
-                        }
-                        ImGui::PopID();
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text(_columns[f.columnIndex].name.c_str());
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text("    ");
-
-                        ImGui::TableNextColumn();
-                        ImGui::Text(queryString.empty() ? "has value" : queryString.c_str());
-
-                        ImGui::TableNextColumn();
-                        ImGui::PushID(i);
-                        if (ImGui::SmallButton("Delete")) {
-                            indexToErase = i;
-                        }
-                        ImGui::PopID();
-                    }
-
-                    if (indexToErase != -1) {
-                        _appliedFilters.erase(_appliedFilters.begin() + indexToErase);
-                        _filterChanged = true;
-                    }
-
-                    ImGui::EndTable();
-                }
-                ImGui::Unindent();
-            }
-        }
-
-        ImGui::Separator();
-        ImGui::Spacing();
-
-        // Pre-defined filters
-        {
-            _filterChanged |= ImGui::Checkbox("Hide null TSM", &hideNanTsm);
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Hide null ESM", &hideNanEsm);
-
-            _filterChanged |= ImGui::Checkbox("Only multi-planet", &showOnlyMultiPlanetSystems);
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Must have 3D positional data", &showOnlyHasPosition);
-            ImGui::SameLine();
-            renderHelpMarker(
-                "Only include data points that will show up in OpenSpace's 3D rendered view"
-            );
-
-            ImGui::Text("Planet bin");
-            _filterChanged |= ImGui::Checkbox("Terrestrial", &showTerrestrial);
-            ImGui::SameLine();
-            renderHelpMarker("Rp < 1.5  (Earth radii)");
-
-            _filterChanged |= ImGui::Checkbox("Small Sub-Neptune", &showSmallSubNeptunes);
-            ImGui::SameLine();
-            renderHelpMarker("1.5 < Rp < 2.75  (Earth radii)");
-
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Large Sub-Neptune", &showLargeSubNeptunes);
-            ImGui::SameLine();
-            renderHelpMarker("2.75 < Rp < 4.0  (Earth radii)");
-
-            _filterChanged |= ImGui::Checkbox("Sub-Jovian", &showSubJovians);
-            ImGui::SameLine();
-            renderHelpMarker("4.0 < Rp < 10)  (Earth radii)");
-
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Larger", &showLargerPlanets);
-            ImGui::SameLine();
-            renderHelpMarker("Rp > 10  (Earth radii)");
-
-            ImGui::Text("Discovery method");
-            _filterChanged |= ImGui::Checkbox("Transit", &showTransit);
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Radial Velocity", &showRadialVelocity);
-            ImGui::SameLine();
-            _filterChanged |= ImGui::Checkbox("Other", &showOther);
-        }
-    }
-
-    ImGui::Spacing();
-    ImGui::Separator();
-
-    // Row limit group
-    bool showRowLimitSection = ImGui::CollapsingHeader("Row limit");
-    ImGui::SameLine();
-    renderHelpMarker(
-        "Limit the number of filtered rows (internal) based on which "
-        "have the highest TSM/ESM value"
-    );
-
-    static bool overrideInternalSelection = false;
-    bool useHighestValue = true;  // This default value does not matter
-    ColumnID rowLimitCol = ColumnID::TSM; // This default value does not matter
-    bool rowLimitFilterChanged = false;
-    if (showRowLimitSection) {
-        rowLimitFilterChanged |= ImGui::Checkbox("##RowLimit", &limitNumberOfRows);
-        ImGui::SameLine();
-        ImGui::Text("Limit number of rows");
-        ImGui::SameLine();
-        renderHelpMarker(
-            "Enable to only show the top X resulting rows with highest or lowest value "
-            "for the given column"
-        );
-
-
-        ImGui::Text("Show");
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(85);
-        rowLimitFilterChanged |= ImGui::InputInt("##nRows", &nRows);
-        ImGui::SameLine();
-        ImGui::Text("rows with");
-        ImGui::SameLine();
-
-        const char* highOrLowChoices[] = { "highest", "lowest" };
-        static int highOrLowIndex = 0; // highest
-        ImGui::SetNextItemWidth(80);
-        bool highLowChanged = ImGui::Combo(
-            "##HighOrLowCombo",
-            &highOrLowIndex,
-            highOrLowChoices,
-            IM_ARRAYSIZE(highOrLowChoices)
-        );
-        if (highLowChanged) {
-            rowLimitFilterChanged = true;
-        };
-
-        useHighestValue = std::string(highOrLowChoices[highOrLowIndex]) == "highest";
-
-        ImGui::SameLine();
-
-        static int currentMetricChoiceIndex = -1;
-        if (currentMetricChoiceIndex < 0) {
-            // Find default column - first numeric
-            for (int i = 0; i < _columns.size(); ++i) {
-                if (isNumericColumn(i)) {
-                    currentMetricChoiceIndex = i;
-                    rowLimitFilterChanged = true;
-                    break;
-                }
-            }
-        }
-
-        ImGui::SetNextItemWidth(100);
-        if (ImGui::BeginCombo("##RowLimitColumn", _columns[currentMetricChoiceIndex].name.c_str())) {
-            for (int i = 0; i < _columns.size(); ++i) {
-                // Ignore non-numeric columns
-                if (!isNumericColumn(i)) {
-                    continue;
-                }
-
-                const char* name = _columns[i].name.c_str();
-                if (ImGui::Selectable(name, currentMetricChoiceIndex == i)) {
-                    currentMetricChoiceIndex = i;
-                    rowLimitFilterChanged = true;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        rowLimitCol = _columns[currentMetricChoiceIndex].id;
-    }
-    _filterChanged |= rowLimitFilterChanged;
-
-    ImGui::Spacing();
-    ImGui::Separator();
-
-    // External filter
-    bool showExternalFiltersSection = ImGui::CollapsingHeader("External filters");
-    ImGui::SameLine();
-    renderHelpMarker(
-        "Control filtering/selection coming from the external webpage. \n \n"
-        "Note that it is ignored by default. Set the 'Use selection from webpage' "
-        "to true to apply the selection. "
-    );
-
-    bool externalSelectionSettingsChanged = false;
-    if (showExternalFiltersSection) {
-        // Filter from webpage
-        {
-            if (ImGui::Checkbox("Use selection from website", &_useExternalSelection)) {
-                externalSelectionSettingsChanged = true;
-            }
-            if (!_externalSelection.value().empty()) {
-                ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 100);
-                if (ImGui::Button("Delete", ImVec2(100, 0))) {
-                    LINFO("Deleted external selection");
-                    _externalSelection = {};
-                    externalSelectionSettingsChanged = true;
-                }
-            }
-
-            ImGui::Text("Selection: ");
-            if (!_externalSelection.value().empty()) {
-                ImGui::SameLine();
-                ImGui::TextColored(
-                    ImColor(200, 200, 200),
-                    std::format("{} items", _externalSelection.value().size()).c_str()
-                );
-            }
-
-            ImGui::Text("Last updated: ");
-            ImGui::SameLine();
-            ImGui::TextColored(ImColor(200, 200, 200), _lastExternalSelectionTimeStamp.c_str());
-
-            if (ImGui::Checkbox("Override internal selection", &overrideInternalSelection)) {
-                externalSelectionSettingsChanged = true;
-            }
-            ImGui::SameLine();
-            renderHelpMarker(
-                "If set to true, only the selection from the webpage will be shown. "
-                "Meaning that the above internal filtering will be ignored."
-            );
-        }
-
-        _filterChanged |= externalSelectionSettingsChanged;
-
-        // Also check if a new selection was sent from the webpage
-        _filterChanged |= (_useExternalSelection && _externalSelectionChanged);
-    }
-
-    ImGui::Separator();
-
-    // Filter the data
     // Update the filtered data
     if (_filterChanged) {
-        _filteredData.clear();
-        _filteredData.reserve(_data.size());
-
-        for (int i = 0; i < _data.size(); i++) {
-            const ExoplanetItem& d = _data[i];
-
-            // Pre-defined filters
-            bool filteredOut = hideNanTsm && std::isnan(d.tsm);
-            filteredOut |= hideNanEsm && std::isnan(d.esm);
-            filteredOut |= showOnlyMultiPlanetSystems && !d.multiSystemFlag;
-            filteredOut |= showOnlyHasPosition && !d.position.has_value();
-
-            bool hasBinFilter = showTerrestrial || showSmallSubNeptunes ||
-                                showLargeSubNeptunes || showSubJovians ||
-                                showLargerPlanets;
-
-            if (hasBinFilter) {
-                bool matchesBinFilter = false;
-                if (d.radius.hasValue()) {
-                    float r = d.radius.value;
-                    // TODO: make it possible to set these values
-                    matchesBinFilter |= showTerrestrial && (r <= 1.5);
-                    matchesBinFilter |= showSmallSubNeptunes && (r > 1.5 && r <= 2.75);
-                    matchesBinFilter |= showLargeSubNeptunes && (r > 2.75 && r <= 4.0);
-                    matchesBinFilter |= showSubJovians && (r > 4.0 && r <= 10.0);
-                    matchesBinFilter |= showLargerPlanets && (r > 10.0);
-                }
-                filteredOut |= !matchesBinFilter;
-            }
-
-            // Shortcut filter for discovery method
-            bool passDiscoveryMethod = false;
-
-            bool isTransit = ColumnFilter(
-                "transit",
-                ColumnFilter::Type::Text
-            ).passFilter(d.discoveryMethod);
-
-            bool isRV = ColumnFilter(
-                "radial velocity",
-                ColumnFilter::Type::Text
-            ).passFilter(d.discoveryMethod);
-
-            if (showOther && !(isTransit || isRV)) {
-                passDiscoveryMethod = true;
-            }
-            else {
-                passDiscoveryMethod |= (showTransit && isTransit);
-                passDiscoveryMethod |= (showRadialVelocity && isRV);
-            }
-            filteredOut |= !passDiscoveryMethod;
-
-            // Other filters
-            for (const ColumnFilterEntry& f : _appliedFilters) {
-                if (!f.enabled) {
-                    continue;
-                }
-
-                std::variant<const char*, float> value =
-                    valueFromColumn(f.columnIndex, d);
-
-                if (std::holds_alternative<float>(value)) {
-                    float val = std::get<float>(value);
-                    filteredOut |= !f.filter.passFilter(val);
-                }
-                else { // text
-                    const char* val = std::get<const char*>(value);
-                    filteredOut |= !f.filter.passFilter(val);
-                }
-            }
-
-            if (!filteredOut) {
-                _filteredData.push_back(i);
-            }
-        }
-        _filteredData.shrink_to_fit();
-
-        nItemsWithoutRowLimit = static_cast<int>(_filteredData.size());
-    }
-
-    // Show how many values the filter corresponds to, without the limited rows
-    ImGui::TextColored(
-        toImVec4(DescriptiveTextColor),
-        std::format(
-            "Current internal filter corresponds to {} exoplanets and \n"
-            "has {} active column filters \n", nItemsWithoutRowLimit, _appliedFilters.size()
-        ).c_str()
-    );
-
-    // Limit the number of rows by first sorting based on the chosen metric
-    static int nRowsAfterLimit = 0;
-    if (limitNumberOfRows && _filteredData.size() > nRows) {
-        auto compare = [&rowLimitCol, &useHighestValue, this](const size_t& lhs, const size_t& rhs) {
-            // We are interested in the largest, so flip the order
-            const ExoplanetItem& l = _data[useHighestValue ? rhs : lhs];
-            const ExoplanetItem& r = _data[useHighestValue ? lhs : rhs];
-            return compareColumnValues(columnIndexFromId(rowLimitCol), l, r);
-        };
-
-        std::sort(_filteredData.begin(), _filteredData.end(), compare);
-        _filteredData.erase(_filteredData.begin() + nRows, _filteredData.end());
-        nRowsAfterLimit = static_cast<int>(_filteredData.size());
-    }
-
-    if (limitNumberOfRows) {
-        ImGui::TextColored(
-            toImVec4(DescriptiveTextColor),
-            std::format("After row limit : {}", nRowsAfterLimit).c_str()
+        _filteredData = _filteringView->applyFiltering(
+            _data,
+            _externalSelection.value()
         );
     }
 
-    // OBS! This is a little nasty. Should be some better way to do it
-    bool shouldUpdateBasedOnExternalSelection = false;
-    shouldUpdateBasedOnExternalSelection |= externalSelectionSettingsChanged;
-    shouldUpdateBasedOnExternalSelection |= _externalSelectionChanged;
-    shouldUpdateBasedOnExternalSelection |= (_filterChanged && _useExternalSelection);
-    shouldUpdateBasedOnExternalSelection &= (_useExternalSelection && !_externalSelection.value().empty());
+    ImGui::Separator();
 
-    if (shouldUpdateBasedOnExternalSelection) {
-        if (overrideInternalSelection) {
-            // Just use the external seleciton, out of the box
-            std::vector<size_t> newFilteredData;
-            newFilteredData.reserve(_externalSelection.value().size());
-
-            for (int i : _externalSelection.value()) {
-                newFilteredData.push_back(static_cast<size_t>(i));
-            }
-
-            _filterChanged = true; // Update filter changed flag, to always trigger resorting
-            _filteredData = std::move(newFilteredData);
-        }
-        else {
-            // Do an intersection, i.e. check if the filtered out items are in the selection
-            std::vector<size_t> newFilteredData;
-            newFilteredData.reserve(_filteredData.size());
-            std::vector<int> searchList = _externalSelection.value();
-
-            for (size_t index : _filteredData) {
-                bool isFound = std::find(
-                    searchList.begin(),
-                    searchList.end(),
-                    static_cast<int>(index)
-                ) != searchList.end();
-                if (isFound) {
-                    newFilteredData.push_back(index);
-                }
-            }
-            newFilteredData.shrink_to_fit();
-            _filteredData = std::move(newFilteredData);
-        }
-    }
-
-    if (_useExternalSelection && !_externalSelection.value().empty()) {
-        ImGui::TextColored(
-            toImVec4(DescriptiveTextColor),
-            std::format("After applying external filtering: {}", _filteredData.size()).c_str()
-        );
-    }
+    view::helper::renderDescriptiveText(std::format(
+        "Number items after filtering: {} / {}",
+        _filteredData.size(), _data.size()
+    ).c_str());
 
     ImGui::End(); // Filter settings window
 
     updateFilteredRowsProperty();
 
-    // Handle selection
+    // Clear selection
     if (_filterChanged) {
         _selection.clear();
         updateSelectionInRenderable();
     }
-
-    // Reset some state changed variables
-    _externalSelectionChanged = false;
 }
-
 
 int DataViewer::getHoveredPlanetIndex() const {
     std::string sgnId = std::string(ExoplanetsExpertToolModule::GlyphCloudIdentifier);
@@ -2045,8 +1010,9 @@ void DataViewer::renderPlanetTooltip(int index) const {
     const ExoplanetItem& item = _data[index];
 
     if (ImGui::Begin("##planetToolTip", NULL, flags)) {
-        ImGui::Text(item.planetName.c_str());
+        ImGui::Text(item.name.c_str());
     }
+    ImGui::End();
 }
 
 void DataViewer::handleDoubleClickHoveredPlanet(int index) {
@@ -2071,20 +1037,7 @@ void DataViewer::handleDoubleClickHoveredPlanet(int index) {
     const ExoplanetItem& item = _data[index];
 
     if (ImGui::IsMouseDoubleClicked(0)) {
-        // Open system window
-        bool isAlreadyOpen = std::find(
-            _shownPlanetSystemWindows.begin(),
-            _shownPlanetSystemWindows.end(),
-            item.hostName
-        ) != _shownPlanetSystemWindows.end();
-
-        if (!isAlreadyOpen) {
-            _shownPlanetSystemWindows.push_back(item.hostName);
-        }
-        else {
-            // Bring window to front
-            ImGui::SetWindowFocus(systemWindowName(item.hostName).c_str());
-        }
+        _systemViewer->showSystemView(item.hostName);
 
         // Select planet, if not already selected
         auto found = std::find(_selection.begin(), _selection.end(), index);
@@ -2131,7 +1084,8 @@ void DataViewer::renderSettingsMenuContent() {
     static bool showKepler = true;
     static bool showMilkyWayLine = true;
 
-    renderColumnSettingsModal();
+    // This function also renders the buttons that opens the modal
+    _columnSelectionView.renderColumnSettingsView(_columns, _dataSettings);
 
     if (ImGui::Checkbox("Use fixed ring width", &useFixedWidth)) {
         queueScriptSynced(std::format(
@@ -2195,420 +1149,19 @@ void DataViewer::renderSettingsMenuContent() {
     }
 }
 
-void DataViewer::renderColumnSettingsModal() {
-    if (ImGui::Button("Set up columns...")) {
-        ImGui::OpenPopup("Set columns");
-    }
+void DataViewer::renderColumnValue(int columnIndex, const ExoplanetItem& item) {
+    std::optional<const char*> format;
 
-    constexpr const int nPerColumn = 20;
+    if (_dataSettings.columnInfo.contains(_columns[columnIndex])) {
+        const DataSettings::ColumnInfo& colInfo =
+            _dataSettings.columnInfo.at(_columns[columnIndex]);
 
-    std::deque<bool> prevSelectedDefault = _selectedDefaultColumns;
-    std::deque<bool> prevSelectedOther = _selectedOtherColumns;
-    auto resetSelection = [this, &prevSelectedDefault, &prevSelectedOther]() {
-        _selectedDefaultColumns = prevSelectedDefault;
-        _selectedOtherColumns = prevSelectedOther;
-    };
-
-    // Always center this window when appearing
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-    int nSelected = 0;
-    bool canSelectMore = true;
-    ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
-
-    if (ImGui::BeginPopupModal("Set columns", NULL, flags)) {
-        ImGui::Text(std::format(
-            "Select up to 64 columns to show in the tool, out of {} ({} default columns, {} other columns)",
-            _defaultColumns.size() + _otherColumns.size(),
-            _defaultColumns.size(),
-            _otherColumns.size()
-        ).c_str());
-
-        ImGui::Separator();
-
-        // Default columns
-        ImGui::BeginGroup();
-        {
-            ImGui::Text("Default columns:");
-            ImGui::SameLine();
-
-            ImGui::PushID("clear_default");
-            if (ImGui::Button("Clear selection")) {
-                _selectedDefaultColumns.assign(_defaultColumns.size(), false);
-            }
-            ImGui::PopID();
-
-            ImGui::BeginGroup();
-            for (int i = 0; i < _defaultColumns.size(); i++) {
-                if (i % nPerColumn == 0) {
-                    ImGui::EndGroup();
-                    ImGui::SameLine();
-                    ImGui::BeginGroup();
-                }
-
-                if (nSelected > IMGUI_TABLE_MAX_COLUMNS) {
-                    canSelectMore = false;
-                }
-
-                const Column& c = _defaultColumns[i];
-
-                if (c.id == ColumnID::Name) {
-                    // Name is required
-                    ImGui::Checkbox(c.name.c_str(), &_selectedDefaultColumns[i]);
-                    ImGui::SameLine();
-                    ImGui::TextDisabled(" (required)");
-                    _selectedDefaultColumns[i] = true;
-                }
-                else {
-                    ImGui::Checkbox(c.name.c_str(), &_selectedDefaultColumns[i]);
-                }
-
-                nSelected += _selectedDefaultColumns[i] ? 1 : 0;
-            }
-            ImGui::EndGroup();
-
-            ImGui::EndGroup();
-        }
-        ImGui::SameLine();
-
-        // Other columns
-        ImGui::BeginGroup();
-        {
-            ImGui::Text("Other columns:");
-            ImGui::SameLine();
-
-            ImGui::PushID("clear_other");
-            if (ImGui::Button("Clear selection")) {
-                _selectedOtherColumns.assign(_otherColumns.size(), false);
-            }
-            ImGui::PopID();
-
-            ImGui::BeginGroup();
-            for (int i = 0; i < _otherColumns.size(); i++) {
-                if (i % nPerColumn == 0) {
-                    ImGui::EndGroup();
-                    ImGui::SameLine();
-                    ImGui::BeginGroup();
-                }
-
-                if (nSelected > IMGUI_TABLE_MAX_COLUMNS) {
-                    canSelectMore = false;
-                }
-
-                const Column& c = _otherColumns[i];
-                ImGui::Checkbox(c.name.c_str(), &_selectedOtherColumns[i]);
-                nSelected += _selectedOtherColumns[i] ? 1 : 0;
-            }
-            ImGui::EndGroup();
-
-            ImGui::EndGroup();
-        }
-
-        bool isTooManyColumns = nSelected > IMGUI_TABLE_MAX_COLUMNS;
-        glm::vec4 textColor = isTooManyColumns ? ErrorColor : DescriptiveTextColor;
-
-        ImGui::TextColored(
-            toImVec4(textColor),
-            std::format(
-                "Selected: {} / {}", nSelected, IMGUI_TABLE_MAX_COLUMNS
-            ).c_str()
-        );
-
-        // Ok / Cancel
-        if (isTooManyColumns) {
-            ImGui::PushStyleColor(ImGuiCol_Button, toImVec4(DisabledButtonColor));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, toImVec4(DisabledButtonColor));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, toImVec4(DisabledButtonColor));
-        }
-
-        if (ImGui::Button("OK", ImVec2(120, 0)) && !isTooManyColumns) {
-            setUpSelectedColumns(nSelected);
-            ImGui::CloseCurrentPopup();
-        }
-
-        if (isTooManyColumns) {
-            ImGui::PopStyleColor(3);
-        }
-
-        ImGui::SetItemDefaultFocus();
-        ImGui::SameLine();
-        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-            resetSelection();
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
-}
-
-void DataViewer::setUpSelectedColumns(int nSelected) {
-    ghoul_assert(
-        (_selectedDefaultColumns.size() == _defaultColumns.size()) &&
-        (_selectedOtherColumns.size() == _otherColumns.size()),
-        "Number of columns must match!"
-    );
-    _columns.clear();
-    _columns.reserve(nSelected);
-
-    for (int i = 0; i < _defaultColumns.size(); i++) {
-        if (_selectedDefaultColumns[i]) {
-            _columns.push_back(_defaultColumns[i]);
+        if (!colInfo.format.empty()) {
+            format = colInfo.format.c_str();
         }
     }
 
-    for (int i = 0; i < _otherColumns.size(); i++) {
-        if (_selectedOtherColumns[i]) {
-            _columns.push_back(_otherColumns[i]);
-        }
-    }
-}
-
-void DataViewer::renderSystemViewContent(const std::string& host) {
-    const std::string hostIdentifier = makeIdentifier(host);
-    bool systemIsAdded = !systemCanBeAdded(host);
-
-    std::vector<size_t>& planetIndices = _hostIdToPlanetsMap[makeIdentifier(host)];
-
-    static bool changeDefaultValueOrbitAppearance = false;
-
-    ImGui::BeginGroup();
-    {
-        if (!systemIsAdded) {
-            if (ImGui::Button("Add system")) {
-                addExoplanetSystem(host);
-                setDefaultValueOrbitVisuals(changeDefaultValueOrbitAppearance);
-            }
-        }
-        else {
-            // Button to focus Star
-            if (ImGui::Button("Focus star")) {
-                // Ugly: Always set reach factors when targetting object;
-                // we can't do it until the system is added to the scene
-                setIncreasedReachfactors();
-
-                queueScriptSynced(std::format(
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '{}');"
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
-                    hostIdentifier
-                ));
-            }
-
-            ImGui::SameLine();
-            if (ImGui::Button("Zoom to star")) {
-                flyToStar(hostIdentifier);
-            }
-
-            // Buttons to enable/disable helper renderables
-            const std::string sizeRingId = hostIdentifier + "_1AU_Circle";
-            const Renderable* sizeRing = renderable(sizeRingId);
-            if (sizeRing) {
-                bool enabled = sizeRing->isEnabled();
-                if (ImGui::Checkbox("Show 1 AU Ring ", &enabled)) {
-                    setRenderableEnabled(sizeRingId, enabled);
-                }
-                ImGui::SameLine();
-                renderHelpMarker(
-                    "Show a ring with a radius of 1 AU around the star of the system"
-                );
-            }
-
-            const std::string inclinationPlaneId = hostIdentifier + "_EdgeOnInclinationPlane";
-            const Renderable* inclinationPlane = renderable(inclinationPlaneId);
-            if (inclinationPlane) {
-                bool enabled = inclinationPlane->isEnabled();
-                if (ImGui::Checkbox("Show 90 degree inclination plane", &enabled)) {
-                    setRenderableEnabled(inclinationPlaneId, enabled);
-                }
-                ImGui::SameLine();
-                renderHelpMarker(
-                    "Show a grid plane that represents 90 degree inclinaiton, "
-                    "i.e. orbits in this plane are visible \"edge-on\" from Earth"
-                );
-            }
-
-            const std::string arrowId = hostIdentifier + "_EarthDirectionArrow";
-            const Renderable* arrow = renderable(arrowId);
-            if (arrow) {
-                bool enabled = arrow->isEnabled();
-                if (ImGui::Checkbox("Show direction to Earth", &enabled)) {
-                    setRenderableEnabled(arrowId, enabled);
-                }
-                ImGui::SameLine();
-                renderHelpMarker(
-                    "Show an arrow pointing in the direction from the host star "
-                    "to Earth"
-                );
-            }
-
-            const std::string habitableZoneId = hostIdentifier + "_HZ_Disc";
-            const Renderable* habitableZone = renderable(habitableZoneId);
-            if (habitableZone) {
-                bool enabled = habitableZone->isEnabled();
-                if (ImGui::Checkbox("Show habitable zone", &enabled)) {
-                    setRenderableEnabled(habitableZoneId, enabled);
-                }
-            }
-
-            if (planetIndices.size() > 0) {
-                // Assume that if first one we find is enabled/disabled, all are
-                std::string planetDiscId;
-                for (size_t i : planetIndices) {
-                    const std::string discId = planetIdentifier(_data[i]) + "_Disc";
-                    if (renderable(discId)) {
-                        planetDiscId = discId;
-                        break;
-                    }
-                }
-
-                const Renderable* planetOrbitDisc = renderable(planetDiscId);
-                if (planetOrbitDisc) {
-                    bool enabled = planetOrbitDisc->isEnabled();
-
-                    if (ImGui::Checkbox("Show orbit uncertainty", &enabled)) {
-                        for (size_t i : planetIndices) {
-                            const ExoplanetItem& p = _data[i];
-                            const std::string discId = planetIdentifier(p) + "_Disc";
-                            if (renderable(discId)) {
-                                setRenderableEnabled(discId, enabled);
-                            }
-                        }
-                    }
-                    ImGui::SameLine();
-                    renderHelpMarker(
-                        "Show/hide the disc overlayed on planet orbits that visualizes the "
-                        "uncertainty of the orbit's semi-major axis"
-                    );
-                }
-            }
-
-            if (ImGui::Checkbox(
-                    "Point orbit for default values",
-                    &changeDefaultValueOrbitAppearance
-                ))
-            {
-                setDefaultValueOrbitVisuals(changeDefaultValueOrbitAppearance);
-            }
-            ImGui::SameLine();
-            renderHelpMarker(
-                "Orbits whose shape/inclination is set using default values will be "
-                "rendered as points instead of lines. This setting is applied globally "
-                "across all rendered systems"
-            );
-        }
-
-        ImGui::EndGroup();
-    }
-
-    ImGui::SameLine();
-    ImGui::BeginGroup();
-    {
-        if (systemIsAdded) {
-            static bool colorOrbits = false;
-            bool colorOptionChanged = ImGui::Checkbox("Color planet orbits", &colorOrbits);
-
-            auto colorTrail = [](const ExoplanetItem& p, const glm::vec3& color) {
-                const std::string planetTrailId = planetIdentifier(p) + "_Trail";
-                const std::string planetDiscId = planetIdentifier(p) + "_Disc";
-
-                if (renderable(planetTrailId)) {
-                    std::string propertyId = std::format(
-                        "Scene.{}.Renderable.Appearance.Color", planetTrailId
-                    );
-                    queueScriptSynced(std::format(
-                        "openspace.setPropertyValueSingle('{}', {});",
-                        propertyId, ghoul::to_string(color)
-                    ));
-                }
-
-                if (renderable(planetDiscId)) {
-                    std::string propertyId = std::format(
-                        "Scene.{}.Renderable.MultiplyColor", planetDiscId
-                    );
-                    queueScriptSynced(std::format(
-                        "openspace.setPropertyValueSingle('{}', {});",
-                        propertyId, ghoul::to_string(color)
-                    ));
-                }
-            };
-
-            auto setTrailThicknessAndFade = [](const ExoplanetItem& p, float width, float fade) {
-                const std::string id = planetIdentifier(p) + "_Trail";
-                if (!renderable(id)) {
-                    return;
-                }
-                std::string appearance =
-                    std::format("Scene.{}.Renderable.Appearance", id);
-
-                queueScriptSynced(std::format(
-                    "openspace.setPropertyValueSingle('{0}.LineWidth', {1});"
-                    "openspace.setPropertyValueSingle('{0}.Fade', {2});",
-                    appearance, width, fade
-                ));
-            };
-
-            auto resetTrailWidth = [&setTrailThicknessAndFade](const ExoplanetItem& p) {
-                setTrailThicknessAndFade(p, 10.f, 1.f);
-            };
-
-            if (colorOrbits) {
-                static ColorMappedVariable variable;
-                bool colorEditChanged = renderColormapEdit(variable, host);
-                if (colorOptionChanged || colorEditChanged) {
-                    for (size_t planetIndex : planetIndices) {
-                        const ExoplanetItem& p = _data[planetIndex];
-                        if (colorOptionChanged) {
-                            // First time we change color
-                            setTrailThicknessAndFade(p, 20.f, 30.f);
-                        }
-
-                        glm::vec3 color = glm::vec3(colorFromColormap(p, variable));
-                        colorTrail(p, color);
-                    }
-                }
-            }
-            else if (colorOptionChanged) {
-                // Reset rendering
-                for (size_t planetIndex : planetIndices) {
-                    const ExoplanetItem& p = _data[planetIndex];
-                    colorTrail(p, glm::vec3(1.f, 1.f, 1.f));
-                    resetTrailWidth(p);
-                }
-            }
-
-        }
-        ImGui::EndGroup();
-    }
-
-    ImGui::Text("Planets:");
-
-    // OBS! Push an overrided id to make the column settings sync across multiple
-    // windows. This is not possible just using the same id in the BeginTable call,
-    // since the id is connected to the ImGuiwindow instance
-    ImGui::PushOverrideID(ImHashStr("systemTable"));
-    renderTable("systemTable", planetIndices, true);
-    ImGui::PopID();
-
-    // Quickly set external selection to webpage
-    if (ImGui::Button("Send planets to external webpage")) {
-        updateFilteredRowsProperty(planetIndices);
-    }
-    ImGui::SameLine();
-    renderHelpMarker(
-        "Send just the planets in this planet system to the ExoplanetExplorer analysis "
-        "webpage. Note that this overrides any other filtering. To bring back the filter "
-        "selection, update the filtering in any way or press the next button."
-    );
-    ImGui::SameLine();
-    if (ImGui::Button("Reset webpage to filtered")) {
-        updateFilteredRowsProperty();
-    }
-}
-
-void DataViewer::renderColumnValue(int columnIndex, std::optional<const char*> format,
-                                   const ExoplanetItem& item)
-{
-    std::variant<const char*, float> value = valueFromColumn(columnIndex, item);
+    std::variant<const char*, float> value = columnValue(_columns[columnIndex], item);
 
     if (std::holds_alternative<float>(value)) {
         float v = std::get<float>(value);
@@ -2616,186 +1169,12 @@ void DataViewer::renderColumnValue(int columnIndex, std::optional<const char*> f
             ImGui::TextUnformatted("");
         }
         else {
-            ImGui::Text(format.value_or("%f"), v);
+            ImGui::Text(format.value_or("%.4f"), v);
         }
     }
     else if (std::holds_alternative<const char*>(value)) {
         ImGui::Text("%s", std::get<const char*>(value));
     }
-}
-
-int DataViewer::columnIndexFromId(ColumnID id) const {
-    ghoul_assert(id != ColumnID::Other, "Can only check specific columns");
-
-    for (int i = 0; i < _columns.size(); i++) {
-        if (_columns[i].id == id) {
-            return i;
-        }
-    }
-    throw("Could not find column"); // not found
-}
-
-
-bool DataViewer::compareColumnValues(int columnIndex, const ExoplanetItem& left,
-                                     const ExoplanetItem& right) const
-{
-    std::variant<const char*, float> leftValue = valueFromColumn(columnIndex, left);
-    std::variant<const char*, float> rightValue = valueFromColumn(columnIndex, right);
-
-    // TODO: make sure they are the same type
-
-    if (std::holds_alternative<const char*>(leftValue) && std::holds_alternative<const char*>(rightValue)) {
-        return !caseInsensitiveLessThan(
-            std::get<const char*>(leftValue),
-            std::get<const char*>(rightValue)
-        );
-    }
-    else if (std::holds_alternative<float>(leftValue) && std::holds_alternative<float>(rightValue)) {
-        return compareValues(std::get<float>(leftValue), std::get<float>(rightValue));
-    }
-    else {
-        LERROR("Trying to compare mismatching column types");
-        return false;
-    }
-}
-
-std::variant<const char*, float> DataViewer::valueFromColumn(int columnIndex,
-                                                         const ExoplanetItem& item) const
-{
-    ColumnID column = _columns[columnIndex].id;
-    switch (column) {
-        case ColumnID::Name:
-            return item.planetName.c_str();
-        case ColumnID::Host:
-            return item.hostName.c_str();
-        case ColumnID::DiscoveryYear:
-            return static_cast<float>(item.discoveryYear);
-        case ColumnID::NPlanets:
-            return static_cast<float>(item.nPlanets);
-        case ColumnID::NStars:
-            return static_cast<float>(item.nStars);
-        case ColumnID::ESM:
-            return item.esm;
-        case ColumnID::TSM:
-            return item.tsm;
-        case ColumnID::PlanetRadius:
-            return item.radius.value;
-        case ColumnID::PlanetTemperature:
-            return item.eqilibriumTemp.value;
-        case ColumnID::PlanetMass:
-            return item.mass.value;
-        case ColumnID::PlanetMassError:
-            return item.mass.relativeErrorRange(); // TODO: make it possible to change whicha and how errors are being shown
-        case ColumnID::SurfaceGravity:
-            return item.surfaceGravity.value;
-        // Orbits
-        case ColumnID::SemiMajorAxis:
-            return item.semiMajorAxis.value;
-        case ColumnID::Eccentricity:
-            return item.eccentricity.value;
-        case ColumnID::Period:
-            return item.period.value;
-        case ColumnID::Inclination:
-            return item.inclination.value;
-        // Star
-        case ColumnID::StarTemperature:
-            return item.starEffectiveTemp.value;
-        case ColumnID::StarRadius:
-            return item.starRadius.value;
-        case ColumnID::StarAge:
-            return item.starAge.value;
-        case ColumnID::MagnitudeJ:
-            return item.magnitudeJ.value;
-        case ColumnID::MagnitudeK:
-            return item.magnitudeK.value;
-        case ColumnID::Distance:
-            return item.distance.value;
-        case ColumnID::Ra:
-            return item.ra.value;
-        case ColumnID::Dec:
-            return item.dec.value;
-        case ColumnID::Metallicity:
-            return item.starMetallicity.value;
-        case ColumnID::MetallicityRatio:
-            return item.starMetallicityRatio.c_str();
-        // Discovery
-        case ColumnID::DiscoveryMethod:
-            return item.discoveryMethod.c_str();
-        case ColumnID::DiscoveryTelescope:
-            return item.discoveryTelescope.c_str();
-        case ColumnID::DiscoveryInstrument:
-            return item.discoveryInstrument.c_str();
-        // Detected molecules
-        case ColumnID::MoleculesDetection:
-            return item.moleculesDetection.c_str();
-        case ColumnID::MoleculesUpperLimit:
-            return item.moleculesUpperLimit.c_str();
-        case ColumnID::MoleculesNoDetection:
-            return item.moleculesNoDetection.c_str();
-        case ColumnID::WaterDetection:
-            return item.waterDetection;
-        case ColumnID::Other: {
-            std::string key = _columns[columnIndex].name;
-            const std::variant<std::string, float>& value = item.otherColumns.at(key);
-
-            if (std::holds_alternative<std::string>(value)) {
-                return std::get<std::string>(value).c_str();
-            }
-            else {
-                return std::get<float>(value);
-            }
-        }
-        default:
-            throw ghoul::MissingCaseException();
-    }
-}
-
-bool DataViewer::isNumericColumn(int index) const {
-    ghoul_assert(_data.size() > 0, "Data size cannot be zero");
-    // Test type using the first data point
-    std::variant<const char*, float> aValue = valueFromColumn(index, _data.front());
-    return std::holds_alternative<float>(aValue);
-}
-
-glm::vec4 DataViewer::colorFromColormap(const ExoplanetItem& item,
-                                        const ColorMappedVariable& variable)
-{
-    const int colormapColumn = variable.columnIndex;
-
-    std::variant<const char*, float> value = valueFromColumn(colormapColumn, item);
-    float fValue = 0.0;
-    if (std::holds_alternative<float>(value)) {
-        fValue = std::get<float>(value);
-    }
-    else {
-        // text column => cannot be mapped to colormap
-        // OBS! This should not happen
-        return _nanPointColor;
-    }
-
-    glm::vec4 pointColor;
-    if (std::isnan(fValue)) {
-        pointColor = _nanPointColor;
-    }
-    else {
-        // TODO: handle min > max
-        ImPlot::PushColormap(_colormaps[variable.colormapIndex]);
-
-        float min = variable.colorScaleMin;
-        float max = variable.colorScaleMax;
-        float minMaxDiff = std::abs(max - min);
-        float t = minMaxDiff > std::numeric_limits<float>::epsilon() ?
-                 (fValue - min) / minMaxDiff : 0.f;
-
-        t = std::clamp(t, 0.f, 1.f);
-        ImVec4 c = ImPlot::SampleColormap(t);
-        ImPlot::PopColormap();
-        pointColor = { c.x, c.y, c.z, c.w };
-    }
-    // Apply opacity
-    pointColor.a *= variable.opacity;
-
-    return pointColor;
 }
 
 void DataViewer::writeRenderDataToFile() {
@@ -2830,18 +1209,16 @@ void DataViewer::writeRenderDataToFile() {
     std::vector<std::string_view> hosts;
     hosts.reserve(_filteredData.size());
 
-    // TODO: use size_t instead of unsigned int
-
     // Write number of points
-    unsigned int nPoints = static_cast<unsigned int>(indicesWithPositions.size());
-    file.write(reinterpret_cast<const char*>(&nPoints), sizeof(unsigned int));
+    size_t nPoints = indicesWithPositions.size();
+    file.write(reinterpret_cast<const char*>(&nPoints), sizeof(size_t));
 
     for (size_t index : indicesWithPositions) {
         const ExoplanetItem& item = _data[index];
 
         file.write(reinterpret_cast<const char*>(&index), sizeof(size_t));
 
-        size_t nVariables = _variableSelection.size();
+        size_t nVariables = _colorMappingView->colorMapperVariables().size();
         file.write(reinterpret_cast<const char*>(&nVariables), sizeof(size_t));
 
         const glm::dvec3 position = *item.position;
@@ -2849,23 +1226,21 @@ void DataViewer::writeRenderDataToFile() {
         file.write(reinterpret_cast<const char*>(&position.y), sizeof(double));
         file.write(reinterpret_cast<const char*>(&position.z), sizeof(double));
 
-        if (!_useGlyphRendering) {
-            nVariables = 1; // If not glyph, just use first variable
-        }
-
         for (int i = 0; i < nVariables; ++i) {
-            const ImVec4 color = toImVec4(colorFromColormap(item, _variableSelection[i]));
+            const ImVec4 color = view::helper::toImVec4(
+                _colorMappingView->colorFromColormap(
+                    item,
+                    _colorMappingView->colorMapperVariables()[i]
+                )
+            );
             file.write(reinterpret_cast<const char*>(&color.x), sizeof(float));
             file.write(reinterpret_cast<const char*>(&color.y), sizeof(float));
             file.write(reinterpret_cast<const char*>(&color.z), sizeof(float));
             file.write(reinterpret_cast<const char*>(&color.w), sizeof(float));
         }
 
-        // Other data used for rendering
-        if (_useGlyphRendering) {
-            // Get a number for the planet's index in system
-            file.write(reinterpret_cast<const char*>(&item.indexInSystem), sizeof(int));
-        }
+        // Get a number for the planet's index in system
+        file.write(reinterpret_cast<const char*>(&item.indexInSystem), sizeof(int));
 
         // Write label to file
         bool isAdded = std::find(hosts.begin(), hosts.end(), item.hostName) != hosts.end();
@@ -2879,6 +1254,7 @@ void DataViewer::writeRenderDataToFile() {
         }
     }
 
+    file.close();
 }
 
 void DataViewer::updateSelectionInRenderable() {
@@ -2891,45 +1267,6 @@ void DataViewer::updateSelectionInRenderable() {
     queueScriptSynced(
         "openspace.setPropertyValueSingle('" + uri + "', { " + indices + " })"
     );
-}
-
-void DataViewer::addOrTargetPlanet(const ExoplanetItem& item) {
-    const std::string identifier = makeIdentifier(item.hostName);
-
-    if (systemCanBeAdded(item.hostName)) {
-        LINFO("Adding system. Click again to target");
-        addExoplanetSystem(item.hostName);
-    }
-    else {
-        // Ugly: Always set reach factors when targetting object;
-        // we can't do it until the system is added to the scene
-        setIncreasedReachfactors();
-
-        queueScriptSynced(
-            "openspace.setPropertyValueSingle("
-                "'NavigationHandler.OrbitalNavigator.Anchor',"
-                "'" + planetIdentifier(item) + "'"
-            ");"
-            "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
-            "openspace.setPropertyValueSingle("
-                "'NavigationHandler.OrbitalNavigator.RetargetAnchor', "
-                "nil"
-            ");"
-        );
-    }
-}
-
-bool DataViewer::systemCanBeAdded(const std::string& host) const {
-    const std::string identifier = makeIdentifier(host);
-
-    // Check if it does not already exist
-    return sceneGraphNode(identifier) == nullptr;
-
-    // TODO: also check against exoplanet list
-}
-
-void DataViewer::addExoplanetSystem(const std::string& host) const {
-    queueScriptSynced("openspace.exoplanets.addExoplanetSystem('" + host + "')");
 }
 
 void DataViewer::refocusView() const {
@@ -2963,20 +1300,6 @@ void DataViewer::flyToInsideView() const {
             "Duration = 4, "
             "PathType = 'Linear'"
         "});"
-    );
-}
-
-void DataViewer::flyToStar(std::string_view hostIdentifier) const {
-    // Ugly: Always set reach factors when targetting object;
-    // we can't do it until the system is added to the scene
-    setIncreasedReachfactors();
-
-    queueScriptSynced(
-        "openspace.setPropertyValueSingle("
-            "'NavigationHandler.OrbitalNavigator.Anchor',"
-            "'" + std::string(hostIdentifier) +
-        "')"
-        "openspace.pathnavigation.zoomToDistanceRelative(100.0, 5.0);"
     );
 }
 

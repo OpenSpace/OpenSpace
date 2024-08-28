@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
-#include <modules/exoplanetsexperttool/rendering/renderablepointdata.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -44,7 +43,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Decides if the GUI for this module should be enabled"
+        "Decides if the GUI for this module should be enabled."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowInfoAtStartupInfo = {
@@ -52,6 +51,14 @@ namespace {
         "Show Info at Startup",
         "If true, an info window is shown when starting the application, containing "
         "information about the research projecs and contact info for feedback."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DataConfigFileInfo = {
+        "DataConfigFile",
+        "Data Config File",
+        "The path to a file that dictates which dataset to load, what columns to use for "
+        "position, and optional names and descriptions for columns and pre-defined "
+        "filters."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilteredDataRowsInfo = {
@@ -63,6 +70,9 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ExoplanetsExpertToolModule)]] Parameters {
+        // [[codegen::verbatim(DataConfigFileInfo.description)]]
+        std::optional<std::filesystem::path> dataConfigFile;
+
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
@@ -80,11 +90,18 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     : OpenSpaceModule(Name)
     , _enabled(EnabledInfo)
     , _showInfoWindowAtStartup(ShowInfoAtStartupInfo)
+    , _dataConfigFile(DataConfigFileInfo)
     , _filteredRows(FilteredDataRowsInfo)
     , _gui("ExoplanetsToolGui")
 {
     addProperty(_enabled);
     addProperty(_showInfoWindowAtStartup);
+    addProperty(_dataConfigFile);
+
+    _dataConfigFile.onChange([this]() {
+        _gui.initializeDataset();
+    });
+
     addPropertySubOwner(_gui);
 
     _filteredRows.setReadOnly(true);
@@ -206,8 +223,17 @@ bool ExoplanetsExpertToolModule::showInfoWindowAtStartup() const {
     return _showInfoWindowAtStartup;
 }
 
+std::filesystem::path ExoplanetsExpertToolModule::dataConfigFile() const {
+    return std::filesystem::path(_dataConfigFile.value());
+}
+
 void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
+
+    if (p.dataConfigFile.has_value()) {
+        _dataConfigFile = (*p.dataConfigFile).string();
+    }
+
     _enabled = p.enabled.value_or(false);
     _showInfoWindowAtStartup = p.showInfoAtStartup.value_or(false);
 
@@ -216,15 +242,13 @@ void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dic
     fRenderable->registerClass<RenderableExoplanetGlyphCloud>(
         "RenderableExoplanetGlyphCloud"
     );
-    fRenderable->registerClass<RenderablePointData>("RenderablePointData");
 }
 
 std::vector<documentation::Documentation>
 ExoplanetsExpertToolModule::documentations() const
 {
     return {
-        RenderableExoplanetGlyphCloud::Documentation(),
-        RenderablePointData::Documentation()
+        RenderableExoplanetGlyphCloud::Documentation()
     };
 }
 

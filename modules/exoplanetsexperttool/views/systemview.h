@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,32 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SYSTEMVIEW___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SYSTEMVIEW___H__
 
-in float vs_depthClipSpace;
-in vec4 vs_positionViewSpace;
-in vec4 vs_color;
+#include <modules/exoplanetsexperttool/datastructures.h>
 
-uniform float opacity;
+namespace openspace::exoplanets {
 
-Fragment getFragment() {
-    float radius = 0.5;
-    float distance = length(gl_PointCoord - vec2(radius));
+class DataViewer;
 
-    if (distance > pow(radius, 2))
-        discard;
+class SystemViewer {
+public:
+    SystemViewer(DataViewer& dataViewer);
 
-    vec4 color = vs_color;
-    color.a *= opacity;
+    void renderAllSystemViews();
+    void renderSystemViewQuickControls(const std::string& host);
 
-    Fragment frag;
-    frag.color     = color;
-    frag.depth     = vs_depthClipSpace;
-    frag.gPosition = vs_positionViewSpace;
+    const std::list<std::string>& showSystemViews() const;
+    void showSystemView(const std::string& host);
 
-    // There is no normal here
-    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+    bool systemCanBeAdded(const std::string& host) const;
 
-    return frag;
-}
+    void addExoplanetSystem(const std::string& host) const;
+    void addOrTargetPlanet(const ExoplanetItem& item) const;
+    void flyToStar(std::string_view hostIdentifier) const;
+
+private:
+    void renderSystemViewContent(const std::string& host);
+
+    DataViewer& _dataViewer;
+
+    std::list<std::string> _shownPlanetSystemWindows;
+};
+
+} // namespace openspace::exoplanets
+
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___SYSTEMVIEW___H__

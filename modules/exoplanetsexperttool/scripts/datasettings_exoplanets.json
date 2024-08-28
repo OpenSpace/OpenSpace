@@ -1,0 +1,296 @@
+{
+    "datafile": "data/aggregated_data.csv",
+    "data_mapping": {
+        "position_ra": "ra",
+        "position_dec": "dec",
+        "position_distance": "sy_dist",
+        "name": "pl_name",
+        "hostName": "hostname",
+        "ring_size": "pl_orbsmax",
+        "reference_name": "pl_refname_name",
+        "reference_link": "pl_refname_url"
+    },
+    "default_colormapping": {
+        "column": "ESM",
+        "min": 10,
+        "max": 200
+    },
+    "column_info": {
+        "pl_name": {
+            "name": "Name",
+            "isText": true
+        },
+        "hostname": {
+            "name": "Host",
+            "isText": true
+        },
+        "disc_year": {
+            "name": "Year",
+            "format": "%.0f",
+            "desc": "Discovery year"
+        },
+        "sy_pnum": {
+            "name": "Planets",
+            "format": "%.0f"
+        },
+        "sy_snum": {
+            "name": "Stars",
+            "format": "%.0f"
+        },
+        "ESM": {
+            "name": "ESM",
+            "format": "%.2f"
+        },
+        "TSM": {
+            "name": "TSM",
+            "format": "%.2f"
+        },
+        "pl_rade": {
+            "name": "Radius",
+            "desc": "Planet radius in Earth radii"
+        },
+        "pl_Teq": {
+            "name": "Teq",
+            "format": "%.0f",
+            "desc": "Planet equilibrium temperature (K)"
+        },
+        "pl_bmasse": {
+            "name": "Mass",
+            "desc": "in Earth masses"
+        },
+        "_TODO_mass_error": {
+            "name": "Mass Err (%)",
+            "desc": "Mass uncertainty"
+        },
+        "pl_surface_gravity": {
+            "name": "Surface gravity",
+            "desc": "(m/s^2)"
+        },
+        "pl_orbsmax": {
+            "name": "Semi-major axis",
+            "desc": "(AU)"
+        },
+        "pl_orbeccen": {
+            "name": "Eccentricity"
+        },
+        "pl_orbper": {
+            "name": "Orbit period"
+        },
+        "pl_orbincl": {
+            "name": "Inclination"
+        },
+        "pl_refname_name": {
+            "name": "Reference"
+        },
+        "st_teff": {
+            "name": "Star Teff",
+            "format": "%.0f",
+            "desc": "Star effective temperature (K)"
+        },
+        "st_rad": {
+            "name": "Star radius",
+            "desc": "(Solar)"
+        },
+        "st_age": {
+            "name": "Star age",
+            "desc": "(Gyr)"
+        },
+        "sy_jmag": {
+            "name": "MagJ"
+        },
+        "sy_kmag": {
+            "name": "MagK"
+        },
+        "sy_dist": {
+            "name": "Distance",
+            "desc": "(pc)"
+        },
+        "ra": {
+            "name": "Ra"
+        },
+        "dec": {
+            "name": "Dec"
+        },
+        "st_met": {
+            "name": "Metallicity (dex)"
+        },
+        "st_metratio": {
+            "name": "Metallicity ratio",
+            "isText": true
+        },
+        "discoverymethod": {
+            "name": "Discovery method",
+            "isText": true
+        },
+        "disc_telescope": {
+            "name": "Telescope",
+            "isText": true
+        },
+        "disc_instrument": {
+            "name": "Instrument",
+            "isText": true
+        },
+        "_TODO_molecule_detection": {
+            "name": "Detected",
+            "desc": "Detected molecules from IAC ExoAtmospheres dataset",
+            "isText": true
+        },
+        "_TODO_molecule_upperLimit": {
+            "name": "Upper limit",
+            "desc": "Upper limit detection of molecules from IAC ExoAtmospheres dataset",
+            "isText": true
+        },
+        "_TODO_molecule_noDetection": {
+            "name": "No detection",
+            "desc": "Upper limit detection of molecules from IAC ExoAtmospheres dataset",
+            "isText": true
+        },
+        "_TODO_molecule_waterDetection": {
+            "name": "No detection",
+            "format": "%.0f",
+            "desc": "Flag for whether water has been detected in the planet atmosphere (1 = yes, -1 = no, 0 = maybe/upper limit)"
+        }
+    },
+    "quick_filters" : [
+        {
+            "group_title": "",
+            "type": "AND",
+            "same_line": true,
+            "filters": [
+                {
+                    "name": "Hide null ESM",
+                    "filter": {
+                        "column": "ESM",
+                        "query": ""
+                    }
+                },
+                {
+                    "name": "Hide null TSM",
+                    "filter": {
+                        "column": "TSM",
+                        "query": ""
+                    }
+                },
+                {
+                    "name": "Must have 3D positional data",
+                    "filter": [
+                        {
+                            "column": "ra",
+                            "query": ""
+                        },
+                        {
+                            "column": "dec",
+                            "query": ""
+                        },
+                        {
+                            "column": "sy_dist",
+                            "query": ""
+                        }
+                    ],
+                    "desc": "Only include data points that will show up in OpenSpace's 3D rendered view"
+                }
+            ]
+        },
+        {
+            "group_title": "Planet bin",
+            "type": "OR",
+            "same_line": false,
+            "filters": [
+                {
+                    "name": "Terrestrial",
+                    "filter": {
+                        "column": "pl_rade",
+                        "query": "<= 1.5"
+                    },
+                    "desc": "Rp <= 1.5  (Earth radii)"
+                },
+                {
+                    "name": "Small Sub-Neptune",
+                    "filter": [
+                        {
+                            "column": "pl_rade",
+                            "query": "> 1.5"
+                        },
+                        {
+                            "column": "pl_rade",
+                            "query": "<= 2.75"
+                        }
+                    ],
+                    "desc": "1.5 < Rp <= 2.75 (Earth radii)"
+                },
+                {
+                    "name": "Large Sub-Neptune",
+                    "filter": [
+                        {
+                            "column": "pl_rade",
+                            "query": "> 2.75"
+                        },
+                        {
+                            "column": "pl_rade",
+                            "query": "<= 4.0"
+                        }
+                    ],
+                    "desc": "2.75 < Rp <= 4.0 (Earth radii)"
+                },
+                {
+                    "name": "Sub-Jovian",
+                    "filter": [
+                        {
+                            "column": "pl_rade",
+                            "query": "> 4.0"
+                        },
+                        {
+                            "column": "pl_rade",
+                            "query": "<= 10.0"
+                        }
+                    ],
+                    "desc": "4.0 < Rp <= 10.0 (Earth radii)"
+                },
+                {
+                    "name": "Larger",
+                    "filter": [
+                        {
+                            "column": "pl_rade",
+                            "query": "> 10.0"
+                        }
+                    ],
+                    "desc": "Rp > 10.0 (Earth radii)"
+                }
+            ]
+        },
+        {
+            "group_title": "Discovery method",
+            "type": "OR",
+            "same_line": true,
+            "filters": [
+                {
+                    "name": "Transit",
+                    "filter": [
+                        {
+                            "column": "discoverymethod",
+                            "query": "transit"
+                        }
+                    ]
+                },
+                {
+                    "name": "Radial Velocity",
+                    "filter": [
+                        {
+                            "column": "discoverymethod",
+                            "query": "radial velocity"
+                        }
+                    ]
+                },
+                {
+                    "name": "Other",
+                    "filter": [
+                        {
+                            "column": "discoverymethod",
+                            "query": "-transit, -radial"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

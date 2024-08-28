@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,5 +65,27 @@ int parseIntegerData(const std::string& str) {
     }
     return std::numeric_limits<int>::quiet_NaN();
 };
+
+bool compareValuesWithNan(float lhs, float rhs) {
+    if (std::isnan(lhs)) {
+        // nan should be considered smaller than non-nan values
+        if (!std::isnan(rhs)) {
+            return true;
+        }
+        // if both are nan, return false
+        return false;
+    }
+
+    // rhs is nan, but not lhs
+    if (std::isnan(rhs)) {
+        return false;
+    }
+    return lhs < rhs;
+}
+
+bool caseInsensitiveLessThan(const char* lhs, const char* rhs) {
+    int res = _stricmp(lhs, rhs);
+    return res <= 0;
+}
 
 } // namespace openspace::data

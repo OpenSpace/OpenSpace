@@ -22,51 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNSELECTIONVIEW___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNSELECTIONVIEW___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <modules/exoplanetsexperttool/datastructures.h>
+#include <string>
+#include <vector>
 
-#include <modules/exoplanetsexperttool/gui.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/list/intlistproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <string_view>
+namespace openspace::exoplanets {
 
-namespace openspace {
-
-class ExoplanetsExpertToolModule : public OpenSpaceModule {
+class ColumnSelectionView {
 public:
-    constexpr static const char* Name = "ExoplanetsExpertTool";
+    ColumnSelectionView() = default;
 
-    // The identifier used for the glyph cloud renderable throughout the module
-    constexpr static std::string_view GlyphCloudIdentifier = "ExoplanetDataPoints";
+    std::vector<ColumnKey> initializeColumnsFromData(
+        const std::vector<ExoplanetItem>& data, const DataSettings& dataSettings);
 
-    ExoplanetsExpertToolModule();
-    virtual ~ExoplanetsExpertToolModule() = default;
+    void renderColumnSettingsView(std::vector<ColumnKey>& columnsToEdit,
+        const DataSettings& dataSettings);
 
-    bool enabled() const;
-    bool showInfoWindowAtStartup() const;
-    std::filesystem::path dataConfigFile() const;
+private:
+    std::vector<ColumnKey> _namedColumns;
+    std::vector<ColumnKey> _otherColumns;
+    std::vector<bool> _selectedNamedColumns;
+    std::vector<bool> _selectedOtherColumns;
 
-    std::vector<documentation::Documentation> documentations() const override;
-
-protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
-
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _showInfoWindowAtStartup;
-    properties::IntListProperty _filteredRows;
-    properties::StringProperty _dataConfigFile;
-
-    exoplanets::gui::Gui _gui;
-    glm::vec2 _mousePosition = glm::vec2(0.f);
-    uint32_t _mouseButtons = 0;
-
-    bool _cameraWasWithinGalaxy = false;
+    std::vector<bool> _savedSelectedNamedColumns;
+    std::vector<bool> _savedSelectedOtherColumns;
 };
 
-} // namespace openspace
+} // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLUMNSELECTIONVIEW___H__

@@ -97,6 +97,11 @@
       "name": "NavigationHandler.OrbitalNavigator.StereoscopicDepthOfFocusSurface",
       "type": "setPropertyValueSingle",
       "value": "100"
+    },
+    {
+      "name": "Modules.ExoplanetsExpertTool.DataConfigFile",
+      "type": "setPropertyValueSingle",
+      "value": "${MODULE_EXOPLANETSEXPERTTOOL}/scripts/datasettings_exoplanets.json"
     }
   ],
   "time": {

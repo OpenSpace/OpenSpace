@@ -22,51 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <modules/imgui/include/imgui_include.h>
+#include <ghoul/glm.h>
 
-#include <modules/exoplanetsexperttool/gui.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/list/intlistproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <string_view>
+namespace openspace::view {
 
-namespace openspace {
+namespace colors {
+    constexpr const glm::vec3 DefaultSelected = { 0.2f, 0.8f, 1.f };
+    constexpr const glm::vec4 DescriptiveText = { 0.6f, 0.6f, 0.6f, 1.f };
+    constexpr const glm::vec4 Error = { 1.f, 0.2f, 0.2f, 1.f };
+    constexpr const glm::vec4 DisabledButton = { 0.3f, 0.3f, 0.3f, 0.7f };
+} // namespace colors
 
-class ExoplanetsExpertToolModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "ExoplanetsExpertTool";
+namespace helper {
+    ImVec4 toImVec4(const glm::vec4& v);
 
-    // The identifier used for the glyph cloud renderable throughout the module
-    constexpr static std::string_view GlyphCloudIdentifier = "ExoplanetDataPoints";
+    void renderDescriptiveText(const char* text);
+    void renderHelpMarker(const char* text);
 
-    ExoplanetsExpertToolModule();
-    virtual ~ExoplanetsExpertToolModule() = default;
+} // namespace helper
 
-    bool enabled() const;
-    bool showInfoWindowAtStartup() const;
-    std::filesystem::path dataConfigFile() const;
+} // namespace openspace::view
 
-    std::vector<documentation::Documentation> documentations() const override;
-
-protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
-
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _showInfoWindowAtStartup;
-    properties::IntListProperty _filteredRows;
-    properties::StringProperty _dataConfigFile;
-
-    exoplanets::gui::Gui _gui;
-    glm::vec2 _mousePosition = glm::vec2(0.f);
-    uint32_t _mouseButtons = 0;
-
-    bool _cameraWasWithinGalaxy = false;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___GUIRENDERHELPER___H__

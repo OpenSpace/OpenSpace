@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -98,6 +98,24 @@ std::string ColumnFilter::query() const {
 
 bool ColumnFilter::isValid() const {
     return _valid;
+}
+
+bool ColumnFilter::isNumeric() const {
+    return _type == Type::Numeric;
+}
+
+bool ColumnFilter::passFilter(std::variant<const char*, float> value) const {
+    if (std::holds_alternative<float>(value) && _type == Type::Numeric) {
+        float val = std::get<float>(value);
+        return passFilter(val);
+    }
+    else if (std::holds_alternative<const char*>(value) && _type == Type::Text) {
+        const char* val = std::get<const char*>(value);
+        return passFilter(std::string(val));
+    }
+    else {
+        throw ghoul::RuntimeError("Mismatching value and filter type!");
+    }
 }
 
 bool ColumnFilter::passFilter(float value) const {

@@ -22,51 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLORMAPPINGVIEW___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLORMAPPINGVIEW___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <modules/exoplanetsexperttool/datastructures.h>
+#include <string>
+#include <vector>
 
-#include <modules/exoplanetsexperttool/gui.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/list/intlistproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <string_view>
+namespace openspace::exoplanets {
 
-namespace openspace {
+class DataViewer;
+struct DataSettings;
 
-class ExoplanetsExpertToolModule : public OpenSpaceModule {
+class ColorMappingView {
 public:
-    constexpr static const char* Name = "ExoplanetsExpertTool";
+    struct ColorMappedVariable {
+        int colormapIndex = 0;
+        size_t columnIndex = 0;
+        float colorScaleMin = 0.f;
+        float colorScaleMax = 100.f;
+        float opacity = 1.f;
+    };
 
-    // The identifier used for the glyph cloud renderable throughout the module
-    constexpr static std::string_view GlyphCloudIdentifier = "ExoplanetDataPoints";
+    ColorMappingView(DataViewer& dataViewer,
+        const DataSettings& dataSettings);
 
-    ExoplanetsExpertToolModule();
-    virtual ~ExoplanetsExpertToolModule() = default;
+    void initializeGL();
 
-    bool enabled() const;
-    bool showInfoWindowAtStartup() const;
-    std::filesystem::path dataConfigFile() const;
+    const std::vector<ColorMappedVariable>& colorMapperVariables() const;
 
-    std::vector<documentation::Documentation> documentations() const override;
+    // Return true if the color map was changed
+    bool renderViewContent();
 
-protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    // Render an edit view for one individual color mapped value.
+    // Returns true if value was changed. If relevantSystem given,
+    // also show a button to color based on planets in that system
+    bool renderColormapEdit(ColorMappedVariable& variable,
+        std::string_view relevantSystem = "");
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _showInfoWindowAtStartup;
-    properties::IntListProperty _filteredRows;
-    properties::StringProperty _dataConfigFile;
+    glm::vec4 colorFromColormap(const ExoplanetItem& item,
+        const ColorMappedVariable& variable);
 
-    exoplanets::gui::Gui _gui;
-    glm::vec2 _mousePosition = glm::vec2(0.f);
-    uint32_t _mouseButtons = 0;
+private:
+    glm::vec4 _nanPointColor = { 0.3f, 0.3f, 0.3f, 1.f };
+    std::vector<const char*> _colormaps;
 
-    bool _cameraWasWithinGalaxy = false;
+    std::vector<ColorMappedVariable> _variableSelection;
+
+    size_t _firstNumericColumnIndex = 0;
+
+    DataViewer& _dataViewer;
 };
 
-} // namespace openspace
+} // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___COLORMAPPINGVIEW___H__

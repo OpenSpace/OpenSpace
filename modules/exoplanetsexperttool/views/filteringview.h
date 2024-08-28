@@ -22,51 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
-#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
+#ifndef __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___FILTERINGVIEW___H__
+#define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___FILTERINGVIEW___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <modules/exoplanetsexperttool/columnfilter.h>
+#include <modules/exoplanetsexperttool/datastructures.h>
 
-#include <modules/exoplanetsexperttool/gui.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/list/intlistproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <string_view>
+namespace openspace::exoplanets {
 
-namespace openspace {
+class DataViewer;
 
-class ExoplanetsExpertToolModule : public OpenSpaceModule {
+class FilteringView {
 public:
-    constexpr static const char* Name = "ExoplanetsExpertTool";
+    FilteringView(DataViewer& dataViewer, const DataSettings& dataSettings);
 
-    // The identifier used for the glyph cloud renderable throughout the module
-    constexpr static std::string_view GlyphCloudIdentifier = "ExoplanetDataPoints";
+    bool isUsingRowFiltering() const;
+    bool isUsingExternalFiltering() const;
 
-    ExoplanetsExpertToolModule();
-    virtual ~ExoplanetsExpertToolModule() = default;
+    // Return true if filtering was changed
+    bool renderFilterSettings();
 
-    bool enabled() const;
-    bool showInfoWindowAtStartup() const;
-    std::filesystem::path dataConfigFile() const;
+    // Return the rows matching the current filtering
+    std::vector<size_t> applyFiltering(const std::vector<ExoplanetItem>& data,
+        const std::vector<int>& externalSelection);
 
-    std::vector<documentation::Documentation> documentations() const override;
+private:
+    bool renderColumnFilterSettings();
+    bool renderRowLimitFilterSettings();
+    bool renderExternalFilterSettings();
 
-protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    void applyRowLimit(const std::vector<ExoplanetItem>& data,
+        std::vector<size_t>& prefilteredData);
+    void applyExternalSelection(const std::vector<int>& externalSelection,
+        std::vector<size_t>& prefilteredData);
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _showInfoWindowAtStartup;
-    properties::IntListProperty _filteredRows;
-    properties::StringProperty _dataConfigFile;
+    struct ColumnFilterEntry {
+        size_t columnIndex;
+        ColumnFilter filter;
+        bool enabled = true;
+    };
+    std::vector<ColumnFilterEntry> _columnFilters;
+    std::vector<std::vector<bool>> _quickFilterFlags;
 
-    exoplanets::gui::Gui _gui;
-    glm::vec2 _mousePosition = glm::vec2(0.f);
-    uint32_t _mouseButtons = 0;
+    bool _limitNumberOfRows = false;
+    int _nRows = 100;
+    bool _useHighestValue = true;
+    size_t _rowLimitColumnIndex = 0;
 
-    bool _cameraWasWithinGalaxy = false;
+    // Filter selection from webpage
+    bool _useExternalSelection = false;
+    bool _overrideInternalSelection = false;
+
+    DataViewer& _dataViewer;
+    const std::vector<DataSettings::QuickFilterGroup>& _quickFilterGroups;
 };
 
-} // namespace openspace
+} // namespace openspace::exoplanets
 
-#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
+#endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___FILTERINGVIEW___H__

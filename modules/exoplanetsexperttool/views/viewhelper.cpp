@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,32 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include <modules/exoplanetsexperttool/views/viewhelper.h>
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+namespace openspace::view {
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
+namespace helper {
 
-out float vs_depthClipSpace;
-out vec4 vs_positionViewSpace;
-out vec4 vs_color;
-
-uniform dmat4 modelViewTransform;
-uniform dmat4 MVPTransform;
-uniform float size;
-
-void main() {
-    dvec4 position = dvec4(in_position, 1.0);
-    dvec4 positionViewSpace = modelViewTransform * position;
-    dvec4 positionClipSpace = MVPTransform * position;
-
-    positionClipSpace.z = 0.0;
-
-    vs_depthClipSpace = float(positionClipSpace.w);
-    vs_positionViewSpace = vec4(positionViewSpace);
-    vs_color = in_color;
-
-    gl_PointSize = size;
-    gl_Position = vec4(positionClipSpace);
+ImVec4 toImVec4(const glm::vec4& v) {
+    return ImVec4(v.x, v.y, v.z, v.w);
 }
+
+void renderDescriptiveText(const char* text) {
+    ImGui::TextColored(toImVec4(colors::DescriptiveText), text);
+}
+
+void renderHelpMarker(const char* text) {
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered()) {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(text);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
+
+} // namespace helper
+
+} // namespace openspace::view

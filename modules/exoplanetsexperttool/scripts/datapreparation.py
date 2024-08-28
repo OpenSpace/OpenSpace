@@ -136,6 +136,10 @@ data_filter = (
     (df['pl_refname'] != '<a refstr=STASSUN_ET_AL__2017 href=https://ui.adsabs.harvard.edu/abs/2017AJ....153..136S/abstract target=ref>Stassun et al. 2017</a>')
 )
 
+# Create separate columns with just the name and the url for the reference
+df['pl_refname_name'] = df['pl_refname'].str.extract('>(.*)<')
+df['pl_refname_url'] = df['pl_refname'].str.extract('href=(.*) target')
+
 # ## Group by planet name and grab the most recent record
 cols = df.columns.to_list()[1:]
 agg_dict = dict(zip(cols, ['first'] * len(cols)))
@@ -149,7 +153,10 @@ df.fillna({'pl_bmasse': df.pl_bmassj*Mjup}, inplace=True)
 df.fillna({'pl_bmasseerr1': df.pl_bmassjerr1*Mjup}, inplace=True)
 df.fillna({'pl_bmasseerr2': df.pl_bmassjerr2*Mjup}, inplace=True)
 
-# ## Initialize new column for aggregate temperature
+## TODO: If relevant, use mass/radius relationship from Chen & Kipping (2017)
+# See eq. (2) in https://arxiv.org/pdf/1805.03671.pdf
+
+## Initialize new column for aggregate temperature
 # Try to use as few columns in the data as possible:
 # first populate with insolation flux
 df['pl_Teq'] = 278.*(df['pl_insol'])**0.25
@@ -159,6 +166,13 @@ df.fillna({'pl_Teq': df.pl_eqt}, inplace=True)
 df.fillna({'pl_Teq': 1/(np.sqrt(2*df['pl_ratdor']))*df['st_teff']}, inplace=True)
 # if a/Rs is unavailable, calculate it from a [AU] and Rs [Rsun]
 df.fillna({'pl_Teq': 1/(np.sqrt(2*215.*df['pl_orbsmax']/df['st_rad']))*df['st_teff']}, inplace=True)
+
+## New column for estimated planet surface gravity
+EARTH_RADIUS = 6.3781e6; # meter
+EARTH_MASS = 5.972e24; # kg
+G = 6.67430e-11
+df['pl_surface_gravity'] = (G*EARTH_MASS*df['pl_bmasse']) / pow(EARTH_RADIUS*(df['pl_rade']), 2.)
+
 
 # fill rprs if not given
 df['pl_ratror'] = ReRs*df['pl_rade']/df['st_rad']
@@ -196,6 +210,7 @@ print("Computing ESM")
 df['pl_Tday'] = 1.1*df['pl_Teq']
 df['planck_ratio'] = Plancks_function(df['pl_Tday'], 7.5e-6) / Plancks_function(df['st_teff'], 7.5e-6)
 df['ESM'] = 4.29 * 1e6 * df['pl_rprs2'] * df['planck_ratio'] * 10**(-0.2*df['sy_kmag'])
+df.loc[df['ESM'] < 0.001, 'ESM'] = np.nan # Replace really low values with nothing
 
 # TODO: propagate errors, so we get uncertainties for ESM and TSM
 
@@ -343,6 +358,9 @@ df = df.merge(galah, on='gaia_id', how='left')
 #     rows.append([name, '&'.join(detections), '&'.join(upperLimits), '&'.join(noDetections)])
 
 # res_df_iac = pd.DataFrame(rows, columns=['name', 'molecule_detection', 'molecule_upperLimit', 'molecule_noDetection'])
+
+## TODO: add water column was detected (value 1 if it was, 0 if in upper limit, and -1 if no detection)
+# Used to be done in C++
 
 # print ('IAC Detected Molecules in Atmosphere: ')
 # print ('--------------------------------')

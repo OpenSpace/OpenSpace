@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,6 +56,8 @@ public:
 
     void initializeGL();
     void deinitializeGL();
+
+    void initializeDataset();
 
     bool mouseButtonCallback(MouseButton button, MouseAction action);
     bool mouseWheelCallback(double position);

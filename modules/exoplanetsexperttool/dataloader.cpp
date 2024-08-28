@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,14 @@
 #include <modules/exoplanetsexperttool/dataloader.h>
 
 #include <modules/exoplanetsexperttool/datahelper.h>
+#include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/coordinateconversion.h>
+#include <openspace/util/progressbar.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/dictionary.h>
@@ -43,13 +48,7 @@
 #include <string_view>
 
 namespace {
-    constexpr const char _loggerCat[] = "ExoplanetsDataLoader";
-
-    // @TODO: naturally, this path should not be hardcoded
-    std::string DataPath = "${MODULES}/exoplanetsexperttool/data/aggregated_data.csv";
-
-    constexpr const double EarthMass = 5.972e24; // kg
-    constexpr const double EarthRadius = 6.3781e6; // meter
+    constexpr std::string_view _loggerCat = "ExoplanetsDataLoader";
 
     bool hasEnding(std::string const& fullString, std::string const& ending) {
         if (fullString.length() >= ending.length()) {
@@ -70,40 +69,209 @@ namespace {
             s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
     }
 
+    bool isNan(const std::string& s) {
+        if (s.empty()) {
+            return true;
+        }
+        std::string lc = ghoul::toLowerCase(s);
+        return (lc == "null") || (lc == "nan");
+    }
+
+    void from_json(const nlohmann::json& j, openspace::exoplanets::DataSettings& s) {
+        using namespace openspace::exoplanets;
+
+        try {
+            std::string file;
+            j.at("datafile").get_to(file);
+            s.dataFile = file;
+
+            const nlohmann::json dataMapping = j.at("data_mapping");
+            dataMapping.at("position_ra").get_to(s.dataMapping.positionRa);
+            dataMapping.at("position_dec").get_to(s.dataMapping.positionDec);
+            dataMapping.at("position_distance").get_to(s.dataMapping.positionDistance);
+
+            if (dataMapping.contains("name")) {
+                dataMapping.at("name").get_to(s.dataMapping.name);
+            }
+            if (dataMapping.contains("hostName")) {
+               dataMapping.at("hostName").get_to(s.dataMapping.hostName);
+            }
+            if (dataMapping.contains("ring_size")) {
+                dataMapping.at("ring_size").get_to(s.dataMapping.ringSize);
+            }
+            if (dataMapping.contains("reference_name")) {
+                dataMapping.at("reference_name").get_to(s.dataMapping.referenceName);
+            }
+            if (dataMapping.contains("reference_link")) {
+                dataMapping.at("reference_link").get_to(s.dataMapping.referenceLink);
+            }
+
+            if (j.contains("default_colormapping")) {
+                const nlohmann::json cmapping = j.at("default_colormapping");
+                if (!cmapping.empty()) {
+                    DataSettings::CmapInfo cmap;
+                    cmapping.at("column").get_to(cmap.column);
+                    cmapping.at("min").get_to(cmap.min);
+                    cmapping.at("max").get_to(cmap.max);
+                    s.defaultColormapping = cmap;
+                }
+            }
+
+            const nlohmann::json columnInfo = j.at("column_info");
+            for (auto& [key, value] : columnInfo.items()) {
+                DataSettings::ColumnInfo info;
+                value.at("name").get_to(info.name);
+                if (value.contains("format")) {
+                    value.at("format").get_to(info.format);
+                }
+                if (value.contains("desc")) {
+                    value.at("desc").get_to(info.description);
+                }
+                if (value.contains("isText")) {
+                    bool temp = false;
+                    value.at("isText").get_to(temp);
+                    info.isText = temp;
+                }
+                s.columnInfo[key] = info;
+            }
+
+            const std::vector<nlohmann::json> quickFilterGroups = j.at("quick_filters");
+            s.quickFilterGroups.reserve(quickFilterGroups.size());
+
+            for (const nlohmann::json& groupInfo : quickFilterGroups) {
+                DataSettings::QuickFilterGroup group;
+
+                groupInfo.at("group_title").get_to(group.title);
+
+                if (groupInfo.contains("type")) {
+                    if (ghoul::toUpperCase(groupInfo.at("type")) == "OR") {
+                        group.type = DataSettings::QuickFilterGroup::Type::Or;
+                    }
+                    else if (ghoul::toUpperCase(groupInfo.at("type")) == "AND") {
+                        group.type = DataSettings::QuickFilterGroup::Type::And;
+                    }
+                    else {
+                        LERROR("Invalid quick filter group type. Expected 'AND' or 'OR'");
+                    }
+
+                }
+                groupInfo.at("same_line").get_to(group.showOnSameLine);
+
+                const std::vector<nlohmann::json> quickFilters = groupInfo.at("filters");
+
+                for (const nlohmann::json& filterInfo : quickFilters) {
+                    DataSettings::QuickFilter quickFilter;
+
+                    filterInfo.at("name").get_to(quickFilter.name);
+
+                    if (filterInfo.at("filter").is_array()) {
+                        const std::vector<nlohmann::json>& filters = filterInfo.at("filter");
+                        quickFilter.filters.reserve(filters.size());
+
+                        for (const nlohmann::json& f : filters) {
+                            DataSettings::QuickFilter::Filter filter;
+                            f.at("column").get_to(filter.column);
+                            f.at("query").get_to(filter.query);
+                            quickFilter.filters.push_back(filter);
+                        }
+                    }
+                    else if (filterInfo.at("filter").is_object()) {
+                        const nlohmann::json f = filterInfo.at("filter");
+
+                        DataSettings::QuickFilter::Filter filter;
+                        f.at("column").get_to(filter.column);
+                        f.at("query").get_to(filter.query);
+                        quickFilter.filters.push_back(filter);
+                    }
+
+                    if (filterInfo.contains("desc")) {
+                        filterInfo.at("desc").get_to(quickFilter.description);
+                    }
+
+                    group.quickFilters.push_back(quickFilter);
+                }
+
+                s.quickFilterGroups.push_back(group);
+            }
+        }
+        catch (const nlohmann::json::out_of_range& e) {
+            LERROR(std::format("When reading data settings .json: {}", e.what()));
+        }
+    }
+
 } // namespace
 
 namespace openspace::exoplanets {
 
-DataLoader::DataLoader() : _inExoplanetsCsvPath(absPath(DataPath).string()) {}
+DataLoader::DataLoader() {}
 
-std::vector<ExoplanetItem> DataLoader::loadData() {
-    std::ifstream exoplanetsCsvFile(_inExoplanetsCsvPath);
-    if (!exoplanetsCsvFile.good()) {
-        LERROR(std::format("Failed to open input file '{}'", _inExoplanetsCsvPath));
+DataSettings DataLoader::loadDataSettingsFromJson() {
+    auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
+    std::filesystem::path settingsPath = absPath(mod->dataConfigFile());
+
+    if (settingsPath.empty()) {
+        LERROR("No dataset settings (.json) file was provided.");
+        return DataSettings();
+    }
+    else if (!std::filesystem::is_regular_file(settingsPath)) {
+        LERROR(std::format(
+            "Could not find dataset settings (.json) file: '{}'", settingsPath
+        ));
+        return DataSettings();
+    }
+
+    std::ifstream datasetConfigFile(settingsPath);
+
+    if (!datasetConfigFile.good()) {
+        LERROR(std::format(
+            "Failed reading dataset settings file: '{}'", settingsPath
+        ));
+        return DataSettings();
+    }
+
+    try {
+        const nlohmann::json j = nlohmann::json::parse(datasetConfigFile);
+        DataSettings settings;
+        from_json(j, settings);
+        return settings;
+    }
+    catch (...) {
+        LERROR(std::format(
+            "Failed parsing dataset settings file: '{}'", settingsPath
+        ));
+        return DataSettings();
+    }
+}
+
+std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
+    std::filesystem::path csvFilePath = absPath("${MODULE_EXOPLANETSEXPERTTOOL}") / settings.dataFile;
+
+    if (!std::filesystem::is_regular_file(csvFilePath)) {
+        LERROR(std::format("Could not find input data file '{}'", csvFilePath));
         return std::vector<ExoplanetItem>();
     }
 
-    LINFO("Reading Exoplanets CSV");
+    std::ifstream csvFile(csvFilePath);
+    if (!csvFile.good()) {
+        LERROR(std::format("Failed to open input data file '{}'", csvFilePath));
+        return std::vector<ExoplanetItem>();
+    }
+
+    LINFO(std::format("Reading CSV file: '{}'", csvFilePath));
 
     std::vector<std::vector<std::string>> csvContent = ghoul::loadCSVFile(
-        _inExoplanetsCsvPath,
+        csvFilePath,
         true
     );
 
     if (csvContent.empty()) {
         LERROR(
-            std::format("Could not read CSV data from file '{}'", _inExoplanetsCsvPath)
+            std::format("Could not read CSV data from file '{}'", csvFilePath)
         );
         return std::vector<ExoplanetItem>();
     }
 
-    auto isPositiveErrorCol = [](const std::string& c) {
-        return c.find("err1") != std::string::npos;
-    };
-
-    auto isNegativeErrorCol = [](const std::string& c) {
-        return c.find("err2") != std::string::npos;
-    };
+    LINFO("Parsing content of CSV file");
 
     // Write exoplanet records to file
     std::vector<std::string> columns = csvContent[0];
@@ -113,285 +281,125 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
     std::vector<ExoplanetItem> planets;
     planets.reserve(nRows);
 
-    int nOtherColumns = -1;
+    ProgressBar progressBar(100);
+    auto printProgress = [&progressBar](float progress) {
+        progressBar.print(static_cast<int>(progress * 100.f));
+    };
+
+    int nDataColumns = -1;
+
+    printProgress(0.f);
 
     for (int row = 1; row < nRows; row++) {
         ExoplanetItem p;
-        std::string name;
-        std::string component;
-        std::string hostStar;
 
         p.id = row - 1;
+
+        DataPoint ra;
+        DataPoint dec;
+        DataPoint distance;
+
+        if (settings.dataMapping.name.empty()) {
+            p.name = std::format("Item {}", row);
+            p.dataColumns["name"] = p.name;
+        }
 
         for (int col = 0; col < columns.size(); col++) {
             const std::string& column = columns[col];
             const std::string& data = csvContent[row][col];
 
-            if (column == "pl_name") {
-                p.planetName = data;
-                // TODO: create identifier matching exoplanets module?
+            // Get special values first
+            if (column == settings.dataMapping.name) {
+                p.name = data;
             }
-            else if (column == "hostname") {
+            else if (column == settings.dataMapping.hostName) {
                 p.hostName = data;
-                // TODO: create identifier matching exoplanets module?
             }
-            else if (column == "pl_letter") {
-                if (data.size() == 1) {
-                    p.component = data.at(0);
-                }
-                else {
-                    LWARNING(std::format(
-                        "Could not read planet letter from data: '{}'", data
-                    ));
-                }
+            else if (column == settings.dataMapping.ringSize) {
+                p.sizeValue = data::parseFloatData(data);
             }
-            // Discovery
-            else if (column == "disc_year") {
-                p.discoveryYear = static_cast<int>(data::parseFloatData(data));
+            else if (column == settings.dataMapping.positionRa) {
+                ra.value = data::parseFloatData(data);
             }
-            else if (column == "discoverymethod") {
-                p.discoveryMethod = data;
+            else if (column == settings.dataMapping.positionDec) {
+                dec.value = data::parseFloatData(data);
             }
-            else if (column == "disc_telescope") {
-                p.discoveryTelescope = data;
+            else if (column == settings.dataMapping.positionDistance) {
+                distance.value = data::parseFloatData(data);
             }
-            else if (column == "disc_instrument") {
-                p.discoveryInstrument = data;
+            else if (column == settings.dataMapping.referenceName) {
+                p.referenceName = data;
             }
-            // Planet properties
-            else if (column == "pl_rade") {
-                p.radius.value = data::parseFloatData(data);
+            else if (column == settings.dataMapping.referenceLink) {
+                p.referenceUrl= data;
             }
-            else if (column.rfind("pl_bmasse") != std::string::npos) {
-                // TODO: generalize
-                if (isPositiveErrorCol(column)) {
-                    p.mass.errorUpper = data::parseFloatData(data);
-                }
-                else if (isNegativeErrorCol(column)) {
-                    p.mass.errorLower = data::parseFloatData(data);
-                }
-                else if (column == "pl_bmasse") {
-                    p.mass.value = data::parseFloatData(data);
-                }
-            }
-            // Orbital properties
-            else if (column == "pl_orbsmax") {
-                p.semiMajorAxis.value = data::parseFloatData(data);
-            }
-            else if (column == "pl_orbeccen") {
-                p.eccentricity.value = data::parseFloatData(data);
-            }
-            else if (column == "pl_orbper") {
-                p.period.value = data::parseFloatData(data);
-            }
-            else if (column == "pl_orbincl") {
-                p.inclination.value = data::parseFloatData(data);
-            }
-            else if (column == "pl_Teq") {
-                p.eqilibriumTemp.value = data::parseFloatData(data);
-            }
-            // Star properties
-            else if (column == "st_teff") {
-                p.starEffectiveTemp.value = data::parseFloatData(data);
-            }
-            else if (column == "st_rad") {
-                p.starRadius.value = data::parseFloatData(data);
-            }
-            else if (column == "st_age") {
-                p.starAge.value = data::parseFloatData(data);
-            }
-            else if (column == "st_met") {
-                p.starMetallicity.value = data::parseFloatData(data);
-            }
-            else if (column == "st_metratio") {
-                p.starMetallicityRatio = data;
-            }
-            else if (column == "sy_jmag") {
-                p.magnitudeJ.value = data::parseFloatData(data);
-            }
-            else if (column == "sy_kmag") {
-                p.magnitudeK.value = data::parseFloatData(data);
-            }
-            // System properties
-            else if (column == "sy_snum") {
-                p.nStars = static_cast<int>(data::parseFloatData(data));
-            }
-            else if (column == "sy_pnum") {
-                p.nPlanets = static_cast<int>(data::parseFloatData(data));
-            }
-            // Position
-            else if (column == "ra") {
-                p.ra.value = data::parseFloatData(data);
-            }
-            else if (column == "dec") {
-                p.dec.value = data::parseFloatData(data);
-            }
-            else if (column == "sy_dist") {
-                p.distance.value = data::parseFloatData(data);
-            }
-            else if (column == "ESM") {
-                p.esm = data::parseFloatData(data);
-            }
-            else if (column == "TSM") {
-                p.tsm = data::parseFloatData(data);
-            }
-            // Molecules in atmosphere
-            // Note that molecules are separated with '&' signs. We replace those
-            else if (column == "molecule_detection") {
-                auto molecules = ghoul::tokenizeString(data, '&');
-                p.moleculesDetection = ghoul::join(molecules, ", ");
-            }
-            else if (column == "molecule_upperLimit") {
-                auto molecules = ghoul::tokenizeString(data, '&');
-                p.moleculesUpperLimit = ghoul::join(molecules, ", ");
-            }
-            else if (column == "molecule_noDetection") {
-                auto molecules = ghoul::tokenizeString(data, '&');
-                p.moleculesNoDetection = ghoul::join(molecules, ", ");
-            }
-            // Data reference
-            else if (column == "pl_refname") {
-                // Parse reference string
-                //
-                // TODO: try loading name like this instead
-                // scn::scan(data, "<a refstr={} href={} target=ref>{}</a>"
-                //
-                // For some reason we fail reading the name above. Try and see if splitting up the string helps
-                std::vector<std::string> list = ghoul::tokenizeString(data, '>');
-                list.pop_back(); // Last is always empty();
 
-                if (list.size() != 2) {
-                    LERROR(std::format(
-                        "Failed reading reference: '{}' (wrong format)", data)
-                    );
-                }
+            // Parse data column values
 
-                // Read url
-                auto res = scn::scan<std::string, std::string>(list[0], "<a refstr={} href={} target=ref");
-                if (res) {
-                    auto [refstr, href] = res->values();
+            float parsedNumeric = data::parseFloatData(data);
 
-                }
+            bool hasIsTextInfo = settings.columnInfo.contains(column) &&
+                settings.columnInfo.at(column).isText.has_value();
 
-                // Remove final tag from name
-                std::string name = ghoul::replaceAll(list[1], "</a", "");
-                ghoul::trimWhitespace(name);
-                p.referenceName = name;
-            }
-            // Any other columns that might be in the datset
-            else {
-                std::string key = column;
+            bool shouldEnforceString =
+                hasIsTextInfo ? *settings.columnInfo.at(column).isText : false;
 
-                // For now, ignore any empty, limit and error columns
-                if (hasEnding(key, "err1") ||
-                    hasEnding(key, "err2") ||
-                    hasEnding(key, "lim"))
-                {
-                    continue;
-                }
-
-
-                float parsedNumeric = data::parseFloatData(data);
-
+            if (data.empty() && isNan(data)) {
                 // All columns should have empty string for missing values
-                if (data.empty()) {
-                    p.otherColumns[key] = ""; // Empty string
-                }
-                else if (!std::isnan(parsedNumeric)) {
-                    p.otherColumns[key] = parsedNumeric;
-                }
-                else {
-                    // Non empty string value
-                    p.otherColumns[key] = data;
-                }
-
+                p.dataColumns[column] = "";
+            }
+            else if (!std::isnan(parsedNumeric) && !shouldEnforceString) {
+                p.dataColumns[column] = parsedNumeric;
+            }
+            else {
+                // Non empty string value
+                p.dataColumns[column] = isNan(data) ? "" : data;
             }
         }
 
-        p.multiSystemFlag = (p.nPlanets > 1);
-
-        // Compute galactic position of system
-        bool hasPos = p.ra.hasValue() && p.dec.hasValue() && p.distance.hasValue();
+        // Compute galactic position of item
+        bool hasPos = ra.hasValue() && dec.hasValue() && distance.hasValue();
         if (hasPos) {
-            const float ra = p.ra.value;
-            const float dec = p.dec.value;
-            p.position = icrsToGalacticCartesian(ra, dec, p.distance.value);
+            p.position = icrsToGalacticCartesian(ra.value, dec.value, distance.value);
         }
 
-        // Check if water has been detected
-        // TODO: move to python
-        // 1 = yes, 0 = maybe, -1 = no
-        constexpr const char WaterKey[] = "H2O";
-        if (p.moleculesDetection.find(WaterKey) != std::string::npos) {
-            p.waterDetection = 1.f;
-        }
-        else if (p.moleculesUpperLimit.find(WaterKey) != std::string::npos) {
-            p.waterDetection = 0.f;
-        }
-        else if (p.moleculesNoDetection.find(WaterKey) != std::string::npos) {
-            p.waterDetection = -1.f;
-        }
-
-        //// If unknown, compute planet mass
-        //// TODO: move to python
-        //if ((!p.mass.hasValue()) && p.radius.hasValue()) {
-        //    float r = p.radius.value;
-
-        //    // Mass radius relationship from Chen & Kipping (2017)
-        //    // See eq. (2) in https://arxiv.org/pdf/1805.03671.pdf
-
-        //    if (r < 1.23f) { // Terran
-        //        p.mass.value = 0.9718f * glm::pow(r, 3.58f);
-        //    }
-        //    else if (r < 14.26) { // Neptunian
-        //        p.mass.value = 1.436f * glm::pow(r, 1.70f);
-        //    }
-        //    // TODO: constant for larger planets (Jovian & Stellar)
-        //    // Use their python package!
-        //    // Their paper: https://iopscience.iop.org/article/10.3847/1538-4357/834/1/17
-        //}
-
-        // TODO: move to python
-        if (p.radius.hasValue() && p.mass.hasValue()) {
-            constexpr const double G = 6.67430e-11;
-            const double r = static_cast<double>(p.radius.value) * EarthRadius;
-            const double M = static_cast<double>(p.mass.value) * EarthMass;
-            p.surfaceGravity.value = static_cast<float>((G * M) / (r * r));
-        }
-
-        // Virification related to "other columns"
-        if (nOtherColumns == -1) {
-            nOtherColumns = static_cast<int>(p.otherColumns.size());
+        // Verification related to "other columns". All rows should have the same number
+        // of columns
+        if (nDataColumns == -1) {
+            nDataColumns = static_cast<int>(p.dataColumns.size());
         }
         else {
-            if (p.otherColumns.size() != nOtherColumns) {
+            if (p.dataColumns.size() != nDataColumns) {
                 throw; // TODO: throw something meaningful
             }
         }
 
         planets.push_back(p);
+
+        printProgress(static_cast<float>(row) / static_cast<float>(nRows));
     }
     planets.shrink_to_fit();
+    printProgress(1.f);
 
     if (planets.empty()) {
         return planets;
     }
 
-    // Handle missing values in "other columns"
+    // Handle missing values
+
+    LINFO("Modifing data based on missing values and detecting column data types...");
 
     std::map<std::string, bool> colIsNumeric;
-    auto first = planets.front().otherColumns;
+    auto firstDataValues = planets.front().dataColumns;
 
     // Determine the type of all other columns
-    for (auto iter = first.begin(); iter != first.end(); ++iter) {
-        const std::string key = iter->first;
-
-        // Default value if we have no vlaue for any planet is false
+    for (const auto& [key, _] : firstDataValues) {
+        // Default is text
         colIsNumeric[key] = false;
 
         // Find first entry with a value and use that to determine category
         for (auto p : planets) {
-            std::variant<std::string, float> value = p.otherColumns[key];
+            std::variant<std::string, float> value = p.dataColumns[key];
             if (std::holds_alternative<std::string>(value) &&
                 std::get<std::string>(value).empty())
             {
@@ -404,26 +412,51 @@ std::vector<ExoplanetItem> DataLoader::loadData() {
         }
     }
 
-    // Replace all the missing values in the numeric columns with something meaningful
-    for (auto iter = first.begin(); iter != first.end(); ++iter) {
-        const std::string key = iter->first;
-
+    // Replace all the missing values in the numeric columns with NaN values
+    for (const auto& [key, _] : firstDataValues) {
         if (!colIsNumeric[key]) {
             continue;
         }
 
         // Find first entry with a value and use that to determine category
         for (ExoplanetItem& p : planets) {
-            std::variant<std::string, float> value = p.otherColumns[key];
+            std::variant<std::string, float> value = p.dataColumns[key];
             if (std::holds_alternative<std::string>(value) &&
                 std::get<std::string>(value).empty())
             {
-                p.otherColumns[key] = std::numeric_limits<float>::quiet_NaN();
+                p.dataColumns[key] = std::numeric_limits<float>::quiet_NaN();
+            }
+        }
+    }
+    // At this stage all values in the data columns should have the correct type
+
+    if (!settings.dataMapping.hostName.empty()) {
+        std::map<std::string, std::vector<size_t>> hostIdToPlanetsMap;
+        for (int i = 0; i < planets.size(); i++) {
+            hostIdToPlanetsMap[makeIdentifier(planets[i].hostName)].push_back(i);
+        }
+
+        // Fill planets internal indices in system (based on whatever column is used for size)
+        std::map<std::string, std::vector<size_t>>::iterator it;
+        for (it = hostIdToPlanetsMap.begin(); it != hostIdToPlanetsMap.end(); it++) {
+            std::vector<size_t> planetIds = it->second;
+
+            std::sort(
+                planetIds.begin(),
+                planetIds.end(),
+                [&planets](const size_t a, const size_t b) -> bool {
+                    float v1 = planets[a].sizeValue;
+                    float v2 = planets[b].sizeValue;
+                    return data::compareValuesWithNan(v1, v2);
+                }
+            );
+            for (int i = 0; i < static_cast<int>(planetIds.size()); ++i) {
+                planets[planetIds[i]].indexInSystem = i;
             }
         }
     }
 
-    // At this stage all values in the other columns should have the correct type
+    LINFO("Done loading dataset!");
 
     return planets;
 }

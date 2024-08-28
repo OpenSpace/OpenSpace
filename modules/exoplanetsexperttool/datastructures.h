@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,9 +30,12 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <variant>
 
 namespace openspace::exoplanets {
+
+using ColumnKey = std::string;
 
 // Represent a data point with upper and lower uncertainty values
 struct DataPoint {
@@ -71,65 +74,114 @@ struct DataPoint {
     };
 };
 
+// TODO: Automatically determine which columns have uncertainty and should be
+// represented with a datapoint.
+
 struct ExoplanetItem {
     int id; // Id used for UI (same as row number in data file)
-    std::string planetName;
-    std::string hostName;
-    char component;
 
-    int discoveryYear;
-    std::string discoveryMethod;
-    std::string discoveryTelescope;
-    std::string discoveryInstrument;
-
-    DataPoint radius; // in Earth radii
-    DataPoint mass; // in Earth mass
-    DataPoint eqilibriumTemp;  // in Kelvin
-    DataPoint eccentricity;
-    DataPoint semiMajorAxis; // in AU
-    DataPoint period; // in days
-    DataPoint inclination;
-    float tsm = std::numeric_limits<float>::quiet_NaN();
-    float esm = std::numeric_limits<float>::quiet_NaN();
-    DataPoint surfaceGravity;
-
-    // System
-    bool multiSystemFlag;
-    int nStars;
-    int nPlanets;
-
-    // Star
-    DataPoint starEffectiveTemp; // in Kelvin
-    DataPoint starAge; // in Gyr
-    DataPoint starRadius; // in Solar radii
-    DataPoint starMetallicity; // in dex
-    std::string starMetallicityRatio;
-    DataPoint magnitudeJ; // apparent magnitude in the J band (star)
-    DataPoint magnitudeK; // apparent magnitude in the K band (star)
-
-    // Position
-    DataPoint ra; // in decimal degrees
-    DataPoint dec; // in decimal degrees
-    DataPoint distance; // in Parsec
     std::optional<glm::dvec3> position = std::nullopt; // in Parsec
 
-    // Detected molecules in atmosphere
-    std::string moleculesDetection;
-    std::string moleculesUpperLimit;
-    std::string moleculesNoDetection;
-    float waterDetection = std::numeric_limits<float>::quiet_NaN();
+    std::string name;
+    std::string hostName;
 
     // Data reference
     std::string referenceName;
     std::string referenceUrl;
 
-    // Any other kind of data that might be interesting. can be numeric or string
-    std::map<std::string, std::variant<std::string, float>> otherColumns;
+    // A map between column name and a string/float value
+    std::map<ColumnKey, std::variant<std::string, float>> dataColumns;
+
+    float sizeValue = 0.f;
 
     // The planet's internal index within its system, from the inside out
     int indexInSystem = -1;
 };
 
-} // namespace openspace
+struct DataSettings {
+    std::filesystem::path dataFile;
+
+    // Column names for certain columns that we need for the tool to work
+    struct {
+        ColumnKey positionRa;
+        ColumnKey positionDec;
+        ColumnKey positionDistance;
+
+        ColumnKey name = "";
+        ColumnKey hostName = "";
+        ColumnKey ringSize = "";
+        ColumnKey referenceName = "";
+        ColumnKey referenceLink = "";
+    } dataMapping;
+
+    struct CmapInfo {
+        ColumnKey column;
+        float min = 0.f; // TODO: optional (set from range if excluded?)
+        float max = 100.f; // TODO: optional
+    };
+    std::optional<CmapInfo> defaultColormapping;
+
+    struct ColumnInfo {
+        std::string name;
+        std::string format = "";
+        std::string description = "";
+
+        // Sometimes, a seemingly numeric column should really be a text-based one.
+        // This allows us to control that
+        std::optional<bool> isText;
+    };
+    std::unordered_map<ColumnKey, ColumnInfo> columnInfo;
+
+    struct QuickFilter {
+        std::string name;
+
+        struct Filter {
+            ColumnKey column;
+            std::string query;
+        };
+        std::vector<Filter> filters;
+
+        std::string description = "";
+    };
+
+    struct QuickFilterGroup {
+        std::string title = "";
+
+        enum class Type {
+            And = 0,
+            Or
+        } type;
+
+        bool showOnSameLine = false;
+
+        std::vector<QuickFilter> quickFilters;
+    };
+
+    std::vector<QuickFilterGroup> quickFilterGroups;
+
+
+    ColumnKey nameColumn() const {
+        return dataMapping.name;
+    };
+
+    // Returns the column name, if there is one. Otherwise just the key.
+    const char* columnName(const ColumnKey& key) const {
+        return columnInfo.contains(key) ? columnInfo.at(key).name.c_str() : key.c_str();
+    }
+
+    bool hasName(const ColumnKey& key) const {
+        return columnInfo.contains(key);
+    }
+
+    const std::string& description(const ColumnKey& key) const {
+        return columnInfo.at(key).description;
+    }
+
+    bool hasDescription(const ColumnKey& key) const {
+        return columnInfo.contains(key) && !columnInfo.at(key).description.empty();
+    }
+};
+
+} // namespace openspace::exoplanets
 
 #endif // __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___DATASTRUCTURES___H__
