@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,8 +37,8 @@ namespace openspace {
 BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(glm::vec3 blockSize,
                                                                glm::vec3 planeNormal,
                                                                float planeDistance)
-    : _size(blockSize)
-    , _normal(planeNormal)
+    : _size(std::move(blockSize))
+    , _normal(std::move(planeNormal))
     , _planeDistance(planeDistance)
 {}
 
@@ -52,7 +52,7 @@ void BlockPlaneIntersectionGeometry::setBlockSize(glm::vec3 size) {
     updateVertices();
 }
 
-void BlockPlaneIntersectionGeometry::setPlane(glm::vec3 normal, float distance) {
+void BlockPlaneIntersectionGeometry::setPlane(const glm::vec3& normal, float distance) {
     _normal = glm::normalize(normal);
     _planeDistance = distance;
     updateVertices();
@@ -61,7 +61,7 @@ void BlockPlaneIntersectionGeometry::setPlane(glm::vec3 normal, float distance) 
 void BlockPlaneIntersectionGeometry::updateVertices() {
     _vertices.clear();
 
-    const int cornersInLines[24] = {
+    constexpr std::array<int, 24> CornersInLines = {
         0, 1,
         1, 5,
         5, 4,
@@ -84,23 +84,24 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     int nIntersections = 0;
 
     for (int i = 0; i < 12; i++) {
-        int iCorner0 = cornersInLines[i * 2];
-        int iCorner1 = cornersInLines[i * 2 + 1];
+        const int iCorner0 = CornersInLines[i * 2];
+        const int iCorner1 = CornersInLines[i * 2 + 1];
 
-        glm::vec3 corner0 = glm::vec3(
+        const glm::vec3 corner0 = glm::vec3(
             iCorner0 % 2,
             (iCorner0 / 2) % 2,
             iCorner0 / 4
         ) - halfSize;
-        glm::vec3 corner1 = glm::vec3(
+        const glm::vec3 corner1 = glm::vec3(
             iCorner1 % 2,
             (iCorner1 / 2) % 2,
             iCorner1 / 4
         ) - halfSize;
 
-        glm::vec3 line = corner1 - corner0;
+        const glm::vec3 line = corner1 - corner0;
 
-        float t = (_planeDistance - glm::dot(corner0, _normal)) / glm::dot(line, _normal);
+        const float t =
+            (_planeDistance - glm::dot(corner0, _normal)) / glm::dot(line, _normal);
         if (t >= 0.0 && t <= 1.0) {
             intersections[nIntersections++] = corner0 + t * line;
         }
@@ -115,13 +116,13 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
 
     std::vector<std::pair<int, float>> angles(nIntersections - 1);
 
-    glm::vec3 vector1 = glm::normalize(intersections[1] - intersections[0]);
-    angles[0] = std::pair<int, float>(1, 0.0f);
+    const glm::vec3 vec1 = glm::normalize(intersections[1] - intersections[0]);
+    angles[0] = std::pair<int, float>(1, 0.f);
 
     for (int i = 2; i < nIntersections; i++) {
-        glm::vec3 vectorI = glm::normalize(intersections[i] - intersections[0]);
-        float sinA = glm::dot(glm::cross(vector1, vectorI), _normal);
-        float cosA = glm::dot(vector1, vectorI);
+        const glm::vec3 vectorI = glm::normalize(intersections[i] - intersections[0]);
+        const float sinA = glm::dot(glm::cross(vec1, vectorI), _normal);
+        const float cosA = glm::dot(vec1, vectorI);
         angles[i - 1] = { i, glm::sign(sinA) * (1.f - cosA) };
     }
 
@@ -137,7 +138,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     _vertices.push_back(intersections[0].z);
     //_vertices.push_back(_w);
     for (int i = 0; i < nIntersections - 1; i++) {
-        int j = angles[i].first;
+        const int j = angles[i].first;
         _vertices.push_back(intersections[j].x);
         _vertices.push_back(intersections[j].y);
         _vertices.push_back(intersections[j].z);

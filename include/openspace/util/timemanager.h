@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,17 +41,17 @@
 
 namespace openspace {
 
-struct TimeKeyframeData {
-    Time time;
-    double delta = 0.0;
-    bool pause = false;
-    bool jump = false;
-};
-
 class TimeManager : public properties::PropertyOwner {
 public:
     using CallbackHandle = int;
     using TimeChangeCallback = std::function<void()>;
+
+    struct TimeKeyframeData {
+        Time time;
+        double delta = 0.0;
+        bool pause = false;
+        bool jump = false;
+    };
 
     TimeManager();
 
@@ -70,12 +70,12 @@ public:
     void setDeltaTimeSteps(const std::vector<double> deltaTimes);
 
     /**
-     * Returns the delta time, unaffected by pause
+     * Returns the delta time, unaffected by pause.
      */
     double targetDeltaTime() const;
 
     /*
-     * Returns the current delta time, as affected by pause
+     * Returns the current delta time, as affected by pause.
      */
     double deltaTime() const;
 
@@ -83,7 +83,7 @@ public:
      * Sets the simulation time using the time contents of a profile. The function will
      * set either a relative or absolute time.
      *
-     * \param p The Profile to be read.
+     * \param p The Profile to be read
      */
     void setTimeFromProfile(const Profile& p);
 
@@ -98,8 +98,8 @@ public:
 
     void interpolateTime(double targetTime, double durationSeconds);
     void interpolateTimeRelative(double delta, double durationSeconds);
-    void interpolateDeltaTime(double targetDeltaTime, double durationSeconds);
-    void interpolatePause(bool pause, double durationSeconds);
+    void interpolateDeltaTime(double newDeltaTime, double interpolationDuration);
+    void interpolatePause(bool pause, double interpolationDuration);
 
     std::optional<double> nextDeltaTimeStep();
     std::optional<double> previousDeltaTimeStep();
@@ -110,7 +110,7 @@ public:
     void interpolateNextDeltaTimeStep(double durationSeconds);
     void interpolatePreviousDeltaTimeStep(double durationSeconds);
 
-    void addKeyframe(double timestamp, TimeKeyframeData kf);
+    void addKeyframe(double timestamp, TimeKeyframeData time);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
     void removeKeyframesAfter(double timestamp, bool inclusive = false);
 
@@ -137,10 +137,7 @@ private:
 
     void addDeltaTimesKeybindings();
     void clearDeltaTimesKeybindings();
-    double currentApplicationTimeForInterpolation() const;
     double previousApplicationTimeForInterpolation() const;
-
-    bool isPlayingBackSessionRecording() const;
 
     Timeline<TimeKeyframeData> _timeline;
     SyncData<Time> _currentTime;

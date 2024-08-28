@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,9 +31,8 @@ Worker::Worker(ThreadPool& p) : pool(p) {}
 void Worker::operator()() {
     std::function<void()> task;
     while (true) {
-        // acquire lock
         {
-            std::unique_lock<std::mutex> lock(pool.queue_mutex);
+            std::unique_lock lock(pool.queue_mutex);
 
             // look for a work item
             while (!pool.stop && pool.tasks.empty()) {
@@ -48,8 +47,7 @@ void Worker::operator()() {
             // get the task from the queue
             task = pool.tasks.front();
             pool.tasks.pop_front();
-
-        } // release lock
+        }
 
         // execute the task
         task();
@@ -57,8 +55,8 @@ void Worker::operator()() {
 }
 
 ThreadPool::ThreadPool(size_t numThreads) : stop(false) {
-    for (size_t i = 0; i < numThreads; ++i) {
-        workers.emplace_back(std::thread(Worker(*this)));
+    for (size_t i = 0; i < numThreads; i++) {
+        workers.emplace_back(Worker(*this));
     }
 }
 
@@ -68,7 +66,7 @@ ThreadPool::ThreadPool(const ThreadPool& toCopy) : ThreadPool(toCopy.workers.siz
 ThreadPool::~ThreadPool() {
     // stop all threads
     {
-        std::unique_lock<std::mutex> lock(queue_mutex);
+        const std::unique_lock lock(queue_mutex);
         stop = true;
     }
     condition.notify_all();
@@ -81,22 +79,20 @@ ThreadPool::~ThreadPool() {
 
 // add new work item to the pool
 void ThreadPool::enqueue(std::function<void()> f) {
-    { // acquire lock
-        std::unique_lock<std::mutex> lock(queue_mutex);
+    {
+        const std::unique_lock lock(queue_mutex);
 
         // add the task
         tasks.push_back(std::move(f));
-    } // release lock
+    }
 
     // wake up one thread
     condition.notify_one();
 }
 
 void ThreadPool::clearTasks() {
-    { // acquire lock
-        std::unique_lock<std::mutex> lock(queue_mutex);
-        tasks.clear();
-    } // release lock
+    const std::unique_lock lock(queue_mutex);
+    tasks.clear();
 }
 
 bool ThreadPool::hasOutstandingTasks() const {

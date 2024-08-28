@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -111,11 +111,14 @@ namespace {
     if (module->hasStateMachine()) {
         std::string currentState = module->currentState();
         std::vector<std::string> transitions = module->possibleTransitions();
-        LINFOC("StateMachine", fmt::format(
-            "Currently in state: '{}'. Can transition to states: [ {} ]",
-            currentState,
-            ghoul::join(transitions, ",")
-        ));
+        LINFOC(
+            "StateMachine",
+            std::format(
+                "Currently in state: '{}'. Can transition to states: [ {} ]",
+                currentState,
+                ghoul::join(transitions, ",")
+            )
+        );
     }
     else {
         LINFOC("StateMachine", "No state machine has been created");

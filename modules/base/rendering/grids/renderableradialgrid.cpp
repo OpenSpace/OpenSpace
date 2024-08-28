@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,8 +40,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered",
-        // @VISIBILITY(1.25)
+        "The color used for the grid lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -49,24 +48,21 @@ namespace {
         "GridSegments",
         "Number of Grid Segments",
         "Specifies the number of segments for the grid, in the radial and angular "
-        "direction respectively",
-        // @VISIBILITY(2.5)
+        "direction respectively.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
         "Number of Circle Segments",
-        "This value specifies the number of segments that is used to render each circle "
-        "in the grid",
-        // @VISIBILITY(2.5)
+        "The number of segments that is used to render each circle in the grid.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the spherical grid",
+        "The width of the grid lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -75,15 +71,14 @@ namespace {
         "Inner and Outer Radius",
         "The radii values that determine the size of the circular grid. The first value "
         "is the radius of the inmost ring and the second is the radius of the outmost "
-        "ring",
-        // @VISIBILITY(2.67)
+        "ring.",
         openspace::properties::Property::Visibility::User
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the grid"
+        "The labels for the grid."
     };
 
     struct [[codegen::Dictionary(RenderableRadialGrid)]] Parameters {
@@ -104,7 +99,7 @@ namespace {
 
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
     };
 #include "renderableradialgrid_codegen.cpp"
 } // namespace
@@ -169,7 +164,6 @@ bool RenderableRadialGrid::isReady() const {
 void RenderableRadialGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
@@ -218,7 +212,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_LINE_SMOOTH);
     glDepthMask(false);
 
-    for (GeometryData& c : _circles) {
+    for (const GeometryData& c : _circles) {
         c.render();
     }
 
@@ -244,7 +238,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
         );
 
         if (orthoRight == glm::vec3(0.0)) {
-            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+            const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
             right = glm::cross(viewDirection, otherVector);
             orthoRight = glm::normalize(
                 glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
@@ -280,8 +274,8 @@ void RenderableRadialGrid::update(const UpdateData&) {
         std::vector<rendering::helper::Vertex> vertices =
             rendering::helper::createRing(nSegments, radius);
 
-        _circles.push_back(GeometryData(GL_LINE_STRIP));
-        _circles.back().varray = rendering::helper::convert(vertices);
+        _circles.emplace_back(GL_LINE_STRIP);
+        _circles.back().varray = rendering::helper::convert(std::move(vertices));
         _circles.back().update();
     };
 
@@ -290,7 +284,7 @@ void RenderableRadialGrid::update(const UpdateData&) {
         addRing(_circleSegments, innerRadius);
     }
 
-    for (int i = 0; i < nRadialSegments; ++i) {
+    for (int i = 0; i < nRadialSegments; i++) {
         const float ri = static_cast<float>(i + 1) * deltaRadius + innerRadius;
         addRing(_circleSegments, ri);
     }
@@ -309,7 +303,7 @@ void RenderableRadialGrid::update(const UpdateData&) {
         std::vector<rendering::helper::Vertex> innerVertices =
             rendering::helper::createRing(nLines, innerRadius);
 
-        for (int i = 0; i < nLines; ++i) {
+        for (int i = 0; i < nLines; i++) {
             const rendering::helper::VertexXYZ vOut =
                 rendering::helper::convertToXYZ(outerVertices[i]);
 
@@ -340,7 +334,10 @@ RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode)
 }
 
 RenderableRadialGrid::GeometryData::GeometryData(GeometryData&& other) noexcept {
-    if (this == &other) return;
+    if (this == &other) {
+        return;
+    }
+
     vao = other.vao;
     vbo = other.vbo;
     varray = std::move(other.varray);
@@ -373,7 +370,7 @@ RenderableRadialGrid::GeometryData::~GeometryData() {
     vbo = 0;
 }
 
-void RenderableRadialGrid::GeometryData::update() {
+void RenderableRadialGrid::GeometryData::update() const {
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(
@@ -393,7 +390,7 @@ void RenderableRadialGrid::GeometryData::update() {
     );
 }
 
-void RenderableRadialGrid::GeometryData::render() {
+void RenderableRadialGrid::GeometryData::render() const {
     glBindVertexArray(vao);
     glDrawArrays(mode, 0, static_cast<GLsizei>(varray.size()));
     glBindVertexArray(0);

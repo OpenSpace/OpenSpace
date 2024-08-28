@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "MOLA_HRSC_NewYork",
   Name = "MOLA HRSC [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("mola_hrsc_newyork.wms"),
   Description = [[This map layer is colorzied based elevation data from MOLA and HRSC.
     Compared to MOLA Psuedo Color, this layer has no terrain shading, which is
@@ -28,7 +29,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "MOLA HRSC [New York]",
-  Version = "1.1",
   Description = [[Colorzied elevation data for Mars. This map is hosted on the OpenSpace
     server in New York]],
   Author = "OpenSpace Team",

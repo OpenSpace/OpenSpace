@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,10 +32,10 @@
 namespace openspace::kepler {
 
 struct Parameters {
-    // Some human-readable name for the object represented by this kepler parameter set
+    /// Some human-readable name for the object represented by this kepler parameter set
     std::string name;
 
-    // Some form of unique identifier for the object represented by this data
+    /// Some form of unique identifier for the object represented by this data
     std::string id;
 
     double inclination = 0.0;
@@ -58,7 +58,7 @@ struct Parameters {
  * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p file is not a valid TLE file
  */
-std::vector<Parameters> readTleFile(std::filesystem::path file);
+std::vector<Parameters> readTleFile(const std::filesystem::path& file);
 
 /**
  * Reads the object information from the provided \p file and returns them as individual
@@ -70,7 +70,7 @@ std::vector<Parameters> readTleFile(std::filesystem::path file);
  * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p file is not a valid OMM file
  */
-std::vector<Parameters> readOmmFile(std::filesystem::path file);
+std::vector<Parameters> readOmmFile(const std::filesystem::path& file);
 
 /**
  * Reads the object information from a CSV file following JPL's Small Body Database
@@ -83,10 +83,10 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file);
  * \pre \p file must be a file and must exist
  * \throw ghoul::RuntimeError If the provided \p is not a valid JPL SBDB CSV format
  */
-std::vector<Parameters> readSbdbFile(std::filesystem::path file);
+std::vector<Parameters> readSbdbFile(const std::filesystem::path& file);
 
 /**
- * The different formats that the readFile function is capable of loading
+ * The different formats that the readFile function is capable of loading.
  */
 enum class Format {
     TLE,

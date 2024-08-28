@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,6 @@ size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
         case ghoul::opengl::Texture::Format::BGRA:
             return 4;
         default:
-            ghoul_assert(false, "Unknown format");
             throw ghoul::MissingCaseException();
     }
 }
@@ -56,7 +55,6 @@ size_t numberOfBytes(GLenum glType) {
         case GL_FLOAT:          return sizeof(GLfloat);
         case GL_DOUBLE:         return sizeof(GLdouble);
         default:
-            ghoul_assert(false, "Unknown data type");
             throw ghoul::MissingCaseException();
     }
 }
@@ -84,7 +82,7 @@ openspace::globebrowsing::TileTextureInitData::HashKey calculateHashKey(
     ghoul_assert(dimensions.x <= 1024, "Incorrect dimension");
     ghoul_assert(dimensions.y <= 1024, "Incorrect dimension");
     ghoul_assert(dimensions.z == 1, "Incorrect dimension");
-    unsigned int formatId = uniqueIdForTextureFormat(format);
+    const unsigned int formatId = uniqueIdForTextureFormat(format);
     ghoul_assert(formatId < 256, "Incorrect format");
 
     openspace::globebrowsing::TileTextureInitData::HashKey res = 0ULL;
@@ -151,9 +149,8 @@ TileTextureInitData tileTextureInitData(layers::Group::ID id,
                 ghoul::opengl::Texture::Format::BGRA
             );
         }
-        default: {
+        default:
             throw ghoul::MissingCaseException();
-        }
     }
 }
 
@@ -172,20 +169,20 @@ TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum typ
     , hashKey(calculateHashKey(dimensions, ghoulTextureFormat, glType))
 {}
 
-TileTextureInitData TileTextureInitData::operator=(const TileTextureInitData& rhs) {
+TileTextureInitData& TileTextureInitData::operator=(const TileTextureInitData& rhs) {
     if (this == &rhs) {
         return *this;
     }
 
-    return rhs;
+    return *this;
 }
 
-TileTextureInitData TileTextureInitData::operator=(TileTextureInitData&& rhs) noexcept {
+TileTextureInitData& TileTextureInitData::operator=(TileTextureInitData&& rhs) noexcept {
     if (this == &rhs) {
         return *this;
     }
 
-    return std::move(rhs);
+    return *this;
 }
 
 } // namespace openspace::globebrowsing

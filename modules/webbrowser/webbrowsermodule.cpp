@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <modules/webbrowser/include/cefhost.h>
 #include <modules/webbrowser/include/eventhandler.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
@@ -37,6 +38,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <filesystem>
 
 namespace {
@@ -58,7 +60,7 @@ namespace {
         "Update Browser Between Renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs "
-        "once per frame",
+        "once per frame.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -66,9 +68,28 @@ namespace {
         "BrowserUpdateInterval",
         "Browser Update Interval",
         "The time in microseconds between running the message loop of the browser. "
-        "Only used if UpdateBrowserBetweenRenderables is true",
+        "Only used if UpdateBrowserBetweenRenderables is true.",
         openspace::properties::Property::Visibility::Developer
     };
+
+    /**
+     * Try to find the CEF Helper executable. It looks in the bin/openspace folder.
+     * Therefore, if you change that this might cause a crash here.
+     *
+     * \return the absolute path to the file
+     */
+    std::filesystem::path findHelperExecutable() {
+        const std::filesystem::path execLocation = absPath(std::format(
+            "${{BIN}}/{}", SubprocessPath
+        ));
+        if (!std::filesystem::is_regular_file(execLocation)) {
+            LERROR(std::format(
+                "Could not find web helper executable at location: {}", execLocation
+            ));
+        }
+        return execLocation;
+    }
+
 } // namespace
 
 namespace openspace {
@@ -76,7 +97,7 @@ namespace openspace {
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
     , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
-    , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.0f, 1000.f)
+    , _browserUpdateInterval(BrowserUpdateIntervalInfo, 1.f, 1.f, 1000.f)
     , _eventHandler(new EventHandler)
 {
     global::callback::deinitialize->emplace_back([this]() {
@@ -104,6 +125,8 @@ WebBrowserModule::WebBrowserModule()
     addProperty(_browserUpdateInterval);
 }
 
+WebBrowserModule::~WebBrowserModule() {}
+
 void WebBrowserModule::internalDeinitialize() {
     ZoneScoped;
 
@@ -113,20 +136,10 @@ void WebBrowserModule::internalDeinitialize() {
 
     _eventHandler->resetBrowserInstance();
 
-    bool forceBrowserShutdown = true;
+    const bool forceBrowserShutdown = true;
     for (BrowserInstance* browser : _browsers) {
         browser->close(forceBrowserShutdown);
     }
-}
-
-std::filesystem::path WebBrowserModule::findHelperExecutable() {
-    std::filesystem::path execLocation = absPath("${BIN}/" + std::string(SubprocessPath));
-    if (!std::filesystem::is_regular_file(execLocation)) {
-        LERROR(fmt::format(
-            "Could not find web helper executable at location: {}" , execLocation
-        ));
-    }
-    return execLocation;
 }
 
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
@@ -143,7 +156,7 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         _enabled = dictionary.value<bool>("Enabled");
     }
 
-    LDEBUG(fmt::format("CEF using web helper executable: {}", _webHelperLocation));
+    LDEBUG(std::format("CEF using web helper executable: {}", _webHelperLocation));
     _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
     LDEBUG("Starting CEF... done");
 
@@ -194,7 +207,7 @@ void WebBrowserModule::removeBrowser(BrowserInstance* browser) {
         global::callback::webBrowserPerformanceHotfix = nullptr;
     }
 
-    LDEBUG(fmt::format("Number of browsers stored: {}", _browsers.size()));
+    LDEBUG(std::format("Number of browsers stored: {}", _browsers.size()));
 }
 
 void WebBrowserModule::attachEventHandler(BrowserInstance* browserInstance) {
@@ -213,6 +226,31 @@ bool WebBrowserModule::isEnabled() const {
     return _enabled;
 }
 
+bool WebBrowserModule::canUseAcceleratedRendering() {
+// Linux doesn't have a problem with the rendering, Apple doesn't support OpenGL 4.5
+#ifdef WIN32
+    ghoul::systemcapabilities::Version acceleratedVersion = {
+        .major = 4, .minor = 5, .release = 0
+    };
+    auto it = std::find(
+        OpenGLCap.extensions().begin(),
+        OpenGLCap.extensions().end(),
+        "GL_EXT_memory_object_win32"
+    );
+    bool isVersionOk = OpenGLCap.openGLVersion() >= acceleratedVersion;
+    bool isExtensionsOk = it != OpenGLCap.extensions().end();
+    return isVersionOk && isExtensionsOk;
+#else
+    return false;
+#endif
+}
+
+std::vector<documentation::Documentation> WebBrowserModule::documentations() const {
+    return {
+        ScreenSpaceBrowser::Documentation()
+    };
+}
+
 /// Logic for the webbrowser performance hotfix, described in globalscallbacks.h
 namespace webbrowser {
 
@@ -229,7 +267,7 @@ void update() {
     const std::chrono::time_point<std::chrono::high_resolution_clock> timeBefore =
         std::chrono::high_resolution_clock::now();
 
-    std::chrono::microseconds duration =
+    const std::chrono::microseconds duration =
         std::chrono::duration_cast<std::chrono::microseconds>(timeBefore - latestCall);
 
     if (duration > interval) {

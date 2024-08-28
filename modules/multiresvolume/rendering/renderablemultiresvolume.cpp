@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,11 +42,11 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/fmt.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/framebufferobject.h>
@@ -79,7 +79,6 @@ namespace {
         "CurrentTime",
         "Current Time",
         "", // @TODO Missing documentation
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -87,7 +86,6 @@ namespace {
         "MemoryBudget",
         "Memory Budget",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -95,7 +93,6 @@ namespace {
         "StreamingBudget",
         "Streaming Budget",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -103,7 +100,6 @@ namespace {
         "UseGlobalTime",
         "Global Time",
         "", // @TODO Missing documentation
-        // @VISIBILITY(2.5)
         openspace::properties::Property::Visibility::User
     };
 
@@ -118,7 +114,6 @@ namespace {
         "Selector",
         "Brick Selector",
         "", // @TODO Missing documentation
-        // @VISIBILITY(3.5)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -189,10 +184,10 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     , _scaling(ScalingInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(10.f))
 {
     if (dictionary.hasValue<std::string>(KeyDataSource)) {
-        _filename = absPath(dictionary.value<std::string>(KeyDataSource)).string();
+        _filename = absPath(dictionary.value<std::string>(KeyDataSource));
     }
     else {
-        LERROR(fmt::format("Node did not contain a valid '{}'", KeyDataSource));
+        LERROR(std::format("Node did not contain a valid '{}'", KeyDataSource));
         return;
     }
 
@@ -241,11 +236,11 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
         _transferFunctionPath = absPath(
             dictionary.value<std::string>(KeyTransferFunction)
-        ).string();
+        );
         _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
     }
     else {
-        LERROR(fmt::format("Node did not contain a valid '{}'", KeyTransferFunction));
+        LERROR(std::format("Node did not contain a valid '{}'", KeyTransferFunction));
         return;
     }
 
@@ -474,36 +469,31 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::TF:
             if (_errorHistogramManager) {
                  std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                     fmt::format(
-                         "{}_{}_errorHistograms",
-                         std::filesystem::path(_filename).stem().string(), nHistograms
-                     ),
+                     std::format("{}_{}_errorHistograms", _filename.stem(), nHistograms),
                      ""
                 );
                 std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
-                    // Read histograms from cache.
+                    // Read histograms from cache
                     cacheFile.close();
                     LINFO(
-                        fmt::format("Loading histograms from cache: {}", cached)
+                        std::format("Loading histograms from cache '{}'", cached)
                     );
                     success &= _errorHistogramManager->loadFromFile(cached);
                 }
                 else if (!_errorHistogramsPath.empty()) {
-                    // Read histograms from scene data.
-                    LINFO(fmt::format(
-                        "Loading histograms from scene data: {}", _errorHistogramsPath
+                    // Read histograms from scene data
+                    LINFO(std::format(
+                        "Loading histograms from scene data '{}'", _errorHistogramsPath
                     ));
-                    success &= _errorHistogramManager->loadFromFile(
-                        _errorHistogramsPath.string()
-                    );
+                    success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
                 }
                 else {
-                    // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cached));
+                    // Build histograms from tsp file
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _errorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cached));
+                        LINFO(std::format("Writing cache to '{}'", cached));
                         _errorHistogramManager->saveToFile(cached);
                     }
                 }
@@ -514,27 +504,25 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::SIMPLE:
             if (_histogramManager) {
                 std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                    fmt::format("{}_{}_histogram",
-                        std::filesystem::path(_filename).stem().string(), nHistograms
-                    ),
+                    std::format("{}_{}_histogram", _filename.stem(), nHistograms),
                     ""
                 );
                 std::ifstream cacheFile(cached, std::ios::in | std::ios::binary);
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from {}", cached));
+                    LINFO(std::format("Loading histograms from '{}'", cached));
                     success &= _histogramManager->loadFromFile(cached);
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cached));
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _histogramManager->buildHistograms(
                         _tsp.get(),
                         nHistograms
                     );
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cached));
+                        LINFO(std::format("Writing cache to '{}'", cached));
                         _histogramManager->saveToFile(cached);
                     }
                 }
@@ -545,9 +533,8 @@ bool RenderableMultiresVolume::initializeSelector() {
         case Selector::LOCAL:
             if (_localErrorHistogramManager) {
                  std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-                    fmt::format(
-                        "{}_{}_localErrorHistograms",
-                        std::filesystem::path(_filename).stem().string(), nHistograms
+                    std::format(
+                        "{}_{}_localErrorHistograms", _filename.stem(), nHistograms
                     ),
                     ""
                 );
@@ -555,15 +542,15 @@ bool RenderableMultiresVolume::initializeSelector() {
                 if (cacheFile.is_open()) {
                     // Read histograms from cache.
                     cacheFile.close();
-                    LINFO(fmt::format("Loading histograms from {}", cached));
+                    LINFO(std::format("Loading histograms from '{}'", cached));
                     success &= _localErrorHistogramManager->loadFromFile(cached);
                 }
                 else {
                     // Build histograms from tsp file.
-                    LWARNING(fmt::format("Failed to open {}", cached));
+                    LWARNING(std::format("Failed to open '{}'", cached));
                     success &= _localErrorHistogramManager->buildHistograms(nHistograms);
                     if (success) {
-                        LINFO(fmt::format("Writing cache to {}", cached));
+                        LINFO(std::format("Writing cache to '{}'", cached));
                         _localErrorHistogramManager->saveToFile(cached);
                     }
                 }
@@ -581,7 +568,7 @@ void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program)
 
     std::stringstream ss;
     ss << "opacity_" << getId();
-    program->setUniform(ss.str(), visible ? 1.0f : 0.0f);
+    program->setUniform(ss.str(), visible ? 1.f : 0.f);
 
     ss.str(std::string());
     ss << "stepSizeCoefficient_" << getId();

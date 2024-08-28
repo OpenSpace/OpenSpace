@@ -13,8 +13,8 @@ local MajisVisnir = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_VISNIR",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisVisnir,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_VISNIR",
@@ -22,8 +22,7 @@ local MajisVisnir = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Majis Visnir FOV",
@@ -45,8 +44,8 @@ local MajisVisnirB2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_VISNIR_B2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisVisnirB2,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_VISNIR_B2",
@@ -54,8 +53,7 @@ local MajisVisnirB2 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Majis Visnir B2 FOV",
@@ -73,8 +71,8 @@ local MajisVisnirB4 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_VISNIR_B4",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisVisnirB4,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_VISNIR_B4",
@@ -82,8 +80,7 @@ local MajisVisnirB4 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Majis Visnir B4 FOV",
@@ -101,8 +98,8 @@ local MajisIr = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_IR",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisIR,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_IR",
@@ -110,8 +107,7 @@ local MajisIr = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Majis IR FOV",
@@ -129,8 +125,8 @@ local MajisIrB2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_IR_B2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisIRB2,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_IR_B2",
@@ -138,8 +134,7 @@ local MajisIrB2 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Majis IR B2 FOV",
@@ -157,8 +152,8 @@ local MajisIrB4 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS_IR_B4",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.MajisIRB4,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS_IR_B4",
@@ -166,8 +161,7 @@ local MajisIrB4 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Majis IR B4 FOV",
@@ -185,8 +179,8 @@ local Majis = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_MAJIS",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.Majis,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_MAJIS",
@@ -194,8 +188,7 @@ local Majis = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Majis FOV",
@@ -245,7 +238,6 @@ asset.export(Majis)
 
 asset.meta = {
   Name = "Majis",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Moon and Jupiter Imaging Spectrometer (MAJIS) onboard
     Juice, which is going to take spectroscopic measurements of the Jovian moons and

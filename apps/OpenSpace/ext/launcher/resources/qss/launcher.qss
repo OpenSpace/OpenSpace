@@ -92,6 +92,16 @@ LauncherWindow  QPushButton#small:disabled {
   background: rgb(160, 160, 160);
 }
 
+LauncherWindow  QPushButton#settings {
+  border-image: url(:/images/cogwheel);
+  background-repeat: no-repeat;
+}
+
+LauncherWindow  QPushButton#settings:hover {
+  border-image: url(:/images/cogwheel-highlight);
+}
+
+
 /*
  * ProfileEdit
  */
@@ -208,4 +218,13 @@ WindowControl QLabel#info {
 WindowControl QLabel#notice {
   font-weight: normal;
   font-size: 11pt;
+}
+
+/*
+ * Settings
+ */
+SettingsWidget  QLabel#information {
+  font-style: italic;
+  font-weight: normal;
+  font-size: 8pt;
 }

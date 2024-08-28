@@ -10,7 +10,6 @@ asset.export("TexturesPath", texturesPath)
 
 asset.meta = {
   Name = "Habitable Zone Textures",
-  Version = "1.0",
   Description = "Default textures that can be used for the habitable zone rendering",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

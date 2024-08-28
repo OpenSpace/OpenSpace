@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -112,13 +111,12 @@ bool ParallelConnection::sendMessage(const Message& message) {
         reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
     );
 
-    if (!_socket->put<char>(header.data(), header.size())) {
+    const bool res = _socket->put<char>(header.data(), header.size());
+    if (!res) {
         return false;
     }
-    if (!_socket->put<char>(message.content.data(), message.content.size())) {
-        return false;
-    }
-    return true;
+    const bool res2 = _socket->put<char>(message.content.data(), message.content.size());
+    return res2;
 }
 
 void ParallelConnection::disconnect() {
@@ -158,7 +156,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     }
 
     // Make sure that header matches this version of OpenSpace
-    if (!(headerBuffer[0] == 'O' && headerBuffer[1] == 'S')) {
+    if (headerBuffer[0] != 'O' || headerBuffer[1] != 'S') {
         LERROR("Expected to read message header 'OS' from socket");
         throw ConnectionLostError();
     }
@@ -169,7 +167,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     offset += sizeof(uint8_t);
 
     if (protocolVersionIn != ProtocolVersion) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Protocol versions do not match. Remote version: {}, Local version: {}",
             protocolVersionIn,
             ProtocolVersion

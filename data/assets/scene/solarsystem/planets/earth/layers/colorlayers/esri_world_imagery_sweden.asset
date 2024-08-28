@@ -1,0 +1,42 @@
+local globe = asset.require("../../earth")
+
+
+
+local Layer = {
+  Identifier = "ESRI_World_Imagery_Sweden",
+  Name = "ESRI World Imagery [Sweden]",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = asset.resource("esri_world_imagery_sweden.wms"),
+  Description = [[World Imagery provides one meter or better satellite and aerial
+    imagery in many parts of the world and lower resolution satellite imagery
+    worldwide. The map includes 15m TerraColor imagery at small and mid-scales
+    (~1:591M down to ~1:72k) and 2.5m SPOT Imagery (~1:288k to ~1:72k) for the world.
+    The map features 0.5m resolution imagery in the continental United States and
+    parts of Western Europe from Maxar. Additional Maxar sub-meter imagery is
+    featured in many parts of the world. In other parts of the world, imagery at
+    different resolutions has been contributed by the GIS User Community. In select
+    communities, very high resolution imagery (down to 0.03m) is available down to
+    ~1:280 scale. (Description from URL)]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "ESRI World Imagery",
+  Description = "Main web loaded map layer for Earth. This layer is hosted by ESRI",
+  Author = "ESRI",
+  URL = "https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9",
+  License = "Esri Master License Agreement"
+}

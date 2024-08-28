@@ -81,7 +81,6 @@ asset.export("ToggleFluxnodes", ToggleFluxnodes.Identifier)
 
 asset.meta = {
   Name = "Predictive Science Inc. Flux nodes Bastille Day",
-  Version = "1.1",
   Description = "Flux nodes for the bastille day CME event",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

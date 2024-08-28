@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,7 +57,7 @@ Fragment getFragment() {
     // Ambient color
     vec3 shadedColor = ambientIntensity  * color;
 
-    for (int i = 0; i < nLightSources; ++i) {
+    for (int i = 0; i < nLightSources; i++) {
       vec3 l = lightDirectionsViewSpace[i];
 
       // Diffuse

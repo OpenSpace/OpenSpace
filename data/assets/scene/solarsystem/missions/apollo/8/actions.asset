@@ -48,7 +48,6 @@ asset.export("Launch", Launch.Identifier)
 
 asset.meta = {
   Name = "Apollo 8 Actions",
-  Version = "1.0",
   Description = "Asset with actions related to the Apollo 8 mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

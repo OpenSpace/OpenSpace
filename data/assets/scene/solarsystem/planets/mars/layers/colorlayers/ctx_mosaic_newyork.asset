@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "CTX_Mosaic_NewYork",
   Name = "CTX Mosaic [New York]",
   Enabled = asset.enabled,
+  ZIndex = 60,
   FilePath = asset.resource("ctx_mosaic_newyork.wms"),
   BlendMode = "Color"
 }
@@ -25,7 +26,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "CTX Mosaic [New York]",
-  Version = "1.0",
   Description = [[CTX Mosaic layer for Mars globe. This layer is served from the
     OpenSpace servers in New York]],
   Author = "OpenSpace Team",

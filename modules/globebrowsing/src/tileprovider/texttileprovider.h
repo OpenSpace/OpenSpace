@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@ namespace openspace::globebrowsing {
 
 class TextTileProvider : public TileProvider {
 public:
-    TextTileProvider(TileTextureInitData initData, size_t fontSize = 48);
+    TextTileProvider(TileTextureInitData initData_, size_t fontSize_ = 48);
     ~TextTileProvider() override;
 
     void reset() override;

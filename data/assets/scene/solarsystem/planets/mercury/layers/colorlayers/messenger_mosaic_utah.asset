@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_Mosaic_Utah",
   Name = "Messenger Mosaic [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 20,
   FilePath = asset.resource("messenger_mosaic_utah.wms")
 }
 
@@ -24,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger Mosaic [Utah]",
-  Version = "1.0",
   Description = [[Mercury Messenger Mosaic layer for Mercury globe. This map is hosted on
     the OpenSpace server in Utah]],
   Author = "USGS",

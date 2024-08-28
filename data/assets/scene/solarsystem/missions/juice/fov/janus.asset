@@ -19,8 +19,8 @@ local Janus = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_JANUS",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.Janus,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_JANUS",
@@ -28,8 +28,7 @@ local Janus = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Janus FOV",
@@ -53,7 +52,6 @@ asset.export(Janus)
 
 asset.meta = {
   Name = "Janus",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Jovis Amorum ac Natorum Undique Scrutator (JANUS)
     instrument onboard Juice, which is the camera operating in visible wavelengths. See

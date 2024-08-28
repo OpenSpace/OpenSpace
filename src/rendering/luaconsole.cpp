@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/clipboard.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -55,8 +56,8 @@ namespace {
     constexpr uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
 
     constexpr std::string_view FontName = "Console";
-    constexpr float EntryFontSize = 14.0f;
-    constexpr float HistoryFontSize = 11.0f;
+    constexpr float EntryFontSize = 14.f;
+    constexpr float HistoryFontSize = 11.f;
 
     // Additional space between the entry text and the history (in pixels)
     constexpr float SeparatorSpace = 30.f;
@@ -72,7 +73,7 @@ namespace {
         "IsVisible",
         "Is Visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
-        "will fade the console in and out",
+        "will fade the console in and out.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -81,7 +82,7 @@ namespace {
        "Should Be Synchronized",
        "Determines whether the entered commands will only be executed locally (if this "
        "is disabled), or whether they will be send to other connected nodes, for "
-       "example in a cluster environment",
+       "example in a cluster environment.",
        openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -90,35 +91,35 @@ namespace {
         "Should Send To Remote",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remote instances (other "
-        "peers through a parallel connection)",
+        "peers through a parallel connection).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background Color",
-        "Sets the background color of the console",
+        "Sets the background color of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry Text Color",
-        "Sets the text color of the entry area of the console",
+        "Sets the text color of the entry area of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
         "History Text Color",
-        "Sets the text color of the history area of the console",
+        "Sets the text color of the history area of the console.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
         "History Length",
-        "Determines the length of the history in number of lines",
+        "Determines the length of the history in number of lines.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -144,8 +145,8 @@ namespace openspace {
 LuaConsole::LuaConsole()
     : properties::PropertyOwner({ "LuaConsole", "Lua Console" })
     , _isVisible(VisibleInfo, false)
-    , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
     , _shouldBeSynchronized(ShouldBeSynchronizedInfo, true)
+    , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
     , _backgroundColor(
         BackgroundColorInfo,
         glm::vec4(21.f / 255.f, 23.f / 255.f, 28.f / 255.f, 0.8f),
@@ -182,8 +183,6 @@ LuaConsole::LuaConsole()
     addProperty(_historyTextColor);
 }
 
-LuaConsole::~LuaConsole() {}
-
 void LuaConsole::initialize() {
     ZoneScoped;
 
@@ -196,26 +195,26 @@ void LuaConsole::initialize() {
 
         if (file.good()) {
             // Read the number of commands from the history
-            uint64_t version;
+            uint64_t version = 0;
             file.read(reinterpret_cast<char*>(&version), sizeof(uint64_t));
 
             if (version != CurrentVersion) {
                 LWARNINGC(
                     "LuaConsole",
-                    fmt::format("Outdated console history version: {}", version)
+                    std::format("Outdated console history version: {}", version)
                 );
             }
             else {
-                int64_t nCommands;
+                int64_t nCommands = 0;
                 file.read(reinterpret_cast<char*>(&nCommands), sizeof(int64_t));
 
-                for (int64_t i = 0; i < nCommands; ++i) {
-                    int64_t length;
+                for (int64_t i = 0; i < nCommands; i++) {
+                    int64_t length = 0;
                     file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
 
                     std::vector<char> tmp(length);
                     file.read(tmp.data(), length);
-                    _commandsHistory.emplace_back(std::string(tmp.begin(), tmp.end()));
+                    _commandsHistory.emplace_back(tmp.begin(), tmp.end());
                 }
             }
         }
@@ -243,7 +242,7 @@ void LuaConsole::initialize() {
         "luaConsole",
         "statusChanged",
         [this]() {
-            ParallelConnection::Status status = global::parallelPeer->status();
+            const ParallelConnection::Status status = global::parallelPeer->status();
             parallelConnectionChanged(status);
         }
     );
@@ -251,6 +250,10 @@ void LuaConsole::initialize() {
 
 void LuaConsole::deinitialize() {
     ZoneScoped;
+
+    if (!FileSys.cacheManager()) {
+        return;
+    }
 
     const std::filesystem::path filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
@@ -306,7 +309,9 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 if (_shouldSendToRemote) {
                     _shouldSendToRemote = false;
                 }
-                else if (global::parallelPeer->status() == ParallelConnection::Status::Host) {
+                else if (global::parallelPeer->status() ==
+                         ParallelConnection::Status::Host)
+                {
                     _shouldSendToRemote = true;
                 }
             }
@@ -448,7 +453,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     }
 
     if (key == Key::Enter || key == Key::KeypadEnter) {
-        std::string cmd = _commands.at(_activeCommand);
+        const std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
             global::scriptEngine->queueScript(
                 cmd,
@@ -486,7 +491,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         std::vector<std::string> allCommands = global::scriptEngine->allLuaFunctions();
         std::sort(allCommands.begin(), allCommands.end());
 
-        std::string currentCommand = _commands.at(_activeCommand);
+        const std::string currentCommand = _commands.at(_activeCommand);
 
         // Check if it is the first time the tab has been pressed. If so, we need to
         // store the already entered command so that we can later start the search
@@ -497,7 +502,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             _autoCompleteInfo.hasInitialValue = true;
         }
 
-        for (int i = 0; i < static_cast<int>(allCommands.size()); ++i) {
+        for (int i = 0; i < static_cast<int>(allCommands.size()); i++) {
             const std::string& command = allCommands[i];
 
             // Check if the command has enough length (we don't want crashes here)
@@ -507,19 +512,10 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             const size_t fullLength = _autoCompleteInfo.initialValue.length();
             const bool correctLength = command.length() >= fullLength;
 
-            std::string commandLowerCase;
-            std::transform(
-                command.begin(), command.end(),
-                std::back_inserter(commandLowerCase),
-                [](char v) { return static_cast<char>(tolower(v)); }
-            );
+            const std::string commandLowerCase = ghoul::toLowerCase(command);
 
-            std::string initialValueLowerCase;
-            std::transform(
-                _autoCompleteInfo.initialValue.begin(),
-                _autoCompleteInfo.initialValue.end(),
-                std::back_inserter(initialValueLowerCase),
-                [](char v) { return static_cast<char>(tolower(v)); }
+            const std::string initialValueLowerCase = ghoul::toLowerCase(
+                _autoCompleteInfo.initialValue
             );
 
             const bool correctCommand =
@@ -668,7 +664,7 @@ void LuaConsole::render() {
 
     using namespace ghoul::fontrendering;
 
-    ghoul::GLDebugGroup group("LuaConsole");
+    const ghoul::GLDebugGroup group("LuaConsole");
 
     // Don't render the console if it's collapsed.
     if (_currentHeight < 1.f) {
@@ -838,7 +834,7 @@ void LuaConsole::render() {
     else if (_shouldSendToRemote) {
         const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
 
-        ParallelConnection::Status status = global::parallelPeer->status();
+        const ParallelConnection::Status status = global::parallelPeer->status();
         const int nClients =
             status != ParallelConnection::Status::Disconnected ?
             global::parallelPeer->nConnections() - 1 :
@@ -870,9 +866,9 @@ void LuaConsole::setCommandInputButton(Key key) {
     _commandInputButton = key;
 }
 
-void LuaConsole::addToCommand(std::string c) {
+void LuaConsole::addToCommand(const std::string& c) {
     const size_t length = c.length();
-    _commands.at(_activeCommand).insert(_inputPosition, std::move(c));
+    _commands.at(_activeCommand).insert(_inputPosition, c);
     _inputPosition += length;
 }
 

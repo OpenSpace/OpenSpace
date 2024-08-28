@@ -1,0 +1,51 @@
+-- Animation Loop Infinitely
+-- This example loads a model with an animation. The animation starts at a set time, in
+-- this case "2024 07 09 12:00:00" and is set to loop both before and after that time.
+
+-- Load the example model from OpenSpace servers
+-- If you want to use your own model, this block of code can be safely deleted
+local model = asset.resource({
+  Name = "Animated Box",
+  Type = "HttpSynchronization",
+  Identifier = "animated_box",
+  Version = 1
+})
+
+local Node = {
+  Identifier = "RenderableModel_Example_Animation_Loop_Infinitely",
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "BoxAnimated.glb",
+    -- Use the line below insted of the one above if you want to use your own model
+    --GeometryFile = "C:/path/to/model.fbx",
+
+    -- Animation Parameters:
+    EnableAnimation = true,
+    -- Start the animation and play it once at this time
+    AnimationStartTime = "2024 07 09 12:00:00",
+    -- Loop the animation both before and after the set start time
+    AnimationMode = "LoopInfinitely",
+  },
+  GUI = {
+    Name = "RenderableModel - Animation Loop Infinitely",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
+
+
+-- Model credit
+--[[
+  Author = Cesium, https://cesium.com/
+  URL = https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/BoxAnimated
+  License =
+    Creative Commons Attribution 4.0 International License,
+    https://creativecommons.org/licenses/by/4.0/
+]]

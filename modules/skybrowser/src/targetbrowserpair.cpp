@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,11 +41,11 @@
 #include <chrono>
 
 namespace {
-    void aimTargetGalactic(std::string id, glm::dvec3 direction) {
-        glm::dvec3 positionCelestial = glm::normalize(direction) *
+    void aimTargetGalactic(std::string_view id, const glm::dvec3& direction) {
+        const glm::dvec3 positionCelestial = glm::normalize(direction) *
             openspace::skybrowser::CelestialSphereRadius;
 
-        std::string script = fmt::format(
+        const std::string script = std::format(
             "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
             id, ghoul::to_string(positionCelestial)
         );
@@ -83,16 +83,16 @@ void TargetBrowserPair::startFinetuningTarget() {
 // drag on the sky browser window. This is to be able to drag the target around when it
 // has a very small field of view
 void TargetBrowserPair::fineTuneTarget(const glm::vec2& translation) {
-    glm::dvec2 percentage = glm::dvec2(translation);
-    glm::dvec3 right = _targetRenderable->rightVector() * percentage.x;
-    glm::dvec3 up = _targetRenderable->upVector() * percentage.y;
+    const glm::dvec2 percentage = glm::dvec2(translation);
+    const glm::dvec3 right = _targetRenderable->rightVector() * percentage.x;
+    const glm::dvec3 up = _targetRenderable->upVector() * percentage.y;
 
-    glm::dvec3 newPosition = _startTargetPosition - (right - up);
+    const glm::dvec3 newPosition = _startTargetPosition - (right - up);
     aimTargetGalactic(_targetNode->identifier(), newPosition);
 }
 
 void TargetBrowserPair::synchronizeAim() {
-    bool shouldUpdate =
+    const bool shouldUpdate =
         _browser->shouldUpdateWhileTargetAnimates() ||
         !_targetAnimation.isAnimating();
     if (shouldUpdate && _browser->isInitialized()) {
@@ -113,7 +113,7 @@ bool TargetBrowserPair::isEnabled() const {
 
 void TargetBrowserPair::initialize() {
     _targetRenderable->setColor(_browser->borderColor());
-    glm::vec2 dim = _browser->screenSpaceDimensions();
+    const glm::vec2 dim = _browser->screenSpaceDimensions();
     _targetRenderable->setRatio(dim.x / dim.y);
     _browser->updateBorderColor();
     _browser->hideChromeInterface();
@@ -125,7 +125,7 @@ glm::ivec3 TargetBrowserPair::borderColor() const {
 }
 
 glm::dvec2 TargetBrowserPair::targetDirectionEquatorial() const {
-    glm::dvec3 cartesian = skybrowser::galacticToEquatorial(
+    const glm::dvec3 cartesian = skybrowser::galacticToEquatorial(
         glm::normalize(_targetNode->worldPosition())
     );
     return skybrowser::cartesianToSpherical(cartesian);
@@ -164,13 +164,13 @@ std::vector<std::string> TargetBrowserPair::selectedImages() const {
 }
 
 ghoul::Dictionary TargetBrowserPair::dataAsDictionary() const {
-    glm::dvec2 spherical = targetDirectionEquatorial();
-    glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
+    const glm::dvec2 spherical = targetDirectionEquatorial();
+    const glm::dvec3 cartesian = skybrowser::sphericalToCartesian(spherical);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     std::vector<std::string> selectedImagesIndices;
 
     for (const std::string& imageUrl : selectedImages()) {
-        bool imageExists = module->wwtDataHandler().image(imageUrl).has_value();
+        const bool imageExists = module->wwtDataHandler().image(imageUrl).has_value();
         ghoul_assert(imageExists, "Image doesn't exist in the wwt catalog!");
         selectedImagesIndices.push_back(
             module->wwtDataHandler().image(imageUrl)->identifier
@@ -218,7 +218,9 @@ void TargetBrowserPair::selectImage(const ImageData& image) {
     // If the image has coordinates, move the target
     if (image.hasCelestialCoords) {
         // Animate the target to the image coordinate position
-        glm::dvec3 galactic = skybrowser::equatorialToGalactic(image.equatorialCartesian);
+        const glm::dvec3 galactic = skybrowser::equatorialToGalactic(
+            image.equatorialCartesian
+        );
         startAnimation(galactic * skybrowser::CelestialSphereRadius, image.fov);
     }
 }
@@ -279,7 +281,7 @@ void TargetBrowserPair::setBrowserRatio(float ratio) {
 }
 
 void TargetBrowserPair::setVerticalFovWithScroll(float scroll) {
-    double fov = _browser->setVerticalFovWithScroll(scroll);
+    const double fov = _browser->setVerticalFovWithScroll(scroll);
     _targetRenderable->setVerticalFov(fov);
 }
 
@@ -320,7 +322,7 @@ void TargetBrowserPair::incrementallyAnimateToCoordinate() {
 }
 
 void TargetBrowserPair::startFading(float goal, float fadeTime) {
-    const std::string script = fmt::format(
+    const std::string script = std::format(
         "openspace.setPropertyValueSingle('Scene.{0}.Renderable.Fade', {2}, {3});"
         "openspace.setPropertyValueSingle('ScreenSpace.{1}.Fade', {2}, {3});",
         _targetNode->identifier(), _browser->identifier(), goal, fadeTime
@@ -339,40 +341,42 @@ void TargetBrowserPair::stopAnimations() {
 }
 
 void TargetBrowserPair::startAnimation(glm::dvec3 galacticCoords, double fovEnd) {
+    using namespace skybrowser;
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    double fovSpeed = module->browserAnimationSpeed();
+    const double fovSpeed = module->browserAnimationSpeed();
     // The speed is given degrees /sec
-    double fovTime = std::abs(_browser->verticalFov() - fovEnd) / fovSpeed;
+    const double fovTime = std::abs(_browser->verticalFov() - fovEnd) / fovSpeed;
     // Fov animation
     _fovAnimation = skybrowser::Animation(_browser->verticalFov(), fovEnd, fovTime);
 
     // Target animation
-    glm::dvec3 start = glm::normalize(_targetNode->worldPosition()) *
+    const glm::dvec3 start = glm::normalize(_targetNode->worldPosition()) *
         skybrowser::CelestialSphereRadius;
-    double targetSpeed = module->targetAnimationSpeed();
-    double angle = skybrowser::angleBetweenVectors(start, galacticCoords);
-    _targetAnimation = skybrowser::Animation(start, galacticCoords, angle / targetSpeed);
+    const double targetSpeed = module->targetAnimationSpeed();
+    const double angle = angleBetweenVectors(start, galacticCoords);
+    _targetAnimation = Animation(start, std::move(galacticCoords), angle / targetSpeed);
     _targetAnimation.start();
     _targetIsAnimating = true;
 }
 
 void TargetBrowserPair::centerTargetOnScreen() {
     // Get camera direction in celestial spherical coordinates
-    glm::dvec3 viewDirection = skybrowser::cameraDirectionGalactic();
+    const glm::dvec3 viewDirection = skybrowser::cameraDirectionGalactic();
     // Keep the current fov
-    double currentFov = verticalFov();
+    const double currentFov = verticalFov();
     startAnimation(viewDirection, currentFov);
 }
 
 double TargetBrowserPair::targetRoll() const {
     // To remove the lag effect when moving the camera while having a locked
     // target, send the locked coordinates to wwt
-    glm::dvec3 normal = glm::normalize(
+    const glm::dvec3 normal = glm::normalize(
         _targetNode->worldPosition() -
         global::navigationHandler->camera()->positionVec3()
     );
-    glm::dvec3 right = _targetRenderable->rightVector();
-    glm::dvec3 up = glm::normalize(glm::cross(right, normal));
+    const glm::dvec3 right = _targetRenderable->rightVector();
+    const glm::dvec3 up = glm::normalize(glm::cross(right, normal));
     return skybrowser::targetRoll(up, normal);
 }
 

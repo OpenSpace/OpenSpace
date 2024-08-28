@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ namespace {
         //ImGui::Text("Bucket Size: %i", p.BucketSize);
         ImGui::Text("Number of Buckets: %i", p.nBuckets());
         const std::vector<int>& occupancies = p.occupancies();
-        for (size_t i = 0; i < occupancies.size(); ++i) {
+        for (size_t i = 0; i < occupancies.size(); i++) {
             ImGui::Text(
                 "  %i: %i/%i (%.2f/%.2f kiB)",
                 static_cast<int>(i),

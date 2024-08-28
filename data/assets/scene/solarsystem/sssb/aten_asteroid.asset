@@ -6,13 +6,13 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Aten Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_aten_asteroid",
-  Version = 3
+  Version = 4
 })
 
 
 local Object = {
   Identifier = "sssb_aten_asteroid",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_aten_asteroid.csv",
@@ -20,7 +20,8 @@ local Object = {
     Segments = 200,
     SegmentQuality = 2,
     Color = { 0.15, 0.15, 1.0 },
-    TrailFade = 18
+    TrailFade = 18,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Aten Asteroids",
@@ -45,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Aten Asteroids",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Aten group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

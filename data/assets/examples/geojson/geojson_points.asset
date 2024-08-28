@@ -35,7 +35,6 @@ asset.export(ExamplePoints)
 
 asset.meta = {
   Name = "GeoJson Example - Points",
-  Version = "1.0",
   Description = [[GeoJson example asset with points that are facing the camera
     (default)]],
   Author = "OpenSpace Team",

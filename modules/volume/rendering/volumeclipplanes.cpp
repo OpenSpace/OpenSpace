@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,9 +34,9 @@ VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
     // @TODO Missing documentation
     , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10)
 {
-    for (std::string_view key : dictionary.keys()) {
-        ghoul::Dictionary cutPlaneDictionary = dictionary.value<ghoul::Dictionary>(key);
-        VolumeClipPlane clipPlane = VolumeClipPlane(cutPlaneDictionary);
+    for (const std::string_view key : dictionary.keys()) {
+        const ghoul::Dictionary cutplane = dictionary.value<ghoul::Dictionary>(key);
+        VolumeClipPlane clipPlane = VolumeClipPlane(cutplane);
         clipPlane.setIdentifier(std::string(key));
         _clipPlanes.push_back(std::move(clipPlane));
     }
@@ -54,6 +54,7 @@ void VolumeClipPlanes::deinitialize() {}
 
 std::vector<glm::vec3> VolumeClipPlanes::normals() {
     std::vector<glm::vec3> normals;
+    normals.reserve(_clipPlanes.size());
     for (const VolumeClipPlane& clipPlane : _clipPlanes) {
         normals.push_back(clipPlane.normal());
     }
@@ -62,6 +63,7 @@ std::vector<glm::vec3> VolumeClipPlanes::normals() {
 
 std::vector<glm::vec2> VolumeClipPlanes::offsets() {
     std::vector<glm::vec2> offsets;
+    offsets.reserve(_clipPlanes.size());
     for (const VolumeClipPlane& clipPlane : _clipPlanes) {
         offsets.push_back(clipPlane.offsets());
     }

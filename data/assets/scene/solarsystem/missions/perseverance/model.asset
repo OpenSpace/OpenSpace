@@ -1,7 +1,8 @@
 local trail = asset.require("./trail")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
-local spice = asset.require("./spice")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -16,41 +17,41 @@ local models = asset.resource({
 local TranslationKeyframes = {
   ["1850 JAN 01 00:00:00"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
-    Observer = "MARS",
-    Frame = "IAU_MARS",
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars,
     FixedDate = "2020 JUL 17 13:56:43"
   },
   ["2020 JUL 17 13:56:42"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
-    Observer = "MARS",
-    Frame = "IAU_MARS",
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars,
     FixedDate = "2020 JUL 17 13:56:43"
   },
   ["2020 JUL 17 13:56:43"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars
   },
   ["2020 JUL 17 13:56:44"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars
   },
   ["2021 FEB 18 20:43:48"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
-    Observer = "MARS",
-    Frame = "IAU_MARS"
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars
   },
   ["2021 FEB 18 20:43:49"] = {
     Type = "SpiceTranslation",
-    Target = spice.ID,
-    Observer = "MARS",
-    Frame = "IAU_MARS",
+    Target = kernels.ID.Perseverance,
+    Observer = kernels.ID.Mars,
+    Frame = kernels.Frame.Mars,
     FixedDate = "2021 FEB 18 20:43:48"
   }
 }
@@ -61,13 +62,13 @@ local PerseveranceNode = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS",
-      Observer = "MARS BARYCENTER"
+      Target = kernels.ID.Mars,
+      Observer = kernels.ID.MarsBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MARS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Mars,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
@@ -110,7 +111,6 @@ local Body = {
   Parent = PerseveranceModel.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    Body = "MARS SCIENCE LABORATORY",
     GeometryFile = models .. "Perseverance.obj",
     LightSources = {
       sun.LightSource,
@@ -130,8 +130,6 @@ local Body = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(spice.Kernels)
-
   openspace.addSceneGraphNode(PerseveranceNode)
   openspace.addSceneGraphNode(Perseverance)
   openspace.addSceneGraphNode(PerseveranceModel)
@@ -143,8 +141,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(PerseveranceModel)
   openspace.removeSceneGraphNode(Perseverance)
   openspace.removeSceneGraphNode(PerseveranceNode)
-
-  openspace.spice.unloadKernel(spice.Kernels)
 end)
 
 asset.export(PerseveranceNode)

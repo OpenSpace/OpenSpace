@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,7 +59,7 @@ void Interpolator<T>::setInterpolationTime(float interpolationTime) {
 template <typename T>
 void Interpolator<T>::step() {
     _t += _scaledDeltaTime;
-    _t = glm::clamp(_t, 0.0f, 1.0f);
+    _t = glm::clamp(_t, 0.f, 1.f);
 }
 
 template <typename T>

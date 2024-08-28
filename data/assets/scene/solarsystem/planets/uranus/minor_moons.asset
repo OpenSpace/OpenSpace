@@ -82,7 +82,6 @@ asset.export("UranusMinorMoonsOff", UranusMinorMoonsOff.Identifier)
 
 asset.meta = {
   Name = "Uranus Minor Moons",
-  Version = "1.1",
   Description = [[Meta asset containing three moon groups: Inner Moons, Irregular Prograde
     Moons and Irregular Retrograde Moons]],
   Author = "OpenSpace Team",

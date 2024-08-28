@@ -8,7 +8,6 @@ end)
 
 asset.meta = {
   Name = "SkyBrowser Module Default Settings",
-  Version = "1.0",
   Description = "Some default settings related to the SkyBrowser module",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

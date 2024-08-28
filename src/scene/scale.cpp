@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,6 +53,8 @@ documentation::Documentation Scale::Documentation() {
 ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     Scale* result = FactoryManager::ref().factory<Scale>()->create(
@@ -81,6 +83,8 @@ glm::dvec3 Scale::scaleValue() const {
 }
 
 void Scale::update(const UpdateData& data) {
+    ZoneScoped;
+
     if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }

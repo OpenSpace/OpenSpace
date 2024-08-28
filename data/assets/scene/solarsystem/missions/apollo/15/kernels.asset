@@ -1,4 +1,4 @@
-local folder = asset.resource({
+local data = asset.resource({
   Name = "Apollo Kernels",
   Type = "HttpSynchronization",
   Identifier = "apollo_spice",
@@ -7,87 +7,31 @@ local folder = asset.resource({
 
 
 local kernels = {
-  folder .. "apollo15.0001.tsc",
-
-  -- folder .. "AS15-P_v01.bc",
-  folder .. "apollo15.0001.tf",
-  folder .. "apollo15MetricAddendum002.ti",
-  -- folder .. "apollo15PanoramicAddendum001.ti",
-  folder .. "apollo15_metric.0002.ti",
-  -- folder .. "apollo15_panoramic.0001.ti",
-  folder .. "apollo15-1.bsp",
-  folder .. "AS15-M_v01.bc"
-  -- folder .. "AS15-M_v01.bsp"
+  data .. "apollo15.0001.tsc",
+  data .. "apollo15.0001.tf",
+  data .. "apollo15MetricAddendum002.ti",
+  data .. "apollo15_metric.0002.ti",
+  data .. "apollo15-1.bsp",
+  data .. "AS15-M_v01.bc"
 }
 
--- local kernels = {
--- --sclk
--- folder .. "apollo15.0001.tsc",
+local ID = {
+  Apollo15 = -915
+}
 
--- --pck
--- folder .. "moon_080317.tf",
--- folder .. "moon_assoc_me.tf",
+local Frame = {
+  Apollo15Nadir = -915240,
+  Apollo15Metric = "A15_METRIC"
+}
 
--- --ik
--- folder .. "apollo15_metric_v2.0001.ti",
--- folder .. "apollo15_panoramic.0001.ti",
 
--- --tspk
--- folder .. "de421.bsp",
--- folder .. "moon_pa_de421_1900-2050.bpc",
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels)
+end)
 
--- --iak
--- folder .. "apollo15MetricAddendum002.ti",
--- folder .. "apolloPanAddendum001.ti",
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels)
+end)
 
--- --fk
--- folder .. "apollo15_v2.0001.tf",
--- folder .. "apollo15_v2.0002.tf",
-
--- --spk
--- folder .. "AS15_M_REV23_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV4.bsp             ",
--- folder .. "AS15_M_REV70_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV04_v2.bsp         ",
--- folder .. "AS15_M_REV27_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV44_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV71_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV15_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV33_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV50_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV71_SMITHED_V02.bsp",
--- folder .. "AS15_M_REV15_v2.bsp         ",
--- folder .. "AS15_M_REV34_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV60_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV72_v2.bsp",
--- folder .. "AS15_M_REV16_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV35_SMITHED_V02.bsp",
--- folder .. "AS15_M_REV62_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV22_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV38_SMITHED_V01.bsp",
--- folder .. "AS15_M_REV63_SMITHED_V01.bsp",
-
--- --ck
--- folder .. "AS15_M_REV04_SMITHED_V01.bc",
--- folder .. "AS15_M_REV15_SMITHED_V01.bc",
--- folder .. "AS15_M_REV16_SMITHED_V01.bc",
--- folder .. "AS15_M_REV22_SMITHED_V01.bc",
--- folder .. "AS15_M_REV23_SMITHED_V01.bc",
--- folder .. "AS15_M_REV27_SMITHED_V01.bc",
--- folder .. "AS15_M_REV33_SMITHED_V01.bc",
--- folder .. "AS15_M_REV34_SMITHED_V01.bc",
--- folder .. "AS15_M_REV35_SMITHED_V01.bc",
--- folder .. "AS15_M_REV35_SMITHED_V02.bc",
--- folder .. "AS15_M_REV38_SMITHED_V01.bc",
--- folder .. "AS15_M_REV44_SMITHED_V01.bc",
--- folder .. "AS15_M_REV50_SMITHED_V01.bc",
--- folder .. "AS15_M_REV60_SMITHED_V01.bc",
--- folder .. "AS15_M_REV62_SMITHED_V01.bc",
--- folder .. "AS15_M_REV63_SMITHED_V01.bc",
--- folder .. "AS15_M_REV70_SMITHED_V01.bc",
--- folder .. "AS15_M_REV71_SMITHED_V01.bc",
--- folder .. "AS15_M_REV71_SMITHED_V02.bc",
--- folder .. "AS15_M_REV72_v2.bc",
--- }
-
-asset.export("kernels", kernels)
+asset.export("ID", ID)
+asset.export("Frame", Frame)

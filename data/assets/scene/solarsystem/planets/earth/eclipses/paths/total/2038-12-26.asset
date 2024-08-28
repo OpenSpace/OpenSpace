@@ -1,5 +1,5 @@
-local earth = asset.require('scene/solarsystem/planets/earth/earth')
-local data = asset.require('../total_data')
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local data = asset.require("../total_data")
 
 
 
@@ -27,7 +27,6 @@ end)
 
 asset.meta = {
   Name = "Total 2038-12-26",
-  Version = "1.0",
   Description = "Total eclipse map for 2038-12-26",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

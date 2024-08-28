@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
@@ -52,110 +53,104 @@ namespace {
         "ColorMethod",
         "Color Method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
-        "examples, temperature or particle density",
+        "examples, temperature or particle density.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
         "Quantity to Color By",
-        "Quantity used to color lines if the 'By Quantity' color method is selected",
-        // @VISIBILITY(2.67)
+        "Quantity used to color lines if the 'By Quantity' color method is selected.",
         openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
         "ColorQuantityMinMax",
         "ColorTable Min Value",
-        "Value to map to the lowest and highest end of the color table",
+        "Value to map to the lowest and highest end of the color table.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to Color Table",
-        "Color Table/Transfer Function to use for 'By Quantity' coloring",
+        "Color Table/Transfer Function to use for 'By Quantity' coloring.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "Color",
         "Uniform Line Color",
-        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'",
-        // @VISIBILITY(1.67)
+        "The uniform color of lines shown when 'Color Method' is set to 'Uniform'.",
         openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
         "Additive Blending",
-        "Activate/deactivate additive blending",
+        "Activate/deactivate additive blending.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
         "Domain Limits",
-        "Enable/Disable domain limits",
+        "Enable/Disable domain limits.",
         openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo DomainXInfo = {
         "LimitsX",
         "X-limits",
-        "Valid range along the X-axis. [Min, Max]",
+        "Valid range along the X-axis. [Min, Max].",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainYInfo = {
         "LimitsY",
         "Y-limits",
-        "Valid range along the Y-axis. [Min, Max]",
+        "Valid range along the Y-axis. [Min, Max].",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
         "LimitsZ",
         "Z-limits",
-        "Valid range along the Z-axis. [Min, Max]",
+        "Valid range along the Z-axis. [Min, Max].",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo DomainRInfo = {
         "LimitsR",
         "Radial limits",
-        "Valid radial range. [Min, Max]",
+        "Valid radial range. [Min, Max].",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow Color",
-        "Color of particles flow direction indication",
-        // @VISIBILITY(1.33)
+        "Color of particles flow direction indication.",
         openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
         "Flow Direction",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
-        "illustrate magnetic flow",
-        // @VISIBILITY(1.67)
+        "illustrate magnetic flow.",
         openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
         "Reversed",
         "Reversed Flow",
-        "Toggle to make the flow move in the opposite direction",
+        "Toggle to make the flow move in the opposite direction.",
         openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
         "Particle Size",
-        "Size of the particles",
-        // @VISIBILITY(2.33)
+        "Size of the particles.",
         openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
         "Particle Spacing",
-        "Spacing inbetween particles",
-        // @VISIBILITY(2.33)
+        "Spacing inbetween particles.",
         openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
         "Speed",
         "Speed",
-        "Speed of the flow",
+        "Speed of the flow.",
         openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
@@ -164,32 +159,31 @@ namespace {
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
-        "topologies like solar wind & closed lines",
+        "topologies like solar wind & closed lines.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
         "Lower Limit",
-        "Lower and upper limit of the valid masking range",
+        "Lower and upper limit of the valid masking range.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
         "Quantity used for Masking",
-        "Quantity used for masking",
+        "Quantity used for masking.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "This value specifies the line width of the fieldlines",
-        // @VISIBILITY(1.33)
+        "This value specifies the line width of the fieldlines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
         "Jump to Start Of Sequence",
-        "Performs a time jump to the start of the sequence",
+        "Performs a time jump to the start of the sequence.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -231,7 +225,7 @@ namespace {
 
         // A list of paths to transferfunction .txt files containing color tables
         // used for colorizing the fieldlines according to different parameters
-        std::optional<std::vector<std::string>> colorTablePaths;
+        std::optional<std::vector<std::filesystem::path>> colorTablePaths;
 
         // [[codegen::verbatim(ColorMethodInfo.description)]]
         std::optional<std::string> colorMethod;
@@ -368,7 +362,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             }
             else {
                 _tracingVariable = "b"; //  Magnetic field variable as default
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "No tracing variable, using default '{}'", _tracingVariable
                 ));
             }
@@ -387,9 +381,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     // the files with the same extension as fileTypeString
     std::filesystem::path sourcePath = p.sourceFolder;
     if (!std::filesystem::is_directory(sourcePath)) {
-        LERROR(fmt::format(
-            "FieldlinesSequence {} is not a valid directory",
-            sourcePath.string()
+        LERROR(std::format(
+            "FieldlinesSequence '{}' is not a valid directory", sourcePath
         ));
     }
 
@@ -411,12 +404,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             [&fileTypeString](const std::string& str) {
                 const size_t extLength = fileTypeString.length();
                 std::string sub = str.substr(str.length() - extLength, extLength);
-                std::transform(
-                    sub.begin(),
-                    sub.end(),
-                    sub.begin(),
-                    [](char c) { return static_cast<char>(::tolower(c)); }
-                );
+                sub = ghoul::toLowerCase(sub);
                 return sub != fileTypeString;
             }
         ),
@@ -425,9 +413,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     // Ensure that there are available and valid source files left
     if (_sourceFiles.empty()) {
-        LERROR(fmt::format(
-            "{} contains no {} files", sourcePath.string(), fileTypeString
-        ));
+        LERROR(std::format("'{}' contains no {} files", sourcePath, fileTypeString));
     }
     _extraVars = p.extraVariables.value_or(_extraVars);
     _flowEnabled = p.flowEnabled.value_or(_flowEnabled);
@@ -443,7 +429,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _maskingEnabled = p.maskingEnabled.value_or(_maskingEnabled);
     _maskingQuantityTemp = p.maskingQuantity.value_or(_maskingQuantityTemp);
     if (p.colorTablePaths.has_value()) {
-        _colorTablePaths = p.colorTablePaths.value();
+        _colorTablePaths = *p.colorTablePaths;
     }
     else {
         // Set a default color table, just in case the (optional) user defined paths are
@@ -495,8 +481,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     _outputFolderPath = p.outputFolder.value_or(_outputFolderPath);
     if (!_outputFolderPath.empty() && !std::filesystem::is_directory(_outputFolderPath)) {
         _outputFolderPath.clear();
-        LERROR(fmt::format(
-            "The specified output path: '{}', does not exist", _outputFolderPath
+        LERROR(std::format(
+            "The specified output path '{}' does not exist", _outputFolderPath
         ));
     }
 
@@ -504,9 +490,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 }
 
 void RenderableFieldlinesSequence::initialize() {
-    _transferFunction = std::make_unique<TransferFunction>(
-        absPath(_colorTablePaths[0]).string()
-    );
+    _transferFunction = std::make_unique<TransferFunction>(absPath(_colorTablePaths[0]));
 }
 
 void RenderableFieldlinesSequence::initializeGL() {
@@ -570,12 +554,7 @@ void RenderableFieldlinesSequence::initializeGL() {
 
 // Returns fls::Model::Invalid if it fails to extract mandatory information
 fls::Model stringToModel(std::string str) {
-    std::transform(
-        str.begin(),
-        str.end(),
-        str.begin(),
-        [](char c) { return static_cast<char>(::tolower(c)); }
-    );
+    str = ghoul::toLowerCase(str);
     return fls::stringToModel(str);
 }
 
@@ -627,7 +606,7 @@ void RenderableFieldlinesSequence::loadOsflsStatesIntoRAM() {
             }
         }
         else {
-            LWARNING(fmt::format("Failed to load state from: {}", filePath));
+            LWARNING(std::format("Failed to load state from '{}'", filePath));
         }
     }
 }
@@ -683,14 +662,14 @@ void RenderableFieldlinesSequence::setupProperties() {
         // the given sequence have the same extra quantities
         const size_t nExtraQuantities = _states[0].nExtraQuantities();
         const std::vector<std::string>& extraNamesVec = _states[0].extraQuantityNames();
-        for (int i = 0; i < static_cast<int>(nExtraQuantities); ++i) {
+        for (int i = 0; i < static_cast<int>(nExtraQuantities); i++) {
             _colorQuantity.addOption(i, extraNamesVec[i]);
             _maskingQuantity.addOption(i, extraNamesVec[i]);
         }
         // Each quantity should have its own color table and color table range
         // no more, no less
         _colorTablePaths.resize(nExtraQuantities, _colorTablePaths.back());
-        _colorTablePath = _colorTablePaths[0];
+        _colorTablePath = _colorTablePaths[0].string();
         _colorTableRanges.resize(nExtraQuantities, _colorTableRanges.back());
         _maskingRanges.resize(nExtraQuantities, _maskingRanges.back());
     }
@@ -714,11 +693,11 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         _colorQuantity.onChange([this]() {
             _shouldUpdateColorBuffer = true;
             _colorQuantityMinMax = _colorTableRanges[_colorQuantity];
-            _colorTablePath = _colorTablePaths[_colorQuantity];
+            _colorTablePath = _colorTablePaths[_colorQuantity].string();
         });
 
         _colorTablePath.onChange([this]() {
-            _transferFunction->setPath(_colorTablePath);
+            _transferFunction->setPath(_colorTablePath.value());
         });
 
         _colorQuantityMinMax.onChange([this]() {
@@ -861,8 +840,8 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
 
     if (!std::filesystem::is_directory(filePath)) {
-        LERROR(fmt::format(
-            "The specified seed point directory: '{}' does not exist", filePath
+        LERROR(std::format(
+            "The specified seed point directory '{}' does not exist", filePath
         ));
         return outMap;
     }
@@ -878,15 +857,15 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
 
         std::ifstream seedFile(seedFilePath);
         if (!seedFile.good()) {
-            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
+            LERROR(std::format("Could not open seed points file '{}'", seedFilePath));
             outMap.clear();
             return {};
         }
 
-        LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
+        LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
         std::string line;
         std::vector<glm::vec3> outVec;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             std::stringstream ss(line);
             glm::vec3 point;
             ss >> point.x;
@@ -896,7 +875,7 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
         }
 
         if (outVec.empty()) {
-            LERROR(fmt::format("Found no seed points in: {}", seedFilePath));
+            LERROR(std::format("Found no seed points in '{}'", seedFilePath));
             outMap.clear();
             return {};
         }
@@ -925,7 +904,7 @@ std::vector<std::string>
             std::istringstream ss(str.substr(2, str.size() - 4));
             std::string magVar;
             size_t counter = 0;
-            while (std::getline(ss, magVar, ',')) {
+            while (ghoul::getline(ss, magVar, ',')) {
                 magVar.erase(
                     std::remove_if(
                         magVar.begin(),

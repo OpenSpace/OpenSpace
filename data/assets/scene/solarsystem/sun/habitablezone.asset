@@ -5,7 +5,7 @@ local textures = asset.require("scene/milkyway/habitable_zones/habitable_zone_te
 
 local HabitableZone = {
   Identifier = "SunHabitableZone",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableHabitableZone",
     Enabled = false,
@@ -37,7 +37,6 @@ asset.export(HabitableZone)
 
 asset.meta = {
   Name = "Sun Habitable Zone",
-  Version = "1.1",
   Description = [[The habitable zone around our sun, computed using formula and
     coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292]],
   Author = "OpenSpace Team",

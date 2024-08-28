@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Magellan_Mosaic_NewYork",
   Name = "Magellan Mosaic [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("magellan_mosaic_newyork.vrt"),
   BlendMode = "Color",
   Settings = { Gamma = 2.0 },
@@ -42,7 +43,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Venus Magellan Mosaic",
-  Version = "1.0",
   Description = [[Map layer for Venus containting Venus Magellan Mosaic from the USGS.
     Hosted on the OpenSpace servers in New York]],
   Author = "USGS",

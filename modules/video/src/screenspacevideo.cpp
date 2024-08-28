@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,12 +38,9 @@
 namespace openspace {
 
 documentation::Documentation ScreenSpaceVideo::Documentation() {
-    documentation::Documentation doc = ScreenSpaceRenderable::Documentation();
+    documentation::Documentation doc = VideoPlayer::Documentation();
     doc.name = "ScreenSpaceVideo";
     doc.id = "video_screenspacevideo";
-
-    documentation::Documentation vp = VideoPlayer::Documentation();
-    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
 
     return doc;
 }
@@ -73,15 +70,15 @@ void ScreenSpaceVideo::update() {
     if (!_videoPlayer.isInitialized()) {
         return;
     }
-    glm::uvec3 texDimensions = _videoPlayer.frameTexture()->dimensions();
+    const glm::uvec3& texDimensions = _videoPlayer.frameTexture()->dimensions();
     if (_objectSize != glm::ivec2(texDimensions.x, texDimensions.y)) {
         _objectSize = texDimensions;
     }
 }
 
-void ScreenSpaceVideo::render(float blackoutFactor) {
+void ScreenSpaceVideo::render(const RenderData& renderData) {
     if (_videoPlayer.isInitialized()) {
-        ScreenSpaceRenderable::render(blackoutFactor);
+        ScreenSpaceRenderable::render(renderData);
     }
 }
 

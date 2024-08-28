@@ -62,7 +62,7 @@ local PFSS = {
     FlowSpeed = 75,
     ColorTablePaths = {
       pfssTopologyColorTable,
-      pfssBsignColorTable,
+      pfssBsignColorTable
     },
     ColorTableRanges = {
       { 0, 2 },
@@ -78,14 +78,7 @@ local PFSS = {
 
 asset.onInitialize(function()
   openspace.action.registerAction(DarkSun)
-
   openspace.addSceneGraphNode(PFSS)
-
-  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.FlowEnabled", true)
-  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.Reversed", true)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSize", 5)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSpacing", 250)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.speed", 75.0)
 end)
 
 asset.onDeinitialize(function()
@@ -100,7 +93,6 @@ asset.export("DarkSun", DarkSun.Identifier)
 
 asset.meta = {
   Name = "Fieldlines from PFSS model of 2012 event",
-  Version = "1.0",
   Description = "Magnetic fieldlines from PFSS model for a 2012 CME event",
   Author = "CCMC",
   URL = "",

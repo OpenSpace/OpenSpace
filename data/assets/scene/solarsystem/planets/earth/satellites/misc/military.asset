@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_military",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=military&FORMAT=kvn",
   Filename = "military.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -21,7 +21,8 @@ local MilitarySatellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
-    Fade = 1.5,
+    TrailFade = 20,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
@@ -46,7 +47,6 @@ asset.export(MilitarySatellites)
 
 asset.meta = {
   Name = "Satellites Military",
-  Version = "1.0",
   Description = "Satellites asset for Military. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

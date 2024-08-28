@@ -1,0 +1,29 @@
+{
+  "profile": "apollo",
+  "commands": [
+    { "type": "time", "value": "2015-07-14T08:14:30.00" },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.PlutoProjection.Renderable.ColorTexturePaths",
+        "value": 1.0
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Pluto",
+        "pitch": -0.0566951,
+        "position": [ -2300324, 2259246, 3521214 ],
+        "up": [ 0.862771, 0.403378, 0.304816 ],
+        "yaw": -0.119485
+      }
+    },
+    { "type": "deltatime", "value": 10 },
+    { "type": "pause", "value": false },
+    { "type": "wait", "value": 120 },
+    { "type": "pause", "value": true },
+    { "type": "time", "value": "2015-07-14T08:31:00.00" },
+    { "type": "screenshot" }
+  ]
+}

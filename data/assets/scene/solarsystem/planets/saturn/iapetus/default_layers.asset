@@ -4,7 +4,6 @@ asset.require("./layers/colorlayers/iapetus_texture", true)
 
 asset.meta = {
   Name = "Default Iapetus Layers",
-  Version = "1.0",
   Description = "Default Iapetus layers are: Iapetus Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

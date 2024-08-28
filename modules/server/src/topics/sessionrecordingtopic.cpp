@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,7 +78,8 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
         if (!json.at(PropertiesKey).is_array()) {
             LERROR("Properties must be an array of strings");
         }
-        nlohmann::json requestedProperties = json.at(PropertiesKey).get<nlohmann::json>();
+        const nlohmann::json requestedProperties =
+            json.at(PropertiesKey).get<nlohmann::json>();
         for (const auto& p : requestedProperties) {
             if (!p.is_string()) {
                 _isDone = true;
@@ -100,7 +101,7 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
     if (event == SubscribeEvent && _sendState) {
         _stateCallbackHandle = global::sessionRecording->addStateChangeCallback(
             [this]() {
-                interaction::SessionRecording::SessionState currentState =
+                const interaction::SessionRecording::SessionState currentState =
                     global::sessionRecording->state();
                 if (currentState != _lastState) {
                     sendJsonData();
@@ -113,9 +114,9 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
 
 void SessionRecordingTopic::sendJsonData() {
     json stateJson;
-    using SessionRecording = openspace::interaction::SessionRecording;
+    using SessionRecording = interaction::SessionRecording;
     if (_sendState) {
-        SessionRecording::SessionState state = global::sessionRecording->state();
+        const SessionRecording::SessionState state = global::sessionRecording->state();
         std::string stateString;
         switch (state) {
             case SessionRecording::SessionState::Recording:

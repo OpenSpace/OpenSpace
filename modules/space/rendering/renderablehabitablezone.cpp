@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,18 +48,16 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EffectiveTemperatureInfo = {
         "EffectiveTemperature",
         "Effective Temperature",
-        "The effective temperature of the corresponding star, in Kelvin. "
-        "Used to compute the width and size of the disc",
-        // @VISIBILITY(2.5)
+        "The effective temperature of the corresponding star, in Kelvin. Used to compute "
+        "the width and size of the disc.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LuminosityInfo = {
         "Luminosity",
         "Luminosity",
-        "The luminosity of the corresponding star, in units of solar luminosities. "
-        "Used to compute the width and size of the disc",
-        // @VISIBILITY(2.5)
+        "The luminosity of the corresponding star, in units of solar luminosities. Used "
+        "to compute the width and size of the disc.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -67,8 +65,7 @@ namespace {
         "Optimistic",
         "Optimistic" ,
         "If true, the habitable zone disc is rendered with the optimistic boundaries "
-        "rather than the conservative ones",
-        // @VISIBILITY(2.5)
+        "rather than the conservative ones.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -78,8 +75,7 @@ namespace {
         "The effective temperature interval for which Kopparapu's formula is used for "
         "the habitable zone computation. For stars with temperatures outside the range, "
         "a simpler method by Tom E. Harris is used. This method only uses the star "
-        "luminosity and does not include computation of the optimistic boundaries",
-        // @VISIBILITY(2.5)
+        "luminosity and does not include computation of the optimistic boundaries.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -221,8 +217,8 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
         // For the other stars, use a method by Tom E. Morris:
         // https://www.planetarybiology.com/calculating_habitable_zone.html
         const double L = static_cast<double>(luminosity);
-        double inner = std::sqrt(L / 1.1);
-        double outer = std::sqrt(L / 0.53);
+        const double inner = std::sqrt(L / 1.1);
+        const double outer = std::sqrt(L / 0.53);
         return glm::dvec4(inner, inner, outer, outer);
     }
 
@@ -236,15 +232,15 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
 
     // Coefficients for planets of 1 Earth mass. Received from:
     // https://depts.washington.edu/naivpl/sites/default/files/HZ_coefficients.dat
-    constexpr Coefficients coefficients[] = {
+    constexpr std::array<Coefficients, 4> coefficients = {
         // Optimistic Inner boundary - Recent Venus
-        { 1.77600E+00, 2.13600E-04, 2.53300E-08, -1.33200E-11, -3.09700E-15 },
+        Coefficients{ 1.77600E+00, 2.13600E-04, 2.53300E-08, -1.33200E-11, -3.09700E-15 },
         // Conservative Inner boundary - Runaway greenhouse
-        { 1.10700E+00, 1.33200E-04, 1.58000E-08, -8.30800E-12, -1.93100E-15 },
+        Coefficients{ 1.10700E+00, 1.33200E-04, 1.58000E-08, -8.30800E-12, -1.93100E-15 },
         // Conservative Outer boundary - Maximum greenhouse
-        { 3.56000E-01, 6.17100E-05, 1.69800E-09, -3.19800E-12, -5.57500E-16 },
+        Coefficients{ 3.56000E-01, 6.17100E-05, 1.69800E-09, -3.19800E-12, -5.57500E-16 },
         // Optimistic Outer boundary - Early Mars
-        { 3.20000E-01, 5.54700E-05, 1.52600E-09, -2.87400E-12, -5.01100E-16 }
+        Coefficients{ 3.20000E-01, 5.54700E-05, 1.52600E-09, -2.87400E-12, -5.01100E-16 }
     };
 
     const double tstar = static_cast<double>(teff - 5780.f);
@@ -252,9 +248,9 @@ glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,
     const double L = static_cast<double>(luminosity);
 
     glm::dvec4 distances;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; i++) {
         const Coefficients& coeffs = coefficients[i];
-        double seff = coeffs.seffSun + (coeffs.a * tstar) + (coeffs.b * tstar2) +
+        const double seff = coeffs.seffSun + (coeffs.a * tstar) + (coeffs.b * tstar2) +
             (coeffs.c * tstar * tstar2) + (coeffs.d * tstar2 * tstar2);
 
         distances[i] = std::pow(L / seff, 0.5);

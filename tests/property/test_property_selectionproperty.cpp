@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,10 +33,10 @@
 #include <vector>
 
 TEST_CASE("SelectionProperty: Class Name and Default Value", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    const openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
 
     CHECK(p.className() == "SelectionProperty");
-    CHECK(p.value() == std::set<std::string>());
+    CHECK(p.value().empty());
     CHECK(p.options().empty());
 }
 
@@ -51,7 +51,7 @@ TEST_CASE("SelectionProperty: Set Value", "[selectionproperty]") {
 
     // Empty value
     p.setValue({});
-    CHECK(p.value() == std::set<std::string>());
+    CHECK(p.value().empty());
 }
 
 TEST_CASE("SelectionProperty: Set Value - Invalid Input", "[selectionproperty]") {
@@ -133,7 +133,7 @@ TEST_CASE("SelectionProperty: Set Lua Value", "[selectionproperty]") {
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, std::vector{ "a", "b" });
 
     p.setLuaValue(L);
@@ -145,7 +145,7 @@ TEST_CASE("SelectionProperty: Set Lua Value - Duplicates", "[selectionproperty]"
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, std::vector{ "a", "a", "b" });
 
     p.setLuaValue(L);
@@ -157,7 +157,7 @@ TEST_CASE("SelectionProperty: Set Lua Value - Invalid Key", "[selectionproperty]
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     ghoul::lua::push(L, std::vector{ "a", "d" });
 
     p.setLuaValue(L);
@@ -172,7 +172,7 @@ TEST_CASE("SelectionProperty: Get Lua Value", "[selectionproperty]") {
     const std::set<std::string> list{ "a", "b" };
     p.setValue(list);
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     p.getLuaValue(L);
 
     ghoul::Dictionary reference;
@@ -193,7 +193,7 @@ TEST_CASE("SelectionProperty: Get Empty Lua Value", "[selectionproperty]") {
     openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
-    ghoul::lua::LuaState L;
+    const ghoul::lua::LuaState L;
     p.getLuaValue(L);
 
     ghoul::Dictionary res = ghoul::lua::value<ghoul::Dictionary>(L);
