@@ -71,7 +71,7 @@ public:
 
     ColorMappingView* colorMappingView();
 
-    const std::vector<size_t>& planetsForHost(const std::string& hostStar) const;
+    std::vector<size_t> planetsForHost(const std::string& hostStar) const;
 
     size_t externalSelectionSize() const;
     const std::string& lastExternalSelectionTimestamp() const;

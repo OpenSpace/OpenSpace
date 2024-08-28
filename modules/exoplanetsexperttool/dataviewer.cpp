@@ -300,8 +300,10 @@ ColorMappingView* DataViewer::colorMappingView() {
     return _colorMappingView.get();
 }
 
-const std::vector<size_t>& DataViewer::planetsForHost(const std::string& hostIdentifier) const {
-    ghoul_assert(_hostIdToPlanetsMap.contains(hostIdentifier), "Map must contain the host");
+std::vector<size_t> DataViewer::planetsForHost(const std::string& hostIdentifier) const {
+    if (!_hostIdToPlanetsMap.contains(hostIdentifier)) {
+        return {};
+    }
     return _hostIdToPlanetsMap.at(hostIdentifier);
 }
 
