@@ -17,8 +17,7 @@ local MertisTis = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO MERTIS TIS",
@@ -40,8 +39,7 @@ local MertisTisPlanet = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO MERTIS TIS Planet",
@@ -63,8 +61,7 @@ local MertisTisSpace = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO MERTIS TIS Space",

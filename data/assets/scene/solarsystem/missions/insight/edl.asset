@@ -770,6 +770,7 @@ local Insight_Trail = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(InsightParent)
   openspace.addSceneGraphNode(Insight)

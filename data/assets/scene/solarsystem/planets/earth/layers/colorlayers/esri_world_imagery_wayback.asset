@@ -99,7 +99,6 @@ local WaybackLayer20231207 = {
 }
 
 
-
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20140220)
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", WaybackLayer20150430)

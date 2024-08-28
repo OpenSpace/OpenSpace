@@ -5,6 +5,7 @@ local coreKernels = asset.require("spice/core")
 
 local GSMKernel = asset.resource("../kernels/GSM.ti")
 
+
 local Frame = {
   GSM = "GSM" -- Geocentric Solar Magnetospheric
 }

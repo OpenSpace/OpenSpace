@@ -132,7 +132,7 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
     // When the window is minimized the texture is 1x1.
     // This prevents a hard crash when minimizing the window or when you resize the window
     // so that only the top bar is visible.
-    // TODO ylvse 2024-08-20: minimizing window should be handled with the appropriate
+    // @TODO (ylvse 2024-08-20): minimizing window should be handled with the appropriate
     // function in the CefBrowser called WasHidden
     if (dirtyRects[0].height <= 1 || dirtyRects[0].width <= 1) {
         return; 
@@ -235,7 +235,7 @@ void WebRenderHandler::updateTexture() {
 bool WebRenderHandler::hasContent(int x, int y) {
     if (_acceleratedRendering) {
         // To see the alpha value of the pixel we first have to get the texture from the
-        // GPU. Use a pbo for better performance
+        // GPU. Use a PBO for better performance
         bool hasContent = false;
         GLuint pbo = 0;
         glGenBuffers(1, &pbo);

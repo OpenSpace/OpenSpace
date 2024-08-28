@@ -1,4 +1,5 @@
 local Mission = {
+  Identifier = "Apollo",
   Name = "The Apollo Missions",
   Image = "https://solarsystem.nasa.gov/system/downloadable_items/2962_s65-55202.jpg",
   Description = "Apollo was the NASA program that resulted in American astronauts' making a total of 11 spaceflights and walking on the moon. The first four flights tested the equipment used in the Apollo Program. Six of the other seven flights landed on the moon. The first Apollo flight happened in 1968. The first moon landing took place in 1969. The last moon landing was in 1972. A total of 12 astronauts walked on the moon. The astronauts conducted scientific research there. They studied the lunar surface. They collected moon rocks to bring back to Earth.",
@@ -54,5 +55,5 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)

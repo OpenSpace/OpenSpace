@@ -17,6 +17,7 @@ end)
 asset.export(Browser)
 
 
+
 asset.meta = {
   Name = "ScreenSpaceBrowser Example",
   Description = [[Example of how to load and show a webpage in the rendering. The loaded

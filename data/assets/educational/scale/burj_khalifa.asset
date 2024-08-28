@@ -4,11 +4,10 @@ local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 local modelFolder = asset.resource({
-  Name = "Scale Burj Khalifa",
-  Type = "UrlSynchronization",
+  Name = "Scale Model Burj Khalifa",
+  Type = "HttpSynchronization",
   Identifier = "scale_model_burj_khalifa",
-  Url = "https://wms.openspace.amnh.org/static/sync/url/scalemodels/Burj_Khalifa.osmodel",
-  Filename = "Burj_Khalifa.osmodel"
+  Version = 1
 })
 
 

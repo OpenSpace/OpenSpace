@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_ApolloZone_MetricCam_Shade_Global_1024ppd = {
   Identifier = "ApolloZone_MetricCam_Shade_Global_1024ppd",
   Name = [[Apollo Zone Metric Cam, Hillshade]],
@@ -13,6 +15,7 @@ local treks_ApolloZone_MetricCam_Shade_Global_1024ppd = {
   FilePath = asset.resource("Apollo_Zone_Metric_Cam/Hillshade.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_ApolloZone_MetricCam_Shade_Global_1024ppd)
@@ -23,6 +26,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("ApolloZone_MetricCam_Shade_Global_1024ppd", treks_ApolloZone_MetricCam_Shade_Global_1024ppd)
+
 
 
 asset.meta = {

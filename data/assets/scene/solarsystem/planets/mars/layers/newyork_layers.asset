@@ -19,7 +19,6 @@ asset.meta = {
     Themis IR Day, Themis IR Night, CTX Mosaic, MDEM200M (3D), HiRISE Local Set DEM (3D),
     Mola Elevation (3D), Tile Indicies, and Size Reference.
 
-
     Layers only loaded from the New York server
   ]],
   Author = "OpenSpace Team",

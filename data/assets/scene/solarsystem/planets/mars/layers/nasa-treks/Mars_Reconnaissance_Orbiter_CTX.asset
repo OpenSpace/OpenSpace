@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
 
+
+
 local treks_CTX_ClrSlope_8bit_12S182E_24mp_P22_009609_1674_B02_010453_1675 = {
   Identifier = "CTX_ClrSlope_8bit_12S182E_24mp_P22_009609_1674_B02_010453_1675",
   Name = [[Mars Reconnaissance Orbiter CTX, Color Slope Apollinaris 12S182E]],
@@ -871,6 +873,7 @@ Mayer, D. P., E. S. Kite, 2016, An Integrated Workflow for Producing Digital Ter
 Slopes were derived using the Python script called gdal_baseline_slope.py: https://github.com/USGS-Astrogeology/GDAL_scripts/blob/master/gdal_baseline_slope ]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_CTX_ClrSlope_8bit_12S182E_24mp_P22_009609_1674_B02_010453_1675)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_CTX_ClrSlope_8bit_13S182E_24mp_G15_024127_1673_G16_024483_1673)
@@ -1066,6 +1069,7 @@ asset.export("CTX_Ortho_16S291E_6mp_D22_035951_1644", treks_CTX_Ortho_16S291E_6m
 asset.export("CTX_Slope_12S182E_24mp_P22_009609_1674_B02_010453_1675", treks_CTX_Slope_12S182E_24mp_P22_009609_1674_B02_010453_1675)
 asset.export("CTX_Slope_13S182E_24mp_G15_024127_1673_G16_024483_1673", treks_CTX_Slope_13S182E_24mp_G15_024127_1673_G16_024483_1673)
 asset.export("CTX_Slope_14S184E_24mp_B01_009886_1658_P21_009385_1658", treks_CTX_Slope_14S184E_24mp_B01_009886_1658_P21_009385_1658)
+
 
 
 asset.meta = {

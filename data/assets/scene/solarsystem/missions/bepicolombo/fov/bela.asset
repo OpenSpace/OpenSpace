@@ -17,8 +17,7 @@ local BelaReceiver = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO BELA Receiver",
@@ -40,8 +39,7 @@ local BelaTransmitterMain = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO BELA Transmitter Main",
@@ -63,8 +61,7 @@ local BelaTransmitterRed = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO BELA Transmitter Main",

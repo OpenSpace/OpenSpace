@@ -5,6 +5,7 @@ local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 asset.require("scene/solarsystem/planets/earth/moon/default_layers")
 
 
+
 local heightmaps = asset.resource({
   Name = "Apollo Globebrowsing Heightmaps",
   Type = "HttpSynchronization",
@@ -63,6 +64,7 @@ local DisableApolloSites = {
   GuiPath = "/Missions/Apollo",
   IsLocal = false
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addBlendingLayersFromDirectory(heightmaps, moon.Moon.Identifier)

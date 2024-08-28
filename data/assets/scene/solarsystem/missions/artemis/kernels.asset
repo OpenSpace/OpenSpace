@@ -5,7 +5,6 @@ local data = asset.resource({
   Version = 1
 })
 
-
 local ID = {
   Artemis = -1023
 }

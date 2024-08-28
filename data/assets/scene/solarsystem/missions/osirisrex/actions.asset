@@ -136,6 +136,7 @@ local LookImageCapture = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.action.registerAction(FocusOsirisRex)
   openspace.action.registerAction(FocusBennu)

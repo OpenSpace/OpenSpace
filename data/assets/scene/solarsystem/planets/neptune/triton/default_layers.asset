@@ -1,6 +1,7 @@
 asset.require("./layers/colorlayers/triton_voyager2_clrmosaic_globalfill_600m", true)
 
 
+
 asset.meta = {
   Name = "Default Triton Layers",
   Description = "Default Triton layers are: Voyager2 Mosaic",

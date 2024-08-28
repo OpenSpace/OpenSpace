@@ -193,7 +193,10 @@ ScreenSpaceSkyBrowser::~ScreenSpaceSkyBrowser() {
 
 bool ScreenSpaceSkyBrowser::initializeGL() {
     WwtCommunicator::initializeGL();
-    ScreenSpaceRenderable::initializeGL();
+    // @TODO (ylvse, 2024-08-23) Remove this once the skybrowser has been rewritten
+    ghoul::Dictionary dict;
+    dict.setValue("useAcceleratedRendering", false);
+    createShaders(dict);
     return true;
 }
 

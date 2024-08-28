@@ -51,6 +51,7 @@ local is_wms_file = function(extension)
   return extension == ".wms"
 end
 
+
 if is_image_file(extension) then
   return [[
   openspace.addScreenSpaceRenderable({

@@ -47,8 +47,7 @@ local Iapetus = {
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
   GUI = {
     Name = "Iapetus",
-    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus",
-    Description = "Third largest moon of Saturn"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus"
   }
 }
 
@@ -72,8 +71,7 @@ local IapetusLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Iapetus Label",
-    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus",
-    Description = "Label for Saturn's moon Iapetus"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus"
   }
 }
 

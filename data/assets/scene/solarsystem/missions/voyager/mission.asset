@@ -5,6 +5,7 @@
 -- are approximate and need fixing
 
 local Mission = {
+  Identifier = "Voyager",
   Name = "Voyager",
   Image = "https://upload.wikimedia.org/wikipedia/commons/8/87/Voyager_-_mission_logo.png",
   Description = "The twin Voyager 1 and 2 spacecraft are exploring where nothing from Earth has flown before. Continuing on their more-than-40-year journey since their 1977 launches, they each are much farther away from Earth and the sun than Pluto. In August 2012, Voyager 1 made the historic entry into interstellar space, the region between stars, filled with material ejected by the death of nearby stars millions of years ago. Voyager 2 entered interstellar space on November 5, 2018 and scientists hope to learn more about this region. Both spacecraft are still sending scientific information about their surroundings through the Deep Space Network, or DSN. The primary mission was the exploration of Jupiter and Saturn. After making a string of discoveries there — such as active volcanoes on Jupiter's moon Io and intricacies of Saturn's rings — the mission was extended. Voyager 2 went on to explore Uranus and Neptune, and is still the only spacecraft to have visited those outer planets. The adventurers' current mission, the Voyager Interstellar Mission (VIM), will explore the outermost edge of the Sun's domain. And beyond.",
@@ -108,7 +109,7 @@ local Mission = {
         {
           Name = "Voyager 2 Neptune Encounter",
           TimeRange = { Start = "1989 AUG 25 00:00:00", End = "1989 AUG 25 00:00:00" }
-        }            
+        }
       }
     }
   }
@@ -120,5 +121,5 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)

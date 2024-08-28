@@ -42,6 +42,8 @@ void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
 void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
                                                   CefRefPtr<CefCommandLine> commandline)
 {
+    // This is to allow dev tools to connect
+    commandline->AppendSwitchWithValue("remote-allow-origins", "http://localhost:8088");
     commandline->AppendSwitch("log-gpu-control-list-decisions");
     commandline->AppendSwitch("use-mock-keychain");
     commandline->AppendSwitch("enable-begin-frame-scheduling");
