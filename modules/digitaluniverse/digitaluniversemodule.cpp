@@ -34,7 +34,6 @@
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager DigitalUniverseModule::ProgramObjectManager;
-ghoul::opengl::TextureManager DigitalUniverseModule::TextureManager;
 
 DigitalUniverseModule::DigitalUniverseModule()
     : OpenSpaceModule(DigitalUniverseModule::Name)
@@ -50,7 +49,6 @@ void DigitalUniverseModule::internalInitialize(const ghoul::Dictionary&) {
 
 void DigitalUniverseModule::internalDeinitializeGL() {
     ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
-    TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
 }
 
 std::vector<documentation::Documentation> DigitalUniverseModule::documentations() const {
