@@ -281,7 +281,9 @@ const ColumnKey& DataViewer::nameColumn() const {
 }
 
 bool DataViewer::isNameColumn(const ColumnKey& key) const {
-    return key == nameColumn();
+    const ColumnKey& mappedNameColumn = _dataSettings.dataMapping.name;
+    const ColumnKey nameColumn = mappedNameColumn.empty() ? "name" : mappedNameColumn;
+    return key == nameColumn;
 }
 
 const std::vector<ExoplanetItem>& DataViewer::data() const {
@@ -784,37 +786,7 @@ void DataViewer::renderTable(const std::string& tableId,
                 ImGui::TableNextRow(ImGuiTableRowFlags_None, RowHeight);
 
                 ImGui::TableNextColumn();
-                if (_systemViewer->systemCanBeAdded(item.hostName)) {
-                    ImGui::PushID(std::format("addbutton{}", row).c_str());
-                    if (ImGui::Button("+", ImVec2(20, RowHeight))) {
-                        _systemViewer->addExoplanetSystem(item.hostName);
-                    }
-                    ImGui::PopID();
-                }
-                else {
-                    // Add a target button instead
-                    ImGui::PushID(std::format("targetbutton{}", row).c_str());
-
-                    // Check if is target item. The GUI name should be set from the planet name
-                    const SceneGraphNode* node = global::navigationHandler->anchorNode();
-                    bool isCurrentAnchor = node && node->guiName() == item.name;
-                    if (isCurrentAnchor) {
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0, 153, 112).Value);
-                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(0, 204, 150).Value);
-                    }
-                    else {
-                        // A slightly darker blue color
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImColor(23, 43, 71).Value);
-                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(71, 135, 223).Value);
-                    }
-
-                    if (ImGui::Button("->", ImVec2(20, RowHeight))) {
-                        _systemViewer->addOrTargetPlanet(item);
-                    }
-                    ImGui::PopStyleColor(2);
-
-                    ImGui::PopID();
-                }
+                renderFirstTableColumn(item, row);
 
                 for (int colIdx = 0; colIdx < _columns.size(); colIdx++) {
                     const ColumnKey col = _columns[colIdx];
@@ -873,8 +845,15 @@ void DataViewer::renderTable(const std::string& tableId,
                         // Check double click, left mouse button
                         if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0)) {
                             LINFO(std::format("Double click: {}", item.name));
-                            _systemViewer->addOrTargetPlanet(item);
-                            _systemViewer->showSystemView(item.hostName);
+                            bool isPlanetSystem = !item.hostName.empty();
+
+                            if (isPlanetSystem) {
+                                _systemViewer->addOrTargetPlanet(item);
+                                _systemViewer->showSystemView(item.hostName);
+                            }
+                            else {
+                                LINFO("Can't add a non-exoplanet object, yet!");
+                            }
                         }
 
                         if (changed) {
@@ -906,6 +885,56 @@ void DataViewer::renderTable(const std::string& tableId,
             updateSelectionInRenderable();
             _selectionChanged = false;
         }
+    }
+}
+
+void DataViewer::renderFirstTableColumn(const ExoplanetItem& item, size_t row) {
+    const float RowHeight = ImGui::GetTextLineHeightWithSpacing(); // Inner height
+
+    bool isPlanetSystem = !item.hostName.empty();
+
+    if (_systemViewer->systemCanBeAdded(item.hostName)) {
+        ImGui::PushID(std::format("addbutton{}", row).c_str());
+        if (ImGui::Button("+", ImVec2(20, RowHeight))) {
+
+            if (isPlanetSystem) {
+                _systemViewer->addExoplanetSystem(item.hostName);
+            }
+            else {
+                LINFO("Can't add a non-exoplanet object, yet!");
+            }
+        }
+        ImGui::PopID();
+    }
+    else {
+        // Add a target button instead
+        ImGui::PushID(std::format("targetbutton{}", row).c_str());
+
+        // Check if is target item. The GUI name should be set from the planet name
+        const SceneGraphNode* node = global::navigationHandler->anchorNode();
+        bool isCurrentAnchor = node && node->guiName() == item.name;
+        if (isCurrentAnchor) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0, 153, 112).Value);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(0, 204, 150).Value);
+        }
+        else {
+            // A slightly darker blue color
+            ImGui::PushStyleColor(ImGuiCol_Button, ImColor(23, 43, 71).Value);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(71, 135, 223).Value);
+        }
+
+        if (ImGui::Button("->", ImVec2(20, RowHeight))) {
+            if (isPlanetSystem) {
+                _systemViewer->addOrTargetPlanet(item);
+            }
+            else {
+                // TODO: use the samae function to target
+                LINFO("Can't target a non-exoplanet object, yet!");
+            }
+        }
+        ImGui::PopStyleColor(2);
+
+        ImGui::PopID();
     }
 }
 

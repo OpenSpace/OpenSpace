@@ -93,6 +93,9 @@ public:
     void renderTable(const std::string& tableId, std::vector<size_t>& dataRows,
         bool useFixedHeight, std::string_view search = "");
 
+    // Render the first column in the table, which is used for navigation
+    void renderFirstTableColumn(const ExoplanetItem& item, size_t row);
+
 private:
     void renderStartupInfo();
     bool _shouldOpenInfoWindow = true;

@@ -176,6 +176,10 @@ void SystemViewer::renderAllSystemViews() {
 
 
 void SystemViewer::renderSystemViewQuickControls(const std::string& host) {
+    if (host.empty()) {
+        return;
+    }
+
     bool isAlreadyOpen = std::find(
         _shownPlanetSystemWindows.begin(),
         _shownPlanetSystemWindows.end(),
