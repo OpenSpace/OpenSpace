@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,17 +28,17 @@
 namespace {
 
 /**
- * Starts a new sequence of keyframes, any previously loaded sequence is discarded
+ * Starts a new sequence of keyframes. Any previously loaded sequence is discarded.
  */
 [[codegen::luawrap]] void newSequence() {
     openspace::global::keyframeRecording->newSequence();
 }
 
 /**
- * Adds a keyframe at the specified sequence time
+ * Adds a keyframe at the specified time in the sequence.
  *
  * \param sequenceTime The time at which to add the new keyframe in the sequence given in
- * seconds
+ *                     seconds
  */
 [[codegen::luawrap]] void addKeyframe(double sequenceTime) {
     if (sequenceTime < 0) {
@@ -48,9 +48,9 @@ namespace {
 }
 
 /**
- * Removes a keyframe at the specified index
+ * Removes a keyframe at the specified index.
  *
- * \param index The 0-based index of the keyframe
+ * \param index The 0-based index of the keyframe to remove
  */
 [[codegen::luawrap]] void removeKeyframe(int index) {
     if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
@@ -63,7 +63,7 @@ namespace {
 }
 
 /**
- * Update the camera position of a keyframe
+ * Update the camera position of a keyframe at the specified index.
  *
  * \param index The 0-based index of e keyframe to update
  */
@@ -78,7 +78,7 @@ namespace {
 }
 
 /**
- * Move an existing keyframe in time
+ * Move an existing keyframe in time.
  *
  * \param index The index of the keyframe to move
  * \param sequenceTime The new time in seconds to update the keyframe to
@@ -98,7 +98,7 @@ namespace {
 
 /**
  * Saves the current sequence of keyframes to disk by the optionally specified `filename`.
- * `filename` can be omitted if the sequence was previously saved or loaded from file
+ * `filename` can be omitted if the sequence was previously saved or loaded from file.
  *
  * \param filename The name of the file to save
  */
@@ -110,7 +110,7 @@ namespace {
 }
 
 /**
- * Loads a sequence from the specified file
+ * Loads a keyframe recording sequence from the specified file.
  *
  * \param filename The name of the file to load
  */
@@ -119,11 +119,11 @@ namespace {
 }
 
 /**
- * Playback sequence optionally from the specified `sequenceTime` or if not specified
- *  starts playing from the beginning
+ * Playback keyframe recording sequence optionally from the specified `sequenceTime` or if
+ * not specified starts playing from the beginning.
  *
- * \param sequenceTime The time in seconds at which to start playing the sequence, or
- * beginning if omitted
+ * \param sequenceTime The time in seconds at which to start playing the sequence. If
+ *                     omitted, the playback starts at the beginning of the sequence.
  */
 [[codegen::luawrap]] void play(std::optional<double> sequenceTime) {
     if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
@@ -134,21 +134,21 @@ namespace {
 }
 
 /**
- * Pauses a playing sequence
+ * Pauses a playing keyframe recording sequence.
  */
 [[codegen::luawrap]] void pause() {
     openspace::global::keyframeRecording->pause();
 }
 
 /**
- * Resume playing a sequence from where its paused
+ * Resume playing a keyframe recording sequence that has been paused.
  */
 [[codegen::luawrap]] void resume() {
     openspace::global::keyframeRecording->play();
 }
 
 /**
- * Jumps to a specified time within the sequence
+ * Jumps to a specified time within the keyframe recording sequence.
  *
  * \param sequenceTime The time in seconds to jump to
  */
@@ -160,16 +160,16 @@ namespace {
 }
 
 /**
- * Returns `true` if there currently is a sequence loaded, otherwise `false`
+ * Returns true if there currently is a sequence loaded, otherwise false.
  */
 [[codegen::luawrap]] bool hasKeyframeRecording() {
     return openspace::global::keyframeRecording->hasKeyframeRecording();
 }
 
 /**
- * Fetches the sequence keyframes as a JSON object
+ * Fetches the sequence keyframes as a JSON object.
  */
- [[codegen::luawrap]] std::vector<ghoul::Dictionary> keyframes() {
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> keyframes() {
     return openspace::global::keyframeRecording->keyframes();
 }
 

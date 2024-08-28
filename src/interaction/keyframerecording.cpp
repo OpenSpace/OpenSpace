@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,32 +65,34 @@ namespace openspace::interaction::keys {
 namespace openspace::interaction {
 
 void to_json(nlohmann::json& j, const KeyframeRecording::Keyframe& keyframe) {
+    nlohmann::json position = {
+        { keys::X, keyframe.camera.position.x },
+        { keys::Y, keyframe.camera.position.y },
+        { keys::Z, keyframe.camera.position.z },
+    };
+    nlohmann::json rotation = {
+        { keys::X, keyframe.camera.rotation.x },
+        { keys::Y, keyframe.camera.rotation.y },
+        { keys::Z, keyframe.camera.rotation.z },
+        { keys::W, keyframe.camera.rotation.w },
+    };
+    nlohmann::json camera = {
+        { keys::Position, position },
+        { keys::Rotation, rotation },
+        { keys::Scale, keyframe.camera.scale },
+        { keys::FollowFocusNodeRotation, keyframe.camera.followFocusNodeRotation },
+        { keys::FocusNode, keyframe.camera.focusNode }
+    };
+
+    nlohmann::json timestamp = {
+        { keys::Application, keyframe.timestamp.application },
+        { keys::Sequence, keyframe.timestamp.sequenceTime },
+        { keys::Simulation, keyframe.timestamp.simulation }
+    };
+
     j = {
-        { keys::Camera, {
-                { keys::Position, {
-                        { keys::X, keyframe.camera.position.x },
-                        { keys::Y, keyframe.camera.position.y },
-                        { keys::Z, keyframe.camera.position.z },
-                    }
-                },
-                { keys::Rotation, {
-                        { keys::X, keyframe.camera.rotation.x },
-                        { keys::Y, keyframe.camera.rotation.y },
-                        { keys::Z, keyframe.camera.rotation.z },
-                        { keys::W, keyframe.camera.rotation.w },
-                    }
-                },
-                { keys::Scale, keyframe.camera.scale },
-                { keys::FollowFocusNodeRotation, keyframe.camera.followFocusNodeRotation },
-                { keys::FocusNode, keyframe.camera.focusNode }
-            },
-        },
-        { keys::Timestamp, {
-                { keys::Application, keyframe.timestamp.application },
-                { keys::Sequence, keyframe.timestamp.sequenceTime },
-                { keys::Simulation, keyframe.timestamp.simulation }
-            }
-        }
+        { keys::Camera, camera },
+        { keys::Timestamp, timestamp }
     };
 }
 
@@ -138,7 +140,7 @@ void KeyframeRecording::addKeyframe(double sequenceTime) {
     auto it = std::find_if(
         _keyframes.begin(),
         _keyframes.end(),
-        [sequenceTime](const Keyframe& entry) {
+        [&sequenceTime](const Keyframe& entry) {
             return sequenceTime < entry.timestamp.sequenceTime;
         }
     );
@@ -183,8 +185,10 @@ void KeyframeRecording::moveKeyframe(int index, double sequenceTime) {
     double oldSequenceTime = _keyframes[index].timestamp.sequenceTime;
     _keyframes[index].timestamp.sequenceTime = sequenceTime;
     sortKeyframes();
-    LINFO(std::format("Moved keyframe {} from sequence time: {} to {}",
-        index, oldSequenceTime, sequenceTime));
+    LINFO(std::format(
+        "Moved keyframe {} from sequence time: {} to {}",
+        index, oldSequenceTime, sequenceTime
+    ));
 }
 
 bool KeyframeRecording::saveSequence(std::optional<std::string> filename) {
@@ -201,9 +205,9 @@ bool KeyframeRecording::saveSequence(std::optional<std::string> filename) {
     }
 
     nlohmann::json sequence = _keyframes;
-    std::filesystem::path path = absPath(std::format(
-        "${{RECORDINGS}}/{}.json", _filename
-    ));
+    std::filesystem::path path = absPath(
+        std::format("${{RECORDINGS}}/{}.json", _filename)
+    );
     std::ofstream ofs(path);
     ofs << sequence.dump(2);
     LINFO(std::format("Saved keyframe sequence to '{}'", path.string()));
@@ -212,8 +216,8 @@ bool KeyframeRecording::saveSequence(std::optional<std::string> filename) {
 
 void KeyframeRecording::loadSequence(std::string filename) {
     std::filesystem::path path = absPath(
-        std::format("${{RECORDINGS}}/{}.json", filename
-    ));
+        std::format("${{RECORDINGS}}/{}.json", filename)
+    );
     if (!std::filesystem::exists(path)) {
         LERROR(std::format("File '{}' does not exist", path));
         return;
@@ -233,7 +237,7 @@ void KeyframeRecording::loadSequence(std::string filename) {
 }
 
 void KeyframeRecording::play() {
-    ghoul_assert(hasKeyframeRecording(), "Keyframe sequence can't be empty")
+    ghoul_assert(hasKeyframeRecording(), "Keyframe sequence can't be empty");
 
     LINFO("Keyframe sequence playing");
     _isPlaying = true;
