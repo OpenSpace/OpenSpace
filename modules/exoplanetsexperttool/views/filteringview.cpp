@@ -281,6 +281,8 @@ bool FilteringView::renderColumnFilterSettings() {
                 if (ImGui::Selectable(_dataViewer.columnName(i), filterColIndex == i)) {
                     filterColIndex = i;
                 }
+
+                _dataViewer.renderColumnDescriptionTooltip(i);
             }
             ImGui::EndCombo();
         }
@@ -376,6 +378,7 @@ bool FilteringView::renderColumnFilterSettings() {
 
                     ImGui::TableNextColumn();
                     ImGui::Text(_dataViewer.columnName(f.columnIndex));
+                    _dataViewer.renderColumnDescriptionTooltip(f.columnIndex);
 
                     ImGui::TableNextColumn();
                     ImGui::Text("    ");

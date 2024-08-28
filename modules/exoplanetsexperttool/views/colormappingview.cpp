@@ -283,6 +283,8 @@ bool ColorMappingView::renderColormapEdit(ColorMappedVariable& variable,
                     variable.columnIndex = i;
                     wasChanged = true;
                 }
+
+                _dataViewer.renderColumnDescriptionTooltip(i);
             }
             ImGui::EndCombo();
         }

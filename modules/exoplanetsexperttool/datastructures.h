@@ -161,7 +161,7 @@ struct DataSettings {
 
 
     ColumnKey nameColumn() const {
-        return dataMapping.name;
+        return dataMapping.name.empty() ? "name" : dataMapping.name;
     };
 
     // Returns the column name, if there is one. Otherwise just the key.

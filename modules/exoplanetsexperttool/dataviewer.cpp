@@ -276,14 +276,17 @@ const char* DataViewer::columnName(size_t columnIndex) const {
     return _dataSettings.columnName(_columns[columnIndex]);
 }
 
-const ColumnKey& DataViewer::nameColumn() const {
-    return _dataSettings.dataMapping.name;
+bool DataViewer::isNameColumn(const ColumnKey& key) const {
+    return key == _dataSettings.nameColumn();
 }
 
-bool DataViewer::isNameColumn(const ColumnKey& key) const {
-    const ColumnKey& mappedNameColumn = _dataSettings.dataMapping.name;
-    const ColumnKey nameColumn = mappedNameColumn.empty() ? "name" : mappedNameColumn;
-    return key == nameColumn;
+bool DataViewer::hasColumnDescription(const ColumnKey& key) const {
+    return _dataSettings.hasDescription(key);
+}
+
+const char* DataViewer::columnDescription(const ColumnKey& key) const {
+    ghoul_assert(hasColumnDescription(key), "Must have a description");
+    return _dataSettings.description(key).c_str();
 }
 
 const std::vector<ExoplanetItem>& DataViewer::data() const {
@@ -715,11 +718,11 @@ void DataViewer::renderTable(const std::string& tableId,
         ImGui::TableHeader("");
 
         for (int colIdx = 0; colIdx < _columns.size(); colIdx++) {
-            const ColumnKey c = _columns[colIdx];
             ImGui::TableSetColumnIndex(colIdx + 1);
             ImGui::PushID(colIdx);
-            ImGui::TableHeader(columnName(c));
+            ImGui::TableHeader(columnName(colIdx));
 
+            const ColumnKey& c = _columns[colIdx];
             if (_dataSettings.hasDescription(c)) {
                 const float TEXT_WIDTH = ImGui::CalcTextSize(columnName(c)).x;
                 ImGui::SameLine(0.0f, TEXT_WIDTH + 2.f);
@@ -935,6 +938,14 @@ void DataViewer::renderFirstTableColumn(const ExoplanetItem& item, size_t row) {
         ImGui::PopStyleColor(2);
 
         ImGui::PopID();
+    }
+}
+
+void DataViewer::renderColumnDescriptionTooltip(size_t index) const {
+    const ColumnKey& key = _columns[index];
+    if (hasColumnDescription(key)) {
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(columnDescription(key));
     }
 }
 

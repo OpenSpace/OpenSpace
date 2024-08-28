@@ -62,8 +62,10 @@ public:
     size_t columnIndex(const ColumnKey& key) const;
     const char* columnName(const ColumnKey& key) const;
     const char* columnName(size_t columnIndex) const;
-    const ColumnKey& nameColumn() const;
     bool isNameColumn(const ColumnKey& key) const;
+
+    bool hasColumnDescription(const ColumnKey& key) const;
+    const char* columnDescription(const ColumnKey& key) const;
 
     const std::vector<ExoplanetItem>& data() const;
     const std::vector<size_t>& currentFiltering() const;
@@ -95,6 +97,10 @@ public:
 
     // Render the first column in the table, which is used for navigation
     void renderFirstTableColumn(const ExoplanetItem& item, size_t row);
+
+    // Render column description on the same line as the previous imgui item,
+    // if a description exists.
+    void renderColumnDescriptionTooltip(size_t index) const;
 
 private:
     void renderStartupInfo();
