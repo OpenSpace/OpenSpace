@@ -57,8 +57,13 @@ class WebKeyboardHandler;
 class BrowserInstance {
 public:
     static constexpr int SingleClick = 1;
-
-    BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
+    // @TODO (ylvse 2024-08-20): remove third argument when the sky browser rewrite is done.
+    //   The browser instance should always accelerate the rendering if possible but for
+    //   now the skybrowser is not accelerated. Will be when the rewrite is done.
+    BrowserInstance(WebRenderHandler* renderer,
+        WebKeyboardHandler* keyboardHandler,
+        bool accelerateRendering = true
+    );
     ~BrowserInstance();
 
     void loadUrl(const std::string& url);

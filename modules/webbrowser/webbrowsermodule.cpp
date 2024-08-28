@@ -38,6 +38,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <filesystem>
 
 namespace {
@@ -223,6 +224,25 @@ void WebBrowserModule::detachEventHandler() {
 
 bool WebBrowserModule::isEnabled() const {
     return _enabled;
+}
+
+bool WebBrowserModule::canUseAcceleratedRendering() {
+// Linux doesn't have a problem with the rendering, Apple doesn't support OpenGL 4.5
+#ifdef WIN32
+    ghoul::systemcapabilities::Version acceleratedVersion = {
+        .major = 4, .minor = 5, .release = 0
+    };
+    auto it = std::find(
+        OpenGLCap.extensions().begin(),
+        OpenGLCap.extensions().end(),
+        "GL_EXT_memory_object_win32"
+    );
+    bool isVersionOk = OpenGLCap.openGLVersion() >= acceleratedVersion;
+    bool isExtensionsOk = it != OpenGLCap.extensions().end();
+    return isVersionOk && isExtensionsOk;
+#else
+    return false;
+#endif
 }
 
 std::vector<documentation::Documentation> WebBrowserModule::documentations() const {

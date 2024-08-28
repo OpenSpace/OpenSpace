@@ -1406,6 +1406,13 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
         return;
     }
 
+#ifdef WIN32
+    if (file.extension() == ".lnk") {
+        LDEBUG(std::format("Replacing shell link path '{}'", file));
+        file = FileSys.resolveShellLink(file);
+    }
+#endif // WIN32
+
     ghoul::lua::push(s, file);
     lua_setglobal(s, "filename");
 
@@ -1548,7 +1555,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::ResetCamera,
             codegen::lua::Configuration,
             codegen::lua::LayerServer,
-            codegen::lua::LoadJson
+            codegen::lua::LoadJson,
+            codegen::lua::ResolveShortcut,
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")

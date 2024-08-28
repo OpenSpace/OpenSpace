@@ -27,6 +27,7 @@
 #include <modules/webbrowser/include/browserclient.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
+#include <modules/webbrowser/webbrowsermodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/filesystem/file.h>
@@ -44,7 +45,8 @@ namespace {
 namespace openspace {
 
 BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
-                                 WebKeyboardHandler* keyboardHandler)
+                                 WebKeyboardHandler* keyboardHandler,
+                                 bool accelerateRendering)
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
     , _client(new BrowserClient(_renderHandler.get(), _keyboardHandler.get()))
@@ -54,8 +56,15 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
     // requires this to be a long unsigned int, so we can't use nullptr here
     windowInfo.SetAsWindowless(0);
 
+    // Use accelerated rendering if possible
+    if (WebBrowserModule::canUseAcceleratedRendering() && accelerateRendering) {
+        windowInfo.shared_texture_enabled = true;
+        LINFO("Enabling shared texture mode for CEF");
+    }
+
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;
+    browserSettings.webgl = cef_state_t::STATE_ENABLED;
 
     _browser = CefBrowserHost::CreateBrowserSync(
         windowInfo,
