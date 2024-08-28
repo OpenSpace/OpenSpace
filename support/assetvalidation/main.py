@@ -59,6 +59,14 @@ def setupArgparse():
         default=False,
     )
 
+    parser.add_argument(
+        "-s", "--start",
+        dest="startOS",
+        help="Whether to start OpenSpace as a subprocess before running the validation",
+        required=False,
+        default=True,
+    )
+
     args = parser.parse_args()
     return args
 

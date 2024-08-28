@@ -79,6 +79,7 @@ async def subscribeToAssetLoadingFinishedEvent(api: Api):
     """
     topic = api.subscribeToEvent("AssetLoadingFinished")
     await api.nextValue(topic) # Wait for the event to be fired
+    log("Assets were loaded")
     topic.cancel() # Unsubscribe to the event
 
 async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Api):
@@ -126,32 +127,42 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
         path = str(asset).replace(os.sep, "/")
 
         # Load asset
+        log("Subscribing to AssetLoadingFinished event")
+        event = subscribeToAssetLoadingFinishedEvent(api)
         log(f"Adding asset without cache")
         await openspace.asset.add(path)
-
-        await subscribeToAssetLoadingFinishedEvent(api)
+        log("Waiting for AssetLoadingFinished event")
+        await event
 
         # Printscreen?
         # Unload asset
-        await unloadAssets()
+        log("Unloading assets")
 
+        await unloadAssets()
+        log("Validating empty scene")
         isSceneEmpty = await validateEmptyScene()
         # TODO: manually remove each asset that are still loaded?
         # openspace.remove.asset(asset)
+        log("Scene is empty")
 
+        log("Subscribing to AssetLoadingFinished event again")
+        event = subscribeToAssetLoadingFinishedEvent(api)
         # Load asset using cache
         log(f"Adding asset from cache")
         await openspace.asset.add(path)
-
-        await subscribeToAssetLoadingFinishedEvent(api)
+        log("Waiting for AssetLoadingFinished event")
+        await event
         # printscreen?
 
         # Unload assets again
+        log("Unloading assets")
         await unloadAssets()
+        log("Validating empty scene")
         isSceneEmpty = await validateEmptyScene()
 
         assetCount += 1
-        time.sleep(2) # Arbitrary sleep to let OpenSpace breathe
+        log("Waiting for 5 seconds before next asset")
+        time.sleep(5) # Arbitrary sleep to let OpenSpace breathe
 
     unsubscribeToErrorLogEvent.set()
     # await errorLog
@@ -180,18 +191,20 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
     global verbose
     verbose = args.verbose
 
-    log("Starting OpenSpace...")
-    process = subprocess.Popen(
-        [executable,
-         "--bypassLauncher"
-         ],
-         cwd=os.path.dirname(executable),
-         stdout=subprocess.DEVNULL,
-         stderr=subprocess.PIPE
-    )
+    if args.startOS:
+        log("Starting OpenSpace...")
+        process = subprocess.Popen(
+            [executable,
+            "--bypassLauncher"
+            ],
+            cwd=os.path.dirname(executable),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE
+        )
 
     # We wait for OpenSpace to start before trying to connect
     time.sleep(5)
     asyncio.new_event_loop().run_until_complete(mainLoop(files, args.dir))
 
-    process.kill()
+    if args.startOS:
+        process.kill()
