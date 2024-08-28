@@ -92,6 +92,47 @@ namespace {
         "that converts the position into a J2000+Galactic reference frame.",
         openspace::properties::Property::Visibility::Developer
     };
+
+    const std::vector<std::string> PropertyBaselineRejects {
+    "NavigationHandler.OrbitalNavigator.Anchor",
+    "NavigationHandler.OrbitalNavigator.Aim",
+    "NavigationHandler.OrbitalNavigator.RetargetAnchor",
+    "NavigationHandler.OrbitalNavigator.RetargetAim"
+    };
+
+    // A script that begins with an exact match of any of the strings contained in
+    // ScriptRejects will not be recorded
+    const std::vector<std::string> ScriptRejects {
+        "openspace.sessionRecording.enableTakeScreenShotDuringPlayback",
+        "openspace.sessionRecording.startPlayback",
+        "openspace.sessionRecording.stopPlayback",
+        "openspace.sessionRecording.startRecording",
+        "openspace.sessionRecording.stopRecording",
+        "openspace.scriptScheduler.clear"
+    };
+    const std::vector<std::string> NavScriptsUsingNodes {
+        "RetargetAnchor",
+        "Anchor",
+        "Aim"
+    };
+
+    // Any script snippet included in this vector will be trimmed from any script
+    // from the script manager, before it is recorded in the session recording file.
+    // The remainder of the script will be retained.
+    const std::vector<std::string> ScriptsToBeTrimmed {
+        "openspace.sessionRecording.togglePlaybackPause"
+    };
+
+    // Any script snippet included in this vector will be trimmed from any script
+    // from the script manager, before it is recorded in the session recording file.
+    // The remainder of the script will be retained.
+    const std::vector<openspace::interaction::SessionRecording::ScriptSubstringReplace>
+        ScriptsToBeReplaced {
+            {
+                "openspace.time.pauseToggleViaKeyboard",
+                "openspace.time.interpolateTogglePause"
+            }
+    };
 } // namespace
 
 namespace openspace::interaction {
@@ -878,7 +919,7 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
     if (script.starts_with(scriptReturnPrefix)) {
         script = script.substr(scriptReturnPrefix.length());
     }
-    for (const std::string& reject : _scriptRejects) {
+    for (const std::string& reject : ScriptRejects) {
         if (script.starts_with(reject)) {
             return;
         }
@@ -909,7 +950,7 @@ void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script
 }
 
 void SessionRecording::trimCommandsFromScriptIfFound(std::string& script) {
-    for (const std::string& trimSnippet : _scriptsToBeTrimmed) {
+    for (const std::string& trimSnippet : ScriptsToBeTrimmed) {
         auto findIdx = script.find(trimSnippet);
         if (findIdx != std::string::npos) {
             auto findClosingParens = script.find_first_of(')', findIdx);
@@ -919,7 +960,7 @@ void SessionRecording::trimCommandsFromScriptIfFound(std::string& script) {
 }
 
 void SessionRecording::replaceCommandsFromScriptIfFound(std::string& script) {
-    for (const ScriptSubstringReplace& replacementSnippet : _scriptsToBeReplaced) {
+    for (const ScriptSubstringReplace& replacementSnippet : ScriptsToBeReplaced) {
         auto findIdx = script.find(replacementSnippet.substringFound);
         if (findIdx != std::string::npos) {
             script.erase(findIdx, replacementSnippet.substringFound.length());
@@ -988,7 +1029,7 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
 }
 
 bool SessionRecording::isPropertyAllowedForBaseline(const std::string& propString) {
-    for (const std::string& reject : _propertyBaselineRejects) {
+    for (const std::string& reject : PropertyBaselineRejects) {
         if (propString.starts_with(reject)) {
             return false;
         }
@@ -1614,7 +1655,7 @@ bool SessionRecording::checkForScenegraphNodeAccessNav(std::string& navTerm) {
     const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
     const size_t posNav = navTerm.find(nextTerm);
     if (posNav != std::string::npos) {
-        for (const std::string& accessName : _navScriptsUsingNodes) {
+        for (const std::string& accessName : NavScriptsUsingNodes) {
               if (navTerm.find(accessName) != std::string::npos) {
                   return true;
               }

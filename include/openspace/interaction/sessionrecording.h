@@ -760,45 +760,7 @@ protected:
     std::vector<std::string> _keyframesSavePropertiesBaseline_scripts;
     std::vector<TimelineEntry> _keyframesSavePropertiesBaseline_timeline;
     std::vector<std::string> _propertyBaselinesSaved;
-    const std::vector<std::string> _propertyBaselineRejects = {
-        "NavigationHandler.OrbitalNavigator.Anchor",
-        "NavigationHandler.OrbitalNavigator.Aim",
-        "NavigationHandler.OrbitalNavigator.RetargetAnchor",
-        "NavigationHandler.OrbitalNavigator.RetargetAim"
-    };
 
-    //A script that begins with an exact match of any of the strings contained in
-    // _scriptRejects will not be recorded
-    const std::vector<std::string> _scriptRejects = {
-        "openspace.sessionRecording.enableTakeScreenShotDuringPlayback",
-        "openspace.sessionRecording.startPlayback",
-        "openspace.sessionRecording.stopPlayback",
-        "openspace.sessionRecording.startRecording",
-        "openspace.sessionRecording.stopRecording",
-        "openspace.scriptScheduler.clear"
-    };
-    const std::vector<std::string> _navScriptsUsingNodes = {
-        "RetargetAnchor",
-        "Anchor",
-        "Aim"
-    };
-
-    //Any script snippet included in this vector will be trimmed from any script
-    // from the script manager, before it is recorded in the session recording file.
-    // The remainder of the script will be retained.
-    const std::vector<std::string> _scriptsToBeTrimmed = {
-        "openspace.sessionRecording.togglePlaybackPause"
-    };
-
-    //Any script snippet included in this vector will be trimmed from any script
-    // from the script manager, before it is recorded in the session recording file.
-    // The remainder of the script will be retained.
-    const std::vector<ScriptSubstringReplace> _scriptsToBeReplaced = {
-        {
-            "openspace.time.pauseToggleViaKeyboard",
-            "openspace.time.interpolateTogglePause"
-        }
-    };
     std::vector<std::string> _loadedNodes;
 
     unsigned int _idxTimeline_nonCamera = 0;
