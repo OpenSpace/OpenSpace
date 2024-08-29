@@ -39,8 +39,8 @@ public:
      * Constructor for markNodes class.
      *
      * \param parent Pointer to parent Qt widget
-     * \param profile The list of marked nodes containing all data of the new or imported
-     *        profile
+     * \param markedNodes The list of marked nodes containing all data of the new or
+     *        imported profile
      */
     MarkNodesDialog(QWidget* parent, std::vector<std::string>* markedNodes);
 
