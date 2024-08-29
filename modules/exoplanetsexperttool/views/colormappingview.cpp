@@ -141,6 +141,10 @@ ColorMappingView::colorMapperVariables() const
     return _variableSelection;
 }
 
+size_t ColorMappingView::firstNumericColumn() const {
+    return _firstNumericColumnIndex;
+}
+
 bool ColorMappingView::renderViewContent() {
     bool cmapWasChanged = false;
 

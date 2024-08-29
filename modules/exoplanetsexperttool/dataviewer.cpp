@@ -63,7 +63,7 @@
 
 #include <implot.h>
 
-//#define SHOW_IMGUI_HELPERS
+#define SHOW_IMGUI_HELPERS
 
 namespace {
     constexpr char _loggerCat[] = "ExoplanetsDataViewer";
@@ -227,6 +227,26 @@ void DataViewer::initializeData() {
 
     LDEBUG("Finished initializing based on dataset");
 
+    // Compute mean values
+    for (size_t i = 0; i < _columns.size(); i++) {
+        if (!isNumericColumn(i)) {
+            continue;
+        }
+
+        const ColumnKey& key = _columns[i];
+        int count = 0;
+        float sum = 0.f;
+        for (const ExoplanetItem& p : _data) {
+            float v = std::get<float>(p.dataColumns.at(key));
+            if (!std::isnan(v)) {
+                sum += v;
+                count++;
+            }
+        }
+
+        _meanColumnValues[key] = sum / static_cast<float>(count);
+    }
+
     _filterChanged = true;
 }
 
@@ -280,6 +300,13 @@ bool DataViewer::isNameColumn(const ColumnKey& key) const {
     return key == _dataSettings.nameColumn();
 }
 
+std::optional<float> DataViewer::meanValue(const ColumnKey& key) const {
+    if (_meanColumnValues.contains(key)) {
+        return _meanColumnValues.at(key);
+    }
+    return std::nullopt;
+}
+
 bool DataViewer::hasColumnDescription(const ColumnKey& key) const {
     return _dataSettings.hasDescription(key);
 }
@@ -299,6 +326,10 @@ const std::vector<size_t>& DataViewer::currentFiltering() const {
 
 const std::vector<ColumnKey>& DataViewer::columns() const {
     return _columns;
+}
+
+const DataSettings::DataMapping& DataViewer::dataMapping() const {
+    return _dataSettings.dataMapping;
 }
 
 ColorMappingView* DataViewer::colorMappingView() {
@@ -949,6 +980,38 @@ void DataViewer::renderColumnDescriptionTooltip(size_t index) const {
     }
 }
 
+void DataViewer::renderColumnValue(size_t columnIndex, const ExoplanetItem& item) const {
+    renderColumnValue(_columns[columnIndex], item);
+}
+
+void DataViewer::renderColumnValue(const ColumnKey& key, const ExoplanetItem& item) const {
+    std::optional<const char*> format;
+
+    if (_dataSettings.columnInfo.contains(key)) {
+        const DataSettings::ColumnInfo& colInfo =
+            _dataSettings.columnInfo.at(key);
+
+        if (!colInfo.format.empty()) {
+            format = colInfo.format.c_str();
+        }
+    }
+
+    std::variant<const char*, float> value = columnValue(key, item);
+
+    if (std::holds_alternative<float>(value)) {
+        float v = std::get<float>(value);
+        if (std::isnan(v)) {
+            ImGui::TextUnformatted("");
+        }
+        else {
+            ImGui::Text(format.value_or("%.2f"), v);
+        }
+    }
+    else if (std::holds_alternative<const char*>(value)) {
+        ImGui::Text("%s", std::get<const char*>(value));
+    }
+}
+
 void DataViewer::renderFilterSettingsWindow(bool* open) {
     // Reset some state changed variables
     _filterChanged = false;
@@ -1157,34 +1220,6 @@ void DataViewer::renderSettingsMenuContent() {
                 ghoul::to_string(glm::dvec2(DefaultGlyphSize * glyphSizeScale))
             ));
         }
-    }
-}
-
-void DataViewer::renderColumnValue(int columnIndex, const ExoplanetItem& item) {
-    std::optional<const char*> format;
-
-    if (_dataSettings.columnInfo.contains(_columns[columnIndex])) {
-        const DataSettings::ColumnInfo& colInfo =
-            _dataSettings.columnInfo.at(_columns[columnIndex]);
-
-        if (!colInfo.format.empty()) {
-            format = colInfo.format.c_str();
-        }
-    }
-
-    std::variant<const char*, float> value = columnValue(_columns[columnIndex], item);
-
-    if (std::holds_alternative<float>(value)) {
-        float v = std::get<float>(value);
-        if (std::isnan(v)) {
-            ImGui::TextUnformatted("");
-        }
-        else {
-            ImGui::Text(format.value_or("%.4f"), v);
-        }
-    }
-    else if (std::holds_alternative<const char*>(value)) {
-        ImGui::Text("%s", std::get<const char*>(value));
     }
 }
 

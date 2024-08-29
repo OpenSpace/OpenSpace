@@ -64,12 +64,15 @@ public:
     const char* columnName(size_t columnIndex) const;
     bool isNameColumn(const ColumnKey& key) const;
 
+    std::optional<float> meanValue(const ColumnKey& key) const;
+
     bool hasColumnDescription(const ColumnKey& key) const;
     const char* columnDescription(const ColumnKey& key) const;
 
     const std::vector<ExoplanetItem>& data() const;
     const std::vector<size_t>& currentFiltering() const;
     const std::vector<ColumnKey>& columns() const;
+    const DataSettings::DataMapping& dataMapping() const;
 
     ColorMappingView* colorMappingView();
 
@@ -102,6 +105,9 @@ public:
     // if a description exists.
     void renderColumnDescriptionTooltip(size_t index) const;
 
+    void renderColumnValue(size_t columnIndex, const ExoplanetItem& item) const;
+    void renderColumnValue(const ColumnKey& key, const ExoplanetItem& item) const;
+
 private:
     void renderStartupInfo();
     bool _shouldOpenInfoWindow = true;
@@ -110,7 +116,6 @@ private:
     void initializeCallbacks();
 
     void renderTableWindow(bool* open);
-
     void renderColormapWindow(bool* open);
     void renderFilterSettingsWindow(bool* open);
 
@@ -119,8 +124,6 @@ private:
     void handleDoubleClickHoveredPlanet(int index);
 
     void renderSettingsMenuContent();
-
-    void renderColumnValue(int columnIndex, const ExoplanetItem& item);
 
     // Write the information about the rendered points to a file
     void writeRenderDataToFile();
@@ -144,6 +147,8 @@ private:
     std::vector<size_t> _pinnedItems;
 
     std::unordered_map<std::string, std::vector<size_t>> _hostIdToPlanetsMap;
+
+    std::unordered_map<std::string, float> _meanColumnValues; // For only numerical columns
 
     std::vector<ColumnKey> _columns;
 

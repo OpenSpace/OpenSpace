@@ -102,7 +102,7 @@ struct DataSettings {
     std::filesystem::path dataFile;
 
     // Column names for certain columns that we need for the tool to work
-    struct {
+    struct DataMapping {
         ColumnKey positionRa;
         ColumnKey positionDec;
         ColumnKey positionDistance;

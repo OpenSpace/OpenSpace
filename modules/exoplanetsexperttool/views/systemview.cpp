@@ -27,6 +27,8 @@
 #include <modules/exoplanetsexperttool/dataviewer.h>
 #include <modules/exoplanetsexperttool/views/colormappingview.h>
 #include <modules/exoplanetsexperttool/views/viewhelper.h>
+#include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scene.h>
@@ -157,11 +159,11 @@ void SystemViewer::renderAllSystemViews() {
     for (const std::string& host : _shownPlanetSystemWindows) {
         bool isOpen = true;
 
-        ImGui::SetNextWindowSize(ImVec2(500.f, 0.f), ImGuiCond_Appearing);
+        ImGui::SetNextWindowSize(ImVec2(0.f, 0.f), ImGuiCond_Appearing);
         if (ImGui::Begin(systemWindowName(host).c_str(), &isOpen)) {
             renderSystemViewContent(host);
+            ImGui::End();
         }
-        ImGui::End();
 
         if (!isOpen) {
             // was closed => remove from list
@@ -292,205 +294,429 @@ void SystemViewer::renderSystemViewContent(const std::string& host) {
     std::vector<size_t> planetIndices =
         _dataViewer.planetsForHost(makeIdentifier(host));
 
-    static bool changeDefaultValueOrbitAppearance = false;
+    ImGui::Text(std::format("{} system, {} planets", host, planetIndices.size()).c_str());
+    ImGui::SameLine();
 
-    ImGui::BeginGroup();
-    {
-        if (!systemIsAdded) {
-            if (ImGui::Button("Add system")) {
-                addExoplanetSystem(host);
-                setDefaultValueOrbitVisuals(changeDefaultValueOrbitAppearance);
-            }
+    if (!systemIsAdded) {
+        if (ImGui::Button("Add system")) {
+            addExoplanetSystem(host);
+            setDefaultValueOrbitVisuals(_highlightDefaultOrbits);
         }
-        else {
-            // Button to focus Star
-            if (ImGui::Button("Focus star")) {
-                // Ugly: Always set reach factors when targetting object;
-                // we can't do it until the system is added to the scene
-                setIncreasedReachfactors();
+    }
+    else {
+        // Button to focus Star
+        if (ImGui::Button("Focus star")) {
+            // Ugly: Always set reach factors when targetting object;
+            // we can't do it until the system is added to the scene
+            setIncreasedReachfactors();
 
-                queueScriptSynced(std::format(
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '{}');"
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
-                    "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
-                    hostIdentifier
-                ));
+            queueScriptSynced(std::format(
+                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '{}');"
+                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
+                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",
+                hostIdentifier
+            ));
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Zoom to star")) {
+            flyToStar(hostIdentifier);
+        }
+    }
+
+    ImGui::Separator();
+
+    if (ImGui::BeginTabBar("SystemViewTabs")) {
+        // Initial tab shows an overview of the exoplanet system
+        if (ImGui::BeginTabItem("Overview")) {
+            renderOverviewTabContent(host, planetIndices);
+            ImGui::EndTabItem();
+        }
+
+        // Tab: Buttons to enable/disable helper renderables or otherwise control the visuals
+        if (ImGui::BeginTabItem("Visuals")) {
+            if (systemIsAdded) {
+                renderVisualsTabContent(host, planetIndices);
             }
-
-            ImGui::SameLine();
-            if (ImGui::Button("Zoom to star")) {
-                flyToStar(hostIdentifier);
+            else {
+                ImGui::Text("Start by adding the system...");
             }
+            ImGui::EndTabItem();
+        }
 
-            // Buttons to enable/disable helper renderables
-            const std::string sizeRingId = hostIdentifier + "_1AU_Circle";
-            const Renderable* sizeRing = renderable(sizeRingId);
-            if (sizeRing) {
-                bool enabled = sizeRing->isEnabled();
-                if (ImGui::Checkbox("Show 1 AU Ring ", &enabled)) {
-                    setRenderableEnabled(sizeRingId, enabled);
-                }
-                ImGui::SameLine();
-                view::helper::renderHelpMarker(
-                    "Show a ring with a radius of 1 AU around the star of the system"
-                );
-            }
+        // Tab: Show the table
+        if (ImGui::BeginTabItem("Data (Table)")) {
+            ImGui::Text("Here is the full table data for all planets in this system.");
 
-            const std::string inclinationPlaneId = hostIdentifier + "_EdgeOnInclinationPlane";
-            const Renderable* inclinationPlane = renderable(inclinationPlaneId);
-            if (inclinationPlane) {
-                bool enabled = inclinationPlane->isEnabled();
-                if (ImGui::Checkbox("Show 90 degree inclination plane", &enabled)) {
-                    setRenderableEnabled(inclinationPlaneId, enabled);
-                }
-                ImGui::SameLine();
-                view::helper::renderHelpMarker(
-                    "Show a grid plane that represents 90 degree inclinaiton, "
-                    "i.e. orbits in this plane are visible \"edge-on\" from Earth"
-                );
-            }
+            // OBS! Push an overrided id to make the column settings sync across multiple
+            // windows. This is not possible just using the same id in the BeginTable call,
+            // since the id is connected to the ImGuiwindow instance
+            ImGui::PushOverrideID(ImHashStr("systemTable"));
+            _dataViewer.renderTable("systemTable", planetIndices, true);
+            ImGui::PopID();
 
-            const std::string arrowId = hostIdentifier + "_EarthDirectionArrow";
-            const Renderable* arrow = renderable(arrowId);
-            if (arrow) {
-                bool enabled = arrow->isEnabled();
-                if (ImGui::Checkbox("Show direction to Earth", &enabled)) {
-                    setRenderableEnabled(arrowId, enabled);
-                }
-                ImGui::SameLine();
-                view::helper::renderHelpMarker(
-                    "Show an arrow pointing in the direction from the host star "
-                    "to Earth"
-                );
-            }
 
-            const std::string habitableZoneId = hostIdentifier + "_HZ_Disc";
-            const Renderable* habitableZone = renderable(habitableZoneId);
-            if (habitableZone) {
-                bool enabled = habitableZone->isEnabled();
-                if (ImGui::Checkbox("Show habitable zone", &enabled)) {
-                    setRenderableEnabled(habitableZoneId, enabled);
-                }
-            }
-
-            if (planetIndices.size() > 0) {
-                // Assume that if first one we find is enabled/disabled, all are
-                std::string planetDiscId;
-                for (size_t i : planetIndices) {
-                    const ExoplanetItem& p = _dataViewer.data()[i];
-                    const std::string discId = planetIdentifier(p) + "_Disc";
-                    if (renderable(discId)) {
-                        planetDiscId = discId;
-                        break;
-                    }
-                }
-
-                const Renderable* planetOrbitDisc = renderable(planetDiscId);
-                if (planetOrbitDisc) {
-                    bool enabled = planetOrbitDisc->isEnabled();
-
-                    if (ImGui::Checkbox("Show orbit uncertainty", &enabled)) {
-                        for (size_t i : planetIndices) {
-                            const ExoplanetItem& p = _dataViewer.data()[i];
-                            const std::string discId = planetIdentifier(p) + "_Disc";
-                            if (renderable(discId)) {
-                                setRenderableEnabled(discId, enabled);
-                            }
-                        }
-                    }
-                    ImGui::SameLine();
-                    view::helper::renderHelpMarker(
-                        "Show/hide the disc overlayed on planet orbits that visualizes the "
-                        "uncertainty of the orbit's semi-major axis"
-                    );
-                }
-            }
-
-            if (ImGui::Checkbox(
-                "Point orbit for default values",
-                &changeDefaultValueOrbitAppearance
-            ))
-            {
-                setDefaultValueOrbitVisuals(changeDefaultValueOrbitAppearance);
+            // Quickly set external selection to webpage
+            if (ImGui::Button("Send planets to external webpage")) {
+                _dataViewer.updateFilteredRowsProperty(planetIndices);
             }
             ImGui::SameLine();
             view::helper::renderHelpMarker(
-                "Orbits whose shape/inclination is set using default values will be "
-                "rendered as points instead of lines. This setting is applied globally "
-                "across all rendered systems"
+                "Send just the planets in this planet system to the ExoplanetExplorer analysis "
+                "webpage. Note that this overrides any other filtering. To bring back the filter "
+                "selection, update the filtering in any way or press the next button."
+            );
+            ImGui::SameLine();
+            if (ImGui::Button("Reset webpage to filtered")) {
+                _dataViewer.updateFilteredRowsProperty();
+            }
+
+            ImGui::EndTabItem();
+        }
+
+        ImGui::EndTabBar();
+    }
+}
+
+void SystemViewer::renderOverviewTabContent(const std::string& host,
+                                            const std::vector<size_t>& planetIndices)
+{
+    // TODO: For now, assume that the table columns come from the Exoplanet archive.
+    // Later, the names for the columns should not be hardcoded.
+
+    if (planetIndices.empty()) {
+        ImGui::Text("No information.");
+        return;
+    }
+
+    const ExoplanetItem& first = _dataViewer.data()[planetIndices.front()];
+    size_t nPlanets = planetIndices.size();
+
+    // General information about the system
+    ImGui::BeginChild(std::format("overview_left{}", host).c_str(), ImVec2(300, 150), true);
+    {
+        constexpr int Indent = 150;
+        view::helper::renderDescriptiveText("Distance to Earth: ");
+        ImGui::SameLine(Indent);
+        _dataViewer.renderColumnValue(_dataViewer.dataMapping().positionDistance, first);
+        ImGui::SameLine();
+        view::helper::renderDescriptiveText("(Parsec)");
+
+        view::helper::renderDescriptiveText("In habitable zone: ");
+        ImGui::SameLine(Indent);
+        ImGui::Text("x"); // TODO: add detals of how many
+
+        ImGui::Text("");
+
+        ImGui::Text("TODO: Other general interesting");
+        ImGui::Text("info about the system");
+    }
+    ImGui::EndChild();
+    ImGui::SameLine();
+    ImGui::BeginChild(std::format("overview_right{}", host).c_str(), ImVec2(190, 150), true);
+    {
+        constexpr int Indent = 100;
+        // Star information
+        view::helper::renderDescriptiveText("Stars: ");
+        ImGui::SameLine(Indent);
+        _dataViewer.renderColumnValue("sy_snum", first);
+
+        ImGui::Text("");
+
+        view::helper::renderDescriptiveText("Teff: ");
+        ImGui::SameLine(Indent);
+        _dataViewer.renderColumnValue("st_teff", first);
+        ImGui::SameLine();
+        view::helper::renderDescriptiveText("(K)");
+
+        view::helper::renderDescriptiveText("Metallicity: ");
+        ImGui::SameLine(Indent);
+        _dataViewer.renderColumnValue("st_met", first);
+        ImGui::SameLine();
+        _dataViewer.renderColumnValue("st_metratio", first);
+
+        view::helper::renderDescriptiveText("Radius: ");
+        ImGui::SameLine(Indent);
+        _dataViewer.renderColumnValue("st_rad", first);
+        ImGui::SameLine();
+        view::helper::renderDescriptiveText("(Solar)");
+
+        view::helper::renderDescriptiveText("Age: ");
+        ImGui::SameLine(Indent);
+        _dataViewer.renderColumnValue("st_age", first);
+        ImGui::SameLine();
+        view::helper::renderDescriptiveText("(Gyr)");
+    }
+    ImGui::EndChild();
+
+    // Frames showing information about each planet
+    ImGui::Text("Planets: ");
+
+    constexpr int Indent = 80;
+    constexpr int AvgExtraIndent = 20;
+
+    const float avgColumnIndent = static_cast<float>(
+        (nPlanets + 1) * Indent + AvgExtraIndent
+    );
+
+    auto columnIndent = [&](size_t columnIndex) {
+        return static_cast<float>((columnIndex + 1) * Indent);
+    };
+
+    ImGui::Text("");
+
+    for (size_t i = 0; i < nPlanets; ++i) {
+        size_t index = planetIndices[i];
+        const ExoplanetItem& p = _dataViewer.data()[index];
+
+        ImGui::SameLine(columnIndent(i));
+
+        // Get the name, but remove the star name from the beginning
+        const std::variant<std::string, float>& value =
+            p.dataColumns.at(_dataViewer.dataMapping().name);
+
+        if (std::holds_alternative<float>(value)) {
+            // This should not happen
+            ImGui::Text(std::format("{}", i).c_str());
+        }
+        else {
+            std::string fullName = std::get<std::string>(value);
+
+            std::string::size_type it = fullName.find(host);
+
+            if (it != std::string::npos) {
+                fullName.erase(it, host.length());
+            }
+
+            ImGui::Text(std::format("{}", fullName).c_str());
+        }
+    }
+
+    ImGui::SameLine(avgColumnIndent);
+    view::helper::renderDescriptiveText("Average");
+
+    // TODO: Include average for certain groups?  Like planets of similar size, for example
+    // TODO: Include which "quick filters" that the planet matches...?
+
+    ImGui::Separator();
+
+    // TODO: Avoid hardcoded column names
+    std::vector<std::pair<std::string, ColumnKey>> columns = {
+        {"ESM", "ESM"},
+        {"TSM", "TSM"},
+        {"Radius", "pl_rade"},
+        {"Mass", "pl_bmasse"},
+        {"Incl.", "pl_orbincl"},
+        {"Orbit", "pl_orbsmax"},
+        {"Period", "pl_orbper"},
+        {"Ecc", "pl_orbeccen"},
+        {"Method", "discoverymethod"}
+    };
+
+    for (const std::pair<std::string, ColumnKey>& pair : columns) {
+        view::helper::renderDescriptiveText(std::format("{}: ", pair.first).c_str());
+        const ColumnKey& colKey = pair.second;
+        for (size_t i = 0; i < nPlanets; ++i) {
+            size_t index = planetIndices[i];
+            const ExoplanetItem& p = _dataViewer.data()[index];
+
+            ImGui::SameLine(columnIndent(i));
+            ImGui::PushItemWidth(static_cast<float>(Indent));
+            _dataViewer.renderColumnValue(colKey, p);
+        }
+
+        if (_dataViewer.meanValue(colKey).has_value()) {
+            ImGui::SameLine(avgColumnIndent);
+            view::helper::renderDescriptiveText(std::format("{:.2f}", *_dataViewer.meanValue(colKey)).c_str());
+        }
+    }
+    // TODO: Highlight values that are very different from average
+
+    ImGui::Separator();
+
+    ImGui::Text("");
+
+    for (size_t i = 0; i < nPlanets; ++i) {
+        size_t index = planetIndices[i];
+        const ExoplanetItem& p = _dataViewer.data()[index];
+
+        const SceneGraphNode* node = global::navigationHandler->anchorNode();
+        bool isCurrentAnchor = node && node->guiName() == p.name;
+        if (isCurrentAnchor) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImColor(0, 153, 112).Value);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImColor(0, 204, 150).Value);
+        }
+
+        ImGui::SameLine(columnIndent(i));
+
+        ImGui::PushID(std::format("target_button{} ", index).c_str());
+        if (ImGui::Button("Target")) {
+            addOrTargetPlanet(p);
+        }
+        ImGui::PopID();
+
+        if (isCurrentAnchor) {
+            ImGui::PopStyleColor(2);
+        }
+    }
+}
+
+void SystemViewer::renderVisualsTabContent(const std::string& host,
+                                           const std::vector<size_t>& planetIndices)
+{
+    const std::string hostIdentifier = makeIdentifier(host);
+
+    ImGui::BeginGroup();
+    {
+        ImGui::Text("Local:");
+        ImGui::SameLine();
+        view::helper::renderHelpMarker("Applied to just this individual system");
+
+        const std::string sizeRingId = hostIdentifier + "_1AU_Circle";
+        const Renderable* sizeRing = renderable(sizeRingId);
+        if (sizeRing) {
+            bool enabled = sizeRing->isEnabled();
+            if (ImGui::Checkbox("Show 1 AU Ring ", &enabled)) {
+                setRenderableEnabled(sizeRingId, enabled);
+            }
+            ImGui::SameLine();
+            view::helper::renderHelpMarker(
+                "Show a ring with a radius of 1 AU around the star of the system"
             );
         }
 
-        ImGui::EndGroup();
+        const std::string inclinationPlaneId = hostIdentifier + "_EdgeOnInclinationPlane";
+        const Renderable* inclinationPlane = renderable(inclinationPlaneId);
+        if (inclinationPlane) {
+            bool enabled = inclinationPlane->isEnabled();
+            if (ImGui::Checkbox("Show 90 degree inclination plane", &enabled)) {
+                setRenderableEnabled(inclinationPlaneId, enabled);
+            }
+            ImGui::SameLine();
+            view::helper::renderHelpMarker(
+                "Show a grid plane that represents 90 degree inclinaiton, "
+                "i.e. orbits in this plane are visible \"edge-on\" from Earth"
+            );
+        }
+
+        const std::string arrowId = hostIdentifier + "_EarthDirectionArrow";
+        const Renderable* arrow = renderable(arrowId);
+        if (arrow) {
+            bool enabled = arrow->isEnabled();
+            if (ImGui::Checkbox("Show direction to Earth", &enabled)) {
+                setRenderableEnabled(arrowId, enabled);
+            }
+            ImGui::SameLine();
+            view::helper::renderHelpMarker(
+                "Show an arrow pointing in the direction from the host star "
+                "to Earth"
+            );
+        }
+
+        const std::string habitableZoneId = hostIdentifier + "_HZ_Disc";
+        const Renderable* habitableZone = renderable(habitableZoneId);
+        if (habitableZone) {
+            bool enabled = habitableZone->isEnabled();
+            if (ImGui::Checkbox("Show habitable zone", &enabled)) {
+                setRenderableEnabled(habitableZoneId, enabled);
+            }
+        }
+
+        if (!planetIndices.empty()) {
+            // Assume that if first one we find is enabled/disabled, all are
+            std::string planetDiscId;
+            for (size_t i : planetIndices) {
+                const ExoplanetItem& p = _dataViewer.data()[i];
+                const std::string discId = planetIdentifier(p) + "_Disc";
+                if (renderable(discId)) {
+                    planetDiscId = discId;
+                    break;
+                }
+            }
+
+            const Renderable* planetOrbitDisc = renderable(planetDiscId);
+            if (planetOrbitDisc) {
+                bool enabled = planetOrbitDisc->isEnabled();
+
+                if (ImGui::Checkbox("Show orbit uncertainty", &enabled)) {
+                    for (size_t i : planetIndices) {
+                        const ExoplanetItem& p = _dataViewer.data()[i];
+                        const std::string discId = planetIdentifier(p) + "_Disc";
+                        if (renderable(discId)) {
+                            setRenderableEnabled(discId, enabled);
+                        }
+                    }
+                }
+                ImGui::SameLine();
+                view::helper::renderHelpMarker(
+                    "Show/hide the disc overlayed on planet orbits that visualizes the "
+                    "uncertainty of the orbit's semi-major axis"
+                );
+            }
+        }
     }
+    ImGui::EndGroup();
 
     ImGui::SameLine();
     ImGui::BeginGroup();
     {
-        if (systemIsAdded) {
-            static bool colorOrbits = false;
+        ImGui::Text("Global:");
+        ImGui::SameLine();
+        view::helper::renderHelpMarker("Applied globally, to all rendered exoplanet systems");
 
-            bool colorOptionChanged = ImGui::Checkbox("Color planet orbits", &colorOrbits);
+        if (ImGui::Checkbox("Point orbit for default values", &_highlightDefaultOrbits)) {
+            setDefaultValueOrbitVisuals(_highlightDefaultOrbits);
+        }
+        ImGui::SameLine();
+        view::helper::renderHelpMarker(
+            "Orbits whose shape/inclination is set using default values will be "
+            "rendered as points instead of lines."
+        );
 
-            if (colorOrbits) {
-                static ColorMappingView::ColorMappedVariable variable;
+        bool colorOptionChanged = ImGui::Checkbox("Color planet orbits", &_colorOrbits);
 
-                bool colorEditChanged = _dataViewer.colorMappingView()->renderColormapEdit(
-                    variable,
-                    makeIdentifier(host)
-                );
+        static bool colorVariableInitialized = false;
+        static ColorMappingView::ColorMappedVariable orbitColorVariable;
 
-                if (colorOptionChanged || colorEditChanged) {
-                    for (size_t planetIndex : planetIndices) {
-                        const ExoplanetItem& p = _dataViewer.data()[planetIndex];
-                        if (colorOptionChanged) {
-                            // First time we change color
-                            setTrailThicknessAndFade(p, 20.f, 30.f);
-                        }
+        if (!colorVariableInitialized) {
+            orbitColorVariable = {
+                .columnIndex = _dataViewer.colorMappingView()->firstNumericColumn()
+            };
+            colorVariableInitialized = true;
+        }
 
-                        glm::vec3 color = glm::vec3(
-                            _dataViewer.colorMappingView()->colorFromColormap(p, variable)
-                        );
-                        colorTrail(p, color);
-                    }
-                }
-            }
-            else if (colorOptionChanged) {
-                // Reset rendering
+        if (_colorOrbits) {
+            bool colorEditChanged = _dataViewer.colorMappingView()->renderColormapEdit(
+                orbitColorVariable,
+                hostIdentifier
+            );
+
+            if (colorOptionChanged || colorEditChanged) {
                 for (size_t planetIndex : planetIndices) {
                     const ExoplanetItem& p = _dataViewer.data()[planetIndex];
-                    colorTrail(p, glm::vec3(1.f, 1.f, 1.f));
-                    resetTrailWidth(p);
+                    if (colorOptionChanged) {
+                        // First time we change color
+                        setTrailThicknessAndFade(p, 20.f, 30.f);
+                    }
+
+                    glm::vec3 color = glm::vec3(
+                        _dataViewer.colorMappingView()->colorFromColormap(p, orbitColorVariable)
+                    );
+                    colorTrail(p, color);
                 }
             }
-
         }
-        ImGui::EndGroup();
+        else if (colorOptionChanged) {
+            // Reset rendering
+            for (size_t planetIndex : planetIndices) {
+                const ExoplanetItem& p = _dataViewer.data()[planetIndex];
+                colorTrail(p, glm::vec3(1.f, 1.f, 1.f));
+                resetTrailWidth(p);
+            }
+        }
     }
-
-    ImGui::Text("Planets:");
-
-    // OBS! Push an overrided id to make the column settings sync across multiple
-    // windows. This is not possible just using the same id in the BeginTable call,
-    // since the id is connected to the ImGuiwindow instance
-    ImGui::PushOverrideID(ImHashStr("systemTable"));
-    _dataViewer.renderTable("systemTable", planetIndices, true);
-    ImGui::PopID();
-
-    // Quickly set external selection to webpage
-    if (ImGui::Button("Send planets to external webpage")) {
-        _dataViewer.updateFilteredRowsProperty(planetIndices);
-    }
-    ImGui::SameLine();
-    view::helper::renderHelpMarker(
-        "Send just the planets in this planet system to the ExoplanetExplorer analysis "
-        "webpage. Note that this overrides any other filtering. To bring back the filter "
-        "selection, update the filtering in any way or press the next button."
-    );
-    ImGui::SameLine();
-    if (ImGui::Button("Reset webpage to filtered")) {
-        _dataViewer.updateFilteredRowsProperty();
-    }
+    ImGui::EndGroup();
 }
+
 
 } // namespace openspace::exoplanets

@@ -50,6 +50,7 @@ public:
     void initializeGL();
 
     const std::vector<ColorMappedVariable>& colorMapperVariables() const;
+    size_t firstNumericColumn() const;
 
     // Return true if the color map was changed
     bool renderViewContent();

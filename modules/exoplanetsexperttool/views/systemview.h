@@ -50,9 +50,18 @@ public:
 private:
     void renderSystemViewContent(const std::string& host);
 
+    void renderVisualsTabContent(const std::string& host,
+        const std::vector<size_t>& planetIndices);
+    void renderOverviewTabContent(const std::string& host,
+        const std::vector<size_t>& planetIndices);
+
     DataViewer& _dataViewer;
 
     std::list<std::string> _shownPlanetSystemWindows;
+
+    bool _colorOrbits = false;
+    bool _highlightDefaultOrbits = false;
+
 };
 
 } // namespace openspace::exoplanets
