@@ -256,6 +256,17 @@ void KeyframeRecording::setSequenceTime(double sequenceTime) {
     LINFO(std::format("Set sequence time to {}", sequenceTime));
 }
 
+void KeyframeRecording::jumpToKeyframe(int index)
+{
+    if (!isInRange(index)) {
+        LERROR(std::format("Index {} out of range", index));
+        return;
+    }
+    const double time = _keyframes[index].timestamp.sequenceTime;
+    LINFO(std::format("Jumped to keyframe {}", index));
+    setSequenceTime(time);
+}
+
 bool KeyframeRecording::hasKeyframeRecording() const {
     return !_keyframes.empty();
 }
@@ -367,6 +378,7 @@ scripting::LuaLibrary KeyframeRecording::luaLibrary() {
             codegen::lua::Pause,
             codegen::lua::Resume,
             codegen::lua::SetTime,
+            codegen::lua::JumpToKeyframe,
             codegen::lua::HasKeyframeRecording,
             codegen::lua::Keyframes
         }
@@ -413,7 +425,7 @@ KeyframeRecording::Keyframe KeyframeRecording::newKeyframe(double sequenceTime) 
 }
 
 bool KeyframeRecording::isInRange(int index) const {
-    return index > 0 && index < _keyframes.size();
+    return index >= 0 && index < _keyframes.size();
 }
 
 } // namespace openspace::interaction

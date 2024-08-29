@@ -60,6 +60,7 @@ public:
     void play();
     void pause();
     void setSequenceTime(double sequenceTime);
+    void jumpToKeyframe(int index);
     bool hasKeyframeRecording() const;
     std::vector<ghoul::Dictionary> keyframes() const;
 

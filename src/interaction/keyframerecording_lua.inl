@@ -159,6 +159,13 @@ namespace {
     openspace::global::keyframeRecording->setSequenceTime(sequenceTime);
 }
 
+[[codegen::luawrap]] void jumpToKeyframe(int index) {
+    if (index < 0) {
+        throw ghoul::lua::LuaError("Index must be positive");
+    }
+    openspace::global::keyframeRecording->jumpToKeyframe(index);
+}
+
 /**
  * Returns true if there currently is a sequence loaded, otherwise false.
  */
