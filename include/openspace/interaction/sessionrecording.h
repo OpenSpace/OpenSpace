@@ -60,18 +60,6 @@ public:
         double timeSim;
     };
 
-    /**
-     * Struct for storing a script substring that, if found in a saved script, will be
-     * replaced by its substringReplacement counterpart.
-     */
-    struct ScriptSubstringReplace {
-        std::string substringFound;
-        std::string substringReplacement;
-        ScriptSubstringReplace(std::string found, std::string replace)
-            : substringFound(found)
-            , substringReplacement(replace) {}
-    };
-
     using CallbackHandle = int;
     using StateChangeCallback = std::function<void()>;
 
@@ -389,7 +377,6 @@ protected:
     void recordCurrentTimePauseState();
     void recordCurrentTimeRate();
     bool handleRecordingFile(std::string filenameIn);
-    void removeTrailingPathSlashes(std::string& filename) const;
     bool playbackCamera();
     bool playbackTimeChange();
     bool playbackScript();
@@ -422,11 +409,8 @@ protected:
     bool processCameraKeyframe(double now);
     bool processScriptKeyframe();
     void saveScriptKeyframeToPropertiesBaseline(std::string script);
-    bool isPropertyAllowedForBaseline(const std::string& propString);
     unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
-    void trimCommandsFromScriptIfFound(std::string& script);
-    void replaceCommandsFromScriptIfFound(std::string& script);
 
     RecordedType getNextKeyframeType();
     RecordedType getPrevKeyframeType();
@@ -444,22 +428,10 @@ protected:
         unsigned char* buffer);
     virtual bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
-    DataMode readModeFromHeader(const std::string& filename);
-    void readPlaybackHeader_stream(std::stringstream& conversionInStream,
-        std::string& version, DataMode& mode);
     void populateListofLoadedSceneGraphNodes();
 
     void checkIfScriptUsesScenegraphNode(std::string s);
-    bool checkForScenegraphNodeAccessScene(const std::string& s);
-    bool checkForScenegraphNodeAccessNav(std::string& navTerm);
-    std::string extractScenegraphNodeFromScene(const std::string& s);
     bool checkIfInitialFocusNodeIsLoaded(unsigned int firstCamIndex);
-    std::string isolateTermFromQuotes(std::string s);
-    void eraseSpacesFromString(std::string& s);
-    std::string getNameFromSurroundingQuotes(std::string& s);
-
-    void readFileIntoStringStream(std::string filename,
-        std::ifstream& inputFstream, std::stringstream& stream);
 
     DataMode _recordingDataMode = DataMode::Binary;
     SessionState _state = SessionState::Idle;
@@ -530,7 +502,6 @@ protected:
 
     DataMode _conversionDataMode = DataMode::Binary;
     int _conversionLineNum = 1;
-    const int _maximumRecursionDepth = 50;
 };
 
 // Instructions for bumping the file format version with new changes:

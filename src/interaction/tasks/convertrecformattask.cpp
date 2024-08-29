@@ -58,16 +58,8 @@ ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) 
         LERROR(std::format("Failed to load session recording file: {}", _inFilePath));
     }
     else {
-        //_iFile.open(_inFilePath, std::ifstream::in | std::ifstream::binary);
-        auto [_fileFormatType, _version] = determineFormatTypeAndVersion(_inFilePath);
-        //sessRec = new SessionRecording(false);
+        std::tie(_fileFormatType, _version) = determineFormatTypeAndVersion(_inFilePath);
     }
-}
-
-ConvertRecFormatTask::~ConvertRecFormatTask() {
-    //_iFile.close();
-    //_oFile.close();
-    //delete sessRec;
 }
 
 std::string ConvertRecFormatTask::description() {

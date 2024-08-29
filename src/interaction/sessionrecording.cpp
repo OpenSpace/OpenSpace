@@ -137,6 +137,9 @@ namespace {
     static const size_t _saveBufferMaxSize_bytes = keyframeHeaderSize_bytes +
         +saveBufferCameraSize_min + saveBufferStringSize_max;
 
+    const std::string scriptReturnPrefix = "return ";
+
+
     // Any script snippet included in this vector will be trimmed from any script
     // from the script manager, before it is recorded in the session recording file.
     // The remainder of the script will be retained.
@@ -144,15 +147,27 @@ namespace {
         "openspace.sessionRecording.togglePlaybackPause"
     };
 
+    /**
+     * Struct for storing a script substring that, if found in a saved script, will be
+     * replaced by its substringReplacement counterpart.
+     */
+    struct ScriptSubstringReplace {
+        std::string substringFound;
+        std::string substringReplacement;
+        ScriptSubstringReplace(std::string found, std::string replace)
+            : substringFound(found)
+            , substringReplacement(replace) {}
+    };
+
+
     // Any script snippet included in this vector will be trimmed from any script
     // from the script manager, before it is recorded in the session recording file.
     // The remainder of the script will be retained.
-    const std::vector<openspace::interaction::SessionRecording::ScriptSubstringReplace>
-        ScriptsToBeReplaced {
-            {
-                "openspace.time.pauseToggleViaKeyboard",
-                "openspace.time.interpolateTogglePause"
-            }
+    const std::vector<ScriptSubstringReplace> ScriptsToBeReplaced {
+        {
+            "openspace.time.pauseToggleViaKeyboard",
+            "openspace.time.interpolateTogglePause"
+        }
     };
 
     void writeToFileBuffer(unsigned char* buf, size_t& idx, double src) {
@@ -703,6 +718,206 @@ namespace {
         }
     }
 
+    openspace::interaction::SessionRecording::DataMode readModeFromHeader(const std::string& filename)
+    {
+        openspace::interaction::SessionRecording::DataMode mode = openspace::interaction::SessionRecording::DataMode::Unknown;
+        std::ifstream inputFile;
+        // Open in ASCII first
+        inputFile.open(filename, std::ifstream::in);
+        // Read header
+        const std::string readBackHeaderString = readHeaderElement(
+            inputFile,
+            FileHeaderTitle.length()
+        );
+        if (readBackHeaderString != FileHeaderTitle) {
+            LERROR("Specified playback file does not contain expected header");
+        }
+        readHeaderElement(inputFile, FileHeaderVersionLength);
+        std::string readDataMode = readHeaderElement(inputFile, 1);
+        if (readDataMode[0] == DataFormatAsciiTag) {
+            mode = openspace::interaction::SessionRecording::DataMode::Ascii;
+        }
+        else if (readDataMode[0] == DataFormatBinaryTag) {
+            mode = openspace::interaction::SessionRecording::DataMode::Binary;
+        }
+        else {
+            throw openspace::interaction::ConversionError("Unknown data type in header (should be Ascii or Binary)");
+        }
+        return mode;
+    }
+
+    void readFileIntoStringStream(std::string filename,
+        std::ifstream& inputFstream,
+        std::stringstream& stream)
+    {
+        std::filesystem::path conversionInFilename = absPath(filename);
+        if (!std::filesystem::is_regular_file(conversionInFilename)) {
+            throw openspace::interaction::ConversionError(std::format(
+                "Cannot find the specified playback file '{}' to convert",
+                conversionInFilename
+            ));
+        }
+
+        const openspace::interaction::SessionRecording::DataMode mode =
+            readModeFromHeader(conversionInFilename.string());
+
+        stream.str("");
+        stream.clear();
+        inputFstream.close();
+        if (mode == openspace::interaction::SessionRecording::DataMode::Binary) {
+            inputFstream.open(conversionInFilename, std::ifstream::in | std::ios::binary);
+        }
+        else {
+            inputFstream.open(conversionInFilename, std::ifstream::in);
+        }
+        stream << inputFstream.rdbuf();
+        if (!inputFstream.is_open() || !inputFstream.good()) {
+            throw openspace::interaction::ConversionError(std::format(
+                "Unable to open file '{}' for conversion", filename
+            ));
+        }
+        inputFstream.close();
+    }
+
+    void readPlaybackHeader_stream(std::stringstream& conversionInStream,
+        std::string& version, openspace::interaction::SessionRecording::DataMode& mode)
+    {
+        // Read header
+        const std::string readBackHeaderString = readHeaderElement(
+            conversionInStream,
+            FileHeaderTitle.length()
+        );
+
+        if (readBackHeaderString != FileHeaderTitle) {
+            throw openspace::interaction::ConversionError("File to convert does not contain expected header");
+        }
+        version = readHeaderElement(conversionInStream, FileHeaderVersionLength);
+        std::string readDataMode = readHeaderElement(conversionInStream, 1);
+        if (readDataMode[0] == DataFormatAsciiTag) {
+            mode = openspace::interaction::SessionRecording::DataMode::Ascii;
+        }
+        else if (readDataMode[0] == DataFormatBinaryTag) {
+            mode = openspace::interaction::SessionRecording::DataMode::Binary;
+        }
+        else {
+            throw openspace::interaction::ConversionError("Unknown data type in header (needs Ascii or Binary)");
+        }
+        // Read to throw out newline at end of header
+        readHeaderElement(conversionInStream, 1);
+    }
+
+    void eraseSpacesFromString(std::string& s) {
+        s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
+    }
+
+    std::string getNameFromSurroundingQuotes(std::string& s) {
+        std::string result;
+        const char quote = s.at(0);
+        // Handle either ' or " marks
+        if (quote == '\'' || quote == '\"') {
+            const size_t quoteCount = std::count(s.begin(), s.end(), quote);
+            // Must be an opening and closing quote char
+            if (quoteCount == 2) {
+                result = s.substr(1, s.rfind(quote) - 1);
+            }
+        }
+        return result;
+    }
+
+    std::string isolateTermFromQuotes(std::string s) {
+        //Remove any leading spaces
+        while (s.front() == ' ') {
+            s.erase(0, 1);
+        }
+        const std::string possibleQuotes = "\'\"[]";
+        while (possibleQuotes.find(s.front()) != std::string::npos) {
+            s.erase(0, 1);
+        }
+        for (const char q : possibleQuotes) {
+            if (s.find(q) != std::string::npos) {
+                s = s.substr(0, s.find(q));
+                return s;
+            }
+        }
+        //If no quotes found, remove other possible characters from end
+        const std::string unwantedChars = " );";
+        while (!s.empty() && (unwantedChars.find(s.back()) != std::string::npos)) {
+            s.pop_back();
+        }
+        return s;
+    }
+
+    bool checkForScenegraphNodeAccessNav(std::string& navTerm) {
+        const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
+        const size_t posNav = navTerm.find(nextTerm);
+        if (posNav != std::string::npos) {
+            for (const std::string& accessName : NavScriptsUsingNodes) {
+                if (navTerm.find(accessName) != std::string::npos) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    bool checkForScenegraphNodeAccessScene(const std::string& s) {
+        const std::string scene = "Scene.";
+        return (s.find(scene) != std::string::npos);
+    }
+
+    std::string extractScenegraphNodeFromScene(const std::string& s) {
+        const std::string scene = "Scene.";
+        std::string extracted;
+        const size_t posScene = s.find(scene);
+        if (posScene != std::string::npos) {
+            const size_t posDot = s.find('.', posScene + scene.length() + 1);
+            if (posDot > posScene && posDot != std::string::npos) {
+                extracted = s.substr(posScene + scene.length(), posDot -
+                    (posScene + scene.length()));
+            }
+        }
+        return extracted;
+    }
+
+    bool isPropertyAllowedForBaseline(const std::string& propString) {
+        for (const std::string& reject : PropertyBaselineRejects) {
+            if (propString.starts_with(reject)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void replaceCommandsFromScriptIfFound(std::string& script) {
+        for (const ScriptSubstringReplace& replacementSnippet : ScriptsToBeReplaced) {
+            auto findIdx = script.find(replacementSnippet.substringFound);
+            if (findIdx != std::string::npos) {
+                script.erase(findIdx, replacementSnippet.substringFound.length());
+                script.insert(findIdx, replacementSnippet.substringReplacement);
+            }
+        }
+    }
+
+    void trimCommandsFromScriptIfFound(std::string& script) {
+        for (const std::string& trimSnippet : ScriptsToBeTrimmed) {
+            auto findIdx = script.find(trimSnippet);
+            if (findIdx != std::string::npos) {
+                auto findClosingParens = script.find_first_of(')', findIdx);
+                script.erase(findIdx, findClosingParens + 1);
+            }
+        }
+    }
+
+    void removeTrailingPathSlashes(std::string& filename) const {
+        while (filename.substr(filename.length() - 1, 1) == "/") {
+            filename.pop_back();
+        }
+        while (filename.substr(filename.length() - 1, 1) == "\\") {
+            filename.pop_back();
+        }
+    }
+
+
 } // namespace
 
 namespace openspace::interaction {
@@ -729,15 +944,6 @@ void SessionRecording::deinitialize() {
 
 void SessionRecording::setRecordDataFormat(DataMode dataMode) {
     _recordingDataMode = dataMode;
-}
-
-void SessionRecording::removeTrailingPathSlashes(std::string& filename) const {
-    while (filename.substr(filename.length() - 1, 1) == "/") {
-        filename.pop_back();
-    }
-    while (filename.substr(filename.length() - 1, 1) == "\\") {
-        filename.pop_back();
-    }
 }
 
 // TODO: take a std::filesystem::path rather than string?
@@ -1379,26 +1585,6 @@ void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script
     );
 }
 
-void SessionRecording::trimCommandsFromScriptIfFound(std::string& script) {
-    for (const std::string& trimSnippet : ScriptsToBeTrimmed) {
-        auto findIdx = script.find(trimSnippet);
-        if (findIdx != std::string::npos) {
-            auto findClosingParens = script.find_first_of(')', findIdx);
-            script.erase(findIdx, findClosingParens + 1);
-        }
-    }
-}
-
-void SessionRecording::replaceCommandsFromScriptIfFound(std::string& script) {
-    for (const ScriptSubstringReplace& replacementSnippet : ScriptsToBeReplaced) {
-        auto findIdx = script.find(replacementSnippet.substringFound);
-        if (findIdx != std::string::npos) {
-            script.erase(findIdx, replacementSnippet.substringFound.length());
-            script.insert(findIdx, replacementSnippet.substringReplacement);
-        }
-    }
-}
-
 void SessionRecording::savePropertyBaseline(properties::Property& prop) {
     const std::string propIdentifier = prop.uri();
     if (isPropertyAllowedForBaseline(propIdentifier)) {
@@ -1419,15 +1605,6 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
             _propertyBaselinesSaved.push_back(propIdentifier);
         }
     }
-}
-
-bool SessionRecording::isPropertyAllowedForBaseline(const std::string& propString) {
-    for (const std::string& reject : PropertyBaselineRejects) {
-        if (propString.starts_with(reject)) {
-            return false;
-        }
-    }
-    return true;
 }
 
 void SessionRecording::preSynchronization() {
@@ -1803,79 +1980,6 @@ void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
             }
         }
     }
-}
-
-bool SessionRecording::checkForScenegraphNodeAccessScene(const std::string& s) {
-    const std::string scene = "Scene.";
-    return (s.find(scene) != std::string::npos);
-}
-
-std::string SessionRecording::extractScenegraphNodeFromScene(const std::string& s) {
-    const std::string scene = "Scene.";
-    std::string extracted;
-    const size_t posScene = s.find(scene);
-    if (posScene != std::string::npos) {
-        const size_t posDot = s.find('.', posScene + scene.length() + 1);
-        if (posDot > posScene && posDot != std::string::npos) {
-            extracted = s.substr(posScene + scene.length(), posDot -
-                (posScene + scene.length()));
-        }
-    }
-    return extracted;
-}
-
-bool SessionRecording::checkForScenegraphNodeAccessNav(std::string& navTerm) {
-    const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
-    const size_t posNav = navTerm.find(nextTerm);
-    if (posNav != std::string::npos) {
-        for (const std::string& accessName : NavScriptsUsingNodes) {
-              if (navTerm.find(accessName) != std::string::npos) {
-                  return true;
-              }
-        }
-    }
-    return false;
-}
-
-std::string SessionRecording::isolateTermFromQuotes(std::string s) {
-    //Remove any leading spaces
-    while (s.front() == ' ') {
-        s.erase(0, 1);
-    }
-    const std::string possibleQuotes = "\'\"[]";
-    while (possibleQuotes.find(s.front()) != std::string::npos) {
-        s.erase(0, 1);
-    }
-    for (const char q : possibleQuotes) {
-        if (s.find(q) != std::string::npos) {
-            s = s.substr(0, s.find(q));
-            return s;
-        }
-    }
-    //If no quotes found, remove other possible characters from end
-    const std::string unwantedChars = " );";
-    while (!s.empty() && (unwantedChars.find(s.back()) != std::string::npos)) {
-        s.pop_back();
-    }
-    return s;
-}
-
-void SessionRecording::eraseSpacesFromString(std::string& s) {
-    s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
-}
-
-std::string SessionRecording::getNameFromSurroundingQuotes(std::string& s) {
-    std::string result;
-    const char quote = s.at(0);
-    // Handle either ' or " marks
-    if (quote == '\'' || quote == '\"') {
-        const size_t quoteCount = std::count(s.begin(), s.end(), quote);
-        // Must be an opening and closing quote char
-        if (quoteCount == 2) {
-            result = s.substr(1, s.rfind(quote) - 1);
-        }
-    }
-    return result;
 }
 
 bool SessionRecording::checkIfInitialFocusNodeIsLoaded(unsigned int firstCamIndex) {
@@ -2343,94 +2447,6 @@ std::vector<std::string> SessionRecording::playbackList() const {
     return fileList;
 }
 
-void SessionRecording::readPlaybackHeader_stream(std::stringstream& conversionInStream,
-                                                 std::string& version, DataMode& mode)
-{
-    // Read header
-    const std::string readBackHeaderString = readHeaderElement(
-        conversionInStream,
-        FileHeaderTitle.length()
-    );
-
-    if (readBackHeaderString != FileHeaderTitle) {
-        throw ConversionError("File to convert does not contain expected header");
-    }
-    version = readHeaderElement(conversionInStream, FileHeaderVersionLength);
-    std::string readDataMode = readHeaderElement(conversionInStream, 1);
-    if (readDataMode[0] == DataFormatAsciiTag) {
-        mode = DataMode::Ascii;
-    }
-    else if (readDataMode[0] == DataFormatBinaryTag) {
-        mode = DataMode::Binary;
-    }
-    else {
-        throw ConversionError("Unknown data type in header (needs Ascii or Binary)");
-    }
-    // Read to throw out newline at end of header
-    readHeaderElement(conversionInStream, 1);
-}
-
-SessionRecording::DataMode SessionRecording::readModeFromHeader(
-                                                              const std::string& filename)
-{
-    DataMode mode = DataMode::Unknown;
-    std::ifstream inputFile;
-    // Open in ASCII first
-    inputFile.open(filename, std::ifstream::in);
-    // Read header
-    const std::string readBackHeaderString = readHeaderElement(
-        inputFile,
-        FileHeaderTitle.length()
-    );
-    if (readBackHeaderString != FileHeaderTitle) {
-        LERROR("Specified playback file does not contain expected header");
-    }
-    readHeaderElement(inputFile, FileHeaderVersionLength);
-    std::string readDataMode = readHeaderElement(inputFile, 1);
-    if (readDataMode[0] == DataFormatAsciiTag) {
-        mode = DataMode::Ascii;
-    }
-    else if (readDataMode[0] == DataFormatBinaryTag) {
-        mode = DataMode::Binary;
-    }
-    else {
-        throw ConversionError("Unknown data type in header (should be Ascii or Binary)");
-    }
-    return mode;
-}
-
-void SessionRecording::readFileIntoStringStream(std::string filename,
-                                                std::ifstream& inputFstream,
-                                                std::stringstream& stream)
-{
-    std::filesystem::path conversionInFilename = absPath(filename);
-    if (!std::filesystem::is_regular_file(conversionInFilename)) {
-        throw ConversionError(std::format(
-            "Cannot find the specified playback file '{}' to convert",
-            conversionInFilename
-        ));
-    }
-
-    const DataMode mode = readModeFromHeader(conversionInFilename.string());
-
-    stream.str("");
-    stream.clear();
-    inputFstream.close();
-    if (mode == DataMode::Binary) {
-        inputFstream.open(conversionInFilename, std::ifstream::in | std::ios::binary);
-    }
-    else {
-        inputFstream.open(conversionInFilename, std::ifstream::in);
-    }
-    stream << inputFstream.rdbuf();
-    if (!inputFstream.is_open() || !inputFstream.good()) {
-        throw ConversionError(std::format(
-            "Unable to open file '{}' for conversion", filename
-        ));
-    }
-    inputFstream.close();
-}
-
 void SessionRecording::convertFileRelativePath(std::string filenameRelative) {
     const std::filesystem::path path = absPath(std::move(filenameRelative));
     convertFile(path.string());
@@ -2440,7 +2456,8 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
     std::string conversionOutFilename = filename;
     std::ifstream conversionInFile;
     std::stringstream conversionInStream;
-    if (depth >= _maximumRecursionDepth) {
+    static constexpr int MaximumRecursionDepth = 50;
+    if (depth >= MaximumRecursionDepth) {
         LERROR("Runaway recursion in session recording conversion of file version");
         exit(EXIT_FAILURE);
     }
