@@ -407,18 +407,19 @@ bool SessionRecording::startPlayback(std::string& filename,
     absFilename = convertFile(absFilename);
 
     if (_state == SessionState::Recording) {
-        LERROR("Unable to start playback while in session recording mode");
-        return false;
+        throw ghoul::RuntimeError(
+            "Unable to start playback while in session recording mode"
+        );
     }
     else if (isPlayingBack()) {
-        LERROR("Unable to start new playback while in session playback mode");
-        return false;
+        throw ghoul::RuntimeError(
+            "Unable to start new playback while in session playback mode"
+        );
     }
 
     if (!std::filesystem::is_regular_file(absFilename)) {
-        LERROR("Cannot find the specified playback file");
         cleanUpPlayback();
-        return false;
+        throw ghoul::RuntimeError("Cannot find the specified playback file");
     }
 
     _playbackLineNum = 1;
@@ -434,9 +435,10 @@ bool SessionRecording::startPlayback(std::string& filename,
         FileHeaderTitle.length()
     );
     if (readBackHeaderString != FileHeaderTitle) {
-        LERROR("Specified playback file does not contain expected header");
         cleanUpPlayback();
-        return false;
+        throw ghoul::RuntimeError(
+            "Specified playback file does not contain expected header"
+        );
     }
     readHeaderElement(_playbackFile, FileHeaderVersionLength);
     std::string readDataMode = readHeaderElement(_playbackFile, 1);
@@ -447,8 +449,10 @@ bool SessionRecording::startPlayback(std::string& filename,
         _recordingDataMode = DataMode::Binary;
     }
     else {
-        LERROR("Unknown data type in header (should be Ascii or Binary)");
         cleanUpPlayback();
+        throw ghoul::RuntimeError(
+            "Unknown data type in header (should be Ascii or Binary)"
+        );
     }
     // throwaway newline character(s)
     std::string lineEnd = readHeaderElement(_playbackFile, 1);
@@ -471,12 +475,11 @@ bool SessionRecording::startPlayback(std::string& filename,
     }
 
     if (!_playbackFile.is_open() || !_playbackFile.good()) {
-        LERROR(std::format(
-            "Unable to open file '{}' for keyframe playback", absFilename.c_str()
-        ));
         stopPlayback();
         cleanUpPlayback();
-        return false;
+        throw ghoul::RuntimeError(std::format(
+            "Unable to open file '{}' for keyframe playback", absFilename.c_str()
+        ));
     }
     _saveRendering_isFirstFrame = true;
     // Set time reference mode
