@@ -207,7 +207,7 @@ public:
      *
      * \return `true` if recording to file starts without errors
      */
-    bool startPlayback(std::string& filename, KeyframeTimeRef timeMode,
+    bool startPlayback(std::string& filename,
         bool forceSimTimeAtStart, bool loop, bool shouldWaitForFinishedTiles);
 
     /**
@@ -614,9 +614,7 @@ protected:
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
     bool hasCameraChangedFromPrev(const datamessagestructures::CameraKeyframe& kfNew);
-    double appropriateTimestamp(Timestamps t3stamps);
-    double equivalentSimulationTime(double timeOs, double timeRec, double timeSim);
-    double equivalentApplicationTime(double timeOs, double timeRec, double timeSim);
+    double equivalentApplicationTime(double timeRec) const; // TODO remove or rename function?
     void recordCurrentTimePauseState();
     void recordCurrentTimeRate();
     bool handleRecordingFile(std::string filenameIn);
@@ -724,7 +722,8 @@ protected:
     std::ofstream _recordFile;
     int _playbackLineNum = 1;
     int _recordingEntryNum = 1;
-    KeyframeTimeRef _playbackTimeReferenceMode;
+    const KeyframeTimeRef _playbackTimeReferenceMode =
+        KeyframeTimeRef::Relative_recordedStart;
     datamessagestructures::CameraKeyframe _prevRecordedCameraKeyframe;
     bool _playbackActive_camera = false;
     bool _playbackActive_time = false;

@@ -70,8 +70,7 @@ namespace {
  * value of true is given, then playback will continually loop until it is manually
  * stopped.
  */
-[[codegen::luawrap("startPlayback")]] void startPlaybackDefault(std::string file,
-                                                                bool loop = false,
+[[codegen::luawrap]] void startPlayback(std::string file, bool loop = false,
                                                            bool shouldWaitForTiles = true)
 {
     using namespace openspace;
@@ -81,73 +80,9 @@ namespace {
     }
     global::sessionRecording->startPlayback(
         file,
-        interaction::KeyframeTimeRef::Relative_recordedStart,
         true,
         loop,
         shouldWaitForTiles
-    );
-}
-
-/**
- * Starts a playback session with keyframe times that are relative to application time
- * (seconds since OpenSpace application started). The string argument is the filename to
- * pull playback keyframes from (the file path is relative to the RECORDINGS variable
- * specified in the config file).
- */
-[[codegen::luawrap]] void startPlaybackApplicationTime(std::string file) {
-    using namespace openspace;
-
-    if (file.empty()) {
-        throw ghoul::lua::LuaError("Filepath string is empty");
-    }
-    global::sessionRecording->startPlayback(
-        file,
-        interaction::KeyframeTimeRef::Relative_applicationStart,
-        false,
-        false,
-        false
-    );
-}
-
-/**
- * Starts a playback session with keyframe times that are relative to the time since the
- * recording was started (the same relative time applies to the playback). The string
- * argument is the filename to pull playback keyframes from (the file path is relative to
- * the RECORDINGS variable specified in the config file). If a second input value of true
- * is given, then playback will continually loop until it is manually stopped.
- */
-[[codegen::luawrap]] void startPlaybackRecordedTime(std::string file, bool loop = false) {
-    using namespace openspace;
-
-    if (file.empty()) {
-        throw ghoul::lua::LuaError("Filepath string is empty");
-    }
-    global::sessionRecording->startPlayback(
-        file,
-        interaction::KeyframeTimeRef::Relative_recordedStart,
-        false,
-        loop,
-        false
-    );
-}
-
-/**
- * Starts a playback session with keyframe times that are relative to the simulated date &
- * time. The string argument is the filename to pull playback keyframes from (the file
- * path is relative to the RECORDINGS variable specified in the config file).
- */
-[[codegen::luawrap]] void startPlaybackSimulationTime(std::string file) {
-    using namespace openspace;
-
-    if (file.empty()) {
-        throw ghoul::lua::LuaError("Filepath string is empty");
-    }
-    global::sessionRecording->startPlayback(
-        file,
-        interaction::KeyframeTimeRef::Absolute_simTimeJ2000,
-        false,
-        false,
-        false
     );
 }
 

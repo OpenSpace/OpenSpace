@@ -392,7 +392,6 @@ void SessionRecording::stopRecording() {
 }
 
 bool SessionRecording::startPlayback(std::string& filename,
-                                     KeyframeTimeRef timeMode,
                                      bool forceSimTimeAtStart,
                                      bool loop, bool shouldWaitForFinishedTiles)
 {
@@ -483,10 +482,9 @@ bool SessionRecording::startPlayback(std::string& filename,
     // Set time reference mode
     _playbackForceSimTimeAtStart = forceSimTimeAtStart;
     double now = global::windowDelegate->applicationTime();
-    _playbackTimeReferenceMode = timeMode;
     initializePlayback_time(now);
 
-    global::scriptScheduler->setTimeReferenceMode(timeMode);
+    global::scriptScheduler->setTimeReferenceMode(_playbackTimeReferenceMode);
     _loadedNodes.clear();
     populateListofLoadedSceneGraphNodes();
 
@@ -606,8 +604,8 @@ bool SessionRecording::findFirstCameraKeyframeInTimeline() {
             _idxTimeline_cameraFirstInTimeline = i;
             _idxTimeline_cameraPtrPrev = _idxTimeline_cameraFirstInTimeline;
             _idxTimeline_cameraPtrNext = _idxTimeline_cameraFirstInTimeline;
-            _cameraFirstInTimeline_timestamp = appropriateTimestamp(
-                _timeline[_idxTimeline_cameraFirstInTimeline].t3stamps);
+            _cameraFirstInTimeline_timestamp =
+                _timeline[_idxTimeline_cameraFirstInTimeline].t3stamps.timeRec;
             foundCameraKeyframe = true;
             break;
         }
@@ -870,6 +868,7 @@ void SessionRecording::saveCameraKeyframeAscii(Timestamps& times,
                                                datamessagestructures::CameraKeyframe& kf,
                                                std::ofstream& file)
 {
+    // TODO remove admodelmatrixasci
     if (_addModelMatrixinAscii) {
         SceneGraphNode* node = sceneGraphNode(kf._focusNode);
         const glm::dmat4 modelTransform = node->modelTransform();
@@ -1198,62 +1197,18 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
     return parsingStatusOk;
 }
 
-double SessionRecording::appropriateTimestamp(Timestamps t3stamps)
+double SessionRecording::equivalentApplicationTime(double timeRec) const
 {
-    if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_recordedStart) {
-        return t3stamps.timeRec;
-    }
-    else if (_playbackTimeReferenceMode == KeyframeTimeRef::Absolute_simTimeJ2000) {
-        return t3stamps.timeSim;
-    }
-    else {
-        return t3stamps.timeOs;
-    }
-}
-
-double SessionRecording::equivalentSimulationTime(double timeOs,
-                                                  double timeRec,
-                                                  double timeSim)
-{
-    if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_recordedStart) {
-        return _timestampPlaybackStarted_simulation + timeRec;
-    }
-    else if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_applicationStart) {
-        return _timestampApplicationStarted_simulation + timeOs;
-    }
-    else {
-        return timeSim;
-    }
-}
-
-double SessionRecording::equivalentApplicationTime(double timeOs,
-                                                   double timeRec,
-                                                   double timeSim)
-{
-    if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_recordedStart) {
-        return _timestampPlaybackStarted_application + timeRec;
-    }
-    else if (_playbackTimeReferenceMode == KeyframeTimeRef::Absolute_simTimeJ2000) {
-        return timeSim - _timestampApplicationStarted_simulation;
-    }
-    else {
-        return timeOs;
-    }
+    return _timestampPlaybackStarted_application + timeRec;
 }
 
 double SessionRecording::currentTime() const {
     if (isSavingFramesDuringPlayback()) {
         return _saveRenderingCurrentRecordedTime;
     }
-    else if (_playbackTimeReferenceMode == KeyframeTimeRef::Relative_recordedStart) {
+    else {
         return (global::windowDelegate->applicationTime() -
                 _timestampPlaybackStarted_application) - _playbackPauseOffset;
-    }
-    else if (_playbackTimeReferenceMode == KeyframeTimeRef::Absolute_simTimeJ2000) {
-        return global::timeManager->time().j2000Seconds();
-    }
-    else {
-        return global::windowDelegate->applicationTime() - _playbackPauseOffset;
     }
 }
 
@@ -1425,7 +1380,7 @@ bool SessionRecording::playbackTimeChange() {
         _playbackLineParsing,
         _playbackLineNum
     );
-    kf._timestamp = equivalentApplicationTime(times.timeOs, times.timeRec, times.timeSim);
+    kf._timestamp = equivalentApplicationTime(times.timeRec);
     kf._time = kf._timestamp + _timestampApplicationStarted_simulation;
     if (success) {
         success = addKeyframe(
@@ -1994,8 +1949,8 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
         if (doesTimelineEntryContainCamera(seekAheadIndex)) {
             const unsigned int indexIntoCameraKeyframes =
                 _timeline[seekAheadIndex].idxIntoKeyframeTypeArray;
-            const double seekAheadKeyframeTimestamp
-                = appropriateTimestamp(_timeline[seekAheadIndex].t3stamps);
+            const double seekAheadKeyframeTimestamp =
+                _timeline[seekAheadIndex].t3stamps.timeRec;
 
             if (indexIntoCameraKeyframes >= (_keyframesCamera.size() - 1)) {
                 _hasHitEndOfCameraKeyframes = true;
@@ -2015,7 +1970,7 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
         }
 
         const double interpolationUpperBoundTimestamp =
-            appropriateTimestamp(_timeline[_idxTimeline_cameraPtrNext].t3stamps);
+            _timeline[_idxTimeline_cameraPtrNext].t3stamps.timeRec;
         if ((currTime > interpolationUpperBoundTimestamp) && _hasHitEndOfCameraKeyframes)
         {
             _idxTimeline_cameraPtrPrev = _idxTimeline_cameraPtrNext;
@@ -2090,13 +2045,9 @@ bool SessionRecording::processCameraKeyframe(double now) {
     }
 
     // getPrevTimestamp();
-    const double prevTime = appropriateTimestamp(
-        _timeline[_idxTimeline_cameraPtrPrev].t3stamps
-    );
+    const double prevTime = _timeline[_idxTimeline_cameraPtrPrev].t3stamps.timeRec;
     // getNextTimestamp();
-    const double nextTime = appropriateTimestamp(
-        _timeline[_idxTimeline_cameraPtrNext].t3stamps
-    );
+    const double nextTime = _timeline[_idxTimeline_cameraPtrNext].t3stamps.timeRec;
 
     double t = 0.0;
     if ((nextTime - prevTime) >= 1e-7) {
@@ -2152,10 +2103,10 @@ double SessionRecording::getNextTimestamp() {
         return 0.0;
     }
     else if (_idxTimeline_nonCamera < _timeline.size()) {
-        return appropriateTimestamp(_timeline[_idxTimeline_nonCamera].t3stamps);
+        return _timeline[_idxTimeline_nonCamera].t3stamps.timeRec;
     }
     else {
-        return appropriateTimestamp(_timeline.back().t3stamps);
+        return _timeline.back().t3stamps.timeRec;
     }
 }
 
@@ -2164,13 +2115,13 @@ double SessionRecording::getPrevTimestamp() {
         return 0.0;
     }
     else if (_idxTimeline_nonCamera == 0) {
-        return appropriateTimestamp(_timeline.front().t3stamps);
+        return _timeline.front().t3stamps.timeRec;
     }
     else if (_idxTimeline_nonCamera < _timeline.size()) {
-        return appropriateTimestamp(_timeline[_idxTimeline_nonCamera - 1].t3stamps);
+        return _timeline[_idxTimeline_nonCamera - 1].t3stamps.timeRec;
     }
     else {
-        return appropriateTimestamp(_timeline.back().t3stamps);
+        return _timeline.back().t3stamps.timeRec;
     }
 }
 
@@ -2660,10 +2611,7 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
             codegen::lua::StartRecording,
             codegen::lua::StartRecordingAscii,
             codegen::lua::StopRecording,
-            codegen::lua::StartPlaybackDefault,
-            codegen::lua::StartPlaybackApplicationTime,
-            codegen::lua::StartPlaybackRecordedTime,
-            codegen::lua::StartPlaybackSimulationTime,
+            codegen::lua::StartPlayback,
             codegen::lua::StopPlayback,
             codegen::lua::EnableTakeScreenShotDuringPlayback,
             codegen::lua::DisableTakeScreenShotDuringPlayback,
