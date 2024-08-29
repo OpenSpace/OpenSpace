@@ -79,8 +79,7 @@ local CordeliaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Cordelia Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia",
-    Description = "Label for Uranus' moon Cordelia (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cordelia"
   }
 }
 
@@ -159,8 +158,7 @@ local OpheliaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Ophelia Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia",
-    Description = "Label for Uranus' moon Ophelia (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Ophelia"
   }
 }
 
@@ -239,8 +237,7 @@ local BiancaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Bianca Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca",
-    Description = "Label for Uranus' moon Bianca (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Bianca"
   }
 }
 
@@ -319,8 +316,7 @@ local CressidaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Cressida Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida",
-    Description = "Label for Uranus' moon Cressida (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cressida"
   }
 }
 
@@ -399,8 +395,7 @@ local DesdemonaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Desdemona Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona",
-    Description = "Label for Uranus' moon Desdemona (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Desdemona"
   }
 }
 
@@ -479,8 +474,7 @@ local JulietLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Juliet Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet",
-    Description = "Label for Uranus' moon Juliet (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Juliet"
   }
 }
 
@@ -559,8 +553,7 @@ local PortiaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Portia Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia",
-    Description = "Label for Uranus' moon Portia (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Portia"
   }
 }
 
@@ -639,8 +632,7 @@ local RosalindLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Rosalind Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind",
-    Description = "Label for Uranus' moon Rosalind (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Rosalind"
   }
 }
 
@@ -719,8 +711,7 @@ local CupidLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Cupid Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid",
-    Description = "Label for Uranus' moon Cupid (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Cupid"
   }
 }
 
@@ -799,8 +790,7 @@ local BelindaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Belinda Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda",
-    Description = "Label for Uranus' moon Belinda (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Belinda"
   }
 }
 
@@ -879,8 +869,7 @@ local PerditaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Perdita Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita",
-    Description = "Label for Uranus' moon Perdita (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Perdita"
   }
 }
 
@@ -959,8 +948,7 @@ local PuckLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Puck Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck",
-    Description = "Label for Uranus' moon Puck (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Puck"
   }
 }
 
@@ -1039,10 +1027,10 @@ local MabLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Mab Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab",
-    Description = "Label for Uranus' moon Mab (Inner Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/Mab"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Cordelia)

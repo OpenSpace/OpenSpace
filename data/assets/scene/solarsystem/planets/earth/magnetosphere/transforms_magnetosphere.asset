@@ -5,6 +5,7 @@ local GSEKernel = asset.resource("../kernels/GSE.tf")
 local GSMKernel = asset.resource("../kernels/GSM.tf")
 local SMKernel = asset.resource("../kernels/SM.tf")
 
+
 local Frame = {
   GSE = "GSE",
   GSM = "GSM", -- Geocentric Solar Magnetospheric

@@ -1,0 +1,52 @@
+local globe = asset.require("../../earth")
+local snpp = asset.require("./definitions/snpp")
+
+
+
+local Layer = {
+  Identifier = "ESRI_VIIRS_Combo",
+  Name = "ESRI VIIRS Combo",
+  Enabled = asset.enabled,
+  ZIndex = 20,
+  Type = "TileProviderByLevel",
+  LevelTileProviders = {
+    {
+      MaxLevel = 4,
+      TileProvider = snpp.Layer
+    },
+    {
+      MaxLevel = 22,
+      TileProvider = {
+        Identifier = "ESRI_World_Imagery",
+        Name = "ESRI World Imagery",
+        FilePath = asset.resource("esri_world_imagery.wms"),
+        PadTiles = false
+      }
+    }
+  },
+  PadTiles = false,
+  Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
+    Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "ESRI VIIRS Combo",
+  Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
+  Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]],
+  Author = "OpenSpace Tem",
+  URL = "http://www.openspaceproject.com",
+  License = "MIT License"
+}

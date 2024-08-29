@@ -1,4 +1,5 @@
 local Mission = {
+  Identifier = "Perseverance",
   Name = "Mars 2020 Perseverance Events on Mars",
   Phases = {
     {
@@ -34,5 +35,5 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)

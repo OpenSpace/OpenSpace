@@ -52,6 +52,7 @@ public:
     void connect();
     void setPort(std::string port);
     void setAddress(std::string address);
+    void setServerName(std::string name);
     void setName(std::string name);
     bool isHost();
     const std::string& hostName();
@@ -97,6 +98,7 @@ private:
 
     properties::StringProperty _password;
     properties::StringProperty _hostPassword;
+    properties::StringProperty _serverName;
 
     // While the port should in theory be an int,
     // we use a StringProperty to avoid a slider in the GUI.

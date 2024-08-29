@@ -186,14 +186,14 @@ RenderableTrail::Appearance::Appearance()
     })
     , lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , useLineFade(EnableFadeInfo, true)
-    , lineLength(LineLengthInfo, 1.f, 0.f, 1.f)
-    , lineFadeAmount(LineFadeAmountInfo, 1.f, 0.f, 1.f)
     , lineWidth(LineWidthInfo, 10.f, 1.f, 20.f)
     , pointSize(PointSizeInfo, 1, 1, 64)
     , renderingModes(
           RenderingModeInfo,
           properties::OptionProperty::DisplayType::Dropdown
     )
+    , lineLength(LineLengthInfo, 1.f, 0.f, 1.f)
+    , lineFadeAmount(LineFadeAmountInfo, 1.f, 0.f, 1.f)
 {
     renderingModes.addOptions({
         { RenderingModeLines, "Lines" },

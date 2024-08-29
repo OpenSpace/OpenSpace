@@ -11,6 +11,7 @@ local fieldlinesDirectory = asset.resource({
   Version = 1
 })
 
+
 local EarthMagnetosphere = {
   Identifier = "EarthMagnetosphere",
   Parent = transforms.GSMReferenceFrame.Identifier,

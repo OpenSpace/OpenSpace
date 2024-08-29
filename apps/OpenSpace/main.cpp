@@ -992,6 +992,57 @@ void setSgctDelegateFunctions() {
 
         return mousePosition;
     };
+    sgctDelegate.setStatisticsGraphScale = [](float scale) {
+        sgct::Engine::instance().setStatsGraphScale(scale);
+    };
+    sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
+        static std::unordered_map<WindowDelegate::Cursor, GLFWcursor*> Cursors = {
+            {
+                WindowDelegate::Cursor::Arrow,
+                glfwCreateStandardCursor(GLFW_ARROW_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::IBeam,
+                glfwCreateStandardCursor(GLFW_IBEAM_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::CrossHair,
+                glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::PointingHand,
+                glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::ResizeEW,
+                glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::ResizeNS,
+                glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::ResizeNWSE,
+                glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::ResizeNESW,
+                glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::ResizeAll,
+                glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::NotAllowed,
+                glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR)
+            },
+        };
+        ghoul_assert(
+            Cursors.find(mouse) != Cursors.end(), "Tried to create non-existent cursor"
+        );
+        glfwSetCursor(glfwGetCurrentContext(), Cursors[mouse]);
+    };
 }
 
 std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,

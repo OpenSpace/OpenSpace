@@ -13,9 +13,7 @@ local OrionImage = {
   Opacity = 1.0,
   TexturePath = orion.image .. "orion-nebula.png",
   Tag = { "mission_jwst_target" },
-  Description = [[
-    Image of the Orion Nebula by Bill Schoening/NOIRLab/NSF/AURA.
-  ]]
+  Description = "Image of the Orion Nebula by Bill Schoening/NOIRLab/NSF/AURA."
 }
 
 

@@ -27,24 +27,41 @@
 
 #include <string>
 
+#cmakedefine OPENSPACE_RELEASE_BUILD
+
 namespace openspace {
 
 std::string licenseText();
 
-constexpr int OPENSPACE_VERSION_MAJOR = @OPENSPACE_VERSION_MAJOR@;
-constexpr int OPENSPACE_VERSION_MINOR = @OPENSPACE_VERSION_MINOR@;
-constexpr int OPENSPACE_VERSION_PATCH = @OPENSPACE_VERSION_PATCH@;
+#ifdef OPENSPACE_RELEASE_BUILD
+
+constexpr bool OPENSPACE_IS_RELEASE_BUILD = true;
+
+constexpr uint8_t OPENSPACE_VERSION_MAJOR = @OPENSPACE_VERSION_MAJOR@;
+constexpr uint8_t OPENSPACE_VERSION_MINOR = @OPENSPACE_VERSION_MINOR@;
+constexpr uint8_t OPENSPACE_VERSION_PATCH = @OPENSPACE_VERSION_PATCH@;
 
 constexpr std::string_view OPENSPACE_VERSION_NUMBER = "@OPENSPACE_VERSION_MAJOR@.@OPENSPACE_VERSION_MINOR@.@OPENSPACE_VERSION_PATCH@";
-
 constexpr std::string_view OPENSPACE_VERSION_STRING = "@OPENSPACE_VERSION_STRING@";
-
 constexpr std::string_view OPENSPACE_VERSION_STRING_FULL = "@OPENSPACE_VERSION_MAJOR@.@OPENSPACE_VERSION_MINOR@.@OPENSPACE_VERSION_PATCH@ (@OPENSPACE_VERSION_STRING@)";
+
+#else // ^^^^ OPENSPACE_RELEASE_BUILD || !OPENSPACE_RELEASE_BUILD vvvv
+
+constexpr bool OPENSPACE_IS_RELEASE_BUILD = false;
+
+constexpr uint8_t OPENSPACE_VERSION_MAJOR = std::numeric_limits<uint8_t>::max();
+constexpr uint8_t OPENSPACE_VERSION_MINOR = std::numeric_limits<uint8_t>::max();
+constexpr uint8_t OPENSPACE_VERSION_PATCH = std::numeric_limits<uint8_t>::max();
+
+constexpr std::string_view OPENSPACE_VERSION_NUMBER = "";
+constexpr std::string_view OPENSPACE_VERSION_STRING = "";
+constexpr std::string_view OPENSPACE_VERSION_STRING_FULL = "";
+
+#endif // OPENSPACE_RELEASE_BUILD
 
 constexpr std::string_view OPENSPACE_GIT_BRANCH = "@OPENSPACE_GIT_BRANCH@";
 constexpr std::string_view OPENSPACE_GIT_COMMIT = "@OPENSPACE_GIT_COMMIT@";
-constexpr std::string_view OPENSPACE_GIT_STATUS = "@OPENSPACE_GIT_STATUS@";
-constexpr std::string_view OPENSPACE_GIT_FULL = "@OPENSPACE_GIT_BRANCH@@@OPENSPACE_GIT_COMMIT@ @OPENSPACE_GIT_STATUS@";
+constexpr std::string_view OPENSPACE_GIT_FULL = "@OPENSPACE_GIT_BRANCH@@@OPENSPACE_GIT_COMMIT@";
 
 } // namespace openspace
 

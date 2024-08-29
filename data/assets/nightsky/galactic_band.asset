@@ -2,29 +2,28 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local GalacticBand = {
-    Identifier = "GalacticBand",
-    Parent = transforms.SolarSystemBarycenter.Name,
-    Transform = {
-        Scale = {
-          Type = "StaticScale",
-          Scale = 9.46377307652E18
-        }
-    },
-    Renderable = {
-        Type = "RenderableRadialGrid",
-        Opacity = 0.8,
-        Color = { 1.0, 1.0, 1.0 },
-        LineWidth = 3.0,
-        GridSegments = { 1, 1 },
-        Radii = { 0.5, 0.5 },
-        Enabled = asset.enabled
-    },
-    GUI = {
-        Name = "Galactic Equator Line",
-        Description = "A line representation of the Galactic Equator plane.",
-        Path = "/Other/Lines"
+local GalacticLine = {
+  Identifier = "GalacticLine",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 9.46377307652E18
     }
+  },
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    Opacity = 0.8,
+    Color = { 0.08, 0.40, 0.40 },
+    LineWidth = 4.0,
+    GridSegments = { 1, 1 },
+    Enabled = asset.enabled
+  },
+  GUI = {
+    Name = "Galactic Equator",
+    Description = "A line representation of the Galactic Equator plane.",
+    Path = "/Night Sky/Coordinate Systems/Galactic"
+  }
 }
 
 
@@ -59,8 +58,9 @@ local ToggleGalacticBand = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(GalacticBand)
+  openspace.addSceneGraphNode(GalacticLine)
   openspace.action.registerAction(ShowGalacticBand)
   openspace.action.registerAction(HideGalacticBand)
 end)
@@ -68,12 +68,13 @@ end)
 asset.onDeinitialize(function()
   openspace.action.removeAction(HideGalacticBand)
   openspace.action.removeAction(ShowGalacticBand)
-  openspace.removeSceneGraphNode(GalacticBand)
+  openspace.removeSceneGraphNode(GalacticLine)
 end)
 
-asset.export(GalacticBand)
+asset.export(GalacticLine)
 asset.export("ShowGalacticBand", ShowGalacticBand.Identifier)
 asset.export("HideGalacticBand", HideGalacticBand.Identifier)
+
 
 
 asset.meta = {

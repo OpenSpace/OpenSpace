@@ -99,6 +99,7 @@ local ToggleEquatorial = {
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
+
 local ToggleMeridial = {
   Identifier = "os.bastilleday.fluxnodescutplane.ToggleMeridial",
   Name = "Toggle meridial cutplane",

@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_planet",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=planet&FORMAT=kvn",
   Filename = "planet.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -31,6 +31,7 @@ local PlanetSatellites = {
     Path = "/Solar System/Planets/Earth/Satellites"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(PlanetSatellites)

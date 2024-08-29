@@ -44,6 +44,10 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     LDEBUG("Initializing CEF...");
 
     CefSettings settings;
+    const std::filesystem::path root =
+        std::filesystem::path(helperLocation).parent_path();
+    const std::filesystem::path cefcache = std::format("{}/cefcache", root);
+    CefString(&settings.root_cache_path).FromString(cefcache.string());
 
 #ifndef __APPLE__
     // Apple will always look for helper in a fixed location
@@ -52,11 +56,6 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
 
     settings.windowless_rendering_enabled = true;
     attachDebugSettings(settings);
-
-#ifdef WIN32
-    // Enable High-DPI support on Windows 7 or newer
-    CefEnableHighDPISupport();
-#endif // WIN32
 
 #ifdef __APPLE__
     // Load the CEF framework library at runtime instead of linking directly as required

@@ -141,7 +141,6 @@ private:
 
     bool _dataIsDirty = true;
     bool _heightOffsetIsDirty = false;
-    bool _dataIsInitialized = false;
     bool _textureIsDirty = false;
 
     properties::Vec2Property _centerLatLong;

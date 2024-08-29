@@ -186,9 +186,7 @@ private:
 
     properties::IntListProperty _screenshotWindowIds;
     properties::BoolProperty _applyWarping;
-    properties::BoolProperty _showStatistics;
     properties::BoolProperty _screenshotUseDate;
-    properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
@@ -217,7 +215,6 @@ private:
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontCameraInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontVersionInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontShutdown;
@@ -228,8 +225,6 @@ private:
         glm::ivec4 zoom = glm::ivec4(0);
         glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
-
-    std::string _versionString;
 
     properties::Vec4Property _enabledFontColor;
     properties::Vec4Property _disabledFontColor;

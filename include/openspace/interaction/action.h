@@ -63,7 +63,7 @@ struct Action {
     /// current OpenSpace instance. If it is `No`, it is synchronized to other OpenSpace
     /// instances, for example other nodes in a cluster environment, or to other OpenSpace
     /// instances using a parallel connection
-    IsLocal isLocal = IsLocal::Yes;
+    IsLocal isLocal = IsLocal::No;
 };
 
 } // namespace openspace::interaction

@@ -38,6 +38,25 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
+    using namespace openspace;
+
+    // The URIs have to be validated because it is not known in what order things are
+    // constructed. For example, a SceneGraphNode can be created before its Renderable,
+    // and vice versa. Invalid URIs are empty. The reason this works even though we don't
+    // know what is created first is because if the child is created first, it has not
+    // been added to the property tree so URI will be invalid and not sent. But the parent
+    // will be added later, which will include the child in it's subowners
+    void publishPropertyTreeUpdatedEvent(const std::string& uri) {
+        if (!uri.empty()) {
+            global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(uri);
+        }
+    }
+
+    void publishPropertyTreePrunedEvent(const std::string& uri) {
+        if (!uri.empty()) {
+            global::eventEngine->publishEvent<events::EventPropertyTreePruned>(uri);
+        }
+    }
 } // namespace
 
 namespace openspace::properties {
@@ -137,13 +156,18 @@ std::string PropertyOwner::uri() const {
     std::string identifier = _identifier;
     PropertyOwner* currentOwner = owner();
     while (currentOwner) {
+        // We have reached the top of the property tree and the uri is finished
+        if (currentOwner == global::rootPropertyOwner) {
+            return identifier;
+        }
         const std::string& ownerId = currentOwner->identifier();
         if (!ownerId.empty()) {
             identifier = std::format("{}.{}", ownerId, identifier);
         }
         currentOwner = currentOwner->owner();
     }
-    return identifier;
+    // If the uri hasn't been sent at this point it is not valid, so send an empty string
+    return "";
 }
 
 bool PropertyOwner::hasProperty(const std::string& uri) const {
@@ -235,6 +259,9 @@ void PropertyOwner::addProperty(Property* prop) {
         else {
             _properties.push_back(prop);
             prop->setPropertyOwner(this);
+
+            // Notify change so we can update the UI
+            publishPropertyTreeUpdatedEvent(prop->uri());
         }
     }
 }
@@ -282,6 +309,9 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
         else {
             _subOwners.push_back(owner);
             owner->setPropertyOwner(this);
+
+            // Notify change so UI gets updated
+            publishPropertyTreeUpdatedEvent(owner->uri());
         }
     }
 }
@@ -302,6 +332,9 @@ void PropertyOwner::removeProperty(Property* prop) {
 
     // If we found the property identifier, we can delete it
     if (it != _properties.end() && (*it)->identifier() == prop->identifier()) {
+        // Notify change so we can update the UI
+        publishPropertyTreePrunedEvent(prop->uri());
+
         (*it)->setPropertyOwner(nullptr);
         _properties.erase(it);
     }
@@ -330,6 +363,8 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
 
     // If we found the propertyowner, we can delete it
     if (it != _subOwners.end() && (*it)->identifier() == owner->identifier()) {
+        // Notify the change so the UI can update
+        publishPropertyTreePrunedEvent(owner->uri());
         _subOwners.erase(it);
     }
     else {

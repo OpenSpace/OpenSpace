@@ -17,7 +17,6 @@ local vrts = asset.resource({
 })
 
 
-
 asset.onInitialize(function()
   openspace.globebrowsing.addBlendingLayersFromDirectory(vrts, assetGlobe)
   flipbook = helper.createFlipbook(assetPrefix, assetGlobe, 19)
@@ -42,7 +41,6 @@ asset.onInitialize(function()
     IsLocal = false
   })
 end)
-
 
 asset.onDeinitialize(function()
   flipbook = nil

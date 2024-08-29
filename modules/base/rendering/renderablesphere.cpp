@@ -378,10 +378,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    if (renderBin() == Renderable::RenderBin::PreDeferredTransparent) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        glDepthMask(false);
-    }
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     _sphere->render();
 
