@@ -129,7 +129,7 @@ public:
      * \param filename File saved with recorded keyframes
      * \return `true` if recording to file starts without errors
      */
-    bool startRecording(const std::string& filename);
+    void startRecording(const std::string& filename);
 
     /**
      * Starts a recording session, which will save data to the provided filename in ASCII
@@ -168,10 +168,8 @@ public:
      *        finished before progressing to the next frame. This value is only used when
      *        `enableTakeScreenShotDuringPlayback` was called before. Otherwise this value
      *        will be ignored
-     *
-     * \return `true` if recording to file starts without errors
      */
-    bool startPlayback(std::string& filename,
+    void startPlayback(std::string& filename,
         bool forceSimTimeAtStart, bool loop, bool shouldWaitForFinishedTiles);
 
     /**
@@ -373,14 +371,12 @@ protected:
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
     bool hasCameraChangedFromPrev(const datamessagestructures::CameraKeyframe& kfNew);
-    double equivalentApplicationTime(double timeRec) const; // TODO remove or rename function?
     void recordCurrentTimePauseState();
     void recordCurrentTimeRate();
-    bool handleRecordingFile(std::string filenameIn);
     bool playbackCamera();
     bool playbackTimeChange();
     bool playbackScript();
-    bool playbackAddEntriesToTimeline();
+    bool playbackAddEntriesToTimeline(std::string playbackFilename);
     void signalPlaybackFinishedForComponent(RecordedType type);
     void handlePlaybackEnd();
 
@@ -436,7 +432,6 @@ protected:
     DataMode _recordingDataMode = DataMode::Binary;
     SessionState _state = SessionState::Idle;
     SessionState _lastState = SessionState::Idle;
-    std::string _playbackFilename;
     std::ifstream _playbackFile;
     std::string _playbackLineParsing;
     std::ofstream _recordFile;
@@ -474,7 +469,6 @@ protected:
 
     bool _cleanupNeededRecording = false;
     bool _cleanupNeededPlayback = false;
-    const std::string scriptReturnPrefix = "return ";
 
     std::vector<interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
     std::vector<datamessagestructures::TimeKeyframe> _keyframesTime;

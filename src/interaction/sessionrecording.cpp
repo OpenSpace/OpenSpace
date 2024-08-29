@@ -908,7 +908,7 @@ namespace {
         }
     }
 
-    void removeTrailingPathSlashes(std::string& filename) const {
+    void removeTrailingPathSlashes(std::string& filename) {
         while (filename.substr(filename.length() - 1, 1) == "/") {
             filename.pop_back();
         }
@@ -916,7 +916,6 @@ namespace {
             filename.pop_back();
         }
     }
-
 
 } // namespace
 
@@ -946,15 +945,33 @@ void SessionRecording::setRecordDataFormat(DataMode dataMode) {
     _recordingDataMode = dataMode;
 }
 
-// TODO: take a std::filesystem::path rather than string?
-bool SessionRecording::handleRecordingFile(std::string filenameIn) {
-    std::filesystem::path filename(filenameIn);
+void SessionRecording::startRecording(const std::string& fn) {
+    _timeline.clear();
+    if (_state == SessionState::Recording) {
+        throw ghoul::RuntimeError(
+            "Unable to start recording while already in recording mode",
+            "SessionRecording"
+        );
+    }
+    else if (isPlayingBack()) {
+        throw ghoul::RuntimeError(
+            "Unable to start recording while in session playback mode",
+            "SessionRecording"
+        );
+    }
+    if (!std::filesystem::is_directory(absPath("${RECORDINGS}"))) {
+        std::filesystem::create_directories(absPath("${RECORDINGS}"));
+    }
+
+    std::filesystem::path filename = fn;
     auto extension = filename.extension();
 
     if (_recordingDataMode == DataMode::Binary) {
         if (extension == FileExtensionAscii) {
-            LERROR("Specified filename for binary recording has ascii file extension");
-            return false;
+            throw ghoul::RuntimeError(
+                "Specified filename for binary recording has ascii file extension",
+                "SessionRecording"
+            );
         }
         else if (extension != FileExtensionBinary) {
             filename.replace_extension(FileExtensionBinary);
@@ -962,8 +979,10 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
     }
     else if (_recordingDataMode == DataMode::Ascii) {
         if (extension == FileExtensionBinary) {
-            LERROR("Specified filename for ascii recording has binary file extension");
-            return false;
+            throw ghoul::RuntimeError(
+                "Specified filename for ascii recording has binary file extension",
+                "SessionRecording"
+            );
         }
         else if (extension != FileExtensionAscii) {
             filename.replace_extension(FileExtensionAscii);
@@ -975,22 +994,22 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
         absFilename = absPath("${RECORDINGS}/" + filename.string());
     }
     else if (absFilename.parent_path().is_relative()) {
-        LERROR("If path is provided with the filename, then it must be an absolute path");
-        return false;
+        throw ghoul::RuntimeError(
+            "If path is provided with the filename, then it must be an absolute path",
+            "SessionRecording"
+        );
     }
     else if (!std::filesystem::exists(absFilename.parent_path())) {
-        LERROR(std::format(
+        throw ghoul::RuntimeError(std::format(
             "The recording filename path '{}' is not a valid location in the filesytem",
             absFilename.parent_path().string()
-        ));
-        return false;
+        ), "SessionRecording");
     }
 
     if (std::filesystem::is_regular_file(absFilename)) {
-        LERROR(std::format(
+        throw ghoul::RuntimeError(std::format(
             "Unable to start recording; file '{}' already exists", absFilename
-        ));
-        return false;
+        ), "SessionRecording");
     }
     if (_recordingDataMode == DataMode::Binary) {
         _recordFile.open(absFilename, std::ios::binary);
@@ -1000,66 +1019,43 @@ bool SessionRecording::handleRecordingFile(std::string filenameIn) {
     }
 
     if (!_recordFile.is_open() || !_recordFile.good()) {
-        LERROR(std::format(
+        throw ghoul::RuntimeError(std::format(
             "Unable to open file '{}' for keyframe recording", absFilename
-        ));
-        return false;
-    }
-    return true;
-}
-
-bool SessionRecording::startRecording(const std::string& filename) {
-    _timeline.clear();
-    if (_state == SessionState::Recording) {
-        LERROR("Unable to start recording while already in recording mode");
-        return false;
-    }
-    else if (isPlayingBack()) {
-        LERROR("Unable to start recording while in session playback mode");
-        return false;
-    }
-    if (!std::filesystem::is_directory(absPath("${RECORDINGS}"))) {
-        std::filesystem::create_directories(absPath("${RECORDINGS}"));
+        ), "SessionRecording");
     }
 
-    const bool recordingFileOK = handleRecordingFile(filename);
+    _state = SessionState::Recording;
+    _playbackActive_camera = false;
+    _playbackActive_time = false;
+    _playbackActive_script = false;
+    _propertyBaselinesSaved.clear();
+    _keyframesSavePropertiesBaseline_scripts.clear();
+    _keyframesSavePropertiesBaseline_timeline.clear();
+    _recordingEntryNum = 1;
 
-    if (recordingFileOK) {
-        _state = SessionState::Recording;
-        _playbackActive_camera = false;
-        _playbackActive_time = false;
-        _playbackActive_script = false;
-        _propertyBaselinesSaved.clear();
-        _keyframesSavePropertiesBaseline_scripts.clear();
-        _keyframesSavePropertiesBaseline_timeline.clear();
-        _recordingEntryNum = 1;
-
-        _recordFile << FileHeaderTitle;
-        _recordFile.write(FileHeaderVersion, FileHeaderVersionLength);
-        if (_recordingDataMode == DataMode::Binary) {
-            _recordFile << DataFormatBinaryTag;
-        }
-        else {
-            _recordFile << DataFormatAsciiTag;
-        }
-        _recordFile << '\n';
-
-        _timestampRecordStarted = global::windowDelegate->applicationTime();
-
-        // Record the current delta time as the first property to save in the file.
-        // This needs to be saved as a baseline whether or not it changes during recording
-        _timestamps3RecordStarted = {
-            .timeOs = _timestampRecordStarted,
-            .timeRec = 0.0,
-            .timeSim = global::timeManager->time().j2000Seconds()
-        };
-
-        recordCurrentTimePauseState();
-        recordCurrentTimeRate();
-        LINFO("Session recording started");
+    _recordFile << FileHeaderTitle;
+    _recordFile.write(FileHeaderVersion, FileHeaderVersionLength);
+    if (_recordingDataMode == DataMode::Binary) {
+        _recordFile << DataFormatBinaryTag;
     }
+    else {
+        _recordFile << DataFormatAsciiTag;
+    }
+    _recordFile << '\n';
 
-    return recordingFileOK;
+    _timestampRecordStarted = global::windowDelegate->applicationTime();
+
+    // Record the current delta time as the first property to save in the file.
+    // This needs to be saved as a baseline whether or not it changes during recording
+    _timestamps3RecordStarted = {
+        .timeOs = _timestampRecordStarted,
+        .timeRec = 0.0,
+        .timeSim = global::timeManager->time().j2000Seconds()
+    };
+
+    recordCurrentTimePauseState();
+    recordCurrentTimeRate();
+    LINFO("Session recording started");
 }
 
 void SessionRecording::recordCurrentTimePauseState() {
@@ -1155,7 +1151,7 @@ void SessionRecording::stopRecording() {
     _cleanupNeededRecording = true;
 }
 
-bool SessionRecording::startPlayback(std::string& filename,
+void SessionRecording::startPlayback(std::string& filename,
                                      bool forceSimTimeAtStart,
                                      bool loop, bool shouldWaitForFinishedTiles)
 {
@@ -1187,12 +1183,11 @@ bool SessionRecording::startPlayback(std::string& filename,
     }
 
     _playbackLineNum = 1;
-    _playbackFilename = absFilename;
     _playbackLoopMode = loop;
     _shouldWaitForFinishLoadingWhenPlayback = shouldWaitForFinishedTiles;
 
     // Open in ASCII first
-    _playbackFile.open(_playbackFilename, std::ifstream::in);
+    _playbackFile.open(absFilename, std::ifstream::in);
     // Read header
     const std::string readBackHeaderString = readHeaderElement(
         _playbackFile,
@@ -1230,7 +1225,7 @@ bool SessionRecording::startPlayback(std::string& filename,
         // Close & re-open the file, starting from the beginning, and do dummy read
         // past the header, version, and data type
         _playbackFile.close();
-        _playbackFile.open(_playbackFilename, std::ifstream::in | std::ios::binary);
+        _playbackFile.open(absFilename, std::ifstream::in | std::ios::binary);
         const size_t headerSize = FileHeaderTitle.length() + FileHeaderVersionLength
             + sizeof(DataFormatBinaryTag) + sizeof('\n');
         std::vector<char> hBuffer;
@@ -1255,15 +1250,15 @@ bool SessionRecording::startPlayback(std::string& filename,
     _loadedNodes.clear();
     populateListofLoadedSceneGraphNodes();
 
-    if (!playbackAddEntriesToTimeline()) {
+    if (!playbackAddEntriesToTimeline(absFilename)) {
         cleanUpPlayback();
-        return false;
+        return;
     }
 
     initializePlayback_modeFlags();
     if (!initializePlayback_timeline()) {
         cleanUpPlayback();
-        return false;
+        return;
     }
 
     const bool canTriggerPlayback = global::openSpaceEngine->setMode(
@@ -1272,7 +1267,7 @@ bool SessionRecording::startPlayback(std::string& filename,
 
     if (!canTriggerPlayback) {
         cleanUpPlayback();
-        return false;
+        return;
     }
 
     LINFO(std::format(
@@ -1289,8 +1284,6 @@ bool SessionRecording::startPlayback(std::string& filename,
     initializePlayback_triggerStart();
 
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
-
-    return true;
 }
 
 void SessionRecording::initializePlayback_time(double now) {
@@ -1689,7 +1682,7 @@ SessionRecording::SessionState SessionRecording::state() const {
     return _state;
 }
 
-bool SessionRecording::playbackAddEntriesToTimeline() {
+bool SessionRecording::playbackAddEntriesToTimeline(std::string playbackFilename) {
     bool parsingStatusOk = true;
 
     if (_recordingDataMode == DataMode::Binary) {
@@ -1699,7 +1692,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             if (!_playbackFile) {
                 LINFO(std::format(
                     "Finished parsing {} entries from playback file '{}'",
-                    _playbackLineNum - 1, _playbackFilename
+                    _playbackLineNum - 1, playbackFilename
                 ));
                 break;
             }
@@ -1715,7 +1708,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             else {
                 LERROR(std::format(
                     "Unknown frame type {} @ index {} of playback file '{}'",
-                    frameType, _playbackLineNum - 1, _playbackFilename
+                    frameType, _playbackLineNum - 1, playbackFilename
                 ));
                 parsingStatusOk = false;
                 break;
@@ -1733,7 +1726,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             if (!(iss >> entryType)) {
                 LERROR(std::format(
                     "Error reading entry type @ line {} of playback file '{}'",
-                    _playbackLineNum, _playbackFilename
+                    _playbackLineNum, playbackFilename
                 ));
                 break;
             }
@@ -1753,7 +1746,7 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
             else {
                 LERROR(std::format(
                     "Unknown frame type {} @ line {} of playback file '{}'",
-                    entryType, _playbackLineNum, _playbackFilename
+                    entryType, _playbackLineNum, playbackFilename
                 ));
                 parsingStatusOk = false;
                 break;
@@ -1761,16 +1754,11 @@ bool SessionRecording::playbackAddEntriesToTimeline() {
         }
         LINFO(std::format(
             "Finished parsing {} entries from playback file '{}'",
-            _playbackLineNum, _playbackFilename
+            _playbackLineNum, playbackFilename
         ));
     }
 
     return parsingStatusOk;
-}
-
-double SessionRecording::equivalentApplicationTime(double timeRec) const
-{
-    return _timestampPlaybackStarted_application + timeRec;
 }
 
 double SessionRecording::currentTime() const {
@@ -1870,7 +1858,7 @@ bool SessionRecording::playbackTimeChange() {
         _playbackLineParsing,
         _playbackLineNum
     );
-    kf._timestamp = equivalentApplicationTime(times.timeRec);
+    kf._timestamp = _timestampPlaybackStarted_application + times.timeRec;
     kf._time = kf._timestamp + _timestampApplicationStarted_simulation;
     if (success) {
         success = addKeyframe(
