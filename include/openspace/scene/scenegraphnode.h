@@ -90,8 +90,6 @@ public:
     void deinitialize();
     void deinitializeGL();
 
-    void traversePreOrder(const std::function<void(SceneGraphNode*)>& fn);
-    void traversePostOrder(const std::function<void(SceneGraphNode*)>& fn);
     void update(const UpdateData& data);
     void render(const RenderData& data, RendererTasks& tasks);
 
@@ -152,6 +150,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    void traversePreOrder(const std::function<void(SceneGraphNode*)>& fn);
+    void traversePostOrder(const std::function<void(SceneGraphNode*)>& fn);
+
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
@@ -179,8 +180,8 @@ private:
     properties::StringProperty _guiPath;
     properties::StringProperty _guiDisplayName;
     properties::StringProperty _guiDescription;
-    properties::FloatProperty _guiOrderingNumber;
     properties::BoolProperty _useGuiOrdering;
+    properties::FloatProperty _guiOrderingNumber;
 
     // Transformation defined by translation, rotation and scale
     struct {

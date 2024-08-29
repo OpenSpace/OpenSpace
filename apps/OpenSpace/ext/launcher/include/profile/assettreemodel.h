@@ -59,7 +59,7 @@ public:
         int role = Qt::DisplayRole) const final;
 
     /**
-      * Returns the index of item in #QModelIndex object form.
+      * Returns the index of item in QModelIndex object form.
       *
       * \param row The row number
       * \param column The column number
@@ -116,7 +116,7 @@ public:
       * Return the Qt flags of the item specified by index, which can include
       * Qt::ItemIsEnabled, Qt::ItemIsSelectable.
       *
-      * \param index The index specified by the #QModelIndex index
+      * \param index The index specified by the QModelIndex index
       * \return The Qt flags
       */
     Qt::ItemFlags flags(const QModelIndex& index) const final;
@@ -125,7 +125,7 @@ public:
       * Set data at index \p index.
       *
       * \param index Location of the item to set
-      * \param value The #QVariant data element to store at column \p column
+      * \param value The QVariant data element to store at column \p column
       * \param role Qt-specific role to define context of the call
       * \return `true` if the data set was successful
       */
@@ -133,7 +133,7 @@ public:
         int role = Qt::EditRole) final;
 
     /**
-      * Returns a vector of all #Assets selected in the tree view.
+      * Returns a vector of all #Asset%s selected in the tree view.
       *
       * \param outputPaths The vector of paths that were selected
       * \param outputItems The vector of AssetTreeItem that were selected
