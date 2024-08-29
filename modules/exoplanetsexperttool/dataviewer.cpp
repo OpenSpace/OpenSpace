@@ -225,6 +225,8 @@ void DataViewer::initializeData() {
     _filteringView = std::make_unique<FilteringView>(*this, _dataSettings);
     _systemViewer = std::make_unique<SystemViewer>(*this);
 
+    _currentlyTargettedSystem = std::nullopt;
+
     LDEBUG("Finished initializing based on dataset");
 
     // Compute mean values

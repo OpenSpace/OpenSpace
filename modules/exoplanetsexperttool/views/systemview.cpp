@@ -176,7 +176,6 @@ void SystemViewer::renderAllSystemViews() {
     }
 }
 
-
 void SystemViewer::renderSystemViewQuickControls(const std::string& host) {
     if (host.empty()) {
         return;
