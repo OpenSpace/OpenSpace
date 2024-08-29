@@ -565,7 +565,7 @@ void ScriptEngine::queueScript(Script script) {
 }
 
 void ScriptEngine::queueScript(std::string script) {
-    queueScript({ std::move(script) });
+    queueScript({ .code = std::move(script) });
 }
 
 void ScriptEngine::addBaseLibrary() {
