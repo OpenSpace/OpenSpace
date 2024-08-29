@@ -45,21 +45,21 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
-    void convert();
+    //void convert();
 
 private:
-    void convertToAscii();
-    void convertToBinary();
-    void determineFormatType();
+    //void convertToAscii();
+    //void convertToBinary();
+    //void determineFormatType();
     std::filesystem::path _inFilePath;
     std::filesystem::path _outFilePath;
-    std::ifstream _iFile;
-    std::ofstream _oFile;
+    //std::ifstream _iFile;
+    //std::ofstream _oFile;
     SessionRecording::DataMode _fileFormatType;
     std::string _version;
 
     std::string _valueFunctionLua;
-    SessionRecording* sessRec;
+    //SessionRecording* sessRec;
 };
 
 } // namespace openspace::interaction

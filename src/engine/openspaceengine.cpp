@@ -42,6 +42,7 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/keyframerecording.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/tasks/convertrecformattask.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
@@ -63,6 +64,7 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
@@ -222,6 +224,11 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
+
+
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "No task factory existed");
+    fTask->registerClass<interaction::ConvertRecFormatTask>("ConvertRecFormatTask");
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {}

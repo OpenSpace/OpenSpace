@@ -67,7 +67,6 @@ set(OPENSPACE_SOURCE
   interaction/sessionrecording_lua.inl
   interaction/websocketinputstate.cpp
   interaction/websocketcamerastates.cpp
-  interaction/tasks/convertrecfileversiontask.cpp
   interaction/tasks/convertrecformattask.cpp
   mission/mission.cpp
   mission/missionmanager.cpp
@@ -259,7 +258,6 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketcamerastates.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/tasks/convertrecfileversiontask.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/mission.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/missionmanager.h

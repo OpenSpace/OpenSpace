@@ -333,11 +333,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    sessionRecording = new (currentPos) interaction::SessionRecording(true);
+    sessionRecording = new (currentPos) interaction::SessionRecording;
     ghoul_assert(sessionRecording, "No sessionRecording");
     currentPos += sizeof(interaction::SessionRecording);
 #else // ^^^ WIN32 / !WIN32 vvv
-    sessionRecording = new interaction::SessionRecording(true);
+    sessionRecording = new interaction::SessionRecording;
 #endif // WIN32
 
 #ifdef WIN32
