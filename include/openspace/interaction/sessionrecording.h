@@ -90,7 +90,7 @@ public:
      * If enabled, calling this function will render information about the session
      * recording that is currently taking place to the screen.
      */
-    void render();
+    void render() const;
 
     /**
      * Current time based on playback mode.
@@ -186,7 +186,7 @@ public:
      *
      * \return `true` if playback is paused
      */
-    bool isPlaybackPaused();
+    bool isPlaybackPaused() const;
 
     /**
      * Pauses a playback session. This does both the normal pause functionality of setting
@@ -348,11 +348,9 @@ protected:
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
     bool hasCameraChangedFromPrev(const datamessagestructures::CameraKeyframe& kfNew);
-    void recordCurrentTimePauseState();
-    void recordCurrentTimeRate();
-    bool playbackCamera();
-    bool playbackTimeChange();
-    bool playbackScript();
+    bool playbackCamera(std::string lineParsing, int lineNumber);
+    bool playbackTimeChange(std::string lineParsing, int lineNumber);
+    bool playbackScript(std::string lineParsing, int lineNumber);
     bool playbackAddEntriesToTimeline(std::string playbackFilename);
     void signalPlaybackFinishedForComponent(RecordedType type);
     void handlePlaybackEnd();
@@ -381,7 +379,6 @@ protected:
     bool processCameraKeyframe(double now);
     bool processScriptKeyframe();
     void saveScriptKeyframeToPropertiesBaseline(std::string script);
-    bool doesTimelineEntryContainCamera(unsigned int index) const;
 
     double getNextTimestamp();
     void cleanUpPlayback();
@@ -398,17 +395,13 @@ protected:
         std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
     void populateListofLoadedSceneGraphNodes();
 
-    void checkIfScriptUsesScenegraphNode(std::string s);
-    bool checkIfInitialFocusNodeIsLoaded(unsigned int firstCamIndex);
+    void checkIfScriptUsesScenegraphNode(std::string s) const;
 
     DataMode _recordingDataMode = DataMode::Binary;
     SessionState _state = SessionState::Idle;
     SessionState _lastState = SessionState::Idle;
     std::ifstream _playbackFile;
-    std::string _playbackLineParsing;
-    std::ofstream _recordFile;
-    int _playbackLineNum = 1;
-    int _recordingEntryNum = 1;
+    std::filesystem::path _recordingFile;
     datamessagestructures::CameraKeyframe _prevRecordedCameraKeyframe;
     bool _playbackActive_camera = false;
     bool _playbackActive_time = false;
@@ -528,7 +521,5 @@ std::tuple<SessionRecording::DataMode, std::string> determineFormatTypeAndVersio
     std::filesystem::path inFilePath);
 
 } // namespace openspace
-
-#include "sessionrecording.inl"
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDING___H__
