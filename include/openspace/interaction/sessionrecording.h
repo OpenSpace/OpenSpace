@@ -453,7 +453,6 @@ protected:
     std::chrono::steady_clock::duration _saveRenderingDeltaTime_interpolation_usec;
     std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
     double _saveRenderingCurrentApplicationTime_interpolation = 0.0;
-    long long _saveRenderingClockInterpolation_countsPerSec = 1;
     bool _saveRendering_isFirstFrame = true;
 
     static const size_t keyframeHeaderSize_bytes = 33;
