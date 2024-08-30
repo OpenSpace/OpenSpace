@@ -65,8 +65,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "SessionRecording";
 
-    constexpr bool UsingTimeKeyframes = false;
-
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
         "Render Playback Information",
@@ -202,7 +200,7 @@ namespace {
      * \param kfBuffer The char buffer holding the recording info to be written
      * \param idx Index into write buffer (this is updated with the num of chars written)
      */
-    void saveHeaderBinary(openspace::interaction::SessionRecording::Timestamps& times, char type,
+    void saveHeaderBinary(openspace::interaction::Timestamps& times, char type,
         unsigned char* kfBuffer, size_t& idx)
     {
         kfBuffer[idx++] = type;
@@ -218,7 +216,7 @@ namespace {
      * \param type String signifying the keyframe type
      * \param line The stringstream buffer being written to
      */
-    void saveHeaderAscii(openspace::interaction::SessionRecording::Timestamps& times,
+    void saveHeaderAscii(openspace::interaction::Timestamps& times,
         const std::string& type,
         std::stringstream& line)
     {
@@ -251,7 +249,7 @@ namespace {
      * \param kfBuffer A buffer temporarily used for preparing data to be written
      * \param file An ofstream reference to the recording file being written-to
      */
-    void saveCameraKeyframeBinary(openspace::interaction::SessionRecording::Timestamps& times,
+    void saveCameraKeyframeBinary(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::CameraKeyframe& kf,
         unsigned char* kfBuffer,
         std::ofstream& file)
@@ -273,7 +271,7 @@ namespace {
      * \param kf Reference to a camera keyframe which contains the camera details
      * \param file An ofstream reference to the recording file being written-to
      */
-    void saveCameraKeyframeAscii(openspace::interaction::SessionRecording::Timestamps& times,
+    void saveCameraKeyframeAscii(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::CameraKeyframe& kf,
         std::ofstream& file, bool addModelMatrixinAscii)
     {
@@ -298,7 +296,7 @@ namespace {
      * \param kfBuffer A buffer temporarily used for preparing data to be written
      * \param file An ofstream reference to the recording file being written-to
      */
-    void saveTimeKeyframeBinary(openspace::interaction::SessionRecording::Timestamps& times,
+    void saveTimeKeyframeBinary(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::TimeKeyframe& kf,
         unsigned char* kfBuffer,
         std::ofstream& file)
@@ -318,7 +316,7 @@ namespace {
      * \param kf Reference to a time keyframe which contains the time details
      * \param file An ofstream reference to the recording file being written-to
      */
-    void saveTimeKeyframeAscii(openspace::interaction::SessionRecording::Timestamps& times,
+    void saveTimeKeyframeAscii(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::TimeKeyframe& kf,
         std::ofstream& file)
     {
@@ -336,7 +334,7 @@ namespace {
      * \param smBuffer A buffer temporarily used for preparing data to be written
      * \param file An ofstream reference to the recording file being written-to
      */
-    void saveScriptKeyframeBinary(openspace::interaction::SessionRecording::Timestamps& times,
+    void saveScriptKeyframeBinary(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::ScriptMessage& sm,
         unsigned char* smBuffer,
         std::ofstream& file)
@@ -357,7 +355,7 @@ namespace {
      * \param sm Reference to a ScriptMessage which contains the script details
      * \param file An ofstream reference to the recording file being written-to
      */
-    void saveScriptKeyframeAscii(openspace::interaction::SessionRecording::Timestamps& times,
+    void saveScriptKeyframeAscii(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::ScriptMessage& sm,
         std::ofstream& file)
     {
@@ -381,7 +379,7 @@ namespace {
     }
 
     void saveSingleKeyframeCamera(openspace::datamessagestructures::CameraKeyframe& kf,
-        openspace::interaction::SessionRecording::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
+        openspace::interaction::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
         std::ofstream& file,
         unsigned char* buffer, bool addModelMatrixinAscii)
     {
@@ -403,7 +401,7 @@ namespace {
      * \param lineN Keyframe number in playback file where this keyframe resides
      * \return `true` if data read has no errors
      */
-    bool readCameraKeyframeBinary(openspace::interaction::SessionRecording::Timestamps& times,
+    bool readCameraKeyframeBinary(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::CameraKeyframe& kf,
         std::ifstream& file, int lineN)
     {
@@ -449,7 +447,7 @@ namespace {
      * \param lineN Line number in playback file where this keyframe resides
      * \return `true` if data read has no errors
      */
-    bool readCameraKeyframeAscii(openspace::interaction::SessionRecording::Timestamps& times,
+    bool readCameraKeyframeAscii(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::CameraKeyframe& kf,
         const std::string& currentParsingLine,
         int lineN)
@@ -470,7 +468,7 @@ namespace {
     }
 
     bool readSingleKeyframeCamera(openspace::datamessagestructures::CameraKeyframe& kf,
-        openspace::interaction::SessionRecording::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
+        openspace::interaction::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
         std::ifstream& file, std::string& inLine,
         const int lineNum)
     {
@@ -483,7 +481,7 @@ namespace {
     }
 
     void saveSingleKeyframeTime(openspace::datamessagestructures::TimeKeyframe& kf,
-        openspace::interaction::SessionRecording::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
+        openspace::interaction::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
         std::ofstream& file, unsigned char* buffer)
     {
         if (mode == openspace::interaction::SessionRecording::DataMode::Binary) {
@@ -504,7 +502,7 @@ namespace {
      * \param lineN Keyframe number in playback file where this keyframe resides
      * \return `true` if data read has no errors
      */
-    bool readTimeKeyframeBinary(openspace::interaction::SessionRecording::Timestamps& times,
+    bool readTimeKeyframeBinary(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::TimeKeyframe& kf,
         std::ifstream& file, int lineN)
     {
@@ -549,7 +547,7 @@ namespace {
      * \param lineN Line number in playback file where this keyframe resides
      * \return `true` if data read has no errors
      */
-    bool readTimeKeyframeAscii(openspace::interaction::SessionRecording::Timestamps& times,
+    bool readTimeKeyframeAscii(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::TimeKeyframe& kf,
         const std::string& currentParsingLine,
         int lineN)
@@ -571,7 +569,7 @@ namespace {
     }
 
     bool readSingleKeyframeTime(openspace::datamessagestructures::TimeKeyframe& kf,
-        openspace::interaction::SessionRecording::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
+        openspace::interaction::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
         std::ifstream& file, std::string& inLine,
         const int lineNum)
     {
@@ -614,7 +612,7 @@ namespace {
     }
 
     void saveSingleKeyframeScript(openspace::datamessagestructures::ScriptMessage& kf,
-        openspace::interaction::SessionRecording::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
+        openspace::interaction::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
         std::ofstream& file,
         unsigned char* buffer)
     {
@@ -637,7 +635,7 @@ namespace {
      * \param lineN Keyframe number in playback file where this keyframe resides
      * \return `true` if data read has no errors
      */
-    bool readScriptKeyframeBinary(openspace::interaction::SessionRecording::Timestamps& times,
+    bool readScriptKeyframeBinary(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::ScriptMessage& kf,
         std::ifstream& file, int lineN)
     {
@@ -684,7 +682,7 @@ namespace {
      * \param lineN Line number in playback file where this keyframe resides
      * \return `true` if data read has no errors
      */
-    bool readScriptKeyframeAscii(openspace::interaction::SessionRecording::Timestamps& times,
+    bool readScriptKeyframeAscii(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::ScriptMessage& kf,
         const std::string& currentParsingLine,
         int lineN)
@@ -706,7 +704,7 @@ namespace {
     }
 
     bool readSingleKeyframeScript(openspace::datamessagestructures::ScriptMessage& kf,
-        openspace::interaction::SessionRecording::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
+        openspace::interaction::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
         std::ifstream& file, std::string& inLine,
         const int lineNum)
     {
@@ -1026,7 +1024,6 @@ void SessionRecording::startRecording(const std::string& fn) {
 
     _state = SessionState::Recording;
     _playbackActive_camera = false;
-    _playbackActive_time = false;
     _playbackActive_script = false;
     _propertyBaselinesSaved.clear();
     _keyframesSavePropertiesBaseline_scripts.clear();
@@ -1304,9 +1301,6 @@ void SessionRecording::initializePlayback_time(double now) {
 void SessionRecording::initializePlayback_modeFlags() {
     _playbackActive_camera = true;
     _playbackActive_script = true;
-    if (UsingTimeKeyframes) {
-        _playbackActive_time = true;
-    }
     _hasHitEndOfCameraKeyframes = false;
 }
 
@@ -1385,16 +1379,12 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
         _playbackActive_camera = false;
         LINFO("Playback finished signal: camera");
     }
-    else if (type == RecordedType::Time) {
-        _playbackActive_time = false;
-        LINFO("Playback finished signal: time");
-    }
     else if (type == RecordedType::Script) {
         _playbackActive_script = false;
         LINFO("Playback finished signal: script");
     }
 
-    if (!_playbackActive_camera && !_playbackActive_time && !_playbackActive_script) {
+    if (!_playbackActive_camera && !_playbackActive_script) {
         if (_playbackLoopMode) {
             // Loop back to the beginning to replay
             _saveRenderingDuringPlayback = false;
@@ -1509,7 +1499,7 @@ bool SessionRecording::hasCameraChangedFromPrev(
     return hasChanged;
 }
 
-SessionRecording::Timestamps SessionRecording::generateCurrentTimestamp3(
+Timestamps SessionRecording::generateCurrentTimestamp3(
                                                                 double keyframeTime) const
 {
     return {
@@ -1533,15 +1523,6 @@ void SessionRecording::saveCameraKeyframeToTimeline() {
     Timestamps times = generateCurrentTimestamp3(kf._timestamp);
     interaction::KeyframeNavigator::CameraPose pbFrame(std::move(kf));
     addKeyframe(std::move(times), std::move(pbFrame), _recordingEntryNum++);
-}
-
-void SessionRecording::saveTimeKeyframeToTimeline() {
-    // Create a time keyframe, then call to populate it with current time props
-    const datamessagestructures::TimeKeyframe kf =
-        datamessagestructures::generateTimeKeyframe();
-
-    Timestamps times = generateCurrentTimestamp3(kf._timestamp);
-    addKeyframe(std::move(times), kf, _recordingEntryNum++);
 }
 
 void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
@@ -1605,9 +1586,6 @@ void SessionRecording::preSynchronization() {
 
     if (_state == SessionState::Recording) {
         saveCameraKeyframeToTimeline();
-        if (UsingTimeKeyframes) {
-            saveTimeKeyframeToTimeline();
-        }
     }
     else if (isPlayingBack()) {
         moveAheadInTime();
@@ -2130,9 +2108,6 @@ void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime)
 
         if (++_idxTimeline_nonCamera >= _timeline.size()) {
             _idxTimeline_nonCamera--;
-            if (_playbackActive_time) {
-                signalPlaybackFinishedForComponent(RecordedType::Time);
-            }
             if (_playbackActive_script) {
                 signalPlaybackFinishedForComponent(RecordedType::Script);
             }
@@ -2161,8 +2136,7 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
 }
 
 bool SessionRecording::isTimeToHandleNextNonCameraKeyframe(double currTime) {
-    const bool nonCameraPlaybackActive = (_playbackActive_time || _playbackActive_script);
-    return (currTime > getNextTimestamp()) && nonCameraPlaybackActive;
+    return (currTime > getNextTimestamp()) && _playbackActive_script;
 }
 
 bool SessionRecording::findNextFutureCameraIndex(double currTime) {
@@ -2352,7 +2326,7 @@ double SessionRecording::getPrevTimestamp() {
     }
 }
 
-SessionRecording::RecordedType SessionRecording::getNextKeyframeType() {
+RecordedType SessionRecording::getNextKeyframeType() {
     if (_timeline.empty()) {
         return RecordedType::Invalid;
     }
@@ -2364,7 +2338,7 @@ SessionRecording::RecordedType SessionRecording::getNextKeyframeType() {
     }
 }
 
-SessionRecording::RecordedType SessionRecording::getPrevKeyframeType() {
+RecordedType SessionRecording::getPrevKeyframeType() {
     if (_timeline.empty()) {
         return RecordedType::Invalid;
     }
@@ -2761,7 +2735,7 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
 
 
 void convertToAscii(std::filesystem::path inFilePath, std::filesystem::path outFilePath) {
-    SessionRecording::Timestamps times;
+    Timestamps times;
     datamessagestructures::CameraKeyframe ckf;
     datamessagestructures::TimeKeyframe tkf;
     datamessagestructures::ScriptMessage skf;
@@ -2829,7 +2803,7 @@ void convertToAscii(std::filesystem::path inFilePath, std::filesystem::path outF
 
 void convertToBinary(std::filesystem::path inFilePath, std::filesystem::path outFilePath)
 {
-    SessionRecording::Timestamps times;
+    Timestamps times;
     datamessagestructures::CameraKeyframe ckf;
     datamessagestructures::TimeKeyframe tkf;
     datamessagestructures::ScriptMessage skf;

@@ -39,6 +39,24 @@ struct ConversionError : public ghoul::RuntimeError {
     explicit ConversionError(std::string msg);
 };
 
+struct Timestamps {
+    double timeOs;
+    double timeRec;
+    double timeSim;
+};
+
+enum class RecordedType {
+    Camera = 0,
+    Time,
+    Script,
+    Invalid
+};
+struct TimelineEntry {
+    RecordedType keyframeType;
+    unsigned int idxIntoKeyframeTypeArray;
+    Timestamps t3stamps;
+};
+
 class SessionRecording : public properties::PropertyOwner {
 public:
     enum class DataMode {
@@ -52,12 +70,6 @@ public:
         Recording,
         Playback,
         PlaybackPaused
-    };
-
-    struct Timestamps {
-        double timeOs;
-        double timeRec;
-        double timeSim;
     };
 
     using CallbackHandle = int;
@@ -234,12 +246,6 @@ public:
     void saveCameraKeyframeToTimeline();
 
     /**
-     * Used to trigger a save of the current timing states. The data will be saved to the
-     * recording file only if a recording is currently in progress.
-     */
-    void saveTimeKeyframeToTimeline();
-
-    /**
      * Used to trigger a save of a script to the recording file, but only if a recording
      * is currently in progress.
      *
@@ -354,17 +360,7 @@ protected:
     properties::BoolProperty _ignoreRecordedScale;
     properties::BoolProperty _addModelMatrixinAscii;
 
-    enum class RecordedType {
-        Camera = 0,
-        Time,
-        Script,
-        Invalid
-    };
-    struct TimelineEntry {
-        RecordedType keyframeType;
-        unsigned int idxIntoKeyframeTypeArray;
-        Timestamps t3stamps;
-    };
+
     double _timestampRecordStarted = 0.0;
     Timestamps _timestamps3RecordStarted{ 0.0, 0.0, 0.0 };
     double _timestampPlaybackStarted_application = 0.0;
