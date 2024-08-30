@@ -364,8 +364,6 @@ protected:
         datamessagestructures::TimeKeyframe keyframe);
     void addKeyframe(Timestamps t3stamps,
         std::string scriptToQueue);
-    void addKeyframeToTimeline(std::vector<TimelineEntry>& timeline, RecordedType type,
-            size_t indexIntoTypeKeyframes, Timestamps t3stamps);
 
     void initializePlayback_time(double now);
     void initializePlayback_modeFlags();
@@ -387,12 +385,11 @@ protected:
     bool convertEntries(std::string& inFilename, std::stringstream& inStream,
         DataMode mode, int lineNum, std::ofstream& outFile);
     virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
+        std::string& inputLine, std::ofstream& outFile);
     virtual bool convertTimeChange(std::stringstream& inStream, DataMode mode,
-        int lineNum, std::string& inputLine, std::ofstream& outFile,
-        unsigned char* buffer);
+        int lineNum, std::string& inputLine, std::ofstream& outFile);
     virtual bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer);
+        std::string& inputLine, std::ofstream& outFile);
     void populateListofLoadedSceneGraphNodes();
 
     void checkIfScriptUsesScenegraphNode(std::string s) const;
@@ -420,13 +417,6 @@ protected:
     double _saveRenderingCurrentApplicationTime_interpolation = 0.0;
     bool _saveRendering_isFirstFrame = true;
 
-    static const size_t keyframeHeaderSize_bytes = 33;
-    static const size_t saveBufferCameraSize_min = 82;
-    static const size_t saveBufferStringSize_max = 2000;
-    static const size_t _saveBufferMaxSize_bytes = keyframeHeaderSize_bytes +
-        +saveBufferCameraSize_min + saveBufferStringSize_max;
-    unsigned char _keyframeBuffer[_saveBufferMaxSize_bytes];
-
     bool _cleanupNeededRecording = false;
     bool _cleanupNeededPlayback = false;
 
@@ -442,7 +432,6 @@ protected:
     std::vector<std::string> _loadedNodes;
 
     unsigned int _idxTimeline_nonCamera = 0;
-    unsigned int _idxTime = 0;
     unsigned int _idxScript = 0;
 
     unsigned int _idxTimeline_cameraPtrNext = 0;
@@ -495,7 +484,8 @@ public:
             size_t strLen;
             //Read string length from file
             in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
-            if (strLen > saveBufferStringSize_max) {
+            // 2000 = Previous max length for scripts
+            if (strLen > 2000) {
                 throw ConversionError("Invalid script size for conversion read");
             }
             //Read back full string
@@ -510,7 +500,7 @@ public:
 
 protected:
     bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile, unsigned char* buffer) override;
+        std::string& inputLine, std::ofstream& outFile) override;
 };
 
 
