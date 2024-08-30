@@ -80,7 +80,6 @@ namespace {
     }
     global::sessionRecording->startPlayback(
         file,
-        true,
         loop,
         shouldWaitForTiles
     );

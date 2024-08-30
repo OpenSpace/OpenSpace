@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/navigation/keyframenavigator.h>
+#include <openspace/network/messagestructures.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
 #include <vector>
@@ -48,9 +49,9 @@ struct Timestamps {
 enum class RecordedType {
     Camera = 0,
     Time,
-    Script,
-    Invalid
+    Script
 };
+
 struct TimelineEntry {
     RecordedType keyframeType;
     unsigned int idxIntoKeyframeTypeArray;
@@ -77,12 +78,6 @@ public:
 
     SessionRecording();
     ~SessionRecording() override = default;
-
-    /**
-     * Used to de-initialize the session recording feature. Any recording or playback
-     * in progress will be stopped, files closed, and keyframes in memory deleted.
-     */
-    void deinitialize();
 
     /**
      * This is called with every rendered frame. If in recording state, the camera state
@@ -171,9 +166,6 @@ public:
      *                 relative to the base recordings directory specified in the config
      *                 file by the RECORDINGS variable
      * \param timeMode Which of the 3 time modes to use for time reference during
-     * \param forceSimTimeAtStart If true simulation time is forced to that of playback
-     *        playback: recorded time, application time, or simulation time. See the
-     *        LuaLibrary entry for SessionRecording for details on these time modes
      * \param loop If true then the file will playback in loop mode, continuously looping
      *        back to the beginning until it is manually stopped
      * \param shouldWaitForFinishedTiles If true, the playback will wait for tiles to be
@@ -181,8 +173,7 @@ public:
      *        `enableTakeScreenShotDuringPlayback` was called before. Otherwise this value
      *        will be ignored
      */
-    void startPlayback(std::string& filename,
-        bool forceSimTimeAtStart, bool loop, bool shouldWaitForFinishedTiles);
+    void startPlayback(std::string& filename, bool loop, bool shouldWaitForFinishedTiles);
 
     /**
      * Used to stop a playback in progress. If open, the playback file will be closed, and
@@ -238,13 +229,14 @@ public:
      */
     SessionState state() const;
 
+    private:
     /**
      * Used to trigger a save of the camera states (position, rotation, focus node,
      * whether it is following the rotation of a node, and timestamp). The data will be
      * saved to the recording file only if a recording is currently in progress.
      */
     void saveCameraKeyframeToTimeline();
-
+    public:
     /**
      * Used to trigger a save of a script to the recording file, but only if a recording
      * is currently in progress.
@@ -307,16 +299,6 @@ public:
     std::string convertFile(std::string filename, int depth = 0);
 
     /**
-     * Converts file format of a session recording file to the current format version
-     * (will determine the file format conversion to convert from based on the file's
-     * header version number). Accepts a relative path (currently from task runner dir)
-     * rather than a path assumed to be relative to `${RECORDINGS}`.
-     *
-     * \param filenameRelative name of the file to convert
-     */
-    void convertFileRelativePath(std::string filenameRelative);
-
-    /**
      * Goes to legacy session recording inherited class, and calls its #convertFile
      * method, and then returns the resulting conversion filename.
      *
@@ -361,7 +343,6 @@ protected:
     properties::BoolProperty _addModelMatrixinAscii;
 
 
-    double _timestampRecordStarted = 0.0;
     Timestamps _timestamps3RecordStarted{ 0.0, 0.0, 0.0 };
     double _timestampPlaybackStarted_application = 0.0;
     double _timestampPlaybackStarted_simulation = 0.0;
@@ -379,19 +360,18 @@ protected:
     bool findFirstCameraKeyframeInTimeline();
     Timestamps generateCurrentTimestamp3(double keyframeTime) const;
 
-    bool addKeyframe(Timestamps t3stamps,
-        interaction::KeyframeNavigator::CameraPose keyframe, int lineNum);
-    bool addKeyframe(Timestamps t3stamps,
-        datamessagestructures::TimeKeyframe keyframe, int lineNum);
-    bool addKeyframe(Timestamps t3stamps,
-        std::string scriptToQueue, int lineNum);
-    bool addKeyframeToTimeline(std::vector<TimelineEntry>& timeline, RecordedType type,
-            size_t indexIntoTypeKeyframes, Timestamps t3stamps, int lineNum);
+    void addKeyframe(Timestamps t3stamps,
+        interaction::KeyframeNavigator::CameraPose keyframe);
+    void addKeyframe(Timestamps t3stamps,
+        datamessagestructures::TimeKeyframe keyframe);
+    void addKeyframe(Timestamps t3stamps,
+        std::string scriptToQueue);
+    void addKeyframeToTimeline(std::vector<TimelineEntry>& timeline, RecordedType type,
+            size_t indexIntoTypeKeyframes, Timestamps t3stamps);
 
     void initializePlayback_time(double now);
     void initializePlayback_modeFlags();
     bool initializePlayback_timeline();
-    void initializePlayback_triggerStart();
     void moveAheadInTime();
     void lookForNonCameraKeyframesThatHaveComeDue(double currTime);
     void updateCameraWithOrWithoutNewKeyframes(double currTime);
@@ -401,13 +381,9 @@ protected:
     bool processCameraKeyframe(double now);
     bool processScriptKeyframe();
     void saveScriptKeyframeToPropertiesBaseline(std::string script);
-    unsigned int findIndexOfLastCameraKeyframeInTimeline();
     bool doesTimelineEntryContainCamera(unsigned int index) const;
 
-    RecordedType getNextKeyframeType();
-    RecordedType getPrevKeyframeType();
     double getNextTimestamp();
-    double getPrevTimestamp();
     void cleanUpPlayback();
     void cleanUpRecording();
     void cleanUpTimelinesAndKeyframes();
@@ -433,8 +409,6 @@ protected:
     std::ofstream _recordFile;
     int _playbackLineNum = 1;
     int _recordingEntryNum = 1;
-    const KeyframeTimeRef _playbackTimeReferenceMode =
-        KeyframeTimeRef::Relative_recordedStart;
     datamessagestructures::CameraKeyframe _prevRecordedCameraKeyframe;
     bool _playbackActive_camera = false;
     bool _playbackActive_time = false;
@@ -442,7 +416,6 @@ protected:
     bool _hasHitEndOfCameraKeyframes = false;
     bool _playbackPausedWithinDeltaTimePause = false;
     bool _playbackLoopMode = false;
-    bool _playbackForceSimTimeAtStart = false;
     double _playbackPauseOffset = 0.0;
     double _previousTime = 0.0;
 
@@ -450,7 +423,6 @@ protected:
     double _saveRenderingDeltaTime = 1.0 / 30.0;
     double _saveRenderingCurrentRecordedTime = 0.0;
     bool _shouldWaitForFinishLoadingWhenPlayback = false;
-    std::chrono::steady_clock::duration _saveRenderingDeltaTime_interpolation_usec;
     std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
     double _saveRenderingCurrentApplicationTime_interpolation = 0.0;
     bool _saveRendering_isFirstFrame = true;
@@ -488,9 +460,6 @@ protected:
 
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
-
-    DataMode _conversionDataMode = DataMode::Binary;
-    int _conversionLineNum = 1;
 };
 
 // Instructions for bumping the file format version with new changes:

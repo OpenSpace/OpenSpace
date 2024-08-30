@@ -852,7 +852,8 @@ void OpenSpaceEngine::deinitialize() {
             global::renderEngine->scene()->camera()->syncables()
         );
     }
-    global::sessionRecording->deinitialize();
+    global::sessionRecording->stopRecording();
+    global::sessionRecording->stopPlayback();
     global::versionChecker->cancel();
 
     _assetManager = nullptr;

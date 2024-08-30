@@ -90,29 +90,6 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
-    const std::vector<std::string> PropertyBaselineRejects {
-    "NavigationHandler.OrbitalNavigator.Anchor",
-    "NavigationHandler.OrbitalNavigator.Aim",
-    "NavigationHandler.OrbitalNavigator.RetargetAnchor",
-    "NavigationHandler.OrbitalNavigator.RetargetAim"
-    };
-
-    // A script that begins with an exact match of any of the strings contained in
-    // ScriptRejects will not be recorded
-    const std::vector<std::string> ScriptRejects {
-        "openspace.sessionRecording.enableTakeScreenShotDuringPlayback",
-        "openspace.sessionRecording.startPlayback",
-        "openspace.sessionRecording.stopPlayback",
-        "openspace.sessionRecording.startRecording",
-        "openspace.sessionRecording.stopRecording",
-        "openspace.scriptScheduler.clear"
-    };
-    const std::vector<std::string> NavScriptsUsingNodes {
-        "RetargetAnchor",
-        "Anchor",
-        "Aim"
-    };
-
     const std::string FileHeaderTitle = "OpenSpace_record/playback";
     const std::string HeaderCameraAscii = "camera";
     const std::string HeaderTimeAscii = "time";
@@ -135,15 +112,8 @@ namespace {
     static const size_t _saveBufferMaxSize_bytes = keyframeHeaderSize_bytes +
         +saveBufferCameraSize_min + saveBufferStringSize_max;
 
-    const std::string scriptReturnPrefix = "return ";
+    constexpr std::string_view scriptReturnPrefix = "return ";
 
-
-    // Any script snippet included in this vector will be trimmed from any script
-    // from the script manager, before it is recorded in the session recording file.
-    // The remainder of the script will be retained.
-    const std::vector<std::string> ScriptsToBeTrimmed {
-        "openspace.sessionRecording.togglePlaybackPause"
-    };
 
     /**
      * Struct for storing a script substring that, if found in a saved script, will be
@@ -784,11 +754,6 @@ SessionRecording::SessionRecording()
     addProperty(_addModelMatrixinAscii);
 }
 
-void SessionRecording::deinitialize() {
-    stopRecording();
-    stopPlayback();
-}
-
 void SessionRecording::setRecordDataFormat(DataMode dataMode) {
     _recordingDataMode = dataMode;
 }
@@ -879,7 +844,6 @@ void SessionRecording::startRecording(const std::string& fn) {
     _propertyBaselinesSaved.clear();
     _keyframesSavePropertiesBaseline_scripts.clear();
     _keyframesSavePropertiesBaseline_timeline.clear();
-    _recordingEntryNum = 1;
 
     _recordFile << FileHeaderTitle;
     _recordFile.write(FileHeaderVersion, FileHeaderVersionLength);
@@ -891,12 +855,10 @@ void SessionRecording::startRecording(const std::string& fn) {
     }
     _recordFile << '\n';
 
-    _timestampRecordStarted = global::windowDelegate->applicationTime();
-
     // Record the current delta time as the first property to save in the file.
     // This needs to be saved as a baseline whether or not it changes during recording
     _timestamps3RecordStarted = {
-        .timeOs = _timestampRecordStarted,
+        .timeOs = global::windowDelegate->applicationTime(),
         .timeRec = 0.0,
         .timeSim = global::timeManager->time().j2000Seconds()
     };
@@ -1003,7 +965,6 @@ void SessionRecording::stopRecording() {
 }
 
 void SessionRecording::startPlayback(std::string& filename,
-                                     bool forceSimTimeAtStart,
                                      bool loop, bool shouldWaitForFinishedTiles)
 {
     std::string absFilename;
@@ -1092,12 +1053,10 @@ void SessionRecording::startPlayback(std::string& filename,
         ));
     }
     _saveRendering_isFirstFrame = true;
-    // Set time reference mode
-    _playbackForceSimTimeAtStart = forceSimTimeAtStart;
     double now = global::windowDelegate->applicationTime();
     initializePlayback_time(now);
 
-    global::scriptScheduler->setTimeReferenceMode(_playbackTimeReferenceMode);
+    global::scriptScheduler->setTimeReferenceMode(KeyframeTimeRef::Relative_recordedStart);
     _loadedNodes.clear();
     populateListofLoadedSceneGraphNodes();
 
@@ -1122,11 +1081,9 @@ void SessionRecording::startPlayback(std::string& filename,
     }
 
     LINFO(std::format(
-        "Playback session started: ({:8.3f},0.0,{:13.3f}) with {}/{}/{} entries, "
-        "forceTime={}",
+        "Playback session started: ({:8.3f},0.0,{:13.3f}) with {}/{}/{} entries",
         now, _timestampPlaybackStarted_simulation, _keyframesCamera.size(),
-        _keyframesTime.size(), _keyframesScript.size(),
-        (_playbackForceSimTimeAtStart ? 1 : 0)
+        _keyframesTime.size(), _keyframesScript.size()
     ));
 
     global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
@@ -1146,7 +1103,7 @@ void SessionRecording::initializePlayback_time(double now) {
         global::windowDelegate->applicationTime();
     _playbackPauseOffset = 0.0;
     global::navigationHandler->keyframeNavigator().setTimeReferenceMode(
-        _playbackTimeReferenceMode, now);
+        KeyframeTimeRef::Relative_recordedStart, now);
 }
 
 void SessionRecording::initializePlayback_modeFlags() {
@@ -1159,11 +1116,11 @@ bool SessionRecording::initializePlayback_timeline() {
     if (!findFirstCameraKeyframeInTimeline()) {
         return false;
     }
-    if (_playbackForceSimTimeAtStart) {
-        const Timestamps times = _timeline[_idxTimeline_cameraFirstInTimeline].t3stamps;
-        global::timeManager->setTimeNextFrame(Time(times.timeSim));
-        _saveRenderingCurrentRecordedTime = times.timeRec;
-    }
+
+    const Timestamps times = _timeline[_idxTimeline_cameraFirstInTimeline].t3stamps;
+    global::timeManager->setTimeNextFrame(Time(times.timeSim));
+    _saveRenderingCurrentRecordedTime = times.timeRec;
+
     _idxTimeline_nonCamera = 0;
     _idxTime = 0;
     _idxScript = 0;
@@ -1260,8 +1217,6 @@ void SessionRecording::handlePlaybackEnd() {
 void SessionRecording::enableTakeScreenShotDuringPlayback(int fps) {
     _saveRenderingDuringPlayback = true;
     _saveRenderingDeltaTime = 1.0 / fps;
-    _saveRenderingDeltaTime_interpolation_usec =
-        std::chrono::microseconds(static_cast<long>(_saveRenderingDeltaTime * 1000000));
 }
 
 void SessionRecording::disableTakeScreenShotDuringPlayback() {
@@ -1323,7 +1278,6 @@ void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _saveRendering_isFirstFrame = true;
     _playbackPauseOffset = 0.0;
     _playbackLoopMode = false;
-    _playbackForceSimTimeAtStart = false;
 }
 
 bool SessionRecording::hasCameraChangedFromPrev(
@@ -1346,12 +1300,10 @@ bool SessionRecording::hasCameraChangedFromPrev(
     return hasChanged;
 }
 
-Timestamps SessionRecording::generateCurrentTimestamp3(
-                                                                double keyframeTime) const
-{
+Timestamps SessionRecording::generateCurrentTimestamp3(double keyframeTime) const {
     return {
         keyframeTime,
-        keyframeTime - _timestampRecordStarted,
+        keyframeTime - _timestamps3RecordStarted.timeOs,
         global::timeManager->time().j2000Seconds()
     };
 }
@@ -1369,21 +1321,34 @@ void SessionRecording::saveCameraKeyframeToTimeline() {
 
     Timestamps times = generateCurrentTimestamp3(kf._timestamp);
     interaction::KeyframeNavigator::CameraPose pbFrame(std::move(kf));
-    addKeyframe(std::move(times), std::move(pbFrame), _recordingEntryNum++);
+    addKeyframe(std::move(times), std::move(pbFrame));
 }
 
 void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
+    constexpr std::array<std::string_view, 6> ScriptRejects = {
+        "openspace.sessionRecording.enableTakeScreenShotDuringPlayback",
+        "openspace.sessionRecording.startPlayback",
+        "openspace.sessionRecording.stopPlayback",
+        "openspace.sessionRecording.startRecording",
+        "openspace.sessionRecording.stopRecording",
+        "openspace.scriptScheduler.clear"
+    };
+
+    constexpr std::array<std::string_view, 1> ScriptsToBeTrimmed = {
+        "openspace.sessionRecording.togglePlaybackPause"
+    };
+
     if (script.starts_with(scriptReturnPrefix)) {
         script = script.substr(scriptReturnPrefix.length());
     }
-    for (const std::string& reject : ScriptRejects) {
+    for (std::string_view reject : ScriptRejects) {
         if (script.starts_with(reject)) {
             return;
         }
     }
 
     // Trim commands from script if found
-    for (const std::string& trimSnippet : ScriptsToBeTrimmed) {
+    for (std::string_view trimSnippet : ScriptsToBeTrimmed) {
         auto findIdx = script.find(trimSnippet);
         if (findIdx != std::string::npos) {
             auto findClosingParens = script.find_first_of(')', findIdx);
@@ -1404,7 +1369,7 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
         = datamessagestructures::generateScriptMessage(script);
 
     Timestamps times = generateCurrentTimestamp3(sm._timestamp);
-    addKeyframe(std::move(times), sm._script, _playbackLineNum);
+    addKeyframe(std::move(times), sm._script);
 }
 
 void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script) {
@@ -1418,14 +1383,20 @@ void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script
         _keyframesSavePropertiesBaseline_timeline,
         RecordedType::Script,
         indexIntoScriptKeyframesFromMainTimeline,
-        times,
-        0
+        times
     );
 }
 
 void SessionRecording::savePropertyBaseline(properties::Property& prop) {
+    constexpr std::array<std::string_view, 4> PropertyBaselineRejects{
+        "NavigationHandler.OrbitalNavigator.Anchor",
+        "NavigationHandler.OrbitalNavigator.Aim",
+        "NavigationHandler.OrbitalNavigator.RetargetAnchor",
+        "NavigationHandler.OrbitalNavigator.RetargetAim"
+    };
+
     const std::string propIdentifier = prop.uri();
-    for (const std::string& reject : PropertyBaselineRejects) {
+    for (std::string_view reject : PropertyBaselineRejects) {
         if (propIdentifier.starts_with(reject)) {
             return;
         }
@@ -1481,7 +1452,6 @@ void SessionRecording::render() {
     if (!(_renderPlaybackInformation && isPlayingBack())) {
         return;
     }
-
 
     constexpr std::string_view FontName = "Mono";
     constexpr float FontSizeFrameinfo = 32.f;
@@ -1626,7 +1596,7 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
         return _saveRenderingDeltaTime;
     }
     else {
-        return 0;
+        return 0.0;
     }
 }
 
@@ -1652,13 +1622,9 @@ bool SessionRecording::playbackCamera() {
         _playbackLineNum
     );
 
-    const interaction::KeyframeNavigator::CameraPose pbFrame(std::move(kf));
     if (success) {
-        success = addKeyframe(
-            {times.timeOs, times.timeRec, times.timeSim},
-            pbFrame,
-            _playbackLineNum
-        );
+        const interaction::KeyframeNavigator::CameraPose pbFrame(std::move(kf));
+        addKeyframe(times, pbFrame);
     }
     return success;
 }
@@ -1706,11 +1672,7 @@ bool SessionRecording::playbackTimeChange() {
     kf._timestamp = _timestampPlaybackStarted_application + times.timeRec;
     kf._time = kf._timestamp + _timestampApplicationStarted_simulation;
     if (success) {
-        success = addKeyframe(
-            {times.timeOs, times.timeRec, times.timeSim},
-            kf,
-            _playbackLineNum
-        );
+        addKeyframe(times, kf);
     }
     return success;
 }
@@ -1758,11 +1720,7 @@ bool SessionRecording::playbackScript() {
     checkIfScriptUsesScenegraphNode(kf._script);
 
     if (success) {
-        success = addKeyframe(
-            {times.timeOs, times.timeRec, times.timeSim},
-            kf._script,
-            _playbackLineNum
-        );
+        addKeyframe(times, kf._script);
     }
     return success;
 }
@@ -1800,10 +1758,16 @@ void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
     };
 
     auto checkForScenegraphNodeAccessNav = [](std::string& navTerm) {
+        constexpr std::array<std::string_view, 3> NavScriptsUsingNodes = {
+            "RetargetAnchor",
+            "Anchor",
+            "Aim"
+        };
+
         const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
         const size_t posNav = navTerm.find(nextTerm);
         if (posNav != std::string::npos) {
-            for (const std::string& accessName : NavScriptsUsingNodes) {
+            for (std::string_view accessName : NavScriptsUsingNodes) {
                 if (navTerm.find(accessName) != std::string::npos) {
                     return true;
                 }
@@ -1813,8 +1777,8 @@ void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
     };
 
     auto checkForScenegraphNodeAccessScene = [](const std::string & s) -> bool {
-        const std::string scene = "Scene.";
-        return (s.find(scene) != std::string::npos);
+        constexpr std::string_view scene = "Scene.";
+        return s.find(scene) != std::string::npos;
     };
 
     auto extractScenegraphNodeFromScene = [](const std::string & s) -> std::string {
@@ -1852,7 +1816,7 @@ void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
                 }
             }
         }
-        else if (checkForScenegraphNodeAccessScene(subjectOfSetProp)) {
+        else if (subjectOfSetProp.find("Scene.") != std::string::npos) {
             std::string found = extractScenegraphNodeFromScene(subjectOfSetProp);
             if (!found.empty()) {
                 const std::vector<properties::Property*> matchHits =
@@ -1905,82 +1869,59 @@ bool SessionRecording::convertScript(std::stringstream& inStream, DataMode mode,
         lineNum
     );
     if (success) {
-        saveSingleKeyframeScript(
-            kf,
-            times,
-            mode,
-            outFile,
-            buffer
-        );
+        saveSingleKeyframeScript(kf, times, mode, outFile, buffer);
     }
     return success;
 }
 
-bool SessionRecording::addKeyframeToTimeline(std::vector<TimelineEntry>& timeline,
+void SessionRecording::addKeyframeToTimeline(std::vector<TimelineEntry>& timeline,
                                              RecordedType type,
                                              size_t indexIntoTypeKeyframes,
-                                             Timestamps t3stamps, int lineNum)
+                                             Timestamps t3stamps)
 {
-    try {
-        timeline.push_back({
-            type,
-            static_cast<unsigned int>(indexIntoTypeKeyframes),
-            t3stamps
-        });
-    }
-    catch(...) {
-        LERROR(std::format(
-            "Timeline memory allocation error trying to add keyframe {}. The playback "
-            "file may be too large for system memory",
-            lineNum - 1
-        ));
-        return false;
-    }
-    return true;
+    timeline.push_back({
+        type,
+        static_cast<unsigned int>(indexIntoTypeKeyframes),
+        t3stamps
+    });
 }
 
-bool SessionRecording::addKeyframe(Timestamps t3stamps,
-                                   interaction::KeyframeNavigator::CameraPose keyframe,
-                                   int lineNum)
+void SessionRecording::addKeyframe(Timestamps t3stamps,
+                                   interaction::KeyframeNavigator::CameraPose keyframe)
 {
     const size_t indexIntoCameraKeyframesFromMainTimeline = _keyframesCamera.size();
     _keyframesCamera.push_back(std::move(keyframe));
-    return addKeyframeToTimeline(
+    addKeyframeToTimeline(
         _timeline,
         RecordedType::Camera,
         indexIntoCameraKeyframesFromMainTimeline,
-        t3stamps,
-        lineNum
+        t3stamps
     );
 }
 
-bool SessionRecording::addKeyframe(Timestamps t3stamps,
-                                   datamessagestructures::TimeKeyframe keyframe,
-                                   int lineNum)
+void SessionRecording::addKeyframe(Timestamps t3stamps,
+                                   datamessagestructures::TimeKeyframe keyframe)
 {
     const size_t indexIntoTimeKeyframesFromMainTimeline = _keyframesTime.size();
     _keyframesTime.push_back(std::move(keyframe));
-    return addKeyframeToTimeline(
+    addKeyframeToTimeline(
         _timeline,
         RecordedType::Time,
         indexIntoTimeKeyframesFromMainTimeline,
-        t3stamps,
-        lineNum
+        t3stamps
     );
 }
 
-bool SessionRecording::addKeyframe(Timestamps t3stamps,
-                                   std::string scriptToQueue,
-                                   int lineNum)
+void SessionRecording::addKeyframe(Timestamps t3stamps,
+                                   std::string scriptToQueue)
 {
     const size_t indexIntoScriptKeyframesFromMainTimeline = _keyframesScript.size();
     _keyframesScript.push_back(std::move(scriptToQueue));
-    return addKeyframeToTimeline(
+    addKeyframeToTimeline(
         _timeline,
         RecordedType::Script,
         indexIntoScriptKeyframesFromMainTimeline,
-        t3stamps,
-        lineNum
+        t3stamps
     );
 }
 
@@ -2012,7 +1953,7 @@ void SessionRecording::moveAheadInTime() {
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
             if (!playbackPaused) {
                 _saveRenderingCurrentRecordedTime_interpolation +=
-                    _saveRenderingDeltaTime_interpolation_usec;
+                    std::chrono::microseconds(static_cast<long>(_saveRenderingDeltaTime * 1000000));
                 _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
                 _saveRenderingCurrentApplicationTime_interpolation +=
                     _saveRenderingDeltaTime;
@@ -2112,7 +2053,20 @@ bool SessionRecording::doesTimelineEntryContainCamera(unsigned int index) const 
 }
 
 bool SessionRecording::processNextNonCameraKeyframeAheadInTime() {
-    switch (getNextKeyframeType()) {
+    if (_timeline.empty()) {
+        return false;
+    }
+
+    RecordedType type;
+
+    if (_idxTimeline_nonCamera < _timeline.size()) {
+        type = _timeline[_idxTimeline_nonCamera].keyframeType;
+    }
+    else {
+        type = _timeline.back().keyframeType;
+    }
+
+    switch (type) {
         case RecordedType::Camera:
             // Just return true since this function no longer handles camera keyframes
             return true;
@@ -2134,18 +2088,6 @@ bool SessionRecording::processNextNonCameraKeyframeAheadInTime() {
             ));
             return false;
     }
-}
-
-//void SessionRecording::moveBackInTime() { } //for future use
-
-unsigned int SessionRecording::findIndexOfLastCameraKeyframeInTimeline() {
-    unsigned int i = static_cast<unsigned int>(_timeline.size()) - 1;
-    for (; i > 0; i--) {
-        if (_timeline[i].keyframeType == RecordedType::Camera) {
-            break;
-        }
-    }
-    return i;
 }
 
 bool SessionRecording::processCameraKeyframe(double now) {
@@ -2233,50 +2175,6 @@ double SessionRecording::getNextTimestamp() {
     }
 }
 
-double SessionRecording::getPrevTimestamp() {
-    if (_timeline.empty()) {
-        return 0.0;
-    }
-    else if (_idxTimeline_nonCamera == 0) {
-        return _timeline.front().t3stamps.timeRec;
-    }
-    else if (_idxTimeline_nonCamera < _timeline.size()) {
-        return _timeline[_idxTimeline_nonCamera - 1].t3stamps.timeRec;
-    }
-    else {
-        return _timeline.back().t3stamps.timeRec;
-    }
-}
-
-RecordedType SessionRecording::getNextKeyframeType() {
-    if (_timeline.empty()) {
-        return RecordedType::Invalid;
-    }
-    else if (_idxTimeline_nonCamera < _timeline.size()) {
-        return _timeline[_idxTimeline_nonCamera].keyframeType;
-    }
-    else {
-        return _timeline.back().keyframeType;
-    }
-}
-
-RecordedType SessionRecording::getPrevKeyframeType() {
-    if (_timeline.empty()) {
-        return RecordedType::Invalid;
-    }
-    else if (_idxTimeline_nonCamera < _timeline.size()) {
-        if (_idxTimeline_nonCamera > 0) {
-            return _timeline[_idxTimeline_nonCamera - 1].keyframeType;
-        }
-        else {
-            return _timeline.front().keyframeType;
-        }
-    }
-    else {
-        return _timeline.back().keyframeType;
-    }
-}
-
 SessionRecording::CallbackHandle SessionRecording::addStateChangeCallback(
                                                                    StateChangeCallback cb)
 {
@@ -2304,36 +2202,32 @@ void SessionRecording::removeStateChangeCallback(CallbackHandle handle) {
 
 std::vector<std::string> SessionRecording::playbackList() const {
     const std::filesystem::path path = absPath("${RECORDINGS}");
+    if (!std::filesystem::is_directory(path)) {
+        return std::vector<std::string>();
+    }
 
     std::vector<std::string> fileList;
-    if (std::filesystem::is_directory(path)) {
-        namespace fs = std::filesystem;
-        for (const fs::directory_entry& e : fs::directory_iterator(path)) {
-            if (!e.is_regular_file()) {
-                continue;
-            }
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::directory_iterator(path)) {
+        if (!e.is_regular_file()) {
+            continue;
+        }
 
-            // Remove path and keep only the filename
-            const std::string filename = e.path().filename().string();
+        // Remove path and keep only the filename
+        const std::string filename = e.path().filename().string();
 #ifdef WIN32
-            DWORD attributes = GetFileAttributes(e.path().string().c_str());
-            bool isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
+        DWORD attributes = GetFileAttributes(e.path().string().c_str());
+        bool isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
 #else
-            const bool isHidden = filename.find('.') == 0;
+        const bool isHidden = filename.find('.') == 0;
 #endif // WIN32
-            if (!isHidden) {
-                // Don't add hidden files
-                fileList.push_back(filename);
-            }
+        if (!isHidden) {
+            // Don't add hidden files
+            fileList.push_back(filename);
         }
     }
     std::sort(fileList.begin(), fileList.end());
     return fileList;
-}
-
-void SessionRecording::convertFileRelativePath(std::string filenameRelative) {
-    const std::filesystem::path path = absPath(std::move(filenameRelative));
-    convertFile(path.string());
 }
 
 std::string SessionRecording::convertFile(std::string filename, int depth) {
