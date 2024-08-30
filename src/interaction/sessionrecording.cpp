@@ -788,9 +788,7 @@ void SessionRecording::startRecording(const std::string& fn) {
     _state = SessionState::Recording;
     _playbackActive_camera = false;
     _playbackActive_script = false;
-    _propertyBaselinesSaved.clear();
-    _keyframesSavePropertiesBaseline_scripts.clear();
-    _keyframesSavePropertiesBaseline_timeline.clear();
+    _savePropertiesBaseline.clear();
 
     // Record the current delta time as the first property to save in the file.
     // This needs to be saved as a baseline whether or not it changes during recording
@@ -800,13 +798,12 @@ void SessionRecording::startRecording(const std::string& fn) {
         .timeSim = global::timeManager->time().j2000Seconds()
     };
 
-    saveScriptKeyframeToPropertiesBaseline(std::format(
-        "openspace.time.setPause({})",
-        global::timeManager->isPaused() ? "true" : "false"
-    ));
-    saveScriptKeyframeToPropertiesBaseline(std::format(
-        "openspace.time.setDeltaTime({})", global::timeManager->targetDeltaTime()
-    ));
+    _savePropertiesBaseline["_time"] = std::format(
+        "openspace.time.setPause({});openspace.time.setDeltaTime({});",
+        global::timeManager->isPaused() ? "true" : "false",
+        global::timeManager->targetDeltaTime()
+    );
+
     LINFO("Session recording started");
 }
 
@@ -851,12 +848,8 @@ void SessionRecording::stopRecording() {
 
     // Add all property baseline scripts to the beginning of the recording file
     datamessagestructures::ScriptMessage smTmp;
-    for (TimelineEntry& initPropScripts : _keyframesSavePropertiesBaseline_timeline) {
-        if (initPropScripts.keyframeType != RecordedType::Script) {
-            continue;
-        }
-
-        smTmp._script = _keyframesSavePropertiesBaseline_scripts[initPropScripts.idxIntoKeyframeTypeArray];
+    for (const auto& [prop, script] : _savePropertiesBaseline) {
+        smTmp._script = script;
         saveSingleKeyframeScript(
             smTmp,
             _timestamps3RecordStarted,
@@ -1227,9 +1220,7 @@ void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _keyframesCamera.clear();
     _keyframesTime.clear();
     _keyframesScript.clear();
-    _keyframesSavePropertiesBaseline_scripts.clear();
-    _keyframesSavePropertiesBaseline_timeline.clear();
-    _propertyBaselinesSaved.clear();
+    _savePropertiesBaseline.clear();
     _loadedNodes.clear();
     _idxTimeline_nonCamera = 0;
     _idxScript = 0;
@@ -1344,20 +1335,6 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
     addKeyframe(std::move(times), sm._script);
 }
 
-void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script) {
-    const Timestamps times = generateCurrentTimestamp3(
-        global::windowDelegate->applicationTime()
-    );
-    const size_t indexIntoScriptKeyframesFromMainTimeline =
-        _keyframesSavePropertiesBaseline_scripts.size();
-    _keyframesSavePropertiesBaseline_scripts.push_back(std::move(script));
-    _keyframesSavePropertiesBaseline_timeline.emplace_back(
-        RecordedType::Script,
-        static_cast<unsigned int>(indexIntoScriptKeyframesFromMainTimeline),
-        times
-    );
-}
-
 void SessionRecording::savePropertyBaseline(properties::Property& prop) {
     constexpr std::array<std::string_view, 4> PropertyBaselineRejects{
         "NavigationHandler.OrbitalNavigator.Anchor",
@@ -1373,20 +1350,13 @@ void SessionRecording::savePropertyBaseline(properties::Property& prop) {
         }
     }
 
-    const bool isPropAlreadySaved =
-        std::find(
-            _propertyBaselinesSaved.begin(),
-            _propertyBaselinesSaved.end(),
-            propIdentifier
-        )
-        != _propertyBaselinesSaved.end();
+    const bool isPropAlreadySaved = _savePropertiesBaseline.contains(propIdentifier);
     if (!isPropAlreadySaved) {
         const std::string initialScriptCommand = std::format(
             "openspace.setPropertyValueSingle(\"{}\", {})",
             propIdentifier, prop.stringValue()
         );
-        saveScriptKeyframeToPropertiesBaseline(initialScriptCommand);
-        _propertyBaselinesSaved.push_back(propIdentifier);
+        _savePropertiesBaseline[propIdentifier] = initialScriptCommand;
     }
 }
 

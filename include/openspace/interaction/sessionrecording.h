@@ -376,7 +376,6 @@ protected:
     bool findNextFutureCameraIndex(double currTime);
     bool processCameraKeyframe(double now);
     bool processScriptKeyframe();
-    void saveScriptKeyframeToPropertiesBaseline(std::string script);
 
     double getNextTimestamp();
     void cleanUpPlayback();
@@ -424,9 +423,7 @@ protected:
     std::vector<std::string> _keyframesScript;
     std::vector<TimelineEntry> _timeline;
 
-    std::vector<std::string> _keyframesSavePropertiesBaseline_scripts;
-    std::vector<TimelineEntry> _keyframesSavePropertiesBaseline_timeline;
-    std::vector<std::string> _propertyBaselinesSaved;
+    std::unordered_map<std::string, std::string> _savePropertiesBaseline;
 
     std::vector<std::string> _loadedNodes;
 
