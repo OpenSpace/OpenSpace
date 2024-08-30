@@ -44,7 +44,7 @@ public:
         bool useCheckboxes);
 
     /**
-     * Function that uses the #QtFileSystemModel class to search the given directory.
+     * Function that uses the QtFileSystemModel class to search the given directory.
      *
      * \param dir The directory from which to start the search from
      */

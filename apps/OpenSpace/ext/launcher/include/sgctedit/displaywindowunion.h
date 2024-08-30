@@ -45,9 +45,9 @@ public:
      *        each monitor
      * \param nMaxWindows The maximum number of windows allowed (depends on the number of
      *        monitors in the system)
-     * \param winColors An array of QColor objects for window colors. The indexing of this
-     *        array matches the window indexing used elsewhere in the class. This allows
-     *        for a unique color for each window
+     * \param windowColors An array of QColor objects for window colors. The indexing of
+     *        this array matches the window indexing used elsewhere in the class. This
+     *        allows for a unique color for each window
      * \param resetToDefault If set to true, all display and window settings will be
      *        initialized to their default values
      * \param parent The parent to which this widget belongs

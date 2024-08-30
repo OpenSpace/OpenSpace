@@ -40,6 +40,7 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/keyframerecording.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -1036,6 +1037,7 @@ void OpenSpaceEngine::preSynchronization() {
             }
         }
         global::sessionRecording->preSynchronization();
+        global::keyframeRecording->preSynchronization(dt);
         global::parallelPeer->preSynchronization();
         global::interactionMonitor->updateActivityState();
     }
@@ -1406,6 +1408,13 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
         return;
     }
 
+#ifdef WIN32
+    if (file.extension() == ".lnk") {
+        LDEBUG(std::format("Replacing shell link path '{}'", file));
+        file = FileSys.resolveShellLink(file);
+    }
+#endif // WIN32
+
     ghoul::lua::push(s, file);
     lua_setglobal(s, "filename");
 
@@ -1548,7 +1557,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::ResetCamera,
             codegen::lua::Configuration,
             codegen::lua::LayerServer,
-            codegen::lua::LoadJson
+            codegen::lua::LoadJson,
+            codegen::lua::ResolveShortcut,
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")

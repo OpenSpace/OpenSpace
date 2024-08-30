@@ -456,9 +456,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul_assert(result->_renderable, "Failed to create Renderable");
         result->_renderable->_parent = result.get();
         result->addPropertySubOwner(result->_renderable.get());
-        //LDEBUG(std::format(
-        //    "Successfully created renderable for '{}'", result->identifier()
-        //));
     }
 
     // Extracting the actions from the dictionary
@@ -512,15 +509,12 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (std::holds_alternative<std::string>(*p.tag)) {
             result->addTag(std::get<std::string>(*p.tag));
         }
-        else if (std::holds_alternative<std::vector<std::string>>(*p.tag)) {
+        else {
             for (const std::string& tag : std::get<std::vector<std::string>>(*p.tag)) {
                 if (!tag.empty()) {
                     result->addTag(tag);
                 }
             }
-        }
-        else {
-            throw ghoul::MissingCaseException();
         }
     }
 
@@ -543,8 +537,8 @@ SceneGraphNode::SceneGraphNode()
     , _guiPath(GuiPathInfo, "/")
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
-    , _guiOrderingNumber(GuiOrderInfo, 0.f)
     , _useGuiOrdering(UseGuiOrderInfo, false)
+    , _guiOrderingNumber(GuiOrderInfo, 0.f)
     , _transform {
         ghoul::mm_unique_ptr<Translation>(
             global::memoryManager->PersistentMemory.alloc<StaticTranslation>()

@@ -510,9 +510,7 @@ float ScreenSpaceRenderable::scale() const {
     return _scale;
 }
 
-void ScreenSpaceRenderable::createShaders() {
-    ghoul::Dictionary dict = ghoul::Dictionary();
-
+void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
     auto res = global::windowDelegate->currentDrawBufferResolution();
     ghoul::Dictionary rendererData;
     rendererData.setValue(
@@ -699,7 +697,9 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     unbindTexture();
 }
 
-void ScreenSpaceRenderable::unbindTexture() {}
+void ScreenSpaceRenderable::unbindTexture() {
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 glm::vec3 ScreenSpaceRenderable::sanitizeSphericalCoordinates(glm::vec3 spherical) const {
     const float r = spherical.x;

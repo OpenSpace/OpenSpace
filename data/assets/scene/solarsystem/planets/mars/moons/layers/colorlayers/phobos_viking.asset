@@ -2,13 +2,38 @@ local globe = asset.require("../../phobos_globe")
 
 
 
+local maps = asset.resource({
+  Name = "Phobos Maps",
+  Type = "HttpSynchronization",
+  Identifier = "phobos_maps",
+  Version = 1
+})
+
+
 local Layer = {
-  Identifier = "Phobos_Global_Shaded_Relief_USGS",
-  Name = "Phobos Global Shaded Relief [USGS]",
+  Identifier = "Viking_5m",
+  Name = "Viking 5m",
   Enabled = asset.enabled,
   ZIndex = 10,
-  FilePath = "WMS:https://wms.wr.usgs.gov/cgi-bin/mapserv?map=/maps/mars/phobos_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=Phobos_Simple_Cylindrical_Rasters&SRS=EPSG:4326&BBOX=-180,-90,360,90",
-  Description = "Viking-base Phobos shaded relief created by USGS"
+  FilePath = maps .. "viking_5m.vrt",
+  Description = [[This mosaic of Phobos was created by compiling updated versions of
+    Viking high-resolution mosaics and selecting the best high-resolution images from
+    other spacecraft to construct an entirely new mosaic. The process of compiling this
+    mosaic significantly improved areas of poor control. Where images with reverse
+    lighting meet, artistic effects are necessary to create satisfactory appearance, but
+    this affects the appearance only and not the map geometry. This global mosaic has a
+    pixel resolution of five meters per pixel (m).
+
+    This image was further color-enhanced based on data from the Mars Reconnaissance
+    Orbiter: https://www.planetary.org/space-images/color-view-of-phobos-from-mars-reconnaissance-orbiter#:~:text=The%20color%20view%20shows%20that
+
+    References:
+    Stooke, P. (2012). Stooke Small Bodies Maps V2.0. MULTI-SA-MULTI-6-STOOKEMAPS-V2.0.
+    NASA Planetary Data System. https://sbn.psi.edu/pds/resource/stookemaps.html
+
+    Simonelli, D. P., Thomas, P. C., Carcich, B. T., & Veverka, J. (1993). The generation
+    and use of numerical shape models for irregular solar system objects. Icarus, 103,
+    49-61. https://doi.org/10.1006/icar.1993.1057]]
 }
 
 
@@ -20,13 +45,12 @@ asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globe.Phobos_Globe.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", Layer)
-
+asset.export(Layer)
 
 
 asset.meta = {
-  Name = "Phobos Global Shaded Relief [USGS]",
-  Author = "USGS/NASA",
-  URL = "https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html",
-  License = "NASA/PDS"
+  Name = "Phobos Viking Global Mosaic 5m",
+  Author = "OpenSpace Team",
+  URL = "https://astrogeology.usgs.gov/search/map/phobos_viking_global_mosaic_5m",
+  License = "Please cite authors"
 }

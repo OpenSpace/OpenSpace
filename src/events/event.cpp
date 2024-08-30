@@ -211,6 +211,11 @@ void log(int i, const EventScheduledScriptExecuted& e) {
     LINFO(std::format("[{}] ScheduledScriptExecuted: Script '{}'", i, e.script));
 }
 
+void log(int i, const EventGuiTreeUpdated& e) {
+    ghoul_assert(e.type == EventGuiTreeUpdated::Type, "Wrong type");
+    LINFO(std::format("[{}] EventGuiTreeUpdated", i));
+}
+
 void log(int i, const CustomEvent& e) {
     ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
     LINFO(std::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
@@ -240,6 +245,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::CameraPathFinished: return "CameraPathFinished";
         case Event::Type::CameraMovedPosition: return "CameraMovedPosition";
         case Event::Type::ScheduledScriptExecuted: return "ScheduledScriptExecuted";
+        case Event::Type::GuiTreeUpdated: return "GuiTreeUpdated";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -312,6 +318,9 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "ScheduledScriptExecuted") {
         return Event::Type::ScheduledScriptExecuted;
+    }
+    else if (str == "GuiTreeUpdated") {
+        return Event::Type::GuiTreeUpdated;
     }
     else if (str == "Custom") {
         return Event::Type::Custom;
@@ -565,6 +574,9 @@ void logAllEvents(const Event* e) {
             case Event::Type::ScheduledScriptExecuted:
                 log(i, *static_cast<const EventScheduledScriptExecuted*>(e));
                 break;
+            case Event::Type::GuiTreeUpdated:
+                log(i, *static_cast<const EventGuiTreeUpdated*>(e));
+                break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
                 break;
@@ -700,6 +712,10 @@ EventCameraMovedPosition::EventCameraMovedPosition()
 EventScheduledScriptExecuted::EventScheduledScriptExecuted(std::string_view script_)
     : Event(Type)
     , script(temporaryString(script_))
+{}
+
+EventGuiTreeUpdated::EventGuiTreeUpdated()
+    : Event(Type)
 {}
 
 CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)

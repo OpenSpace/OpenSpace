@@ -41,8 +41,8 @@ public:
      * Constructor for camera gui class
      *
      * \param parent Pointer to parent Qt widget
-     * \param profile The #openspace::Profile::CameraType object containing all data of
-     *        the new or imported profile
+     * \param camera The #openspace::Profile::CameraType object containing all data of the
+     *        new or imported profile
      */
     CameraDialog(QWidget* parent, std::optional<openspace::Profile::CameraType>* camera);
 
