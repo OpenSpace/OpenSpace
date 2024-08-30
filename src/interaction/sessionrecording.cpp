@@ -227,21 +227,6 @@ namespace {
     }
 
     /**
-     * Saves a keyframe to an ASCII recording file.
-     *
-     * \param entry The ASCII string version of the keyframe (any type)
-     * \param file `std::ofstream` object to write to
-     */
-    void saveKeyframeToFileBinary(unsigned char* buffer, size_t size, std::ofstream& file)
-    {
-        file.write(reinterpret_cast<char*>(buffer), size);
-    }
-
-    void saveKeyframeToFile(const std::string& entry, std::ofstream& file) {
-        file << entry << '\n';
-    }
-
-    /**
      * Writes a camera keyframe to a binary format recording file using a CameraKeyframe.
      *
      * \param times Reference to a timestamps structure which contains recorded times
@@ -261,7 +246,7 @@ namespace {
         std::vector<char> writeBuffer;
         kf.serialize(writeBuffer);
         writeToFileBuffer(kfBuffer, idx, writeBuffer);
-        saveKeyframeToFileBinary(kfBuffer, idx, file);
+        file.write(reinterpret_cast<char*>(kfBuffer), idx);
     }
 
     /**
@@ -285,7 +270,7 @@ namespace {
         std::stringstream keyframeLine = std::stringstream();
         saveHeaderAscii(times, HeaderCameraAscii, keyframeLine);
         kf.write(keyframeLine);
-        saveKeyframeToFile(keyframeLine.str(), file);
+        file << keyframeLine.str() << '\n';
     }
 
     /**
@@ -306,7 +291,7 @@ namespace {
         std::vector<char> writeBuffer;
         kf.serialize(writeBuffer);
         writeToFileBuffer(kfBuffer, idx, writeBuffer);
-        saveKeyframeToFileBinary(kfBuffer, idx, file);
+        file.write(reinterpret_cast<char*>(kfBuffer), idx);
     }
 
     /**
@@ -323,7 +308,7 @@ namespace {
         std::stringstream keyframeLine = std::stringstream();
         saveHeaderAscii(times, HeaderTimeAscii, keyframeLine);
         kf.write(keyframeLine);
-        saveKeyframeToFile(keyframeLine.str(), file);
+        file << keyframeLine.str() << '\n';
     }
 
     /**
@@ -345,7 +330,7 @@ namespace {
         std::vector<char> writeBuffer;
         sm.serialize(writeBuffer);
         writeToFileBuffer(smBuffer, idx, writeBuffer);
-        saveKeyframeToFileBinary(smBuffer, idx, file);
+        file.write(reinterpret_cast<char*>(smBuffer), idx);
     }
 
     /**
@@ -375,7 +360,7 @@ namespace {
             startPos = sm._script.find('\n', startPos);
         }
         sm.write(keyframeLine);
-        saveKeyframeToFile(keyframeLine.str(), file);
+        file << keyframeLine.str() << '\n';
     }
 
     void saveSingleKeyframeCamera(openspace::datamessagestructures::CameraKeyframe& kf,
@@ -411,13 +396,6 @@ namespace {
 
         try {
             kf.read(&file);
-        }
-        catch (std::bad_alloc&) {
-            LERROR(std::format(
-                "Allocation error with camera playback from keyframe entry {}",
-                lineN - 1
-            ));
-            return false;
         }
         catch (std::length_error&) {
             LERROR(std::format(
@@ -512,13 +490,6 @@ namespace {
 
         try {
             kf.read(&file);
-        }
-        catch (std::bad_alloc&) {
-            LERROR(std::format(
-                "Allocation error with time playback from keyframe entry {}",
-                lineN - 1
-            ));
-            return false;
         }
         catch (std::length_error&) {
             LERROR(std::format(
@@ -646,13 +617,6 @@ namespace {
         try {
             kf.read(&file);
         }
-        catch (std::bad_alloc&) {
-            LERROR(std::format(
-                "Allocation error with script playback from keyframe entry {}",
-                lineN - 1
-            ));
-            return false;
-        }
         catch (std::length_error&) {
             LERROR(std::format(
                 "length_error with script playback from keyframe entry {}",
@@ -745,7 +709,6 @@ namespace {
     }
 
     void readFileIntoStringStream(std::string filename,
-        std::ifstream& inputFstream,
         std::stringstream& stream)
     {
         std::filesystem::path conversionInFilename = absPath(filename);
@@ -761,7 +724,7 @@ namespace {
 
         stream.str("");
         stream.clear();
-        inputFstream.close();
+        std::ifstream inputFstream;
         if (mode == openspace::interaction::SessionRecording::DataMode::Binary) {
             inputFstream.open(conversionInFilename, std::ifstream::in | std::ios::binary);
         }
@@ -774,7 +737,6 @@ namespace {
                 "Unable to open file '{}' for conversion", filename
             ));
         }
-        inputFstream.close();
     }
 
     void readPlaybackHeader_stream(std::stringstream& conversionInStream,
@@ -803,118 +765,6 @@ namespace {
         // Read to throw out newline at end of header
         readHeaderElement(conversionInStream, 1);
     }
-
-    void eraseSpacesFromString(std::string& s) {
-        s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
-    }
-
-    std::string getNameFromSurroundingQuotes(std::string& s) {
-        std::string result;
-        const char quote = s.at(0);
-        // Handle either ' or " marks
-        if (quote == '\'' || quote == '\"') {
-            const size_t quoteCount = std::count(s.begin(), s.end(), quote);
-            // Must be an opening and closing quote char
-            if (quoteCount == 2) {
-                result = s.substr(1, s.rfind(quote) - 1);
-            }
-        }
-        return result;
-    }
-
-    std::string isolateTermFromQuotes(std::string s) {
-        //Remove any leading spaces
-        while (s.front() == ' ') {
-            s.erase(0, 1);
-        }
-        const std::string possibleQuotes = "\'\"[]";
-        while (possibleQuotes.find(s.front()) != std::string::npos) {
-            s.erase(0, 1);
-        }
-        for (const char q : possibleQuotes) {
-            if (s.find(q) != std::string::npos) {
-                s = s.substr(0, s.find(q));
-                return s;
-            }
-        }
-        //If no quotes found, remove other possible characters from end
-        const std::string unwantedChars = " );";
-        while (!s.empty() && (unwantedChars.find(s.back()) != std::string::npos)) {
-            s.pop_back();
-        }
-        return s;
-    }
-
-    bool checkForScenegraphNodeAccessNav(std::string& navTerm) {
-        const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
-        const size_t posNav = navTerm.find(nextTerm);
-        if (posNav != std::string::npos) {
-            for (const std::string& accessName : NavScriptsUsingNodes) {
-                if (navTerm.find(accessName) != std::string::npos) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    bool checkForScenegraphNodeAccessScene(const std::string& s) {
-        const std::string scene = "Scene.";
-        return (s.find(scene) != std::string::npos);
-    }
-
-    std::string extractScenegraphNodeFromScene(const std::string& s) {
-        const std::string scene = "Scene.";
-        std::string extracted;
-        const size_t posScene = s.find(scene);
-        if (posScene != std::string::npos) {
-            const size_t posDot = s.find('.', posScene + scene.length() + 1);
-            if (posDot > posScene && posDot != std::string::npos) {
-                extracted = s.substr(posScene + scene.length(), posDot -
-                    (posScene + scene.length()));
-            }
-        }
-        return extracted;
-    }
-
-    bool isPropertyAllowedForBaseline(const std::string& propString) {
-        for (const std::string& reject : PropertyBaselineRejects) {
-            if (propString.starts_with(reject)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    void replaceCommandsFromScriptIfFound(std::string& script) {
-        for (const ScriptSubstringReplace& replacementSnippet : ScriptsToBeReplaced) {
-            auto findIdx = script.find(replacementSnippet.substringFound);
-            if (findIdx != std::string::npos) {
-                script.erase(findIdx, replacementSnippet.substringFound.length());
-                script.insert(findIdx, replacementSnippet.substringReplacement);
-            }
-        }
-    }
-
-    void trimCommandsFromScriptIfFound(std::string& script) {
-        for (const std::string& trimSnippet : ScriptsToBeTrimmed) {
-            auto findIdx = script.find(trimSnippet);
-            if (findIdx != std::string::npos) {
-                auto findClosingParens = script.find_first_of(')', findIdx);
-                script.erase(findIdx, findClosingParens + 1);
-            }
-        }
-    }
-
-    void removeTrailingPathSlashes(std::string& filename) {
-        while (filename.substr(filename.length() - 1, 1) == "/") {
-            filename.pop_back();
-        }
-        while (filename.substr(filename.length() - 1, 1) == "\\") {
-            filename.pop_back();
-        }
-    }
-
 } // namespace
 
 namespace openspace::interaction {
@@ -1534,8 +1384,25 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
             return;
         }
     }
-    trimCommandsFromScriptIfFound(script);
-    replaceCommandsFromScriptIfFound(script);
+
+    // Trim commands from script if found
+    for (const std::string& trimSnippet : ScriptsToBeTrimmed) {
+        auto findIdx = script.find(trimSnippet);
+        if (findIdx != std::string::npos) {
+            auto findClosingParens = script.find_first_of(')', findIdx);
+            script.erase(findIdx, findClosingParens + 1);
+        }
+    }
+
+    // Replace commands from script if found
+    for (const ScriptSubstringReplace& replacementSnippet : ScriptsToBeReplaced) {
+        auto findIdx = script.find(replacementSnippet.substringFound);
+        if (findIdx != std::string::npos) {
+            script.erase(findIdx, replacementSnippet.substringFound.length());
+            script.insert(findIdx, replacementSnippet.substringReplacement);
+        }
+    }
+
     const datamessagestructures::ScriptMessage sm
         = datamessagestructures::generateScriptMessage(script);
 
@@ -1561,23 +1428,26 @@ void SessionRecording::saveScriptKeyframeToPropertiesBaseline(std::string script
 
 void SessionRecording::savePropertyBaseline(properties::Property& prop) {
     const std::string propIdentifier = prop.uri();
-    if (isPropertyAllowedForBaseline(propIdentifier)) {
-        const bool isPropAlreadySaved = (
-            std::find(
-                _propertyBaselinesSaved.begin(),
-                _propertyBaselinesSaved.end(),
-                propIdentifier
-            )
-            != _propertyBaselinesSaved.end()
-            );
-        if (!isPropAlreadySaved) {
-            const std::string initialScriptCommand = std::format(
-                "openspace.setPropertyValueSingle(\"{}\", {})",
-                propIdentifier, prop.stringValue()
-            );
-            saveScriptKeyframeToPropertiesBaseline(initialScriptCommand);
-            _propertyBaselinesSaved.push_back(propIdentifier);
+    for (const std::string& reject : PropertyBaselineRejects) {
+        if (propIdentifier.starts_with(reject)) {
+            return;
         }
+    }
+
+    const bool isPropAlreadySaved =
+        std::find(
+            _propertyBaselinesSaved.begin(),
+            _propertyBaselinesSaved.end(),
+            propIdentifier
+        )
+        != _propertyBaselinesSaved.end();
+    if (!isPropAlreadySaved) {
+        const std::string initialScriptCommand = std::format(
+            "openspace.setPropertyValueSingle(\"{}\", {})",
+            propIdentifier, prop.stringValue()
+        );
+        saveScriptKeyframeToPropertiesBaseline(initialScriptCommand);
+        _propertyBaselinesSaved.push_back(propIdentifier);
     }
 }
 
@@ -1909,6 +1779,61 @@ void SessionRecording::populateListofLoadedSceneGraphNodes() {
 }
 
 void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) {
+    auto isolateTermFromQuotes = [](std::string s) -> std::string {
+        //Remove any leading spaces
+        while (s.front() == ' ') {
+            s.erase(0, 1);
+        }
+        const std::string possibleQuotes = "\'\"[]";
+        while (possibleQuotes.find(s.front()) != std::string::npos) {
+            s.erase(0, 1);
+        }
+        for (const char q : possibleQuotes) {
+            if (s.find(q) != std::string::npos) {
+                s = s.substr(0, s.find(q));
+                return s;
+            }
+        }
+        //If no quotes found, remove other possible characters from end
+        const std::string unwantedChars = " );";
+        while (!s.empty() && (unwantedChars.find(s.back()) != std::string::npos)) {
+            s.pop_back();
+        }
+        return s;
+    };
+
+    auto checkForScenegraphNodeAccessNav = [](std::string& navTerm) {
+        const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
+        const size_t posNav = navTerm.find(nextTerm);
+        if (posNav != std::string::npos) {
+            for (const std::string& accessName : NavScriptsUsingNodes) {
+                if (navTerm.find(accessName) != std::string::npos) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+    auto checkForScenegraphNodeAccessScene = [](const std::string & s) -> bool {
+        const std::string scene = "Scene.";
+        return (s.find(scene) != std::string::npos);
+    };
+
+    auto extractScenegraphNodeFromScene = [](const std::string & s) -> std::string {
+        const std::string scene = "Scene.";
+        std::string extracted;
+        const size_t posScene = s.find(scene);
+        if (posScene != std::string::npos) {
+            const size_t posDot = s.find('.', posScene + scene.length() + 1);
+            if (posDot > posScene && posDot != std::string::npos) {
+                extracted = s.substr(posScene + scene.length(), posDot -
+                    (posScene + scene.length()));
+            }
+        }
+        return extracted;
+    };
+
     if (s.rfind(scriptReturnPrefix, 0) == 0) {
         s.erase(0, scriptReturnPrefix.length());
     }
@@ -2416,7 +2341,6 @@ void SessionRecording::convertFileRelativePath(std::string filenameRelative) {
 
 std::string SessionRecording::convertFile(std::string filename, int depth) {
     std::string conversionOutFilename = filename;
-    std::ifstream conversionInFile;
     std::stringstream conversionInStream;
     static constexpr int MaximumRecursionDepth = 50;
     if (depth >= MaximumRecursionDepth) {
@@ -2425,7 +2349,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
     }
     std::string newFilename = filename;
     try {
-        readFileIntoStringStream(filename, conversionInFile, conversionInStream);
+        readFileIntoStringStream(filename, conversionInStream);
         DataMode mode = DataMode::Unknown;
         std::string fileVersion;
         readPlaybackHeader_stream(
@@ -2442,11 +2366,19 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
         if (fileVersion != fileFormatVersion()) {
             //conversionInStream.seekg(conversionInStream.beg);
             newFilename = getLegacyConversionResult(filename, depth + 1);
-            removeTrailingPathSlashes(newFilename);
+
+            // Remove trailing path slashes
+            while (newFilename.substr(newFilename.length() - 1, 1) == "/") {
+                newFilename.pop_back();
+            }
+            while (newFilename.substr(newFilename.length() - 1, 1) == "\\") {
+                newFilename.pop_back();
+            }
+
             if (filename == newFilename) {
                 return filename;
             }
-            readFileIntoStringStream(newFilename, conversionInFile, conversionInStream);
+            readFileIntoStringStream(newFilename, conversionInStream);
             readPlaybackHeader_stream(
                 conversionInStream,
                 fileVersion,
@@ -2496,7 +2428,6 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
             );
             conversionOutFile.close();
         }
-        conversionInFile.close();
     }
     catch (ConversionError& c) {
         LERROR(c.message);
@@ -2796,7 +2727,7 @@ void convertToAscii(std::filesystem::path inFilePath, std::filesystem::path outF
             break;
         }
 
-        saveKeyframeToFile(keyframeLine.str(), _oFile);
+        _oFile << keyframeLine.str() << '\n';
         lineNum++;
     }
 }
