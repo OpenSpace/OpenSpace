@@ -1059,7 +1059,6 @@ void SessionRecording::initializePlayback_time(double now) {
 void SessionRecording::initializePlayback_modeFlags() {
     _playbackActive_camera = true;
     _playbackActive_script = true;
-    _hasHitEndOfCameraKeyframes = false;
 }
 
 bool SessionRecording::initializePlayback_timeline() {
@@ -1236,7 +1235,6 @@ void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _idxScript = 0;
     _idxTimeline_cameraPtrNext = 0;
     _idxTimeline_cameraPtrPrev = 0;
-    _hasHitEndOfCameraKeyframes = false;
     _saveRenderingDuringPlayback = false;
     _saveRendering_isFirstFrame = true;
     _playbackPauseOffset = 0.0;
@@ -1944,6 +1942,7 @@ bool SessionRecording::isTimeToHandleNextNonCameraKeyframe(double currTime) {
 
 bool SessionRecording::findNextFutureCameraIndex(double currTime) {
     unsigned int seekAheadIndex = _idxTimeline_cameraPtrPrev;
+    bool hasHitEndOfCameraKeyframes = false;
     while (true) {
         seekAheadIndex++;
         if (seekAheadIndex >= static_cast<unsigned int>(_timeline.size())) {
@@ -1957,7 +1956,7 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
                 _timeline[seekAheadIndex].t3stamps.timeRec;
 
             if (indexIntoCameraKeyframes >= (_keyframesCamera.size() - 1)) {
-                _hasHitEndOfCameraKeyframes = true;
+                hasHitEndOfCameraKeyframes = true;
             }
 
             if (currTime < seekAheadKeyframeTimestamp) {
@@ -1975,7 +1974,7 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
 
         const double interpolationUpperBoundTimestamp =
             _timeline[_idxTimeline_cameraPtrNext].t3stamps.timeRec;
-        if ((currTime > interpolationUpperBoundTimestamp) && _hasHitEndOfCameraKeyframes)
+        if ((currTime > interpolationUpperBoundTimestamp) && hasHitEndOfCameraKeyframes)
         {
             _idxTimeline_cameraPtrPrev = _idxTimeline_cameraPtrNext;
             return false;

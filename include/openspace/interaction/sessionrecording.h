@@ -403,7 +403,6 @@ protected:
     bool _playbackActive_camera = false;
     bool _playbackActive_time = false;
     bool _playbackActive_script = false;
-    bool _hasHitEndOfCameraKeyframes = false;
     bool _playbackPausedWithinDeltaTimePause = false;
     bool _playbackLoopMode = false;
     double _playbackPauseOffset = 0.0;
