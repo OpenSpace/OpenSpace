@@ -391,18 +391,26 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
     const ExoplanetItem& first = _dataViewer.data()[planetIndices.front()];
     size_t nPlanets = planetIndices.size();
 
+    ImGuiIO& io = ImGui::GetIO();
+    float wScale = io.FontGlobalScale;
+    float hScale = wScale * (wScale < 1.f ? 1.f : 0.9f);
+
     // General information about the system
-    ImGui::BeginChild(std::format("overview_left{}", host).c_str(), ImVec2(300, 150), true);
+    ImGui::BeginChild(
+        std::format("overview_left{}", host).c_str(),
+        ImVec2(300 * wScale, 150 * hScale),
+        true
+    );
     {
-        constexpr int Indent = 150;
+        const float indent = 150.f * wScale;
         view::helper::renderDescriptiveText("Distance to Earth: ");
-        ImGui::SameLine(Indent);
+        ImGui::SameLine(indent);
         _dataViewer.renderColumnValue(_dataViewer.dataMapping().positionDistance, first);
         ImGui::SameLine();
         view::helper::renderDescriptiveText("(Parsec)");
 
         view::helper::renderDescriptiveText("In habitable zone: ");
-        ImGui::SameLine(Indent);
+        ImGui::SameLine(indent);
         ImGui::Text("x"); // TODO: add detals of how many
 
         ImGui::Text("");
@@ -412,36 +420,40 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
     }
     ImGui::EndChild();
     ImGui::SameLine();
-    ImGui::BeginChild(std::format("overview_right{}", host).c_str(), ImVec2(190, 150), true);
+    ImGui::BeginChild(
+        std::format("overview_right{}", host).c_str(),
+        ImVec2(190 * wScale, 150 * hScale),
+        true
+    );
     {
-        constexpr int Indent = 100;
+        const float indent = 100.f * wScale;
         // Star information
         view::helper::renderDescriptiveText("Stars: ");
-        ImGui::SameLine(Indent);
+        ImGui::SameLine(indent);
         _dataViewer.renderColumnValue("sy_snum", first);
 
         ImGui::Text("");
 
         view::helper::renderDescriptiveText("Teff: ");
-        ImGui::SameLine(Indent);
+        ImGui::SameLine(indent);
         _dataViewer.renderColumnValue("st_teff", first);
         ImGui::SameLine();
         view::helper::renderDescriptiveText("(K)");
 
         view::helper::renderDescriptiveText("Metallicity: ");
-        ImGui::SameLine(Indent);
+        ImGui::SameLine(indent);
         _dataViewer.renderColumnValue("st_met", first);
         ImGui::SameLine();
         _dataViewer.renderColumnValue("st_metratio", first);
 
         view::helper::renderDescriptiveText("Radius: ");
-        ImGui::SameLine(Indent);
+        ImGui::SameLine(indent);
         _dataViewer.renderColumnValue("st_rad", first);
         ImGui::SameLine();
         view::helper::renderDescriptiveText("(Solar)");
 
         view::helper::renderDescriptiveText("Age: ");
-        ImGui::SameLine(Indent);
+        ImGui::SameLine(indent);
         _dataViewer.renderColumnValue("st_age", first);
         ImGui::SameLine();
         view::helper::renderDescriptiveText("(Gyr)");
@@ -451,16 +463,14 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
     // Frames showing information about each planet
     ImGui::Text("Planets: ");
 
-    constexpr int Indent = 80;
-    constexpr int AvgExtraIndent = 20;
-
-    const float avgColumnIndent = static_cast<float>(
-        (nPlanets + 1) * Indent + AvgExtraIndent
-    );
+    const float indent = 80.f * wScale;
+    const float avgExtraIndent = 20.f * wScale;
 
     auto columnIndent = [&](size_t columnIndex) {
-        return static_cast<float>((columnIndex + 1) * Indent);
+        return static_cast<float>((columnIndex + 1)) * indent;
     };
+
+    const float avgColumnIndent = columnIndent(nPlanets) + avgExtraIndent;
 
     ImGui::Text("");
 
@@ -520,7 +530,7 @@ void SystemViewer::renderOverviewTabContent(const std::string& host,
             const ExoplanetItem& p = _dataViewer.data()[index];
 
             ImGui::SameLine(columnIndent(i));
-            ImGui::PushItemWidth(static_cast<float>(Indent));
+            ImGui::PushItemWidth(static_cast<float>(indent));
             _dataViewer.renderColumnValue(colKey, p);
         }
 
