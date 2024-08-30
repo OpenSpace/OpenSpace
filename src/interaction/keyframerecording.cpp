@@ -256,8 +256,7 @@ void KeyframeRecording::setSequenceTime(double sequenceTime) {
     LINFO(std::format("Set sequence time to {}", sequenceTime));
 }
 
-void KeyframeRecording::jumpToKeyframe(int index)
-{
+void KeyframeRecording::jumpToKeyframe(int index) {
     if (!isInRange(index)) {
         LERROR(std::format("Index {} out of range", index));
         return;

@@ -64,10 +64,6 @@ public:
     bool hasKeyframeRecording() const;
     std::vector<ghoul::Dictionary> keyframes() const;
 
-    /**
-     * \return The Lua library that contains all Lua functions available to affect the
-     * interaction
-     */
     static openspace::scripting::LuaLibrary luaLibrary();
 
 private:

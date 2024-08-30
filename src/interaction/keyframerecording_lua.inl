@@ -65,7 +65,7 @@ namespace {
 /**
  * Update the camera position of a keyframe at the specified index.
  *
- * \param index The 0-based index of e keyframe to update
+ * \param index The 0-based index of the keyframe to update
  */
 [[codegen::luawrap]] void updateKeyframe(int index) {
     if (!openspace::global::keyframeRecording->hasKeyframeRecording()) {
@@ -159,6 +159,11 @@ namespace {
     openspace::global::keyframeRecording->setSequenceTime(sequenceTime);
 }
 
+/**
+ * Jumps to a specified keyframe within the keyframe recording sequence.
+ *
+ * \param index The index of the keyframe to jump to
+ */
 [[codegen::luawrap]] void jumpToKeyframe(int index) {
     if (index < 0) {
         throw ghoul::lua::LuaError("Index must be positive");
