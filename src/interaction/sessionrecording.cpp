@@ -336,7 +336,7 @@ namespace {
      */
     void readCameraKeyframeBinary(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::CameraKeyframe& kf,
-        std::ifstream& file, int lineN)
+        std::istream& file, int lineN)
     {
         file.read(reinterpret_cast<char*>(&times.timeOs), sizeof(double));
         file.read(reinterpret_cast<char*>(&times.timeRec), sizeof(double));
@@ -383,7 +383,7 @@ namespace {
 
     void readSingleKeyframeCamera(openspace::datamessagestructures::CameraKeyframe& kf,
         openspace::interaction::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
-        std::ifstream& file, std::string& inLine,
+        std::istream& file, std::string& inLine,
         const int lineNum)
     {
         if (mode == openspace::interaction::SessionRecording::DataMode::Binary) {
@@ -418,7 +418,7 @@ namespace {
      */
     void readTimeKeyframeBinary(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::TimeKeyframe& kf,
-        std::ifstream& file, int lineN)
+        std::istream& file, int lineN)
     {
         file.read(reinterpret_cast<char*>(&times.timeOs), sizeof(double));
         file.read(reinterpret_cast<char*>(&times.timeRec), sizeof(double));
@@ -464,7 +464,7 @@ namespace {
 
     void readSingleKeyframeTime(openspace::datamessagestructures::TimeKeyframe& kf,
         openspace::interaction::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
-        std::ifstream& file, std::string& inLine,
+        std::istream& file, std::string& inLine,
         const int lineNum)
     {
         if (mode == openspace::interaction::SessionRecording::DataMode::Binary) {
@@ -482,7 +482,7 @@ namespace {
      * \param readLen_chars Number of characters to be read, which may be the expected
      *        length of the header line, or an arbitrary number of characters within it
      */
-    std::string readHeaderElement(std::ifstream& stream,
+    std::string readHeaderElement(std::istream& stream,
         size_t readLenChars)
     {
         std::vector<char> readTemp(readLenChars);
@@ -530,7 +530,7 @@ namespace {
      */
     void readScriptKeyframeBinary(openspace::interaction::Timestamps& times,
         openspace::datamessagestructures::ScriptMessage& kf,
-        std::ifstream& file, int lineN)
+        std::istream& file, int lineN)
     {
         file.read(reinterpret_cast<char*>(&times.timeOs), sizeof(double));
         file.read(reinterpret_cast<char*>(&times.timeRec), sizeof(double));
@@ -581,7 +581,7 @@ namespace {
 
     void readSingleKeyframeScript(openspace::datamessagestructures::ScriptMessage& kf,
         openspace::interaction::Timestamps& times, openspace::interaction::SessionRecording::DataMode mode,
-        std::ifstream& file, std::string& inLine,
+        std::istream& file, std::string& inLine,
         const int lineNum)
     {
         if (mode == openspace::interaction::SessionRecording::DataMode::Binary) {
@@ -1237,26 +1237,6 @@ void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _playbackLoopMode = false;
 }
 
-bool SessionRecording::hasCameraChangedFromPrev(
-                                       const datamessagestructures::CameraKeyframe& kfNew)
-{
-    constexpr double threshold = 1e-2;
-    bool hasChanged = false;
-
-    const glm::dvec3 position = kfNew._position - _prevRecordedCameraKeyframe._position;
-    if (glm::length(position) > threshold) {
-        hasChanged = true;
-    }
-
-    const double rotation = dot(kfNew._rotation, _prevRecordedCameraKeyframe._rotation);
-    if (std::abs(rotation - 1.0) > threshold) {
-        hasChanged = true;
-    }
-
-    _prevRecordedCameraKeyframe = kfNew;
-    return hasChanged;
-}
-
 Timestamps SessionRecording::generateCurrentTimestamp3(double keyframeTime) const {
     return {
         keyframeTime,
@@ -1333,8 +1313,8 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
         }
     }
 
-    const datamessagestructures::ScriptMessage sm
-        = datamessagestructures::generateScriptMessage(script);
+    const datamessagestructures::ScriptMessage sm =
+        datamessagestructures::generateScriptMessage(script);
 
     Timestamps times = generateCurrentTimestamp3(sm._timestamp);
     addKeyframe(std::move(times), sm._script);
@@ -1481,7 +1461,7 @@ void SessionRecording::playbackAddEntriesToTimeline(std::string playbackFilename
         while (ghoul::getline(_playbackFile, lineParsing)) {
             lineNumber++;
 
-            std::istringstream iss(lineParsing);
+            std::istringstream iss = std::istringstream(lineParsing);
             std::string entryType;
             if (!(iss >> entryType)) {
                 LERROR(std::format(
@@ -1573,14 +1553,7 @@ void SessionRecording::convertCamera(std::stringstream& inStream, DataMode mode,
     Timestamps times;
     datamessagestructures::CameraKeyframe kf;
 
-    readSingleKeyframeCamera(
-        kf,
-        times,
-        mode,
-        reinterpret_cast<std::ifstream&>(inStream),
-        inputLine,
-        lineNum
-    );
+    readSingleKeyframeCamera(kf, times, mode, inStream, inputLine, lineNum);
     saveSingleKeyframeCamera(kf, times, mode, outFile, _addModelMatrixinAscii);
 }
 
@@ -2329,27 +2302,22 @@ scripting::LuaLibrary SessionRecording::luaLibrary() {
 
 
 
-void convertToAscii(std::filesystem::path inFilePath, std::filesystem::path outFilePath) {
-    Timestamps times;
-    datamessagestructures::CameraKeyframe ckf;
-    datamessagestructures::TimeKeyframe tkf;
-    datamessagestructures::ScriptMessage skf;
+void convertToAscii(std::filesystem::path inPath, std::filesystem::path outPath) {
     int lineNum = 1;
-    std::ofstream _oFile;
-    _oFile.open(outFilePath, std::ifstream::app);
+    std::ofstream oFile = std::ofstream(outPath, std::ifstream::app);
     const char tmpType = DataFormatAsciiTag;
-    _oFile.write(&tmpType, 1);
-    _oFile.write("\n", 1);
-    std::ifstream _iFile;
-    _iFile.open(inFilePath, std::ifstream::in | std::ifstream::binary);
+    oFile.write(&tmpType, 1);
+    oFile.write("\n", 1);
+
+    std::ifstream file = std::ifstream(inPath, std::ifstream::in | std::ifstream::binary);
 
     while (true) {
         unsigned char frameType;
-        _iFile.read(reinterpret_cast<char*>(&frameType), sizeof(unsigned char));
+        file.read(reinterpret_cast<char*>(&frameType), sizeof(unsigned char));
         // Check if have reached EOF
-        if (!_iFile) {
+        if (!file) {
             LINFO(std::format(
-                "Finished converting {} entries from file '{}'", lineNum - 1, inFilePath
+                "Finished converting {} entries from file '{}'", lineNum - 1, inPath
             ));
             break;
         }
@@ -2358,86 +2326,78 @@ void convertToAscii(std::filesystem::path inFilePath, std::filesystem::path outF
         keyframeLine.str(std::string());
 
         if (frameType == HeaderCameraBinary) {
-            readCameraKeyframeBinary(times, ckf, _iFile, lineNum);
-            saveHeaderAscii(
-                times,
-                HeaderCameraAscii,
-                keyframeLine
-            );
+            Timestamps times;
+            datamessagestructures::CameraKeyframe ckf;
+            readCameraKeyframeBinary(times, ckf, file, lineNum);
+            saveHeaderAscii(times, HeaderCameraAscii, keyframeLine);
             ckf.write(keyframeLine);
         }
         else if (frameType == HeaderTimeBinary) {
-            readTimeKeyframeBinary(times, tkf, _iFile, lineNum);
-            saveHeaderAscii(
-                times,
-                HeaderTimeAscii,
-                keyframeLine
-            );
+            Timestamps times;
+            datamessagestructures::TimeKeyframe tkf;
+            readTimeKeyframeBinary(times, tkf, file, lineNum);
+            saveHeaderAscii(times, HeaderTimeAscii, keyframeLine);
             tkf.write(keyframeLine);
         }
         else if (frameType == HeaderScriptBinary) {
-            readScriptKeyframeBinary(times, skf, _iFile, lineNum);
-            saveHeaderAscii(
-                times,
-                HeaderScriptAscii,
-                keyframeLine
-            );
+            Timestamps times;
+            datamessagestructures::ScriptMessage skf;
+            readScriptKeyframeBinary(times, skf, file, lineNum);
+            saveHeaderAscii(times, HeaderScriptAscii, keyframeLine);
             skf.write(keyframeLine);
         }
         else {
             LERROR(std::format(
                 "Unknown frame type @ index {} of playback file '{}'",
-                lineNum - 1, inFilePath
+                lineNum - 1, inPath
             ));
             break;
         }
 
-        _oFile << keyframeLine.str() << '\n';
+        oFile << keyframeLine.str() << '\n';
         lineNum++;
     }
 }
 
-void convertToBinary(std::filesystem::path inFilePath, std::filesystem::path outFilePath)
-{
-    Timestamps times;
-    datamessagestructures::CameraKeyframe ckf;
-    datamessagestructures::TimeKeyframe tkf;
-    datamessagestructures::ScriptMessage skf;
+void convertToBinary(std::filesystem::path inPath, std::filesystem::path outPath) {
     int lineNum = 1;
-    std::string lineContents;
-    std::ofstream _oFile;
-    _oFile.open(outFilePath, std::ifstream::app | std::ios::binary);
+    std::ofstream oFile = std::ofstream(outPath, std::ifstream::app | std::ios::binary);
     const char tmpType = DataFormatBinaryTag;
-    _oFile.write(&tmpType, 1);
-    _oFile.write("\n", 1);
+    oFile.write(&tmpType, 1);
+    oFile.write("\n", 1);
 
-    std::ifstream _iFile;
-    _iFile.open(inFilePath, std::ifstream::in | std::ifstream::binary);
+    std::ifstream file = std::ifstream(inPath, std::ifstream::in | std::ifstream::binary);
 
-
-    while (ghoul::getline(_iFile, lineContents)) {
+    std::string lineContents;
+    while (ghoul::getline(file, lineContents)) {
         lineNum++;
 
         std::istringstream iss(lineContents);
         std::string entryType;
         if (!(iss >> entryType)) {
             LERROR(std::format(
-                "Error reading entry type @ line {} of file '{}'", lineNum, inFilePath
+                "Error reading entry type @ line {} of file '{}'", lineNum, inPath
             ));
             break;
         }
 
         if (entryType == HeaderCameraAscii) {
+            Timestamps times;
+            datamessagestructures::CameraKeyframe ckf;
             readCameraKeyframeAscii(times, ckf, lineContents, lineNum);
-            saveCameraKeyframeBinary(times, ckf, _oFile);
+            saveCameraKeyframeBinary(times, ckf, oFile);
         }
         else if (entryType == HeaderTimeAscii) {
+            Timestamps times;
+            datamessagestructures::TimeKeyframe tkf;
             readTimeKeyframeAscii(times, tkf, lineContents, lineNum);
-            saveTimeKeyframeBinary(times, tkf, _oFile);
+            saveTimeKeyframeBinary(times, tkf, oFile);
         }
         else if (entryType == HeaderScriptAscii) {
+            Timestamps times;
+            datamessagestructures::ScriptMessage skf;
             readScriptKeyframeAscii(times, skf, lineContents, lineNum);
-            saveScriptKeyframeBinary(times, skf, _oFile);
+            saveScriptKeyframeBinary(times, skf, oFile);
         }
         else if (entryType.substr(0, 1) == HeaderCommentAscii) {
             continue;
@@ -2445,28 +2405,21 @@ void convertToBinary(std::filesystem::path inFilePath, std::filesystem::path out
         else {
             LERROR(std::format(
                 "Unknown frame type {} @ line {} of file '{}'",
-                entryType, lineContents, inFilePath
+                entryType, lineContents, inPath
             ));
             break;
         }
     }
-    _oFile.close();
-    LINFO(std::format(
-        "Finished converting {} entries from file '{}'", lineNum, inFilePath
-    ));
+    LINFO(std::format("Finished converting {} entries from file '{}'", lineNum, inPath));
 }
 
 void convertTypes(SessionRecording::DataMode fileFormatType,
                   std::filesystem::path inFilePath, std::filesystem::path outFilePath,
                   std::string version)
 {
-    std::ifstream _iFile;
-
-    std::ofstream _oFile;
-
+    std::string currentFormat;
     std::string expectedFileExtension_in;
     std::string expectedFileExtension_out;
-    std::string currentFormat;
     if (fileFormatType == SessionRecording::DataMode::Binary) {
         currentFormat = "binary";
         expectedFileExtension_in = FileExtensionBinary;
@@ -2495,23 +2448,21 @@ void convertTypes(SessionRecording::DataMode fileFormatType,
         outFilePath += expectedFileExtension_out;
     }
 
+    std::ifstream iFile;
+    std::ofstream oFile;
     if (fileFormatType == SessionRecording::DataMode::Ascii) {
-        //_iFile.close();
-        _iFile.open(inFilePath, std::ifstream::in);
+        iFile.open(inFilePath, std::ifstream::in);
         //Throw out first line
         std::string throw_out;
-        ghoul::getline(_iFile, throw_out);
-        _oFile.open(outFilePath);
+        ghoul::getline(iFile, throw_out);
+        oFile.open(outFilePath);
     }
     else if (fileFormatType == SessionRecording::DataMode::Binary) {
-        _oFile.open(outFilePath, std::ios::binary);
+        oFile.open(outFilePath, std::ios::binary);
     }
-    _oFile.write(
-        FileHeaderTitle.c_str(),
-        FileHeaderTitle.length()
-    );
-    _oFile.write(version.c_str(), FileHeaderVersionLength);
-    _oFile.close();
+    oFile.write(FileHeaderTitle.c_str(), FileHeaderTitle.length());
+    oFile.write(version.c_str(), FileHeaderVersionLength);
+    oFile.close();
 
     if (fileFormatType == SessionRecording::DataMode::Ascii) {
         convertToBinary(inFilePath, outFilePath);
@@ -2520,43 +2471,36 @@ void convertTypes(SessionRecording::DataMode fileFormatType,
         convertToAscii(inFilePath, outFilePath);
     }
     else {
-        // Add error output for file type not recognized
-        LERROR("Session recording file unrecognized format type");
+        throw LoadingError("Session recording file unrecognized format type");
     }
 }
 
 std::tuple<SessionRecording::DataMode, std::string> determineFormatTypeAndVersion(
-                                                         std::filesystem::path inFilePath)
+                                                             std::filesystem::path inPath)
 {
     SessionRecording::DataMode fileFormatType = SessionRecording::DataMode::Unknown;
 
-    std::ifstream _iFile;
-    _iFile.open(inFilePath, std::ifstream::in | std::ifstream::binary);
+    std::ifstream file = std::ifstream(inPath, std::ifstream::in | std::ifstream::binary);
 
-    std::string version;
-
-    std::string line = readHeaderElement(_iFile,
-        FileHeaderTitle.length());
-
-    if (line.substr(0, FileHeaderTitle.length())
-        != FileHeaderTitle)
-    {
-        LERROR(std::format(
-            "Session recording file '{}' does not have expected header", inFilePath
+    std::string line = readHeaderElement(file, FileHeaderTitle.length());
+    if (line.substr(0, FileHeaderTitle.length()) == FileHeaderTitle) {
+        throw LoadingError(std::format(
+            "Session recording file '{}' does not have expected header", inPath
         ));
     }
-    else {
-        version = readHeaderElement(_iFile,
-            FileHeaderVersionLength);
-        line = readHeaderElement(_iFile, 1);
-        readHeaderElement(_iFile, 1);
 
-        if (line.at(0) == DataFormatAsciiTag) {
-            fileFormatType = SessionRecording::DataMode::Ascii;
-        }
-        else if (line.at(0) == DataFormatBinaryTag) {
-            fileFormatType = SessionRecording::DataMode::Binary;
-        }
+    std::string version = readHeaderElement(file, FileHeaderVersionLength);
+    line = readHeaderElement(file, 1);
+    readHeaderElement(file, 1);
+
+    if (line.at(0) == DataFormatAsciiTag) {
+        fileFormatType = SessionRecording::DataMode::Ascii;
+    }
+    else if (line.at(0) == DataFormatBinaryTag) {
+        fileFormatType = SessionRecording::DataMode::Binary;
+    }
+    else {
+        throw LoadingError(std::format("Unrecognized file format tag {}", line.at(0)));
     }
 
     return { fileFormatType, version };

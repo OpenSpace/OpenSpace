@@ -343,7 +343,6 @@ protected:
     double _timestampPlaybackStarted_application = 0.0;
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
-    bool hasCameraChangedFromPrev(const datamessagestructures::CameraKeyframe& kfNew);
     void playbackCamera(std::string lineParsing, int lineNumber);
     void playbackTimeChange(std::string lineParsing, int lineNumber);
     void playbackScript(std::string lineParsing, int lineNumber);
