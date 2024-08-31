@@ -36,10 +36,6 @@
 
 namespace openspace::interaction {
 
-struct ConversionError : public ghoul::RuntimeError {
-    explicit ConversionError(std::string msg);
-};
-
 struct Timestamps {
     double timeOs;
     double timeRec;
@@ -348,10 +344,10 @@ protected:
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
     bool hasCameraChangedFromPrev(const datamessagestructures::CameraKeyframe& kfNew);
-    bool playbackCamera(std::string lineParsing, int lineNumber);
-    bool playbackTimeChange(std::string lineParsing, int lineNumber);
-    bool playbackScript(std::string lineParsing, int lineNumber);
-    bool playbackAddEntriesToTimeline(std::string playbackFilename);
+    void playbackCamera(std::string lineParsing, int lineNumber);
+    void playbackTimeChange(std::string lineParsing, int lineNumber);
+    void playbackScript(std::string lineParsing, int lineNumber);
+    void playbackAddEntriesToTimeline(std::string playbackFilename);
     void signalPlaybackFinishedForComponent(RecordedType type);
     void handlePlaybackEnd();
 
@@ -377,19 +373,17 @@ protected:
     bool processCameraKeyframe(double now);
     bool processScriptKeyframe();
 
-    double getNextTimestamp();
     void cleanUpPlayback();
     void cleanUpRecording();
     void cleanUpTimelinesAndKeyframes();
-    bool convertEntries(std::string& inFilename, std::stringstream& inStream,
+    void convertEntries(std::string& inFilename, std::stringstream& inStream,
         DataMode mode, int lineNum, std::ofstream& outFile);
-    virtual bool convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
+    virtual void convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile);
-    virtual bool convertTimeChange(std::stringstream& inStream, DataMode mode,
+    virtual void convertTimeChange(std::stringstream& inStream, DataMode mode,
         int lineNum, std::string& inputLine, std::ofstream& outFile);
-    virtual bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
+    virtual void convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile);
-    void populateListofLoadedSceneGraphNodes();
 
     void checkIfScriptUsesScenegraphNode(std::string s) const;
 
@@ -476,26 +470,11 @@ public:
     std::string getLegacyConversionResult(std::string filename, int depth) override;
 
     struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
-        void read(std::istream* in) override {
-            size_t strLen;
-            //Read string length from file
-            in->read(reinterpret_cast<char*>(&strLen), sizeof(strLen));
-            // 2000 = Previous max length for scripts
-            if (strLen > 2000) {
-                throw ConversionError("Invalid script size for conversion read");
-            }
-            //Read back full string
-            std::vector<char> temp(strLen + 1);
-            in->read(temp.data(), strLen);
-            temp[strLen] = '\0';
-
-            _script.erase();
-            _script = temp.data();
-        }
+        void read(std::istream* in) override;
     };
 
 protected:
-    bool convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
+    void convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile) override;
 };
 
