@@ -366,7 +366,6 @@ protected:
     void moveAheadInTime();
     void lookForNonCameraKeyframesThatHaveComeDue(double currTime);
     void updateCameraWithOrWithoutNewKeyframes(double currTime);
-    bool isTimeToHandleNextNonCameraKeyframe(double currTime);
     bool processNextNonCameraKeyframeAheadInTime();
     bool findNextFutureCameraIndex(double currTime);
     bool processCameraKeyframe(double now);
@@ -461,10 +460,10 @@ public:
     char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
     char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
     std::string fileFormatVersion() override {
-        return std::string(FileHeaderVersion);
+        return FileHeaderVersion;
     }
     std::string targetFileFormatVersion() override {
-        return std::string(TargetConvertVersion);
+        return TargetConvertVersion;
     }
     std::string getLegacyConversionResult(std::string filename, int depth) override;
 
