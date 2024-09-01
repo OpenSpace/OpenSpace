@@ -44,7 +44,6 @@ struct Timestamps {
 
 enum class RecordedType {
     Camera = 0,
-    Time,
     Script
 };
 
@@ -344,7 +343,6 @@ protected:
     double _timestampPlaybackStarted_simulation = 0.0;
     double _timestampApplicationStarted_simulation = 0.0;
     void playbackCamera(std::string lineParsing, int lineNumber);
-    void playbackTimeChange(std::string lineParsing, int lineNumber);
     void playbackScript(std::string lineParsing, int lineNumber);
     void playbackAddEntriesToTimeline(std::string playbackFilename);
     void signalPlaybackFinishedForComponent(RecordedType type);
@@ -355,8 +353,6 @@ protected:
 
     void addKeyframe(Timestamps t3stamps,
         interaction::KeyframeNavigator::CameraPose keyframe);
-    void addKeyframe(Timestamps t3stamps,
-        datamessagestructures::TimeKeyframe keyframe);
     void addKeyframe(Timestamps t3stamps,
         std::string scriptToQueue);
 
@@ -369,7 +365,6 @@ protected:
     bool processNextNonCameraKeyframeAheadInTime();
     bool findNextFutureCameraIndex(double currTime);
     bool processCameraKeyframe(double now);
-    bool processScriptKeyframe();
 
     void cleanUpPlayback();
     void cleanUpRecording();
@@ -378,8 +373,6 @@ protected:
         DataMode mode, int lineNum, std::ofstream& outFile);
     virtual void convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile);
-    virtual void convertTimeChange(std::stringstream& inStream, DataMode mode,
-        int lineNum, std::string& inputLine, std::ofstream& outFile);
     virtual void convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile);
 
@@ -411,7 +404,6 @@ protected:
     bool _cleanupNeededPlayback = false;
 
     std::vector<interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
-    std::vector<datamessagestructures::TimeKeyframe> _keyframesTime;
     std::vector<std::string> _keyframesScript;
     std::vector<TimelineEntry> _timeline;
 
@@ -420,7 +412,6 @@ protected:
     std::vector<std::string> _loadedNodes;
 
     unsigned int _idxTimeline_nonCamera = 0;
-    unsigned int _idxScript = 0;
 
     unsigned int _idxTimeline_cameraPtrNext = 0;
     unsigned int _idxTimeline_cameraPtrPrev = 0;
