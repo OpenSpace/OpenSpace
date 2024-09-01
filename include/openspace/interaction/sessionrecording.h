@@ -50,7 +50,7 @@ enum class RecordedType {
 struct TimelineEntry {
     RecordedType keyframeType;
     unsigned int idxIntoKeyframeTypeArray;
-    Timestamps t3stamps;
+    Timestamps timestamps;
 };
 
 class SessionRecording : public properties::PropertyOwner {
@@ -385,7 +385,6 @@ protected:
     double _saveRenderingCurrentApplicationTime_interpolation = 0.0;
     bool _saveRendering_isFirstFrame = true;
 
-    bool _cleanupNeededRecording = false;
     bool _cleanupNeededPlayback = false;
 
     std::vector<interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
