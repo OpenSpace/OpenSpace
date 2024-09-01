@@ -224,14 +224,6 @@ public:
      */
     SessionState state() const;
 
-    private:
-    /**
-     * Used to trigger a save of the camera states (position, rotation, focus node,
-     * whether it is following the rotation of a node, and timestamp). The data will be
-     * saved to the recording file only if a recording is currently in progress.
-     */
-    void saveCameraKeyframeToTimeline();
-    public:
     /**
      * Used to trigger a save of a script to the recording file, but only if a recording
      * is currently in progress.
@@ -338,38 +330,31 @@ protected:
     properties::BoolProperty _addModelMatrixinAscii;
 
 
-    Timestamps _timestamps3RecordStarted{ 0.0, 0.0, 0.0 };
-    double _timestampPlaybackStarted_application = 0.0;
-    double _timestampPlaybackStarted_simulation = 0.0;
-    double _timestampApplicationStarted_simulation = 0.0;
+    Timestamps _timestampsRecordStarted = { 0.0, 0.0, 0.0 };
+    double _timestampPlaybackStarted = 0.0;
     void playbackCamera(std::string lineParsing, int lineNumber);
     void playbackScript(std::string lineParsing, int lineNumber);
     void playbackAddEntriesToTimeline(std::string playbackFilename);
     void signalPlaybackFinishedForComponent(RecordedType type);
     void handlePlaybackEnd();
 
-    bool findFirstCameraKeyframeInTimeline();
-    Timestamps generateCurrentTimestamp3(double keyframeTime) const;
+    void findFirstCameraKeyframeInTimeline();
 
     void addKeyframe(Timestamps t3stamps,
-        interaction::KeyframeNavigator::CameraPose keyframe);
-    void addKeyframe(Timestamps t3stamps,
-        std::string scriptToQueue);
+        datamessagestructures::CameraKeyframe keyframe);
+    void addKeyframe(Timestamps t3stamps, std::string scriptToQueue);
 
     void initializePlayback_time(double now);
     void initializePlayback_modeFlags();
-    bool initializePlayback_timeline();
+    void initializePlayback_timeline();
     void moveAheadInTime();
     void lookForNonCameraKeyframesThatHaveComeDue(double currTime);
     void updateCameraWithOrWithoutNewKeyframes(double currTime);
-    bool processNextNonCameraKeyframeAheadInTime();
     bool findNextFutureCameraIndex(double currTime);
-    bool processCameraKeyframe(double now);
 
     void cleanUpPlayback();
-    void cleanUpRecording();
     void cleanUpTimelinesAndKeyframes();
-    void convertEntries(std::string& inFilename, std::stringstream& inStream,
+    void convertEntries(const std::string& inFilename, std::stringstream& inStream,
         DataMode mode, int lineNum, std::ofstream& outFile);
     virtual void convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile);

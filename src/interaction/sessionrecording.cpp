@@ -639,6 +639,13 @@ namespace {
         }
     }
 
+    Timestamps generateCurrentTimestamp(double keyframeTime, double recordStartTime) {
+        return {
+            keyframeTime,
+            keyframeTime - recordStartTime,
+            global::timeManager->time().j2000Seconds()
+        };
+    }
 } // namespace
 
 namespace openspace::interaction {
@@ -734,9 +741,8 @@ void SessionRecording::startRecording(const std::string& fn) {
 
     // Record the current delta time as the first property to save in the file.
     // This needs to be saved as a baseline whether or not it changes during recording
-    _timestamps3RecordStarted = {
+    _timestampsRecordStarted = {
         .timeOs = global::windowDelegate->applicationTime(),
-        .timeRec = 0.0,
         .timeSim = global::timeManager->time().j2000Seconds()
     };
 
@@ -795,7 +801,7 @@ void SessionRecording::stopRecording() {
         smTmp._script = script;
         saveSingleKeyframeScript(
             smTmp,
-            _timestamps3RecordStarted,
+            _timestampsRecordStarted,
             _recordingDataMode,
             recordFile
         );
@@ -948,25 +954,38 @@ void SessionRecording::startPlayback(std::string& filename,
         return;
     }
 
-    initializePlayback_modeFlags();
-    if (!initializePlayback_timeline()) {
+    // Make sure that there is at least one camera keyframe
+    bool foundCameraKeyframe = false;
+    for (const TimelineEntry& e : _timeline) {
+        if (e.keyframeType == RecordedType::Camera) {
+            foundCameraKeyframe = true;
+            break;
+        }
+    }
+    if (!foundCameraKeyframe) {
+        LERROR(std::format(
+            "Session recording '{}' did not contain any camera keyframes",
+            absFilename
+        ));
         cleanUpPlayback();
         return;
     }
 
+
+    initializePlayback_modeFlags();
+    initializePlayback_timeline();
+
     const bool canTriggerPlayback = global::openSpaceEngine->setMode(
         OpenSpaceEngine::Mode::SessionRecordingPlayback
     );
-
     if (!canTriggerPlayback) {
         cleanUpPlayback();
         return;
     }
 
     LINFO(std::format(
-        "Playback session started: ({:8.3f},0.0,{:13.3f}) with {}/{} entries",
-        now, _timestampPlaybackStarted_simulation, _keyframesCamera.size(),
-        _keyframesScript.size()
+        "Playback session started with {}/{}/{} entries",
+        _timeline.size(), _keyframesCamera.size(), _keyframesScript.size()
     ));
 
     global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
@@ -978,9 +997,7 @@ void SessionRecording::startPlayback(std::string& filename,
 }
 
 void SessionRecording::initializePlayback_time(double now) {
-    _timestampPlaybackStarted_application = now;
-    _timestampPlaybackStarted_simulation = global::timeManager->time().j2000Seconds();
-    _timestampApplicationStarted_simulation = _timestampPlaybackStarted_simulation - now;
+    _timestampPlaybackStarted = now;
     _saveRenderingCurrentRecordedTime_interpolation = std::chrono::steady_clock::now();
     _saveRenderingCurrentApplicationTime_interpolation =
         global::windowDelegate->applicationTime();
@@ -994,10 +1011,8 @@ void SessionRecording::initializePlayback_modeFlags() {
     _playbackActive_script = true;
 }
 
-bool SessionRecording::initializePlayback_timeline() {
-    if (!findFirstCameraKeyframeInTimeline()) {
-        return false;
-    }
+void SessionRecording::initializePlayback_timeline() {
+    findFirstCameraKeyframeInTimeline();
 
     const Timestamps times = _timeline[_idxTimeline_cameraFirstInTimeline].t3stamps;
     global::timeManager->setTimeNextFrame(Time(times.timeSim));
@@ -1006,7 +1021,6 @@ bool SessionRecording::initializePlayback_timeline() {
     _idxTimeline_nonCamera = 0;
     _idxTimeline_cameraPtrNext = 0;
     _idxTimeline_cameraPtrPrev = 0;
-    return true;
 }
 
 bool SessionRecording::isPlaybackPaused() const {
@@ -1035,8 +1049,7 @@ void SessionRecording::setPlaybackPause(bool pause) {
     }
 }
 
-bool SessionRecording::findFirstCameraKeyframeInTimeline() {
-    bool foundCameraKeyframe = false;
+void SessionRecording::findFirstCameraKeyframeInTimeline() {
     for (unsigned int i = 0; i < _timeline.size(); i++) {
         if (_timeline[i].keyframeType == RecordedType::Camera) {
             _idxTimeline_cameraFirstInTimeline = i;
@@ -1044,32 +1057,23 @@ bool SessionRecording::findFirstCameraKeyframeInTimeline() {
             _idxTimeline_cameraPtrNext = _idxTimeline_cameraFirstInTimeline;
             _cameraFirstInTimeline_timestamp =
                 _timeline[_idxTimeline_cameraFirstInTimeline].t3stamps.timeRec;
-            foundCameraKeyframe = true;
             break;
         }
     }
 
-    if (!foundCameraKeyframe) {
-        signalPlaybackFinishedForComponent(RecordedType::Camera);
-        return true;
+    // Check if the initial focus node is loaded
+    if (_keyframesCamera.empty()) {
+        return;
     }
-    else {
-        // Check if the initial focus node is loaded
-        if (_keyframesCamera.empty()) {
-            return true;
-        }
 
-        std::string startFocusNode =
-            _keyframesCamera[_timeline[_idxTimeline_cameraFirstInTimeline].idxIntoKeyframeTypeArray].focusNode;
-        auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
-        if (it == _loadedNodes.end()) {
-            LERROR(std::format(
-                "Playback file requires scenegraph node '{}', which is "
-                "not currently loaded", startFocusNode
-            ));
-            return false;
-        }
-        return true;
+    std::string startFocusNode =
+        _keyframesCamera[_timeline[_idxTimeline_cameraFirstInTimeline].idxIntoKeyframeTypeArray].focusNode;
+    auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
+    if (it == _loadedNodes.end()) {
+        throw LoadingError(std::format(
+            "Playback file requires scenegraph node '{}', which is "
+            "not currently loaded", startFocusNode
+        ));
     }
 }
 
@@ -1149,11 +1153,6 @@ void SessionRecording::cleanUpPlayback() {
     _cleanupNeededPlayback = false;
 }
 
-void SessionRecording::cleanUpRecording() {
-    cleanUpTimelinesAndKeyframes();
-    _cleanupNeededRecording = false;
-}
-
 void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _timeline.clear();
     _keyframesCamera.clear();
@@ -1167,30 +1166,6 @@ void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _saveRendering_isFirstFrame = true;
     _playbackPauseOffset = 0.0;
     _playbackLoopMode = false;
-}
-
-Timestamps SessionRecording::generateCurrentTimestamp3(double keyframeTime) const {
-    return {
-        keyframeTime,
-        keyframeTime - _timestamps3RecordStarted.timeOs,
-        global::timeManager->time().j2000Seconds()
-    };
-}
-
-void SessionRecording::saveCameraKeyframeToTimeline() {
-    const SceneGraphNode* an = global::navigationHandler->orbitalNavigator().anchorNode();
-    if (!an) {
-        return;
-    }
-
-    // Create a camera keyframe, then call to populate it with current position
-    // & orientation of camera
-    datamessagestructures::CameraKeyframe kf =
-        datamessagestructures::generateCameraKeyframe();
-
-    Timestamps times = generateCurrentTimestamp3(kf._timestamp);
-    interaction::KeyframeNavigator::CameraPose pbFrame(std::move(kf));
-    addKeyframe(std::move(times), std::move(pbFrame));
 }
 
 void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
@@ -1248,7 +1223,7 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
     const datamessagestructures::ScriptMessage sm =
         datamessagestructures::generateScriptMessage(script);
 
-    Timestamps times = generateCurrentTimestamp3(sm._timestamp);
+    Timestamps times = generateCurrentTimestamp(sm._timestamp, _timestampsRecordStarted.timeOs);
     addKeyframe(std::move(times), sm._script);
 }
 
@@ -1281,7 +1256,9 @@ void SessionRecording::preSynchronization() {
     ZoneScoped;
 
     if (_state == SessionState::Recording) {
-        saveCameraKeyframeToTimeline();
+        CameraKeyframe kf = generateCameraKeyframe();
+        Timestamps times = generateCurrentTimestamp(kf._timestamp, _timestampsRecordStarted.timeOs);
+        addKeyframe(std::move(times), std::move(kf));
     }
     else if (isPlayingBack()) {
         if (!_timeline.empty()) {
@@ -1292,7 +1269,8 @@ void SessionRecording::preSynchronization() {
         cleanUpPlayback();
     }
     else if (_cleanupNeededRecording) {
-        cleanUpRecording();
+        cleanUpTimelinesAndKeyframes();
+        _cleanupNeededRecording = false;
     }
 
     // Handle callback(s) for change in idle/record/playback state
@@ -1430,8 +1408,8 @@ double SessionRecording::currentTime() const {
         return _saveRenderingCurrentRecordedTime;
     }
     else {
-        return (global::windowDelegate->applicationTime() -
-                _timestampPlaybackStarted_application) - _playbackPauseOffset;
+        return global::windowDelegate->applicationTime() -
+               _timestampPlaybackStarted - _playbackPauseOffset;
     }
 }
 
@@ -1465,8 +1443,7 @@ void SessionRecording::playbackCamera(std::string lineParsing, int lineNumber) {
         lineParsing,
         lineNumber
     );
-    const interaction::KeyframeNavigator::CameraPose pbFrame(std::move(kf));
-    addKeyframe(times, pbFrame);
+    addKeyframe(std::move(times), std::move(kf));
 }
 
 void SessionRecording::convertCamera(std::stringstream& inStream, DataMode mode,
@@ -1595,20 +1572,17 @@ void SessionRecording::convertScript(std::stringstream& inStream, DataMode mode,
                                      int lineNum, std::string& inputLine,
                                      std::ofstream& outFile)
 {
-    auto [times, kf] = readSingleKeyframeScript(
-        mode,
-        reinterpret_cast<std::ifstream&>(inStream),
-        inputLine,
-        lineNum
-    );
-    saveSingleKeyframeScript(kf, times, mode, outFile);
+    auto [times, kf] = readSingleKeyframeScript(mode, inStream, inputLine, lineNum);
+    saveSingleKeyframeScript(std::move(kf), std::move(times), mode, outFile);
 }
 
 void SessionRecording::addKeyframe(Timestamps t3stamps,
-                                   interaction::KeyframeNavigator::CameraPose keyframe)
+                                   datamessagestructures::CameraKeyframe keyframe)
 {
     const size_t indexIntoCameraKeyframesFromMainTimeline = _keyframesCamera.size();
-    _keyframesCamera.push_back(std::move(keyframe));
+    _keyframesCamera.push_back(
+        interaction::KeyframeNavigator::CameraPose(std::move(keyframe))
+    );
     _timeline.emplace_back(
         RecordedType::Camera,
         static_cast<unsigned int>(indexIntoCameraKeyframesFromMainTimeline),
@@ -1616,9 +1590,7 @@ void SessionRecording::addKeyframe(Timestamps t3stamps,
     );
 }
 
-void SessionRecording::addKeyframe(Timestamps t3stamps,
-                                   std::string scriptToQueue)
-{
+void SessionRecording::addKeyframe(Timestamps t3stamps, std::string scriptToQueue) {
     const size_t indexIntoScriptKeyframesFromMainTimeline = _keyframesScript.size();
     _keyframesScript.push_back(std::move(scriptToQueue));
     _timeline.emplace_back(
@@ -1666,11 +1638,26 @@ void SessionRecording::moveAheadInTime() {
 }
 
 void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime) {
-    ghoul_assert(!_timeline.empty(), "No timeline entries");
-
     while ((currTime > _timeline[_idxTimeline_nonCamera].t3stamps.timeRec) && _playbackActive_script) {
-        if (!processNextNonCameraKeyframeAheadInTime()) {
-            break;
+        RecordedType type = _timeline[_idxTimeline_nonCamera].keyframeType;
+        // This should always be true, but it currently isn't
+        if (type == RecordedType::Script) {
+            unsigned int idxScript = _timeline[_idxTimeline_nonCamera].idxIntoKeyframeTypeArray;
+            if (!_playbackActive_script || _keyframesScript.empty()) {
+                break;
+            }
+
+            const auto [nextScript, atEnd] = nextKeyframeObj(idxScript, _keyframesScript);
+            if (atEnd) {
+                signalPlaybackFinishedForComponent(RecordedType::Script);
+            }
+
+            global::scriptEngine->queueScript(
+                nextScript,
+                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+                scripting::ScriptEngine::ShouldSendToRemote::Yes
+            );
+
         }
 
         _idxTimeline_nonCamera++;
@@ -1696,7 +1683,40 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
         (currTime < _cameraFirstInTimeline_timestamp);
 
     if (! (isPrevAtFirstKeyframe && isFirstTimelineCameraKeyframeInFuture)) {
-        processCameraKeyframe(currTime);
+        if (!_playbackActive_camera || _keyframesCamera.empty()) {
+            return;
+        }
+
+        unsigned int prevIdx = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
+        interaction::KeyframeNavigator::CameraPose prevPose = _keyframesCamera[prevIdx];
+        unsigned int nextIdx = _timeline[_idxTimeline_cameraPtrNext].idxIntoKeyframeTypeArray;
+        interaction::KeyframeNavigator::CameraPose nextPose = _keyframesCamera[nextIdx];
+
+        const double prevTime = _timeline[_idxTimeline_cameraPtrPrev].t3stamps.timeRec;
+        const double nextTime = _timeline[_idxTimeline_cameraPtrNext].t3stamps.timeRec;
+
+        double t = 0.0;
+        if ((nextTime - prevTime) >= 1e-7) {
+            t = (currTime - prevTime) / (nextTime - prevTime);
+        }
+
+        // Need to activly update the focusNode position of the camera in relation to
+        // the rendered objects will be unstable and actually incorrect
+        Camera* camera = global::navigationHandler->camera();
+        Scene* scene = camera->parent()->scene();
+
+        const SceneGraphNode* n = scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode);
+        if (n) {
+            global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
+        }
+
+        interaction::KeyframeNavigator::updateCamera(
+            global::navigationHandler->camera(),
+            prevPose,
+            nextPose,
+            t,
+            _ignoreRecordedScale
+        );
     }
     if (!didFindFutureCameraKeyframes) {
         signalPlaybackFinishedForComponent(RecordedType::Camera);
@@ -1748,74 +1768,6 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
         }
     }
     return true;
-}
-
-bool SessionRecording::processNextNonCameraKeyframeAheadInTime() {
-    ghoul_assert(!_timeline.empty(), "No timeline entries");
-    RecordedType type = _timeline[_idxTimeline_nonCamera].keyframeType;
-    // This should always be true, but it currently isn't
-    if (type == RecordedType::Script) {
-        unsigned int idxScript = _timeline[_idxTimeline_nonCamera].idxIntoKeyframeTypeArray;
-        if (!_playbackActive_script || _keyframesScript.empty()) {
-            return false;
-        }
-
-        const auto [nextScript, atEnd] = nextKeyframeObj(idxScript, _keyframesScript);
-        if (atEnd) {
-            signalPlaybackFinishedForComponent(RecordedType::Script);
-        }
-
-        global::scriptEngine->queueScript(
-            nextScript,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
-
-    }
-    return true;
-}
-
-bool SessionRecording::processCameraKeyframe(double now) {
-    if (!_playbackActive_camera || _keyframesCamera.empty()) {
-        return false;
-    }
-
-    unsigned int prevIdx = _timeline[_idxTimeline_cameraPtrPrev].idxIntoKeyframeTypeArray;
-    interaction::KeyframeNavigator::CameraPose prevPose = _keyframesCamera[prevIdx];
-    unsigned int nextIdx = _timeline[_idxTimeline_cameraPtrNext].idxIntoKeyframeTypeArray;
-    interaction::KeyframeNavigator::CameraPose nextPose = _keyframesCamera[nextIdx];
-
-    const double prevTime = _timeline[_idxTimeline_cameraPtrPrev].t3stamps.timeRec;
-    const double nextTime = _timeline[_idxTimeline_cameraPtrNext].t3stamps.timeRec;
-
-    double t = 0.0;
-    if ((nextTime - prevTime) >= 1e-7) {
-        t = (now - prevTime) / (nextTime - prevTime);
-    }
-
-#ifdef INTERPOLATION_DEBUG_PRINT
-    LINFOC("prev", std::to_string(prevTime));
-    LINFOC("now", std::to_string(prevTime + t));
-    LINFOC("next", std::to_string(nextTime));
-#endif
-
-    // Need to activly update the focusNode position of the camera in relation to
-    // the rendered objects will be unstable and actually incorrect
-    Camera* camera = global::navigationHandler->camera();
-    Scene* scene = camera->parent()->scene();
-
-    const SceneGraphNode* n = scene->sceneGraphNode(_keyframesCamera[prevIdx].focusNode);
-    if (n) {
-        global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
-    }
-
-    return interaction::KeyframeNavigator::updateCamera(
-        global::navigationHandler->camera(),
-        prevPose,
-        nextPose,
-        t,
-        _ignoreRecordedScale
-    );
 }
 
 SessionRecording::CallbackHandle SessionRecording::addStateChangeCallback(
@@ -1909,56 +1861,58 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
         readFileIntoStringStream(newFilename, conversionInStream);
         readPlaybackHeader_stream(conversionInStream, fileVersion, mode);
     }
-    if (depth != 0) {
-        conversionOutFilename = determineConversionOutFilename(filename, mode);
-        LINFO(std::format(
-            "Starting conversion on rec file '{}', version {} in {} mode. "
-            "Writing result to '{}'",
-            newFilename, fileVersion, (mode == DataMode::Ascii) ? "ascii" : "binary",
-            conversionOutFilename
-        ));
-        std::ofstream conversionOutFile;
-        if (mode == DataMode::Binary) {
-            conversionOutFile.open(conversionOutFilename, std::ios::binary);
-        }
-        else {
-            conversionOutFile.open(conversionOutFilename);
-        }
-        if (!conversionOutFile.is_open() || !conversionOutFile.good()) {
-            LERROR(std::format(
-                "Unable to open file '{}' for conversion result", conversionOutFilename
-            ));
-            return "";
-        }
-        conversionOutFile << FileHeaderTitle;
-        conversionOutFile.write(
-            targetFileFormatVersion().c_str(),
-            FileHeaderVersionLength
-        );
-        if (mode == DataMode::Binary) {
-            conversionOutFile << DataFormatBinaryTag;
-        }
-        else {
-            conversionOutFile << DataFormatAsciiTag;
-        }
-        conversionOutFile << '\n';
-        convertEntries(
-            newFilename,
-            conversionInStream,
-            mode,
-            conversionLineNum,
-            conversionOutFile
-        );
-        conversionOutFile.close();
+    if (depth == 0) {
+        return newFilename;
     }
 
-    return depth == 0 ? newFilename : conversionOutFilename;
+    conversionOutFilename = determineConversionOutFilename(filename, mode);
+    LINFO(std::format(
+        "Starting conversion on rec file '{}', version {} in {} mode. "
+        "Writing result to '{}'",
+        newFilename, fileVersion, (mode == DataMode::Ascii) ? "ascii" : "binary",
+        conversionOutFilename
+    ));
+    std::ofstream conversionOutFile;
+    if (mode == DataMode::Binary) {
+        conversionOutFile.open(conversionOutFilename, std::ios::binary);
+    }
+    else {
+        conversionOutFile.open(conversionOutFilename);
+    }
+    if (!conversionOutFile.is_open() || !conversionOutFile.good()) {
+        LERROR(std::format(
+            "Unable to open file '{}' for conversion result", conversionOutFilename
+        ));
+        return "";
+    }
+    conversionOutFile << FileHeaderTitle;
+    conversionOutFile.write(
+        targetFileFormatVersion().c_str(),
+        FileHeaderVersionLength
+    );
+    if (mode == DataMode::Binary) {
+        conversionOutFile << DataFormatBinaryTag;
+    }
+    else {
+        conversionOutFile << DataFormatAsciiTag;
+    }
+    conversionOutFile << '\n';
+    convertEntries(
+        newFilename,
+        conversionInStream,
+        mode,
+        conversionLineNum,
+        conversionOutFile
+    );
+
+    return conversionOutFilename;
 }
 
-void SessionRecording::convertEntries(std::string& inFilename,
+void SessionRecording::convertEntries(const std::string& inFilename,
                                       std::stringstream& inStream, DataMode mode,
                                       int lineNum, std::ofstream& outFile)
 {
+    // There is some more elegant way of doing this
     std::string lineParsing;
 
     if (mode == DataMode::Binary) {
@@ -2006,8 +1960,7 @@ void SessionRecording::convertEntries(std::string& inFilename,
                 convertCamera(inStream, mode, lineNum, lineParsing, outFile);
             }
             else if (entryType == HeaderScriptAscii) {
-                convertScript(inStream, mode, lineNum, lineParsing, outFile
-                );
+                convertScript(inStream, mode, lineNum, lineParsing, outFile);
             }
             else if (entryType.substr(0, 1) == HeaderCommentAscii) {
                 continue;
