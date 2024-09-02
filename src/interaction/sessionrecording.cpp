@@ -541,7 +541,6 @@ namespace {
     }
 
     SessionRecording::DataMode readModeFromHeader(const std::string& filename) {
-        SessionRecording::DataMode mode = SessionRecording::DataMode::Unknown;
         std::ifstream inputFile = std::ifstream(filename, std::ifstream::in);
 
         // Read header
@@ -554,6 +553,7 @@ namespace {
         }
         readHeaderElement(inputFile, FileHeaderVersionLength);
         std::string readDataMode = readHeaderElement(inputFile, 1);
+        SessionRecording::DataMode mode;
         if (readDataMode[0] == DataFormatAsciiTag) {
             mode = SessionRecording::DataMode::Ascii;
         }
@@ -806,8 +806,7 @@ void SessionRecording::stopRecording() {
         switch (entry.keyframeType) {
             case RecordedType::Camera:
             {
-                interaction::KeyframeNavigator::CameraPose kf
-                    = _keyframesCamera[entry.idxIntoKeyframeTypeArray];
+                auto kf = std::get<CameraEntry>(entry.value);
                 datamessagestructures::CameraKeyframe kfMsg(
                     std::move(kf.position),
                     std::move(kf.rotation),
@@ -826,7 +825,7 @@ void SessionRecording::stopRecording() {
             }
             case RecordedType::Script:
             {
-                smTmp._script = _keyframesScript[entry.idxIntoKeyframeTypeArray];
+                smTmp._script = std::get<ScriptEntry>(entry.value);
                 saveSingleKeyframeScript(
                     smTmp,
                     entry.timestamps,
@@ -967,8 +966,6 @@ void SessionRecording::startPlayback(std::string& filename,
         return;
     }
 
-    ghoul_assert(!_keyframesCamera.empty(), "No camera keyframes");
-
     initializePlayback_modeFlags();
     initializePlayback_timeline();
 
@@ -980,10 +977,7 @@ void SessionRecording::startPlayback(std::string& filename,
         return;
     }
 
-    LINFO(std::format(
-        "Playback session started with {}/{}/{} entries",
-        _timeline.size(), _keyframesCamera.size(), _keyframesScript.size()
-    ));
+    LINFO(std::format("Playback session started with {} entries", _timeline.size()));
 
     global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
         events::EventSessionRecordingPlayback::State::Started
@@ -1015,9 +1009,16 @@ void SessionRecording::initializePlayback_timeline() {
             break;
         }
     }
+    for (int i = _timeline.size() - 1; i >= 0; i--) {
+        if (_timeline[i].keyframeType == RecordedType::Camera) {
+            _idxTimeline_cameraLastInTimeline = i;
+            break;
+        }
+    }
 
-    std::string startFocusNode =
-        _keyframesCamera[_timeline[_idxTimeline_cameraFirstInTimeline].idxIntoKeyframeTypeArray].focusNode;
+    std::string startFocusNode = std::get<CameraEntry>(
+        _timeline[_idxTimeline_cameraFirstInTimeline].value
+    ).focusNode;
     auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
     if (it == _loadedNodes.end()) {
         throw LoadingError(std::format(
@@ -1121,8 +1122,6 @@ void SessionRecording::cleanUpPlayback() {
 
 void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _timeline.clear();
-    _keyframesCamera.clear();
-    _keyframesScript.clear();
     _savePropertiesBaseline.clear();
     _loadedNodes.clear();
     _idxTimeline_nonCamera = 0;
@@ -1533,24 +1532,18 @@ void SessionRecording::convertScript(std::stringstream& inStream, DataMode mode,
 void SessionRecording::addKeyframe(Timestamps t3stamps,
                                    datamessagestructures::CameraKeyframe keyframe)
 {
-    const size_t indexIntoCameraKeyframesFromMainTimeline = _keyframesCamera.size();
-    _keyframesCamera.push_back(
-        interaction::KeyframeNavigator::CameraPose(std::move(keyframe))
-    );
     _timeline.emplace_back(
         RecordedType::Camera,
-        static_cast<unsigned int>(indexIntoCameraKeyframesFromMainTimeline),
-        t3stamps
+        t3stamps,
+        interaction::KeyframeNavigator::CameraPose(std::move(keyframe))
     );
 }
 
 void SessionRecording::addKeyframe(Timestamps t3stamps, std::string scriptToQueue) {
-    const size_t indexIntoScriptKeyframesFromMainTimeline = _keyframesScript.size();
-    _keyframesScript.push_back(std::move(scriptToQueue));
     _timeline.emplace_back(
         RecordedType::Script,
-        static_cast<unsigned int>(indexIntoScriptKeyframesFromMainTimeline),
-        t3stamps
+        t3stamps,
+        std::move(scriptToQueue)
     );
 }
 
@@ -1564,6 +1557,7 @@ void SessionRecording::moveAheadInTime() {
     const double currTime = currentTime();
     lookForNonCameraKeyframesThatHaveComeDue(currTime);
     updateCameraWithOrWithoutNewKeyframes(currTime);
+
     // Unfortunately the first frame is sometimes rendered because globebrowsing reports
     // that all chunks are rendered when they apparently are not.
     if (_saveRendering_isFirstFrame) {
@@ -1590,19 +1584,14 @@ void SessionRecording::moveAheadInTime() {
 }
 
 void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime) {
-    if (_keyframesScript.empty()) {
-        return;
-    }
-
     while (_playbackActive_script && (currTime > _timeline[_idxTimeline_nonCamera].timestamps.timeRec)) {
         ghoul_assert(
             _timeline[_idxTimeline_nonCamera].keyframeType == RecordedType::Script,
             "Index out of whack"
         );
 
-        unsigned int idxScript = _timeline[_idxTimeline_nonCamera].idxIntoKeyframeTypeArray;
         global::scriptEngine->queueScript(
-            _keyframesScript[idxScript],
+            std::get<ScriptEntry>(_timeline[_idxTimeline_nonCamera].value),
             scripting::ScriptEngine::ShouldBeSynchronized::Yes,
             scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
@@ -1638,11 +1627,13 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
 
     if (!isPrevAtFirstKeyframe || !isFirstTimelineCameraKeyframeInFuture) {
         const TimelineEntry& prev = _timeline[_idxTimeline_cameraPtrPrev];
-        interaction::KeyframeNavigator::CameraPose prevPose = _keyframesCamera[prev.idxIntoKeyframeTypeArray];
+        interaction::KeyframeNavigator::CameraPose prevPose =
+            std::get<CameraEntry>(prev.value);
         const double prevTime = prev.timestamps.timeRec;
 
         const TimelineEntry& next = _timeline[_idxTimeline_cameraPtrNext];
-        interaction::KeyframeNavigator::CameraPose nextPose = _keyframesCamera[next.idxIntoKeyframeTypeArray];
+        interaction::KeyframeNavigator::CameraPose nextPose =
+            std::get<CameraEntry>(next.value);
         const double nextTime = next.timestamps.timeRec;
 
         double t = 0.0;
@@ -1680,9 +1671,7 @@ bool SessionRecording::findNextFutureCameraIndex(double currTime) {
             continue;
         }
 
-        if (_timeline[seekAheadIndex].idxIntoKeyframeTypeArray ==
-            (_keyframesCamera.size() - 1))
-        {
+        if (seekAheadIndex == _idxTimeline_cameraLastInTimeline) {
             hasHitEndOfCameraKeyframes = true;
         }
 
@@ -1776,7 +1765,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
     }
     std::string newFilename = filename;
     readFileIntoStringStream(filename, conversionInStream);
-    DataMode mode = DataMode::Unknown;
+    DataMode mode;
     std::string fileVersion;
     readPlaybackHeader_stream(conversionInStream, fileVersion, mode);
     const int conversionLineNum = 1;

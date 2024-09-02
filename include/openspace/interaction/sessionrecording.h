@@ -31,6 +31,7 @@
 #include <openspace/network/messagestructures.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
+#include <variant>
 #include <vector>
 #include <chrono>
 
@@ -47,18 +48,20 @@ enum class RecordedType {
     Script
 };
 
+using CameraEntry = interaction::KeyframeNavigator::CameraPose;
+using ScriptEntry = std::string;
+
 struct TimelineEntry {
     RecordedType keyframeType;
-    unsigned int idxIntoKeyframeTypeArray;
     Timestamps timestamps;
+    std::variant<CameraEntry, ScriptEntry> value;
 };
 
 class SessionRecording : public properties::PropertyOwner {
 public:
     enum class DataMode {
         Ascii = 0,
-        Binary,
-        Unknown
+        Binary
     };
 
     enum class SessionState {
@@ -385,8 +388,6 @@ protected:
 
     bool _cleanupNeededPlayback = false;
 
-    std::vector<interaction::KeyframeNavigator::CameraPose> _keyframesCamera;
-    std::vector<std::string> _keyframesScript;
     std::vector<TimelineEntry> _timeline;
 
     std::unordered_map<std::string, std::string> _savePropertiesBaseline;
@@ -399,6 +400,7 @@ protected:
     unsigned int _idxTimeline_cameraPtrPrev = 0;
 
     unsigned int _idxTimeline_cameraFirstInTimeline = 0;
+    unsigned int _idxTimeline_cameraLastInTimeline = 0;
 
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
