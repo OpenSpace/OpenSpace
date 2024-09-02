@@ -631,6 +631,17 @@ namespace {
             global::timeManager->time().j2000Seconds()
         };
     }
+
+    std::vector<TimelineEntry>::const_iterator findNextOfType(const std::vector<TimelineEntry>& timeline, RecordedType type, std::vector<TimelineEntry>::const_iterator start) {
+        start++;
+        for (auto it = start; it != timeline.end(); it++) {
+            if (it->keyframeType == type) {
+                return it;
+            }
+        }
+
+        return timeline.end();
+    }
 } // namespace
 
 namespace openspace::interaction {
@@ -998,7 +1009,22 @@ void SessionRecording::initializePlayback_modeFlags() {
 }
 
 void SessionRecording::initializePlayback_timeline() {
-    findFirstCameraKeyframeInTimeline();
+    for (unsigned int i = 0; i < _timeline.size(); i++) {
+        if (_timeline[i].keyframeType == RecordedType::Camera) {
+            _idxTimeline_cameraFirstInTimeline = i;
+            break;
+        }
+    }
+
+    std::string startFocusNode =
+        _keyframesCamera[_timeline[_idxTimeline_cameraFirstInTimeline].idxIntoKeyframeTypeArray].focusNode;
+    auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
+    if (it == _loadedNodes.end()) {
+        throw LoadingError(std::format(
+            "Playback file requires scenegraph node '{}', which is "
+            "not currently loaded", startFocusNode
+        ));
+    }
 
     const Timestamps times = _timeline[_idxTimeline_cameraFirstInTimeline].timestamps;
     global::timeManager->setTimeNextFrame(Time(times.timeSim));
@@ -1032,29 +1058,6 @@ void SessionRecording::setPlaybackPause(bool pause) {
         global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
             events::EventSessionRecordingPlayback::State::Resumed
         );
-    }
-}
-
-void SessionRecording::findFirstCameraKeyframeInTimeline() {
-    for (unsigned int i = 0; i < _timeline.size(); i++) {
-        if (_timeline[i].keyframeType == RecordedType::Camera) {
-            _idxTimeline_cameraFirstInTimeline = i;
-            _idxTimeline_cameraPtrPrev = _idxTimeline_cameraFirstInTimeline;
-            _idxTimeline_cameraPtrNext = _idxTimeline_cameraFirstInTimeline;
-            _cameraFirstInTimeline_timestamp =
-                _timeline[_idxTimeline_cameraFirstInTimeline].timestamps.timeRec;
-            break;
-        }
-    }
-
-    std::string startFocusNode =
-        _keyframesCamera[_timeline[_idxTimeline_cameraFirstInTimeline].idxIntoKeyframeTypeArray].focusNode;
-    auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
-    if (it == _loadedNodes.end()) {
-        throw LoadingError(std::format(
-            "Playback file requires scenegraph node '{}', which is "
-            "not currently loaded", startFocusNode
-        ));
     }
 }
 
@@ -1631,7 +1634,7 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
     const bool isPrevAtFirstKeyframe =
         (_idxTimeline_cameraPtrPrev == _idxTimeline_cameraFirstInTimeline);
     const bool isFirstTimelineCameraKeyframeInFuture =
-        (currTime < _cameraFirstInTimeline_timestamp);
+        (currTime < _timeline[_idxTimeline_cameraFirstInTimeline].timestamps.timeRec);
 
     if (!isPrevAtFirstKeyframe || !isFirstTimelineCameraKeyframeInFuture) {
         const TimelineEntry& prev = _timeline[_idxTimeline_cameraPtrPrev];
@@ -1668,45 +1671,41 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
 }
 
 bool SessionRecording::findNextFutureCameraIndex(double currTime) {
-    unsigned int seekAheadIndex = _idxTimeline_cameraPtrPrev;
     bool hasHitEndOfCameraKeyframes = false;
-    while (true) {
-        seekAheadIndex++;
-        if (seekAheadIndex >= static_cast<unsigned int>(_timeline.size())) {
-            seekAheadIndex = static_cast<unsigned int>(_timeline.size()) - 1;
+    for (unsigned int seekAheadIndex = _idxTimeline_cameraPtrPrev + 1;
+         seekAheadIndex < _timeline.size();
+         seekAheadIndex++)
+    {
+        if (_timeline[seekAheadIndex].keyframeType != RecordedType::Camera) {
+            continue;
         }
 
-        if (_timeline[seekAheadIndex].keyframeType == RecordedType::Camera) {
-            const unsigned int indexIntoCameraKeyframes =
-                _timeline[seekAheadIndex].idxIntoKeyframeTypeArray;
-            if (indexIntoCameraKeyframes == (_keyframesCamera.size() - 1)) {
-                hasHitEndOfCameraKeyframes = true;
-            }
-
-            if (currTime < _timeline[seekAheadIndex].timestamps.timeRec) {
-                if (seekAheadIndex > _idxTimeline_cameraPtrNext) {
-                    _idxTimeline_cameraPtrPrev = _idxTimeline_cameraPtrNext;
-                    _idxTimeline_cameraPtrNext = seekAheadIndex;
-                }
-                break;
-            }
-            else {
-                // Force interpolation between consecutive keyframes
-                _idxTimeline_cameraPtrPrev = seekAheadIndex;
-            }
+        if (_timeline[seekAheadIndex].idxIntoKeyframeTypeArray ==
+            (_keyframesCamera.size() - 1))
+        {
+            hasHitEndOfCameraKeyframes = true;
         }
 
-        const double interpolationUpperBoundTimestamp =
-            _timeline[_idxTimeline_cameraPtrNext].timestamps.timeRec;
-        if ((currTime > interpolationUpperBoundTimestamp) && hasHitEndOfCameraKeyframes) {
+        if (seekAheadIndex > _idxTimeline_cameraPtrNext) {
             _idxTimeline_cameraPtrPrev = _idxTimeline_cameraPtrNext;
-            return false;
+            _idxTimeline_cameraPtrNext = seekAheadIndex;
         }
-
-        if (seekAheadIndex == (_timeline.size() - 1)) {
+        if (currTime < _timeline[seekAheadIndex].timestamps.timeRec) {
             break;
         }
+        else {
+            // Force interpolation between consecutive keyframes
+            _idxTimeline_cameraPtrPrev = seekAheadIndex;
+        }
     }
+
+    if ((currTime > _timeline[_idxTimeline_cameraPtrNext].timestamps.timeRec) &&
+        hasHitEndOfCameraKeyframes)
+    {
+        _idxTimeline_cameraPtrPrev = _idxTimeline_cameraPtrNext;
+        return false;
+    }
+
     return true;
 }
 

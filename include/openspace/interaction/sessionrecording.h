@@ -338,8 +338,6 @@ protected:
     void signalPlaybackFinishedForComponent(RecordedType type);
     void handlePlaybackEnd();
 
-    void findFirstCameraKeyframeInTimeline();
-
     void addKeyframe(Timestamps t3stamps,
         datamessagestructures::CameraKeyframe keyframe);
     void addKeyframe(Timestamps t3stamps, std::string scriptToQueue);
@@ -401,7 +399,6 @@ protected:
     unsigned int _idxTimeline_cameraPtrPrev = 0;
 
     unsigned int _idxTimeline_cameraFirstInTimeline = 0;
-    double _cameraFirstInTimeline_timestamp = 0;
 
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
