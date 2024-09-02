@@ -720,7 +720,6 @@ void SessionRecording::startRecording(const std::string& fn) {
     _recordingFile = absFilename;
 
     _state = SessionState::Recording;
-    _playbackActive_camera = false;
     _savePropertiesBaseline.clear();
 
     // Record the current delta time as the first property to save in the file.
@@ -794,7 +793,7 @@ void SessionRecording::stopRecording() {
         switch (entry.keyframeType) {
             case RecordedType::Camera:
             {
-                auto kf = std::get<CameraEntry>(entry.value);
+                CameraEntry kf = std::get<CameraEntry>(entry.value);
                 datamessagestructures::CameraKeyframe kfMsg(
                     std::move(kf.position),
                     std::move(kf.rotation),
@@ -969,7 +968,6 @@ void SessionRecording::startPlayback(std::string& filename,
 
     setupPlayback(now);
 
-
     LINFO(std::format("Playback session started with {} entries", _timeline.size()));
 
     global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
@@ -979,43 +977,21 @@ void SessionRecording::startPlayback(std::string& filename,
 }
 
 void SessionRecording::setupPlayback(double startTime) {
-    initializePlayback_time(startTime);
-    initializePlayback_modeFlags();
-    initializePlayback_timeline();
-    _state = SessionState::Playback;
-}
-
-void SessionRecording::initializePlayback_time(double now) {
-    _timestampPlaybackStarted = now;
+    _timestampPlaybackStarted = startTime;
     _saveRenderingCurrentRecordedTime_interpolation = std::chrono::steady_clock::now();
     _saveRenderingCurrentApplicationTime_interpolation =
         global::windowDelegate->applicationTime();
     _playbackPauseOffset = 0.0;
     global::navigationHandler->keyframeNavigator().setTimeReferenceMode(
-        KeyframeTimeRef::Relative_recordedStart, now);
-}
+        KeyframeTimeRef::Relative_recordedStart, startTime);
 
-void SessionRecording::initializePlayback_modeFlags() {
-    _playbackActive_camera = true;
-}
 
-void SessionRecording::initializePlayback_timeline() {
-    for (unsigned int i = 0; i < _timeline.size(); i++) {
-        if (_timeline[i].keyframeType == RecordedType::Camera) {
-            _idxTimeline_cameraFirstInTimeline = i;
-            break;
-        }
-    }
-    for (int i = _timeline.size() - 1; i >= 0; i--) {
-        if (_timeline[i].keyframeType == RecordedType::Camera) {
-            _idxTimeline_cameraLastInTimeline = i;
-            break;
-        }
+    std::vector<TimelineEntry>::const_iterator firstCamera = _timeline.begin();
+    while (firstCamera != _timeline.end() && firstCamera->keyframeType != RecordedType::Camera) {
+        firstCamera++;
     }
 
-    std::string startFocusNode = std::get<CameraEntry>(
-        _timeline[_idxTimeline_cameraFirstInTimeline].value
-    ).focusNode;
+    std::string startFocusNode = std::get<CameraEntry>(firstCamera->value).focusNode;
     auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
     if (it == _loadedNodes.end()) {
         throw LoadingError(std::format(
@@ -1024,14 +1000,13 @@ void SessionRecording::initializePlayback_timeline() {
         ));
     }
 
-    const Timestamps times = _timeline[_idxTimeline_cameraFirstInTimeline].timestamps;
+    const Timestamps times = firstCamera->timestamps;
     global::timeManager->setTimeNextFrame(Time(times.timeSim));
     _saveRenderingCurrentRecordedTime = times.timeRec;
 
     _previous = _timeline.begin();
 
-    _idxTimeline_cameraPtrNext = 0;
-    _idxTimeline_cameraPtrPrev = 0;
+    _state = SessionState::Playback;
 }
 
 bool SessionRecording::isPlaybackPaused() const {
@@ -1091,8 +1066,6 @@ void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _savePropertiesBaseline.clear();
     _loadedNodes.clear();
     _previous = _timeline.end();
-    _idxTimeline_cameraPtrNext = 0;
-    _idxTimeline_cameraPtrPrev = 0;
     _saveRenderingDuringPlayback = false;
     _saveRendering_isFirstFrame = true;
     _playbackPauseOffset = 0.0;
@@ -1536,63 +1509,55 @@ void SessionRecording::moveAheadInTime() {
         }
     }
 
-
+    //  ... < _previous < ... < prevCamera <= now <= nextCamera < ...
+    std::vector<TimelineEntry>::const_iterator prevCamera = now - 1;
+    while (prevCamera != _timeline.begin() && prevCamera->keyframeType != RecordedType::Camera) {
+        prevCamera--;
+    }
+    std::vector<TimelineEntry>::const_iterator nextCamera = now;
+    while (nextCamera != _timeline.end() && nextCamera->keyframeType != RecordedType::Camera) {
+        nextCamera++;
+    }
 
     // update camera with or without new keyframes
-    if (_playbackActive_camera) {
-        const bool didFindFutureCameraKeyframes = findNextFutureCameraIndex(currTime);
-        const bool isPrevAtFirstKeyframe =
-            (_idxTimeline_cameraPtrPrev == _idxTimeline_cameraFirstInTimeline);
-        const bool isFirstTimelineCameraKeyframeInFuture =
-            (currTime < _timeline[_idxTimeline_cameraFirstInTimeline].timestamps.timeRec);
+    if (prevCamera != nextCamera && prevCamera != _timeline.begin() && nextCamera != _timeline.end()) {
+        const CameraEntry prevPose = std::get<CameraEntry>(prevCamera->value);
+        const double prevTime = prevCamera->timestamps.timeRec;
 
-        if (!isPrevAtFirstKeyframe || !isFirstTimelineCameraKeyframeInFuture) {
-            const TimelineEntry& prev = _timeline[_idxTimeline_cameraPtrPrev];
-            interaction::KeyframeNavigator::CameraPose prevPose =
-                std::get<CameraEntry>(prev.value);
-            const double prevTime = prev.timestamps.timeRec;
+        const CameraEntry nextPose = std::get<CameraEntry>(nextCamera->value);
+        const double nextTime = nextCamera->timestamps.timeRec;
 
-            const TimelineEntry& next = _timeline[_idxTimeline_cameraPtrNext];
-            interaction::KeyframeNavigator::CameraPose nextPose =
-                std::get<CameraEntry>(next.value);
-            const double nextTime = next.timestamps.timeRec;
+        const double t = std::clamp(
+            (currTime - prevTime) / (nextTime - prevTime),
+            0.0,
+            1.0
+        );
 
-            double t = 0.0;
-            if ((nextTime - prevTime) >= 1e-7) {
-                t = (currTime - prevTime) / (nextTime - prevTime);
-            }
-
-            // Need to actively update the focusNode position of the camera in relation to
-            // the rendered objects will be unstable and actually incorrect
-            const SceneGraphNode* n = sceneGraphNode(prevPose.focusNode);
-            if (n) {
-                global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
-            }
-
-            interaction::KeyframeNavigator::updateCamera(
-                global::navigationHandler->camera(),
-                prevPose,
-                nextPose,
-                t,
-                _ignoreRecordedScale
-            );
+        // Need to actively update the focusNode position of the camera in relation to
+        // the rendered objects will be unstable and actually incorrect
+        const SceneGraphNode* n = sceneGraphNode(prevPose.focusNode);
+        if (n) {
+            global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
         }
-        if (!didFindFutureCameraKeyframes) {
-            _playbackActive_camera = false;
-        }
+
+        interaction::KeyframeNavigator::updateCamera(
+            global::navigationHandler->camera(),
+            prevPose,
+            nextPose,
+            t,
+            _ignoreRecordedScale
+        );
     }
 
     _previous = now;
     if (now == _timeline.end()) {
-        if (!_playbackActive_camera) {
-            if (_playbackLoopMode) {
-                _saveRenderingDuringPlayback = false;
-                setupPlayback(global::windowDelegate->applicationTime());
-            }
-            else {
-                LINFO("Playback session finished");
-                handlePlaybackEnd();
-            }
+        if (_playbackLoopMode) {
+            _saveRenderingDuringPlayback = false;
+            setupPlayback(global::windowDelegate->applicationTime());
+        }
+        else {
+            LINFO("Playback session finished");
+            handlePlaybackEnd();
         }
     }
 
@@ -1620,43 +1585,6 @@ void SessionRecording::moveAheadInTime() {
             }
         }
     }
-}
-
-bool SessionRecording::findNextFutureCameraIndex(double currTime) {
-    bool hasHitEndOfCameraKeyframes = false;
-    for (unsigned int seekAheadIndex = _idxTimeline_cameraPtrPrev + 1;
-         seekAheadIndex < _timeline.size();
-         seekAheadIndex++)
-    {
-        if (_timeline[seekAheadIndex].keyframeType != RecordedType::Camera) {
-            continue;
-        }
-
-        if (seekAheadIndex == _idxTimeline_cameraLastInTimeline) {
-            hasHitEndOfCameraKeyframes = true;
-        }
-
-        if (seekAheadIndex > _idxTimeline_cameraPtrNext) {
-            _idxTimeline_cameraPtrPrev = _idxTimeline_cameraPtrNext;
-            _idxTimeline_cameraPtrNext = seekAheadIndex;
-        }
-        if (currTime < _timeline[seekAheadIndex].timestamps.timeRec) {
-            break;
-        }
-        else {
-            // Force interpolation between consecutive keyframes
-            _idxTimeline_cameraPtrPrev = seekAheadIndex;
-        }
-    }
-
-    if ((currTime > _timeline[_idxTimeline_cameraPtrNext].timestamps.timeRec) &&
-        hasHitEndOfCameraKeyframes)
-    {
-        _idxTimeline_cameraPtrPrev = _idxTimeline_cameraPtrNext;
-        return false;
-    }
-
-    return true;
 }
 
 SessionRecording::CallbackHandle SessionRecording::addStateChangeCallback(

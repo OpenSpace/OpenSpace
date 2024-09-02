@@ -342,11 +342,7 @@ protected:
         datamessagestructures::CameraKeyframe keyframe);
     void addKeyframe(Timestamps timestamps, std::string scriptToQueue);
 
-    void initializePlayback_time(double now);
-    void initializePlayback_modeFlags();
-    void initializePlayback_timeline();
     void moveAheadInTime();
-    bool findNextFutureCameraIndex(double currTime);
 
     void setupPlayback(double startTime);
 
@@ -364,7 +360,6 @@ protected:
     SessionState _state = SessionState::Idle;
     SessionState _lastState = SessionState::Idle;
     std::filesystem::path _recordingFile;
-    bool _playbackActive_camera = false;
     bool _playbackPausedWithinDeltaTimePause = false;
     bool _playbackLoopMode = false;
     double _playbackPauseOffset = 0.0;
@@ -384,12 +379,6 @@ protected:
     std::unordered_map<std::string, std::string> _savePropertiesBaseline;
 
     std::vector<std::string> _loadedNodes;
-
-    unsigned int _idxTimeline_cameraPtrNext = 0;
-    unsigned int _idxTimeline_cameraPtrPrev = 0;
-
-    unsigned int _idxTimeline_cameraFirstInTimeline = 0;
-    unsigned int _idxTimeline_cameraLastInTimeline = 0;
 
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
