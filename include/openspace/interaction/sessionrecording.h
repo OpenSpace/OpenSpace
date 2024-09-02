@@ -38,21 +38,14 @@
 namespace openspace::interaction {
 
 struct Timestamps {
-    double timeOs;
     double timeRec;
     double timeSim;
-};
-
-enum class RecordedType {
-    Camera = 0,
-    Script
 };
 
 using CameraEntry = interaction::KeyframeNavigator::CameraPose;
 using ScriptEntry = std::string;
 
 struct TimelineEntry {
-    RecordedType keyframeType;
     Timestamps timestamps;
     std::variant<CameraEntry, ScriptEntry> value;
 };
@@ -82,18 +75,13 @@ public:
      * will be saved to the recording file (if its state has changed since last). If in
      * playback state, the next keyframe will be used (if it is time to do so).
      */
-    void preSynchronization();
+    void preSynchronization(double dt);
 
     /**
      * If enabled, calling this function will render information about the session
      * recording that is currently taking place to the screen.
      */
     void render() const;
-
-    /**
-     * Current time based on playback mode.
-     */
-    double currentTime() const;
 
     /**
      * Fixed delta time set by user for use during saving of frame during playback mode.
@@ -333,16 +321,12 @@ protected:
     properties::BoolProperty _addModelMatrixinAscii;
 
 
-    Timestamps _timestampsRecordStarted = { 0.0, 0.0, 0.0 };
-    double _timestampPlaybackStarted = 0.0;
+    double _timestampRecordStarted = 0.0;
+    double _timeIntoPlayback = 0.0;
     void playbackAddEntriesToTimeline(std::istream& playback, std::string playbackFilename);
     void handlePlaybackEnd();
 
-    void addKeyframe(Timestamps timestamps,
-        datamessagestructures::CameraKeyframe keyframe);
-    void addKeyframe(Timestamps timestamps, std::string scriptToQueue);
-
-    void moveAheadInTime();
+    void moveAheadInTime(double dt);
 
     void setupPlayback(double startTime);
 
@@ -362,8 +346,6 @@ protected:
     std::filesystem::path _recordingFile;
     bool _playbackPausedWithinDeltaTimePause = false;
     bool _playbackLoopMode = false;
-    double _playbackPauseOffset = 0.0;
-    double _previousTime = 0.0;
 
     bool _saveRenderingDuringPlayback = false;
     double _saveRenderingDeltaTime = 1.0 / 30.0;
@@ -374,7 +356,7 @@ protected:
     bool _saveRendering_isFirstFrame = true;
 
     std::vector<TimelineEntry> _timeline;
-    std::vector<TimelineEntry>::const_iterator _previous = _timeline.end();
+    std::vector<TimelineEntry>::const_iterator _currentEntry = _timeline.end();
 
     std::unordered_map<std::string, std::string> _savePropertiesBaseline;
 
