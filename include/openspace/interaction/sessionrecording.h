@@ -316,15 +316,7 @@ public:
         DataMode mode);
 
 protected:
-    properties::BoolProperty _renderPlaybackInformation;
-    properties::BoolProperty _ignoreRecordedScale;
-    properties::BoolProperty _addModelMatrixinAscii;
-
-
-    double _timestampRecordStarted = 0.0;
-    double _timeIntoPlayback = 0.0;
     void playbackAddEntriesToTimeline(std::istream& playback, std::string playbackFilename);
-    void handlePlaybackEnd();
 
     void moveAheadInTime(double dt);
 
@@ -340,26 +332,37 @@ protected:
 
     void checkIfScriptUsesScenegraphNode(std::string s) const;
 
-    DataMode _recordingDataMode = DataMode::Binary;
+    properties::BoolProperty _renderPlaybackInformation;
+    properties::BoolProperty _ignoreRecordedScale;
+    properties::BoolProperty _addModelMatrixinAscii;
+
+    struct {
+        double elapsedTime = 0.0;
+        bool isLooping = false;
+        bool playbackPausedWithDeltaTimePause = false;
+        bool waitForLoading = false;
+
+        struct {
+            bool enabled = false;
+            double deltaTime = 1.0 / 30.0;
+            std::chrono::steady_clock::time_point currentRecordedTime;
+            double currentApplicationTime = 0.0;
+        } saveScreenshots;
+    } _playback;
+
+    struct {
+        DataMode dataMode = DataMode::Binary;
+        std::filesystem::path file;
+        double elapsedTime = 0.0;
+    } _recording;
+
     SessionState _state = SessionState::Idle;
     SessionState _lastState = SessionState::Idle;
-    std::filesystem::path _recordingFile;
-    bool _playbackPausedWithinDeltaTimePause = false;
-    bool _playbackLoopMode = false;
 
-    bool _saveRenderingDuringPlayback = false;
-    double _saveRenderingDeltaTime = 1.0 / 30.0;
-    double _saveRenderingCurrentRecordedTime = 0.0;
-    bool _shouldWaitForFinishLoadingWhenPlayback = false;
-    std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
-    double _saveRenderingCurrentApplicationTime_interpolation = 0.0;
-    bool _saveRendering_isFirstFrame = true;
 
     std::vector<TimelineEntry> _timeline;
     std::vector<TimelineEntry>::const_iterator _currentEntry = _timeline.end();
-
     std::unordered_map<std::string, std::string> _savePropertiesBaseline;
-
     std::vector<std::string> _loadedNodes;
 
     int _nextCallbackHandle = 0;

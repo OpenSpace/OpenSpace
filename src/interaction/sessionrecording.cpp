@@ -178,7 +178,7 @@ namespace {
         std::stringstream& line)
     {
         line << type << ' ';
-        line << '0.0 ';
+        line << "0.0 ";
         line << times.timeRec << ' ';
         line << std::fixed << std::setprecision(3) << times.timeSim << ' ';
     }
@@ -646,7 +646,7 @@ SessionRecording::SessionRecording()
 }
 
 void SessionRecording::setRecordDataFormat(DataMode dataMode) {
-    _recordingDataMode = dataMode;
+    _recording.dataMode = dataMode;
 }
 
 void SessionRecording::startRecording(const std::string& fn) {
@@ -670,7 +670,7 @@ void SessionRecording::startRecording(const std::string& fn) {
     std::filesystem::path filename = fn;
     auto extension = filename.extension();
 
-    if (_recordingDataMode == DataMode::Binary) {
+    if (_recording.dataMode == DataMode::Binary) {
         if (extension == FileExtensionAscii) {
             throw ghoul::RuntimeError(
                 "Specified filename for binary recording has ascii file extension",
@@ -681,7 +681,7 @@ void SessionRecording::startRecording(const std::string& fn) {
             filename.replace_extension(FileExtensionBinary);
         }
     }
-    else if (_recordingDataMode == DataMode::Ascii) {
+    else if (_recording.dataMode == DataMode::Ascii) {
         if (extension == FileExtensionBinary) {
             throw ghoul::RuntimeError(
                 "Specified filename for ascii recording has binary file extension",
@@ -716,12 +716,12 @@ void SessionRecording::startRecording(const std::string& fn) {
         ), "SessionRecording");
     }
 
-    _recordingFile = absFilename;
+    _recording.file = absFilename;
 
     _state = SessionState::Recording;
     _savePropertiesBaseline.clear();
 
-    _timestampRecordStarted = global::windowDelegate->applicationTime();
+    _recording.elapsedTime = 0.0;
 
     // Record the current delta time as the first property to save in the file.
     // This needs to be saved as a baseline whether or not it changes during recording
@@ -745,27 +745,27 @@ void SessionRecording::stopRecording() {
     };
 
     std::ofstream recordFile;
-    if (_recordingDataMode == DataMode::Binary) {
-        recordFile.open(_recordingFile, std::ios::binary);
+    if (_recording.dataMode == DataMode::Binary) {
+        recordFile.open(_recording.file, std::ios::binary);
     }
     else {
-        recordFile.open(_recordingFile);
+        recordFile.open(_recording.file);
     }
 
     if (!recordFile.is_open() || !recordFile.good()) {
         std::filesystem::path newName = absPath(std::format("${{TEMPORARY}}/{}", rand()));
         LERROR(std::format(
             "Unable to open file '{}' for recording, using '{}' instead",
-            _recordingFile, newName
+            _recording.file, newName
         ));
-        _recordingFile = newName;
+        _recording.file = newName;
         stopRecording();
         return;
     }
 
     recordFile << FileHeaderTitle;
     recordFile.write(FileHeaderVersion, FileHeaderVersionLength);
-    if (_recordingDataMode == DataMode::Binary) {
+    if (_recording.dataMode == DataMode::Binary) {
         recordFile << DataFormatBinaryTag;
     }
     else {
@@ -781,7 +781,7 @@ void SessionRecording::stopRecording() {
         saveSingleKeyframeScript(
             smTmp,
             {},
-            _recordingDataMode,
+            _recording.dataMode,
             recordFile
         );
     }
@@ -798,7 +798,7 @@ void SessionRecording::stopRecording() {
                 saveSingleKeyframeCamera(
                     kfMsg,
                     entry.timestamps,
-                    _recordingDataMode,
+                    _recording.dataMode,
                     recordFile,
                     _addModelMatrixinAscii
                 );
@@ -809,7 +809,7 @@ void SessionRecording::stopRecording() {
                 saveSingleKeyframeScript(
                     smTmp,
                     entry.timestamps,
-                    _recordingDataMode,
+                    _recording.dataMode,
                     recordFile
                 );
             }
@@ -858,8 +858,8 @@ void SessionRecording::startPlayback(std::string& filename,
         );
     }
 
-    _playbackLoopMode = loop;
-    _shouldWaitForFinishLoadingWhenPlayback = shouldWaitForFinishedTiles;
+    _playback.isLooping = loop;
+    _playback.waitForLoading = shouldWaitForFinishedTiles;
 
     // Open in ASCII first
     std::ifstream playbackFile = std::ifstream(absFilename, std::ifstream::in);
@@ -877,10 +877,10 @@ void SessionRecording::startPlayback(std::string& filename,
     readHeaderElement(playbackFile, FileHeaderVersionLength);
     std::string readDataMode = readHeaderElement(playbackFile, 1);
     if (readDataMode[0] == DataFormatAsciiTag) {
-        _recordingDataMode = DataMode::Ascii;
+        _recording.dataMode = DataMode::Ascii;
     }
     else if (readDataMode[0] == DataFormatBinaryTag) {
-        _recordingDataMode = DataMode::Binary;
+        _recording.dataMode = DataMode::Binary;
     }
     else {
         cleanUpTimelinesAndKeyframes();
@@ -896,7 +896,7 @@ void SessionRecording::startPlayback(std::string& filename,
         readHeaderElement(playbackFile, 1);
     }
 
-    if (_recordingDataMode == DataMode::Binary) {
+    if (_recording.dataMode == DataMode::Binary) {
         // Close & re-open the file, starting from the beginning, and do dummy read
         // past the header, version, and data type
         playbackFile.close();
@@ -915,7 +915,6 @@ void SessionRecording::startPlayback(std::string& filename,
             "Unable to open file '{}' for keyframe playback", absFilename.c_str()
         ));
     }
-    _saveRendering_isFirstFrame = true;
     double now = global::windowDelegate->applicationTime();
 
     // Populate liste of loaded scene graph nodes
@@ -969,9 +968,9 @@ void SessionRecording::startPlayback(std::string& filename,
 }
 
 void SessionRecording::setupPlayback(double startTime) {
-    _timeIntoPlayback = 0.0;
-    _saveRenderingCurrentRecordedTime_interpolation = std::chrono::steady_clock::now();
-    _saveRenderingCurrentApplicationTime_interpolation =
+    _playback.elapsedTime = 0.0;
+    _playback.saveScreenshots.currentRecordedTime = std::chrono::steady_clock::now();
+    _playback.saveScreenshots.currentApplicationTime =
         global::windowDelegate->applicationTime();
     global::navigationHandler->keyframeNavigator().setTimeReferenceMode(
         KeyframeTimeRef::Relative_recordedStart, startTime);
@@ -993,7 +992,6 @@ void SessionRecording::setupPlayback(double startTime) {
 
     const Timestamps times = firstCamera->timestamps;
     global::timeManager->setTimeNextFrame(Time(times.timeSim));
-    _saveRenderingCurrentRecordedTime = times.timeRec;
 
     _currentEntry = _timeline.begin();
 
@@ -1006,8 +1004,8 @@ bool SessionRecording::isPlaybackPaused() const {
 
 void SessionRecording::setPlaybackPause(bool pause) {
     if (pause && _state == SessionState::Playback) {
-        _playbackPausedWithinDeltaTimePause = global::timeManager->isPaused();
-        if (!_playbackPausedWithinDeltaTimePause) {
+        _playback.playbackPausedWithDeltaTimePause = global::timeManager->isPaused();
+        if (!_playback.playbackPausedWithDeltaTimePause) {
             global::timeManager->setPause(true);
         }
         _state = SessionState::PlaybackPaused;
@@ -1016,7 +1014,7 @@ void SessionRecording::setPlaybackPause(bool pause) {
         );
     }
     else if (!pause && _state == SessionState::PlaybackPaused) {
-        if (!_playbackPausedWithinDeltaTimePause) {
+        if (!_playback.playbackPausedWithDeltaTimePause) {
             global::timeManager->setPause(false);
         }
         _state = SessionState::Playback;
@@ -1026,29 +1024,25 @@ void SessionRecording::setPlaybackPause(bool pause) {
     }
 }
 
-void SessionRecording::handlePlaybackEnd() {
-    _state = SessionState::Idle;
-    cleanUpTimelinesAndKeyframes();
-    global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
-        events::EventSessionRecordingPlayback::State::Finished
-    );
-    global::openSpaceEngine->resetMode();
-    global::navigationHandler->resetNavigationUpdateVariables();
-}
-
 void SessionRecording::enableTakeScreenShotDuringPlayback(int fps) {
-    _saveRenderingDuringPlayback = true;
-    _saveRenderingDeltaTime = 1.0 / fps;
+    _playback.saveScreenshots.enabled = true;
+    _playback.saveScreenshots.deltaTime = 1.0 / fps;
 }
 
 void SessionRecording::disableTakeScreenShotDuringPlayback() {
-    _saveRenderingDuringPlayback = false;
+    _playback.saveScreenshots.enabled = false;
 }
 
 void SessionRecording::stopPlayback() {
     if (isPlayingBack()) {
-        LINFO("Session playback stopped");
-        handlePlaybackEnd();
+        LINFO("Session playback finished");
+        _state = SessionState::Idle;
+        cleanUpTimelinesAndKeyframes();
+        global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
+            events::EventSessionRecordingPlayback::State::Finished
+        );
+        global::openSpaceEngine->resetMode();
+        global::navigationHandler->resetNavigationUpdateVariables();
     }
 }
 
@@ -1057,9 +1051,8 @@ void SessionRecording::cleanUpTimelinesAndKeyframes() {
     _savePropertiesBaseline.clear();
     _loadedNodes.clear();
     _currentEntry = _timeline.end();
-    _saveRenderingDuringPlayback = false;
-    _saveRendering_isFirstFrame = true;
-    _playbackLoopMode = false;
+    _playback.saveScreenshots.enabled = false;
+    _playback.isLooping = false;
 }
 
 void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
@@ -1118,7 +1111,7 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
         datamessagestructures::generateScriptMessage(script);
 
     Timestamps times = {
-        sm._timestamp - _timestampRecordStarted,
+        _recording.elapsedTime,
         global::timeManager->time().j2000Seconds()
     };
     _timeline.emplace_back(std::move(times), sm._script);
@@ -1153,9 +1146,11 @@ void SessionRecording::preSynchronization(double dt) {
     ZoneScoped;
 
     if (_state == SessionState::Recording) {
+        _recording.elapsedTime += dt;
+
         CameraKeyframe kf = generateCameraKeyframe();
         Timestamps times = {
-            kf._timestamp - _timestampRecordStarted,
+            _recording.elapsedTime,
             global::timeManager->time().j2000Seconds()
         };
         _timeline.emplace_back(
@@ -1192,7 +1187,7 @@ void SessionRecording::render() const {
 
     const glm::vec2 res = global::renderEngine->fontResolution();
     glm::vec2 penPosition = glm::vec2(res.x / 2 - 150.f, res.y / 4);
-    const std::string text1 = std::to_string(_timeIntoPlayback);
+    const std::string text1 = std::to_string(_playback.elapsedTime);
     ghoul::fontrendering::RenderFont(
         *font,
         penPosition,
@@ -1215,11 +1210,11 @@ bool SessionRecording::isPlayingBack() const {
 }
 
 bool SessionRecording::isSavingFramesDuringPlayback() const {
-    return isPlayingBack() && _saveRenderingDuringPlayback;
+    return isPlayingBack() && _playback.saveScreenshots.enabled;
 }
 
 bool SessionRecording::shouldWaitForTileLoading() const {
-    return _shouldWaitForFinishLoadingWhenPlayback;
+    return _playback.waitForLoading;
 }
 
 SessionRecording::SessionState SessionRecording::state() const {
@@ -1228,7 +1223,7 @@ SessionRecording::SessionState SessionRecording::state() const {
 
 void SessionRecording::playbackAddEntriesToTimeline(std::istream& playback, std::string playbackFilename) {
     int lineNumber = 1;
-    if (_recordingDataMode == DataMode::Binary) {
+    if (_recording.dataMode == DataMode::Binary) {
         while (true) {
             unsigned char frameType;
             playback.read(reinterpret_cast<char*>(&frameType), sizeof(unsigned char));
@@ -1242,7 +1237,7 @@ void SessionRecording::playbackAddEntriesToTimeline(std::istream& playback, std:
             }
             if (frameType == HeaderCameraBinary) {
                 auto [times, kf] = readSingleKeyframeCamera(
-                    _recordingDataMode,
+                    _recording.dataMode,
                     playback,
                     "",
                     lineNumber
@@ -1254,7 +1249,7 @@ void SessionRecording::playbackAddEntriesToTimeline(std::istream& playback, std:
             }
             else if (frameType == HeaderScriptBinary) {
                 auto [times, kf] = readSingleKeyframeScript(
-                    _recordingDataMode,
+                    _recording.dataMode,
                     playback,
                     "",
                     lineNumber
@@ -1289,7 +1284,7 @@ void SessionRecording::playbackAddEntriesToTimeline(std::istream& playback, std:
 
             if (entryType == HeaderCameraAscii) {
                 auto [times, kf] = readSingleKeyframeCamera(
-                    _recordingDataMode,
+                    _recording.dataMode,
                     playback,
                     lineParsing,
                     lineNumber
@@ -1301,7 +1296,7 @@ void SessionRecording::playbackAddEntriesToTimeline(std::istream& playback, std:
             }
             else if (entryType == HeaderScriptAscii) {
                 auto [times, kf] = readSingleKeyframeScript(
-                    _recordingDataMode,
+                    _recording.dataMode,
                     playback,
                     lineParsing,
                     lineNumber
@@ -1332,7 +1327,7 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
     const SceneGraphNode* an = global::navigationHandler->orbitalNavigator().anchorNode();
     const Renderable* focusRenderable = an->renderable();
     if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
-        return _saveRenderingDeltaTime;
+        return _playback.saveScreenshots.deltaTime;
     }
     else {
         return 0.0;
@@ -1341,11 +1336,11 @@ double SessionRecording::fixedDeltaTimeDuringFrameOutput() const {
 
 std::chrono::steady_clock::time_point
 SessionRecording::currentPlaybackInterpolationTime() const {
-    return _saveRenderingCurrentRecordedTime_interpolation;
+    return _playback.saveScreenshots.currentRecordedTime;
 }
 
 double SessionRecording::currentApplicationInterpolationTime() const {
-    return _saveRenderingCurrentApplicationTime_interpolation;
+    return _playback.saveScreenshots.currentApplicationTime;
 }
 
 void SessionRecording::convertCamera(std::stringstream& inStream, DataMode mode,
@@ -1465,11 +1460,12 @@ void SessionRecording::moveAheadInTime(double dt) {
         return;
     }
 
-    _timeIntoPlayback += dt;
+    const double previousTime = _playback.elapsedTime;
+    _playback.elapsedTime += dt;
     
     // Find the first value whose recording time is past now
     std::vector<TimelineEntry>::const_iterator probe = _currentEntry;
-    while (probe != _timeline.end() && _timeIntoPlayback > probe->timestamps.timeRec) {
+    while (probe != _timeline.end() && _playback.elapsedTime > probe->timestamps.timeRec) {
         probe++;
     }
 
@@ -1503,7 +1499,7 @@ void SessionRecording::moveAheadInTime(double dt) {
         const double nextTime = nextCamera->timestamps.timeRec;
 
         const double t = std::clamp(
-            (_timeIntoPlayback - prevTime) / (nextTime - prevTime),
+            (_playback.elapsedTime - prevTime) / (nextTime - prevTime),
             0.0,
             1.0
         );
@@ -1524,38 +1520,37 @@ void SessionRecording::moveAheadInTime(double dt) {
         );
     }
 
-    _currentEntry = probe;
-    if (probe == _timeline.end()) {
-        if (_playbackLoopMode) {
-            _saveRenderingDuringPlayback = false;
-            setupPlayback(global::windowDelegate->applicationTime());
-        }
-        else {
-            LINFO("Playback session finished");
-            handlePlaybackEnd();
-        }
-    }
-
 
     // Unfortunately the first frame is sometimes rendered because globebrowsing reports
     // that all chunks are rendered when they apparently are not.
-    if (_saveRendering_isFirstFrame) {
-        _saveRendering_isFirstFrame = false;
+    if (previousTime == 0.0) {
+        // previousTime == 0.0 -> rendering the first frame
         return;
     }
-    if (_shouldWaitForFinishLoadingWhenPlayback && isSavingFramesDuringPlayback()) {
+    if (_playback.waitForLoading && isSavingFramesDuringPlayback()) {
         // Check if renderable in focus is still resolving tile loading
         // do not adjust time while we are doing this, or take screenshot
         const SceneGraphNode* focusNode =
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
         if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
-            _saveRenderingCurrentRecordedTime_interpolation +=
-                std::chrono::microseconds(static_cast<long>(_saveRenderingDeltaTime * 1000000));
-            _saveRenderingCurrentRecordedTime += _saveRenderingDeltaTime;
-            _saveRenderingCurrentApplicationTime_interpolation +=
-                _saveRenderingDeltaTime;
+            _playback.saveScreenshots.currentRecordedTime +=
+                std::chrono::microseconds(static_cast<long>(_playback.saveScreenshots.deltaTime * 1000000));
+            _playback.saveScreenshots.currentApplicationTime +=
+                _playback.saveScreenshots.deltaTime;
             global::renderEngine->takeScreenshot();
+        }
+    }
+
+
+    _currentEntry = probe;
+    if (probe == _timeline.end()) {
+        if (_playback.isLooping) {
+            _playback.saveScreenshots.enabled = false;
+            setupPlayback(global::windowDelegate->applicationTime());
+        }
+        else {
+            stopPlayback();
         }
     }
 }
