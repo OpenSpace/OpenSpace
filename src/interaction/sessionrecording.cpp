@@ -1107,14 +1107,11 @@ void SessionRecording::saveScriptKeyframeToTimeline(std::string script) {
         }
     }
 
-    const datamessagestructures::ScriptMessage sm =
-        datamessagestructures::generateScriptMessage(script);
-
     Timestamps times = {
         _recording.elapsedTime,
         global::timeManager->time().j2000Seconds()
     };
-    _timeline.emplace_back(std::move(times), sm._script);
+    _timeline.emplace_back(std::move(times), std::move(script));
 }
 
 void SessionRecording::savePropertyBaseline(properties::Property& prop) {
@@ -1169,8 +1166,8 @@ void SessionRecording::preSynchronization(double dt) {
         for (const std::pair<const K, V>& it : _stateChangeCallbacks) {
             it.second();
         }
+        _lastState = _state;
     }
-    _lastState = _state;
 }
 
 void SessionRecording::render() const {
@@ -1186,19 +1183,29 @@ void SessionRecording::render() const {
         global::fontManager->font(FontName, FontSizeFrameinfo);
 
     const glm::vec2 res = global::renderEngine->fontResolution();
-    glm::vec2 penPosition = glm::vec2(res.x / 2 - 150.f, res.y / 4);
-    const std::string text1 = std::to_string(_playback.elapsedTime);
+    glm::vec2 penPosition = glm::vec2(res.x / 2 - 150.f, res.y / 2);
+
+    const std::string text = std::format(
+        "Elapsed:  {:.3f} / {}\n"
+        "Keyframe: {} / {}\n"
+        "Is Looping: {}\n"
+        "Saving frames: {}\n"
+        "Wait for Loading: {}\n"
+        "Scale: {}",
+        _playback.elapsedTime, _timeline.back().timestamps.timeRec,
+        std::distance(_timeline.begin(), _currentEntry), _timeline.size(),
+        _playback.isLooping ? "true" : "false",
+        _playback.saveScreenshots.enabled ? "true" : "false",
+        _playback.waitForLoading ? "true" : "false",
+        global::navigationHandler->camera()->scaling()
+    );
     ghoul::fontrendering::RenderFont(
         *font,
         penPosition,
-        text1,
+        text,
         glm::vec4(1.f),
         ghoul::fontrendering::CrDirection::Down
     );
-    const std::string text2 = std::format(
-        "Scale: {}", global::navigationHandler->camera()->scaling()
-    );
-    ghoul::fontrendering::RenderFont(*font, penPosition, text2, glm::vec4(1.f));
 }
 
 bool SessionRecording::isRecording() const {
@@ -1520,25 +1527,27 @@ void SessionRecording::moveAheadInTime(double dt) {
         );
     }
 
+    if (isSavingFramesDuringPlayback()) {
+        ghoul_assert(dt == _playback.saveScreenshots.deltaTime, "Misaligned delta times");
 
-    // Unfortunately the first frame is sometimes rendered because globebrowsing reports
-    // that all chunks are rendered when they apparently are not.
-    if (previousTime == 0.0) {
-        // previousTime == 0.0 -> rendering the first frame
-        return;
-    }
-    if (_playback.waitForLoading && isSavingFramesDuringPlayback()) {
         // Check if renderable in focus is still resolving tile loading
         // do not adjust time while we are doing this, or take screenshot
         const SceneGraphNode* focusNode =
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
-        if (!focusRenderable || focusRenderable->renderedWithDesiredData()) {
+        if (!_playback.waitForLoading ||
+            !focusRenderable || focusRenderable->renderedWithDesiredData())
+        {
             _playback.saveScreenshots.currentRecordedTime +=
-                std::chrono::microseconds(static_cast<long>(_playback.saveScreenshots.deltaTime * 1000000));
-            _playback.saveScreenshots.currentApplicationTime +=
-                _playback.saveScreenshots.deltaTime;
-            global::renderEngine->takeScreenshot();
+                std::chrono::microseconds(static_cast<long>(dt * 1000000));
+            _playback.saveScreenshots.currentApplicationTime += dt;
+
+            // Unfortunately the first frame is sometimes rendered because globebrowsing
+            // reports that all chunks are rendered when they apparently are not.
+            // previousTime == 0.0 -> rendering the first frame
+            if (previousTime != 0.0) {
+                global::renderEngine->takeScreenshot();
+            }
         }
     }
 
