@@ -121,27 +121,24 @@ namespace {
     constexpr std::string_view scriptReturnPrefix = "return ";
 
     void writeToFileBuffer(unsigned char* buf, size_t& idx, double src) {
-        const size_t writeSize_bytes = sizeof(double);
         unsigned char const* p = reinterpret_cast<unsigned char const*>(&src);
-        memcpy((buf + idx), p, writeSize_bytes);
-        idx += writeSize_bytes;
+        memcpy(buf + idx, p, sizeof(double));
+        idx += sizeof(double);
     }
 
     void writeToFileBuffer(unsigned char* buf, size_t& idx, std::vector<char>& cv) {
-        const size_t writeSize_bytes = cv.size() * sizeof(char);
-        memcpy((buf + idx), cv.data(), writeSize_bytes);
-        idx += writeSize_bytes;
+        memcpy(buf + idx, cv.data(), cv.size());
+        idx += cv.size();
     }
 
     void writeToFileBuffer(unsigned char* buf, size_t& idx, unsigned char c) {
-        const size_t writeSize_bytes = sizeof(char);
         buf[idx] = c;
-        idx += writeSize_bytes;
+        idx += 1;
     }
 
     void writeToFileBuffer(unsigned char* buf, size_t& idx, bool b) {
         buf[idx] = b ? 1 : 0;
-        idx += sizeof(char);
+        idx += 1;
     }
 
     using namespace openspace;
@@ -159,7 +156,8 @@ namespace {
     void saveHeaderBinary(const Timestamps& times, char type,
         unsigned char* kfBuffer, size_t& idx)
     {
-        kfBuffer[idx++] = type;
+        kfBuffer[idx] = type;
+        idx++;
         writeToFileBuffer(kfBuffer, idx, times.timeOs);
         writeToFileBuffer(kfBuffer, idx, times.timeRec);
         writeToFileBuffer(kfBuffer, idx, times.timeSim);
@@ -349,8 +347,8 @@ namespace {
     }
 
     std::pair<Timestamps, CameraKeyframe> readSingleKeyframeCamera(
-        SessionRecording::DataMode mode, std::istream& file, std::string& inLine,
-        const int lineNum)
+        SessionRecording::DataMode mode, std::istream& file, const std::string& inLine,
+        int lineNum)
     {
         if (mode == SessionRecording::DataMode::Binary) {
             return readCameraKeyframeBinary(file, lineNum);
@@ -528,9 +526,8 @@ namespace {
     }
 
     std::pair<Timestamps, ScriptMessage> readSingleKeyframeScript(
-        SessionRecording::DataMode mode,
-        std::istream& file, std::string& inLine,
-        const int lineNum)
+        SessionRecording::DataMode mode, std::istream& file, const std::string& inLine,
+        int lineNum)
     {
         if (mode == SessionRecording::DataMode::Binary) {
             return readScriptKeyframeBinary(file, lineNum);
@@ -597,8 +594,8 @@ namespace {
         }
     }
 
-    void readPlaybackHeader_stream(std::stringstream& conversionInStream,
-        std::string& version, SessionRecording::DataMode& mode)
+    std::pair<std::string, SessionRecording::DataMode> readPlaybackHeader_stream(
+        std::stringstream& conversionInStream)
     {
         // Read header
         const std::string readBackHeaderString = readHeaderElement(
@@ -609,8 +606,9 @@ namespace {
         if (readBackHeaderString != FileHeaderTitle) {
             throw LoadingError("File to convert does not contain expected header");
         }
-        version = readHeaderElement(conversionInStream, FileHeaderVersionLength);
+        const std::string version = readHeaderElement(conversionInStream, FileHeaderVersionLength);
         std::string readDataMode = readHeaderElement(conversionInStream, 1);
+        SessionRecording::DataMode mode;
         if (readDataMode[0] == DataFormatAsciiTag) {
             mode = SessionRecording::DataMode::Ascii;
         }
@@ -622,6 +620,8 @@ namespace {
         }
         // Read to throw out newline at end of header
         readHeaderElement(conversionInStream, 1);
+
+        return { version, mode };
     }
 
     Timestamps generateCurrentTimestamp(double keyframeTime, double recordStartTime) {
@@ -843,6 +843,14 @@ void SessionRecording::stopRecording() {
 void SessionRecording::startPlayback(std::string& filename,
                                      bool loop, bool shouldWaitForFinishedTiles)
 {
+    const bool canTriggerPlayback = global::openSpaceEngine->setMode(
+        OpenSpaceEngine::Mode::SessionRecordingPlayback
+    );
+    if (!canTriggerPlayback) {
+        return;
+    }
+
+
     std::string absFilename;
     if (std::filesystem::is_regular_file(filename)) {
         absFilename = filename;
@@ -852,7 +860,7 @@ void SessionRecording::startPlayback(std::string& filename,
     }
 
     if (!std::filesystem::is_regular_file(absFilename)) {
-        cleanUpPlayback();
+        cleanUpTimelinesAndKeyframes();
         throw ghoul::RuntimeError("Cannot find the specified playback file");
     }
 
@@ -875,20 +883,20 @@ void SessionRecording::startPlayback(std::string& filename,
     _shouldWaitForFinishLoadingWhenPlayback = shouldWaitForFinishedTiles;
 
     // Open in ASCII first
-    _playbackFile.open(absFilename, std::ifstream::in);
+    std::ifstream playbackFile = std::ifstream(absFilename, std::ifstream::in);
     // Read header
     const std::string readBackHeaderString = readHeaderElement(
-        _playbackFile,
+        playbackFile,
         FileHeaderTitle.length()
     );
     if (readBackHeaderString != FileHeaderTitle) {
-        cleanUpPlayback();
+        cleanUpTimelinesAndKeyframes();
         throw ghoul::RuntimeError(
             "Specified playback file does not contain expected header"
         );
     }
-    readHeaderElement(_playbackFile, FileHeaderVersionLength);
-    std::string readDataMode = readHeaderElement(_playbackFile, 1);
+    readHeaderElement(playbackFile, FileHeaderVersionLength);
+    std::string readDataMode = readHeaderElement(playbackFile, 1);
     if (readDataMode[0] == DataFormatAsciiTag) {
         _recordingDataMode = DataMode::Ascii;
     }
@@ -896,41 +904,40 @@ void SessionRecording::startPlayback(std::string& filename,
         _recordingDataMode = DataMode::Binary;
     }
     else {
-        cleanUpPlayback();
+        cleanUpTimelinesAndKeyframes();
         throw ghoul::RuntimeError(
             "Unknown data type in header (should be Ascii or Binary)"
         );
     }
     // throwaway newline character(s)
-    std::string lineEnd = readHeaderElement(_playbackFile, 1);
+    std::string lineEnd = readHeaderElement(playbackFile, 1);
     bool hasDosLineEnding = (lineEnd == "\r");
     if (hasDosLineEnding) {
         // throwaway the second newline character (\n) also
-        readHeaderElement(_playbackFile, 1);
+        readHeaderElement(playbackFile, 1);
     }
 
     if (_recordingDataMode == DataMode::Binary) {
         // Close & re-open the file, starting from the beginning, and do dummy read
         // past the header, version, and data type
-        _playbackFile.close();
-        _playbackFile.open(absFilename, std::ifstream::in | std::ios::binary);
+        playbackFile.close();
+        playbackFile.open(absFilename, std::ifstream::in | std::ios::binary);
         const size_t headerSize = FileHeaderTitle.length() + FileHeaderVersionLength
             + sizeof(DataFormatBinaryTag) + sizeof('\n');
         std::vector<char> hBuffer;
         hBuffer.resize(headerSize);
-        _playbackFile.read(hBuffer.data(), headerSize);
+        playbackFile.read(hBuffer.data(), headerSize);
     }
 
-    if (!_playbackFile.is_open() || !_playbackFile.good()) {
+    if (!playbackFile.is_open() || !playbackFile.good()) {
         stopPlayback();
-        cleanUpPlayback();
+        cleanUpTimelinesAndKeyframes();
         throw ghoul::RuntimeError(std::format(
             "Unable to open file '{}' for keyframe playback", absFilename.c_str()
         ));
     }
     _saveRendering_isFirstFrame = true;
     double now = global::windowDelegate->applicationTime();
-    initializePlayback_time(now);
 
     // Populate liste of loaded scene graph nodes
     _loadedNodes.clear();
@@ -941,11 +948,17 @@ void SessionRecording::startPlayback(std::string& filename,
     }
 
     try {
-        playbackAddEntriesToTimeline(absFilename);
+        playbackAddEntriesToTimeline(playbackFile, absFilename);
     }
     catch (const LoadingError& e) {
         LERRORC(e.component, e.message);
-        cleanUpPlayback();
+        cleanUpTimelinesAndKeyframes();
+        return;
+    }
+
+    if (_timeline.empty()) {
+        LERROR(std::format("Session recording '{}' is empty", absFilename));
+        cleanUpTimelinesAndKeyframes();
         return;
     }
 
@@ -962,29 +975,26 @@ void SessionRecording::startPlayback(std::string& filename,
             "Session recording '{}' did not contain any camera keyframes",
             absFilename
         ));
-        cleanUpPlayback();
+        cleanUpTimelinesAndKeyframes();
         return;
     }
 
-    initializePlayback_modeFlags();
-    initializePlayback_timeline();
+    setupPlayback(now);
 
-    const bool canTriggerPlayback = global::openSpaceEngine->setMode(
-        OpenSpaceEngine::Mode::SessionRecordingPlayback
-    );
-    if (!canTriggerPlayback) {
-        cleanUpPlayback();
-        return;
-    }
 
     LINFO(std::format("Playback session started with {} entries", _timeline.size()));
 
     global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
         events::EventSessionRecordingPlayback::State::Started
     );
-    _state = SessionState::Playback;
-
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
+}
+
+void SessionRecording::setupPlayback(double startTime) {
+    initializePlayback_time(startTime);
+    initializePlayback_modeFlags();
+    initializePlayback_timeline();
+    _state = SessionState::Playback;
 }
 
 void SessionRecording::initializePlayback_time(double now) {
@@ -1062,24 +1072,11 @@ void SessionRecording::setPlaybackPause(bool pause) {
     }
 }
 
-void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
-    if (type == RecordedType::Camera) {
-        _playbackActive_camera = false;
-        LINFO("Playback finished signal: camera");
-    }
-    else if (type == RecordedType::Script) {
-        _playbackActive_script = false;
-        LINFO("Playback finished signal: script");
-    }
-
+void SessionRecording::maybeLoopTBD() {
     if (!_playbackActive_camera && !_playbackActive_script) {
         if (_playbackLoopMode) {
-            // Loop back to the beginning to replay
             _saveRenderingDuringPlayback = false;
-            initializePlayback_time(global::windowDelegate->applicationTime());
-            initializePlayback_modeFlags();
-            initializePlayback_timeline();
-            _state = SessionState::Playback;
+            setupPlayback(global::windowDelegate->applicationTime());
         }
         else {
             LINFO("Playback session finished");
@@ -1090,7 +1087,7 @@ void SessionRecording::signalPlaybackFinishedForComponent(RecordedType type) {
 
 void SessionRecording::handlePlaybackEnd() {
     _state = SessionState::Idle;
-    _cleanupNeededPlayback = true;
+    cleanUpTimelinesAndKeyframes();
     global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
         events::EventSessionRecordingPlayback::State::Finished
     );
@@ -1112,12 +1109,6 @@ void SessionRecording::stopPlayback() {
         LINFO("Session playback stopped");
         handlePlaybackEnd();
     }
-}
-
-void SessionRecording::cleanUpPlayback() {
-    _playbackFile.close();
-    cleanUpTimelinesAndKeyframes();
-    _cleanupNeededPlayback = false;
 }
 
 void SessionRecording::cleanUpTimelinesAndKeyframes() {
@@ -1226,12 +1217,7 @@ void SessionRecording::preSynchronization() {
         addKeyframe(std::move(times), std::move(kf));
     }
     else if (isPlayingBack()) {
-        if (!_timeline.empty()) {
-            moveAheadInTime();
-        }
-    }
-    else if (_cleanupNeededPlayback) {
-        cleanUpPlayback();
+        moveAheadInTime();
     }
 
     // Handle callback(s) for change in idle/record/playback state
@@ -1258,10 +1244,7 @@ void SessionRecording::render() const {
         global::fontManager->font(FontName, FontSizeFrameinfo);
 
     const glm::vec2 res = global::renderEngine->fontResolution();
-    glm::vec2 penPosition = glm::vec2(
-        res.x / 2 - 150.f,
-        res.y / 4
-    );
+    glm::vec2 penPosition = glm::vec2(res.x / 2 - 150.f, res.y / 4);
     const std::string text1 = std::to_string(currentTime());
     ghoul::fontrendering::RenderFont(
         *font,
@@ -1277,15 +1260,15 @@ void SessionRecording::render() const {
 }
 
 bool SessionRecording::isRecording() const {
-    return (_state == SessionState::Recording);
+    return _state == SessionState::Recording;
 }
 
 bool SessionRecording::isPlayingBack() const {
-    return (_state == SessionState::Playback || _state == SessionState::PlaybackPaused);
+    return _state == SessionState::Playback || _state == SessionState::PlaybackPaused;
 }
 
 bool SessionRecording::isSavingFramesDuringPlayback() const {
-    return (isPlayingBack() && _saveRenderingDuringPlayback);
+    return isPlayingBack() && _saveRenderingDuringPlayback;
 }
 
 bool SessionRecording::shouldWaitForTileLoading() const {
@@ -1296,14 +1279,14 @@ SessionRecording::SessionState SessionRecording::state() const {
     return _state;
 }
 
-void SessionRecording::playbackAddEntriesToTimeline(std::string playbackFilename) {
+void SessionRecording::playbackAddEntriesToTimeline(std::istream& playback, std::string playbackFilename) {
     int lineNumber = 1;
     if (_recordingDataMode == DataMode::Binary) {
         while (true) {
             unsigned char frameType;
-            _playbackFile.read(reinterpret_cast<char*>(&frameType), sizeof(unsigned char));
+            playback.read(reinterpret_cast<char*>(&frameType), sizeof(unsigned char));
             // Check if have reached EOF
-            if (!_playbackFile) {
+            if (!playback) {
                 LINFO(std::format(
                     "Finished parsing {} entries from playback file '{}'",
                     lineNumber - 1, playbackFilename
@@ -1311,10 +1294,23 @@ void SessionRecording::playbackAddEntriesToTimeline(std::string playbackFilename
                 break;
             }
             if (frameType == HeaderCameraBinary) {
-                playbackCamera("", lineNumber);
+                auto [times, kf] = readSingleKeyframeCamera(
+                    _recordingDataMode,
+                    playback,
+                    "",
+                    lineNumber
+                );
+                addKeyframe(std::move(times), std::move(kf));
             }
             else if (frameType == HeaderScriptBinary) {
-                playbackScript("", lineNumber);
+                auto [times, kf] = readSingleKeyframeScript(
+                    _recordingDataMode,
+                    playback,
+                    "",
+                    lineNumber
+                );
+                checkIfScriptUsesScenegraphNode(kf._script);
+                addKeyframe(std::move(times), std::move(kf._script));
             }
             else {
                 throw LoadingError(std::format(
@@ -1328,7 +1324,7 @@ void SessionRecording::playbackAddEntriesToTimeline(std::string playbackFilename
     }
     else {
         std::string lineParsing;
-        while (ghoul::getline(_playbackFile, lineParsing)) {
+        while (ghoul::getline(playback, lineParsing)) {
             lineNumber++;
 
             std::istringstream iss = std::istringstream(lineParsing);
@@ -1342,10 +1338,23 @@ void SessionRecording::playbackAddEntriesToTimeline(std::string playbackFilename
             }
 
             if (entryType == HeaderCameraAscii) {
-                playbackCamera(lineParsing, lineNumber);
+                auto [times, kf] = readSingleKeyframeCamera(
+                    _recordingDataMode,
+                    playback,
+                    lineParsing,
+                    lineNumber
+                );
+                addKeyframe(std::move(times), std::move(kf));
             }
             else if (entryType == HeaderScriptAscii) {
-                playbackScript(lineParsing, lineNumber);
+                auto [times, kf] = readSingleKeyframeScript(
+                    _recordingDataMode,
+                    playback,
+                    lineParsing,
+                    lineNumber
+                );
+                checkIfScriptUsesScenegraphNode(kf._script);
+                addKeyframe(std::move(times), std::move(kf._script));
             }
             else if (entryType.substr(0, 1) == HeaderCommentAscii) {
                 continue;
@@ -1396,33 +1405,12 @@ double SessionRecording::currentApplicationInterpolationTime() const {
     return _saveRenderingCurrentApplicationTime_interpolation;
 }
 
-void SessionRecording::playbackCamera(std::string lineParsing, int lineNumber) {
-    auto [times, kf] = readSingleKeyframeCamera(
-        _recordingDataMode,
-        _playbackFile,
-        lineParsing,
-        lineNumber
-    );
-    addKeyframe(std::move(times), std::move(kf));
-}
-
 void SessionRecording::convertCamera(std::stringstream& inStream, DataMode mode,
                                      int lineNum, std::string& inputLine,
                                      std::ofstream& outFile)
 {
     auto [times, kf] = readSingleKeyframeCamera(mode, inStream, inputLine, lineNum);
     saveSingleKeyframeCamera(kf, times, mode, outFile, _addModelMatrixinAscii);
-}
-
-void SessionRecording::playbackScript(std::string lineParsing, int lineNumber) {
-    auto [times, kf] = readSingleKeyframeScript(
-        _recordingDataMode,
-        _playbackFile,
-        lineParsing,
-        lineNumber
-    );
-    checkIfScriptUsesScenegraphNode(kf._script);
-    addKeyframe(std::move(times), std::move(kf._script));
 }
 
 void SessionRecording::checkIfScriptUsesScenegraphNode(std::string s) const {
@@ -1529,20 +1517,20 @@ void SessionRecording::convertScript(std::stringstream& inStream, DataMode mode,
     saveSingleKeyframeScript(std::move(kf), std::move(times), mode, outFile);
 }
 
-void SessionRecording::addKeyframe(Timestamps t3stamps,
+void SessionRecording::addKeyframe(Timestamps timestamps,
                                    datamessagestructures::CameraKeyframe keyframe)
 {
     _timeline.emplace_back(
         RecordedType::Camera,
-        t3stamps,
+        timestamps,
         interaction::KeyframeNavigator::CameraPose(std::move(keyframe))
     );
 }
 
-void SessionRecording::addKeyframe(Timestamps t3stamps, std::string scriptToQueue) {
+void SessionRecording::addKeyframe(Timestamps timestamps, std::string scriptToQueue) {
     _timeline.emplace_back(
         RecordedType::Script,
-        t3stamps,
+        timestamps,
         std::move(scriptToQueue)
     );
 }
@@ -1607,7 +1595,8 @@ void SessionRecording::lookForNonCameraKeyframesThatHaveComeDue(double currTime)
 
         if (_idxTimeline_nonCamera == _timeline.size()) {
             if (_playbackActive_script) {
-                signalPlaybackFinishedForComponent(RecordedType::Script);
+                _playbackActive_script = false;
+                maybeLoopTBD();
             }
             break;
         }
@@ -1657,7 +1646,8 @@ void SessionRecording::updateCameraWithOrWithoutNewKeyframes(double currTime) {
         );
     }
     if (!didFindFutureCameraKeyframes) {
-        signalPlaybackFinishedForComponent(RecordedType::Camera);
+        _playbackActive_camera = false;
+        maybeLoopTBD();
     }
 }
 
@@ -1755,7 +1745,6 @@ std::vector<std::string> SessionRecording::playbackList() const {
 
 std::string SessionRecording::convertFile(std::string filename, int depth) {
     std::string conversionOutFilename = filename;
-    std::stringstream conversionInStream;
     static constexpr int MaximumRecursionDepth = 50;
     if (depth >= MaximumRecursionDepth) {
         throw ghoul::RuntimeError(
@@ -1764,18 +1753,16 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
         );
     }
     std::string newFilename = filename;
-    readFileIntoStringStream(filename, conversionInStream);
-    DataMode mode;
-    std::string fileVersion;
-    readPlaybackHeader_stream(conversionInStream, fileVersion, mode);
-    const int conversionLineNum = 1;
 
+    std::stringstream conversionInStream;
+    readFileIntoStringStream(filename, conversionInStream);
+    auto [fileVersion, mode] = readPlaybackHeader_stream(conversionInStream);
+    
     // If this instance of the SessionRecording class isn't the instance with the
     // correct version of the file to be converted, then call getLegacy() to recurse
     // to the next level down in the legacy subclasses until we get the right
     // version, then proceed with conversion from there.
     if (fileVersion != fileFormatVersion()) {
-        //conversionInStream.seekg(conversionInStream.beg);
         newFilename = getLegacyConversionResult(filename, depth + 1);
 
         // Remove trailing path slashes
@@ -1787,7 +1774,7 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
         }
 
         readFileIntoStringStream(newFilename, conversionInStream);
-        readPlaybackHeader_stream(conversionInStream, fileVersion, mode);
+        std::tie(fileVersion, mode) = readPlaybackHeader_stream(conversionInStream);
     }
     if (depth == 0) {
         return newFilename;
@@ -1829,7 +1816,6 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
         newFilename,
         conversionInStream,
         mode,
-        conversionLineNum,
         conversionOutFile
     );
 
@@ -1838,10 +1824,11 @@ std::string SessionRecording::convertFile(std::string filename, int depth) {
 
 void SessionRecording::convertEntries(const std::string& inFilename,
                                       std::stringstream& inStream, DataMode mode,
-                                      int lineNum, std::ofstream& outFile)
+                                      std::ofstream& outFile)
 {
     // There is some more elegant way of doing this
     std::string lineParsing;
+    int lineNum = 1;
 
     if (mode == DataMode::Binary) {
         while (true) {

@@ -335,15 +335,13 @@ protected:
 
     Timestamps _timestampsRecordStarted = { 0.0, 0.0, 0.0 };
     double _timestampPlaybackStarted = 0.0;
-    void playbackCamera(std::string lineParsing, int lineNumber);
-    void playbackScript(std::string lineParsing, int lineNumber);
-    void playbackAddEntriesToTimeline(std::string playbackFilename);
-    void signalPlaybackFinishedForComponent(RecordedType type);
+    void playbackAddEntriesToTimeline(std::istream& playback, std::string playbackFilename);
+    void maybeLoopTBD();
     void handlePlaybackEnd();
 
-    void addKeyframe(Timestamps t3stamps,
+    void addKeyframe(Timestamps timestamps,
         datamessagestructures::CameraKeyframe keyframe);
-    void addKeyframe(Timestamps t3stamps, std::string scriptToQueue);
+    void addKeyframe(Timestamps timestamps, std::string scriptToQueue);
 
     void initializePlayback_time(double now);
     void initializePlayback_modeFlags();
@@ -353,10 +351,11 @@ protected:
     void updateCameraWithOrWithoutNewKeyframes(double currTime);
     bool findNextFutureCameraIndex(double currTime);
 
-    void cleanUpPlayback();
+    void setupPlayback(double startTime);
+
     void cleanUpTimelinesAndKeyframes();
     void convertEntries(const std::string& inFilename, std::stringstream& inStream,
-        DataMode mode, int lineNum, std::ofstream& outFile);
+        DataMode mode, std::ofstream& outFile);
     virtual void convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile);
     virtual void convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
@@ -367,9 +366,7 @@ protected:
     DataMode _recordingDataMode = DataMode::Binary;
     SessionState _state = SessionState::Idle;
     SessionState _lastState = SessionState::Idle;
-    std::ifstream _playbackFile;
     std::filesystem::path _recordingFile;
-    datamessagestructures::CameraKeyframe _prevRecordedCameraKeyframe;
     bool _playbackActive_camera = false;
     bool _playbackActive_time = false;
     bool _playbackActive_script = false;
@@ -385,8 +382,6 @@ protected:
     std::chrono::steady_clock::time_point _saveRenderingCurrentRecordedTime_interpolation;
     double _saveRenderingCurrentApplicationTime_interpolation = 0.0;
     bool _saveRendering_isFirstFrame = true;
-
-    bool _cleanupNeededPlayback = false;
 
     std::vector<TimelineEntry> _timeline;
 
