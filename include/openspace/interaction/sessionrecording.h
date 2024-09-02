@@ -336,7 +336,6 @@ protected:
     Timestamps _timestampsRecordStarted = { 0.0, 0.0, 0.0 };
     double _timestampPlaybackStarted = 0.0;
     void playbackAddEntriesToTimeline(std::istream& playback, std::string playbackFilename);
-    void maybeLoopTBD();
     void handlePlaybackEnd();
 
     void addKeyframe(Timestamps timestamps,
@@ -347,8 +346,6 @@ protected:
     void initializePlayback_modeFlags();
     void initializePlayback_timeline();
     void moveAheadInTime();
-    void lookForNonCameraKeyframesThatHaveComeDue(double currTime);
-    void updateCameraWithOrWithoutNewKeyframes(double currTime);
     bool findNextFutureCameraIndex(double currTime);
 
     void setupPlayback(double startTime);
@@ -368,8 +365,6 @@ protected:
     SessionState _lastState = SessionState::Idle;
     std::filesystem::path _recordingFile;
     bool _playbackActive_camera = false;
-    bool _playbackActive_time = false;
-    bool _playbackActive_script = false;
     bool _playbackPausedWithinDeltaTimePause = false;
     bool _playbackLoopMode = false;
     double _playbackPauseOffset = 0.0;
@@ -384,12 +379,11 @@ protected:
     bool _saveRendering_isFirstFrame = true;
 
     std::vector<TimelineEntry> _timeline;
+    std::vector<TimelineEntry>::const_iterator _previous = _timeline.end();
 
     std::unordered_map<std::string, std::string> _savePropertiesBaseline;
 
     std::vector<std::string> _loadedNodes;
-
-    unsigned int _idxTimeline_nonCamera = 0;
 
     unsigned int _idxTimeline_cameraPtrNext = 0;
     unsigned int _idxTimeline_cameraPtrPrev = 0;
