@@ -574,6 +574,20 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
         secondToLast.advanceTime(-Hour);
         secondToFirst.advanceTime(Hour);
     }
+    /* // if the images are for 15 min intervals
+    if (_prototyped.temporalResolution == "15m") {
+        constexpr int QuarterHour = 15 * 60;
+        // the second tile to interpolate between
+        nextTile.advanceTime(QuarterHour);
+        // the tile after the second tile
+        nextNextTile.advanceTime(2 * QuarterHour);
+        // the tile before the first tile
+        prevTile.advanceTime(-QuarterHour + 1);
+        // to make sure that an image outside the dataset is not searched for both
+        // ends of the dataset are calculated
+        secondToLast.advanceTime(-QuarterHour);
+        secondToFirst.advanceTime(QuarterHour);
+    } */
     // if the images are for each month
     if (_prototyped.temporalResolution == "1M") {
         constexpr int Day = 24 * 60 * 60;

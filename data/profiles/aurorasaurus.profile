@@ -96,12 +96,22 @@
       "name": "Scene.Earth.Renderable.Layers.Overlays.Reference_Features.Settings.Multiplier",
       "type": "setPropertyValueSingle",
       "value": "15"
+    },
+    {
+      "name": "RenderEngine.HorizFieldOfView",
+      "type": "setPropertyValueSingle",
+      "value": "37.130000"
+    },
+    {
+      "name": "Scene.shape*.Renderable.Enabled",
+      "type": "setPropertyValue",
+      "value": "false"
     }
   ],
   "time": {
     "is_paused": false,
     "type": "absolute",
-    "value": "2024-05-10T15:00:00"
+    "value": "2024-05-10T15:15:00"
   },
   "version": {
     "major": 1,

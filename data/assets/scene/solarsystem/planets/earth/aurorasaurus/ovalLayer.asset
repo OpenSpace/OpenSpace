@@ -1,0 +1,83 @@
+local globe = asset.require("scene/solarsystem/planets/earth/earth")
+
+local northPath = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_north/combined_images/"
+local southPath = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_south/combined_images/"
+
+local NorthLayer = {
+    Identifier = "Oval_North",
+    Name = "Oval North",
+    Enabled = asset.enabled,
+    ZIndex = 9000,
+    Type = "TemporalTileProvider",
+    Mode = "Prototyped",
+    Prototyped = {
+        Time = {
+            Start = "2024-05-10",
+            End = "2024-05-12"
+        },
+        TemporalResolution = "15m",
+        TimeFormat = "YYYY-MM-DD-HR-MN",
+        Prototype = northPath .. "${OpenSpaceTimeId}.png"
+    },
+    Description = "Earth image from Blue Marble Next Generation",
+    Opacity = 1
+}
+
+local SouthLayer = {
+  Identifier = "Oval_South",
+  Name = "Oval South",
+  Enabled = asset.enabled,
+  ZIndex = 9000,
+  Type = "TemporalTileProvider",
+  Mode = "Prototyped",
+  Prototyped = {
+      Time = {
+          Start = "2024-05-10",
+          End = "2024-05-12"
+      },
+      TemporalResolution = "15m",
+      TimeFormat = "YYYY-MM-DD-HR-MN",
+      Prototype = southPath .. "${OpenSpaceTimeId}.png"
+  },
+  Description = "Earth image from Blue Marble Next Generation",
+  Opacity = 1
+}
+
+local Layer3 = {
+    Identifier = "Oval_Test3",
+    Name = "Oval test 3",
+    Enabled = asset.enabled,
+    ZIndex = 9000,
+    FilePath = "C:/Users/alundkvi/Documents/work/scripts/oval_asset_output_not_simplified/2024-05-10_19-00-00/output4.png",
+    Description = "Earth image from Blue Marble Next Generation",
+    Opacity = 1,
+    CacheSettings = { Enabled = false }
+}
+
+
+local AuroraLayer = {
+  Identifier = "Aurora_Image",
+  Name = "Arurora Image",
+  Enabled = asset.enabled,
+  ZIndex = 5,
+  FilePath = "C:/Users/alundkvi/Documents/work/scripts/us_image_transparent.png",
+  Description = "Lower Resolution offline version of WAC layer",
+  CacheSettings = { Enabled = false }
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", NorthLayer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", SouthLayer)
+  --openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", AuroraLayer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", NorthLayer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", SouthLayer)
+  --openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", AuroraLayer)
+end)
+
+asset.export("Prototype", NorthLayer)
+asset.export("Prototype", SouthLayer)
+--asset.export("Layer", AuroraLayer)
