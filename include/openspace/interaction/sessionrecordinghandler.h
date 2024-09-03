@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/network/messagestructures.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -36,21 +37,6 @@
 #include <chrono>
 
 namespace openspace::interaction {
-
-struct SessionRecordingEntry {
-    struct Timestamps {
-        double timeRec;
-        double timeSim;
-    };
-
-    using Camera = interaction::KeyframeNavigator::CameraPose;
-    using Script = std::string;
-
-    Timestamps timestamps;
-    std::variant<Camera, Script> value;
-};
-
-using SessionRecording = std::vector<SessionRecordingEntry>;
 
 class SessionRecordingHandler : public properties::PropertyOwner {
 public:
@@ -276,7 +262,7 @@ public:
      *         used if there are multiple conversion steps where each step has to use
      *         the output of the previous.
      */
-    std::string convertFile(std::string filename, int depth = 0);
+    std::filesystem::path convertFile(std::filesystem::path filename, int depth = 0);
 
     /**
      * Goes to legacy session recording inherited class, and calls its #convertFile
@@ -286,7 +272,7 @@ public:
      * \param depth Iteration number to prevent runaway recursion (init call with zero)
      * \return string containing the filename of the conversion
      */
-    virtual std::string getLegacyConversionResult(std::string filename, int depth);
+    virtual std::filesystem::path getLegacyConversionResult(std::filesystem::path filename, int depth);
 
     /**
      * Version string for file format version currently supported by this class.
@@ -305,27 +291,15 @@ public:
      */
     virtual std::string targetFileFormatVersion();
 
-    /**
-     * Determines a filename for the conversion result based on the original filename and
-     the file format version number.
-     *
-     * \param filename source filename to be converted
-     * \param mode Whether the file is binary or text-based
-     *
-     * \return pathname of the converted version of the file
-     */
-    std::string determineConversionOutFilename(const std::string& filename,
-        DataMode mode);
-
 protected:
-    void playbackAddEntriesToTimeline(std::istream& playback, std::string playbackFilename);
+    void playbackAddEntriesToTimeline(std::istream& playback, std::filesystem::path playbackFilename);
 
     void moveAheadInTime(double dt);
 
     void setupPlayback(double startTime);
 
     void cleanUpTimelinesAndKeyframes();
-    void convertEntries(const std::string& inFilename, std::stringstream& inStream,
+    void convertEntries(const std::filesystem::path& inFilename, std::stringstream& inStream,
         DataMode mode, std::ofstream& outFile);
     virtual void convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
         std::string& inputLine, std::ofstream& outFile);
@@ -333,6 +307,9 @@ protected:
         std::string& inputLine, std::ofstream& outFile);
 
     void checkIfScriptUsesScenegraphNode(std::string s) const;
+
+    std::filesystem::path determineConversionOutFilename(const std::filesystem::path& filename,
+        DataMode mode);
 
     properties::BoolProperty _renderPlaybackInformation;
     properties::BoolProperty _ignoreRecordedScale;
@@ -404,7 +381,7 @@ public:
     std::string targetFileFormatVersion() override {
         return TargetConvertVersion;
     }
-    std::string getLegacyConversionResult(std::string filename, int depth) override;
+    std::filesystem::path getLegacyConversionResult(std::filesystem::path filename, int depth) override;
 
     struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
         void read(std::istream* in) override;
@@ -422,6 +399,6 @@ void convertTypes(SessionRecordingHandler::DataMode fileFormatType,
 std::tuple<SessionRecordingHandler::DataMode, std::string> determineFormatTypeAndVersion(
     std::filesystem::path inFilePath);
 
-} // namespace openspace
+} // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDINGHANDLER___H__
