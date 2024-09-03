@@ -41,7 +41,7 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/keyframerecording.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/interaction/tasks/convertrecformattask.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -852,8 +852,8 @@ void OpenSpaceEngine::deinitialize() {
             global::renderEngine->scene()->camera()->syncables()
         );
     }
-    global::sessionRecording->stopRecording();
-    global::sessionRecording->stopPlayback();
+    global::sessionRecordingHandler->stopRecording();
+    global::sessionRecordingHandler->stopPlayback();
     global::versionChecker->cancel();
 
     _assetManager = nullptr;
@@ -1010,8 +1010,8 @@ void OpenSpaceEngine::preSynchronization() {
     global::syncEngine->preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
         const double dt =
-            global::sessionRecording->isSavingFramesDuringPlayback() ?
-            global::sessionRecording->fixedDeltaTimeDuringFrameOutput() :
+            global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
+            global::sessionRecordingHandler->fixedDeltaTimeDuringFrameOutput() :
             global::windowDelegate->deltaTime();
 
         global::timeManager->preSynchronization(dt);
@@ -1044,7 +1044,7 @@ void OpenSpaceEngine::preSynchronization() {
                 camera->invalidateCache();
             }
         }
-        global::sessionRecording->preSynchronization(dt);
+        global::sessionRecordingHandler->preSynchronization(dt);
         global::keyframeRecording->preSynchronization(dt);
         global::parallelPeer->preSynchronization();
         global::interactionMonitor->updateActivityState();
@@ -1168,7 +1168,7 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine->renderOverlays(_shutdown);
         global::luaConsole->render();
-        global::sessionRecording->render();
+        global::sessionRecordingHandler->render();
     }
 
     for (const std::function<void()>& func : *global::callback::draw2D) {

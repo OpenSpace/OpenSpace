@@ -32,7 +32,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -91,8 +91,8 @@ namespace {
 
     std::chrono::steady_clock::time_point currentTimeForInterpolation() {
         using namespace openspace::global;
-        if (sessionRecording->isSavingFramesDuringPlayback()) {
-            return sessionRecording->currentPlaybackInterpolationTime();
+        if (sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+            return sessionRecordingHandler->currentPlaybackInterpolationTime();
         }
         else {
             return std::chrono::steady_clock::now();

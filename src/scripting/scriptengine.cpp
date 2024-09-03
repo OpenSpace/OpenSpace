@@ -27,7 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/documentation/documentation.h>
@@ -483,8 +483,8 @@ void ScriptEngine::preSync(bool isMaster) {
             // Not really a received script but the master also needs to run the script...
             _masterScriptQueue.push(item);
 
-            if (global::sessionRecording->isRecording()) {
-                global::sessionRecording->saveScriptKeyframeToTimeline(item.script);
+            if (global::sessionRecordingHandler->isRecording()) {
+                global::sessionRecordingHandler->saveScriptKeyframeToTimeline(item.script);
             }
 
             // Sync out to other nodes (cluster)

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/tasks/convertrecformattask.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/engine/globals.h>
@@ -65,10 +65,10 @@ ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) 
 std::string ConvertRecFormatTask::description() {
     std::string description =
         std::format("Convert session recording file '{}'", _inFilePath);
-    if (_fileFormatType == SessionRecording::DataMode::Ascii) {
+    if (_fileFormatType == SessionRecordingHandler::DataMode::Ascii) {
         description += "(ascii format) ";
     }
-    else if (_fileFormatType == SessionRecording::DataMode::Binary) {
+    else if (_fileFormatType == SessionRecordingHandler::DataMode::Binary) {
         description += "(binary format) ";
     }
     else {

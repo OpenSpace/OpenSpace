@@ -29,7 +29,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/keys.h>
@@ -88,8 +88,8 @@ namespace {
     double currentApplicationTimeForInterpolation() {
         using namespace openspace;
 
-        if (global::sessionRecording->isSavingFramesDuringPlayback()) {
-            return global::sessionRecording->currentApplicationInterpolationTime();
+        if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+            return global::sessionRecordingHandler->currentApplicationInterpolationTime();
         }
         else {
             return global::windowDelegate->applicationTime();

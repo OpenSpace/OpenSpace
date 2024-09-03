@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SESSIONRECORDING___H__
-#define __OPENSPACE_CORE___SESSIONRECORDING___H__
+#ifndef __OPENSPACE_CORE___SESSIONRECORDINGHANDLER___H__
+#define __OPENSPACE_CORE___SESSIONRECORDINGHANDLER___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -37,10 +37,13 @@
 
 namespace openspace::interaction {
 
-struct Timestamps {
-    double timeRec;
-    double timeSim;
+struct Timeline {
 };
+    struct Timestamps {
+        double timeRec;
+        double timeSim;
+    };
+
 
 using CameraEntry = interaction::KeyframeNavigator::CameraPose;
 using ScriptEntry = std::string;
@@ -50,7 +53,7 @@ struct TimelineEntry {
     std::variant<CameraEntry, ScriptEntry> value;
 };
 
-class SessionRecording : public properties::PropertyOwner {
+class SessionRecordingHandler : public properties::PropertyOwner {
 public:
     enum class DataMode {
         Ascii = 0,
@@ -67,8 +70,8 @@ public:
     using CallbackHandle = int;
     using StateChangeCallback = std::function<void()>;
 
-    SessionRecording();
-    ~SessionRecording() override = default;
+    SessionRecordingHandler();
+    ~SessionRecordingHandler() override = default;
 
     /**
      * This is called with every rendered frame. If in recording state, the camera state
@@ -391,7 +394,7 @@ protected:
 //    (for example SessionRecording_legacy_0085::convertScript uses its own
 //    override of script keyframe for the conversion functionality).
 
-class SessionRecording_legacy_0085 : public SessionRecording {
+class SessionRecordingHandler_legacy_0085 : public SessionRecordingHandler {
 public:
     static const size_t FileHeaderVersionLength = 5;
     char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
@@ -414,12 +417,12 @@ protected:
 };
 
 
-void convertTypes(SessionRecording::DataMode fileFormatType,
+void convertTypes(SessionRecordingHandler::DataMode fileFormatType,
     std::filesystem::path inFilePath, std::filesystem::path outFilePath,
     std::string version);
-std::tuple<SessionRecording::DataMode, std::string> determineFormatTypeAndVersion(
+std::tuple<SessionRecordingHandler::DataMode, std::string> determineFormatTypeAndVersion(
     std::filesystem::path inFilePath);
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___SESSIONRECORDING___H__
+#endif // __OPENSPACE_CORE___SESSIONRECORDINGHANDLER___H__

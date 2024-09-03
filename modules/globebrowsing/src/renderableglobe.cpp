@@ -33,7 +33,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -1333,8 +1333,8 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
     }
     _localRenderer.program->deactivate();
 
-    if (global::sessionRecording->isSavingFramesDuringPlayback() &&
-        global::sessionRecording->shouldWaitForTileLoading())
+    if (global::sessionRecordingHandler->isSavingFramesDuringPlayback() &&
+        global::sessionRecordingHandler->shouldWaitForTileLoading())
     {
         // If our tile cache is very full, we assume we need to adjust the level of detail
         // dynamically to not keep rendering frames with unavailable data

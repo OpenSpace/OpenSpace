@@ -38,7 +38,7 @@
 #include <openspace/interaction/keyframerecording.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
@@ -98,7 +98,7 @@ namespace {
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::KeyframeRecording) +
         sizeof(interaction::NavigationHandler) +
-        sizeof(interaction::SessionRecording) +
+        sizeof(interaction::SessionRecordingHandler) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
@@ -333,11 +333,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    sessionRecording = new (currentPos) interaction::SessionRecording;
-    ghoul_assert(sessionRecording, "No sessionRecording");
-    currentPos += sizeof(interaction::SessionRecording);
+    sessionRecordingHandler = new (currentPos) interaction::SessionRecordingHandler;
+    ghoul_assert(sessionRecordingHandler, "No sessionRecording");
+    currentPos += sizeof(interaction::SessionRecordingHandler);
 #else // ^^^ WIN32 / !WIN32 vvv
-    sessionRecording = new interaction::SessionRecording;
+    sessionRecordingHandler = new interaction::SessionRecordingHandler;
 #endif // WIN32
 
 #ifdef WIN32
@@ -399,7 +399,7 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
     rootPropertyOwner->addPropertySubOwner(global::keyframeRecording);
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
-    rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
+    rootPropertyOwner->addPropertySubOwner(global::sessionRecordingHandler);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
     rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
 
@@ -458,9 +458,9 @@ void destroy() {
 
     LDEBUGC("Globals", "Destroying 'SessionRecording'");
 #ifdef WIN32
-    sessionRecording->~SessionRecording();
+    sessionRecordingHandler->~SessionRecordingHandler();
 #else // ^^^ WIN32 / !WIN32 vvv
-    delete sessionRecording;
+    delete sessionRecordingHandler;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'NavigationHandler'");

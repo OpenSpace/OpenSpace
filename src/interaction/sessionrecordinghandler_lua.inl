@@ -34,10 +34,10 @@ namespace {
     if (recordFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    global::sessionRecording->setRecordDataFormat(
-        interaction::SessionRecording::DataMode::Binary
+    global::sessionRecordingHandler->setRecordDataFormat(
+        interaction::SessionRecordingHandler::DataMode::Binary
     );
-    global::sessionRecording->startRecording(recordFilePath);
+    global::sessionRecordingHandler->startRecording(recordFilePath);
 }
 
 /**
@@ -50,15 +50,15 @@ namespace {
     if (recordFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    global::sessionRecording->setRecordDataFormat(
-        interaction::SessionRecording::DataMode::Ascii
+    global::sessionRecordingHandler->setRecordDataFormat(
+        interaction::SessionRecordingHandler::DataMode::Ascii
     );
-    global::sessionRecording->startRecording(recordFilePath);
+    global::sessionRecordingHandler->startRecording(recordFilePath);
 }
 
 // Stops a recording session.
 [[codegen::luawrap]] void stopRecording() {
-    openspace::global::sessionRecording->stopRecording();
+    openspace::global::sessionRecordingHandler->stopRecording();
 }
 
 /**
@@ -78,7 +78,7 @@ namespace {
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    global::sessionRecording->startPlayback(
+    global::sessionRecordingHandler->startPlayback(
         file,
         loop,
         shouldWaitForTiles
@@ -87,7 +87,7 @@ namespace {
 
 // Stops a playback session before playback of all keyframes is complete.
 [[codegen::luawrap]] void stopPlayback() {
-    openspace::global::sessionRecording->stopPlayback();
+    openspace::global::sessionRecordingHandler->stopPlayback();
 }
 
 /**
@@ -96,12 +96,12 @@ namespace {
  * frames per second will be exported.
  */
 [[codegen::luawrap]] void enableTakeScreenShotDuringPlayback(int fps = 60) {
-    openspace::global::sessionRecording->enableTakeScreenShotDuringPlayback(fps);
+    openspace::global::sessionRecordingHandler->enableTakeScreenShotDuringPlayback(fps);
 }
 
 // Used to disable that renderings are saved during playback.
 [[codegen::luawrap]] void disableTakeScreenShotDuringPlayback() {
-    openspace::global::sessionRecording->disableTakeScreenShotDuringPlayback();
+    openspace::global::sessionRecordingHandler->disableTakeScreenShotDuringPlayback();
 }
 
 /**
@@ -112,12 +112,12 @@ namespace {
     if (convertFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string must not be empty");
     }
-    openspace::global::sessionRecording->convertFile(convertFilePath);
+    openspace::global::sessionRecordingHandler->convertFile(convertFilePath);
 }
 
 // Pauses or resumes the playback progression through keyframes.
 [[codegen::luawrap]] void setPlaybackPause(bool pause) {
-    openspace::global::sessionRecording->setPlaybackPause(pause);
+    openspace::global::sessionRecordingHandler->setPlaybackPause(pause);
 }
 
 /**
@@ -127,20 +127,20 @@ namespace {
 [[codegen::luawrap]] void togglePlaybackPause() {
     using namespace openspace;
 
-    bool isPlaybackPaused = global::sessionRecording->isPlaybackPaused();
-    global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
+    bool isPlaybackPaused = global::sessionRecordingHandler->isPlaybackPaused();
+    global::sessionRecordingHandler->setPlaybackPause(!isPlaybackPaused);
 }
 
 // Returns true if session recording is currently playing back a recording.
 [[codegen::luawrap]] bool isPlayingBack() {
-    return openspace::global::sessionRecording->isPlayingBack();
+    return openspace::global::sessionRecordingHandler->isPlayingBack();
 }
 
 // Returns true if session recording is currently recording a recording.
 [[codegen::luawrap]] bool isRecording() {
-    return openspace::global::sessionRecording->isRecording();
+    return openspace::global::sessionRecordingHandler->isRecording();
 }
 
-#include "sessionrecording_lua_codegen.cpp"
+#include "sessionrecordinghandler_lua_codegen.cpp"
 
 } // namespace

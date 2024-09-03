@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___CONVERTRECFORMATTASK___H__
 
 #include <openspace/util/task.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 
 #include <ghoul/glm.h>
 #include <filesystem>
@@ -49,7 +49,7 @@ public:
 private:
     std::filesystem::path _inFilePath;
     std::filesystem::path _outFilePath;
-    SessionRecording::DataMode _fileFormatType;
+    SessionRecordingHandler::DataMode _fileFormatType;
     std::string _version;
 };
 

@@ -241,8 +241,8 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
             // value from the stack, so we need to push it to the end
             lua_pushvalue(L, -1);
 
-            if (global::sessionRecording->isRecording()) {
-                global::sessionRecording->savePropertyBaseline(*prop);
+            if (global::sessionRecordingHandler->isRecording()) {
+                global::sessionRecordingHandler->savePropertyBaseline(*prop);
             }
             if (interpolationDuration == 0.0) {
                 global::renderEngine->scene()->removePropertyInterpolation(prop);
@@ -312,8 +312,8 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
         );
     }
     else {
-        if (global::sessionRecording->isRecording()) {
-            global::sessionRecording->savePropertyBaseline(prop);
+        if (global::sessionRecordingHandler->isRecording()) {
+            global::sessionRecordingHandler->savePropertyBaseline(prop);
         }
         if (duration == 0.0) {
             global::renderEngine->scene()->removePropertyInterpolation(&prop);
