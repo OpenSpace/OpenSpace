@@ -37,21 +37,20 @@
 
 namespace openspace::interaction {
 
-struct Timeline {
-};
+struct SessionRecordingEntry {
     struct Timestamps {
         double timeRec;
         double timeSim;
     };
 
+    using Camera = interaction::KeyframeNavigator::CameraPose;
+    using Script = std::string;
 
-using CameraEntry = interaction::KeyframeNavigator::CameraPose;
-using ScriptEntry = std::string;
-
-struct TimelineEntry {
     Timestamps timestamps;
-    std::variant<CameraEntry, ScriptEntry> value;
+    std::variant<Camera, Script> value;
 };
+
+using SessionRecording = std::vector<SessionRecordingEntry>;
 
 class SessionRecordingHandler : public properties::PropertyOwner {
 public:
@@ -363,8 +362,8 @@ protected:
     SessionState _lastState = SessionState::Idle;
 
 
-    std::vector<TimelineEntry> _timeline;
-    std::vector<TimelineEntry>::const_iterator _currentEntry = _timeline.end();
+    SessionRecording _timeline;
+    SessionRecording::const_iterator _currentEntry = _timeline.end();
     std::unordered_map<std::string, std::string> _savePropertiesBaseline;
     std::vector<std::string> _loadedNodes;
 
