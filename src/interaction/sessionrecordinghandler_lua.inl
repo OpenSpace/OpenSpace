@@ -112,7 +112,7 @@ namespace {
     if (convertFilePath.empty()) {
         throw ghoul::lua::LuaError("Filepath string must not be empty");
     }
-    openspace::global::sessionRecordingHandler->convertFile(convertFilePath);
+    //openspace::global::sessionRecordingHandler->convertFile(convertFilePath);
 }
 
 // Pauses or resumes the playback progression through keyframes.

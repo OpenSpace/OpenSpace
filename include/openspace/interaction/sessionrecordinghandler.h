@@ -262,7 +262,7 @@ public:
      *         used if there are multiple conversion steps where each step has to use
      *         the output of the previous.
      */
-    std::filesystem::path convertFile(std::filesystem::path filename, int depth = 0);
+    //std::filesystem::path convertFile(std::filesystem::path filename, int depth = 0);
 
     /**
      * Goes to legacy session recording inherited class, and calls its #convertFile
@@ -272,14 +272,14 @@ public:
      * \param depth Iteration number to prevent runaway recursion (init call with zero)
      * \return string containing the filename of the conversion
      */
-    virtual std::filesystem::path getLegacyConversionResult(std::filesystem::path filename, int depth);
+    //virtual std::filesystem::path getLegacyConversionResult(std::filesystem::path filename, int depth);
 
     /**
      * Version string for file format version currently supported by this class.
      *
      * \return string of the file format version this class supports
      */
-    virtual std::string fileFormatVersion();
+    //virtual std::string fileFormatVersion();
 
     /**
      * Version string for file format version that a conversion operation will convert to
@@ -289,27 +289,27 @@ public:
      *
      * \return string of the file format version this class supports
      */
-    virtual std::string targetFileFormatVersion();
+    //virtual std::string targetFileFormatVersion();
 
 protected:
-    void playbackAddEntriesToTimeline(std::istream& playback, std::filesystem::path playbackFilename);
+    //void playbackAddEntriesToTimeline(std::istream& playback, std::filesystem::path playbackFilename);
 
     void moveAheadInTime(double dt);
 
     void setupPlayback(double startTime);
 
     void cleanUpTimelinesAndKeyframes();
-    void convertEntries(const std::filesystem::path& inFilename, std::stringstream& inStream,
-        DataMode mode, std::ofstream& outFile);
-    virtual void convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile);
-    virtual void convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile);
+    //void convertEntries(const std::filesystem::path& inFilename, std::stringstream& inStream,
+    //    DataMode mode, std::ofstream& outFile);
+    //virtual void convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
+    //    std::string& inputLine, std::ofstream& outFile);
+    //virtual void convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
+    //    std::string& inputLine, std::ofstream& outFile);
 
     void checkIfScriptUsesScenegraphNode(std::string s) const;
 
-    std::filesystem::path determineConversionOutFilename(const std::filesystem::path& filename,
-        DataMode mode);
+    //std::filesystem::path determineConversionOutFilename(const std::filesystem::path& filename,
+        //DataMode mode);
 
     properties::BoolProperty _renderPlaybackInformation;
     properties::BoolProperty _ignoreRecordedScale;
@@ -370,34 +370,34 @@ protected:
 //    (for example SessionRecording_legacy_0085::convertScript uses its own
 //    override of script keyframe for the conversion functionality).
 
-class SessionRecordingHandler_legacy_0085 : public SessionRecordingHandler {
-public:
-    static const size_t FileHeaderVersionLength = 5;
-    char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
-    char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
-    std::string fileFormatVersion() override {
-        return FileHeaderVersion;
-    }
-    std::string targetFileFormatVersion() override {
-        return TargetConvertVersion;
-    }
-    std::filesystem::path getLegacyConversionResult(std::filesystem::path filename, int depth) override;
-
-    struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
-        void read(std::istream* in) override;
-    };
-
-protected:
-    void convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-        std::string& inputLine, std::ofstream& outFile) override;
-};
-
-
-void convertTypes(SessionRecordingHandler::DataMode fileFormatType,
-    std::filesystem::path inFilePath, std::filesystem::path outFilePath,
-    std::string version);
-std::tuple<SessionRecordingHandler::DataMode, std::string> determineFormatTypeAndVersion(
-    std::filesystem::path inFilePath);
+//class SessionRecordingHandler_legacy_0085 : public SessionRecordingHandler {
+//public:
+//    static const size_t FileHeaderVersionLength = 5;
+//    char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
+//    char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
+//    std::string fileFormatVersion() override {
+//        return FileHeaderVersion;
+//    }
+//    std::string targetFileFormatVersion() override {
+//        return TargetConvertVersion;
+//    }
+//    std::filesystem::path getLegacyConversionResult(std::filesystem::path filename, int depth) override;
+//
+//    struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
+//        void read(std::istream* in) override;
+//    };
+//
+//protected:
+//    void convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
+//        std::string& inputLine, std::ofstream& outFile) override;
+//};
+//
+//
+//void convertTypes(SessionRecordingHandler::DataMode fileFormatType,
+//    std::filesystem::path inFilePath, std::filesystem::path outFilePath,
+//    std::string version);
+//std::tuple<SessionRecordingHandler::DataMode, std::string> determineFormatTypeAndVersion(
+//    std::filesystem::path inFilePath);
 
 } // namespace openspace::interaction
 

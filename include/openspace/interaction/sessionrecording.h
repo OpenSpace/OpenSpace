@@ -44,7 +44,7 @@ struct SessionRecordingEntry {
 };
 using SessionRecording = std::vector<SessionRecordingEntry>;
 
-SessionRecording loadSessionRecording(std::filesystem::path file);
+SessionRecording loadSessionRecording(const std::filesystem::path& filename);
 
 
 } // namespace openspace::interaction

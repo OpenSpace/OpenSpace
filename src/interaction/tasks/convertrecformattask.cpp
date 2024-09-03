@@ -58,7 +58,7 @@ ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) 
         LERROR(std::format("Failed to load session recording file: {}", _inFilePath));
     }
     else {
-        std::tie(_fileFormatType, _version) = determineFormatTypeAndVersion(_inFilePath);
+        //std::tie(_fileFormatType, _version) = determineFormatTypeAndVersion(_inFilePath);
     }
 }
 
@@ -79,7 +79,7 @@ std::string ConvertRecFormatTask::description() {
 }
 
 void ConvertRecFormatTask::perform(const Task::ProgressCallback&) {
-    convertTypes(_fileFormatType, _inFilePath, _outFilePath, _version);
+    //convertTypes(_fileFormatType, _inFilePath, _outFilePath, _version);
 }
 
 documentation::Documentation ConvertRecFormatTask::documentation() {
