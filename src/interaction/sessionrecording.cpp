@@ -166,8 +166,7 @@ namespace {
             Header::DataModeBinary;
         stream.write(&dataMode, sizeof(char));
 
-        constexpr char Newline = '\n';
-        stream.write(&Newline, sizeof(char));
+        stream.write("\n", sizeof(char));
     }
 
 
@@ -267,7 +266,6 @@ namespace {
 
         operator std::tuple<double&, double&>() { return { timestamp, simulationTime }; }
     };
-
 
     template <DataMode mode>
     Timestamps readTimestamps(std::istream&, int) {

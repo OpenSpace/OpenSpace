@@ -40,7 +40,7 @@ namespace {
     constexpr std::string_view KeyInFilePath = "InputFilePath";
     constexpr std::string_view KeyOutFilePath = "OutputFilePath";
 
-    struct [[codegen::Dictionary("ConvertRecFormatTask")]] Parameters {
+    struct [[codegen::Dictionary(ConvertRecFormatTask)]] Parameters {
         std::filesystem::path inputFilePath;
         std::filesystem::path outputFilePath;
 
@@ -51,6 +51,7 @@ namespace {
         DataMode outputMode;
     };
 
+#include "convertrecformattask_codegen.cpp"
 } // namespace
 
 namespace openspace::interaction {
@@ -86,29 +87,6 @@ std::string ConvertRecFormatTask::description() {
 void ConvertRecFormatTask::perform(const Task::ProgressCallback&) {
     SessionRecording sessionRecording = loadSessionRecording(_inFilePath);
     saveSessionRecording(_outFilePath, sessionRecording, _dataMode);
-}
-
-documentation::Documentation ConvertRecFormatTask::documentation() {
-    using namespace documentation;
-    return {
-        "ConvertRecFormatTask",
-        "convert_format_task",
-        "",
-        {
-            {
-                "InputFilePath",
-                new StringAnnotationVerifier("A valid filename to convert"),
-                Optional::No,
-                "The filename to convert to the opposite format",
-            },
-            {
-                "OutputFilePath",
-                new StringAnnotationVerifier("A valid output filename"),
-                Optional::No,
-                "The filename containing the converted result",
-            },
-        },
-    };
 }
 
 } // namespace openspace::interaction
