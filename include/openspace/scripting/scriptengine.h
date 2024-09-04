@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 
 #include <openspace/util/syncable.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/json.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
 #include <filesystem>
@@ -44,9 +43,9 @@ namespace openspace::scripting {
  * The ScriptEngine is responsible for handling the execution of custom Lua functions and
  * executing scripts (#runScript and #runScriptFile). Before usage, it has to be
  * #initialize%d and #deinitialize%d. New ScriptEngine::Library%s consisting of
- * ScriptEngine::Library::Function%s have to be added which can then be called using the
- * `openspace` namespace prefix in Lua. The same functions can be exposed to
- * other Lua states by passing them to the #initializeLuaState method.
+ * Library::Function%s have to be added which can then be called using the
+ * `openspace` namespace prefix in Lua. The same functions can be exposed to other Lua
+ * states by passing them to the #initializeLuaState method.
  */
 class ScriptEngine : public Syncable {
 public:
@@ -63,10 +62,11 @@ public:
 
     static constexpr std::string_view OpenSpaceLibraryName = "openspace";
 
-    ScriptEngine();
+    explicit ScriptEngine(bool sandboxedLua = true);
 
     /**
-     * Initializes the internal Lua state and registers a common set of library functions
+     * Initializes the internal Lua state and registers a common set of library functions.
+     *
      * \throw LuaRuntimeException If the creation of the new Lua state fails
      */
     void initialize();
@@ -83,7 +83,8 @@ public:
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
 
-    bool runScript(const std::string& script, ScriptCallback callback = ScriptCallback());
+    bool runScript(const std::string& script,
+        const ScriptCallback& callback = ScriptCallback());
     bool runScriptFile(const std::filesystem::path& filename);
 
     virtual void preSync(bool isMaster) override;
@@ -92,11 +93,11 @@ public:
     virtual void postSync(bool isMaster) override;
 
     void queueScript(std::string script, ShouldBeSynchronized shouldBeSynchronized,
-        ShouldSendToRemote shouldSendToRemote, ScriptCallback cb = ScriptCallback());
+        ShouldSendToRemote shouldSendToRemote,
+        ScriptCallback callback = ScriptCallback());
 
     std::vector<std::string> allLuaFunctions() const;
-
-    nlohmann::json generateJson() const;
+    const std::vector<LuaLibrary>& allLuaLibraries() const;
 
 private:
     BooleanType(Replace);
@@ -126,7 +127,7 @@ private:
     // Logging variables
     bool _logFileExists = false;
     bool _logScripts = true;
-    std::string _logFilename;
+    std::filesystem::path _logFilename;
 };
 
 } // namespace openspace::scripting

@@ -1,10 +1,10 @@
-asset.require("spice/base")
 asset.require("./trail")
 local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
-local texturesPath = asset.syncedResource({
+local texturesPath = asset.resource({
   Type = "HttpSynchronization",
   Name = "Saturn textures",
   Identifier = "saturn_textures",
@@ -18,20 +18,18 @@ local Saturn = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SATURN",
-      Observer = "SATURN BARYCENTER"
+      Target = coreKernels.ID.Saturn,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_SATURN",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Saturn,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 60268000, 60268000, 54364000 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Rings = {
       -- Single Texture Values:
       --Texture = texturesPath .. "/saturn_rings.png",
@@ -66,8 +64,8 @@ local SaturnLabel = {
   Identifier = "SaturnLabel",
   Parent = Saturn.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Saturn",
     FontSize = 70.0,
     Size = 8.9,
@@ -105,7 +103,6 @@ asset.export(SaturnLabel)
 
 asset.meta = {
   Name = "Saturn",
-  Version = "1.1",
   Description = "Saturn globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

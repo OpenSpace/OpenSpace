@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,12 +49,14 @@ private:
 
     /**
      * Compute the inner and outer boundary of the habitable zone of a star, according to
-     * formula and coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292
+     * formula and coefficients by Kopparapu et al. (2015).
      *
      * \param teff The effective temperature of the star, in Kelvin
      * \param luminosity The luminosity of the star, in solar luminosities
-     * \return A vec4 with the boundaries in atronomical units, in the order:
-               optimistic inner, conservative inner, conservative outer, optimistic outer
+     * \return A vec4 with the boundaries in atronomical units, in the order: optimistic
+     *         inner, conservative inner, conservative outer, optimistic outer
+     *
+     * \sa https://arxiv.org/abs/1404.5292
      */
     glm::dvec4 computeKopparapuZoneBoundaries(float teff, float luminosity);
 

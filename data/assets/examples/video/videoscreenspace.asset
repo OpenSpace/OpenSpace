@@ -5,7 +5,7 @@ local ScreenSpace = {
   Identifier = "ScreenSpaceVideoExample",
   Type = "ScreenSpaceVideo",
   Name = "Screen Space Video Example",
-  Video = asset.localResource("examplevideo.mp4")
+  Video = asset.resource("examplevideo.mp4")
 }
 
 
@@ -23,7 +23,6 @@ asset.export(ScreenSpace)
 
 asset.meta = {
   Name = "ScreenSpace Video Example",
-  Version = "1.0",
   Description = "An example asset that shows how to include a video in screen space.",
   Author = "OpenSpace Team",
   URL = "https://openspaceproject.com",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,11 @@
 
 namespace openspace {
 
+KeyframeBase::KeyframeBase(size_t id_, double timestamp_)
+    : id(id_)
+    , timestamp(timestamp_)
+{}
+
 bool compareKeyframeTimes(const KeyframeBase& a, const KeyframeBase& b) {
     return a.timestamp < b.timestamp;
 }
@@ -42,4 +47,4 @@ bool compareKeyframeTimeWithTime_playbackWithFrames(const KeyframeBase& a, doubl
     return a.timestamp <= b;
 }
 
-} // namespace
+} // namespace openspace

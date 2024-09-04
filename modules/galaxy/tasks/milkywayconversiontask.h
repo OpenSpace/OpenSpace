@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,8 +35,8 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 
 /**
- * Converts a set of exr image slices to a raw volume
- * with floating point RGBA data (32 bit per channel).
+ * Converts a set of exr image slices to a raw volume with floating point RGBA data (32
+ * bit per channel).
  */
 class MilkywayConversionTask : public Task {
 public:

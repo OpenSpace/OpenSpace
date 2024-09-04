@@ -64,8 +64,8 @@
     }
   ],
   "time": {
-    "type": "absolute",
-    "value": "2023 Oct 14 18:00:41"
+    "type": "relative",
+    "value": "-1d"
   },
   "version": {
     "major": 1,

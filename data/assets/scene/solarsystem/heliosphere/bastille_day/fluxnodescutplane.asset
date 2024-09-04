@@ -4,14 +4,14 @@ local rot = asset.require("./carrington_to_heeq_rotation")
 
 
 
-local TexturesPathEquatorial = asset.syncedResource({
+local TexturesPathEquatorial = asset.resource({
 Type = "HttpSynchronization",
   Name = "cutplanes_textures",
   Identifier = "cutplanes_textures",
   Version = 1
 })
 
-local TexturesPathMeridial = asset.syncedResource({
+local TexturesPathMeridial = asset.resource({
   Type = "HttpSynchronization",
   Name = "cutplane_meridial_textures",
   Identifier = "cutplane_meridial_textures",
@@ -100,6 +100,7 @@ local ToggleEquatorial = {
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
+
 local ToggleMeridial = {
   Identifier = "os.bastilleday.fluxnodescutplane.ToggleMeridial",
   Name = "Toggle meridial cutplane",
@@ -151,7 +152,6 @@ asset.export(MeridialCutplane)
 
 asset.meta = {
   Name = "Predictive Science Inc. Cutplanes Bastille Days",
-  Version = "1.1",
   Description = "Cutplanes for the bastille day CME event",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

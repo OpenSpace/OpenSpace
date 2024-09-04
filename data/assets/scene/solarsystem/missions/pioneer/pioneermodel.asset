@@ -1,8 +1,8 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local modelFolder = asset.syncedResource({
+local modelFolder = asset.resource({
   Name = "Pioneer 10/11 Models",
   Type = "HttpSynchronization",
   Identifier = "pioneer_10_11_model",
@@ -29,7 +29,6 @@ asset.export("PioneerModel", ModelRenderable)
 
 asset.meta = {
   Name = "Pioneer Model",
-  Version = "1.0",
   Description = [[Pioneer model asset. Used by both pioneer 10 and pioneer 11 asset.
     Untextured version of model from NASA 3D resources]],
   Author = "NASA",

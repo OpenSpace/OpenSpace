@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ tstring temporaryString(std::string_view str) {
 }
 
 tstring temporaryString(const char str[]) {
-    size_t size = strlen(str);
+    const size_t size = strlen(str);
     void* ptr = global::memoryManager->TemporaryMemory.do_allocate(size, 8);
     std::strcpy(reinterpret_cast<char*>(ptr), str);
     return tstring(reinterpret_cast<char*>(ptr), size);

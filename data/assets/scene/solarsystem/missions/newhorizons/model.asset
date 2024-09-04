@@ -1,9 +1,9 @@
 local transforms = asset.require("./transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "New Horizons Model",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_model",
@@ -16,7 +16,6 @@ local NewHorizons = {
   Parent = transforms.NewHorizonsPosition.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    Body = "NEW HORIZONS",
     GeometryFile = models .. "NewHorizonsCleanModel.obj",
     AmbientIntensity = 0.2,
     DiffuseIntensity = 1.0,

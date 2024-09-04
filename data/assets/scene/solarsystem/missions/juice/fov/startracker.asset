@@ -13,8 +13,8 @@ local StarOh1 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_STR-OH1",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.StarTrackerOH1,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_STR-OH1",
@@ -22,8 +22,7 @@ local StarOh1 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Star Tracker OH1 FOV",
@@ -42,8 +41,8 @@ local StarOh2 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_STR-OH2",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.StarTrackerOH2,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_STR-OH2",
@@ -51,8 +50,7 @@ local StarOh2 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Star Tracker OH2 FOV",
@@ -71,8 +69,8 @@ local StarOh3 = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_STR-OH3",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.StarTrackerOH3,
     RGB = { 0.0, 0.0, 0.0 },
     Instrument = {
       Name = "JUICE_STR-OH3",
@@ -80,8 +78,7 @@ local StarOh3 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Star Tracker OH3 FOV",
@@ -111,7 +108,6 @@ asset.export(StarOh3)
 
 asset.meta = {
   Name = "Star Tracker",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the three headed "Hydra" star trackers onboard Juice, which
     is measuring the location of stars and comparing them to their known locations in

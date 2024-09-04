@@ -1,0 +1,26 @@
+{
+  "profile": "voyager",
+  "commands": [
+    { "type": "time", "value": "1977-09-10T12:00:00.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Voyager_1",
+        "pitch": 0.0289491,
+        "position": [ 9.291557, 3.604126, 0.823166 ],
+        "up": [ 0.130390, -0.527836, 0.839278 ],
+        "yaw": -0.00997966
+      }
+    },
+    { "type": "action", "value": "os.FadeDownTrails" },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Voyager_1_Trail_*.Enabled",
+        "value": false
+      }
+    },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

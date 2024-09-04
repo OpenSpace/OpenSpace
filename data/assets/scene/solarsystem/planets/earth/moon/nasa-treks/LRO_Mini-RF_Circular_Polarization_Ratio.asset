@@ -6,12 +6,16 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_MiniRF_CPR_Gray_Global_128ppd = {
   Identifier = "LRO_MiniRF_CPR_Gray_Global_128ppd",
   Name = [[LRO Mini-RF Circular Polarization Ratio, Grayscale]],
-  FilePath = asset.localResource("LRO_Mini-RF_Circular_Polarization_Ratio/Grayscale.vrt"),
+  ZIndex = 50,
+  FilePath = asset.resource("LRO_Mini-RF_Circular_Polarization_Ratio/Grayscale.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_MiniRF_CPR_Gray_Global_128ppd)
@@ -24,9 +28,9 @@ end)
 asset.export("LRO_MiniRF_CPR_Gray_Global_128ppd", treks_LRO_MiniRF_CPR_Gray_Global_128ppd)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_Mini-RF_Circular_Polarization_Ratio],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_Mini-RF_Circular_Polarization_Ratio]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

@@ -19,7 +19,6 @@ asset.export(Item)
 
 asset.meta = {
   Name = "Dashboard - ParallelConnection",
-  Version = "1.0",
   Description = "This asset provides a ParallelConnection dashboard item",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

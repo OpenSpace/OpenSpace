@@ -2,7 +2,7 @@ local globe = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
-local path = asset.syncedResource({
+local path = asset.resource({
   Name = "Earth Textures Climate",
   Type = "HttpSynchronization",
   Identifier = "earth_textures_climate",
@@ -61,7 +61,6 @@ asset.export("Folder", LayerFolder)
 
 asset.meta = {
   Name = "Climate Earth Layers",
-  Version = "1.0",
   Description = "ERA5 data",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

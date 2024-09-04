@@ -6,7 +6,8 @@ local Layer = {
   Identifier = "Messenger_HIE_Utah",
   Name = "Messenger HIE [Utah]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("messenger_hie_utah.wms")
+  ZIndex = 10,
+  FilePath = asset.resource("messenger_hie_utah.wms")
 }
 
 
@@ -24,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger HIE [Utah]",
-  Version = "1.0",
   Description = [[Mercury HIE layer for Mercury globe. This map is hosted on the OpenSpace
     server in Utah]],
   Author = "USGS",

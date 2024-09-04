@@ -6,7 +6,8 @@ local Layer = {
   Identifier = "LO_MR_Mosaic_NewYork",
   Name = "Moon Lunar Orbiter Digital Photographic Global Mosaic 59m v1 [New York]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("lo_mr_mosaic_newyork.wms"),
+  ZIndex = 20,
+  FilePath = asset.resource("lo_mr_mosaic_newyork.wms"),
   Description = [[
     This Lunar Orbiter (LO) mosaic of the Moon was constructed using
     photographs acquired by LO III, IV and V. Work towards constructing the global mosaic
@@ -41,7 +42,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Moon Lunar Orbiter Digital Photographic Global Mosaic [New York]",
-  Version = "1.0",
   Description = [[Moon Lunar Orbiter Digital Photographic Global Mosaic 59m v1. This
     map is hosted on the OpenSpace server in New York]],
   Author = "USGS",

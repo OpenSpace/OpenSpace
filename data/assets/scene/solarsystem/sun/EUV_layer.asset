@@ -1,10 +1,9 @@
-asset.require("spice/base")
 local propertyHelper = asset.require("util/property_helper")
 local transforms = asset.require("./transforms")
 
 
 
-local textureSourcePath = asset.syncedResource({
+local textureSourcePath = asset.resource({
   Type = "HttpSynchronization",
   Name = "euv_textures_bastille_event",
   Identifier = "euv_textures_bastille_event",
@@ -79,7 +78,6 @@ asset.export(EUVLayer)
 
 asset.meta = {
   Name = "Predictive Science Inc. EUV texture sequence Bastille Days",
-  Version = "1.2",
   Description = [[Texture sequence of an extreme ultraviolet (EUV) simulation during the CME]],
   Author = "CCMC, OpenSpace team",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

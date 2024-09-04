@@ -1,4 +1,8 @@
 {
+  "additional_scripts": [
+    "openspace.action.triggerAction('os.solarsystem.JupiterMinorMoonsOff')",
+    "openspace.action.triggerAction('os.solarsystem.SaturnMinorMoonsOff')"
+  ],
   "assets": [
     "base",
     "base_keybindings",

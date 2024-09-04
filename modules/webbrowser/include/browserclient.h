@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,6 +51,13 @@ public:
         IMPLEMENT_REFCOUNTING(NoContextMenuHandler);
     };
 
+    class DisplayHandler : public CefDisplayHandler {
+        bool OnCursorChange(CefRefPtr<CefBrowser> browser,
+            CefCursorHandle cursor,
+            cef_cursor_type_t type,
+            const CefCursorInfo& custom_cursor_info) override; 
+        IMPLEMENT_REFCOUNTING(DisplayHandler);
+    };
     BrowserClient(WebRenderHandler* handler, WebKeyboardHandler* keyboardHandler);
 
     CefRefPtr<CefRenderHandler> GetRenderHandler() override;
@@ -58,6 +65,7 @@ public:
     CefRefPtr<CefRequestHandler> GetRequestHandler() override;
     CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() override;
     CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override;
+    CefRefPtr<CefDisplayHandler> GetDisplayHandler() override;
 
 private:
     CefRefPtr<CefRenderHandler> _renderHandler;
@@ -65,6 +73,7 @@ private:
     CefRefPtr<CefLifeSpanHandler> _lifeSpanHandler;
     CefRefPtr<CefRequestHandler> _requestHandler;
     CefRefPtr<CefContextMenuHandler> _contextMenuHandler;
+    CefRefPtr<CefDisplayHandler> _displayHandler;
 
     IMPLEMENT_REFCOUNTING(BrowserClient);
 };

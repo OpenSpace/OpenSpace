@@ -1,9 +1,9 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Vesta Models",
   Type = "HttpSynchronization",
   Identifier = "vesta_model",
@@ -52,7 +52,6 @@ asset.export("Planet", VestaModel)
 
 asset.meta = {
   Name = "Vesta Model",
-  Version = "1.0",
   Description = [[Model of Vesta]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

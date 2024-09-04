@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,13 +110,13 @@ void DataProcessor::initializeVectors(int numOptions) {
         _max = std::vector<float>(numOptions, std::numeric_limits<float>::min());
     }
     if (_sum.empty()) {
-        _sum = std::vector<float>(numOptions, 0.0f);
+        _sum = std::vector<float>(numOptions, 0.f);
     }
     if (_standardDeviation.empty()) {
-        _standardDeviation = std::vector<float>(numOptions, 0.0f);
+        _standardDeviation = std::vector<float>(numOptions, 0.f);
     }
     if (_numValues.empty()) {
-        _numValues = std::vector<float>(numOptions, 0.0f);
+        _numValues = std::vector<float>(numOptions, 0.f);
     }
     if (_histograms.empty()) {
         _histograms.clear();
@@ -173,7 +173,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
 {
     const int numOptions = static_cast<int>(optionValues.size());
 
-    for (int i = 0; i < numOptions; ++i) {
+    for (int i = 0; i < numOptions; i++) {
         const std::vector<float>& values = optionValues[i];
         const int numValues = static_cast<int>(values.size());
 
@@ -248,7 +248,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
                 numBins
             );
 
-            for (int j = 0; j < numBins; ++j) {
+            for (int j = 0; j < numBins; j++) {
                 float value = unnormalizeWithStandardScore(
                     j * (histMax - histMin) + histMin,
                     oldMean,
@@ -269,7 +269,7 @@ void DataProcessor::add(const std::vector<std::vector<float>>& optionValues,
             _histograms[i] = std::move(newHist);
         }
 
-        for (int j = 0; j < numValues; ++j) {
+        for (int j = 0; j < numValues; j++) {
             _histograms[i]->add(
                 normalizeWithStandardScore(
                     values[j],

@@ -6,12 +6,16 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_20191118demmoseqccolorhillshade = {
   Identifier = "20191118demmoseqccolorhillshade",
   Name = [[LRO NAC ColorHillshade, Lacus Mortis]],
-  FilePath = asset.localResource("LRO_NAC_ColorHillshade/Lacus_Mortis.vrt"),
+  ZIndex = 50,
+  FilePath = asset.resource("LRO_NAC_ColorHillshade/Lacus_Mortis.vrt"),
   Description = [[TBD]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_20191118demmoseqccolorhillshade)
@@ -24,9 +28,9 @@ end)
 asset.export("20191118demmoseqccolorhillshade", treks_20191118demmoseqccolorhillshade)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_NAC_ColorHillshade],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_NAC_ColorHillshade]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

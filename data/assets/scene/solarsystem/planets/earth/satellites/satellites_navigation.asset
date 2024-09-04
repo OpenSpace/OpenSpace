@@ -10,7 +10,6 @@ asset.require("./navigation/sbas")
 
 asset.meta = {
   Name = "Satellites Navigation",
-  Version = "1.0",
   Description = [[Meta asset for navigation satellites of Earth. Containing groups:
     beidou, galileo, glosnass, gps, musson, nnss, and sbas]],
   Author = "OpenSpace Team",

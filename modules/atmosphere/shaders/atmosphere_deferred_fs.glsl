@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -509,8 +509,8 @@ vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
   // const float SunAngularSize = (0.3 * M_PI / 180.0);
   const float FuzzyFactor = 0.5; // How fuzzy should the edges be
 
-  const float p1 = cos(sunAngularSize);
-  const float p2 = cos(sunAngularSize * FuzzyFactor);
+  float p1 = cos(sunAngularSize);
+  float p2 = cos(sunAngularSize * FuzzyFactor);
 
   float t = (angle - p1) / (p2 - p1);
   float scale = clamp(t, 0.0, 1.0);

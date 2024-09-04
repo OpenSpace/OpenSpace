@@ -13,9 +13,7 @@ local CrabImage = {
   Opacity = 1.0,
   TexturePath = crab.image .. "crab-nebula.png",
   Tag = { "mission_jwst_target" },
-  Description = [[
-    Image of the Crab Nebula by NASA, ESA and Allison Loll/Jeff Hester.
-  ]]
+  Description = "Image of the Crab Nebula by NASA, ESA and Allison Loll/Jeff Hester."
 }
 
 
@@ -33,7 +31,6 @@ asset.export(CrabImage)
 
 asset.meta = {
   Name = "Crab Nebula Image",
-  Version = "1.0",
   Description = "Screenspace image of the Crab Nebula",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

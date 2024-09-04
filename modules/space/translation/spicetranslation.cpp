@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,8 +43,7 @@ namespace {
         "Target",
         "This is the SPICE NAIF name for the body whose translation is to be computed by "
         "the SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') "
-        "or a NAIF integer id code (such as '399')",
-        // @VISIBILITY(3.5)
+        "or a NAIF integer id code (such as '399').",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -53,8 +52,7 @@ namespace {
         "Observer",
         "This is the SPICE NAIF name for the parent of the body whose translation is to "
         "be computed by the SpiceTranslation. It can either be a fully qualified name "
-        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0')",
-        // @VISIBILITY(3.5)
+        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0').",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -62,8 +60,7 @@ namespace {
         "Frame",
         "Reference Frame",
         "This is the SPICE NAIF name for the reference frame in which the position "
-        "should be retrieved. The default value is GALACTIC",
-        // @VISIBILITY(3.33)
+        "should be retrieved. The default value is GALACTIC.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -71,8 +68,7 @@ namespace {
         "FixedDate",
         "Fixed Date",
         "A time to lock the position to. Setting this to an empty string will "
-        "unlock the time and return to position based on current simulation time",
-        // @VISIBILITY(2.5)
+        "unlock the time and return to position based on current simulation time.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -88,10 +84,6 @@ namespace {
 
         std::optional<std::string> fixedDate
             [[codegen::annotation("A date to lock the position to")]];
-
-        // A single kernel or list of kernels that this SpiceTranslation depends on. All
-        // provided kernels will be loaded before any other operation is performed
-        std::optional<std::variant<std::vector<std::string>, std::string>> kernels;
     };
 #include "spicetranslation_codegen.cpp"
 } // namespace
@@ -110,32 +102,6 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
     , _cachedFrame("GALACTIC")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    auto loadKernel = [](const std::string& kernel) {
-        if (!std::filesystem::is_regular_file(kernel)) {
-            throw SpiceManager::SpiceException(fmt::format(
-                "Kernel '{}' does not exist", kernel
-            ));
-        }
-
-        try {
-            SpiceManager::ref().loadKernel(kernel);
-        }
-        catch (const SpiceManager::SpiceException& exception) {
-            LERRORC("SpiceEphemeris", exception.message);
-        }
-    };
-
-    if (p.kernels.has_value()) {
-        if (std::holds_alternative<std::string>(*p.kernels)) {
-            loadKernel(absPath(std::get<std::string>(*p.kernels)).string());
-        }
-        else {
-            for (const std::string& k : std::get<std::vector<std::string>>(*p.kernels)) {
-                loadKernel(absPath(k).string());
-            }
-        }
-    }
 
     _target.onChange([this]() {
         _cachedTarget = _target;

@@ -6,7 +6,8 @@ local Layer = {
   Identifier = "MagellanElevation_Utah",
   Name = "Magellan Elevation [Utah]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("magellan_utah.wms"),
+  ZIndex = 10,
+  FilePath = asset.resource("magellan_utah.wms"),
   TilePixelSize = 129,
   Settings = {
     Gamma = 1.72,
@@ -38,7 +39,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Venus Magellan DEM",
-  Version = "1.0",
   Description = [[Map layer for Venus containting Venus Magellan DEM from the USGS.
     Hosted on the OpenSpace servers in Utah]],
   Author = "USGS",

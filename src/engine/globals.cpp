@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/keyframerecording.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/sessionrecording.h>
@@ -89,11 +90,13 @@ namespace {
         sizeof(TimeManager) +
         sizeof(VersionChecker) +
         sizeof(WindowDelegate) +
-        sizeof(configuration::Configuration) +
+        sizeof(Configuration) +
         sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionMonitor) +
+        sizeof(interaction::JoystickInputStates) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
+        sizeof(interaction::KeyframeRecording) +
         sizeof(interaction::NavigationHandler) +
         sizeof(interaction::SessionRecording) +
         sizeof(properties::PropertyOwner) +
@@ -266,11 +269,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    configuration = new (currentPos) configuration::Configuration;
+    configuration = new (currentPos) Configuration;
     ghoul_assert(configuration, "No configuration");
-    currentPos += sizeof(configuration::Configuration);
+    currentPos += sizeof(Configuration);
 #else // ^^^ WIN32 / !WIN32 vvv
-    configuration = new configuration::Configuration;
+    configuration = new Configuration;
 #endif // WIN32
 
 #ifdef WIN32
@@ -311,6 +314,14 @@ void create() {
     currentPos += sizeof(interaction::KeybindingManager);
 #else // ^^^ WIN32 / !WIN32 vvv
     keybindingManager = new interaction::KeybindingManager;
+#endif // WIN32
+
+#ifdef WIN32
+    keyframeRecording = new (currentPos) interaction::KeyframeRecording;
+    ghoul_assert(keyframeRecording, "No keyframeRecording");
+    currentPos += sizeof(interaction::KeyframeRecording);
+#else // ^^^ WIN32 / !WIN32 vvv
+    keyframeRecording = new interaction::KeyframeRecording;
 #endif // WIN32
 
 #ifdef WIN32
@@ -386,6 +397,7 @@ void initialize() {
 
     // New property subowners also have to be added to the ImGuiModule callback!
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
+    rootPropertyOwner->addPropertySubOwner(global::keyframeRecording);
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
     rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
@@ -456,6 +468,13 @@ void destroy() {
     navigationHandler->~NavigationHandler();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete navigationHandler;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'KeyframeRecording'");
+#ifdef WIN32
+    keyframeRecording->~KeyframeRecording();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete keyframeRecording;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'KeybindingManager'");

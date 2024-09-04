@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -64,12 +64,15 @@ public:
     const LayerRenderSettings& renderSettings() const;
     const LayerAdjustment& layerAdjustment() const;
 
+    void setZIndex(unsigned int value);
+    unsigned int zIndex() const;
+
     void onChange(std::function<void(Layer*)> callback);
 
     void update();
 
     glm::vec2 tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
-        const glm::vec2& tileUV, const glm::uvec2& resolution);
+        const glm::vec2& tileUV);
 
     static documentation::Documentation Documentation();
 
@@ -96,6 +99,9 @@ private:
 
     std::function<void(Layer*)> _onChangeCallback;
     bool _isInitialized = false;
+
+    unsigned int _zIndex = 0;
+    bool _hasManualZIndex = false;
   };
 
 } // namespace openspace::globebrowsing

@@ -6,7 +6,8 @@ local Layer = {
   Identifier = "Kaguya_Utah",
   Name = "Kaguya [Utah]",
   Enabled = asset.enabled,
-  FilePath = asset.localResource("kaguya_utah.vrt"),
+  ZIndex = 20,
+  FilePath = asset.resource("kaguya_utah.vrt"),
   Settings = {
     Gamma = 1.0,
     Multiplier = 1.23
@@ -32,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Kaguya [Utah]",
-  Version = "1.1",
   Description = [[Moon SELENE Kaguya TC Global Orthomosaic 474m v2 layer for Moon globe.
     This map is hosted on the OpenSpace server in Utah]],
   Author = "USGS",

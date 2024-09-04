@@ -1,4 +1,4 @@
-local icons = asset.syncedResource({
+local icons = asset.resource({
   Name = "Icons",
   Type = "HttpSynchronization",
   Identifier = "icons",

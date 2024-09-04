@@ -1,5 +1,7 @@
 local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels")
+local kernels344 = asset.require("../kernels344")
+local kernels346 = asset.require("../kernels346")
+local coreKernels = asset.require("spice/core")
 
 
 
@@ -9,15 +11,13 @@ local Euporie = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EUPORIE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Euporie,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -40,8 +40,8 @@ local EuporieTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EUPORIE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Euporie,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 538.78,
@@ -51,6 +51,7 @@ local EuporieTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -64,8 +65,8 @@ local EuporieLabel = {
   Identifier = "EuporieLabel",
   Parent = Euporie.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Euporie",
     FontSize = 70.0,
     Size = 7.1,
@@ -77,7 +78,13 @@ local EuporieLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Euporie Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie",
@@ -91,15 +98,13 @@ local S2003J18 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "555",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J18,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -122,8 +127,8 @@ local S2003J18Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "555",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J18,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 587.38,
@@ -133,6 +138,7 @@ local S2003J18Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -146,8 +152,8 @@ local S2003J18Label = {
   Identifier = "S2003J18Label",
   Parent = S2003J18.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2003 J 18",
     FontSize = 70.0,
     Size = 7.1,
@@ -159,7 +165,13 @@ local S2003J18Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2003 J 18 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18",
@@ -173,15 +185,13 @@ local Helike = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HELIKE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Helike,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -204,8 +214,8 @@ local HelikeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HELIKE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Helike,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 601.40,
@@ -215,6 +225,7 @@ local HelikeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -228,8 +239,8 @@ local HelikeLabel = {
   Identifier = "HelikeLabel",
   Parent = Helike.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Helike",
     FontSize = 70.0,
     Size = 7.1,
@@ -241,7 +252,13 @@ local HelikeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Helike Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike",
@@ -255,15 +272,13 @@ local Orthosie = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ORTHOSIE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Orthosie,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -286,8 +301,8 @@ local OrthosieTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ORTHOSIE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Orthosie,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 602.62,
@@ -297,6 +312,7 @@ local OrthosieTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -310,8 +326,8 @@ local OrthosieLabel = {
   Identifier = "OrthosieLabel",
   Parent = Orthosie.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Orthosie",
     FontSize = 70.0,
     Size = 7.1,
@@ -323,7 +339,13 @@ local OrthosieLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Orthosie Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie",
@@ -337,15 +359,13 @@ local S2016J1 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "554",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2016J1,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -368,8 +388,8 @@ local S2016J1Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "554",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2016J1,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 603.83,
@@ -379,6 +399,7 @@ local S2016J1Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -392,8 +413,8 @@ local S2016J1Label = {
   Identifier = "S2016J1Label",
   Parent = S2016J1.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2016 J 1",
     FontSize = 70.0,
     Size = 7.1,
@@ -405,7 +426,13 @@ local S2016J1Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2016 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1",
@@ -419,15 +446,13 @@ local S2003J15 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "558",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J15,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -450,8 +475,8 @@ local S2003J15Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "558",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J15,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 699.68,
@@ -461,6 +486,7 @@ local S2003J15Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -474,8 +500,8 @@ local S2003J15Label = {
   Identifier = "S2003J15Label",
   Parent = S2003J15.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2003 J 15",
     FontSize = 70.0,
     Size = 7.1,
@@ -487,7 +513,13 @@ local S2003J15Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2003 J 15 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15",
@@ -501,15 +533,13 @@ local Aoede = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AOEDE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Aoede,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -532,8 +562,8 @@ local AoedeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AOEDE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Aoede,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 714.66,
@@ -543,6 +573,7 @@ local AoedeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -556,8 +587,8 @@ local AoedeLabel = {
   Identifier = "AoedeLabel",
   Parent = Aoede.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Aoede",
     FontSize = 70.0,
     Size = 7.1,
@@ -569,7 +600,13 @@ local AoedeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Aoede Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede",
@@ -583,15 +620,13 @@ local Callirrhoe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALLIRRHOE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Callirrhoe,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 9000, 9000, 9000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 9000, 9000, 9000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -614,8 +649,8 @@ local CallirrhoeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CALLIRRHOE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Callirrhoe,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 727.11,
@@ -625,6 +660,7 @@ local CallirrhoeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -638,8 +674,8 @@ local CallirrhoeLabel = {
   Identifier = "CallirrhoeLabel",
   Parent = Callirrhoe.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Callirrhoe",
     FontSize = 70.0,
     Size = 7.1,
@@ -651,7 +687,13 @@ local CallirrhoeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Callirrhoe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe",
@@ -665,15 +707,13 @@ local Eurydome = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EURYDOME",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Eurydome,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -696,8 +736,8 @@ local EurydomeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EURYDOME",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Eurydome,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 723.36,
@@ -707,6 +747,7 @@ local EurydomeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -720,8 +761,8 @@ local EurydomeLabel = {
   Identifier = "EurydomeLabel",
   Parent = Eurydome.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Eurydome",
     FontSize = 70.0,
     Size = 7.1,
@@ -733,7 +774,13 @@ local EurydomeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Eurydome Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome",
@@ -747,15 +794,13 @@ local Kore = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "KORE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Kore,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -778,8 +823,8 @@ local KoreTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "KORE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Kore,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 776.02,
@@ -789,6 +834,7 @@ local KoreTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -802,8 +848,8 @@ local KoreLabel = {
   Identifier = "KoreLabel",
   Parent = Kore.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Kore",
     FontSize = 70.0,
     Size = 7.1,
@@ -815,7 +861,13 @@ local KoreLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Kore Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore",
@@ -829,15 +881,13 @@ local Cyllene = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CYLLENE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Cyllene,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -860,8 +910,8 @@ local CylleneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CYLLENE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Cyllene,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 731.10,
@@ -871,6 +921,7 @@ local CylleneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -884,8 +935,8 @@ local CylleneLabel = {
   Identifier = "CylleneLabel",
   Parent = Cyllene.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Cyllene",
     FontSize = 70.0,
     Size = 7.1,
@@ -897,7 +948,13 @@ local CylleneLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Cyllene Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene",
@@ -911,15 +968,13 @@ local S2011J2 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "556",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2011J2,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -942,8 +997,8 @@ local S2011J2Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "556",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2011J2,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 731.32,
@@ -953,6 +1008,7 @@ local S2011J2Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -966,8 +1022,8 @@ local S2011J2Label = {
   Identifier = "S2011J2Label",
   Parent = S2011J2.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2011 J 2",
     FontSize = 70.0,
     Size = 7.1,
@@ -979,7 +1035,13 @@ local S2011J2Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2011 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2",
@@ -993,15 +1055,13 @@ local S2017J1 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "559",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2017J1,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1024,8 +1084,8 @@ local S2017J1Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "559",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2017J1,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 734.15,
@@ -1035,6 +1095,7 @@ local S2017J1Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1048,8 +1109,8 @@ local S2017J1Label = {
   Identifier = "S2017J1Label",
   Parent = S2017J1.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2017 J 1",
     FontSize = 70.0,
     Size = 7.1,
@@ -1061,7 +1122,13 @@ local S2017J1Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2017 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1",
@@ -1075,15 +1142,13 @@ local S2003J4 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55502",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J4,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1106,8 +1171,8 @@ local S2003J4Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55502",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J4,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 739.29,
@@ -1117,6 +1182,7 @@ local S2003J4Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1130,8 +1196,8 @@ local S2003J4Label = {
   Identifier = "S2003J4Label",
   Parent = S2003J4.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2003 J 4",
     FontSize = 70.0,
     Size = 7.1,
@@ -1143,7 +1209,13 @@ local S2003J4Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2003 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4",
@@ -1157,15 +1229,13 @@ local Pasiphae = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PASIPHAE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Pasiphae,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 60000, 60000, 60000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 60000, 60000, 60000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1188,8 +1258,8 @@ local PasiphaeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PASIPHAE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Pasiphae,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 731.10,
@@ -1199,6 +1269,7 @@ local PasiphaeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1212,8 +1283,8 @@ local PasiphaeLabel = {
   Identifier = "PasiphaeLabel",
   Parent = Pasiphae.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Pasiphae",
     FontSize = 70.0,
     Size = 7.1,
@@ -1225,7 +1296,13 @@ local PasiphaeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Pasiphae Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae",
@@ -1239,15 +1316,13 @@ local Hegemone = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HEGEMONE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Hegemone,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1270,8 +1345,8 @@ local HegemoneTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HEGEMONE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Hegemone,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 745.50,
@@ -1281,6 +1356,7 @@ local HegemoneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1294,8 +1370,8 @@ local HegemoneLabel = {
   Identifier = "HegemoneLabel",
   Parent = Hegemone.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Hegemone",
     FontSize = 70.0,
     Size = 7.1,
@@ -1307,7 +1383,13 @@ local HegemoneLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Hegemone Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone",
@@ -1321,15 +1403,13 @@ local Sinope = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SINOPE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Sinope,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 38000, 38000, 38000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 38000, 38000, 38000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1352,8 +1432,8 @@ local SinopeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SINOPE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Sinope,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 739.33,
@@ -1363,6 +1443,7 @@ local SinopeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1376,8 +1457,8 @@ local SinopeLabel = {
   Identifier = "SinopeLabel",
   Parent = Sinope.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Sinope",
     FontSize = 70.0,
     Size = 7.1,
@@ -1389,7 +1470,13 @@ local SinopeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Sinope Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope",
@@ -1403,15 +1490,13 @@ local Sponde = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SPONDE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Sponde,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1434,8 +1519,8 @@ local SpondeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SPONDE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Sponde,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 771.60,
@@ -1445,6 +1530,7 @@ local SpondeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1458,8 +1544,8 @@ local SpondeLabel = {
   Identifier = "SpondeLabel",
   Parent = Sponde.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Sponde",
     FontSize = 70.0,
     Size = 7.1,
@@ -1471,7 +1557,13 @@ local SpondeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Sponde Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde",
@@ -1485,15 +1577,13 @@ local Autonoe = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AUTONOE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Autonoe,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1516,8 +1606,8 @@ local AutonoeTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "AUTONOE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Autonoe,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 772.17,
@@ -1527,6 +1617,7 @@ local AutonoeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1540,8 +1631,8 @@ local AutonoeLabel = {
   Identifier = "AutonoeLabel",
   Parent = Autonoe.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Autonoe",
     FontSize = 70.0,
     Size = 7.1,
@@ -1553,7 +1644,13 @@ local AutonoeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Autonoe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe",
@@ -1567,15 +1664,13 @@ local Megaclite = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MEGACLITE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Megaclite,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1598,8 +1693,8 @@ local MegacliteTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MEGACLITE",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.Megaclite,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 792.44,
@@ -1609,6 +1704,7 @@ local MegacliteTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1622,8 +1718,8 @@ local MegacliteLabel = {
   Identifier = "MegacliteLabel",
   Parent = Megaclite.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Megaclite",
     FontSize = 70.0,
     Size = 7.1,
@@ -1635,7 +1731,13 @@ local MegacliteLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Megaclite Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite",
@@ -1649,15 +1751,13 @@ local S2016J4 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55519",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels346.ID.S2016J4,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1680,8 +1780,8 @@ local S2016J4Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55519",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels346.ID.S2016J4,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 743.69,
@@ -1691,6 +1791,7 @@ local S2016J4Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1704,8 +1805,8 @@ local S2016J4Label = {
   Identifier = "S2016J4Label",
   Parent = S2016J4.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2016 J 4",
     FontSize = 70.0,
     Size = 7.1,
@@ -1717,7 +1818,13 @@ local S2016J4Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2016 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4",
@@ -1731,15 +1838,13 @@ local S2017J6 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "567",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2017J6,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1762,8 +1867,8 @@ local S2017J6Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "567",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2017J6,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 683.0,
@@ -1773,6 +1878,7 @@ local S2017J6Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1786,8 +1892,8 @@ local S2017J6Label = {
   Identifier = "S2017J6Label",
   Parent = S2017J6.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2017 J 6",
     FontSize = 70.0,
     Size = 7.1,
@@ -1799,7 +1905,13 @@ local S2017J6Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2017 J 6 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6",
@@ -1813,15 +1925,13 @@ local S2003J23 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55507",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J23,
+      Observer = coreKernels.ID.JupiterBarycenter
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1844,8 +1954,8 @@ local S2003J23Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "55507",
-      Observer = "JUPITER BARYCENTER"
+      Target = kernels344.ID.S2003J23,
+      Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
     Period = 792.00,
@@ -1855,6 +1965,7 @@ local S2003J23Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
@@ -1868,8 +1979,8 @@ local S2003J23Label = {
   Identifier = "S2003J23Label",
   Parent = S2003J23.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "S/2003 J 23",
     FontSize = 70.0,
     Size = 7.1,
@@ -1881,7 +1992,13 @@ local S2003J23Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2003 J 23 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23",
@@ -1891,10 +2008,6 @@ local S2003J23Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel.jup344)
-  openspace.spice.loadKernel(kernel.jup346)
-
-
   openspace.addSceneGraphNode(Euporie)
   openspace.addSceneGraphNode(EuporieTrail)
   openspace.addSceneGraphNode(EuporieLabel)
@@ -2080,10 +2193,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(EuporieLabel)
   openspace.removeSceneGraphNode(EuporieTrail)
   openspace.removeSceneGraphNode(Euporie)
-
-
-  openspace.spice.unloadKernel(kernel.jup346)
-  openspace.spice.unloadKernel(kernel.jup344)
 end)
 
 asset.export(Euporie)
@@ -2179,14 +2288,14 @@ asset.export(S2003J23Trail)
 asset.export(S2003J23Label)
 
 
+
 asset.meta = {
-    Name = "Jupiter Pasiphae Group Moons",
-    Version = "1.0",
-    Description = [[Procedural Globe asset containing Jupiter's Pasiphae Group moons:
-      Euporie, S2003J18, Helike, Orthosie, S2016J1, S2003J15, Aoede, Callirrhoe, Eurydome,
-      Kore, Cyllene, S2011J2, S2017J1, S2003J4, Pasiphae, Hegemone, Sinope, Sponde,
-      Autonoe and Megaclite. Blank globes and SPICE trails are generated for each moon]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Jupiter Pasiphae Group Moons",
+  Description = [[Procedural Globe asset containing Jupiter's Pasiphae Group moons:
+    Euporie, S2003J18, Helike, Orthosie, S2016J1, S2003J15, Aoede, Callirrhoe, Eurydome,
+    Kore, Cyllene, S2011J2, S2017J1, S2003J4, Pasiphae, Hegemone, Sinope, Sponde,
+    Autonoe and Megaclite. Blank globes and SPICE trails are generated for each moon]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

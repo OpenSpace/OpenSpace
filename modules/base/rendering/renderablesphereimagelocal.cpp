@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,20 +36,18 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this sphere. This image is expected to be an equirectangular "
-        "projection",
-        // @VISIBILITY(2.33)
+        "The path to an image on disk to use as a texture for this sphere. The image is "
+        "expected to be an equirectangular projection.",
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
+    struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::string texture;
+        std::filesystem::path texture;
 
-        // If this value is set to 'true', the image for this sphere will not be loaded at
-        // startup but rather when the image is shown for the first time. Additionally, if
-        // the sphere is disabled, the image will automatically be unloaded
+        // If true, the image for this sphere will not be loaded at startup but rather
+        // when the image is shown for the first time. Additionally, if the sphere is
+        // disabled, the image will automatically be unloaded.
         std::optional<bool> lazyLoading;
     };
 #include "renderablesphereimagelocal_codegen.cpp"
@@ -58,7 +56,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphereImageLocal::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphere_image_local");
+    return codegen::doc<Parameters>(
+        "base_renderable_sphere_image_local",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableSphereImageLocal::RenderableSphereImageLocal(
@@ -68,11 +69,13 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _texturePath = p.texture;
+    _texturePath = p.texture.string();
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
     _texturePath.onChange([this]() {
         loadTexture();
     });
     addProperty(_texturePath);
+    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 
 bool RenderableSphereImageLocal::isReady() const {
@@ -112,19 +115,19 @@ void RenderableSphereImageLocal::loadTexture() {
     }
 
     std::unique_ptr<ghoul::opengl::Texture> texture =
-        ghoul::io::TextureReader::ref().loadTexture(_texturePath, 2);
+        ghoul::io::TextureReader::ref().loadTexture(_texturePath.value(), 2);
 
     if (!texture) {
         LWARNINGC(
             "RenderableSphereImageLocal",
-            fmt::format("Could not load texture from {}", absPath(_texturePath))
+            std::format("Could not load texture from '{}'", absPath(_texturePath))
         );
         return;
     }
 
     LDEBUGC(
         "RenderableSphereImageLocal",
-        fmt::format("Loaded texture from {}", absPath(_texturePath))
+        std::format("Loaded texture from '{}'", absPath(_texturePath))
     );
     texture->uploadTexture();
     texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);

@@ -34,7 +34,6 @@ asset.export(SN1987aImage)
 
 asset.meta = {
   Name = "Supernova SN 1987a Image",
-  Version = "1.0",
   Description = "Screenspace image of the Supernova SN 1987a",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

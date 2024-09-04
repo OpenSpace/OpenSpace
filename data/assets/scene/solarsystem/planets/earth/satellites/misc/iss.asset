@@ -1,22 +1,39 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local coreKernels = asset.require("spice/core")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "ISS Models",
   Type = "HttpSynchronization",
   Identifier = "iss_model",
   Version = 3
 })
 
-local omm = asset.syncedResource({
+local kernels = asset.resource({
+  Name = "ISS Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "iss_kernels",
+  Version = 1
+})
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (ISS)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_iss",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25544&FORMAT=kvn",
   Filename = "ISS.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
+})
+
+local tle = asset.resource({
+  Name = "Satellite TLE Data (ISS)",
+  Type = "UrlSynchronization",
+  Identifier = "satellite_tle_data_iss",
+  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25544&FORMAT=tle",
+  Filename = "ISS.txt",
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -30,11 +47,6 @@ local IssPosition = {
       Observer = transforms.EarthInertial.Identifier,
       File = omm .. "ISS.txt",
       Format = "OMM"
-    },
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "GALACTIC",
-      DestinationFrame = "J2000",
     }
   },
   Tag = { "earth_satellite", "ISS" },
@@ -50,11 +62,9 @@ local IssModel = {
   Parent = IssPosition.Identifier,
   Transform = {
     Rotation = {
-      Type = "FixedRotation",
-      Attached = "ISS",
-      XAxis = { 0.01, -1.0, 0.56 },
-      XAxisOrthogonal = true,
-      YAxis = transforms.EarthInertial.Identifier
+      Type = "SpiceRotation",
+      SourceFrame = "ISS",
+      DestinationFrame = coreKernels.Frame.J2000
     }
   },
   Renderable = {
@@ -101,8 +111,8 @@ local IssLabel = {
   Identifier = "IssLabel",
   Parent = IssPosition.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "ISS",
     FontSize = 70.0,
     Size = 3.4,
@@ -134,19 +144,34 @@ local FocusIss = {
 }
 
 
+local kernelFile
 asset.onInitialize(function()
+  -- In order to get the orientation of the ISS correctly, we need to have its position
+  -- available as a SPICE object. We don't want to just convert the TLE file once as we
+  -- want it to update with every startup.
+  -- For this reason we convert the TLE file into a type 10 SPICE kernel and since we are
+  -- already doing that, we can also get a more accurate position for free, too
+  local translation, kernel = openspace.space.tleToSpiceTranslation(tle .. "ISS.txt")
+  kernelFile = kernel -- Store the path for the deinitialize function
+  openspace.spice.loadKernel(kernelFile)
+
+  openspace.spice.loadKernel(kernels .. "iss.tf")
+
   local i = openspace.space.readKeplerFile(omm .. "ISS.txt", "OMM")
   IssTrail.Renderable.Period = i[1].Period / (60 * 60 * 24)
+
 
   openspace.addSceneGraphNode(IssPosition)
   openspace.addSceneGraphNode(IssModel)
   openspace.addSceneGraphNode(IssTrail)
 
-  openspace.setPropertyValueSingle("Scene.ISS.Rotation.yAxisInvertObject", true)
   openspace.action.registerAction(FocusIss)
 end)
 
 asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "iss.tf")
+  openspace.spice.unloadKernel(kernelFile)
+
   openspace.action.removeAction(FocusIss)
 
   openspace.removeSceneGraphNode(IssTrail)
@@ -162,7 +187,6 @@ asset.export(IssPosition)
 
 asset.meta = {
   Name = "ISS",
-  Version = "2.0",
   Description = [[Model and Trail for ISS. Model from NASA 3D models, trail from
     Celestrak.]],
   Author = "OpenSpace Team",

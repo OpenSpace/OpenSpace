@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,12 +25,14 @@
 #include <openspace/engine/configuration.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/settings.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
+#include <json/json.hpp>
 #include <optional>
 
 namespace {
@@ -132,6 +134,10 @@ namespace {
         // from previous runs) will be silently overwritten
         std::optional<std::string> scriptLog;
 
+        // If this value is specified, this many number of script log files are being
+        // retained before overwriting any
+        std::optional<int> scriptLogRotation;
+
         struct Documentation {
             // The path where the documentation files will be stored
             std::optional<std::string> path;
@@ -184,6 +190,12 @@ namespace {
         // it is advised to disable this value if rendering sessions of individual frames
         // pass beyond local midnight
         std::optional<bool> screenshotUseDate;
+
+        // Toggles whether the Lua states used inside OpenSpace are sandboxed which
+        // prevents potentially unsafe malicious code to run on the system. Only turn this
+        // setting to `false` if you are sure that no external code from asset files,
+        // session recordings, or parallel connections can be executed on this machine.
+        std::optional<bool> sandboxedLua;
 
         struct HttpProxy {
             // Determines whether the proxy is being used
@@ -281,6 +293,11 @@ namespace {
         // multiprojector setups where a launcher window would be undesired
         std::optional<bool> bypassLauncher;
 
+        // Set which layer server should be preferd to be used, the options are
+        // \"All\", \"NewYork\", \"Sweden\", \"Utah\" and \"None\".
+        std::optional<std::string> layerServer [[codegen::inlist("All", "NewYork",
+            "Sweden", "Utah", "None")]];
+
         // The URL that is pinged to check which version of OpenSpace is the most current
         // if you don't want this request to happen, this value should not be set at all
         std::optional<std::string> versionCheckUrl;
@@ -295,9 +312,9 @@ namespace {
             // initialized)
             std::optional<bool> showNodeNames;
 
-            // If this value is set to 'true', the loading screen will contain a progress
-            // bar that gives an estimate of the loading progression
-            std::optional<bool> showProgressbar;
+            // If this value is set to 'true', the loading screen will display a list of
+            // warning and error messages
+            std::optional<bool> showLogMessages;
         };
         // Values in this table describe the behavior of the loading screen that is
         // displayed while the scene graph is created and initialized
@@ -309,14 +326,177 @@ namespace {
 #include "configuration_codegen.cpp"
 } // namespace
 
-namespace openspace::configuration {
+namespace openspace {
+
+ghoul::Dictionary Configuration::createDictionary() {
+    ghoul::Dictionary res;
+
+    res.setValue("WindowConfiguration", windowConfiguration);
+    res.setValue("Asset", asset);
+    res.setValue("Profile", profile);
+    res.setValue("PropertyVisibility", static_cast<int>(propertyVisibility));
+
+    ghoul::Dictionary globalCustomizationScriptsDict;
+    for (size_t i = 0; i < globalCustomizationScripts.size(); i++) {
+        globalCustomizationScriptsDict.setValue(
+            std::to_string(i),
+            globalCustomizationScripts[i]
+        );
+    }
+    res.setValue("GlobalCustomizationScripts", globalCustomizationScriptsDict);
+
+    ghoul::Dictionary fontsDict;
+    for (const auto& [name, path] : fonts) {
+        fontsDict.setValue(name, path);
+    }
+    res.setValue("Fonts", fontsDict);
+
+    {
+        ghoul::Dictionary fontSizeDict;
+        fontSizeDict.setValue("FrameInfo", static_cast<double>(fontSize.frameInfo));
+        fontSizeDict.setValue("Shutdown", static_cast<double>(fontSize.shutdown));
+        fontSizeDict.setValue("Log", static_cast<double>(fontSize.log));
+        fontSizeDict.setValue("CameraInfo", static_cast<double>(fontSize.cameraInfo));
+        fontSizeDict.setValue("VersionInfo", static_cast<double>(fontSize.versionInfo));
+
+        res.setValue("FontSize", fontSizeDict);
+    }
+
+    {
+        ghoul::Dictionary loggingDict;
+        loggingDict.setValue("Level", logging.level);
+        loggingDict.setValue("ForceImmediateFlush", logging.forceImmediateFlush);
+        loggingDict.setValue("CapabilitiesVerbosity", logging.capabilitiesVerbosity);
+
+        ghoul::Dictionary logsDict;
+        for (size_t i = 0; i < logging.logs.size(); i++) {
+            logsDict.setValue(std::to_string(i), logging.logs[i]);
+        }
+        loggingDict.setValue("Logs", logsDict);
+
+        res.setValue("Logging", loggingDict);
+    }
+
+    res.setValue("ScriptLog", scriptLog);
+    res.setValue("ScriptLogRotation", scriptLogRotation);
+
+    {
+        ghoul::Dictionary documentationDict;
+        documentationDict.setValue("Path", documentation.path);
+
+        res.setValue("Documentation", documentationDict);
+    }
+
+    res.setValue("VersionCheckUrl", versionCheckUrl);
+    res.setValue("UseMultithreadedInitialization", useMultithreadedInitialization);
+
+    {
+        ghoul::Dictionary loadingScreenDict;
+        loadingScreenDict.setValue("IsShowingMessages", loadingScreen.isShowingMessages);
+        loadingScreenDict.setValue(
+            "IsShowingNodeNames",
+            loadingScreen.isShowingNodeNames
+        );
+        loadingScreenDict.setValue(
+            "IsShowingLogMessages",
+            loadingScreen.isShowingLogMessages
+        );
+
+        res.setValue("LoadingScreen", loadingScreenDict);
+    }
+
+    res.setValue("IsCheckingOpenGLState", isCheckingOpenGLState);
+    res.setValue("IsLoggingOpenGLCalls", isLoggingOpenGLCalls);
+    res.setValue("IsPrintingEvents", isPrintingEvents);
+    res.setValue("ConsoleKey", ghoul::to_string(consoleKey));
+    res.setValue("ShutdownCountdown", static_cast<double>(shutdownCountdown));
+    res.setValue("shouldUseScreenshotDate", shouldUseScreenshotDate);
+    res.setValue("sandboxedLua", sandboxedLua);
+    res.setValue("OnScreenTextScaling", onScreenTextScaling);
+    res.setValue("UsePerProfileCache", usePerProfileCache);
+    res.setValue("IsRenderingOnMasterDisabled", isRenderingOnMasterDisabled);
+    res.setValue("GlobalRotation", static_cast<glm::dvec3>(globalRotation));
+    res.setValue("ScreenSpaceRotation", static_cast<glm::dvec3>(screenSpaceRotation));
+    res.setValue("MasterRotation", static_cast<glm::dvec3>(masterRotation));
+    res.setValue("IsConsoleDisabled", isConsoleDisabled);
+    res.setValue("BypassLauncher", bypassLauncher);
+    res.setValue("LayerServer", layerServerToString(layerServer));
+
+    ghoul::Dictionary moduleConfigurationsDict;
+    for (const auto& [key, value] : moduleConfigurations) {
+        moduleConfigurationsDict.setValue(key, value);
+    }
+    res.setValue("ModuleConfigurations", moduleConfigurationsDict);
+
+    {
+        ghoul::Dictionary openGLDebugContextDict;
+        openGLDebugContextDict.setValue("IsActive", openGLDebugContext.isActive);
+        openGLDebugContextDict.setValue(
+            "PrintStacktrace",
+            openGLDebugContext.printStacktrace
+        );
+        openGLDebugContextDict.setValue(
+            "IsSynchronous",
+            openGLDebugContext.isSynchronous
+        );
+
+        ghoul::Dictionary identifierFiltersDict;
+        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); i++) {
+            {
+                ghoul::Dictionary identifierFilterDict;
+                identifierFilterDict.setValue(
+                    "Type",
+                    openGLDebugContext.identifierFilters[i].type
+                );
+                identifierFilterDict.setValue(
+                    "Source",
+                    openGLDebugContext.identifierFilters[i].source
+                );
+                identifierFilterDict.setValue(
+                    "Identifier",
+                    static_cast<int>(openGLDebugContext.identifierFilters[i].identifier)
+                );
+
+                identifierFiltersDict.setValue(std::to_string(i), identifierFilterDict);
+            }
+        }
+        openGLDebugContextDict.setValue("IdentifierFilters", identifierFiltersDict);
+
+        ghoul::Dictionary severityFiltersDict;
+        for (size_t i = 0; i < openGLDebugContext.severityFilters.size(); i++) {
+            severityFiltersDict.setValue(
+                std::to_string(i),
+                openGLDebugContext.severityFilters[i]
+            );
+        }
+        openGLDebugContextDict.setValue("SeverityFilters", severityFiltersDict);
+
+        res.setValue("OpenGLDebugContext", openGLDebugContextDict);
+    }
+
+    {
+        ghoul::Dictionary httpProxyDict;
+        httpProxyDict.setValue("UsingHttpProxy", httpProxy.usingHttpProxy);
+        httpProxyDict.setValue("Address", httpProxy.address);
+        httpProxyDict.setValue("Port", static_cast<int>(httpProxy.port));
+        httpProxyDict.setValue("Authentication", httpProxy.authentication);
+        httpProxyDict.setValue("User", httpProxy.user);
+        httpProxyDict.setValue("Password", httpProxy.password);
+
+        res.setValue("HttpProxy", httpProxyDict);
+    }
+
+    res.setValue("SgctConfigNameInitialized", sgctConfigNameInitialized);
+
+    return res;
+}
 
 void parseLuaState(Configuration& configuration) {
     using namespace ghoul::lua;
 
     // Shorten the rest of this function
     Configuration& c = configuration;
-    LuaState& s = c.state;
+    const LuaState& s = c.state;
 
     // The sgctConfigNameInitialized is a bit special
     lua_getglobal(s, "sgctconfiginitializeString");
@@ -333,7 +513,9 @@ void parseLuaState(Configuration& configuration) {
 
     // We go through all of the entries and lift them from global scope into the table on
     // the stack so that we can create a ghoul::Dictionary from this new table
-    documentation::Documentation doc = codegen::doc<Parameters>("core_configuration");
+    const documentation::Documentation doc = codegen::doc<Parameters>(
+        "core_configuration"
+    );
     for (const documentation::DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());
         lua_getglobal(s, e.key.c_str());
@@ -365,6 +547,7 @@ void parseLuaState(Configuration& configuration) {
     c.fontSize.cameraInfo = p.fontSize.cameraInfo;
     c.fontSize.versionInfo = p.fontSize.versionInfo;
     c.scriptLog = p.scriptLog.value_or(c.scriptLog);
+    c.scriptLogRotation = p.scriptLogRotation.value_or(3);
     c.versionCheckUrl = p.versionCheckUrl.value_or(c.versionCheckUrl);
     c.useMultithreadedInitialization =
         p.useMultithreadedInitialization.value_or(c.useMultithreadedInitialization);
@@ -373,9 +556,9 @@ void parseLuaState(Configuration& configuration) {
     c.isPrintingEvents = p.printEvents.value_or(c.isPrintingEvents);
 
     if (p.consoleKey.has_value()) {
-        KeyWithModifier km = stringToKey(*p.consoleKey);
+        const KeyWithModifier km = stringToKey(*p.consoleKey);
         if (km.modifier != KeyModifier::None) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Console key '{}' must be a 'bare' key and cannot contain any modifiers",
                 *p.consoleKey
             ));
@@ -386,6 +569,7 @@ void parseLuaState(Configuration& configuration) {
 
     c.shutdownCountdown = p.shutdownCountdown.value_or(c.shutdownCountdown);
     c.shouldUseScreenshotDate = p.screenshotUseDate.value_or(c.shouldUseScreenshotDate);
+    c.sandboxedLua = p.sandboxedLua.value_or(c.sandboxedLua);
     c.onScreenTextScaling = p.onScreenTextScaling.value_or(c.onScreenTextScaling);
     c.usePerProfileCache = p.perProfileCache.value_or(c.usePerProfileCache);
     c.isRenderingOnMasterDisabled =
@@ -411,10 +595,10 @@ void parseLuaState(Configuration& configuration) {
         const Parameters::LoadingScreen& l = *p.loadingScreen;
         c.loadingScreen.isShowingMessages =
             l.showMessage.value_or(c.loadingScreen.isShowingMessages);
-        c.loadingScreen.isShowingProgressbar =
-            l.showProgressbar.value_or(c.loadingScreen.isShowingProgressbar);
         c.loadingScreen.isShowingNodeNames =
             l.showNodeNames.value_or(c.loadingScreen.isShowingNodeNames);
+        c.loadingScreen.isShowingLogMessages =
+            l.showLogMessages.value_or(c.loadingScreen.isShowingLogMessages);
     }
 
     c.moduleConfigurations = p.moduleConfigurations.value_or(c.moduleConfigurations);
@@ -454,6 +638,45 @@ void parseLuaState(Configuration& configuration) {
     }
 
     c.bypassLauncher = p.bypassLauncher.value_or(c.bypassLauncher);
+
+    if (p.layerServer.has_value()) {
+        c.layerServer = stringToLayerServer(*p.layerServer);
+    }
+}
+
+void patchConfiguration(Configuration& configuration, const Settings& settings) {
+    if (settings.configuration.has_value()) {
+        configuration.windowConfiguration = *settings.configuration;
+        configuration.sgctConfigNameInitialized.clear();
+    }
+    if (settings.profile.has_value()) {
+        configuration.profile = *settings.profile;
+    }
+    if (settings.visibility.has_value()) {
+        configuration.propertyVisibility = *settings.visibility;
+    }
+    if (settings.bypassLauncher.has_value()) {
+        configuration.bypassLauncher = *settings.bypassLauncher;
+    }
+    if (settings.layerServer.has_value()) {
+        configuration.layerServer = *settings.layerServer;
+    }
+    auto it = configuration.moduleConfigurations.find("GlobeBrowsing");
+    // Just in case we have a configuration file that does not specify anything
+    // about the globebrowsing module
+    if (it == configuration.moduleConfigurations.end()) {
+        configuration.moduleConfigurations["GlobeBrowsing"] = ghoul::Dictionary();
+    }
+    if (settings.mrf.isEnabled.has_value()) {
+        configuration.moduleConfigurations["GlobeBrowsing"].setValue(
+            "MRFCacheEnabled", *settings.mrf.isEnabled
+        );
+    }
+    if (settings.mrf.location.has_value()) {
+        configuration.moduleConfigurations["GlobeBrowsing"].setValue(
+            "MRFCacheLocation", *settings.mrf.location
+        );
+    }
 }
 
 documentation::Documentation Configuration::Documentation =
@@ -470,12 +693,12 @@ std::filesystem::path findConfiguration(const std::string& filename) {
         }
 
         // Otherwise, we traverse the directory tree up
-        std::filesystem::path nextDirectory = directory.parent_path();
+        const std::filesystem::path nextDirectory = directory.parent_path();
 
         if (directory == nextDirectory) {
             // We have reached the root of the file system and did not find the file
             throw ghoul::RuntimeError(
-                fmt::format("Could not find configuration file '{}'", filename),
+                std::format("Could not find configuration file '{}'", filename),
                 "ConfigurationManager"
             );
         }
@@ -483,16 +706,19 @@ std::filesystem::path findConfiguration(const std::string& filename) {
     }
 }
 
-Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
-                                        const glm::ivec2& primaryMonitorResolution,
-                                        std::string_view overrideScript)
+Configuration loadConfigurationFromFile(const std::filesystem::path& configurationFile,
+                                        const std::filesystem::path& settingsFile,
+                                        const glm::ivec2& primaryMonitorResolution)
 {
-    ghoul_assert(std::filesystem::is_regular_file(filename), "File must exist");
+    ghoul_assert(std::filesystem::is_regular_file(configurationFile), "File must exist");
 
     Configuration result;
+    // Having the configuration not sandboxed is safe as there is no way for a third-party
+    // file to have any input this early in the loading phase
+    result.state = ghoul::lua::LuaState(ghoul::lua::LuaState::Sandboxed::No);
 
     // Injecting the resolution of the primary screen into the Lua state
-    std::string script = fmt::format(
+    const std::string script = std::format(
         "ScreenResolution = {{ x = {}, y = {} }}",
         primaryMonitorResolution.x, primaryMonitorResolution.y
     );
@@ -500,21 +726,49 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& filename,
 
     // If there is an initial config helper file, load it into the state
     if (std::filesystem::is_regular_file(absPath(InitialConfigHelper))) {
-        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper).string());
+        ghoul::lua::runScriptFile(result.state, absPath(InitialConfigHelper));
     }
 
     // Load the configuration file into the state
-    ghoul::lua::runScriptFile(result.state, filename.string());
+    ghoul::lua::runScriptFile(result.state, configurationFile);
 
-    if (!overrideScript.empty()) {
-        LDEBUGC("Configuration", "Executing Lua script passed through the commandline:");
-        LDEBUGC("Configuration", overrideScript);
-        ghoul::lua::runScript(result.state, overrideScript);
+    // If an override file exist, we want to run it straight after
+    const std::filesystem::path override = std::format("{}.override", configurationFile);
+    if (std::filesystem::exists(override)) {
+        ghoul::lua::runScriptFile(result.state, override);
     }
 
     parseLuaState(result);
 
+    if (std::filesystem::is_regular_file(settingsFile)) {
+        const Settings settings = loadSettings(settingsFile);
+
+        patchConfiguration(result, settings);
+    }
+
     return result;
 }
 
-} // namespace openspace::configuration
+openspace::Configuration::LayerServer stringToLayerServer(std::string_view server) {
+    using Server = openspace::Configuration::LayerServer;
+    if (server == "All") { return Server::All; }
+    else if (server == "NewYork") { return Server::NewYork; }
+    else if (server == "Sweden") { return Server::Sweden; }
+    else if (server == "Utah") { return Server::Utah; }
+    else if (server == "None") { return Server::None; }
+    else { throw ghoul::MissingCaseException(); }
+}
+
+std::string layerServerToString(openspace::Configuration::LayerServer server) {
+    using Server = openspace::Configuration::LayerServer;
+    switch (server) {
+        case Server::All: return "All";
+        case Server::NewYork: return "NewYork";
+        case Server::Sweden: return "Sweden";
+        case Server::Utah: return "Utah";
+        case Server::None: return "None";
+        default: throw ghoul::MissingCaseException();
+    }
+}
+
+} // namespace openspace

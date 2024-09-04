@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,8 +36,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value explicitly specifies the size of the screen space plane",
-        // @VISIBILITY(3.75)
+        "This value explicitly specifies the size of the screen space plane.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
@@ -47,8 +46,9 @@ namespace openspace {
 documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
     using namespace documentation;
     return {
-        "ScreenSpace Framebuffer",
+        "ScreenSpaceFramebuffer",
         "base_screenspace_framebuffer",
+        "",
         {}
     };
 }
@@ -80,9 +80,9 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
         setGuiName("ScreenSpaceFramebuffer " + std::to_string(iIdentifier));
     }
 
-    glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
+    const glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
     addProperty(_size);
-    _size.set(glm::vec4(0.f, 0.f, resolution.x, resolution.y));
+    _size = glm::vec4(0.f, 0.f, resolution.x, resolution.y);
 }
 
 ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
@@ -105,7 +105,7 @@ bool ScreenSpaceFramebuffer::deinitializeGL() {
     return true;
 }
 
-void ScreenSpaceFramebuffer::render(float blackoutFactor) {
+void ScreenSpaceFramebuffer::render(const RenderData& renderData) {
     const glm::vec2& resolution = global::windowDelegate->currentDrawBufferResolution();
     const glm::vec4& size = _size.value();
 
@@ -113,18 +113,18 @@ void ScreenSpaceFramebuffer::render(float blackoutFactor) {
     const float yratio = resolution.y / (size.w - size.y);
 
     if (!_renderFunctions.empty()) {
-        GLint viewport[4];
+        std::array<GLint, 4> viewport;
         //glGetIntegerv(GL_VIEWPORT, viewport);
-        global::renderEngine->openglStateCache().viewport(viewport);
+        global::renderEngine->openglStateCache().viewport(viewport.data());
         glViewport(
             static_cast<GLint>(-size.x * xratio),
             static_cast<GLint>(-size.y * yratio),
             static_cast<GLsizei>(resolution.x * xratio),
             static_cast<GLsizei>(resolution.y * yratio)
         );
-        global::renderEngine->openglStateCache().setViewportState(viewport);
+        global::renderEngine->openglStateCache().setViewportState(viewport.data());
 
-        GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+        const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
         _framebuffer->activate();
 
         glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -145,7 +145,7 @@ void ScreenSpaceFramebuffer::render(float blackoutFactor) {
             glm::vec3((1.f / xratio), (1.f / yratio), 1.f)
         );
         const glm::mat4 modelTransform = globalRotation*translation*localRotation*scale;
-        draw(modelTransform, blackoutFactor);
+        draw(modelTransform, renderData);
     }
 }
 
@@ -173,7 +173,7 @@ void ScreenSpaceFramebuffer::removeAllRenderFunctions() {
 }
 
 void ScreenSpaceFramebuffer::createFramebuffer() {
-    glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
+    const glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
 
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();
@@ -184,7 +184,7 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
     _objectSize = glm::ivec2(resolution);
 
     _texture->uploadTexture();
-    _texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     ghoul::opengl::FramebufferObject::deactivate();

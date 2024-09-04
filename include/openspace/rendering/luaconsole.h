@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ namespace openspace {
 class LuaConsole : public properties::PropertyOwner {
 public:
     LuaConsole();
-    ~LuaConsole() override;
+    ~LuaConsole() override = default;
 
     void initialize();
     void deinitialize();
@@ -62,8 +62,7 @@ public:
 
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
-
-    void addToCommand(std::string c);
+    void addToCommand(const std::string& c);
 
     properties::BoolProperty _isVisible;
     properties::BoolProperty _shouldBeSynchronized;

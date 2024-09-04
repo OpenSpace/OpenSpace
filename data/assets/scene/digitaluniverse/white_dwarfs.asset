@@ -1,0 +1,67 @@
+local textures = asset.resource({
+  Name = "Point Textures",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
+})
+
+local speck = asset.resource({
+  Name = "White Dwarf Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_white_dwarfs_speck",
+  Version = 1
+})
+
+
+local Object = {
+  Identifier = "WhiteDwarfs",
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    File = speck .. "wd.speck",
+    Texture = {
+      File = textures .. "point3.png",
+    },
+    Unit = "pc",
+    Coloring = {
+      FixedColor = { 1.0, 1.0, 1.0 },
+    },
+    SizeSettings = {
+      ScaleExponent = 15.5,
+      MaxSize = 0.7,
+      EnableMaxSizeControl = true
+    }
+  },
+  GUI = {
+    Name = "White Dwarfs",
+    Path = "/Milky Way/Stellar Remnants",
+    Description = [[A white dwarf is the core of a dying star. These are dim objects that
+      are roughly the size of Earth but with the desity of a sunlike star. Stars that are
+      not massive enough to end in a neutraon star or black hole will evolve into a white
+      dwarf. This is the ultimate fate of over 95% of the stars in our Galaxy. As the
+      star is dying, the outer layers will expand out and the gas will glow and become a
+      planetaery nebula, while the core of the star transforms into a white dwarf. Census:
+      192,613 white dwarfs.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "White Dwarfs",
+  Description = Object.GUI.Description,
+  Author = "Zack Reeves, Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

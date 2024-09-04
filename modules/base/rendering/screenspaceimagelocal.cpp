@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,15 +42,16 @@ namespace {
         "Sets the path of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. The size of the image will also automatically set the default "
-        "size of this plane",
-        // @VISIBILITY(2.4)
+        "size of this plane.",
         openspace::properties::Property::Visibility::User
     };
 
+    // This `ScreenSpaceRenderable` can be used to display an image from a local file on
+    // disk.
+    //
+    // To load an image from a web URL, see
+    // [ScreenSpaceImageOnline](#base_screenspace_image_online).
     struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
-        // Specifies the GUI name of the ScreenspaceImage
-        std::optional<std::string> name;
-
         // [[codegen::verbatim(TexturePathInfo.description)]]
         std::optional<std::string> texturePath;
     };
@@ -69,8 +70,6 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // @TODO (abock, 2021-02-02) Should this be the name variable? The identifier wasn't
-    // declared in the documentation
     std::string identifier;
     if (dictionary.hasValue<std::string>(KeyIdentifier)) {
         identifier = dictionary.value<std::string>(KeyIdentifier);
@@ -85,8 +84,8 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
         if (!std::filesystem::is_regular_file(absPath(_texturePath))) {
             LWARNINGC(
                 "ScreenSpaceImageLocal",
-                fmt::format(
-                    "Image {} did not exist for {}", _texturePath.value(), _identifier
+                std::format(
+                    "Image '{}' did not exist for '{}'", _texturePath.value(), _identifier
                 )
             );
         }
@@ -103,7 +102,9 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
         else {
             LWARNINGC(
                 "ScreenSpaceImageLocal",
-                fmt::format("Image {} did not exist for {}", *p.texturePath, _identifier)
+                std::format(
+                    "Image '{}' did not exist for '{}'", *p.texturePath, _identifier
+                )
             );
         }
     }
@@ -118,10 +119,7 @@ bool ScreenSpaceImageLocal::deinitializeGL() {
 void ScreenSpaceImageLocal::update() {
     if (_textureIsDirty && !_texturePath.value().empty()) {
         std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_texturePath).string(),
-                2
-            );
+            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath), 2);
 
         if (texture) {
             // Images don't need to start on 4-byte boundaries, for example if the

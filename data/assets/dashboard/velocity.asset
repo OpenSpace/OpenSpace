@@ -20,7 +20,6 @@ asset.export(Item)
 
 asset.meta = {
   Name = "Dashboard - Velocity",
-  Version = "1.0",
   Description = "This asset provides a dashboard item that shows the camera's velocity",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

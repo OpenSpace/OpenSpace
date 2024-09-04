@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,10 +110,10 @@ void NumericalProperty<T>::setExponent(float exponent) {
         if (!isValidRange(_minimumValue, _maximumValue)) {
             LWARNINGC(
                 "NumericalProperty: setExponent",
-                fmt::format(
+                std::format(
                     "Setting exponent for properties with negative values in "
                     "[min, max] range is not yet supported. Property: {}",
-                    this->fullyQualifiedIdentifier()
+                    this->uri()
                 )
             );
             _exponent = 1.f;

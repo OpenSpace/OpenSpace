@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,16 +35,16 @@ class MonitorBox final : public QWidget {
 Q_OBJECT
 public:
     /**
-     * Constructor for MonitorBox class, which displays the system's monitor(s),
-     * their relative position and size, and window(s) that they contain
+     * Constructor for MonitorBox class, which displays the system's monitor(s), their
+     * relative position and size, and window(s) that they contain.
      *
      * \param widgetDims The size of the display widget in pixels, stored in QRect
-     * \param monitorResolution A vector containing the monitor's maximum display
-     *                          size in pixels in a QRect object
+     * \param monitorResolution A vector containing the monitor's maximum display size in
+     *        pixels in a QRect object
      * \param nWindows The current number of windows that has been selected by the user
-     * \param winColors An array of QColor objects for window colors. The indexing of
-     *                  this array matches the window indexing used elsewhere in the
-     *                  class. This allows for a unique color for each window.
+     * \param winColors An array of QColor objects for window colors. The indexing of this
+     *        array matches the window indexing used elsewhere in the class. This allows
+     *        for a unique color for each window
      * \param parent The parent which to which this MonitorBox belongs
      */
     MonitorBox(QRect widgetDims, const std::vector<QRect>& monitorResolutions,
@@ -65,10 +65,10 @@ public:
 
     /**
      * Called when the number of windows that should be displayed changes.
-     * 
-     * \param newCount The new number of windows included
+     *
+     * \param nWindows The new number of windows included
      */
-    void nWindowsDisplayedChanged(int newCount);
+    void nWindowsDisplayedChanged(int nWindows);
 
 protected:
     void paintEvent(QPaintEvent* event) override;

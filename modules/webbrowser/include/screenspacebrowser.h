@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/uvec2property.h>
 #include <openspace/properties/triggerproperty.h>
 
 #ifdef _MSC_VER
@@ -68,14 +68,15 @@ public:
     bool initializeGL() override;
     bool deinitializeGL() override;
 
-    void render(float blackoutFactor) override;
+    void render(const RenderData& renderData) override;
     void update() override;
     bool isReady() const override;
 
+    static documentation::Documentation Documentation();
+
 protected:
-    properties::Vec2Property _dimensions;
+    properties::UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {

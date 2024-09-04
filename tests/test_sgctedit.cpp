@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,30 +26,27 @@
 #include <catch2/matchers/catch_matchers_exception.hpp>
 
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
 #include <sgct/readconfig.h>
 #include <openspace/engine/configuration.h>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 
-using namespace openspace::configuration;
+using namespace openspace;
 
 namespace {
-    std::string stringify(const std::string filename) {
-        std::ifstream myfile;
-        myfile.open(filename);
+    std::string stringify(const std::filesystem::path& filename) {
+        const std::ifstream myfile = std::ifstream(filename);
         std::stringstream buffer;
         buffer << myfile.rdbuf();
         return buffer.str();
     }
 
-    void attemptValidation(const std::string cfgString) {
-        std::filesystem::path schemaDir = absPath("${TESTDIR}/../config/schema");
-        std::string schemaString = stringify(
-            schemaDir.string() + "/sgcteditor.schema.json"
-        );
+    void attemptValidation(const std::string& cfgString) {
+        const std::filesystem::path schemaDir = absPath("${TESTDIR}/../config/schema");
+        const std::string schemaString = stringify(schemaDir / "sgcteditor.schema.json");
         sgct::validateConfigAgainstSchema(cfgString, schemaString, schemaDir);
     }
 } // namespace
@@ -451,9 +448,9 @@ R"({
 
 TEST_CASE("SgctEdit: minimumVersion", "[sgctedit]") {
     const sgct::config::GeneratorVersion minVersion { "SgctWindowConfig", 1, 1 };
-    std::string inputCfg =
-        absPath("${TESTDIR}/sgctedit/fails_minimum_version.json").string();
-    sgct::config::GeneratorVersion ver = sgct::readConfigGenerator(inputCfg);
+    const std::filesystem::path cfg =
+        absPath("${TESTDIR}/sgctedit/fails_minimum_version.json");
+    const sgct::config::GeneratorVersion ver = sgct::readConfigGenerator(cfg);
     CHECK_FALSE(ver.versionCheck(minVersion));
 }
 

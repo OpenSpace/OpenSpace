@@ -1,18 +1,18 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Stars Textures",
   Type = "HttpSynchronization",
   Identifier = "stars-denver_textures",
   Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Stars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "stars-denver_speck",
   Version = 1
 })
 
-local colorLUT = asset.syncedResource({
+local colorLUT = asset.resource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars-denver_colormap",
@@ -25,11 +25,12 @@ local Object = {
   Renderable = {
     Type = "RenderableStars",
     File = speck .. "denver_stars.speck",
-    Texture = textures .. "halo.png",
+    Glare = {
+      Texture = textures .. "halo.png"
+    },
     ColorMap = colorLUT .. "denver_colorbv.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based", -- or PSF
     DataMapping = {
       Bv = "colorb_v",
       Luminance = "lum",
@@ -62,7 +63,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Stars Denver",
-  Version = "1.0",
   Description = [[Alternative Milky Way Atlas: based on HIPPARCOS and Yale Bright
     Star catalogs]],
   Author = "Ka chun Yu",

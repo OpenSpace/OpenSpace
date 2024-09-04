@@ -1,9 +1,9 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
-local models = asset.syncedResource({
+local models = asset.resource({
   Name = "Apollo Boulders Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_boulders",
@@ -157,6 +157,7 @@ local Station2Boulder3Model = {
     Path = "/Solar System/Missions/Apollo/17/Station 2"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Station2Boulder1Holder)

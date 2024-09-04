@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <fstream>
@@ -59,8 +59,9 @@ ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
 }
 
 std::string ReadSpeckTask::description() {
-    return fmt::format(
-        "Read speck file {} and write raw star data into {}", _inFilePath, _outFilePath
+    return std::format(
+        "Read speck file '{}' and write raw star data into '{}'",
+        _inFilePath, _outFilePath
     );
 }
 
@@ -71,7 +72,7 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
 
     FitsFileReader fileReader(false);
     std::vector<float> fullData = fileReader.readSpeckFile(
-        _inFilePath.string(),
+        _inFilePath,
         nRenderValues
     );
 
@@ -88,13 +89,13 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
         fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
         fileStream.write(reinterpret_cast<const char*>(&nRenderValues), sizeof(int32_t));
 
-        size_t nBytes = nValues * sizeof(fullData[0]);
+        const size_t nBytes = nValues * sizeof(fullData[0]);
         fileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
 
         fileStream.close();
     }
     else {
-        LERROR(fmt::format("Error opening file: {} as output data file", _outFilePath));
+        LERROR(std::format("Error opening file '{}' as output data file", _outFilePath));
     }
 
     onProgress(1.f);

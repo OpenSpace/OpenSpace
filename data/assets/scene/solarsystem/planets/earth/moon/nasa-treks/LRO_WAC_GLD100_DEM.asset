@@ -6,19 +6,24 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_WACGLD100_ClrShade_79S79N_256ppd = {
   Identifier = "LRO_WACGLD100_ClrShade_79S79N_256ppd",
   Name = [[LRO WAC GLD100 DEM, ColorHillShade]],
-  FilePath = asset.localResource("LRO_WAC_GLD100_DEM/ColorHillShade.vrt"),
+  ZIndex = 50,
+  FilePath = asset.resource("LRO_WAC_GLD100_DEM/ColorHillShade.vrt"),
   Description = [[]]
 }
 
 local treks_LRO_WACGLD100_Shade_79S79N_256ppd = {
   Identifier = "LRO_WACGLD100_Shade_79S79N_256ppd",
   Name = [[LRO WAC GLD100 DEM, Hillshade]],
-  FilePath = asset.localResource("LRO_WAC_GLD100_DEM/Hillshade.vrt"),
+  ZIndex = 50,
+  FilePath = asset.resource("LRO_WAC_GLD100_DEM/Hillshade.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_WACGLD100_ClrShade_79S79N_256ppd)
@@ -34,9 +39,9 @@ asset.export("LRO_WACGLD100_ClrShade_79S79N_256ppd", treks_LRO_WACGLD100_ClrShad
 asset.export("LRO_WACGLD100_Shade_79S79N_256ppd", treks_LRO_WACGLD100_Shade_79S79N_256ppd)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_WAC_GLD100_DEM],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_WAC_GLD100_DEM]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",
