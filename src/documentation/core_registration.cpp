@@ -34,7 +34,6 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/keyframerecording.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/interaction/keyframerecording.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -108,7 +107,6 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Time::luaLibrary());
     engine.addLibrary(interaction::ActionManager::luaLibrary());
     engine.addLibrary(interaction::KeybindingManager::luaLibrary());
-    engine.addLibrary(interaction::KeyframeRecording::luaLibrary());
     engine.addLibrary(interaction::NavigationHandler::luaLibrary());
     engine.addLibrary(interaction::OrbitalNavigator::luaLibrary());
     engine.addLibrary(interaction::PathNavigator::luaLibrary());

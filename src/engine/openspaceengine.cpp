@@ -42,7 +42,6 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/keyframerecording.h>
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/interaction/keyframerecording.h>
 #include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
