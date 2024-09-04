@@ -246,65 +246,15 @@ public:
      */
     void savePropertyBaseline(properties::Property& prop);
 
-    /**
-     * Converts file format of a session recording file to the current format version
-     * (will determine the file format conversion to convert from based on the file's
-     * header version number).
-     *
-     * \param filename Name of the file to convert
-     * \param depth iteration number to prevent runaway recursion (init call with zero)
-     * \return String containing the filename of the previous conversion step. This is
-     *         used if there are multiple conversion steps where each step has to use
-     *         the output of the previous.
-     */
-    //std::filesystem::path convertFile(std::filesystem::path filename, int depth = 0);
-
-    /**
-     * Goes to legacy session recording inherited class, and calls its #convertFile
-     * method, and then returns the resulting conversion filename.
-     *
-     * \param filename Name of the file to convert
-     * \param depth Iteration number to prevent runaway recursion (init call with zero)
-     * \return string containing the filename of the conversion
-     */
-    //virtual std::filesystem::path getLegacyConversionResult(std::filesystem::path filename, int depth);
-
-    /**
-     * Version string for file format version currently supported by this class.
-     *
-     * \return string of the file format version this class supports
-     */
-    //virtual std::string fileFormatVersion();
-
-    /**
-     * Version string for file format version that a conversion operation will convert to
-     * (e.g. upgrades to this version). This is only relevant for inherited classes that
-     * support conversion from legacy versions (if called in the base class, it will
-     * return its own current version).
-     *
-     * \return string of the file format version this class supports
-     */
-    //virtual std::string targetFileFormatVersion();
-
 protected:
-    //void playbackAddEntriesToTimeline(std::istream& playback, std::filesystem::path playbackFilename);
-
     void moveAheadInTime(double dt);
 
     void setupPlayback(double startTime);
 
     void cleanUpTimelinesAndKeyframes();
-    //void convertEntries(const std::filesystem::path& inFilename, std::stringstream& inStream,
-    //    DataMode mode, std::ofstream& outFile);
-    //virtual void convertCamera(std::stringstream& inStream, DataMode mode, int lineNum,
-    //    std::string& inputLine, std::ofstream& outFile);
-    //virtual void convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-    //    std::string& inputLine, std::ofstream& outFile);
 
     void checkIfScriptUsesScenegraphNode(std::string s) const;
 
-    //std::filesystem::path determineConversionOutFilename(const std::filesystem::path& filename,
-        //DataMode mode);
 
     properties::BoolProperty _renderPlaybackInformation;
     properties::BoolProperty _ignoreRecordedScale;
@@ -342,57 +292,6 @@ protected:
     int _nextCallbackHandle = 0;
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
 };
-
-// Instructions for bumping the file format version with new changes:
-//
-// 1. Create a new subclass with the current version # in its name, such as:
-//    SessionRecording_legacy_####, which inherits from SessionRecording
-// 2. Override any method that changes in the new version. This includes both
-//    methods in SessionRecording class and structs in
-//    openspace::datamessagestructure that do data read/writes. Make the modified
-//    method/struct virtual, and override it in the new legacy subclass. This
-//    override will contain the code as it is before the new changes. This will
-//    need to be done in every legacy subclass/struct that exists, but only if that
-//    subclass does NOT already contain an override of that method/struct.
-// 3. Override FileHeaderVersion with the version # of the new subclass (which is
-//    the version being replaced by the new changes).
-// 4. Override TargetConvertVersion with the version # with the new changes. This
-//    is now the version that this legacy subclass converts up to.
-// 5. Override getLegacyConversionResult method so that it creates an instance of
-//    the new version subclass. This is how the current version looks back to the
-//    legacy version that preceded it.
-// 6. The convert method for frame types that changed will need to be changed
-//    (for example SessionRecording_legacy_0085::convertScript uses its own
-//    override of script keyframe for the conversion functionality).
-
-//class SessionRecordingHandler_legacy_0085 : public SessionRecordingHandler {
-//public:
-//    static const size_t FileHeaderVersionLength = 5;
-//    char FileHeaderVersion[FileHeaderVersionLength+1] = "00.85";
-//    char TargetConvertVersion[FileHeaderVersionLength+1] = "01.00";
-//    std::string fileFormatVersion() override {
-//        return FileHeaderVersion;
-//    }
-//    std::string targetFileFormatVersion() override {
-//        return TargetConvertVersion;
-//    }
-//    std::filesystem::path getLegacyConversionResult(std::filesystem::path filename, int depth) override;
-//
-//    struct ScriptMessage_legacy_0085 : public datamessagestructures::ScriptMessage {
-//        void read(std::istream* in) override;
-//    };
-//
-//protected:
-//    void convertScript(std::stringstream& inStream, DataMode mode, int lineNum,
-//        std::string& inputLine, std::ofstream& outFile) override;
-//};
-//
-//
-//void convertTypes(SessionRecordingHandler::DataMode fileFormatType,
-//    std::filesystem::path inFilePath, std::filesystem::path outFilePath,
-//    std::string version);
-//std::tuple<SessionRecordingHandler::DataMode, std::string> determineFormatTypeAndVersion(
-//    std::filesystem::path inFilePath);
 
 } // namespace openspace::interaction
 
