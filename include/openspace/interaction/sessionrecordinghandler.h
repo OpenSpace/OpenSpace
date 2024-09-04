@@ -40,11 +40,6 @@ namespace openspace::interaction {
 
 class SessionRecordingHandler : public properties::PropertyOwner {
 public:
-    enum class DataMode {
-        Ascii = 0,
-        Binary
-    };
-
     enum class SessionState {
         Idle = 0,
         Recording,

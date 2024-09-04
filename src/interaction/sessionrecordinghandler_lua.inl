@@ -35,7 +35,7 @@ namespace {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
     global::sessionRecordingHandler->setRecordDataFormat(
-        interaction::SessionRecordingHandler::DataMode::Binary
+        interaction::DataMode::Binary
     );
     global::sessionRecordingHandler->startRecording(recordFilePath);
 }
@@ -51,7 +51,7 @@ namespace {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
     global::sessionRecordingHandler->setRecordDataFormat(
-        interaction::SessionRecordingHandler::DataMode::Ascii
+        interaction::DataMode::Ascii
     );
     global::sessionRecordingHandler->startRecording(recordFilePath);
 }

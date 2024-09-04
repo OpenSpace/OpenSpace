@@ -49,8 +49,7 @@ public:
 private:
     std::filesystem::path _inFilePath;
     std::filesystem::path _outFilePath;
-    SessionRecordingHandler::DataMode _fileFormatType;
-    std::string _version;
+    DataMode _dataMode;
 };
 
 } // namespace openspace::interaction

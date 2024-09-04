@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/tasks/convertrecformattask.h>
-#include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/engine/globals.h>
@@ -39,47 +39,53 @@ namespace {
 
     constexpr std::string_view KeyInFilePath = "InputFilePath";
     constexpr std::string_view KeyOutFilePath = "OutputFilePath";
+
+    struct [[codegen::Dictionary("ConvertRecFormatTask")]] Parameters {
+        std::filesystem::path inputFilePath;
+        std::filesystem::path outputFilePath;
+
+        enum class DataMode {
+            Ascii,
+            Binary
+        };
+        DataMode outputMode;
+    };
+
 } // namespace
 
 namespace openspace::interaction {
 
+documentation::Documentation ConvertRecFormatTask::documentation() {
+    return codegen::doc<Parameters>("convert_format_task");
+}
+
 ConvertRecFormatTask::ConvertRecFormatTask(const ghoul::Dictionary& dictionary) {
-    openspace::documentation::testSpecificationAndThrow(
-        documentation(),
-        dictionary,
-        "ConvertRecFormatTask"
-    );
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _inFilePath = absPath(dictionary.value<std::string>(KeyInFilePath));
-    _outFilePath = absPath(dictionary.value<std::string>(KeyOutFilePath));
+    _inFilePath = p.inputFilePath;
+    _outFilePath = p.outputFilePath;
 
-    ghoul_assert(std::filesystem::is_regular_file(_inFilePath), "The file must exist");
+    switch (p.outputMode) {
+        case Parameters::DataMode::Ascii:
+            _dataMode = DataMode::Ascii;
+            break;
+        case Parameters::DataMode::Binary:
+            _dataMode = DataMode::Binary;
+            break;
+    }
+
     if (!std::filesystem::is_regular_file(_inFilePath)) {
         LERROR(std::format("Failed to load session recording file: {}", _inFilePath));
-    }
-    else {
-        //std::tie(_fileFormatType, _version) = determineFormatTypeAndVersion(_inFilePath);
     }
 }
 
 std::string ConvertRecFormatTask::description() {
-    std::string description =
-        std::format("Convert session recording file '{}'", _inFilePath);
-    if (_fileFormatType == SessionRecordingHandler::DataMode::Ascii) {
-        description += "(ascii format) ";
-    }
-    else if (_fileFormatType == SessionRecordingHandler::DataMode::Binary) {
-        description += "(binary format) ";
-    }
-    else {
-        description += "(UNKNOWN format) ";
-    }
-    description += std::format("conversion to file '{}'", _outFilePath);
-    return description;
+    return "Convert session recording files between ASCII and Binary formats";
 }
 
 void ConvertRecFormatTask::perform(const Task::ProgressCallback&) {
-    //convertTypes(_fileFormatType, _inFilePath, _outFilePath, _version);
+    SessionRecording sessionRecording = loadSessionRecording(_inFilePath);
+    saveSessionRecording(_outFilePath, sessionRecording, _dataMode);
 }
 
 documentation::Documentation ConvertRecFormatTask::documentation() {

@@ -34,6 +34,11 @@
 
 namespace openspace::interaction {
 
+enum class DataMode {
+    Ascii = 0,
+    Binary
+};
+
 struct SessionRecordingEntry {
     using Camera = KeyframeNavigator::CameraPose;
     using Script = std::string;
@@ -44,7 +49,10 @@ struct SessionRecordingEntry {
 };
 using SessionRecording = std::vector<SessionRecordingEntry>;
 
+
 SessionRecording loadSessionRecording(const std::filesystem::path& filename);
+void saveSessionRecording(const std::filesystem::path& filename,
+    const SessionRecording& sessionRecording, DataMode dataMode);
 
 
 } // namespace openspace::interaction
