@@ -113,11 +113,7 @@ SessionRecordingHandler::SessionRecordingHandler()
     addProperty(_addModelMatrixinAscii);
 }
 
-void SessionRecordingHandler::setRecordDataFormat(DataMode dataMode) {
-    _recording.dataMode = dataMode;
-}
-
-void SessionRecordingHandler::startRecording(const std::string& fn) {
+void SessionRecordingHandler::startRecording() {
     _timeline.clear();
     if (_state == SessionState::Recording) {
         throw ghoul::RuntimeError(
@@ -131,39 +127,36 @@ void SessionRecordingHandler::startRecording(const std::string& fn) {
             "SessionRecordingHandler"
         );
     }
+
+    _state = SessionState::Recording;
+    _savePropertiesBaseline.clear();
+
+    _recording.elapsedTime = 0.0;
+
+    // Record the current delta time as the first property to save in the file.
+    // This needs to be saved as a baseline whether or not it changes during recording
+    // Dummy `_time` "property" to store the time setup in the baseline
+    _savePropertiesBaseline["_time"] = std::format(
+        "openspace.time.setPause({});openspace.time.setDeltaTime({});",
+        global::timeManager->isPaused() ? "true" : "false",
+        global::timeManager->targetDeltaTime()
+    );
+
+    LINFO("Session recording started");
+}
+
+void SessionRecordingHandler::stopRecording(const std::string& fn, DataMode dataMode) {
+    if (_state != SessionState::Recording) {
+        return;
+    }
+
     if (!std::filesystem::is_directory(absPath("${RECORDINGS}"))) {
         std::filesystem::create_directories(absPath("${RECORDINGS}"));
     }
 
-    std::filesystem::path filename = fn;
-    auto extension = filename.extension();
-
-    if (_recording.dataMode == DataMode::Binary) {
-        if (extension == FileExtensionAscii) {
-            throw ghoul::RuntimeError(
-                "Specified filename for binary recording has ascii file extension",
-                "SessionRecording"
-            );
-        }
-        else if (extension != FileExtensionBinary) {
-            filename.replace_extension(FileExtensionBinary);
-        }
-    }
-    else if (_recording.dataMode == DataMode::Ascii) {
-        if (extension == FileExtensionBinary) {
-            throw ghoul::RuntimeError(
-                "Specified filename for ascii recording has binary file extension",
-                "SessionRecording"
-            );
-        }
-        else if (extension != FileExtensionAscii) {
-            filename.replace_extension(FileExtensionAscii);
-        }
-    }
-
-    std::filesystem::path absFilename = filename;
+    std::filesystem::path absFilename = fn;
     if (absFilename.parent_path().empty() || absFilename.parent_path() == absFilename) {
-        absFilename = absPath("${RECORDINGS}/" + filename.string());
+        absFilename = absPath("${RECORDINGS}/" + fn);
     }
     else if (absFilename.parent_path().is_relative()) {
         throw ghoul::RuntimeError(
@@ -184,29 +177,6 @@ void SessionRecordingHandler::startRecording(const std::string& fn) {
         ), "SessionRecording");
     }
 
-    _recording.file = absFilename;
-
-    _state = SessionState::Recording;
-    _savePropertiesBaseline.clear();
-
-    _recording.elapsedTime = 0.0;
-
-    // Record the current delta time as the first property to save in the file.
-    // This needs to be saved as a baseline whether or not it changes during recording
-    // Dummy `_time` "property" to store the time setup in the baseline
-    _savePropertiesBaseline["_time"] = std::format(
-        "openspace.time.setPause({});openspace.time.setDeltaTime({});",
-        global::timeManager->isPaused() ? "true" : "false",
-        global::timeManager->targetDeltaTime()
-    );
-
-    LINFO("Session recording started");
-}
-
-void SessionRecordingHandler::stopRecording() {
-    if (_state != SessionState::Recording) {
-        return;
-    }
 
     defer {
         cleanUpTimelinesAndKeyframes();
@@ -218,13 +188,14 @@ void SessionRecordingHandler::stopRecording() {
     }
     _timeline.insert(_timeline.begin(), propEntries.begin(), propEntries.end());
 
-    saveSessionRecording(_recording.file, _timeline, _recording.dataMode);
+    saveSessionRecording(absFilename, _timeline, dataMode);
     _state = SessionState::Idle;
     LINFO("Session recording stopped");
 }
 
-void SessionRecordingHandler::startPlayback(std::string& filename,
-                                     bool loop, bool shouldWaitForFinishedTiles)
+void SessionRecordingHandler::startPlayback(std::string& filename, bool loop,
+                                            bool shouldWaitForFinishedTiles,
+                                            std::optional<int> saveScreenshotFps)
 {
     const bool canTriggerPlayback = global::openSpaceEngine->setMode(
         OpenSpaceEngine::Mode::SessionRecordingPlayback
@@ -302,6 +273,9 @@ void SessionRecordingHandler::startPlayback(std::string& filename,
     }
 
     setupPlayback(now);
+    _playback.saveScreenshots.enabled = saveScreenshotFps.has_value();
+    _playback.saveScreenshots.deltaTime = saveScreenshotFps.value_or(0.0);
+
 
     LINFO(std::format("Playback session started with {} entries", _timeline.size()));
 
@@ -365,15 +339,6 @@ void SessionRecordingHandler::setPlaybackPause(bool pause) {
             events::EventSessionRecordingPlayback::State::Resumed
         );
     }
-}
-
-void SessionRecordingHandler::enableTakeScreenShotDuringPlayback(int fps) {
-    _playback.saveScreenshots.enabled = true;
-    _playback.saveScreenshots.deltaTime = 1.0 / fps;
-}
-
-void SessionRecordingHandler::disableTakeScreenShotDuringPlayback() {
-    _playback.saveScreenshots.enabled = false;
 }
 
 void SessionRecordingHandler::stopPlayback() {
@@ -849,13 +814,9 @@ scripting::LuaLibrary SessionRecordingHandler::luaLibrary() {
         "sessionRecording",
         {
             codegen::lua::StartRecording,
-            codegen::lua::StartRecordingAscii,
             codegen::lua::StopRecording,
             codegen::lua::StartPlayback,
             codegen::lua::StopPlayback,
-            codegen::lua::EnableTakeScreenShotDuringPlayback,
-            codegen::lua::DisableTakeScreenShotDuringPlayback,
-            codegen::lua::FileFormatConversion,
             codegen::lua::SetPlaybackPause,
             codegen::lua::TogglePlaybackPause,
             codegen::lua::IsPlayingBack,

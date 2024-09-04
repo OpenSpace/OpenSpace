@@ -102,24 +102,16 @@ public:
      * to the data format specified, and will continue until recording is stopped using
      * stopRecording() method.
      *
-     * \param filename File saved with recorded keyframes
      * \return `true` if recording to file starts without errors
      */
-    void startRecording(const std::string& filename);
-
-    /**
-     * Starts a recording session, which will save data to the provided filename in ASCII
-     * data format until recording is stopped using stopRecording() method.
-     *
-     * \param dataMode The format in which the session recording is stored
-     */
-    void setRecordDataFormat(DataMode dataMode);
+    void startRecording();
 
     /**
      * Used to stop a recording in progress. If open, the recording file will be closed,
      * and all keyframes deleted from memory.
+     * \param filename File saved with recorded keyframes
      */
-    void stopRecording();
+    void stopRecording(const std::string& filename, DataMode dataMode);
 
     /**
      * Used to check if a session recording is in progress.
@@ -142,7 +134,8 @@ public:
      *        `enableTakeScreenShotDuringPlayback` was called before. Otherwise this value
      *        will be ignored
      */
-    void startPlayback(std::string& filename, bool loop, bool shouldWaitForFinishedTiles);
+    void startPlayback(std::string& filename, bool loop,
+        bool shouldWaitForFinishedTiles, std::optional<int> saveScreenshotFps);
 
     /**
      * Used to stop a playback in progress. If open, the playback file will be closed, and
@@ -170,12 +163,12 @@ public:
      *
      * \param fps Number of frames per second.
      */
-    void enableTakeScreenShotDuringPlayback(int fps);
+    //void enableTakeScreenShotDuringPlayback(int fps);
 
     /**
      * Used to disable that renderings are saved during playback.
      */
-    void disableTakeScreenShotDuringPlayback();
+    //void disableTakeScreenShotDuringPlayback();
 
     /**
      * Used to check if a session playback is in progress.
@@ -275,8 +268,6 @@ protected:
     } _playback;
 
     struct {
-        DataMode dataMode = DataMode::Binary;
-        std::filesystem::path file;
         double elapsedTime = 0.0;
     } _recording;
 
