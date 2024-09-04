@@ -22,40 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "fragment.glsl"
+#version __CONTEXT__
 
-in vec4 vs_position;
-in vec2 vs_textureCoords;
-in vec3 vs_normal;
-in float vs_screenSpaceDepth;
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_textureCoords;
 
-uniform sampler2D colorTexture;
-uniform vec2 dataMinMaxValues;
-uniform float opacity;
-uniform bool mirrorTexture;
+out vec2 vs_textureCoords;
+out vec4 vs_position;
+out vec3 vs_normal;
+out float vs_screenSpaceDepth;
+
+uniform mat4 modelViewProjection;
+uniform mat4 modelViewTransform;
+uniform mat3 modelViewRotation;
 
 
-Fragment getFragment() {
-  vec2 texCoord = vs_textureCoords;
+void main() {
+  vs_normal = modelViewRotation * normalize(in_position.xyz);
+  vs_textureCoords = in_textureCoords;
 
-  Fragment frag;
-  if (mirrorTexture) {
-    texCoord.x = 1.0 - texCoord.x;
-  }
+  vec4 position = modelViewProjection * vec4(in_position.xyz, 1.0);
+  vs_position = modelViewTransform * vec4(in_position.xyz, 1.0);
 
-  frag.color = texture(colorTexture, texCoord);
-  if (frag.color.a == 1.0){
-    if (opacity == 1.0){
-      frag.color.r = 1.0;
-    }
-  }
+  // Set z to 0 to disable near/far-plane clipping
+  gl_Position = vec4(position.xy, 0.0, position.w);
 
-  //frag.color.a *= opacity;
-  frag.depth = vs_screenSpaceDepth;
-
-  // G-Buffer
-  frag.gPosition = vs_position;
-  frag.gNormal = vec4(vs_normal, 1.0);
-
-  return frag;
+  vs_screenSpaceDepth = position.w;
 }
