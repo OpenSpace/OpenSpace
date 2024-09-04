@@ -274,7 +274,9 @@ void SessionRecordingHandler::startPlayback(std::string& filename, bool loop,
 
     setupPlayback(now);
     _playback.saveScreenshots.enabled = saveScreenshotFps.has_value();
-    _playback.saveScreenshots.deltaTime = saveScreenshotFps.value_or(0.0);
+    if (saveScreenshotFps.has_value()) {
+        _playback.saveScreenshots.deltaTime = 1.0 / *saveScreenshotFps;
+    }
 
 
     LINFO(std::format("Playback session started with {} entries", _timeline.size()));
