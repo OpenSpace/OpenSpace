@@ -3,9 +3,11 @@ local coreKernels = asset.require("spice/core")
 
 local GSM_Kernel = asset.resource("kernels/GSMtime.tf")
 local SM_Kernel = asset.resource("kernels/SMtime.tf")
-local TimeDependentMagneticNorth = "C:/Users/eolsson/Downloads/earthnpole_19500101_20251231_v01.bsp"
-local kernels = "C:/Users/eolsson/Downloads/kernels/"
 
+local TimeDependentMagneticNorth = "C:/Users/eolsson/Downloads/earthnpole_19500101_20251231_v01.bsp"
+local lastPosMagNorth25To35 = "C:/Users/eolsson/Downloads/earthnpole_runout.bsp"
+
+local kernels = "C:/Users/eolsson/Downloads/kernels/"
 HighResPredKernels = kernels .. "earth_200101_990825_predict.bpc"
 HighResTo2023Kernels = kernels .. "earth_720101_230601.bpc"
 HighResLatestKernels = kernels .. "earth_latest_high_prec.bpc"
@@ -54,6 +56,7 @@ local SMTimeReferenceFrame = {
 
 
 asset.onInitialize(function()
+  openspace.spice.loadKernel(lastPosMagNorth25To35)
   openspace.spice.loadKernel(TimeDependentMagneticNorth)
   openspace.spice.loadKernel(HighResPredKernels)
   openspace.spice.loadKernel(HighResTo2023Kernels)
@@ -73,6 +76,7 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(HighResTo2023Kernels)
   openspace.spice.unloadKernel(HighResPredKernels)
   openspace.spice.unloadKernel(TimeDependentMagneticNorth)
+  openspace.spice.unloadKernel(lastPosMagNorth25To35)
 end)
 
 asset.export("Frame", Frame)
