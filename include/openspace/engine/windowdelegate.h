@@ -34,6 +34,9 @@ namespace openspace {
 struct WindowDelegate {
     enum class Frustum { Mono, LeftEye, RightEye };
 
+    enum class Cursor { Arrow, IBeam, CrossHair, PointingHand, ResizeEW, ResizeNS,
+        ResizeNWSE, ResizeNESW, ResizeAll, NotAllowed };
+
     void (*terminate)() = [](){};
 
     void (*setBarrier)(bool enabled) = [](bool) {};
@@ -126,6 +129,8 @@ struct WindowDelegate {
         [](const glm::vec2&) { return glm::vec2(0); };
 
     void (*setStatisticsGraphScale)(float scale) = [](float) {};
+
+    void (*setMouseCursor)(Cursor cursor) = [](Cursor) {};
 };
 
 } // namespace openspace

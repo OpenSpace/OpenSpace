@@ -22,30 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DIGITALUNIVERSE___DIGITALUNIVERSEMODULE___H__
-#define __OPENSPACE_MODULE_DIGITALUNIVERSE___DIGITALUNIVERSEMODULE___H__
+#ifndef __OPENSPACE_CORE___KEYFRAMERECORDING___H__
+#define __OPENSPACE_CORE___KEYFRAMERECORDING___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/scripting/lualibrary.h>
+#include <json/json.hpp>
+#include <string>
+#include <vector>
 
-#include <ghoul/opengl/programobjectmanager.h>
+namespace openspace::interaction {
 
-namespace openspace {
-
-class DigitalUniverseModule : public OpenSpaceModule {
+class KeyframeRecording : public properties::PropertyOwner {
 public:
-    constexpr static const char* Name = "DigitalUniverse";
+    struct Keyframe {
+        struct TimeStamp {
+            double application;
+            double sequenceTime;
+            double simulation;
+        };
 
-    DigitalUniverseModule();
-    ~DigitalUniverseModule() override = default;
-    std::vector<documentation::Documentation> documentations() const override;
+        KeyframeNavigator::CameraPose camera;
+        TimeStamp timestamp;
+    };
 
-    static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
+    KeyframeRecording();
 
-protected:
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalDeinitializeGL() override;
+    void newSequence();
+    void addKeyframe(double sequenceTime);
+    void removeKeyframe(int index);
+    void updateKeyframe(int index);
+    void moveKeyframe(int index, double sequenceTime);
+    bool saveSequence(std::optional<std::string> filename);
+    void loadSequence(std::string filename);
+    void preSynchronization(double dt);
+    void play();
+    void pause();
+    void setSequenceTime(double sequenceTime);
+    void jumpToKeyframe(int index);
+    bool hasKeyframeRecording() const;
+    std::vector<ghoul::Dictionary> keyframes() const;
+
+    static openspace::scripting::LuaLibrary luaLibrary();
+
+private:
+    void sortKeyframes();
+
+    Keyframe newKeyframe(double sequenceTime);
+    bool isInRange(int index) const;
+
+    std::vector<Keyframe> _keyframes;
+    std::string _filename;
+    bool _isPlaying = false;
+    bool _hasStateChanged = false;
+    double _sequenceTime = 0.0;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DIGITALUNIVERSE___DIGITALUNIVERSEMODULE___H__
+#endif // __OPENSPACE_CORE___KEYFRAMERECORDING___H__
