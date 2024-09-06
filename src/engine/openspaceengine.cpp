@@ -1204,7 +1204,6 @@ void OpenSpaceEngine::postDraw() {
     global::eventEngine->triggerActions();
     global::eventEngine->triggerTopics();
 
-    global::navigationHandler->orbitalNavigator().postFrameCleanup();
     global::eventEngine->postFrameCleanup();
     global::memoryManager->PersistentMemory.housekeeping();
 

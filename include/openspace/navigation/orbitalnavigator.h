@@ -150,7 +150,6 @@ public:
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
 
     void updateAnchor();
-    void postFrameCleanup();
     std::vector<Syncable*> syncables();
 
     /**
@@ -249,7 +248,7 @@ private:
     WebsocketCameraStates _websocketStates;
     ScriptCameraStates _scriptStates;
 
-    SyncData<std::string> _newAnchorName;
+    SyncData<std::string> _syncedAnchorNode;
     const SceneGraphNode* _anchorNode = nullptr;
     const SceneGraphNode* _aimNode = nullptr;
 
