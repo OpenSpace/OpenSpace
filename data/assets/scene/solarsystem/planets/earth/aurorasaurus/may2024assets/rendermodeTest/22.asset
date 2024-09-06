@@ -1,0 +1,365 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+local notSeenAuroraIcon3997 = {
+  Identifier = "notSeenAuroraIcon3997",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 22:45:00",
+    End = "2024 May 12 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.31583556755319,
+      Longitude = -1.6365926625630527,
+      Altitude = 95000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true,
+  RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora not seen 3997"
+  }
+}
+
+
+local shapeAuroraGreenPinkRed3998 = {
+  Identifier = "shapeAuroraGreenPinkRed3998",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 11 02:00:00",
+    End = "2024 May 11 04:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 34.62354389575096,
+      Longitude = -86.29359909040306,
+      Altitude = 120000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderableSwitch",
+    Renderable1 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3998.jpg",
+        Opacity = 1,
+        Enabled = true,
+        RenderBinMode = "PostDeferredTransparent"
+      },
+      Renderable2 = {
+        Type = "RenderablePlaneImageLocal",
+        Size = 75000,
+        Origin = "Center",
+        Billboard = true,
+        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedPink2.png",
+        Opacity = 1,
+        Enabled = true,
+        RenderBinMode = "PostDeferredTransparent"
+      },
+      DistanceThreshold = 1000000
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora Image 3998"
+  }
+}
+
+
+local notSeenAuroraIcon3999 = {
+  Identifier = "notSeenAuroraIcon3999",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 23:00:00",
+    End = "2024 May 12 23:30:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.28942210363611,
+      Longitude = 1.0417401624862959,
+      Altitude = 95000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true,
+  RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora not seen 3999"
+  }
+}
+
+
+local notSeenAuroraIcon4000 = {
+  Identifier = "notSeenAuroraIcon4000",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 21:45:00",
+    End = "2024 May 12 23:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 53.10005720754886,
+      Longitude = -1.125139789746984,
+      Altitude = 95000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true,
+  RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora not seen 4000"
+  }
+}
+
+
+local notSeenAuroraIcon4001 = {
+  Identifier = "notSeenAuroraIcon4001",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 23:45:00",
+    End = "2024 May 13 00:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.3912327325193,
+      Longitude = 0.238438744710565,
+      Altitude = 95000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true,
+  RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora not seen 4001"
+  }
+}
+
+
+local notSeenAuroraIcon4002 = {
+  Identifier = "notSeenAuroraIcon4002",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 23:00:00",
+    End = "2024 May 12 23:45:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.13388471773215,
+      Longitude = -0.4856795164493719,
+      Altitude = 95000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true,
+  RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora not seen 4002"
+  }
+}
+
+
+local notSeenAuroraIcon4003 = {
+  Identifier = "notSeenAuroraIcon4003",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 23:45:00",
+    End = "2024 May 13 00:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 58.667247475098975,
+      Longitude = 17.047855454073645,
+      Altitude = 95000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true,
+  RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora not seen 4003"
+  }
+}
+
+
+local notSeenAuroraIcon4004 = {
+  Identifier = "notSeenAuroraIcon4004",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 23:00:00",
+    End = "2024 May 12 23:15:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 52.53882441644673,
+      Longitude = -1.527877906533233,
+      Altitude = 95000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true,
+  RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora not seen 4004"
+  }
+}
+
+
+local notSeenAuroraIcon4005 = {
+  Identifier = "notSeenAuroraIcon4005",
+  Parent = earth.Earth.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2024 May 12 23:45:00",
+    End = "2024 May 13 00:00:00"
+  },
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = 51.309025792387146,
+      Longitude = 0.673219821421318,
+      Altitude = 95000,
+      UseHeightmap = false
+    }
+  },
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Size = 75000,
+  Origin = "Center",
+  Billboard = true,
+  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Opacity = 1.0,
+  Enabled = true,
+  RenderBinMode = "PostDeferredTransparent"
+  },
+  GUI = {
+    Path = "/Aurorasaurus",
+    Name = "Aurora not seen 4005"
+  }
+}
+
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(notSeenAuroraIcon3997)
+  openspace.addSceneGraphNode(shapeAuroraGreenPinkRed3998)
+  openspace.addSceneGraphNode(notSeenAuroraIcon3999)
+  openspace.addSceneGraphNode(notSeenAuroraIcon4000)
+  openspace.addSceneGraphNode(notSeenAuroraIcon4001)
+  openspace.addSceneGraphNode(notSeenAuroraIcon4002)
+  openspace.addSceneGraphNode(notSeenAuroraIcon4003)
+  openspace.addSceneGraphNode(notSeenAuroraIcon4004)
+  openspace.addSceneGraphNode(notSeenAuroraIcon4005)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(notSeenAuroraIcon3997)
+  openspace.removeSceneGraphNode(shapeAuroraGreenPinkRed3998)
+  openspace.removeSceneGraphNode(notSeenAuroraIcon3999)
+  openspace.removeSceneGraphNode(notSeenAuroraIcon4000)
+  openspace.removeSceneGraphNode(notSeenAuroraIcon4001)
+  openspace.removeSceneGraphNode(notSeenAuroraIcon4002)
+  openspace.removeSceneGraphNode(notSeenAuroraIcon4003)
+  openspace.removeSceneGraphNode(notSeenAuroraIcon4004)
+  openspace.removeSceneGraphNode(notSeenAuroraIcon4005)
+end)
+
+asset.export(notSeenAuroraIcon3997)
+asset.export(shapeAuroraGreenPinkRed3998)
+asset.export(notSeenAuroraIcon3999)
+asset.export(notSeenAuroraIcon4000)
+asset.export(notSeenAuroraIcon4001)
+asset.export(notSeenAuroraIcon4002)
+asset.export(notSeenAuroraIcon4003)
+asset.export(notSeenAuroraIcon4004)
+asset.export(notSeenAuroraIcon4005)

@@ -106,19 +106,20 @@ void RenderableSwitch::update(const UpdateData& data) {
 }
 
 void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
-    if (_enabled) {
-        glm::dvec3 cameraPosition = data.camera.positionVec3();
-        glm::dvec3 modelPosition = data.modelTransform.translation;
+    if (!_enabled) {
+        return;
+    }
+    glm::dvec3 cameraPosition = data.camera.positionVec3();
+    glm::dvec3 modelPosition = data.modelTransform.translation;
 
-        if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {
-            if (_renderable1) {
-                _renderable1->render(data, tasks);
-            }
+    if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {
+        if (_renderable1) {
+            _renderable1->render(data, tasks);
         }
-        else {
-            if (_renderable2) {
-                _renderable2->render(data, tasks);
-            }
+    }
+    else {
+        if (_renderable2) {
+            _renderable2->render(data, tasks);
         }
     }
 }

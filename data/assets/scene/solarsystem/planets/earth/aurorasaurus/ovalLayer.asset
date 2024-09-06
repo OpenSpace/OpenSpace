@@ -10,6 +10,7 @@ local NorthLayer = {
     ZIndex = 9000,
     Type = "TemporalTileProvider",
     Mode = "Prototyped",
+    RenderBinMode = "PostDeferredTransparent",
     Prototyped = {
         Time = {
             Start = "2024-05-10",
@@ -30,6 +31,7 @@ local SouthLayer = {
   ZIndex = 9000,
   Type = "TemporalTileProvider",
   Mode = "Prototyped",
+  RenderBinMode = "PostDeferredTransparent",
   Prototyped = {
       Time = {
           Start = "2024-05-10",
@@ -42,18 +44,6 @@ local SouthLayer = {
   Description = "Earth image from Blue Marble Next Generation",
   Opacity = 1
 }
-
-local Layer3 = {
-    Identifier = "Oval_Test3",
-    Name = "Oval test 3",
-    Enabled = asset.enabled,
-    ZIndex = 9000,
-    FilePath = "C:/Users/alundkvi/Documents/work/scripts/oval_asset_output_not_simplified/2024-05-10_19-00-00/output4.png",
-    Description = "Earth image from Blue Marble Next Generation",
-    Opacity = 1,
-    CacheSettings = { Enabled = false }
-}
-
 
 local AuroraLayer = {
   Identifier = "Aurora_Image",

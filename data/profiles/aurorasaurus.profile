@@ -103,9 +103,9 @@
       "value": "37.130000"
     },
     {
-      "name": "Scene.shape*.Renderable.Enabled",
-      "type": "setPropertyValue",
-      "value": "false"
+      "name": "NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance",
+      "type": "setPropertyValueSingle",
+      "value": "0.000000"
     }
   ],
   "time": {
