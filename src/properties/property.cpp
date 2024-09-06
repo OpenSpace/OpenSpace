@@ -76,11 +76,11 @@ const std::string& Property::identifier() const {
     return _identifier;
 }
 
-std::string Property::fullyQualifiedIdentifier() const {
-    std::string identifier = _identifier;
+std::string Property::uri() const {
+    std::string identifier = "";
     const std::string& ownerUri = owner()->uri();
     if (!ownerUri.empty()) {
-        identifier = std::format("{}.{}", ownerUri, identifier);
+        identifier = std::format("{}.{}", ownerUri, _identifier);
     }
     return identifier;
 }
@@ -264,7 +264,7 @@ void Property::resetToUnchanged() {
 
 std::string Property::generateJsonDescription() const {
     const std::string cName = escapedJson(std::string(className()));
-    const std::string identifier = fullyQualifiedIdentifier();
+    const std::string identifier = uri();
     const std::string identifierSan = escapedJson(identifier);
     const std::string gName = guiName();
     const std::string gNameSan = escapedJson(gName);

@@ -1,6 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local coreKernels = asset.require("spice/core")
 
+
+
 local EarthMoonShadow = {
   Identifier = "EarthMoonShadow",
   Parent = transforms.Moon.Identifier,
@@ -21,6 +23,7 @@ local EarthMoonShadow = {
     Path = "/Solar System/Planets/Earth"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthMoonShadow)

@@ -18,7 +18,7 @@ local Sphere = {
 
 
 asset.onInitialize(function()
-    openspace.addSceneGraphNode(Sphere)
+  openspace.addSceneGraphNode(Sphere)
 end)
 
 asset.onDeinitialize(function()

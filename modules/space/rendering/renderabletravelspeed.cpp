@@ -287,9 +287,6 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     else { // in case we've reached the target
         reinitiateTravel();
     }
-
-    _shaderProgram->setUniform("lineColor", _lineColor);
-    _shaderProgram->setUniform("opacity", opacity());
 }
 
 void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
@@ -303,6 +300,9 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
         glm::mat4(calcModelViewTransform(data))
     );
     _shaderProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
+
+    _shaderProgram->setUniform("lineColor", _lineColor);
+    _shaderProgram->setUniform("opacity", opacity());
 
 #ifndef __APPLE__
     glLineWidth(_lineWidth);

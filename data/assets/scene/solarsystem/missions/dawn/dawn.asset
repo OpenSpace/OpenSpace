@@ -39,7 +39,6 @@ local DawnPosition = {
       Target = kernels.ID.Dawn,
       Observer = coreKernels.ID.SolarSystemBarycenter
     },
-    -- Rotation for model version 2
     Rotation = {
       Type = "StaticRotation",
       Rotation = { math.pi / 2.0, 0.0, math.pi / 2.0 }

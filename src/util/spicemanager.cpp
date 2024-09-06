@@ -1388,8 +1388,7 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
 }
 
 void SpiceManager::loadLeapSecondsSpiceKernel() {
-    constexpr std::string_view Naif00012tlsSource = R"(
-KPL/LSK
+    constexpr std::string_view Naif00012tlsSource = R"(KPL/LSK
 
 
 LEAPSECONDS KERNEL FILE
@@ -1549,12 +1548,10 @@ const std::filesystem::path path = std::filesystem::temp_directory_path();
         f << Naif00012tlsSource;
     }
     loadKernel(file);
-    std::filesystem::remove(file);
 }
 
 void SpiceManager::loadGeophysicalConstantsKernel() {
-    constexpr std::string_view GeoPhysicalConstantsKernelSource = R"(
-KPL/PCK
+    constexpr std::string_view GeoPhysicalConstantsKernelSource = R"(KPL/PCK
 
       The SPK creations applications (mkspk, mkspk_c) require the data in
       this kernel to produce Type 10 SPK segments based upon the Two-Line
@@ -1683,7 +1680,6 @@ References:
           f << GeoPhysicalConstantsKernelSource;
       }
       loadKernel(file);
-      std::filesystem::remove(file);
 }
 
 void SpiceManager::setExceptionHandling(UseException useException) {

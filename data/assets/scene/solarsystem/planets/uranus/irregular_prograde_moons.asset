@@ -79,8 +79,7 @@ local MargaretLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
   GUI = {
     Name = "Margaret Label",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/Margaret",
-    Description = "Label for Uranus' moon Margaret (Irregular Prograde Moons)"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Prograde Moons/Margaret"
   }
 }
 

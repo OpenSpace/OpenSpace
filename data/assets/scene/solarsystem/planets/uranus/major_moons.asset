@@ -18,7 +18,13 @@ local Miranda = {
     Type = "RenderableGlobe",
     Radii = { 471600, 468000, 466000 }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
   GUI = {
     Name = "Miranda",
     Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
@@ -39,7 +45,12 @@ local MirandaTrail = {
     Period = 1.413479,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_major_uranus"
+  },
   GUI = {
     Name = "Miranda Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
@@ -66,8 +77,7 @@ local MirandaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Miranda Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda",
-    Description = "Label for Uranus' moon Miranda"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
   }
 }
 
@@ -85,7 +95,13 @@ local Ariel = {
     Type = "RenderableGlobe",
     Radii = { 1162000, 1156000, 1155000 }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
   GUI = {
     Name = "Ariel",
     Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
@@ -106,7 +122,12 @@ local ArielTrail = {
     Period = 2.520379,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_major_uranus"
+  },
   GUI = {
     Name = "Ariel Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
@@ -133,8 +154,7 @@ local ArielLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Ariel Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel",
-    Description = "Label for Uranus' moon Ariel"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
   }
 }
 
@@ -152,7 +172,13 @@ local Umbriel = {
     Type = "RenderableGlobe",
     Radii = { 1169400, 1169400, 1169400 }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
   GUI = {
     Name = "Umbriel",
     Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
@@ -173,7 +199,12 @@ local UmbrielTrail = {
     Period = 4.144177,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
+  Tag = {
+     "moonTrail_solarSystem",
+     "moonTrail_giants",
+     "moonTrail_uranus",
+     "moonTrail_major_uranus"
+  },
   GUI = {
     Name = "Umbriel Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
@@ -200,8 +231,7 @@ local UmbrielLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Umbriel Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel",
-    Description = "Label for Uranus' moon Umbriel"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
   }
 }
 
@@ -219,7 +249,13 @@ local Titania = {
     Type = "RenderableGlobe",
     Radii = { 1576800, 1576800, 1576800 }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
   GUI = {
     Name = "Titania",
     Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
@@ -240,7 +276,12 @@ local TitaniaTrail = {
     Period = 8.705872,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_major_uranus"
+  },
   GUI = {
     Name = "Titania Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
@@ -267,8 +308,7 @@ local TitaniaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Titania Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Titania",
-    Description = "Label for Uranus' moon Titania"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
   }
 }
 
@@ -286,7 +326,13 @@ local Oberon = {
     Type = "RenderableGlobe",
     Radii = { 1522800, 1522800, 1522800 }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_uranus", "moon_major", "moon_major_uranus" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_major",
+    "moon_major_uranus"
+  },
   GUI = {
     Name = "Oberon",
     Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
@@ -307,7 +353,12 @@ local OberonTrail = {
     Period = 13.463239,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_uranus", "moonTrail_major_uranus" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_major_uranus"
+  },
   GUI = {
     Name = "Oberon Trail",
     Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
@@ -334,11 +385,9 @@ local OberonLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Oberon Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon",
-    Description = "Label for Uranus' moon Oberon"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
   }
 }
-
 
 local UranusMajorMoonsOn = {
   Identifier = "os.solarsystem.UranusMajorMoonsOn",
@@ -468,6 +517,7 @@ asset.export(OberonTrail)
 asset.export(OberonLabel)
 asset.export("UranusMajorMoonsOn", UranusMajorMoonsOn.Identifier)
 asset.export("UranusMajorMoonsOff", UranusMajorMoonsOff.Identifier)
+
 
 
 asset.meta = {

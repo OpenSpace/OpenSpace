@@ -26,8 +26,7 @@ local Uranus = {
   Tag = { "planet_solarSystem", "planet_giants" },
   GUI = {
     Name = "Uranus",
-    Path = "/Solar System/Planets/Uranus",
-    Description = "Globe for Uranus"
+    Path = "/Solar System/Planets/Uranus"
   }
 }
 
@@ -51,8 +50,7 @@ local UranusLabel = {
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Uranus Label",
-    Path = "/Solar System/Planets/Uranus",
-    Description = "Main planet label for Uranus"
+    Path = "/Solar System/Planets/Uranus"
   }
 }
 

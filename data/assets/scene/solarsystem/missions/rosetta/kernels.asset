@@ -2,57 +2,71 @@ local data = asset.resource({
   Name = "Rosetta Kernels",
   Type = "HttpSynchronization",
   Identifier = "rosetta_kernels",
-  Version = 1
+  Version = 2
 })
 
 
 local Kernels = {
-  data .. "ROS_160718_STEP.TSC",
-  data .. "ros_triv.tsc",
+  data .. "ROS_160929_STEP.TSC",
 
-  data .. "CORB_DV_243_01___T19_00325.BSP",
-  data .. "CORB_DV_223_01___T19_00302.BSP",
-  data .. "CORB_DV_145_01___T19_00216.BSP",
+  data .. "RORB_DV_257_03___T19_00345.BSP",
+  data .. "CORB_DV_257_03___T19_00345.BSP",
+  data .. "LORB_C_G_FIXED_RBD_7_V2_0.BSP",
+  data .. "LORB_ROS_SC_PRESEP_V1_0.BSP",
 
-  data .. "LORB_DV_236_01___T19_00318.BSP",
-  data .. "LORB_DV_223_01___T19_00302.BSP",
-  data .. "LORB_DV_145_01___T19_00216.BSP",
+  data .. "ATNR_P040302093352_T6_00127.BC",
 
-  data .. "RORB_DV_243_01___T19_00325.BSP",
-  data .. "RORB_DV_223_01___T19_00302.BSP",
-  data .. "RORB_DV_145_01___T19_00216.BSP",
+  data .. "ROS_STRUCT_V8.BSP",
 
-  data .. "ATNR_P040302093352_00127.BC",
+  data .. "ROS_ALICE_V17.TI",
+  data .. "ROS_CIVA_V11.TI",
+  data .. "ROS_CONSERT_V11.TI",
+  data .. "ROS_COSIMA_V15.TI",
+  data .. "ROS_DIM_V11.TI",
+  data .. "ROS_GIADA_V12.TI",
+  data .. "ROS_MIDAS_V11.TI",
+  data .. "ROS_MIRO_V11.TI",
+  data .. "ROS_NAVCAM_V03.TI",
+  data .. "ROS_OSIRIS_V17.TI",
+  data .. "ROS_ROLIS_V03.TI",
+  data .. "ROS_ROSINA_V12.TI",
+  data .. "ROS_RPC_V20.TI",
 
-  data .. "ROS_STRUCT_V5.BSP",
+  data .. "ROS_V38.TF",
 
-  data .. "ROS_NAVCAM_V01.TI",
+  data .. "RATT_DV_257_02_01_T6_00344.BC",
+  data .. "RATT_DV_223_01_01_T6_00302.BC",
+  data .. "RATT_DV_145_01_01_T6_00216.BC",
 
-  data .. "ROS_CHURYUMOV_V01.TF",
-  data .. "ROS_V26.TF",
+  data .. "CATT_DV_257_03_______00344.BC",
+  data .. "CATT_DV_223_02_______00302.BC",
+  data .. "CATT_DV_145_02_______00216.BC",
 
-  -- CK
-  -- Rosetta attitude
-  data .. "RATT_DV_243_01_01____00325.BC",
-  data .. "RATT_DV_223_01_01____00302.BC",
-  data .. "RATT_DV_145_01_01____00216.BC",
+  data .. "ROS_HGA_2004_V0002.BC",
+  data .. "ROS_HGA_2005_V0002.BC",
+  data .. "ROS_HGA_2006_V0002.BC",
+  data .. "ROS_HGA_2007_V0002.BC",
+  data .. "ROS_HGA_2008_V0020.BC",
+  data .. "ROS_HGA_2009_V0053.BC",
+  data .. "ROS_HGA_2010_V0047.BC",
+  data .. "ROS_HGA_2011_V0019.BC",
+  data .. "ROS_HGA_2014_V0045.BC",
+  data .. "ROS_HGA_2015_V0054.BC",
+  data .. "ROS_HGA_2016_V0043.BC",
 
-  -- Comet attitude
-  data .. "CATT_DV_243_01_______00325.BC",
-  data .. "CATT_DV_223_01_______00302.BC",
-  data .. "CATT_DV_145_01_______00216.BC",
+  data .. "ROS_SA_2004_V0002.BC",
+  data .. "ROS_SA_2005_V0002.BC",
+  data .. "ROS_SA_2006_V0002.BC",
+  data .. "ROS_SA_2007_V0002.BC",
+  data .. "ROS_SA_2008_V0039.BC",
+  data .. "ROS_SA_2009_V0055.BC",
+  data .. "ROS_SA_2010_V0053.BC",
+  data .. "ROS_SA_2011_V0021.BC",
+  data .. "ROS_SA_2014_V0048.BC",
+  data .. "ROS_SA_2015_V0043.BC",
+  data .. "ROS_SA_2016_V0042.BC",
 
-  -- High gain antenna
-  data .. "ROS_HGA_2016_V0035.BC",
-  data .. "ROS_HGA_2015_V0053.BC",
-  data .. "ROS_HGA_2014_V0044.BC",
-
-  -- Solar arrays
-  data .. "ROS_SA_2016_V0034.BC",
-  data .. "ROS_SA_2015_V0042.BC",
-  data .. "ROS_SA_2014_V0047.BC",
-
-  data .. "ROS_CGS_RSOC_V03.TPC"
+  data .. "ROS_CG_RAD_V10.TPC"
 }
 
 local ID = {

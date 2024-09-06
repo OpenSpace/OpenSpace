@@ -18,8 +18,7 @@ local Trail = {
   Tag = { "planetTrail_dwarf" },
   GUI = {
     Name = "Gonggong Trail",
-    Path = "/Solar System/Dwarf Planets/Gonggong",
-    Description = "Trail of Gonggong"
+    Path = "/Solar System/Dwarf Planets/Gonggong"
   }
 }
 

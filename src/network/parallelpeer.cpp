@@ -85,6 +85,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ServerNameInfo = {
+        "ServerName",
+        "Server Name",
+        "The name of the server instance to join.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
         "BufferTime",
         "Buffer Time",
@@ -123,6 +130,7 @@ ParallelPeer::ParallelPeer()
     , _port(PortInfo)
     , _address(AddressInfo)
     , _name(NameInfo)
+    , _serverName(ServerNameInfo)
     , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
@@ -130,6 +138,7 @@ ParallelPeer::ParallelPeer()
     , _connection(nullptr)
 {
     addProperty(_name);
+    addProperty(_serverName);
     addProperty(_port);
     addProperty(_address);
     addProperty(_bufferTime);
@@ -190,6 +199,12 @@ void ParallelPeer::sendAuthentication() {
     }
     const uint16_t hostPasswordSize = static_cast<uint16_t>(hostPassword.size());
 
+    std::string serverName = _serverName;
+    if (serverName.size() > std::numeric_limits<uint8_t>::max()) {
+        serverName.resize(std::numeric_limits<uint8_t>::max());
+    }
+    const uint8_t serverNameSize = static_cast<uint8_t>(serverName.size());
+
     std::string name = _name;
     if (name.size() > std::numeric_limits<uint8_t>::max()) {
         name.resize(std::numeric_limits<uint8_t>::max());
@@ -200,9 +215,11 @@ void ParallelPeer::sendAuthentication() {
     // Total size of the buffer
     const size_t size =
         sizeof(uint16_t) + // password length
-        passwordSize +     // password
+        passwordSize     + // password
         sizeof(uint16_t) + // host password length
         hostPasswordSize + // host password
+        sizeof(uint8_t) + // server name length
+        serverNameSize   + // server name
         sizeof(uint8_t)  + // name length
         nameLength;        // name
 
@@ -225,6 +242,14 @@ void ParallelPeer::sendAuthentication() {
         reinterpret_cast<const char*>(&hostPasswordSize) + sizeof(uint16_t)
     );
     buffer.insert(buffer.end(), hostPassword.begin(), hostPassword.end());
+
+    // Write the server name to the buffer
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<const char*>(&serverNameSize),
+        reinterpret_cast<const char*>(&serverNameSize) + sizeof(uint8_t)
+    );
+    buffer.insert(buffer.end(), serverName.begin(), serverName.end());
 
     // Write the length of the nodes name to buffer
     buffer.insert(
@@ -483,6 +508,10 @@ void ParallelPeer::setPort(std::string port) {
 
 void ParallelPeer::setAddress(std::string address) {
     _address = std::move(address);
+}
+
+void ParallelPeer::setServerName(std::string name) {
+    _serverName = std::move(name);
 }
 
 void ParallelPeer::setName(std::string name) {

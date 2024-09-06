@@ -4,7 +4,6 @@ local transforms = asset.require("scene/solarsystem/sun/transforms")
 
 local AU = 1.496e+8
 
-
 local PlutoKeplerianTrail = {
   Identifier = "PlutoKeplerianTrail",
   Parent = transforms.SunEclipJ2000.Identifier,
@@ -19,7 +18,7 @@ local PlutoKeplerianTrail = {
       AscendingNode = 110.2099981996057,
       ArgumentOfPeriapsis = 114.2248569189779,
       MeanAnomaly = 14.53,
-      Epoch = "2000 01 01 00:00",
+      Epoch = "2000 JAN 01 00:00:00",
       Period = 7824380000
     },
     Color = { 0.2, 0.8, 0.3 },

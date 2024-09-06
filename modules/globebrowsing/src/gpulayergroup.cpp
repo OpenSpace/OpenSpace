@@ -74,6 +74,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
             case layers::Layer::ID::SizeReferenceTileProvider:
             case layers::Layer::ID::TemporalTileProvider:
             case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByDate:
             case layers::Layer::ID::TileProviderByIndex:
             case layers::Layer::ID::TileProviderByLevel: {
                 const ChunkTilePile& ctp = al.chunkTilePile(
@@ -146,6 +147,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
             case layers::Layer::ID::SizeReferenceTileProvider:
             case layers::Layer::ID::TemporalTileProvider:
             case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByDate:
             case layers::Layer::ID::TileProviderByIndex:
             case layers::Layer::ID::TileProviderByLevel: {
                 gal.gpuChunkTiles.resize(pileSize);

@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_Diviner_CF_Filled_Global_8ppd = {
   Identifier = "LRO_Diviner_CF_Filled_Global_8ppd",
   Name = [[LRO Diviner CF Mosaic, Filled]],
@@ -13,6 +15,7 @@ local treks_LRO_Diviner_CF_Filled_Global_8ppd = {
   FilePath = asset.resource("LRO_Diviner_CF_Mosaic/Filled.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_Diviner_CF_Filled_Global_8ppd)
@@ -23,6 +26,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("LRO_Diviner_CF_Filled_Global_8ppd", treks_LRO_Diviner_CF_Filled_Global_8ppd)
+
 
 
 asset.meta = {

@@ -62,7 +62,7 @@ public:
 
     static constexpr std::string_view OpenSpaceLibraryName = "openspace";
 
-    ScriptEngine();
+    explicit ScriptEngine(bool sandboxedLua = true);
 
     /**
      * Initializes the internal Lua state and registers a common set of library functions.

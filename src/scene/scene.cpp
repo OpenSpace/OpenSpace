@@ -166,7 +166,6 @@ void Scene::registerNode(SceneGraphNode* node) {
     _nodesByIdentifier[node->identifier()] = node;
     addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
-    global::eventEngine->publishEvent<events::EventSceneGraphNodeAdded>(node);
 }
 
 void Scene::unregisterNode(SceneGraphNode* node) {
@@ -186,7 +185,6 @@ void Scene::unregisterNode(SceneGraphNode* node) {
     }
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
-    global::eventEngine->publishEvent<events::EventSceneGraphNodeRemoved>(node);
 }
 
 void Scene::markNodeRegistryDirty() {
@@ -578,7 +576,7 @@ void Scene::updateInterpolations() {
 }
 
 void Scene::setPropertiesFromProfile(const Profile& p) {
-    ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+    ghoul::lua::LuaState L;
 
     for (const Profile::Property& prop : p.properties) {
         if (prop.name.empty()) {
@@ -781,7 +779,7 @@ std::vector<properties::Property*> Scene::propertiesMatchingRegex(
     return findMatchesInAllProperties(propertyString, allProperties(), "");
 }
 
-std::vector<std::string> Scene::allTags() {
+std::vector<std::string> Scene::allTags() const {
     std::set<std::string> result;
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         const std::vector<std::string>& tags = node->tags();
@@ -789,6 +787,21 @@ std::vector<std::string> Scene::allTags() {
     }
 
     return std::vector<std::string>(result.begin(), result.end());
+}
+
+void Scene::setGuiTreeOrder(const std::string& guiPath,
+                            const std::vector<std::string>& list)
+{
+    _guiTreeOrderMap[guiPath] = list;
+    global::eventEngine->publishEvent<events::EventGuiTreeUpdated>();
+}
+
+ghoul::Dictionary Scene::guiTreeOrder() const {
+    ghoul::Dictionary dict;
+    for (const auto& [key, list] : _guiTreeOrderMap) {
+        dict.setValue(key, list);
+    }
+    return dict;
 }
 
 scripting::LuaLibrary Scene::luaLibrary() {
@@ -879,7 +892,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
             codegen::lua::SetParent,
             codegen::lua::BoundingSphere,
             codegen::lua::InteractionSphere,
-            codegen::lua::MakeIdentifier
+            codegen::lua::MakeIdentifier,
+            codegen::lua::SetGuiOrder,
+            codegen::lua::GuiOrder
         }
     };
 }

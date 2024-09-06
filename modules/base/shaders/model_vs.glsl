@@ -30,12 +30,14 @@ layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 layout(location = 3) in vec3 in_tangent;
+layout(location = 4) in vec3 in_color;
 
 out vec2 vs_st;
 out vec3 vs_normalViewSpace;
 out float vs_screenSpaceDepth;
 out vec4 vs_positionCameraSpace;
 out mat3 vs_TBN;
+out vec3 vs_color;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -51,6 +53,7 @@ void main() {
 
   gl_Position = positionScreenSpace;
   vs_st = in_st;
+  vs_color = in_color;
   vs_screenSpaceDepth = positionScreenSpace.w;
 
   vs_normalViewSpace =

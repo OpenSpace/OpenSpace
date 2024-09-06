@@ -15,7 +15,9 @@ local ToggleShutdown = {
   Identifier = "os.ToggleShutdown",
   Name = "Toggle shutdown",
   Command = "openspace.toggleShutdown()",
-  Documentation = "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period",
+  Documentation = [[
+    Toggles the shutdown that will stop OpenSpace after a grace period. Press again to
+    cancel the shutdown during this period]],
   GuiPath = "/System",
   IsLocal = true
 }
@@ -24,7 +26,8 @@ local TakeScreenshot = {
   Identifier = "os.TakeScreenshot",
   Name = "Take screenshot",
   Command = "openspace.takeScreenshot()",
-  Documentation = "Saves the contents of the screen to a file in the ${SCREENSHOTS} directory",
+  Documentation = [[Saves the contents of the screen to a file in the ${SCREENSHOTS}
+    directory]],
   GuiPath = "/System/Rendering",
   IsLocal = true
 }
@@ -51,7 +54,8 @@ local ToggleRotationFriction = {
   Identifier = "os.ToggleRotationFriction",
   Name = "Toggle rotation friction",
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
-  Documentation = "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely",
+  Documentation = [[Toggles the rotational friction of the camera. If it is disabled, the
+    camera rotates around the focus object indefinitely]],
   GuiPath = "/Navigation",
   IsLocal = true
 }
@@ -60,7 +64,8 @@ local ToggleZoomFriction = {
   Identifier = "os.ToggleZoomFriction",
   Name = "Toggle zoom friction",
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
-  Documentation = "Toggles the zoom friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely",
+  Documentation = [[Toggles the zoom friction of the camera. If it is disabled, the camera
+    rises up from or closes in towards the focus object indefinitely]],
   GuiPath = "/Navigation",
   IsLocal = true
 }
@@ -69,7 +74,8 @@ local ToggleRollFriction = {
   Identifier = "os.ToggleRollFriction",
   Name = "Toggle roll friction",
   Command = propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
-  Documentation = "Toggles the roll friction of the camera. If it is disabled, the camera rolls around its own axis indefinitely",
+  Documentation = [[Toggles the roll friction of the camera. If it is disabled, the camera
+    rolls around its own axis indefinitely]],
   GuiPath = "/Navigation",
   IsLocal = true
 }
@@ -84,7 +90,8 @@ local FadeToBlack = {
       openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1.0, 3)
     end
   ]],
-  Documentation = "Toggles the fade to black within 3 seconds or shows the rendering after 3 seconds",
+  Documentation = [[Toggles the fade to black within 3 seconds or shows the rendering
+    after 3 seconds]],
   GuiPath = "/Rendering",
   IsLocal = false
 }
@@ -126,7 +133,8 @@ local NextDeltaStepInterpolate = {
   Identifier = "os.NextDeltaStepInterpolate",
   Name = "Next simulation time step (interpolate)",
   Command = "openspace.time.interpolateNextDeltaTimeStep()",
-  Documentation = "Smoothly interpolates the simulation speed to the next simulation time step, if one exists",
+  Documentation = [[Smoothly interpolates the simulation speed to the next simulation time
+    step, if one exists]],
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true
 }
@@ -135,7 +143,8 @@ local NextDeltaStepImmediate = {
   Identifier = "os.NextDeltaStepImmediate",
   Name = "Next simulation time step (immediate)",
   Command = "openspace.time.setNextDeltaTimeStep()",
-  Documentation = "Immediately set the simulation speed to the next simulation time step, if one exists",
+  Documentation = [[Immediately set the simulation speed to the next simulation time step,
+    if one exists]],
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true
 }
@@ -144,7 +153,8 @@ local PreviousDeltaStepInterpolate = {
   Identifier = "os.PreviousDeltaStepInterpolate",
   Name = "Previous simulation time step (interpolate)",
   Command = "openspace.time.interpolatePreviousDeltaTimeStep()",
-  Documentation = "Smoothly interpolates the simulation speed to the previous simulation time step, if one exists",
+  Documentation = [[Smoothly interpolates the simulation speed to the previous simulation
+      time step, if one exists]],
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true
 }
@@ -153,7 +163,44 @@ local PreviousDeltaStepImmediate = {
   Identifier = "os.PreviousDeltaStepImmediate",
   Name = "Previous simulation time step (immediate)",
   Command = "openspace.time.setPreviousDeltaTimeStep()",
-  Documentation = "Immediately set the simulation speed to the previous simulation time step, if one exists",
+  Documentation = [[Immediately set the simulation speed to the previous simulation time
+    step, if one exists]],
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local RealTimeDeltaStepInterpolate = {
+  Identifier = "os.RealTimeDeltaStepInterpolate",
+  Name = "Reset the simulation time to realtime (interpolate)",
+  Command = "openspace.time.interpolateDeltaTime(1)",
+  Documentation = "Smoothly interpolate the simulation speed to match real-time speed",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local RealTimeDeltaStepImmediate = {
+  Identifier = "os.RealTimeDeltaStepImmediate",
+  Name = "Reset the simulation time to realtime (immediate)",
+  Command = "openspace.time.setDeltaTime(1)",
+  Documentation = "Immediately set the simulation speed to match real-time speed",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local DateToNowInterpolate = {
+  Identifier = "os.DateToNowInterpolate",
+  Name = "Set the in-game time to now (interpolate)",
+  Command = "openspace.time.interpolateTime(openspace.time.currentWallTime())",
+  Documentation = "Immediately set the current in-game time to the 'now' time",
+  GuiPath = "/Time/Simulation Speed",
+  IsLocal = true
+}
+
+local DateToNowImmediate = {
+  Identifier = "os.DateToNowImmediate",
+  Name = "Set the in-game time to now (immediate)",
+  Command = "openspace.time.setTime(openspace.time.currentWallTime())",
+  Documentation = "Smoothly interpolate the current in-game time to the 'now' time",
   GuiPath = "/Time/Simulation Speed",
   IsLocal = true
 }
@@ -166,6 +213,7 @@ local ReloadGui = {
   GuiPath = "/System/GUI",
   IsLocal = true
 }
+
 
 asset.onInitialize(function()
   openspace.action.registerAction(ToggleNativeUi)
@@ -217,6 +265,18 @@ asset.onInitialize(function()
   openspace.action.registerAction(PreviousDeltaStepImmediate)
   openspace.bindKey("Shift+Left", PreviousDeltaStepImmediate.Identifier)
 
+  openspace.action.registerAction(RealTimeDeltaStepInterpolate)
+  openspace.bindKey("Down", RealTimeDeltaStepInterpolate.Identifier)
+
+  openspace.action.registerAction(RealTimeDeltaStepImmediate)
+  openspace.bindKey("Shift+Down", RealTimeDeltaStepImmediate.Identifier)
+
+  openspace.action.registerAction(DateToNowInterpolate)
+  openspace.bindKey("Up", DateToNowInterpolate.Identifier)
+
+  openspace.action.registerAction(DateToNowImmediate)
+  openspace.bindKey("Shift+Up", DateToNowImmediate.Identifier)
+
   openspace.action.registerAction(ReloadGui)
   openspace.bindKey("F5", ReloadGui.Identifier)
 end)
@@ -224,6 +284,18 @@ end)
 asset.onDeinitialize(function()
   openspace.clearKey("F5")
   openspace.action.removeAction(ReloadGui)
+
+  openspace.clearKey("Shift+Up")
+  openspace.action.removeAction(DateToNowImmediate)
+
+  openspace.clearKey("Up")
+  openspace.action.removeAction(DateToNowInterpolate)
+
+  openspace.clearKey("Shift+Down")
+  openspace.action.removeAction(RealTimeDeltaStepImmediate)
+
+  openspace.clearKey("Down")
+  openspace.action.removeAction(RealTimeDeltaStepInterpolate)
 
   openspace.clearKey("Shift+Left")
   openspace.action.removeAction(PreviousDeltaStepImmediate)

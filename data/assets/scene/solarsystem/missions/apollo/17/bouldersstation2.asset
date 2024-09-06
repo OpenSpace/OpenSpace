@@ -158,6 +158,7 @@ local Station2Boulder3Model = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Station2Boulder1Holder)
   openspace.addSceneGraphNode(Station2Boulder1Model)

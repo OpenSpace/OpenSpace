@@ -105,7 +105,6 @@ local Apollo11MoonTrail = {
   }
 }
 
-
 local lemTranslation = {
   Type = "TimelineTranslation",
   Keyframes = {
@@ -129,8 +128,6 @@ local lemRotation = {
   Type = "TimelineRotation",
   Keyframes = descentRotationKeyframes.keyframes
 }
-
-
 
 local Apollo11LemTrail = {
   Identifier = "Apollo11LemTrail",

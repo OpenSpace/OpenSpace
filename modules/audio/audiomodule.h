@@ -219,7 +219,8 @@ public:
      * The \p identifier must be a name for a sound that was started through the
      * #playAudio3d function.
      *
-     * \param handle A valid handle for a track started through the #playAudio3d function
+     * \param identifier The identifier of a track started through the #playAudio3d
+     *        function
      * \param position The new position from which the track originates
      */
     void set3dSourcePosition(const std::string& identifier,
@@ -272,7 +273,7 @@ public:
 
     /**
      * Sets the position of the speaker for the provided \p channel to the provided
-     * \position. In general, this is considered an advanced feature to accommodate
+     * \p position. In general, this is considered an advanced feature to accommodate
      * non-standard audio environments.
      *
      * \param channel The channel whose speaker's position should be changed

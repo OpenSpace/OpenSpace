@@ -26,6 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/tileindex.h>
@@ -130,8 +132,8 @@ namespace {
         std::optional<std::string> type [[codegen::inlist("DefaultTileProvider",
             "SingleImageProvider", "ImageSequenceTileProvider",
             "SizeReferenceTileProvider", "TemporalTileProvider", "TileIndexTileProvider",
-            "TileProviderByIndex", "TileProviderByLevel", "SolidColor",
-            "SpoutImageProvider", "VideoTileProvider")]];
+            "TileProviderByDate", "TileProviderByIndex", "TileProviderByLevel",
+            "SolidColor", "SpoutImageProvider", "VideoTileProvider")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -320,7 +322,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     _remove.onChange([this]() {
         if (_tileProvider) {
             _tileProvider->reset();
-            _parent.deleteLayer(identifier());
+            _parent.scheduleDeleteLayer(identifier());
         }
     });
 
@@ -342,6 +344,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             case layers::Layer::ID::SizeReferenceTileProvider:
             case layers::Layer::ID::TemporalTileProvider:
             case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByDate:
             case layers::Layer::ID::TileProviderByIndex:
             case layers::Layer::ID::TileProviderByLevel:
             case layers::Layer::ID::VideoTileProvider:
@@ -513,6 +516,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
         case layers::Layer::ID::SizeReferenceTileProvider:
         case layers::Layer::ID::TemporalTileProvider:
         case layers::Layer::ID::TileIndexTileProvider:
+        case layers::Layer::ID::TileProviderByDate:
         case layers::Layer::ID::TileProviderByIndex:
         case layers::Layer::ID::TileProviderByLevel:
         case layers::Layer::ID::VideoTileProvider:
@@ -546,6 +550,7 @@ void Layer::addVisibleProperties() {
         case layers::Layer::ID::SizeReferenceTileProvider:
         case layers::Layer::ID::TemporalTileProvider:
         case layers::Layer::ID::TileIndexTileProvider:
+        case layers::Layer::ID::TileProviderByDate:
         case layers::Layer::ID::TileProviderByIndex:
         case layers::Layer::ID::TileProviderByLevel:
         case layers::Layer::ID::VideoTileProvider:

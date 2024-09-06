@@ -109,7 +109,8 @@ Browser::Browser(const ghoul::Dictionary& dictionary)
     // Create browser and render handler
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),
-        _keyboardHandler.get()
+        _keyboardHandler.get(),
+        false
     );
 
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();

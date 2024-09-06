@@ -11,6 +11,12 @@ local SunRadius = 695508000
 local Volume = {
   Identifier = "GeneratedVolumeCartesianSequence",
   Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 1000 * SunRadius
+    }
+  },
   Renderable = {
     Type = "RenderableTimeVaryingVolume",
     SourceDirectory = asset.resource("cartesiansequence"),
@@ -24,12 +30,6 @@ local Volume = {
   },
   GUI = {
     Path = "/Examples"
-  },
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 1000 * SunRadius
-    }
   }
 }
 
