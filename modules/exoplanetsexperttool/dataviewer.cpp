@@ -526,6 +526,8 @@ void DataViewer::render() {
     handleDoubleClickHoveredPlanet(hoveredPlanet);
 
     if (ImGui::BeginMainMenuBar()) {
+        renderFileMenu();
+
         if (ImGui::BeginMenu("Windows")) {
             ImGui::MenuItem("Table", NULL, &showTable);
             ImGui::MenuItem("Filters", NULL, &showFilterSettingsWindow);
@@ -689,7 +691,7 @@ void DataViewer::renderTableWindow(bool *open) {
 
     // Search table
     static char searchString[128] = "";
-   ImGui::InputTextWithHint(
+    ImGui::InputTextWithHint(
         "##Query",
         "Search for an item by name here...",
         searchString,
@@ -1151,6 +1153,117 @@ void DataViewer::updateFilteredRowsProperty(std::optional<std::vector<size_t>> c
 
         // TODO: should set this over Lua script API instead
         filteredRowsProperty->set(indices);
+    }
+}
+
+void DataViewer::renderFileMenu() {
+    static bool showSaveCsvModal = false;
+
+    // Menu
+    if (ImGui::BeginMenu("File")) {
+        if (ImGui::MenuItem("New", NULL, false, false)) {
+            // TODO: Create a settings.json file
+        }
+        if (ImGui::MenuItem("Open", NULL, false, false)) {
+            // TODO: Menu to load a new data file from disk
+        }
+        ImGui::MenuItem("Save CSV", NULL, &showSaveCsvModal);
+        ImGui::SameLine();
+        view::helper::renderHelpMarker("Save the current filtered data items as a CSV file");
+        if (ImGui::MenuItem("Save filters", NULL, false, false)) {
+            // TODO: Menu to save the current set of filters.
+            // To a settings .json file? Or a completely new file format?
+        }
+        ImGui::EndMenu();
+    }
+
+    // Modals for view
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    ImGuiWindowFlags flags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_HorizontalScrollbar;
+
+    if (showSaveCsvModal) {
+        ImGui::OpenPopup("Save CSV");
+        if (ImGui::BeginPopupModal("Save CSV", NULL, flags)) {
+            ImGui::Text("Save the currently selected filtering to a CSV file.");
+
+            static char name[128] = "";
+            ImGui::InputText(
+                "Filename (.csv)",
+                name,
+                IM_ARRAYSIZE(name)
+            );
+
+            const char* defaultDir = absPath(
+                "${MODULE_EXOPLANETSEXPERTTOOL}/data"
+            ).string().c_str();
+
+            const float dirTextWidth = ImGui::CalcTextSize(defaultDir).x;
+            ImGui::SetNextItemWidth(dirTextWidth * 1.3f);
+
+            static char dir[256] = "";
+            ImGui::InputTextWithHint(
+                "Directory",
+                defaultDir,
+                dir,
+                IM_ARRAYSIZE(dir)
+            );
+
+            static bool incudeAllColumns = true;
+            ImGui::Checkbox("Include all columns", &incudeAllColumns);
+            ImGui::SameLine();
+            view::helper::renderHelpMarker(
+                "If checked, include all data column in the original data file. "
+                "Otherwise, only include the selected columns."
+            );
+
+            // TODO: Also add option to save filtering separately
+
+            view::helper::renderDescriptiveText(std::format(
+                "Will save {} rows with {} columns",
+                _filteredData.size(),
+                incudeAllColumns ? _data.front().dataColumns.size() :_columns.size()
+            ).c_str());
+
+            ImGui::Separator();
+
+            // Cancel
+            ImGuiIO& io = ImGui::GetIO();
+            if (ImGui::Button("Cancel") ||
+                ImGui::IsKeyPressed(io.KeyMap[ImGuiKey_Escape]))
+            {
+                ImGui::CloseCurrentPopup();
+                showSaveCsvModal = false;
+            }
+            ImGui::SameLine();
+            // Save
+            if (ImGui::Button("Save") ||
+                ImGui::IsKeyPressed(io.KeyMap[ImGuiKey_Enter]))
+            {
+                std::filesystem::path fileName = std::filesystem::path(name);
+                std::filesystem::path directory = std::filesystem::path(dir);
+                if (directory.empty()) {
+                    directory = std::filesystem::path(defaultDir);
+                }
+
+                if (!fileName.has_extension()) {
+                    fileName.replace_extension("csv");
+                }
+                std::filesystem::path path = directory / fileName;
+                DataLoader::saveData(
+                    path,
+                    _data,
+                    _filteredData,
+                    !incudeAllColumns ? _columns : std::vector<ColumnKey>()
+                );
+
+                ImGui::CloseCurrentPopup();
+                showSaveCsvModal = false;
+            }
+            ImGui::SetItemDefaultFocus();
+
+            ImGui::EndPopup();
+        }
     }
 }
 

@@ -37,6 +37,20 @@ public:
 
     static DataSettings loadDataSettingsFromJson();
     static std::vector<ExoplanetItem> loadData(const DataSettings& settings);
+
+    /**
+     * Save data to a CSV file.
+     *
+     * \param targetPath the filepath for where to save the dataset
+     * \param allItems the list of data items in the loaded dataset
+     * \param indices the indices which to save. If empty, save all
+     * \param columns the list of names for the columns to save in the dataset.
+     *                If empty, save all
+     */
+    static void saveData(const std::filesystem::path& targetPath,
+        const std::vector<ExoplanetItem>& allItems,
+        const std::vector<size_t>& indices = {},
+        const std::vector<ColumnKey>& columns = {});
 };
 
 } // namespace openspace::exoplanets

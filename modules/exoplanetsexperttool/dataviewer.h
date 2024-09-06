@@ -123,6 +123,7 @@ private:
     void renderPlanetTooltip(int index) const;
     void handleDoubleClickHoveredPlanet(int index);
 
+    void renderFileMenu();
     void renderSettingsMenuContent();
 
     // Write the information about the rendered points to a file

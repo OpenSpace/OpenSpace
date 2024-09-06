@@ -46,6 +46,7 @@
 #include <limits>
 #include <string>
 #include <string_view>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataLoader";
@@ -459,6 +460,51 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
     LINFO("Done loading dataset!");
 
     return planets;
+}
+
+void DataLoader::saveData(const std::filesystem::path& targetPath,
+                          const std::vector<ExoplanetItem>& allItems,
+                          const std::vector<size_t>& indices,
+                          const std::vector<ColumnKey>& columns)
+{
+    // TODO: verify csv ending
+
+    std::fstream f(targetPath, std::ios::out);
+
+    if (!f.is_open()) {
+        LERROR(std::format("Failed writing data to file: '{}'", targetPath));
+        return;
+    }
+
+    if (!columns.empty()) {
+        f << ghoul::join(columns, ",") << std::endl;
+    }
+    else {
+        std::string line;
+        for (auto [key, _] : allItems.front().dataColumns) {
+            line += key + ",";
+        }
+        f << line.substr(0, line.size() - 1) << std::endl;
+    }
+
+    for (const size_t& i : indices) {
+        const ExoplanetItem& item = allItems[i];
+
+        std::string line;
+        for (auto [_, value] : item.dataColumns) {
+            if (std::holds_alternative<float>(value)) {
+                float v = std::get<float>(value);
+                line += std::isnan(v) ? "" : ghoul::to_string(v);
+            }
+            else {
+                line += std::get<std::string>(value);
+            }
+            line += ",";
+        }
+        f << line.substr(0, line.size() - 1) << std::endl;
+    }
+
+    // TODO: handle indices empty
 }
 
 } // namespace openspace::exoplanets
