@@ -134,7 +134,7 @@ public:
      *        `enableTakeScreenShotDuringPlayback` was called before. Otherwise this value
      *        will be ignored
      */
-    void startPlayback(std::string& filename, bool loop,
+    void startPlayback(std::filesystem::path filename, bool loop,
         bool shouldWaitForFinishedTiles, std::optional<int> saveScreenshotFps);
 
     /**
@@ -240,7 +240,8 @@ public:
     void savePropertyBaseline(properties::Property& prop);
 
 protected:
-    void moveAheadInTime(double dt);
+    void tickPlayback(double dt);
+    void tickRecording(double dt);
 
     void setupPlayback(double startTime);
 

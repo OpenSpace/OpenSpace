@@ -62,8 +62,7 @@ namespace {
  */
 [[codegen::luawrap]] void startPlayback(std::string file, bool loop = false,
                                         bool shouldWaitForTiles = true,
-                                        bool saveScreenshots = false,
-                                        int saveScreenshotFps = 30)
+                                        std::optional<int> screenshotFps = std::nullopt)
 {
     using namespace openspace;
 
@@ -71,12 +70,12 @@ namespace {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
-    std::optional<int> fps;
-    if (saveScreenshots) {
-        fps = saveScreenshotFps;
-    }
-
-    global::sessionRecordingHandler->startPlayback(file, loop, shouldWaitForTiles, fps);
+    global::sessionRecordingHandler->startPlayback(
+        file,
+        loop,
+        shouldWaitForTiles,
+        screenshotFps
+    );
 }
 
 // Stops a playback session before playback of all keyframes is complete.

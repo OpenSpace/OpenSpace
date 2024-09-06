@@ -49,6 +49,8 @@ struct SessionRecording {
     };
 
     std::vector<Entry> entries;
+
+    bool hasCameraFrame() const noexcept;
 };
 
 SessionRecording loadSessionRecording(const std::filesystem::path& filename);

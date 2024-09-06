@@ -584,6 +584,15 @@ namespace {
 
 namespace openspace::interaction {
 
+bool SessionRecording::hasCameraFrame() const noexcept {
+    for (const Entry& e : entries) {
+        if (std::holds_alternative<Entry::Camera>(e.value)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 SessionRecording loadSessionRecording(const std::filesystem::path& filename) {
     ghoul_assert(std::filesystem::exists(filename), "Session recording did not exist");
 
