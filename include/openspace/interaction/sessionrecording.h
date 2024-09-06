@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___SESSIONRECORDING___H__
 
 #include <openspace/navigation/keyframenavigator.h>
-#include <ghoul/glm.h>
 #include <filesystem>
 #include <string>
 #include <variant>
@@ -52,21 +51,9 @@ struct SessionRecording {
     std::vector<Entry> entries;
 };
 
-//struct SessionRecordingEntry {
-//    using Camera = KeyframeNavigator::CameraPose;
-//    using Script = std::string;
-//
-//    double timestamp = 0.0;
-//    double simulationTime = 0.0;
-//    std::variant<Camera, Script> value;
-//};
-//using SessionRecording = std::vector<SessionRecordingEntry>;
-
-
 SessionRecording loadSessionRecording(const std::filesystem::path& filename);
 void saveSessionRecording(const std::filesystem::path& filename,
     const SessionRecording& sessionRecording, DataMode dataMode);
-
 
 } // namespace openspace::interaction
 

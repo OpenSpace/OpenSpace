@@ -24,17 +24,15 @@
 
 #include <openspace/interaction/sessionrecording.h>
 
+#include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <array>
 #include <format>
 #include <optional>
 
-#include <iostream>
-
 namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-
 
     using namespace openspace::interaction;
 
@@ -78,6 +76,7 @@ namespace {
     constexpr char FrameTypeCameraBinary = 'c';
     constexpr char FrameTypeScriptBinary = 's';
 
+    // Mapping for version numbers in session recording files
     constexpr std::array<std::pair<std::string_view, int>, 3> Versions = {
         std::pair("00.85", 0),
         std::pair("01.00", 1),
@@ -90,7 +89,6 @@ namespace {
     //
     struct Header {
         static constexpr std::string_view MagicBytes = "OpenSpace_record/playback";
-        static constexpr int VersionLength = 5 * sizeof(std::byte);
         static constexpr char DataModeAscii = 'A';
         static constexpr char DataModeBinary = 'B';
 
@@ -98,22 +96,23 @@ namespace {
         DataMode dataMode = DataMode::Ascii;
     };
 
-    Header readHeader(std::istream& file, const std::filesystem::path& filename) {
+    Header readHeader(std::istream& stream, const std::filesystem::path& filename) {
         Header result;
 
         // Read magic title bytes that must always be the same
         std::string magicBytes;
         magicBytes.resize(Header::MagicBytes.size());
-        file.read(magicBytes.data(), Header::MagicBytes.size());
-        if (!file || magicBytes != Header::MagicBytes) {
+        stream.read(magicBytes.data(), Header::MagicBytes.size());
+        if (!stream || magicBytes != Header::MagicBytes) {
             throw LoadingError("Error loading header magic bytes", filename);
         }
 
         // Read the version of the session recording
         std::string version;
-        version.resize(Header::VersionLength);
-        file.read(version.data(), Header::VersionLength);
-        if (!file) {
+        constexpr int VersionLength = 5 * sizeof(std::byte);
+        version.resize(VersionLength);
+        stream.read(version.data(), VersionLength);
+        if (!stream) {
             throw LoadingError("Error loading header version information", filename);
         }
         result.version = [&version, &filename]() {
@@ -127,10 +126,10 @@ namespace {
 
         // Read whether the rest of the file is in ASCII or binary mode
         char dataMode = 0;
-        file.read(&dataMode, sizeof(char));
+        stream.read(&dataMode, sizeof(char));
         const bool goodDataMode =
             dataMode == Header::DataModeAscii || dataMode == Header::DataModeBinary;
-        if (!file || !goodDataMode) {
+        if (!stream || !goodDataMode) {
             throw LoadingError("Error loading header data mode", filename);
         }
         result.dataMode =
@@ -138,10 +137,10 @@ namespace {
 
         // Skip over the line ending
         char buffer = 0;
-        file.read(&buffer, sizeof(char));
+        stream.read(&buffer, sizeof(char));
         if (buffer == '\r') {
             // Skip over the following \n as well as we have a DOS line ending
-            file.seekg(1, std::ios::cur);
+            stream.seekg(1, std::ios::cur);
         }
 
         return result;
@@ -263,12 +262,11 @@ namespace {
     struct Timestamps {
         double timestamp = 0.0;
         double simulationTime = 0.0;
-
-        operator std::tuple<double&, double&>() { return { timestamp, simulationTime }; }
     };
 
     // Not defined on purpose
-    template <DataMode mode> Timestamps readTimestamps(std::istream&, int);
+    template <DataMode mode>
+    Timestamps readTimestamps(std::istream&, int);
 
     template <>
     Timestamps readTimestamps<DataMode::Ascii>(std::istream& stream, int version) {
@@ -294,22 +292,17 @@ namespace {
     }
 
     // Not defined on purpose
-    template <DataMode mode> void writeTimestamps(std::ostream&, const Timestamps&);
+    template <DataMode mode>
+    void writeTimestamps(std::ostream&, const Timestamps&);
 
     template <>
     void writeTimestamps<DataMode::Ascii>(std::ostream& stream,
                                           const Timestamps& timestamps)
     {
-        std::string timestamp = std::format("{}", timestamps.timestamp);
-        stream.write(timestamp.data(), timestamp.size());
-        stream.flush();
-
-        stream.write(" ", sizeof(char));
-        stream.flush();
-
-        std::string simulationTime = std::format("{}", timestamps.simulationTime);
-        stream.write(simulationTime.data(), simulationTime.size());
-        stream.flush();
+        std::string buffer = std::format(
+            "{} {}", timestamps.timestamp, timestamps.simulationTime
+        );
+        stream.write(buffer.data(), buffer.size());
     }
 
     template <>
@@ -336,7 +329,8 @@ namespace {
     SessionRecording::Entry::Camera readCamera(std::istream&, int);
 
     template <>
-    SessionRecording::Entry::Camera readCamera<DataMode::Ascii>(std::istream& stream, int) {
+    SessionRecording::Entry::Camera readCamera<DataMode::Ascii>(std::istream& stream, int)
+    {
         SessionRecording::Entry::Camera camera;
         std::string rotationFollowing;
         stream >> camera.position.x >> camera.position.y >> camera.position.z
@@ -351,7 +345,7 @@ namespace {
 
     template <>
     SessionRecording::Entry::Camera readCamera<DataMode::Binary>(std::istream& stream,
-                                                               int version)
+                                                                 int version)
     {
         SessionRecording::Entry::Camera camera;
         std::array<double, 4> buffer = {};
@@ -359,6 +353,7 @@ namespace {
         camera.position = glm::dvec3(buffer[0], buffer[1], buffer[2]);
 
         if (version < 2) {
+            // Rotations are stored as four doubles immediately get downcasted to floats
             stream.read(reinterpret_cast<char*>(buffer.data()), 4 * sizeof(double));
             camera.rotation = glm::dquat(buffer[3], buffer[0], buffer[1], buffer[2]);
         }
@@ -392,37 +387,15 @@ namespace {
     void writeCamera<DataMode::Ascii>(std::ostream& stream,
                                       const SessionRecording::Entry::Camera& camera)
     {
-        std::string posX = std::format("{}", camera.position.x);
-        stream.write(posX.data(), posX.size());
-        stream.write(" ", sizeof(char));
-        std::string posY = std::format("{}", camera.position.y);
-        stream.write(posY.data(), posY.size());
-        stream.write(" ", sizeof(char));
-        std::string posZ = std::format("{}", camera.position.z);
-        stream.write(posZ.data(), posZ.size());
-        stream.write(" ", sizeof(char));
-
-        std::string rotationX = std::format("{}", camera.rotation.x);
-        stream.write(rotationX.data(), rotationX.size());
-        stream.write(" ", sizeof(char));
-        std::string rotationY = std::format("{}", camera.rotation.y);
-        stream.write(rotationY.data(), rotationY.size());
-        stream.write(" ", sizeof(char));
-        std::string rotationZ = std::format("{}", camera.rotation.z);
-        stream.write(rotationZ.data(), rotationZ.size());
-        stream.write(" ", sizeof(char));
-        std::string rotationW = std::format("{}", camera.rotation.w);
-        stream.write(rotationW.data(), rotationW.size());
-        stream.write(" ", sizeof(char));
-
-        std::string scale = std::format("{}", camera.scale);
-        stream.write(scale.data(), scale.size());
-        stream.write(" ", sizeof(char));
-
-        stream.write(camera.followFocusNodeRotation ? "F" : "-", sizeof(char));
-        stream.write(" ", sizeof(char));
-
-        stream.write(camera.focusNode.data(), camera.focusNode.size());
+        std::string buffer = std::format(
+            "{} {} {} {} {} {} {} {} {} {}",
+            camera.position.x, camera.position.y, camera.position.z,
+            camera.rotation.x, camera.rotation.y, camera.rotation.z, camera.rotation.w,
+            camera.scale,
+            camera.followFocusNodeRotation ? "F" : "-",
+            camera.focusNode
+        );
+        stream.write(buffer.data(), buffer.size());
     }
 
     template <>
@@ -457,7 +430,8 @@ namespace {
     SessionRecording::Entry::Script readScript(std::istream&, int);
 
     template <>
-    SessionRecording::Entry::Script readScript<DataMode::Ascii>(std::istream& stream, int) {
+    SessionRecording::Entry::Script readScript<DataMode::Ascii>(std::istream& stream, int)
+    {
         SessionRecording::Entry::Script script;
 
         int numScriptLines = 0;
@@ -539,9 +513,11 @@ namespace {
             return std::nullopt;
         }
 
-        SessionRecordingEntry entry;
-        std::tie(entry.timestamp, entry.simulationTime) =
-            readTimestamps<mode>(stream, version);
+        Timestamps timestamps = readTimestamps<mode>(stream, version);
+        SessionRecording::Entry entry = {
+            .timestamp = timestamps.timestamp,
+            .simulationTime = timestamps.simulationTime
+        };
 
         switch (*frameType) {
             case FrameType::Camera:
@@ -556,7 +532,7 @@ namespace {
     }
 
     std::optional<SessionRecording::Entry> readEntry(std::istream& stream,
-                                                   DataMode dataMode, int version)
+                                                     DataMode dataMode, int version)
     {
         return
             dataMode == DataMode::Ascii ?
@@ -566,10 +542,10 @@ namespace {
 
     template <DataMode mode>
     void writeEntry(std::ostream& stream, const SessionRecording::Entry& entry) {
-        if (std::holds_alternative<SessionRecordingEntry::Camera>(entry.value)) {
+        if (std::holds_alternative<SessionRecording::Entry::Camera>(entry.value)) {
             writeFrameType<mode>(stream, FrameType::Camera);
         }
-        else if (std::holds_alternative<SessionRecordingEntry::Script>(entry.value)) {
+        else if (std::holds_alternative<SessionRecording::Entry::Script>(entry.value)) {
             writeFrameType<mode>(stream, FrameType::Script);
         }
         else {
@@ -586,10 +562,10 @@ namespace {
         }
 
         std::visit(overloaded {
-            [&stream](const SessionRecordingEntry::Camera& value) {
+            [&stream](const SessionRecording::Entry::Camera& value) {
                 writeCamera<mode>(stream, value);
             },
-            [&stream](const SessionRecordingEntry::Script& value) {
+            [&stream](const SessionRecording::Entry::Script& value) {
                 writeScript<mode>(stream, value);
             }
         }, entry.value);

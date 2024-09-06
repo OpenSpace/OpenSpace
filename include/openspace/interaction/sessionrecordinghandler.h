@@ -111,7 +111,7 @@ public:
      * and all keyframes deleted from memory.
      * \param filename File saved with recorded keyframes
      */
-    void stopRecording(const std::string& filename, DataMode dataMode);
+    void stopRecording(const std::filesystem::path& filename, DataMode dataMode);
 
     /**
      * Used to check if a session recording is in progress.

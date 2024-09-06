@@ -29,32 +29,17 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/interaction/tasks/convertrecformattask.h>
-#include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/network/messagestructureshelper.h>
 #include <openspace/query/query.h>
-#include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/scripting/scriptscheduler.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/task.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
-#include <algorithm>
-#include <filesystem>
-#include <iomanip>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -67,7 +52,6 @@ namespace {
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-
 
     constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
@@ -114,7 +98,6 @@ SessionRecordingHandler::SessionRecordingHandler()
 }
 
 void SessionRecordingHandler::startRecording() {
-    _timeline = SessionRecording();
     if (_state == SessionState::Recording) {
         throw ghoul::RuntimeError(
             "Unable to start recording while already in recording mode",
@@ -128,9 +111,11 @@ void SessionRecordingHandler::startRecording() {
         );
     }
 
-    _state = SessionState::Recording;
-    _savePropertiesBaseline.clear();
+    LINFO("Session recording started");
 
+    _state = SessionState::Recording;
+    _timeline = SessionRecording();
+    _savePropertiesBaseline.clear();
     _recording.elapsedTime = 0.0;
 
     // Record the current delta time as the first property to save in the file.
@@ -141,39 +126,19 @@ void SessionRecordingHandler::startRecording() {
         global::timeManager->isPaused() ? "true" : "false",
         global::timeManager->targetDeltaTime()
     );
-
-    LINFO("Session recording started");
 }
 
-void SessionRecordingHandler::stopRecording(const std::string& fn, DataMode dataMode) {
+void SessionRecordingHandler::stopRecording(const std::filesystem::path& filename,
+                                            DataMode dataMode)
+{
     if (_state != SessionState::Recording) {
         return;
     }
 
-    if (!std::filesystem::is_directory(absPath("${RECORDINGS}"))) {
-        std::filesystem::create_directories(absPath("${RECORDINGS}"));
-    }
-
-    std::filesystem::path absFilename = fn;
-    if (absFilename.parent_path().empty() || absFilename.parent_path() == absFilename) {
-        absFilename = absPath("${RECORDINGS}/" + fn);
-    }
-    else if (absFilename.parent_path().is_relative()) {
-        throw ghoul::RuntimeError(
-            "If path is provided with the filename, then it must be an absolute path",
-            "SessionRecording"
-        );
-    }
-    else if (!std::filesystem::exists(absFilename.parent_path())) {
+    if (std::filesystem::is_regular_file(filename)) {
         throw ghoul::RuntimeError(std::format(
-            "The recording filename path '{}' is not a valid location in the filesytem",
-            absFilename.parent_path().string()
-        ), "SessionRecording");
-    }
-
-    if (std::filesystem::is_regular_file(absFilename)) {
-        throw ghoul::RuntimeError(std::format(
-            "Unable to start recording; file '{}' already exists", absFilename
+            "Unable to start recording; file '{}' already exists. Save with a new name",
+            filename
         ), "SessionRecording");
     }
 
@@ -188,7 +153,7 @@ void SessionRecordingHandler::stopRecording(const std::string& fn, DataMode data
     }
     _timeline.entries.insert(_timeline.entries.begin(), propEntries.begin(), propEntries.end());
 
-    saveSessionRecording(absFilename, _timeline, dataMode);
+    saveSessionRecording(filename, _timeline, dataMode);
     _state = SessionState::Idle;
     LINFO("Session recording stopped");
 }
@@ -243,8 +208,7 @@ void SessionRecordingHandler::startPlayback(std::string& filename, bool loop,
 
     // Populate liste of loaded scene graph nodes
     _loadedNodes.clear();
-    const std::vector<SceneGraphNode*> nodes =
-        global::renderEngine->scene()->allSceneGraphNodes();
+    const std::vector<SceneGraphNode*> nodes = sceneGraph()->allSceneGraphNodes();
     for (SceneGraphNode* n : nodes) {
         _loadedNodes.push_back(n->identifier());
     }
@@ -642,9 +606,7 @@ void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(std::string s) con
             std::string found = extractScenegraphNodeFromScene(subjectOfSetProp);
             if (!found.empty()) {
                 const std::vector<properties::Property*> matchHits =
-                    global::renderEngine->scene()->propertiesMatchingRegex(
-                        subjectOfSetProp
-                    );
+                    sceneGraph()->propertiesMatchingRegex(subjectOfSetProp);
                 if (matchHits.empty()) {
                     LWARNING(std::format(
                         "Playback file contains a property setting of scenegraph "
