@@ -267,10 +267,8 @@ namespace {
         operator std::tuple<double&, double&>() { return { timestamp, simulationTime }; }
     };
 
-    template <DataMode mode>
-    Timestamps readTimestamps(std::istream&, int) {
-        static_assert(sizeof(int) == 0, "Unimplemented overload");
-    }
+    // Not defined on purpose
+    template <DataMode mode> Timestamps readTimestamps(std::istream&, int);
 
     template <>
     Timestamps readTimestamps<DataMode::Ascii>(std::istream& stream, int version) {
@@ -295,10 +293,8 @@ namespace {
         return result;
     }
 
-    template <DataMode mode>
-    void writeTimestamps(std::ostream&, const Timestamps&) {
-        static_assert(sizeof(int) == 0, "Unimplemented overload");
-    }
+    // Not defined on purpose
+    template <DataMode mode> void writeTimestamps(std::ostream&, const Timestamps&);
 
     template <>
     void writeTimestamps<DataMode::Ascii>(std::ostream& stream,
@@ -334,14 +330,14 @@ namespace {
     //
     // Camera frames
     //
+
+    // Not defined on purpose
     template <DataMode mode>
-    SessionRecordingEntry::Camera readCamera(std::istream&, int) {
-        static_assert(sizeof(int) == 0, "Unimplemented overload");
-    }
+    SessionRecording::Entry::Camera readCamera(std::istream&, int);
 
     template <>
-    SessionRecordingEntry::Camera readCamera<DataMode::Ascii>(std::istream& stream, int) {
-        SessionRecordingEntry::Camera camera;
+    SessionRecording::Entry::Camera readCamera<DataMode::Ascii>(std::istream& stream, int) {
+        SessionRecording::Entry::Camera camera;
         std::string rotationFollowing;
         stream >> camera.position.x >> camera.position.y >> camera.position.z
                >> camera.rotation.x >> camera.rotation.y
@@ -354,10 +350,10 @@ namespace {
     }
 
     template <>
-    SessionRecordingEntry::Camera readCamera<DataMode::Binary>(std::istream& stream,
+    SessionRecording::Entry::Camera readCamera<DataMode::Binary>(std::istream& stream,
                                                                int version)
     {
-        SessionRecordingEntry::Camera camera;
+        SessionRecording::Entry::Camera camera;
         std::array<double, 4> buffer = {};
         stream.read(reinterpret_cast<char*>(buffer.data()), 3 * sizeof(double));
         camera.position = glm::dvec3(buffer[0], buffer[1], buffer[2]);
@@ -388,14 +384,13 @@ namespace {
         return camera;
     }
 
+    // Not defined on purpose
     template <DataMode mode>
-    void writeCamera(std::ostream&, const SessionRecordingEntry::Camera&) {
-        static_assert(sizeof(int) == 0, "Unimplemented overload");
-    }
+    void writeCamera(std::ostream&, const SessionRecording::Entry::Camera&);
 
     template <>
     void writeCamera<DataMode::Ascii>(std::ostream& stream,
-                                      const SessionRecordingEntry::Camera& camera)
+                                      const SessionRecording::Entry::Camera& camera)
     {
         std::string posX = std::format("{}", camera.position.x);
         stream.write(posX.data(), posX.size());
@@ -432,7 +427,7 @@ namespace {
 
     template <>
     void writeCamera<DataMode::Binary>(std::ostream& stream,
-                                       const SessionRecordingEntry::Camera& camera)
+                                       const SessionRecording::Entry::Camera& camera)
     {
         stream.write(
             reinterpret_cast<const char*>(glm::value_ptr(camera.position)),
@@ -456,14 +451,14 @@ namespace {
     //
     // Script frames
     //
+
+    // Not defined on purpose
     template <DataMode mode>
-    SessionRecordingEntry::Script readScript(std::istream&, int) {
-        static_assert(sizeof(int) == 0, "Unimplemented overload");
-    }
+    SessionRecording::Entry::Script readScript(std::istream&, int);
 
     template <>
-    SessionRecordingEntry::Script readScript<DataMode::Ascii>(std::istream& stream, int) {
-        SessionRecordingEntry::Script script;
+    SessionRecording::Entry::Script readScript<DataMode::Ascii>(std::istream& stream, int) {
+        SessionRecording::Entry::Script script;
 
         int numScriptLines = 0;
         stream >> numScriptLines;
@@ -483,9 +478,10 @@ namespace {
     }
 
     template <>
-    SessionRecordingEntry::Script readScript<DataMode::Binary>(std::istream& stream, int)
+    SessionRecording::Entry::Script readScript<DataMode::Binary>(std::istream& stream,
+                                                                 int)
     {
-        SessionRecordingEntry::Script script;
+        SessionRecording::Entry::Script script;
 
         uint32_t scriptLength = 0;
         stream.read(reinterpret_cast<char*>(&scriptLength), sizeof(uint32_t));
@@ -495,16 +491,15 @@ namespace {
         return script;
     }
 
-    template <DataMode mode>
-    void writeScript(std::ostream&, const SessionRecordingEntry::Script&) {
-        static_assert(sizeof(int) == 0, "Unimplemented overload");
-    }
+    // Not defined on purpose
+    template <DataMode>
+    void writeScript(std::ostream&, const SessionRecording::Entry::Script&);
 
     template <>
     void writeScript<DataMode::Ascii>(std::ostream& stream,
-                                      const SessionRecordingEntry::Script& script)
+                                      const SessionRecording::Entry::Script& script)
     {
-        SessionRecordingEntry::Script s = script;
+        SessionRecording::Entry::Script s = script;
 
         // Erase all \r (from windows newline), and all \n from line endings and replace
         // with ';' so that lua will treat them as separate lines. This is done in order
@@ -525,7 +520,7 @@ namespace {
 
     template <>
     void writeScript<DataMode::Binary>(std::ostream& stream,
-                                       const SessionRecordingEntry::Script& script)
+                                       const SessionRecording::Entry::Script& script)
     {
         uint32_t scriptLength = static_cast<uint32_t>(script.size());
         stream.write(reinterpret_cast<const char*>(&scriptLength), sizeof(uint32_t));
@@ -536,7 +531,7 @@ namespace {
     // SessionRecordingEntry
     //
     template <DataMode mode>
-    std::optional<SessionRecordingEntry> readEntry(std::istream& stream, int version) {
+    std::optional<SessionRecording::Entry> readEntry(std::istream& stream, int version) {
         std::optional<FrameType> frameType = readFrameType<mode>(stream, version);
 
         if (!frameType.has_value()) {
@@ -560,7 +555,7 @@ namespace {
         return entry;
     }
 
-    std::optional<SessionRecordingEntry> readEntry(std::istream& stream,
+    std::optional<SessionRecording::Entry> readEntry(std::istream& stream,
                                                    DataMode dataMode, int version)
     {
         return
@@ -570,7 +565,7 @@ namespace {
     }
 
     template <DataMode mode>
-    void writeEntry(std::ostream& stream, const SessionRecordingEntry& entry) {
+    void writeEntry(std::ostream& stream, const SessionRecording::Entry& entry) {
         if (std::holds_alternative<SessionRecordingEntry::Camera>(entry.value)) {
             writeFrameType<mode>(stream, FrameType::Camera);
         }
@@ -600,7 +595,7 @@ namespace {
         }, entry.value);
     }
 
-    void writeEntry(std::ostream& stream, const SessionRecordingEntry& entry,
+    void writeEntry(std::ostream& stream, const SessionRecording::Entry& entry,
                     DataMode dataMode)
     {
         dataMode == DataMode::Ascii ?
@@ -625,12 +620,12 @@ SessionRecording loadSessionRecording(const std::filesystem::path& filename) {
 
     Header header = readHeader(file, filename);
     while (true) {
-        std::optional<SessionRecordingEntry> entry;
+        std::optional<SessionRecording::Entry> entry;
         try {
             entry = readEntry(file, header.dataMode, header.version);
         }
         catch (const LoadingError& e) {
-            const int nEntries = static_cast<int>(sessionRecording.size());
+            const int nEntries = static_cast<int>(sessionRecording.entries.size());
             throw LoadingError(e.error, filename, nEntries + 1);
         }
 
@@ -639,7 +634,7 @@ SessionRecording loadSessionRecording(const std::filesystem::path& filename) {
             break;
         }
 
-        sessionRecording.push_back(std::move(*entry));
+        sessionRecording.entries.push_back(std::move(*entry));
     };
 
     return sessionRecording;
@@ -657,7 +652,7 @@ void saveSessionRecording(const std::filesystem::path& filename,
     };
     writeHeader(file, header);
 
-    for (const SessionRecordingEntry& entry : sessionRecording) {
+    for (const SessionRecording::Entry& entry : sessionRecording.entries) {
         writeEntry(file, entry, dataMode);
 
         if (dataMode == DataMode::Ascii) {

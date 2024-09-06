@@ -39,15 +39,28 @@ enum class DataMode {
     Binary
 };
 
-struct SessionRecordingEntry {
-    using Camera = KeyframeNavigator::CameraPose;
-    using Script = std::string;
+struct SessionRecording {
+    struct Entry {
+        using Camera = KeyframeNavigator::CameraPose;
+        using Script = std::string;
 
-    double timestamp = 0.0;
-    double simulationTime = 0.0;
-    std::variant<Camera, Script> value;
+        double timestamp = 0.0;
+        double simulationTime = 0.0;
+        std::variant<Camera, Script> value;
+    };
+
+    std::vector<Entry> entries;
 };
-using SessionRecording = std::vector<SessionRecordingEntry>;
+
+//struct SessionRecordingEntry {
+//    using Camera = KeyframeNavigator::CameraPose;
+//    using Script = std::string;
+//
+//    double timestamp = 0.0;
+//    double simulationTime = 0.0;
+//    std::variant<Camera, Script> value;
+//};
+//using SessionRecording = std::vector<SessionRecordingEntry>;
 
 
 SessionRecording loadSessionRecording(const std::filesystem::path& filename);

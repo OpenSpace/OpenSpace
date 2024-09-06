@@ -114,7 +114,7 @@ SessionRecordingHandler::SessionRecordingHandler()
 }
 
 void SessionRecordingHandler::startRecording() {
-    _timeline.clear();
+    _timeline = SessionRecording();
     if (_state == SessionState::Recording) {
         throw ghoul::RuntimeError(
             "Unable to start recording while already in recording mode",
@@ -182,11 +182,11 @@ void SessionRecordingHandler::stopRecording(const std::string& fn, DataMode data
         cleanUpTimelinesAndKeyframes();
     };
 
-    std::vector<SessionRecordingEntry> propEntries;
+    std::vector<SessionRecording::Entry> propEntries;
     for (const auto& [prop, script] : _savePropertiesBaseline) {
         propEntries.emplace_back(0.0, 0.0, script);
     }
-    _timeline.insert(_timeline.begin(), propEntries.begin(), propEntries.end());
+    _timeline.entries.insert(_timeline.entries.begin(), propEntries.begin(), propEntries.end());
 
     saveSessionRecording(absFilename, _timeline, dataMode);
     _state = SessionState::Idle;
@@ -249,7 +249,7 @@ void SessionRecordingHandler::startPlayback(std::string& filename, bool loop,
         _loadedNodes.push_back(n->identifier());
     }
 
-    if (_timeline.empty()) {
+    if (_timeline.entries.empty()) {
         LERROR(std::format("Session recording '{}' is empty", absFilename));
         cleanUpTimelinesAndKeyframes();
         return;
@@ -257,8 +257,8 @@ void SessionRecordingHandler::startPlayback(std::string& filename, bool loop,
 
     // Make sure that there is at least one camera keyframe
     bool foundCameraKeyframe = false;
-    for (const SessionRecordingEntry& e : _timeline) {
-        if (std::holds_alternative<SessionRecordingEntry::Camera>(e.value)) {
+    for (const SessionRecording::Entry& e : _timeline.entries) {
+        if (std::holds_alternative<SessionRecording::Entry::Camera>(e.value)) {
             foundCameraKeyframe = true;
             break;
         }
@@ -279,7 +279,9 @@ void SessionRecordingHandler::startPlayback(std::string& filename, bool loop,
     }
 
 
-    LINFO(std::format("Playback session started with {} entries", _timeline.size()));
+    LINFO(std::format(
+        "Playback session started with {} entries", _timeline.entries.size()
+    ));
 
     global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
         events::EventSessionRecordingPlayback::State::Started
@@ -296,12 +298,12 @@ void SessionRecordingHandler::setupPlayback(double startTime) {
         KeyframeTimeRef::Relative_recordedStart, startTime);
 
 
-    std::vector<SessionRecordingEntry>::const_iterator firstCamera = _timeline.begin();
-    while (firstCamera != _timeline.end() && !std::holds_alternative<SessionRecordingEntry::Camera>(firstCamera->value)) {
+    auto firstCamera = _timeline.entries.begin();
+    while (firstCamera != _timeline.entries.end() && !std::holds_alternative<SessionRecording::Entry::Camera>(firstCamera->value)) {
         firstCamera++;
     }
 
-    std::string startFocusNode = std::get<SessionRecordingEntry::Camera>(firstCamera->value).focusNode;
+    std::string startFocusNode = std::get<SessionRecording::Entry::Camera>(firstCamera->value).focusNode;
     auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
     if (it == _loadedNodes.end()) {
         throw ghoul::RuntimeError(std::format(
@@ -312,7 +314,7 @@ void SessionRecordingHandler::setupPlayback(double startTime) {
 
     global::timeManager->setTimeNextFrame(Time(firstCamera->simulationTime));
 
-    _currentEntry = _timeline.begin();
+    _currentEntry = _timeline.entries.begin();
 
     _state = SessionState::Playback;
 }
@@ -357,10 +359,10 @@ void SessionRecordingHandler::stopPlayback() {
 }
 
 void SessionRecordingHandler::cleanUpTimelinesAndKeyframes() {
-    _timeline.clear();
+    _timeline = SessionRecording();
     _savePropertiesBaseline.clear();
     _loadedNodes.clear();
-    _currentEntry = _timeline.end();
+    _currentEntry = _timeline.entries.end();
     _playback.saveScreenshots.enabled = false;
     _playback.isLooping = false;
 }
@@ -417,7 +419,7 @@ void SessionRecordingHandler::saveScriptKeyframeToTimeline(std::string script) {
         }
     }
 
-    _timeline.emplace_back(
+    _timeline.entries.emplace_back(
         _recording.elapsedTime,
         global::timeManager->time().j2000Seconds(),
         std::move(script)
@@ -457,7 +459,7 @@ void SessionRecordingHandler::preSynchronization(double dt) {
 
         using namespace datamessagestructures;
         CameraKeyframe kf = generateCameraKeyframe();
-        _timeline.emplace_back(
+        _timeline.entries.emplace_back(
             _recording.elapsedTime,
             global::timeManager->time().j2000Seconds(),
             interaction::KeyframeNavigator::CameraPose(std::move(kf))
@@ -500,8 +502,8 @@ void SessionRecordingHandler::render() const {
         "Saving frames: {}\n"
         "Wait for Loading: {}\n"
         "Scale: {}",
-        _playback.elapsedTime, _timeline.back().timestamp,
-        std::distance(_timeline.begin(), _currentEntry), _timeline.size(),
+        _playback.elapsedTime, _timeline.entries.back().timestamp,
+        std::distance(_timeline.entries.begin(), _currentEntry), _timeline.entries.size(),
         _playback.isLooping ? "true" : "false",
         _playback.saveScreenshots.enabled ? "true" : "false",
         _playback.waitForLoading ? "true" : "false",
@@ -663,16 +665,16 @@ void SessionRecordingHandler::moveAheadInTime(double dt) {
     _playback.elapsedTime += dt;
     
     // Find the first value whose recording time is past now
-    std::vector<SessionRecordingEntry>::const_iterator probe = _currentEntry;
-    while (probe != _timeline.end() && _playback.elapsedTime > probe->timestamp) {
+    std::vector<SessionRecording::Entry>::const_iterator probe = _currentEntry;
+    while (probe != _timeline.entries.end() && _playback.elapsedTime > probe->timestamp) {
         probe++;
     }
 
     // All script entries between _previous and now have to be applied
     for (auto& it = _currentEntry; it != probe; it++) {
-        if (std::holds_alternative<SessionRecordingEntry::Script>(it->value)) {
+        if (std::holds_alternative<SessionRecording::Entry::Script>(it->value)) {
             global::scriptEngine->queueScript(
-                std::get<SessionRecordingEntry::Script>(it->value),
+                std::get<SessionRecording::Entry::Script>(it->value),
                 scripting::ScriptEngine::ShouldBeSynchronized::Yes,
                 scripting::ScriptEngine::ShouldSendToRemote::Yes
             );
@@ -680,21 +682,21 @@ void SessionRecordingHandler::moveAheadInTime(double dt) {
     }
 
     //  ... < _previous < ... < prevCamera <= now <= nextCamera < ...
-    std::vector<SessionRecordingEntry>::const_iterator prevCamera = probe - 1;
-    while (prevCamera != _timeline.begin() && !std::holds_alternative<SessionRecordingEntry::Camera>(prevCamera->value)) {
+    std::vector<SessionRecording::Entry>::const_iterator prevCamera = probe - 1;
+    while (prevCamera != _timeline.entries.begin() && !std::holds_alternative<SessionRecording::Entry::Camera>(prevCamera->value)) {
         prevCamera--;
     }
-    std::vector<SessionRecordingEntry>::const_iterator nextCamera = probe;
-    while (nextCamera != _timeline.end() && !std::holds_alternative<SessionRecordingEntry::Camera>(nextCamera->value)) {
+    std::vector<SessionRecording::Entry>::const_iterator nextCamera = probe;
+    while (nextCamera != _timeline.entries.end() && !std::holds_alternative<SessionRecording::Entry::Camera>(nextCamera->value)) {
         nextCamera++;
     }
 
     // update camera with or without new keyframes
-    if (prevCamera != nextCamera && prevCamera != _timeline.begin() && nextCamera != _timeline.end()) {
-        const SessionRecordingEntry::Camera prevPose = std::get<SessionRecordingEntry::Camera>(prevCamera->value);
+    if (prevCamera != nextCamera && prevCamera != _timeline.entries.begin() && nextCamera != _timeline.entries.end()) {
+        const SessionRecording::Entry::Camera prevPose = std::get<SessionRecording::Entry::Camera>(prevCamera->value);
         const double prevTime = prevCamera->timestamp;
 
-        const SessionRecordingEntry::Camera nextPose = std::get<SessionRecordingEntry::Camera>(nextCamera->value);
+        const SessionRecording::Entry::Camera nextPose = std::get<SessionRecording::Entry::Camera>(nextCamera->value);
         const double nextTime = nextCamera->timestamp;
 
         const double t = std::clamp(
@@ -745,7 +747,7 @@ void SessionRecordingHandler::moveAheadInTime(double dt) {
 
 
     _currentEntry = probe;
-    if (probe == _timeline.end()) {
+    if (probe == _timeline.entries.end()) {
         if (_playback.isLooping) {
             _playback.saveScreenshots.enabled = false;
             setupPlayback(global::windowDelegate->applicationTime());

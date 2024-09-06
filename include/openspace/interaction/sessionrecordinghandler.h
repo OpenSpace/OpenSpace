@@ -276,7 +276,8 @@ protected:
 
 
     SessionRecording _timeline;
-    SessionRecording::const_iterator _currentEntry = _timeline.end();
+    std::vector<SessionRecording::Entry>::const_iterator _currentEntry =
+        _timeline.entries.end();
     std::unordered_map<std::string, std::string> _savePropertiesBaseline;
     std::vector<std::string> _loadedNodes;
 
