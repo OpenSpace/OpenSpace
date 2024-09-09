@@ -40,6 +40,7 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/keyframerecording.h>
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -1032,6 +1033,7 @@ void OpenSpaceEngine::preSynchronization() {
             }
         }
         global::sessionRecording->preSynchronization();
+        global::keyframeRecording->preSynchronization(dt);
         global::parallelPeer->preSynchronization();
         global::interactionMonitor->updateActivityState();
     }
