@@ -32,6 +32,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/scripting/scriptengine.h>
 
@@ -277,7 +278,9 @@ void GuiSpaceTimeComponent::render() {
 
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript("openspace.time.setTime(\"" + nowTime + "\")");
+        global::scriptEngine->queueScript(
+            std::format("openspace.time.setTime('{}')", nowTime)
+        );
     }
     ImGui::SameLine();
 
@@ -359,9 +362,9 @@ void GuiSpaceTimeComponent::render() {
 
             // No sync or send because time settings are always synced and sent
             // to the connected nodes and peers
-            global::scriptEngine->queueScript(
-                "openspace.time.interpolateDeltaTime(" + std::to_string(newDt) + ")"
-            );
+            global::scriptEngine->queueScript(std::format(
+                "openspace.time.interpolateDeltaTime({})", newDt
+            ));
         }
         if (unitChanged) {
             // If only the unit changes, we keep the delta time, but need to convert the
@@ -485,7 +488,9 @@ void GuiSpaceTimeComponent::render() {
     if (minusDs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript("openspace.time.interpolateDeltaTime(-86400)");
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime(-{})", SecondsPerDay
+        ));
     }
     ImGui::SameLine();
 
@@ -493,7 +498,9 @@ void GuiSpaceTimeComponent::render() {
     if (minusHs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript("openspace.time.interpolateDeltaTime(-3600)");
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime(-{})", SecondsPerHour
+        ));
     }
     ImGui::SameLine();
 
@@ -501,7 +508,9 @@ void GuiSpaceTimeComponent::render() {
     if (minusMs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript("openspace.time.interpolateDeltaTime(-60)");
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime(-{})", SecondsPerMinute
+        ));
     }
     ImGui::SameLine();
 
@@ -534,7 +543,9 @@ void GuiSpaceTimeComponent::render() {
     if (plusMs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript("openspace.time.interpolateDeltaTime(60)");
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime({})", SecondsPerMinute
+        ));
     }
     ImGui::SameLine();
 
@@ -542,7 +553,9 @@ void GuiSpaceTimeComponent::render() {
     if (plusHs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript("openspace.time.interpolateDeltaTime(3600)");
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime({})", SecondsPerHour
+        ));
     }
     ImGui::SameLine();
 
@@ -550,7 +563,9 @@ void GuiSpaceTimeComponent::render() {
     if (plusDs) {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript("openspace.time.interpolateDeltaTime(86400)");
+        global::scriptEngine->queueScript(std::format(
+            "openspace.time.interpolateDeltaTime({})", SecondsPerDay
+        ));
     }
 
     ImGui::End();

@@ -66,7 +66,8 @@ public:
 
         /// Determines whether a script should be send to a distant OpenSpace instance
         /// that is not part of the same cluster. This is used in the ParallelConnection
-        /// feature that can connect OpenSpace instances in a less tight connection
+        /// feature that can connect OpenSpace instances in a connection that does not
+        /// require instantaneous synchronization
         ShouldSendToRemote sendToRemote = ShouldSendToRemote::Yes;
 
         /// Determines whether the script should be logged to a local script log file.

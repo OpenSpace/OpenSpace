@@ -137,9 +137,9 @@ void IswaCygnet::initializeGL() {
     else {
         _delete.onChange([this]() {
             deinitialize();
-            global::scriptEngine->queueScript(
-                "openspace.removeSceneGraphNode('" + identifier() + "')"
-            );
+            global::scriptEngine->queueScript(std::format(
+                "openspace.removeSceneGraphNode('{}')", identifier()
+            ));
         });
     }
 
