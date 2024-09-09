@@ -22,13 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/keyframerecording.h>
+#include <openspace/interaction/keyframerecordinghandler.h>
 
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/messagestructureshelper.h>
 #include <openspace/util/timemanager.h>
 
-#include "keyframerecording_lua.inl"
+#include "keyframerecordinghandler_lua.inl"
 
 namespace {
     constexpr std::string_view _loggerCat = "KeyframeRecording";
@@ -36,15 +36,15 @@ namespace {
 
 namespace openspace::interaction {
 
-KeyframeRecording::KeyframeRecording()
+KeyframeRecordingHandler::KeyframeRecordingHandler()
     : properties::PropertyOwner({ "KeyframeRecording", "Keyframe Recording" })
 {}
 
-void KeyframeRecording::newSequence() {
+void KeyframeRecordingHandler::newSequence() {
     _timeline = SessionRecording();
 }
 
-void KeyframeRecording::addCameraKeyframe(double sequenceTime) {
+void KeyframeRecordingHandler::addCameraKeyframe(double sequenceTime) {
     using namespace datamessagestructures;
     CameraKeyframe kf = datamessagestructures::generateCameraKeyframe();
 
@@ -65,7 +65,8 @@ void KeyframeRecording::addCameraKeyframe(double sequenceTime) {
     _timeline.entries.insert(it, std::move(entry));
 }
 
-void KeyframeRecording::addScriptKeyframe(double sequenceTime, std::string script) {
+void KeyframeRecordingHandler::addScriptKeyframe(double sequenceTime, std::string script)
+{
     SessionRecording::Entry entry = {
         sequenceTime,
         global::timeManager->time().j2000Seconds(),
@@ -83,14 +84,14 @@ void KeyframeRecording::addScriptKeyframe(double sequenceTime, std::string scrip
     _timeline.entries.insert(it, std::move(entry));
 }
 
-void KeyframeRecording::removeKeyframe(int index) {
+void KeyframeRecordingHandler::removeKeyframe(int index) {
     if (index < 0 || static_cast<size_t>(index) >(_timeline.entries.size() - 1)) {
         throw ghoul::RuntimeError(std::format("Index {} out of range", index));
     }
     _timeline.entries.erase(_timeline.entries.begin() + index);
 }
 
-void KeyframeRecording::updateKeyframe(int index) {
+void KeyframeRecordingHandler::updateKeyframe(int index) {
     using namespace datamessagestructures;
     if (index < 0 || static_cast<size_t>(index) > (_timeline.entries.size() - 1)) {
         throw ghoul::RuntimeError(std::format("Index {} out of range", index));
@@ -104,7 +105,7 @@ void KeyframeRecording::updateKeyframe(int index) {
     camera = KeyframeNavigator::CameraPose(generateCameraKeyframe());
 }
 
-void KeyframeRecording::moveKeyframe(int index, double sequenceTime) {
+void KeyframeRecordingHandler::moveKeyframe(int index, double sequenceTime) {
     if (index < 0 || static_cast<size_t>(index) >(_timeline.entries.size() - 1)) {
         throw ghoul::RuntimeError(std::format("Index {} out of range", index));
     }
@@ -119,7 +120,7 @@ void KeyframeRecording::moveKeyframe(int index, double sequenceTime) {
     );
 }
 
-void KeyframeRecording::saveSequence(std::filesystem::path filename) {
+void KeyframeRecordingHandler::saveSequence(std::filesystem::path filename) {
     if (filename.empty()) {
         throw ghoul::RuntimeError("Failed to save file, reason: Invalid empty file name");
     }
@@ -127,23 +128,23 @@ void KeyframeRecording::saveSequence(std::filesystem::path filename) {
     saveSessionRecording(filename, _timeline, DataMode::Ascii);
 }
 
-void KeyframeRecording::loadSequence(std::filesystem::path filename) {
+void KeyframeRecordingHandler::loadSequence(std::filesystem::path filename) {
     _timeline = loadSessionRecording(filename);
 }
 
-void KeyframeRecording::play() {
+void KeyframeRecordingHandler::play() {
     global::sessionRecordingHandler->startPlayback(_timeline, false, false, std::nullopt);
 }
 
-bool KeyframeRecording::hasKeyframeRecording() const {
+bool KeyframeRecordingHandler::hasKeyframeRecording() const {
     return !_timeline.entries.empty();
 }
 
-std::vector<ghoul::Dictionary> KeyframeRecording::keyframes() const {
+std::vector<ghoul::Dictionary> KeyframeRecordingHandler::keyframes() const {
     return sessionRecordingToDictionary(_timeline);
 }
 
-scripting::LuaLibrary KeyframeRecording::luaLibrary() {
+scripting::LuaLibrary KeyframeRecordingHandler::luaLibrary() {
     return {
         "keyframeRecording",
         {

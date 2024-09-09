@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYFRAMERECORDING___H__
-#define __OPENSPACE_CORE___KEYFRAMERECORDING___H__
+#ifndef __OPENSPACE_CORE___KEYFRAMERECORDINGHANDLER___H__
+#define __OPENSPACE_CORE___KEYFRAMERECORDINGHANDLER___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -35,9 +35,9 @@
 
 namespace openspace::interaction {
 
-class KeyframeRecording : public properties::PropertyOwner {
+class KeyframeRecordingHandler : public properties::PropertyOwner {
 public:
-    KeyframeRecording();
+    KeyframeRecordingHandler();
 
     void newSequence();
     void addCameraKeyframe(double sequenceTime);
@@ -59,4 +59,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___KEYFRAMERECORDING___H__
+#endif // __OPENSPACE_CORE___KEYFRAMERECORDINGHANDLER___H__

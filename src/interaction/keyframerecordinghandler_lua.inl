@@ -103,6 +103,6 @@ namespace {
     return global::keyframeRecording->keyframes();
 }
 
-#include "keyframerecording_lua_codegen.cpp"
+#include "keyframerecordinghandler_lua_codegen.cpp"
 
 } // namespace

@@ -35,7 +35,7 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/keyframerecording.h>
+#include <openspace/interaction/keyframerecordinghandler.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
@@ -96,7 +96,7 @@ namespace {
         sizeof(interaction::JoystickInputStates) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
-        sizeof(interaction::KeyframeRecording) +
+        sizeof(interaction::KeyframeRecordingHandler) +
         sizeof(interaction::NavigationHandler) +
         sizeof(interaction::SessionRecordingHandler) +
         sizeof(properties::PropertyOwner) +
@@ -317,11 +317,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    keyframeRecording = new (currentPos) interaction::KeyframeRecording;
+    keyframeRecording = new (currentPos) interaction::KeyframeRecordingHandler;
     ghoul_assert(keyframeRecording, "No keyframeRecording");
-    currentPos += sizeof(interaction::KeyframeRecording);
+    currentPos += sizeof(interaction::KeyframeRecordingHandler);
 #else // ^^^ WIN32 / !WIN32 vvv
-    keyframeRecording = new interaction::KeyframeRecording;
+    keyframeRecording = new interaction::KeyframeRecordingHandler;
 #endif // WIN32
 
 #ifdef WIN32
@@ -456,7 +456,7 @@ void destroy() {
     delete rootPropertyOwner;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'SessionRecording'");
+    LDEBUGC("Globals", "Destroying 'SessionRecordingHandler'");
 #ifdef WIN32
     sessionRecordingHandler->~SessionRecordingHandler();
 #else // ^^^ WIN32 / !WIN32 vvv
@@ -470,9 +470,9 @@ void destroy() {
     delete navigationHandler;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'KeyframeRecording'");
+    LDEBUGC("Globals", "Destroying 'KeyframeRecordingHandler'");
 #ifdef WIN32
-    keyframeRecording->~KeyframeRecording();
+    keyframeRecording->~KeyframeRecordingHandler();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete keyframeRecording;
 #endif // WIN32

@@ -40,7 +40,6 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/keyframerecording.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/interaction/tasks/convertrecformattask.h>
 #include <openspace/navigation/navigationhandler.h>
