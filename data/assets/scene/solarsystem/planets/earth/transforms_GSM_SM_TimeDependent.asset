@@ -9,7 +9,7 @@ local lastPosMagNorth25To35 = "C:/Users/eolsson/Downloads/earthnpole_runout.bsp"
 
 local kernels = "C:/Users/eolsson/Downloads/kernels/"
 HighResPredKernels = kernels .. "earth_200101_990825_predict.bpc"
-HighResTo2023Kernels = kernels .. "earth_720101_230601.bpc"
+HighResTo2024Kernels = kernels .. "earth_620120_240827.bpc"
 HighResLatestKernels = kernels .. "earth_latest_high_prec.bpc"
 
 
@@ -59,7 +59,7 @@ asset.onInitialize(function()
   openspace.spice.loadKernel(lastPosMagNorth25To35)
   openspace.spice.loadKernel(TimeDependentMagneticNorth)
   openspace.spice.loadKernel(HighResPredKernels)
-  openspace.spice.loadKernel(HighResTo2023Kernels)
+  openspace.spice.loadKernel(HighResTo2024Kernels)
   openspace.spice.loadKernel(HighResLatestKernels)
   openspace.spice.loadKernel(GSM_Kernel)
   openspace.spice.loadKernel(SM_Kernel)
@@ -73,7 +73,7 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(SM_Kernel)
   openspace.spice.unloadKernel(GSM_Kernel)
   openspace.spice.unloadKernel(HighResLatestKernels)
-  openspace.spice.unloadKernel(HighResTo2023Kernels)
+  openspace.spice.unloadKernel(HighResTo2024Kernels)
   openspace.spice.unloadKernel(HighResPredKernels)
   openspace.spice.unloadKernel(TimeDependentMagneticNorth)
   openspace.spice.unloadKernel(lastPosMagNorth25To35)
