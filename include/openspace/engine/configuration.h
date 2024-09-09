@@ -78,6 +78,7 @@ struct Configuration {
     Logging logging;
 
     std::string scriptLog;
+    bool verboseScriptLog = false;
     int scriptLogRotation = 3;
 
     struct DocumentationInfo {

@@ -2107,11 +2107,7 @@ bool SessionRecording::processScriptKeyframe() {
         _keyframesScript,
         ([this]() { signalPlaybackFinishedForComponent(RecordedType::Script); })
     );
-    global::scriptEngine->queueScript(
-        nextScript,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(nextScript);
 
     return true;
 }

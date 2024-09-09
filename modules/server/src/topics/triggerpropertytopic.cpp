@@ -40,13 +40,10 @@ namespace openspace {
 void TriggerPropertyTopic::handleJson(const nlohmann::json& json) {
     try {
         const std::string& propertyKey = json.at("property").get<std::string>();
-        global::scriptEngine->queueScript(
-            std::format(
-                "openspace.setPropertyValueSingle(\"{}\", nil)", propertyKey
-            ),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+        const std::string script = std::format(
+            "openspace.setPropertyValueSingle(\"{}\", nil)", propertyKey
         );
+        global::scriptEngine->queueScript(script);
     }
     catch (const std::out_of_range& e) {
         LERROR("Could not trigger property -- key or value is missing in payload");
