@@ -58,7 +58,7 @@ public:
         /// The Lua script that should be executed
         std::string code;
 
-        /// Determines whether a script should be sent to computer that are in the same
+        /// Determines whether a script should be sent to computers that are in the same
         /// _cluster_ as the master machine that is user is interacting with. These are
         /// usually different computers that tile a bigger display area and that need to
         /// be tightly locked
