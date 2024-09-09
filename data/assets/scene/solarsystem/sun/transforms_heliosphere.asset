@@ -1,9 +1,10 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local coreKernels = asset.require("spice/core")
 
+local heeq180Kernel = asset.resource("kernels/HEEQ180.tf")
+local heeqKernel = asset.resource("kernels/HEEQ.tf")
+local heeKernel = asset.resource("kernels/HEE.tf")
 
-
-local kernel = asset.resource("kernels/HEEQ180.tf")
 
 local HEEQ180ReferenceFrame = {
   Identifier = "HEEQ180ReferenceFrame",
@@ -27,26 +28,71 @@ local HEEQ180ReferenceFrame = {
   }
 }
 
+local HEEQReferenceFrame = {
+  Identifier = "HEEQReferenceFrame",
+  Parent = sunTransforms.SunCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "HEEQ",
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "HEEQ Reference Frame",
+    Path = "/Solar System/Sun",
+    Hidden = true
+  }
+}
+
+local HEEReferenceFrame = {
+  Identifier = "HEEReferenceFrame",
+  Parent = sunTransforms.SunCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = "HEE",
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "HEE Reference Frame",
+    Path = "/Solar System/Sun",
+    Hidden = true
+  }
+}
+
+
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernel)
+  openspace.spice.loadKernel(heeq180Kernel)
+  openspace.spice.loadKernel(heeqKernel)
+  openspace.spice.loadKernel(heeKernel)
 
   openspace.addSceneGraphNode(HEEQ180ReferenceFrame)
+  openspace.addSceneGraphNode(HEEQReferenceFrame)
+  openspace.addSceneGraphNode(HEEReferenceFrame)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HEEReferenceFrame)
+  openspace.removeSceneGraphNode(HEEQReferenceFrame)
   openspace.removeSceneGraphNode(HEEQ180ReferenceFrame)
 
-  openspace.spice.unloadKernel(kernel)
+  openspace.spice.unloadKernel(heeKernel)
+  openspace.spice.unloadKernel(heeqKernel)
+  openspace.spice.unloadKernel(heeq180Kernel)
 end)
 
 asset.export(HEEQ180ReferenceFrame)
+asset.export(HEEQReferenceFrame)
+asset.export(HEEReferenceFrame)
 
 
 
 asset.meta = {
-  Name = "Sun Transform, HEEQ180",
-  Description = "Sun transform: HEEQ180",
+  Name = "Sun Transform, HEE, HEEQ and HEEQ180",
+  Description = "Sun transform: HEE, HEEQ and HEEQ180",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

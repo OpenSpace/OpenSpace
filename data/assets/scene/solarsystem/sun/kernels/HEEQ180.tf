@@ -1,8 +1,6 @@
 \begintext
 
 Heliocentric Earth Equatorial (HEEQ+180) Frame
-Used by the BATSRUS model
-This Kernel's ID is not a valid ID!
      Definition of the Heliocentric Earth Equatorial frame:
 
               All vectors are geometric: no aberration corrections are

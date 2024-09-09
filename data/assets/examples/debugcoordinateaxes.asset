@@ -4,6 +4,7 @@ local GSM_SM_Transforms = asset.require("scene/solarsystem/planets/earth/transfo
 local GSE_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_GSE")
 local GSM_SM_Time_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_GSM_SM_TimeDependent")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
 
 
@@ -191,6 +192,61 @@ local SolarSystemBarycenterAxes = {
   }
 }
 
+local HEEQAxes = {
+  Identifier = "HEEQAxes",
+  Parent = heliosphereTransforms.HEEQReferenceFrame.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = SunRadius * 300
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "HEEQ Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local HEEQ180Axes = {
+  Identifier = "HEEQ180Axes",
+  Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = SunRadius * 300
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "HEEQ 180 Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local HEEAxes = {
+  Identifier = "HEEAxes",
+  Parent = heliosphereTransforms.HEEReferenceFrame.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = SunRadius * 300
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "HEE Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenterAxes)
@@ -203,9 +259,15 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(GSMAxes)
   openspace.addSceneGraphNode(SMAxes)
   openspace.addSceneGraphNode(SMTimeAxes)
+  openspace.addSceneGraphNode(HEEQAxes)
+  openspace.addSceneGraphNode(HEEQ180Axes)
+  openspace.addSceneGraphNode(HEEAxes)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HEEAxes)
+  openspace.removeSceneGraphNode(HEEQ180Axes)
+  openspace.removeSceneGraphNode(HEEQAxes)
   openspace.removeSceneGraphNode(SMTimeAxes)
   openspace.removeSceneGraphNode(SMAxes)
   openspace.removeSceneGraphNode(GSMAxes)
@@ -228,6 +290,9 @@ asset.export(GSMTimeAxes)
 asset.export(GSMAxes)
 asset.export(SMAxes)
 asset.export(SMTimeAxes)
+asset.export(HEEQAxes)
+asset.export(HEEQ180Axes)
+asset.export(HEEAxes)
 
 
 
