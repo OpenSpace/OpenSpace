@@ -81,7 +81,7 @@ namespace {
     const std::string FileExtensionBinary = ".osrec";
     const std::string FileExtensionAscii = ".osrectxt";
 
-    constexpr std::string_view scriptReturnPrefix = "return ";
+    constexpr std::string_view ScriptReturnPrefix = "return ";
 } // namespace
 
 namespace openspace::interaction {
@@ -158,11 +158,13 @@ void SessionRecordingHandler::tickPlayback(double dt) {
     }
 
     // update camera with or without new keyframes
-    if (prevCamera != nextCamera && prevCamera != _timeline.entries.begin() && nextCamera != _timeline.entries.end()) {
-        auto prevPose = std::get<SessionRecording::Entry::Camera>(prevCamera->value);
+    if (prevCamera != nextCamera && prevCamera != _timeline.entries.begin() &&
+        nextCamera != _timeline.entries.end())
+    {
+        auto& prevPose = std::get<SessionRecording::Entry::Camera>(prevCamera->value);
         const double prevTime = prevCamera->timestamp;
 
-        auto nextPose = std::get<SessionRecording::Entry::Camera>(nextCamera->value);
+        auto& nextPose = std::get<SessionRecording::Entry::Camera>(nextCamera->value);
         const double nextTime = nextCamera->timestamp;
 
         // Need to actively update the focusNode position of the camera in relation to
@@ -313,12 +315,9 @@ void SessionRecordingHandler::stopRecording(const std::filesystem::path& filenam
         ), "SessionRecording");
     }
 
-
-    std::vector<SessionRecording::Entry> propEntries;
     for (const auto& [prop, script] : _savePropertiesBaseline) {
-        propEntries.emplace_back(0.0, 0.0, script);
+        _timeline.entries.insert(_timeline.entries.begin(), { 0.0, 0.0, script });
     }
-    _timeline.entries.insert(_timeline.entries.begin(), propEntries.begin(), propEntries.end());
 
     saveSessionRecording(filename, _timeline, dataMode);
     _state = SessionState::Idle;
@@ -362,7 +361,6 @@ void SessionRecordingHandler::startPlayback(std::filesystem::path filename, bool
         LERROR(std::format("Session recording '{}' is empty", filename));
         return;
     }
-
     if (!_timeline.hasCameraFrame()) {
         LERROR(std::format(
             "Session recording '{}' did not contain any camera keyframes", filename
@@ -370,6 +368,13 @@ void SessionRecordingHandler::startPlayback(std::filesystem::path filename, bool
         _timeline = SessionRecording();
         return;
     }
+    _timeline.forAll<SessionRecording::Entry::Script>(
+        [this](const SessionRecording::Entry::Script& script) {
+            checkIfScriptUsesScenegraphNode(script);
+            return false;
+        }
+    );
+
 
     // Populate list of loaded scene graph nodes
     _loadedNodes.clear();
@@ -420,9 +425,7 @@ void SessionRecordingHandler::setupPlayback(double startTime) {
     }
 
     global::timeManager->setTimeNextFrame(Time(firstCamera->simulationTime));
-
     _currentEntry = _timeline.entries.begin();
-
     _state = SessionState::Playback;
 }
 
@@ -490,8 +493,8 @@ void SessionRecordingHandler::saveScriptKeyframeToTimeline(std::string script) {
         "openspace.sessionRecording.togglePlaybackPause"
     };
 
-    if (script.starts_with(scriptReturnPrefix)) {
-        script = script.substr(scriptReturnPrefix.length());
+    if (script.starts_with(ScriptReturnPrefix)) {
+        script = script.substr(ScriptReturnPrefix.length());
     }
     for (std::string_view reject : ScriptRejects) {
         if (script.starts_with(reject)) {
@@ -602,95 +605,84 @@ double SessionRecordingHandler::currentApplicationInterpolationTime() const {
     return _playback.saveScreenshots.currentApplicationTime;
 }
 
-void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(std::string s) const {
-    auto isolateTermFromQuotes = [](std::string s) -> std::string {
+void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(std::string_view s) const {
+    auto isolateTermFromQuotes = [](std::string_view s) -> std::string_view {
         // Remove any leading spaces
-        while (s.front() == ' ') {
-            s.erase(0, 1);
+        s.remove_prefix(s.find_first_not_of(" "));
+
+        // Find the first substring that is surrounded by possible quotes
+        constexpr std::string_view PossibleQuotes = "\'\"[]";
+        s.remove_prefix(s.find_first_not_of(PossibleQuotes));
+        size_t end = s.find_first_of(PossibleQuotes);
+        if (end != std::string::npos) {
+            return s.substr(0, end);
         }
-        const std::string possibleQuotes = "\'\"[]";
-        while (possibleQuotes.find(s.front()) != std::string::npos) {
-            s.erase(0, 1);
+        else {
+            // There were no closing quotes so we remove as much as possible
+            constexpr std::string_view UnwantedChars = " );";
+            s.remove_suffix(s.find_last_not_of(UnwantedChars));
+            return s;
         }
-        for (const char q : possibleQuotes) {
-            if (s.find(q) != std::string::npos) {
-                s = s.substr(0, s.find(q));
-                return s;
-            }
-        }
-        // If no quotes found, remove other possible characters from end
-        const std::string unwantedChars = " );";
-        while (!s.empty() && (unwantedChars.find(s.back()) != std::string::npos)) {
-            s.pop_back();
-        }
-        return s;
     };
 
-    auto checkForScenegraphNodeAccessNav = [](std::string& navTerm) {
+    auto checkForScenegraphNodeAccessNav = [](std::string_view navTerm) -> bool {
         constexpr std::array<std::string_view, 3> NavScriptsUsingNodes = {
-            "RetargetAnchor",
-            "Anchor",
-            "Aim"
+            "NavigationHandler.OrbitalNavigator.RetargetAnchor",
+            "NavigationHandler.OrbitalNavigator.Anchor",
+            "NavigationHandler.OrbitalNavigator.Aim"
         };
 
-        const std::string nextTerm = "NavigationHandler.OrbitalNavigator.";
-        const size_t posNav = navTerm.find(nextTerm);
-        if (posNav != std::string::npos) {
-            for (std::string_view accessName : NavScriptsUsingNodes) {
-                if (navTerm.find(accessName) != std::string::npos) {
-                    return true;
-                }
+        for (std::string_view script : NavScriptsUsingNodes) {
+            if (navTerm.find(script) != std::string::npos) {
+                return true;
             }
         }
         return false;
     };
 
-    auto extractScenegraphNodeFromScene = [](const std::string& s) -> std::string {
-        const std::string scene = "Scene.";
-        std::string extracted;
-        const size_t posScene = s.find(scene);
-        if (posScene != std::string::npos) {
-            const size_t posDot = s.find('.', posScene + scene.length() + 1);
-            if (posDot > posScene && posDot != std::string::npos) {
-                extracted = s.substr(posScene + scene.length(), posDot -
-                    (posScene + scene.length()));
-            }
-        }
-        return extracted;
-        };
-
-    if (s.rfind(scriptReturnPrefix, 0) == 0) {
-        s.erase(0, scriptReturnPrefix.length());
+    if (s.starts_with(ScriptReturnPrefix)) {
+        s.remove_prefix(ScriptReturnPrefix.length());
     }
     // This works for both setPropertyValue and setPropertyValueSingle
-    const bool containsSetPropertyVal = (s.rfind("openspace.setPropertyValue", 0) == 0);
-    const bool containsParensStart = (s.find('(') != std::string::npos);
-    if (containsSetPropertyVal && containsParensStart) {
-        std::string subjectOfSetProp = isolateTermFromQuotes(s.substr(s.find('(') + 1));
-        if (checkForScenegraphNodeAccessNav(subjectOfSetProp)) {
-            const size_t commaPos = s.find(',');
-            std::string navNode = isolateTermFromQuotes(s.substr(commaPos + 1));
-            if (navNode != "nil") {
-                auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), navNode);
-                if (it == _loadedNodes.end()) {
-                    LWARNING(std::format(
-                        "Playback file contains a property setting of navigation using "
-                        "scenegraph node '{}', which is not currently loaded", navNode
-                    ));
-                }
+    if (!s.starts_with("openspace.setPropertyValue") || s.find('(') == std::string::npos)
+    {
+        return;
+    }
+
+    std::string_view subjectOfSetProp = isolateTermFromQuotes(s.substr(s.find('(') + 1));
+    if (checkForScenegraphNodeAccessNav(subjectOfSetProp)) {
+        std::string_view navNode = isolateTermFromQuotes(s.substr(s.find(',') + 1));
+        if (navNode != "nil") {
+            auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), navNode);
+            if (it == _loadedNodes.end()) {
+                LWARNING(std::format(
+                    "Playback file contains a property setting of navigation using "
+                    "scenegraph node '{}', which is not currently loaded", navNode
+                ));
             }
         }
-        else if (subjectOfSetProp.find("Scene.") != std::string::npos) {
-            std::string found = extractScenegraphNodeFromScene(subjectOfSetProp);
-            if (!found.empty()) {
-                const std::vector<properties::Property*> matchHits =
-                    sceneGraph()->propertiesMatchingRegex(subjectOfSetProp);
-                if (matchHits.empty()) {
-                    LWARNING(std::format(
-                        "Playback file contains a property setting of scenegraph "
-                        "node '{}', which is not currently loaded", found
-                    ));
-                }
+    }
+    else if (subjectOfSetProp.find("Scene.") != std::string::npos) {
+        auto extractScenegraphNodeFromScene = [](std::string_view s) -> std::string_view {
+            constexpr std::string_view Scene = "Scene.";
+            size_t scene = s.find(Scene);
+            if (scene == std::string_view::npos) {
+                return "";
+            }
+            s.remove_prefix(scene + Scene.length());
+            size_t end = s.find('.');
+            return end != std::string_view::npos ? s.substr(0, end) : "";
+        };
+
+        std::string_view found = extractScenegraphNodeFromScene(subjectOfSetProp);
+        if (!found.empty()) {
+            const std::vector<properties::Property*> matchHits =
+                sceneGraph()->propertiesMatchingRegex(subjectOfSetProp);
+            if (matchHits.empty()) {
+                LWARNING(std::format(
+                    "Playback file contains a property setting of scenegraph "
+                    "node '{}', which is not currently loaded", found
+                ));
             }
         }
     }
@@ -713,11 +705,7 @@ void SessionRecordingHandler::removeStateChangeCallback(CallbackHandle handle) {
         }
     );
 
-    ghoul_assert(
-        it != _stateChangeCallbacks.end(),
-        "handle must be a valid callback handle"
-    );
-
+    ghoul_assert(it != _stateChangeCallbacks.end(), "handle must be a valid callback");
     _stateChangeCallbacks.erase(it);
 }
 

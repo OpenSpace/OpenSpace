@@ -239,7 +239,7 @@ public:
      */
     void savePropertyBaseline(properties::Property& prop);
 
-protected:
+private:
     void tickPlayback(double dt);
     void tickRecording(double dt);
 
@@ -247,7 +247,7 @@ protected:
 
     void cleanUpTimelinesAndKeyframes();
 
-    void checkIfScriptUsesScenegraphNode(std::string s) const;
+    void checkIfScriptUsesScenegraphNode(std::string_view s) const;
 
 
     properties::BoolProperty _renderPlaybackInformation;

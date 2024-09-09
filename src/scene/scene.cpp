@@ -774,7 +774,7 @@ PropertyValueType Scene::propertyValueType(const std::string& value) {
 }
 
 std::vector<properties::Property*> Scene::propertiesMatchingRegex(
-                                                        const std::string& propertyString)
+                                                          std::string_view propertyString)
 {
     return findMatchesInAllProperties(propertyString, allProperties(), "");
 }

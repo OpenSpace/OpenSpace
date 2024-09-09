@@ -87,9 +87,9 @@ openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* p
 }
 
 std::vector<openspace::properties::Property*> findMatchesInAllProperties(
-                                                                const std::string& regex,
-                         const std::vector<openspace::properties::Property*>& properties,
-                                                            const std::string& groupName)
+                                                                   std::string_view regex,
+                          const std::vector<openspace::properties::Property*>& properties,
+                                                             const std::string& groupName)
 {
     using namespace openspace;
 

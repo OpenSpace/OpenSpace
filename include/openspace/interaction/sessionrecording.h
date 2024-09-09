@@ -51,6 +51,21 @@ struct SessionRecording {
     std::vector<Entry> entries;
 
     bool hasCameraFrame() const noexcept;
+
+    // Call the provided \p function for all entries of the specified type \tparam T. The
+    // function calls will be ordered by the entries timestamps. If the callback function
+    // returns `true`, the loop is aborted
+    template <typename T>
+    void forAll(std::function<bool (const T&)> function) {
+        for (const Entry& e : entries) {
+            if (std::holds_alternative<T>(e.value)) {
+                bool cont = function(std::get<T>(e.value));
+                if (cont) {
+                    break;
+                }
+            }
+        }
+    }
 };
 
 SessionRecording loadSessionRecording(const std::filesystem::path& filename);
