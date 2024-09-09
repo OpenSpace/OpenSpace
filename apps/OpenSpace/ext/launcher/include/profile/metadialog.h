@@ -40,8 +40,8 @@ public:
     * Constructor for meta class.
     *
     * \param parent Pointer to parent Qt widget
-    * \param profile The #openspace::Profile::Meta object containing all data of the
-    *        new or imported profile
+    * \param meta The #openspace::Profile::Meta object containing all data of the new or
+    *        imported profile
     */
     MetaDialog(QWidget* parent, std::optional<openspace::Profile::Meta>* meta);
 
