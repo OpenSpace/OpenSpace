@@ -158,36 +158,32 @@ void SessionRecordingHandler::tickPlayback(double dt) {
     }
 
     // update camera with or without new keyframes
-    if (prevCamera != nextCamera && prevCamera != _timeline.entries.begin() &&
-        nextCamera != _timeline.entries.end())
-    {
-        auto& prevPose = std::get<SessionRecording::Entry::Camera>(prevCamera->value);
-        const double prevTime = prevCamera->timestamp;
+    const auto& prevPose = std::get<SessionRecording::Entry::Camera>(prevCamera->value);
+    const double prevTime = prevCamera->timestamp;
 
-        auto& nextPose = std::get<SessionRecording::Entry::Camera>(nextCamera->value);
-        const double nextTime = nextCamera->timestamp;
+    const auto& nextPose = std::get<SessionRecording::Entry::Camera>(nextCamera->value);
+    const double nextTime = nextCamera->timestamp;
 
-        // Need to actively update the focusNode position of the camera in relation to
-        // the rendered objects will be unstable and actually incorrect
-        const SceneGraphNode* n = sceneGraphNode(prevPose.focusNode);
-        if (n) {
-            global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
-        }
-
-        const double t = std::clamp(
-            (_playback.elapsedTime - prevTime) / (nextTime - prevTime),
-            0.0,
-            1.0
-        );
-
-        interaction::KeyframeNavigator::updateCamera(
-            global::navigationHandler->camera(),
-            prevPose,
-            nextPose,
-            t,
-            _ignoreRecordedScale
-        );
+    // Need to actively update the focusNode position of the camera in relation to
+    // the rendered objects will be unstable and actually incorrect
+    const SceneGraphNode* n = sceneGraphNode(prevPose.focusNode);
+    if (n) {
+        global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
     }
+
+    const double t = std::clamp(
+        (_playback.elapsedTime - prevTime) / (nextTime - prevTime),
+        0.0,
+        1.0
+    );
+
+    interaction::KeyframeNavigator::updateCamera(
+        global::navigationHandler->camera(),
+        prevPose,
+        nextPose,
+        t,
+        _ignoreRecordedScale
+    );
 
     if (isSavingFramesDuringPlayback()) {
         ghoul_assert(dt == _playback.saveScreenshots.deltaTime, "Misaligned delta times");
@@ -325,10 +321,11 @@ void SessionRecordingHandler::stopRecording(const std::filesystem::path& filenam
     LINFO("Session recording stopped");
 }
 
-void SessionRecordingHandler::startPlayback(std::filesystem::path filename, bool loop,
+void SessionRecordingHandler::startPlayback(SessionRecording timeline, bool loop,
                                             bool shouldWaitForFinishedTiles,
                                             std::optional<int> saveScreenshotFps)
 {
+    OpenSpaceEngine::Mode prevMode = global::openSpaceEngine->currentMode();
     const bool canTriggerPlayback = global::openSpaceEngine->setMode(
         OpenSpaceEngine::Mode::SessionRecordingPlayback
     );
@@ -337,44 +334,38 @@ void SessionRecordingHandler::startPlayback(std::filesystem::path filename, bool
     }
 
     if (_state == SessionState::Recording) {
+        global::openSpaceEngine->setMode(prevMode);
         throw ghoul::RuntimeError(
             "Unable to start playback while in session recording mode"
         );
     }
     else if (isPlayingBack()) {
+        global::openSpaceEngine->setMode(prevMode);
         throw ghoul::RuntimeError(
             "Unable to start new playback while in session playback mode"
         );
     }
 
-    if (!std::filesystem::is_regular_file(filename)) {
-        throw ghoul::RuntimeError(std::format(
-            "Cannot find the specified playback file '{}'", filename
-        ));
-    }
-
     _playback.isLooping = loop;
     _playback.waitForLoading = shouldWaitForFinishedTiles;
 
-    _timeline = loadSessionRecording(filename);
-    if (_timeline.entries.empty()) {
-        LERROR(std::format("Session recording '{}' is empty", filename));
-        return;
-    }
-    if (!_timeline.hasCameraFrame()) {
-        LERROR(std::format(
-            "Session recording '{}' did not contain any camera keyframes", filename
-        ));
-        _timeline = SessionRecording();
-        return;
-    }
-    _timeline.forAll<SessionRecording::Entry::Script>(
+    timeline.forAll<SessionRecording::Entry::Script>(
         [this](const SessionRecording::Entry::Script& script) {
             checkIfScriptUsesScenegraphNode(script);
             return false;
         }
     );
 
+    if (timeline.entries.empty()) {
+        global::openSpaceEngine->setMode(prevMode);
+        throw ghoul::RuntimeError("Session recording is empty");
+    }
+    if (!timeline.hasCameraFrame()) {
+        global::openSpaceEngine->setMode(prevMode);
+        throw ghoul::RuntimeError("Session recording did not contain camera keyframes");
+    }
+
+    _timeline = std::move(timeline);
 
     // Populate list of loaded scene graph nodes
     _loadedNodes.clear();
@@ -427,6 +418,18 @@ void SessionRecordingHandler::setupPlayback(double startTime) {
     global::timeManager->setTimeNextFrame(Time(firstCamera->simulationTime));
     _currentEntry = _timeline.entries.begin();
     _state = SessionState::Playback;
+}
+
+void SessionRecordingHandler::seek(double recordingTime) {
+    _currentEntry = std::upper_bound(
+        _timeline.entries.begin(),
+        _timeline.entries.end(),
+        recordingTime,
+        [](double recordingTime, const SessionRecording::Entry& e) {
+            return recordingTime < e.timestamp;
+        }
+    );
+    _playback.elapsedTime = recordingTime;
 }
 
 bool SessionRecordingHandler::isPlaybackPaused() const {

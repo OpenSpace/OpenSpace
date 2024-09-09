@@ -28,13 +28,8 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/navigation/keyframenavigator.h>
-#include <openspace/network/messagestructures.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
-#include <variant>
-#include <vector>
-#include <chrono>
 
 namespace openspace::interaction {
 
@@ -134,7 +129,7 @@ public:
      *        `enableTakeScreenShotDuringPlayback` was called before. Otherwise this value
      *        will be ignored
      */
-    void startPlayback(std::filesystem::path filename, bool loop,
+    void startPlayback(SessionRecording timeline, bool loop,
         bool shouldWaitForFinishedTiles, std::optional<int> saveScreenshotFps);
 
     /**
@@ -176,6 +171,8 @@ public:
      * \return `true` if playback is in progress
      */
     bool isPlayingBack() const;
+
+    void seek(double recordingTime);
 
     /**
      * Is saving frames during playback.

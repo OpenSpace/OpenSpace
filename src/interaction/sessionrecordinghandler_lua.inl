@@ -70,8 +70,15 @@ namespace {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
+    if (!std::filesystem::is_regular_file(file)) {
+        throw ghoul::RuntimeError(std::format(
+            "Cannot find the specified playback file '{}'", file
+        ));
+    }
+
+    interaction::SessionRecording timeline = interaction::loadSessionRecording(file);
     global::sessionRecordingHandler->startPlayback(
-        file,
+        std::move(timeline),
         loop,
         shouldWaitForTiles,
         screenshotFps

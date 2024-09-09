@@ -622,6 +622,17 @@ SessionRecording loadSessionRecording(const std::filesystem::path& filename) {
         sessionRecording.entries.push_back(std::move(*entry));
     };
 
+    ghoul_assert(
+        std::is_sorted(
+            sessionRecording.entries.begin(),
+            sessionRecording.entries.end(),
+            [](const SessionRecording::Entry& lhs, const SessionRecording::Entry& rhs) {
+                return lhs.timestamp < rhs.timestamp;
+            }
+        ),
+        "Session Recording not sorted by timestamp"
+    );
+
     return sessionRecording;
 }
 
@@ -644,6 +655,43 @@ void saveSessionRecording(const std::filesystem::path& filename,
             file.write("\n", sizeof(char));
         }
     }
+}
+
+std::vector<ghoul::Dictionary> sessionRecordingToDictionary(
+                                                        const SessionRecording& recording)
+{
+    std::vector<ghoul::Dictionary> result;
+    for (const SessionRecording::Entry& entry : recording.entries) {
+        ghoul::Dictionary e;
+        e.setValue("Timestamp", entry.timestamp);
+        e.setValue("SimulationTime", entry.simulationTime);
+
+        if (std::holds_alternative<SessionRecording::Entry::Camera>(entry.value)) {
+            const auto& cam = std::get<SessionRecording::Entry::Camera>(entry.value);
+
+            ghoul::Dictionary c;
+            c.setValue("Position", cam.position);
+            glm::dvec4 q = glm::dvec4(
+                cam.rotation.w,
+                cam.rotation.x,
+                cam.rotation.y,
+                cam.rotation.z
+            );
+            c.setValue("Rotation", q);
+            c.setValue("FocusNode", cam.focusNode);
+            c.setValue("Scale", static_cast<double>(cam.scale));
+            c.setValue("FollowFocusNode", cam.followFocusNodeRotation);
+            e.setValue("Camera", std::move(c));
+        }
+        else if (std::holds_alternative<SessionRecording::Entry::Script>(entry.value)) {
+            const std::string& s = std::get<SessionRecording::Entry::Script>(entry.value);
+            e.setValue("Script", s);
+        }
+
+        result.push_back(e);
+    }
+
+    return result;
 }
 
 } // namespace openspace::interaction

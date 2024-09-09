@@ -72,6 +72,9 @@ SessionRecording loadSessionRecording(const std::filesystem::path& filename);
 void saveSessionRecording(const std::filesystem::path& filename,
     const SessionRecording& sessionRecording, DataMode dataMode);
 
+std::vector<ghoul::Dictionary> sessionRecordingToDictionary(
+    const SessionRecording& recording);
+
 } // namespace openspace::interaction
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDINGHANDLER___H__

@@ -1043,7 +1043,6 @@ void OpenSpaceEngine::preSynchronization() {
             }
         }
         global::sessionRecordingHandler->preSynchronization(dt);
-        global::keyframeRecording->preSynchronization(dt);
         global::parallelPeer->preSynchronization();
         global::interactionMonitor->updateActivityState();
     }
