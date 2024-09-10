@@ -285,6 +285,32 @@ QWidget* LauncherWindow::createCentralWidget() {
     _profileBox->setObjectName("config");
     _profileBox->setGeometry(geometry::ProfileBox);
 
+    QPushButton* editProfileButton = new QPushButton("Edit", centralWidget);
+    connect(
+        editProfileButton, &QPushButton::released,
+        [this]() {
+        const std::string selection = _profileBox->currentText().toStdString();
+        const int selectedIndex = _profileBox->currentIndex();
+        const bool isUserProfile = selectedIndex < _userAssetCount;
+        openProfileEditor(selection, isUserProfile);
+    }
+    );
+    editProfileButton->setObjectName("small");
+    editProfileButton->setGeometry(geometry::EditProfileButton);
+    editProfileButton->setCursor(Qt::PointingHandCursor);
+
+    QPushButton* newProfileButton = new QPushButton("New", centralWidget);
+    connect(
+        newProfileButton, &QPushButton::released,
+        [this]() {
+        openProfileEditor("", true);
+    }
+    );
+    newProfileButton->setObjectName("small");
+    newProfileButton->setGeometry(geometry::NewProfileButton);
+    newProfileButton->setCursor(Qt::PointingHandCursor);
+
+
     QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
     optionsLabel->setObjectName("clear");
     optionsLabel->setGeometry(geometry::OptionsLabel);
@@ -293,63 +319,6 @@ QWidget* LauncherWindow::createCentralWidget() {
     _windowConfigBox = new QComboBox(centralWidget);
     _windowConfigBox->setObjectName("config");
     _windowConfigBox->setGeometry(geometry::WindowConfigBox);
-
-    QPushButton* startButton = new QPushButton("START", centralWidget);
-    connect(
-        startButton, &QPushButton::released,
-        [this]() {
-            if (_profileBox->currentText().isEmpty()) {
-                QMessageBox::critical(
-                    this,
-                    "Empty Profile",
-                    "Cannot launch with an empty profile"
-                );
-            }
-            else {
-                _shouldLaunch = true;
-                close();
-            }
-        }
-    );
-    startButton->setObjectName("large");
-    startButton->setGeometry(geometry::StartButton);
-    startButton->setCursor(Qt::PointingHandCursor);
-
-    QPushButton* newProfileButton = new QPushButton("New", centralWidget);
-    connect(
-        newProfileButton, &QPushButton::released,
-        [this]() {
-            openProfileEditor("", true);
-        }
-    );
-    newProfileButton->setObjectName("small");
-    newProfileButton->setGeometry(geometry::NewProfileButton);
-    newProfileButton->setCursor(Qt::PointingHandCursor);
-
-    QPushButton* editProfileButton = new QPushButton("Edit", centralWidget);
-    connect(
-        editProfileButton, &QPushButton::released,
-        [this]() {
-            const std::string selection = _profileBox->currentText().toStdString();
-            const int selectedIndex = _profileBox->currentIndex();
-            const bool isUserProfile = selectedIndex < _userAssetCount;
-            openProfileEditor(selection, isUserProfile);
-        }
-    );
-    editProfileButton->setObjectName("small");
-    editProfileButton->setGeometry(geometry::EditProfileButton);
-    editProfileButton->setCursor(Qt::PointingHandCursor);
-
-    QPushButton* newWindowButton = new QPushButton("New", centralWidget);
-    connect(
-        newWindowButton, &QPushButton::released,
-        [this]() {
-            openWindowEditor("", true);
-        }
-    );
-    newWindowButton->setObjectName("small");
-    newWindowButton->setGeometry(geometry::NewWindowButton);
-    newWindowButton->setCursor(Qt::PointingHandCursor);
 
     _editWindowButton = new QPushButton("Edit", centralWidget);
     connect(
@@ -369,6 +338,37 @@ QWidget* LauncherWindow::createCentralWidget() {
     _editWindowButton->setGeometry(geometry::EditWindowButton);
     _editWindowButton->setCursor(Qt::PointingHandCursor);
 
+    QPushButton* newWindowButton = new QPushButton("New", centralWidget);
+    connect(
+        newWindowButton, &QPushButton::released,
+        [this]() {
+            openWindowEditor("", true);
+        }
+    );
+    newWindowButton->setObjectName("small");
+    newWindowButton->setGeometry(geometry::NewWindowButton);
+    newWindowButton->setCursor(Qt::PointingHandCursor);
+
+    QPushButton* startButton = new QPushButton("START", centralWidget);
+    connect(
+        startButton, &QPushButton::released,
+        [this]() {
+        if (_profileBox->currentText().isEmpty()) {
+            QMessageBox::critical(
+                this,
+                "Empty Profile",
+                "Cannot launch with an empty profile"
+            );
+        }
+        else {
+            _shouldLaunch = true;
+            close();
+        }
+    }
+    );
+    startButton->setObjectName("large");
+    startButton->setGeometry(geometry::StartButton);
+    startButton->setCursor(Qt::PointingHandCursor);
 
     QLabel* versionLabel = new QLabel(centralWidget);
     versionLabel->setVisible(true);

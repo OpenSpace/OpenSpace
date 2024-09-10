@@ -98,7 +98,15 @@ LauncherWindow  QPushButton#settings:hover {
   border-image: url(:/images/cogwheel-highlight);
 }
 
+LauncherWindow QPushButton#small:focus, LauncherWindow QPushButton#large:focus, 
+LauncherWindow QPushButton#settings:focus {
+  outline: 2px solid rgb(61, 189, 238);
+  outline-offset: 20px;
+}
 
+LauncherWindow QComboBox#config:focus {
+  outline: 2px solid rgb(61, 189, 238);
+}
 /*
  * ProfileEdit
  */
