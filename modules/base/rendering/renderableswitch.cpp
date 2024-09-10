@@ -134,6 +134,10 @@ std::unique_ptr<Renderable> RenderableSwitch::createRenderable(const ghoul::Dict
     {
         return std::make_unique<RenderablePlaneImageOnline>(config);
     }
+    else if (type == "RenderableSwitch")
+    {
+        return std::make_unique<RenderableSwitch>(config);
+    }
     // More renderable types here
 
     return nullptr; // Throw an exception if type is not recognized?

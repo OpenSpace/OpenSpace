@@ -78,6 +78,31 @@ namespace {
         "aspect ratio of the content. Otherwise it will remain in the given size."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceInfo = {
+    "ScaleByDistance",
+    "Scale By Distance",
+    "Decides whether the plane should automatically adjust in size to match the "
+    "distance to the camera. Otherwise it will remain in the given size."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScaleRatioInfo = {
+    "ScaleRatio",
+    "Scale Ratio",
+    "The scale ratio for scaling a plane by distance to camera."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMaxHeightInfo = {
+    "ScaleByDistanceMaxHeight",
+    "Scale By Distance Max Height",
+    "The maximum height a plane can get while using the scale by distance."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMinHeightInfo = {
+    "ScaleByDistanceMinHeight",
+    "Scale By Distance Min Height",
+    "The minimum height a plane can get while using the scale by distance."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending Mode",
@@ -106,6 +131,18 @@ namespace {
         // [[codegen::verbatim(AutoScaleInfo.description)]]
         std::optional<bool> autoScale;
 
+        // [[codegen::verbatim(ScaleByDistanceInfo.description)]]
+        std::optional<bool> scaleByDistance;
+
+        // [[codegen::verbatim(ScaleRatioInfo.description)]]
+        std::optional<float> scaleRatio;
+
+        // [[codegen::verbatim(ScaleByDistanceMaxHeightInfo.description)]]
+        std::optional<float> scaleByDistanceMaxHeight;
+
+        // [[codegen::verbatim(ScaleByDistanceMinHeightInfo.description)]]
+        std::optional<float> scaleByDistanceMinHeight;
+
         enum class [[codegen::map(BlendMode)]] BlendMode {
             Normal,
             Additive
@@ -132,6 +169,10 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _mirrorBackside(MirrorBacksideInfo, false)
     , _size(SizeInfo, glm::vec2(10.f), glm::vec2(0.f), glm::vec2(1e25f))
     , _autoScale(AutoScaleInfo, true)
+    , _scaleByDistance(ScaleByDistanceInfo, false)
+    , _scaleRatio(ScaleRatioInfo, 0.01f)
+    , _scaleByDistanceMaxHeight(ScaleByDistanceMaxHeightInfo, 200000.f)
+    , _scaleByDistanceMinHeight(ScaleByDistanceMinHeightInfo, 30000.f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     Parameters p = codegen::bake<Parameters>(dictionary);
@@ -182,6 +223,18 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
 
     _autoScale = p.autoScale.value_or(_autoScale);
     addProperty(_autoScale);
+
+    _scaleByDistance = p.scaleByDistance.value_or(_scaleByDistance);
+    addProperty(_scaleByDistance);
+
+    _scaleRatio = p.scaleRatio.value_or(_scaleRatio);
+    addProperty(_scaleRatio);
+
+    _scaleByDistanceMaxHeight = p.scaleByDistanceMaxHeight.value_or(_scaleByDistanceMaxHeight);
+    addProperty(_scaleByDistanceMaxHeight);
+
+    _scaleByDistanceMinHeight = p.scaleByDistanceMinHeight.value_or(_scaleByDistanceMinHeight);
+    addProperty(_scaleByDistanceMinHeight);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -257,6 +310,28 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     cameraOrientedRotation[0] = glm::dvec4(newRight, 0.0);
     cameraOrientedRotation[1] = glm::dvec4(newUp, 0.0);
     cameraOrientedRotation[2] = glm::dvec4(normal, 0.0);
+
+    if (_scaleByDistance)
+    {
+        glm::dvec3 cameraPosition = data.camera.positionVec3();
+        glm::dvec3 modelPosition = data.modelTransform.translation;
+
+        // TODO: Change to use actual FOV value from camera
+        float fovDegrees = 37.0f;
+        float fovRadians = glm::radians(fovDegrees);
+
+        float distance = glm::distance(cameraPosition, modelPosition);
+
+        float height = (2.0f * distance * tan(fovRadians * 0.5f)) * _scaleRatio.value();
+        height = std::clamp(height, _scaleByDistanceMinHeight.value(),
+                                    _scaleByDistanceMaxHeight.value());
+
+        glm::vec2 currentSize = _size.value();
+
+        glm::vec2 scaledSize = currentSize * (height / currentSize.y);
+
+        _size.setValue(scaledSize);
+    }
 
     const glm::dmat4 rotationTransform = _billboard ?
         cameraOrientedRotation :
