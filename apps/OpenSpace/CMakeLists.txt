@@ -203,7 +203,7 @@ end_header("Dependency: SGCT")
 # Handles dll copying and library linking for GStreamer functionality.
 if(SGCT_GSTREAMER_SUPPORT)
 	include(${PROJECT_SOURCE_DIR}/apps/OpenSpace/ext/sgct/ext/gstreamer/copy_gstreamer_libs.cmake)
-  #copy_gstreamer_dlls(OpenSpace)
+  copy_gstreamer_dlls(OpenSpace)
   link_gstreamer_libs(OpenSpace)
 
   target_compile_definitions(OpenSpace PUBLIC
