@@ -116,6 +116,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
     _needsRepaint = false;
 }
 
+#ifdef WIN32
 void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
                                           PaintElementType type,
                                           const RectList& dirtyRects,
@@ -177,6 +178,7 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
     _texture = sharedTexture;
     _needsRepaint = false;
 }
+#endif // WIN32
 
 void WebRenderHandler::updateTexture() {
     if (_acceleratedRendering || _needsRepaint) {

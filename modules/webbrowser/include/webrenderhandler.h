@@ -67,11 +67,13 @@ public:
     void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
         const RectList &dirtyRects, const void* buffer, int width, int height) override;
 
+#ifdef WIN32
     // Used when the "shared_texture" flag is set to true for CEF. Uses a shared texture
     // from CEF that is allocated on another part of the GPU. Skip CPU allocationn for
     // better performance. Needs OpenGl 4.5 or higher. 
     void OnAcceleratedPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
         const RectList& dirtyRects, const CefAcceleratedPaintInfo& info) override;
+#endif // WIN32
 
     // Determines if the alpha value is > 0 at the specified pixel coordinates. Used in
     // the GUI to determine if the click is consumed
