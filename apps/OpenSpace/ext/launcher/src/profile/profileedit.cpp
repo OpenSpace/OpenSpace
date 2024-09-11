@@ -95,7 +95,7 @@ namespace {
     }
 } // namespace
 
-ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName, 
+ProfileEdit::ProfileEdit(Profile& profile, const std::string& profileName,
                          std::filesystem::path assetBasePath,
                          std::filesystem::path userAssetBasePath,
                          std::filesystem::path builtInProfileBasePath,
@@ -151,6 +151,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             editProperties, &QPushButton::clicked,
             this, &ProfileEdit::openProperties
         );
+        editProperties->setAccessibleName("Edit properties");
         container->addWidget(editProperties, 0, 2);
 
         _propertiesEdit = new QTextEdit;
@@ -171,6 +172,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
 
         QPushButton* assetsProperties = new QPushButton("Edit");
         connect(assetsProperties, &QPushButton::clicked, this, &ProfileEdit::openAssets);
+        assetsProperties->setAccessibleName("Edit assets");
         container->addWidget(assetsProperties, 0, 2);
 
         _assetsEdit = new QTextEdit;
@@ -193,6 +195,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             keybindingsProperties, &QPushButton::clicked,
             this, &ProfileEdit::openKeybindings
         );
+        keybindingsProperties->setAccessibleName("Edit actions & keybindings");
         container->addWidget(keybindingsProperties, 0, 2);
 
         _keybindingsEdit = new QTextEdit;
@@ -216,6 +219,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* metaEdit = new QPushButton("Edit");
         connect(metaEdit, &QPushButton::clicked, this, &ProfileEdit::openMeta);
         metaEdit->setLayoutDirection(Qt::RightToLeft);
+        metaEdit->setAccessibleName("Edit metadata");
         container->addWidget(metaEdit);
         rightLayout->addLayout(container);
     }
@@ -233,6 +237,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             this, &ProfileEdit::openMarkNodes
         );
         interestingNodesEdit->setLayoutDirection(Qt::RightToLeft);
+        interestingNodesEdit->setAccessibleName("Edit interesting nodes");
         container->addWidget(interestingNodesEdit);
         rightLayout->addLayout(container);
     }
@@ -250,6 +255,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             this, &ProfileEdit::openDeltaTimes
         );
         deltaTimesEdit->setLayoutDirection(Qt::RightToLeft);
+        deltaTimesEdit->setAccessibleName("Edit simulation time increments");
         container->addWidget(deltaTimesEdit);
         rightLayout->addLayout(container);
     }
@@ -264,6 +270,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* cameraEdit = new QPushButton("Edit");
         connect(cameraEdit, &QPushButton::clicked, this, &ProfileEdit::openCamera);
         cameraEdit->setLayoutDirection(Qt::RightToLeft);
+        cameraEdit->setAccessibleName("Edit camera");
         container->addWidget(cameraEdit);
         rightLayout->addLayout(container);
     }
@@ -278,6 +285,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* timeEdit = new QPushButton("Edit");
         connect(timeEdit, &QPushButton::clicked, this, &ProfileEdit::openTime);
         timeEdit->setLayoutDirection(Qt::RightToLeft);
+        timeEdit->setAccessibleName("Edit time");
         container->addWidget(timeEdit);
         rightLayout->addLayout(container);
     }
@@ -292,6 +300,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         QPushButton* modulesEdit = new QPushButton("Edit");
         connect(modulesEdit, &QPushButton::clicked, this, &ProfileEdit::openModules);
         modulesEdit->setLayoutDirection(Qt::RightToLeft);
+        modulesEdit->setAccessibleName("Edit modules");
         container->addWidget(modulesEdit);
         rightLayout->addLayout(container);
     }
@@ -309,6 +318,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             this, &ProfileEdit::openAddedScripts
         );
         additionalScriptsEdit->setLayoutDirection(Qt::RightToLeft);
+        additionalScriptsEdit->setAccessibleName("Edit additional scripts");
         container->addWidget(additionalScriptsEdit);
         rightLayout->addLayout(container);
     }

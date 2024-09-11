@@ -92,11 +92,12 @@ void ModulesDialog::createWidgets() {
         _list->addItem(new QListWidgetItem(createOneLineSummary(m)));
     }
     layout->addWidget(_list);
-    
+
     {
         QBoxLayout* box = new QHBoxLayout;
         _buttonAdd = new QPushButton("Add new");
         connect(_buttonAdd, &QPushButton::clicked, this, &ModulesDialog::listItemAdded);
+        _buttonAdd->setAccessibleName("Add new module");
         box->addWidget(_buttonAdd);
 
         _buttonRemove = new QPushButton("Remove");
@@ -104,6 +105,7 @@ void ModulesDialog::createWidgets() {
             _buttonRemove, &QPushButton::clicked,
             this, &ModulesDialog::listItemRemove
         );
+        _buttonRemove->setAccessibleName("Remove module");
         box->addWidget(_buttonRemove);
 
         box->addStretch();
@@ -113,14 +115,14 @@ void ModulesDialog::createWidgets() {
     {
         _moduleLabel = new QLabel("Module");
         layout->addWidget(_moduleLabel);
-        
+
         _moduleEdit = new QLineEdit;
         _moduleEdit->setToolTip("Name of OpenSpace module related to this profile");
         layout->addWidget(_moduleEdit);
 
         _loadedLabel = new QLabel("Command if Module is Loaded");
         layout->addWidget(_loadedLabel);
-        
+
         _loadedEdit = new QLineEdit;
         _loadedEdit->setToolTip(
             "Lua command(s) to execute if OpenSpace has been compiled with the module"
@@ -129,7 +131,7 @@ void ModulesDialog::createWidgets() {
 
         _notLoadedLabel = new QLabel("Command if Module is NOT Loaded");
         layout->addWidget(_notLoadedLabel);
-        
+
         _notLoadedEdit = new QLineEdit;
         _notLoadedEdit->setToolTip(
             "Lua command(s) to execute if the module is not present in the OpenSpace "
@@ -193,7 +195,7 @@ void ModulesDialog::listItemSelected() {
         else {
             _loadedEdit->clear();
         }
-        
+
         if (m.notLoadedInstruction.has_value()) {
             _notLoadedEdit->setText(QString::fromStdString(*m.notLoadedInstruction));
         }

@@ -284,6 +284,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     _profileBox = new QComboBox(centralWidget);
     _profileBox->setObjectName("config");
     _profileBox->setGeometry(geometry::ProfileBox);
+    _profileBox->setAccessibleName("Choose profile");
 
     QPushButton* editProfileButton = new QPushButton("Edit", centralWidget);
     connect(
@@ -299,6 +300,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     editProfileButton->setGeometry(geometry::EditProfileButton);
     editProfileButton->setCursor(Qt::PointingHandCursor);
     editProfileButton->setAutoDefault(true);
+    editProfileButton->setAccessibleName("Edit profile");
 
     QPushButton* newProfileButton = new QPushButton("New", centralWidget);
     connect(
@@ -311,6 +313,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     newProfileButton->setGeometry(geometry::NewProfileButton);
     newProfileButton->setCursor(Qt::PointingHandCursor);
     newProfileButton->setAutoDefault(true);
+    newProfileButton->setAccessibleName("New profile");
 
 
     QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
@@ -321,6 +324,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     _windowConfigBox = new QComboBox(centralWidget);
     _windowConfigBox->setObjectName("config");
     _windowConfigBox->setGeometry(geometry::WindowConfigBox);
+    _windowConfigBox->setAccessibleName("Select window config");
 
     _editWindowButton = new QPushButton("Edit", centralWidget);
     connect(
@@ -340,6 +344,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     _editWindowButton->setGeometry(geometry::EditWindowButton);
     _editWindowButton->setCursor(Qt::PointingHandCursor);
     _editWindowButton->setAutoDefault(true);
+    _editWindowButton->setAccessibleName("Edit window config");
 
     QPushButton* newWindowButton = new QPushButton("New", centralWidget);
     connect(
@@ -352,6 +357,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     newWindowButton->setGeometry(geometry::NewWindowButton);
     newWindowButton->setCursor(Qt::PointingHandCursor);
     newWindowButton->setAutoDefault(true);
+    newWindowButton->setAccessibleName("New window config");
 
     QPushButton* startButton = new QPushButton("START", centralWidget);
     connect(
@@ -374,6 +380,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     startButton->setGeometry(geometry::StartButton);
     startButton->setCursor(Qt::PointingHandCursor);
     startButton->setAutoDefault(true);
+    startButton->setAccessibleName("Start OpenSpace");
 
     QLabel* versionLabel = new QLabel(centralWidget);
     versionLabel->setVisible(true);
@@ -416,6 +423,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     settingsButton->setGeometry(geometry::SettingsButton);
     settingsButton->setIconSize(QSize(SettingsIconSize, SettingsIconSize));
     settingsButton->setAutoDefault(true);
+    settingsButton->setAccessibleName("Settings");
 
     return centralWidget;
 }

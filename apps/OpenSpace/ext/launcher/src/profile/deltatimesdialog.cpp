@@ -107,7 +107,7 @@ void DeltaTimesDialog::createWidgets() {
     _listWidget->setAutoScroll(true);
     _listWidget->setLayoutMode(QListView::SinglePass);
     layout->addWidget(_listWidget);
-    
+
     {
         QBoxLayout* buttonLayout = new QHBoxLayout;
         _addButton = new QPushButton("Add Entry");
@@ -130,12 +130,13 @@ void DeltaTimesDialog::createWidgets() {
 
     _adjustLabel = new QLabel("Set Simulation Time Increment for key");
     layout->addWidget(_adjustLabel);
-    
+
     {
         QBoxLayout* box = new QHBoxLayout;
         _seconds = new QLineEdit;
         _seconds->setValidator(new QDoubleValidator);
         connect(_seconds, &QLineEdit::textChanged, this, &DeltaTimesDialog::valueChanged);
+        _seconds->setAccessibleName("Set simulation time increment for key");
         box->addWidget(_seconds);
 
         _value = new QLabel;

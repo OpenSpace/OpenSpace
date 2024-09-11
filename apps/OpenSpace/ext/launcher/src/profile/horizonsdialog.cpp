@@ -296,6 +296,7 @@ void HorizonsDialog::createWidgets() {
         _startEdit = new QDateTimeEdit;
         _startEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
         _startEdit->setDate(QDate::currentDate().addYears(-1));
+        _startEdit->setAccessibleName("Set start time");
         _startEdit->setToolTip("Enter the start date and time for the data");
         layout->addWidget(_startEdit, 8, 2);
     }
@@ -306,6 +307,7 @@ void HorizonsDialog::createWidgets() {
         _endEdit = new QDateTimeEdit(this);
         _endEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
         _endEdit->setDate(QDate::currentDate());
+        _endEdit->setAccessibleName("Set end time");
         _endEdit->setToolTip("Enter the end date and time for the data");
         layout->addWidget(_endEdit, 9, 2);
     }
