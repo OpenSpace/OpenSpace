@@ -29,6 +29,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/defer.h>
@@ -39,6 +40,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <optional>
 #include <variant>
+#include <iostream>
 
 namespace {
     enum BlendMode {
@@ -316,8 +318,8 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
         glm::dvec3 cameraPosition = data.camera.positionVec3();
         glm::dvec3 modelPosition = data.modelTransform.translation;
 
-        // TODO: Change to use actual FOV value from camera
-        float fovDegrees = 37.0f;
+        float fovDegrees = global::windowDelegate->getHorizFieldOfView();
+
         float fovRadians = glm::radians(fovDegrees);
 
         float distance = glm::distance(cameraPosition, modelPosition);
