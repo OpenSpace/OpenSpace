@@ -37,6 +37,7 @@
 #include <QFile>
 #include <QLabel>
 #include <QMessageBox>
+#include <QPainter>
 #include <QPushButton>
 #include <QStandardItemModel>
 #include <filesystem>
@@ -66,7 +67,7 @@ namespace {
     namespace geometry {
         constexpr QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
         constexpr QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
-        constexpr QRect ChooseLabel(LeftRuler, TopRuler + 80, 151, 24);
+        constexpr QRect ChooseLabel(LeftRuler + 10, TopRuler + 80, 151, 24);
         constexpr QRect ProfileBox(LeftRuler, TopRuler + 110, ItemWidth, ItemHeight);
         constexpr QRect NewProfileButton(
             LeftRuler + 160, TopRuler + 180, SmallItemWidth, SmallItemHeight
@@ -74,7 +75,7 @@ namespace {
         constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr QRect OptionsLabel(LeftRuler, TopRuler + 230, 151, 24);
+        constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 230, 151, 24);
         constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
             LeftRuler + 160, TopRuler + 330, SmallItemWidth, SmallItemHeight
@@ -468,21 +469,27 @@ void LauncherWindow::setBackgroundImage(const std::filesystem::path& syncPath) {
     // We know there has to be at least one folder, so it's fine to just pick the first
     while (!files.empty()) {
         const std::filesystem::path& p = files.front();
-        if (p.extension() == ".png") {
-            // If the top path starts with the png extension, we have found our candidate
-            break;
+        if (p.extension() != ".png" || p.filename() == "overlay.png") {
+            files.erase(files.begin());
         }
         else {
-            // There shouldn't be any non-png images in here, but you never know. So we
-            // just remove non-image files here
-            files.erase(files.begin());
+            // If the top path starts with the png extension, we have found our candidate
+            break;
         }
     }
 
     // There better be at least one file left, but just in in case
     if (!files.empty()) {
+        // Take the selected image and overpaint the overlay increasing the contrast
         std::string image = files.front().string();
-        _backgroundImage->setPixmap(QPixmap(QString::fromStdString(image)));
+        QPixmap pixmap = QPixmap(QString::fromStdString(image));
+        QPainter painter = QPainter(&pixmap);
+        painter.setOpacity(0.7);
+        QPixmap overlay = QPixmap(QString::fromStdString(
+            std::format("{}/overlay.png", latest.path.path())
+        ));
+        painter.drawPixmap(pixmap.rect(), overlay);
+        _backgroundImage->setPixmap(pixmap);
     }
 }
 
