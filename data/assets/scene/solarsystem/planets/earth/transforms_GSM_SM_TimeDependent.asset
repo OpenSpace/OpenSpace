@@ -4,22 +4,23 @@ local coreKernels = asset.require("spice/core")
 local GSM_Kernel = asset.resource("kernels/GSMtime.tf")
 local SM_Kernel = asset.resource("kernels/SMtime.tf")
 
-local TimeDependentMagneticNorth = "C:/Users/eolsson/Downloads/earthnpole_19500101_20251231_v01.bsp"
-local lastPosMagNorth25To35 = "C:/Users/eolsson/Downloads/earthnpole_runout.bsp"
 
-local kernels = "C:/Users/eolsson/Downloads/kernels/"
-HighResPredKernels = kernels .. "earth_200101_990825_predict.bpc"
-HighResTo2024Kernels = kernels .. "earth_620120_240827.bpc"
-HighResLatestKernels = kernels .. "earth_latest_high_prec.bpc"
 
+local kernels = {
+  "C:/Users/eolsson/Downloads/earthnpole_19500101_20251231_v01.bsp",
+  "C:/Users/eolsson/Downloads/earthnpole_runout.bsp",
+  "C:/Users/eolsson/Downloads/kernels/earth_200101_990825_predict.bpc",
+  "C:/Users/eolsson/Downloads/kernels/earth_620120_240827.bpc",
+  "C:/Users/eolsson/Downloads/kernels/earth_latest_high_prec.bpc"
+}
 
 local Frame = {
   GSM_time = "EARTH_GSM_IGRF",
   SM_time = "EARTH_SM_IGRF"
 }
 
-local GSMTimeReferenceFrame = {
-  Identifier = "GSMTimeReferenceFrame",
+local GeocentricSolarMagnetosphericTimeDependent = {
+  Identifier = "GeocentricSolarMagnetosphericTimeDependent",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Rotation = {
@@ -29,16 +30,25 @@ local GSMTimeReferenceFrame = {
     }
   },
   GUI = {
-    Name = "GSM-Time Reference Frame",
+    Name = "Geocentric Solar Magnetospheric (Timedependent)",
     Path = "/Solar System/Planets/Earth",
+    Description = [[The Earth's magnetic dipole axis direction is time-
+      variable and is defined by the EARTH_NORTH_POLE/399901 object location 
+      as seen from the Earth center provided in the SPK file
+      earthnpole_19500101_20251231_v01.bsp (or newer).
+      +X is parallel to the geometric earth-sun position vector.
+      +Z axis is normalized component of north centered geomagnetic dipole
+      vector orthogonal to GSM +X axis.
+      +Y completes the right-handed frame.
+      - the origin of this frame is the center of mass of the Earth.]],
     Hidden = true
   }
 }
 
 --like the other SM reference frame but with a time variant magnetic north pole. Update every 5years :
 -- 20251231, 20301231 etc...
-local SMTimeReferenceFrame = {
-  Identifier = "SMTimeReferenceFrame",
+local SolarMagnetosphericTimeDependent = {
+  Identifier = "SolarMagnetosphericTimeDependent",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Rotation ={
@@ -48,40 +58,43 @@ local SMTimeReferenceFrame = {
     }
   },
   GUI = {
-    Name = "SM-Time Reference Frame",
+    Name = "Solar Magnetospheric (Timedependent)",
     Path = "/Solar System/Planets/Earth",
+    Description = [[ The Earth's magnetic dipole axis direction is time-
+      variable and is defined by the EARTH_NORTH_POLE/399901 object location 
+      as seen from the Earth center provided in the SPK file
+      earthnpole_19500101_20251231_v01.bsp (or newer).
+      +Z axis is the direction of Earth's magnetic dipole axis
+      (positive North); it's the primary vector.
+      +X axis is the projection of the geometric position of the
+      Sun relative to the Earth onto the plane perpendicular to the
+      Z axis.
+      +Y axis completes the right-handed system.
+      - the origin of this frame is the center of mass of the Earth.]],
     Hidden = true
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(lastPosMagNorth25To35)
-  openspace.spice.loadKernel(TimeDependentMagneticNorth)
-  openspace.spice.loadKernel(HighResPredKernels)
-  openspace.spice.loadKernel(HighResTo2024Kernels)
-  openspace.spice.loadKernel(HighResLatestKernels)
+  openspace.spice.loadKernel(kernels)
   openspace.spice.loadKernel(GSM_Kernel)
   openspace.spice.loadKernel(SM_Kernel)
-  openspace.addSceneGraphNode(GSMTimeReferenceFrame)
-  openspace.addSceneGraphNode(SMTimeReferenceFrame)
+  openspace.addSceneGraphNode(GeocentricSolarMagnetosphericTimeDependent)
+  openspace.addSceneGraphNode(SolarMagnetosphericTimeDependent)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SMTimeReferenceFrame)
-  openspace.removeSceneGraphNode(GSMTimeReferenceFrame)
+  openspace.removeSceneGraphNode(SolarMagnetosphericTimeDependent)
+  openspace.removeSceneGraphNode(GeocentricSolarMagnetosphericTimeDependent)
   openspace.spice.unloadKernel(SM_Kernel)
   openspace.spice.unloadKernel(GSM_Kernel)
-  openspace.spice.unloadKernel(HighResLatestKernels)
-  openspace.spice.unloadKernel(HighResTo2024Kernels)
-  openspace.spice.unloadKernel(HighResPredKernels)
-  openspace.spice.unloadKernel(TimeDependentMagneticNorth)
-  openspace.spice.unloadKernel(lastPosMagNorth25To35)
+  openspace.spice.unloadKernel(kernels)
 end)
 
 asset.export("Frame", Frame)
-asset.export(GSMTimeReferenceFrame)
-asset.export(SMTimeReferenceFrame)
+asset.export(GeocentricSolarMagnetosphericTimeDependent)
+asset.export(SolarMagnetosphericTimeDependent)
 
 
 

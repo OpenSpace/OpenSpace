@@ -4,13 +4,15 @@ local coreKernels = asset.require("spice/core")
 local GSM_Kernel = asset.resource("kernels/GSM.tf")
 local SM_Kernel = asset.resource("kernels/SM.tf")
 
+
+
 local Frame = {
   GSM = "EARTH_GSM_IGRF2000", -- Geocentric Solar Magnetospheric
   SM = "EARTH_SM_IGRF2000",
 }
 
-local GSMReferenceFrame = {
-  Identifier = "GSMReferenceFrame",
+local GeocentricSolarMagnetospheric = {
+  Identifier = "GeocentricSolarMagnetospheric",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Rotation = {
@@ -20,14 +22,19 @@ local GSMReferenceFrame = {
     }
   },
   GUI = {
-    Name = "GSM Reference Frame",
+    Name = "Geocentric Solar Magnetospheric",
     Path = "/Solar System/Planets/Earth",
+    Description = [[ +X is parallel to the geometric earth-sun position vector.
+      +Z axis is normalized component of north centered geomagnetic dipole
+      vector orthogonal to GSM +X axis.
+      +Y completes the right-handed frame.
+      - the origin of this frame is the center of mass of the Earth.]],
     Hidden = true
   }
 }
 
-local SMReferenceFrame = {
-  Identifier = "SMReferenceFrame",
+local SolarMagnetospheric = {
+  Identifier = "SolarMagnetospheric",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Rotation = {
@@ -37,8 +44,15 @@ local SMReferenceFrame = {
     }
   },
   GUI = {
-    Name = "SM Reference Frame",
+    Name = "Solar Magnetospheric",
     Path = "/Solar System/Planets/Earth",
+    Description = [[+Z axis is the direction of Earth's magnetic dipole axis
+      (positive North); it's the primary vector.
+      +X axis is the projection of the geometric position of the
+      Sun relative to the Earth onto the plane perpendicular to the
+      Z axis.
+      +Y axis completes the right-handed system.
+      - the origin of this frame is the center of mass of the Earth.]],
     Hidden = true
   }
 }
@@ -47,28 +61,28 @@ local SMReferenceFrame = {
 asset.onInitialize(function()
   openspace.spice.loadKernel(GSM_Kernel)
   openspace.spice.loadKernel(SM_Kernel)
-  openspace.addSceneGraphNode(GSMReferenceFrame)
-  openspace.addSceneGraphNode(SMReferenceFrame)
+  openspace.addSceneGraphNode(GeocentricSolarMagnetospheric)
+  openspace.addSceneGraphNode(SolarMagnetospheric)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SMReferenceFrame)
-  openspace.removeSceneGraphNode(GSMReferenceFrame)
+  openspace.removeSceneGraphNode(SolarMagnetospheric)
+  openspace.removeSceneGraphNode(GeocentricSolarMagnetospheric)
   openspace.spice.unloadKernel(SM_Kernel)
   openspace.spice.unloadKernel(GSM_Kernel)
 end)
 
 asset.export("Frame", Frame)
-asset.export(GSMReferenceFrame)
-asset.export(SMReferenceFrame)
+asset.export(GeocentricSolarMagnetospheric)
+asset.export(SolarMagnetospheric)
 
 
 
 asset.meta = {
-Name = "Earth GSM and SM transforms",
-Version = "1.0",
-Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric, SMReferenceFrame, Solar Magnetic",
-Author = "CCMC",
-URL = "http://openspaceproject.com",
-License = "MIT license"
+  Name = "Earth GSM and SM transforms",
+  Version = "1.0",
+  Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric, SMReferenceFrame, Solar Magnetic",
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

@@ -3,11 +3,14 @@ local coreKernels = asset.require("spice/core")
 local Eclipdate = asset.resource("kernels/ECLIPDATE.tf")
 local GSEKernel = asset.resource("kernels/GSE.tf")
 
+
+
 local Frame = {
   GSE = "GSE"
 }
-local GSEReferenceFrame = {
-  Identifier = "GSEReferenceFrame",
+
+local GeocentricSolarEcliptic = {
+  Identifier = "GeocentricSolarEcliptic",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Rotation = {
@@ -17,8 +20,14 @@ local GSEReferenceFrame = {
     }
   },
   GUI = {
-    Name = "GSE Reference Frame",
+    Name = "Geocentric Solar Ecliptic",
     Path = "/Solar System/Planets/Earth",
+    Description = [[The X-Y plane is defined by the Earth Mean Ecliptic plane of date:
+        the +Z axis, primary vector, is the normal vector to this plane,
+        always pointing toward the North side of the invariant plane.
+        +X axis is the component of the Earth-Sun vector that is orthogonal
+        to the +Z axis.
+        +Y axis completes the right-handed system.]]
     Hidden = true
   }
 }
@@ -27,17 +36,17 @@ local GSEReferenceFrame = {
 asset.onInitialize(function()
   openspace.spice.loadKernel(Eclipdate)
   openspace.spice.loadKernel(GSEKernel)
-  openspace.addSceneGraphNode(GSEReferenceFrame)
+  openspace.addSceneGraphNode(GeocentricSolarEcliptic)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(GSEReferenceFrame)
+  openspace.removeSceneGraphNode(GeocentricSolarEcliptic)
   openspace.spice.unloadKernel(GSEKernel)
   openspace.spice.unloadKernel(Eclipdate)
 end)
 
 asset.export("Frame", Frame)
-asset.export(GSEReferenceFrame)
+asset.export(GeocentricSolarEcliptic)
 
 
 

@@ -6,13 +6,9 @@ local heeqKernel = asset.resource("kernels/HEEQ.tf")
 local heeKernel = asset.resource("kernels/HEE.tf")
 
 
-local HEEQ180ReferenceFrame = {
-  Identifier = "HEEQ180ReferenceFrame",
-  -- The HEEQ180 reference frame should have Sun_IAU as parent
-  -- instead of Solar center, however the Sun_IAU adds
-  -- an unwanted rotation which is difficult to cancel out
-  -- since it is using SpiceRotation. Sun center
-  -- is used instead.
+
+local HeliocentricEarthEquatorial180  = {
+  Identifier = "HeliocentricEarthEquatorial180",
   Parent = sunTransforms.SunCenter.Identifier,
   Transform = {
     Rotation = {
@@ -22,14 +18,27 @@ local HEEQ180ReferenceFrame = {
     }
   },
   GUI = {
-    Name = "HEEQ180 Reference Frame",
+    Name = "Heliocentric Earth Equatorial 180",
     Path = "/Solar System/Sun",
+    Description = [[      -  X-Y plane is the solar equator of date, therefore, the +Z axis
+          is the primary vector and it is aligned to the Sun's north pole
+          of date.
+
+      -  +X axis is defined by the intersection between the Sun equatorial
+          plane and the solar central meridian of date as seen from the Earth.
+          The solar central meridian of date is defined as the meridian of the
+          Sun that is turned toward the Earth. Therefore, +X axis is the
+          component of the Sun-Earth vector that is orthogonal to the +Z axis.
+
+      -  +Y axis completes the right-handed system.
+
+      -  the origin of this frame is the Sun's center of mass.]],
     Hidden = true
   }
 }
 
-local HEEQReferenceFrame = {
-  Identifier = "HEEQReferenceFrame",
+local HeliocentricEarthEquatorial = {
+  Identifier = "HeliocentricEarthEquatorial",
   Parent = sunTransforms.SunCenter.Identifier,
   Transform = {
     Rotation = {
@@ -39,14 +48,27 @@ local HEEQReferenceFrame = {
     }
   },
   GUI = {
-    Name = "HEEQ Reference Frame",
+    Name = "Heliocentric Earth Equatorial",
     Path = "/Solar System/Sun",
+    Description = [[      -  X-Y plane is the solar equator of date, therefore, the +Z axis
+         is the primary vector and it is aligned to the Sun's north pole
+         of date.
+
+      -  +X axis is defined by the intersection between the Sun equatorial
+         plane and the solar central meridian of date as seen from the Earth.
+         The solar central meridian of date is defined as the meridian of the
+         Sun that is turned toward the Earth. Therefore, +X axis is the
+         component of the Sun-Earth vector that is orthogonal to the +Z axis.
+
+      -  +Y axis completes the right-handed system.
+
+      -  the origin of this frame is the Sun's center of mass.]],
     Hidden = true
   }
 }
 
-local HEEReferenceFrame = {
-  Identifier = "HEEReferenceFrame",
+local HeliocentricEarthEcliptic = {
+  Identifier = "HeliocentricEarthEcliptic",
   Parent = sunTransforms.SunCenter.Identifier,
   Transform = {
     Rotation = {
@@ -56,12 +78,22 @@ local HEEReferenceFrame = {
     }
   },
   GUI = {
-    Name = "HEE Reference Frame",
+    Name = "Heliocentric Earth Ecliptic",
     Path = "/Solar System/Sun",
+    Description = [[      -  X-Y plane is defined by the Earth Mean Ecliptic plane of date,
+         therefore, the +Z axis is the primary vector,and it defined as
+         the normal vector to the Ecliptic plane that points toward the
+         north pole of date \n
+
+      -  +X axis is the component of the Sun-Earth vector that is
+         orthogonal to the +Z axis.
+
+      -  +Y axis completes the right-handed system.
+
+      -  the origin of this frame is the Sun's center of mass.]],
     Hidden = true
   }
 }
-
 
 
 asset.onInitialize(function()
@@ -69,24 +101,24 @@ asset.onInitialize(function()
   openspace.spice.loadKernel(heeqKernel)
   openspace.spice.loadKernel(heeKernel)
 
-  openspace.addSceneGraphNode(HEEQ180ReferenceFrame)
-  openspace.addSceneGraphNode(HEEQReferenceFrame)
-  openspace.addSceneGraphNode(HEEReferenceFrame)
+  openspace.addSceneGraphNode(HeliocentricEarthEquatorial180)
+  openspace.addSceneGraphNode(HeliocentricEarthEquatorial)
+  openspace.addSceneGraphNode(HeliocentricEarthEcliptic)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(HEEReferenceFrame)
-  openspace.removeSceneGraphNode(HEEQReferenceFrame)
-  openspace.removeSceneGraphNode(HEEQ180ReferenceFrame)
+  openspace.removeSceneGraphNode(HeliocentricEarthEcliptic)
+  openspace.removeSceneGraphNode(HeliocentricEarthEquatorial)
+  openspace.removeSceneGraphNode(HeliocentricEarthEquatorial180)
 
   openspace.spice.unloadKernel(heeKernel)
   openspace.spice.unloadKernel(heeqKernel)
   openspace.spice.unloadKernel(heeq180Kernel)
 end)
 
-asset.export(HEEQ180ReferenceFrame)
-asset.export(HEEQReferenceFrame)
-asset.export(HEEReferenceFrame)
+asset.export(HeliocentricEarthEquatorial180)
+asset.export(HeliocentricEarthEquatorial)
+asset.export(HeliocentricEarthEcliptic)
 
 
 

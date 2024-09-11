@@ -1,8 +1,8 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 --local magnetosphereTransforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
-local GSM_SM_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_GSM_SM")
-local GSE_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_GSE")
-local GSM_SM_Time_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_GSM_SM_TimeDependent")
+local GSM_SM_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_sm")
+local GSE_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_gse")
+local GSM_SM_Time_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_sm_timedependent")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
@@ -14,9 +14,9 @@ local EarthRadius = 6.371E6
 
 local GSEAxes = {
   Identifier = "GSECoordinateAxes",
-  Parent = GSE_Transforms.GSEReferenceFrame.Identifier,
+  Parent = GSE_Transforms.GeocentricSolarEcliptic.Identifier,
   Transform = {
-    Scale ={
+    Scale = {
       Type = "StaticScale",
       Scale = EarthRadius * 3.5
     }
@@ -32,9 +32,9 @@ local GSEAxes = {
 
 local GSMAxes = {
   Identifier = "GSMCoordinateAxes",
-  Parent = GSM_SM_Transforms.GSMReferenceFrame.Identifier,
+  Parent = GSM_SM_Transforms.GeocentricSolarMagnetospheric.Identifier,
   Transform = {
-    Scale ={
+    Scale = {
       Type = "StaticScale",
       Scale = EarthRadius * 3.5
     }
@@ -50,9 +50,9 @@ local GSMAxes = {
 
 local SMAxes = {
   Identifier = "SMCoordinateAxes",
-  Parent = GSM_SM_Transforms.SMReferenceFrame.Identifier,
+  Parent = GSM_SM_Transforms.SolarMagnetospheric.Identifier,
   Transform = {
-    Scale ={
+    Scale = {
       Type = "StaticScale",
       Scale = EarthRadius * 3.5
     }
@@ -68,9 +68,9 @@ local SMAxes = {
 
 local SMTimeAxes = {
   Identifier = "SMTimeCoordinateAxes",
-  Parent = GSM_SM_Time_Transforms.SMTimeReferenceFrame.Identifier,
+  Parent = GSM_SM_Time_Transforms.SolarMagnetosphericTimeDependent.Identifier,
   Transform = {
-    Scale ={
+    Scale = {
       Type = "StaticScale",
       Scale = EarthRadius * 5.5
     }
@@ -86,9 +86,9 @@ local SMTimeAxes = {
 
 local GSMTimeAxes = {
   Identifier = "GSMTimeCoordinateAxes",
-  Parent = GSM_SM_Time_Transforms.GSMTimeReferenceFrame.Identifier,
+  Parent = GSM_SM_Time_Transforms.GeocentricSolarMagnetosphericTimeDependent.Identifier,
   Transform = {
-    Scale ={
+    Scale = {
       Type = "StaticScale",
       Scale = EarthRadius * 5.5
     }
@@ -194,7 +194,7 @@ local SolarSystemBarycenterAxes = {
 
 local HEEQAxes = {
   Identifier = "HEEQAxes",
-  Parent = heliosphereTransforms.HEEQReferenceFrame.Identifier,
+  Parent = heliosphereTransforms.HeliocentricEarthEquatorial.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -212,7 +212,7 @@ local HEEQAxes = {
 
 local HEEQ180Axes = {
   Identifier = "HEEQ180Axes",
-  Parent = heliosphereTransforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = heliosphereTransforms.HeliocentricEarthEquatorial180.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -230,7 +230,7 @@ local HEEQ180Axes = {
 
 local HEEAxes = {
   Identifier = "HEEAxes",
-  Parent = heliosphereTransforms.HEEReferenceFrame.Identifier,
+  Parent = heliosphereTransforms.HeliocentricEarthEquatorial.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",

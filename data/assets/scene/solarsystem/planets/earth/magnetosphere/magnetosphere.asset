@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/planets/earth/transforms_GSM_static")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_static")
 
 
 
@@ -13,7 +13,7 @@ local fieldlinesDirectory = asset.resource({
 
 local EarthMagnetosphere = {
   Identifier = "EarthMagnetosphere",
-  Parent = transforms.GSMStaticReferenceFrame.Identifier,
+  Parent = transforms.GeocentricSolarMagnetosphericStatic.Identifier,
   InteractionSphere = 6380000,  -- A value slightly bigger than earth radius
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -29,7 +29,7 @@ local EarthMagnetosphere = {
     ColorQuantity = 4, -- speed
     ColorTableRanges = { { 50, 300 } },
     LoadAtRuntime = true,
-    ColorTablePaths = {transferFunction},
+    ColorTablePaths = { transferFunction },
     ScaleToMeters = 1.0,
     Color = { 1.0, 0.725, 0.75, 0.8 }
   },
