@@ -39,7 +39,7 @@ local Aurora1521 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -90,7 +90,7 @@ local AuroraGreenPinkRed1522 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -179,7 +179,7 @@ local AuroraRed1524 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -268,7 +268,7 @@ local AuroraGreenRed1526 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -319,7 +319,7 @@ local AuroraGreenPinkRedWhite1527 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -370,7 +370,7 @@ local AuroraGreenWhite1528 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -410,7 +410,7 @@ local notSeenAuroraIcon1529 = {
     Enabled = true,
     ScaleByDistance = true,
     ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
+    ScaleByDistanceMaxHeight = 200000,
     ScaleByDistanceMinHeight = 30000
   },
   GUI = {
@@ -459,7 +459,7 @@ local AuroraGreenPinkRed1530 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -510,7 +510,7 @@ local AuroraGreenPink1531 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -561,7 +561,7 @@ local AuroraRed1532 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -612,7 +612,7 @@ local AuroraGreenPinkRedWhite1533 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -701,7 +701,7 @@ local AuroraPinkRed1535 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -752,7 +752,7 @@ local AuroraGreenPink1536 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -803,7 +803,7 @@ local AuroraGreenPinkRed1537 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -854,7 +854,7 @@ local AuroraGreenPinkRed1538 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -905,7 +905,7 @@ local AuroraPinkRed1539 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -956,7 +956,7 @@ local Aurora1540 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1007,7 +1007,7 @@ local AuroraWhite1541 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1058,7 +1058,7 @@ local AuroraGreenPinkRed1542 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1109,7 +1109,7 @@ local AuroraGreenPink1543 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1236,7 +1236,7 @@ local AuroraGreenPinkRed1546 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1287,7 +1287,7 @@ local AuroraRed1547 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1338,7 +1338,7 @@ local AuroraGreenRed1548 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1389,7 +1389,7 @@ local AuroraGreenRed1549 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1516,7 +1516,7 @@ local AuroraGreenPinkWhite1552 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1567,7 +1567,7 @@ local AuroraPinkRed1553 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1656,7 +1656,7 @@ local AuroraGreenPink1555 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1707,7 +1707,7 @@ local AuroraRed1556 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1758,7 +1758,7 @@ local AuroraGreenPink1557 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1847,7 +1847,7 @@ local AuroraGreenPink1559 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -1925,7 +1925,7 @@ local notSeenAuroraIcon1561 = {
     Enabled = true,
     ScaleByDistance = true,
     ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
+    ScaleByDistanceMaxHeight = 200000,
     ScaleByDistanceMinHeight = 30000
   },
   GUI = {
@@ -1974,7 +1974,7 @@ local AuroraGreenRedWhite1562 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2063,7 +2063,7 @@ local AuroraRed1564 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2114,7 +2114,7 @@ local AuroraGreenPink1565 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2165,7 +2165,7 @@ local AuroraGreenPink1566 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2254,7 +2254,7 @@ local AuroraGreenPinkRed1568 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2343,7 +2343,7 @@ local AuroraGreenRed1570 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2432,7 +2432,7 @@ local AuroraGreenPinkRedWhite1572 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2483,7 +2483,7 @@ local AuroraGreenPink1573 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2534,7 +2534,7 @@ local AuroraGreenPinkRed1574 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2585,7 +2585,7 @@ local AuroraPinkWhite1575 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2636,7 +2636,7 @@ local AuroraGreenPink1576 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2725,7 +2725,7 @@ local AuroraGreenPinkWhite1578 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2776,7 +2776,7 @@ local AuroraPinkRed1579 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2903,7 +2903,7 @@ local AuroraGreenPinkRed1582 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -2954,7 +2954,7 @@ local AuroraGreenPinkRedWhite1583 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3043,7 +3043,7 @@ local AuroraPink1585 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3094,7 +3094,7 @@ local AuroraPink1586 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3145,7 +3145,7 @@ local AuroraGreenRed1587 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3196,7 +3196,7 @@ local AuroraGreenPink1588 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3247,7 +3247,7 @@ local AuroraGreenPinkRedWhite1589 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3336,7 +3336,7 @@ local AuroraRed1591 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3425,7 +3425,7 @@ local AuroraRed1593 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3476,7 +3476,7 @@ local AuroraGreenPinkRedWhite1594 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3527,7 +3527,7 @@ local AuroraGreenRed1595 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3578,7 +3578,7 @@ local AuroraGreenRed1596 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3667,7 +3667,7 @@ local AuroraGreenPinkRedWhite1598 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3718,7 +3718,7 @@ local AuroraGreenRed1599 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -3758,7 +3758,7 @@ local notSeenAuroraIcon1600 = {
     Enabled = true,
     ScaleByDistance = true,
     ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
+    ScaleByDistanceMaxHeight = 200000,
     ScaleByDistanceMinHeight = 30000
   },
   GUI = {
@@ -3807,7 +3807,7 @@ local AuroraGreenPinkRedWhite1601 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4010,7 +4010,7 @@ local AuroraPink1606 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4061,7 +4061,7 @@ local AuroraGreenPink1607 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4150,7 +4150,7 @@ local AuroraGreenPinkRed1609 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4201,7 +4201,7 @@ local AuroraRed1610 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4252,7 +4252,7 @@ local AuroraGreenPink1611 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4303,7 +4303,7 @@ local AuroraGreenPinkRed1612 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4430,7 +4430,7 @@ local AuroraGreenPink1615 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4519,7 +4519,7 @@ local AuroraGreenPink1617 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4570,7 +4570,7 @@ local AuroraGreenPinkRed1618 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4659,7 +4659,7 @@ local AuroraGreenPinkRedWhite1620 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4710,7 +4710,7 @@ local AuroraGreenRed1621 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4837,7 +4837,7 @@ local AuroraGreenRedWhite1624 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -4877,7 +4877,7 @@ local notSeenAuroraIcon1625 = {
     Enabled = true,
     ScaleByDistance = true,
     ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
+    ScaleByDistanceMaxHeight = 200000,
     ScaleByDistanceMinHeight = 30000
   },
   GUI = {
@@ -4926,7 +4926,7 @@ local AuroraRed1626 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5015,7 +5015,7 @@ local AuroraGreenPink1628 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5066,7 +5066,7 @@ local AuroraGreenPink1629 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5117,7 +5117,7 @@ local AuroraGreenRed1630 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5206,7 +5206,7 @@ local AuroraGreenPinkRed1632 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5257,7 +5257,7 @@ local AuroraGreenPink1633 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5308,7 +5308,7 @@ local AuroraGreenPinkRed1634 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5435,7 +5435,7 @@ local AuroraGreenPink1637 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5486,7 +5486,7 @@ local AuroraGreenPink1638 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5537,7 +5537,7 @@ local AuroraPinkRed1639 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5615,7 +5615,7 @@ local notSeenAuroraIcon1641 = {
     Enabled = true,
     ScaleByDistance = true,
     ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
+    ScaleByDistanceMaxHeight = 200000,
     ScaleByDistanceMinHeight = 30000
   },
   GUI = {
@@ -5664,7 +5664,7 @@ local AuroraGreenPink1642 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5791,7 +5791,7 @@ local AuroraGreenPinkRedWhite1645 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5842,7 +5842,7 @@ local AuroraGreenWhite1646 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -5882,7 +5882,7 @@ local notSeenAuroraIcon1647 = {
     Enabled = true,
     ScaleByDistance = true,
     ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
+    ScaleByDistanceMaxHeight = 200000,
     ScaleByDistanceMinHeight = 30000
   },
   GUI = {
@@ -5969,7 +5969,7 @@ local AuroraGreenRed1649 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6020,7 +6020,7 @@ local AuroraGreenPink1650 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6071,7 +6071,7 @@ local AuroraGreenPinkRed1651 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6122,7 +6122,7 @@ local AuroraGreenPinkRedWhite1652 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6173,7 +6173,7 @@ local AuroraGreenPinkRedWhite1653 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6224,7 +6224,7 @@ local AuroraGreenPinkRed1654 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6275,7 +6275,7 @@ local AuroraPink1655 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6364,7 +6364,7 @@ local AuroraGreenRed1657 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6415,7 +6415,7 @@ local AuroraGreenPinkWhite1658 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6455,7 +6455,7 @@ local notSeenAuroraIcon1659 = {
     Enabled = true,
     ScaleByDistance = true,
     ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
+    ScaleByDistanceMaxHeight = 200000,
     ScaleByDistanceMinHeight = 30000
   },
   GUI = {
@@ -6504,7 +6504,7 @@ local Aurora1660 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6631,7 +6631,7 @@ local AuroraGreenPinkRed1663 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6682,7 +6682,7 @@ local AuroraGreenRed1664 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6733,7 +6733,7 @@ local AuroraGreenRed1665 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6784,7 +6784,7 @@ local AuroraGreenPinkWhite1666 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6873,7 +6873,7 @@ local AuroraGreenPinkWhite1668 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6924,7 +6924,7 @@ local AuroraGreenPinkWhite1669 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -6975,7 +6975,7 @@ local AuroraGreenRed1670 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7026,7 +7026,7 @@ local AuroraGreenPinkRedWhite1671 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7077,7 +7077,7 @@ local AuroraGreenPinkRed1672 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7204,7 +7204,7 @@ local AuroraGreenPink1675 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7293,7 +7293,7 @@ local AuroraGreenPinkRed1677 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7344,7 +7344,7 @@ local AuroraGreenPinkRedWhite1678 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7433,7 +7433,7 @@ local AuroraGreenPink1680 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7484,7 +7484,7 @@ local AuroraPinkRed1681 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7573,7 +7573,7 @@ local AuroraGreenPink1683 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7651,7 +7651,7 @@ local notSeenAuroraIcon1685 = {
     Enabled = true,
     ScaleByDistance = true,
     ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
+    ScaleByDistanceMaxHeight = 200000,
     ScaleByDistanceMinHeight = 30000
   },
   GUI = {
@@ -7738,7 +7738,7 @@ local AuroraGreenPinkRed1687 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7789,7 +7789,7 @@ local AuroraGreenRed1688 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7840,7 +7840,7 @@ local AuroraGreenRed1689 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -7929,7 +7929,7 @@ local AuroraGreenPinkWhite1691 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -8018,7 +8018,7 @@ local AuroraGreenPinkRed1693 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -8145,7 +8145,7 @@ local AuroraGreen1696 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -8185,7 +8185,7 @@ local notSeenAuroraIcon1697 = {
     Enabled = true,
     ScaleByDistance = true,
     ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
+    ScaleByDistanceMaxHeight = 200000,
     ScaleByDistanceMinHeight = 30000
   },
   GUI = {
@@ -8234,7 +8234,7 @@ local AuroraGreenPinkRed1698 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -8399,7 +8399,7 @@ local AuroraGreenPinkRed1702 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -8450,7 +8450,7 @@ local AuroraRed1703 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -8501,7 +8501,7 @@ local AuroraGreenRedWhite1704 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -8617,7 +8617,7 @@ local notSeenAuroraIcon1707 = {
     Enabled = true,
     ScaleByDistance = true,
     ScaleRatio = 0.01,
-    ScaleByDistanceMaxHeight = 2000000,
+    ScaleByDistanceMaxHeight = 200000,
     ScaleByDistanceMinHeight = 30000
   },
   GUI = {
@@ -8666,7 +8666,7 @@ local AuroraGreenPinkWhite1708 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000
@@ -8755,7 +8755,7 @@ local AuroraGreenPinkRedWhite1710 = {
       Enabled = true,
       ScaleByDistance = true,
       ScaleRatio = 0.01,
-      ScaleByDistanceMaxHeight = 2000000,
+      ScaleByDistanceMaxHeight = 200000,
       ScaleByDistanceMinHeight = 30000
     },
     DistanceThreshold = 1000000

@@ -40,11 +40,19 @@ namespace {
         "ratio of the content. Otherwise it will remain in the given size."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
+        "DistanceThreshold",
+        "Distance Threshold",
+        "Threshold for when the switch happens between the two renderables. "
+    };
+
 
     struct [[codegen::Dictionary(RenderableSwitch)]] Parameters {
         ghoul::Dictionary Renderable1;
         ghoul::Dictionary Renderable2;
-        float DistanceThreshold;
+
+        // [[codegen::verbatim(DistanceThresholdInfo.description)]]
+        std::optional<float> distanceThreshold;
     };
 #include "renderableswitch_codegen.cpp"
 } // namespace
@@ -59,6 +67,7 @@ documentation::Documentation RenderableSwitch::Documentation() {
 
 RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary), _autoScale(AutoScaleInfo, false)
+    , _distanceThreshold(DistanceThresholdInfo, 1000000.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -68,7 +77,8 @@ RenderableSwitch::RenderableSwitch(const ghoul::Dictionary& dictionary)
     // Instantiate renderable2 based on type specified in p.Renderable2
     _renderable2 = createRenderable(p.Renderable2);
 
-    _distanceThreshold = p.DistanceThreshold;
+    _distanceThreshold = p.distanceThreshold.value_or(_distanceThreshold);
+    addProperty(_distanceThreshold);
 
     addProperty(_autoScale);
 }
