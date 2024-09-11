@@ -298,6 +298,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     editProfileButton->setObjectName("small");
     editProfileButton->setGeometry(geometry::EditProfileButton);
     editProfileButton->setCursor(Qt::PointingHandCursor);
+    editProfileButton->setAutoDefault(true);
 
     QPushButton* newProfileButton = new QPushButton("New", centralWidget);
     connect(
@@ -309,6 +310,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     newProfileButton->setObjectName("small");
     newProfileButton->setGeometry(geometry::NewProfileButton);
     newProfileButton->setCursor(Qt::PointingHandCursor);
+    newProfileButton->setAutoDefault(true);
 
 
     QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
@@ -337,6 +339,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     _editWindowButton->setObjectName("small");
     _editWindowButton->setGeometry(geometry::EditWindowButton);
     _editWindowButton->setCursor(Qt::PointingHandCursor);
+    _editWindowButton->setAutoDefault(true);
 
     QPushButton* newWindowButton = new QPushButton("New", centralWidget);
     connect(
@@ -348,6 +351,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     newWindowButton->setObjectName("small");
     newWindowButton->setGeometry(geometry::NewWindowButton);
     newWindowButton->setCursor(Qt::PointingHandCursor);
+    newWindowButton->setAutoDefault(true);
 
     QPushButton* startButton = new QPushButton("START", centralWidget);
     connect(
@@ -369,6 +373,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     startButton->setObjectName("large");
     startButton->setGeometry(geometry::StartButton);
     startButton->setCursor(Qt::PointingHandCursor);
+    startButton->setAutoDefault(true);
 
     QLabel* versionLabel = new QLabel(centralWidget);
     versionLabel->setVisible(true);
@@ -379,9 +384,6 @@ QWidget* LauncherWindow::createCentralWidget() {
     versionLabel->setGeometry(geometry::VersionString);
 
     QPushButton* settingsButton = new QPushButton(centralWidget);
-    settingsButton->setObjectName("settings");
-    settingsButton->setGeometry(geometry::SettingsButton);
-    settingsButton->setIconSize(QSize(SettingsIconSize, SettingsIconSize));
     connect(
         settingsButton,
         &QPushButton::released,
@@ -410,6 +412,10 @@ QWidget* LauncherWindow::createCentralWidget() {
             dialog.exec();
         }
     );
+    settingsButton->setObjectName("settings");
+    settingsButton->setGeometry(geometry::SettingsButton);
+    settingsButton->setIconSize(QSize(SettingsIconSize, SettingsIconSize));
+    settingsButton->setAutoDefault(true);
 
     return centralWidget;
 }
@@ -459,7 +465,7 @@ void LauncherWindow::setBackgroundImage(const std::filesystem::path& syncPath) {
             break;
         }
         else {
-            // There shouldn't be any non-png images in here, but you never know. So we 
+            // There shouldn't be any non-png images in here, but you never know. So we
             // just remove non-image files here
             files.erase(files.begin());
         }
@@ -474,7 +480,7 @@ void LauncherWindow::setBackgroundImage(const std::filesystem::path& syncPath) {
 
 void LauncherWindow::populateProfilesList(const std::string& preset) {
     namespace fs = std::filesystem;
-    
+
     _profileBox->clear();
     _userAssetCount = 0;
 
@@ -745,7 +751,7 @@ void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
                     versionMin.versionString()
                 )));
                 return;
-            } 
+            }
         }
         catch (const std::runtime_error&) {
             // Ignore an exception here because clicking the edit button will
