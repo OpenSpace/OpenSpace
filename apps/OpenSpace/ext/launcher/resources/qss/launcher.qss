@@ -98,14 +98,16 @@ LauncherWindow  QPushButton#settings:hover {
   border-image: url(:/images/cogwheel-highlight);
 }
 
-LauncherWindow QPushButton#small:focus, LauncherWindow QPushButton#large:focus, 
-LauncherWindow QPushButton#settings:focus {
-  outline: 2px solid rgb(61, 189, 238);
-  outline-offset: 20px;
+LauncherWindow QPushButton#small:focus, LauncherWindow QPushButton#large:focus,
+LauncherWindow QComboBox#config:focus {
+  /* border: 2px solid #00b3e7; */
+  outline: none;
+  border: 3px solid #3DBDEE;
 }
 
-LauncherWindow QComboBox#config:focus {
-  outline: 2px solid rgb(61, 189, 238);
+LauncherWindow QPushButton#settings:focus {
+  /* outline: 2px solid #00b3e7; */
+  outline: 3px solid #3DBDEE;
 }
 /*
  * ProfileEdit
