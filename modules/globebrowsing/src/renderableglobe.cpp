@@ -582,24 +582,6 @@ documentation::Documentation RenderableGlobe::Documentation() {
 
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _debugPropertyOwner({ "Debug" })
-    , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping"})
-    , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
-    , _leftRoot(Chunk(LeftHemisphereIndex))
-    , _rightRoot(Chunk(RightHemisphereIndex))
-    , _debugProperties({
-        BoolProperty(ShowChunkEdgeInfo, false),
-        BoolProperty(LevelProjectedAreaInfo, true),
-        BoolProperty(ResetTileProviderInfo, false),
-        BoolProperty(PerformFrustumCullingInfo, true),
-        IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
-        IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
-    })
-    , _shadowMappingProperties({
-        BoolProperty(ShadowMappingInfo, false),
-        FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
-        IntProperty(NumberShadowSamplesInfo, 5, 1, 7)
-    })
     , _performShading(PerformShadingInfo, true)
     , _useAccurateNormals(AccurateNormalsInfo, false)
     , _ambientIntensity(AmbientIntensityInfo, 0.05f, 0.f, 1.f)
@@ -611,6 +593,24 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _currentLodScaleFactor(CurrentLodScaleFactorInfo, 15.f, 1.f, 50.f)
     , _orenNayarRoughness(OrenNayarRoughnessInfo, 0.f, 0.f, 1.f)
     , _nActiveLayers(NActiveLayersInfo, 0, 0, OpenGLCap.maxTextureUnits() / 3)
+    , _debugProperties({
+        BoolProperty(ShowChunkEdgeInfo, false),
+        BoolProperty(LevelProjectedAreaInfo, true),
+        BoolProperty(ResetTileProviderInfo, false),
+        BoolProperty(PerformFrustumCullingInfo, true),
+        IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
+        IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
+    })
+    , _debugPropertyOwner({ "Debug" })
+    , _shadowMappingProperties({
+        BoolProperty(ShadowMappingInfo, false),
+        FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
+        IntProperty(NumberShadowSamplesInfo, 5, 1, 7)
+    })
+    , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping"})
+    , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
+    , _leftRoot(Chunk(LeftHemisphereIndex))
+    , _rightRoot(Chunk(RightHemisphereIndex))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -1756,21 +1756,13 @@ void RenderableGlobe::recompileShaders() {
     const bool hasHeightLayer =
         !_layerManager.layerGroup(layers::Group::ID::HeightLayers).activeLayers().empty();
 
-    pairs.emplace_back("useAccurateNormals",
+    pairs.emplace_back(
+        "useAccurateNormals",
         std::to_string(_useAccurateNormals && hasHeightLayer)
     );
-    pairs.emplace_back(
-        "performShading",
-        std::to_string(_performShading)
-    );
-    pairs.emplace_back(
-        "useEclipseShadows",
-        std::to_string(_eclipseShadowsEnabled)
-    );
-    pairs.emplace_back(
-        "useEclipseHardShadows",
-        std::to_string(_eclipseHardShadows)
-    );
+    pairs.emplace_back("performShading", std::to_string(_performShading));
+    pairs.emplace_back("useEclipseShadows", std::to_string(_eclipseShadowsEnabled));
+    pairs.emplace_back("useEclipseHardShadows", std::to_string(_eclipseHardShadows));
     pairs.emplace_back(
         "enableShadowMapping",
         std::to_string(_shadowMappingProperties.shadowMapping)
@@ -1779,7 +1771,6 @@ void RenderableGlobe::recompileShaders() {
     pairs.emplace_back("showHeightResolution", "0");
     pairs.emplace_back("showHeightIntensities", "0");
     pairs.emplace_back("defaultHeight", std::to_string(DefaultHeight));
-
 
     //
     // Create dictionary from layerpreprocessing data
