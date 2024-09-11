@@ -1367,16 +1367,14 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
         const float targetLod = _targetLodScaleFactor;
         const bool validLodFactor = clf > clfMin;
         if (exceededIterations && validLodFactor) {
-            _currentLodScaleFactor =
-                _currentLodScaleFactor - 0.1f;
+            _currentLodScaleFactor = _currentLodScaleFactor - 0.1f;
             _iterationsOfUnavailableData = 0;
             _lodScaleFactorDirty = true;
         } // Make 2 times the iterations with available data to move it up again
         else if (static_cast<int>(_iterationsOfAvailableData) >
             (iterCount * 2) && clf < targetLod)
         {
-            _currentLodScaleFactor =
-                _currentLodScaleFactor + 0.1f;
+            _currentLodScaleFactor = _currentLodScaleFactor + 0.1f;
             _iterationsOfAvailableData = 0;
             _lodScaleFactorDirty = true;
         }
@@ -1429,9 +1427,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     setCommonUniforms(program, chunk, data);
 
-    if (_eclipseShadowsEnabled &&
-        !_ellipsoid.shadowConfigurationArray().empty())
-    {
+    if (_eclipseShadowsEnabled && !_ellipsoid.shadowConfigurationArray().empty()) {
         calculateEclipseShadows(program, data, ShadowCompType::GLOBAL_SHADOW);
     }
 
@@ -1571,9 +1567,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     setCommonUniforms(program, chunk, data);
 
-    if (_eclipseShadowsEnabled &&
-        !_ellipsoid.shadowConfigurationArray().empty())
-    {
+    if (_eclipseShadowsEnabled && !_ellipsoid.shadowConfigurationArray().empty()) {
         calculateEclipseShadows(program, data, ShadowCompType::LOCAL_SHADOW);
     }
 
@@ -2340,8 +2334,7 @@ int RenderableGlobe::desiredLevelByDistance(const Chunk& chunk,
     const double distanceToPatch = glm::length(cameraToChunk);
     const double distance = distanceToPatch;
 
-    const double scaleFactor = _currentLodScaleFactor *
-        _ellipsoid.minimumRadius();
+    const double scaleFactor = _currentLodScaleFactor * _ellipsoid.minimumRadius();
     const double projectedScaleFactor = scaleFactor / distance;
     const int desiredLevel = static_cast<int>(ceil(log2(projectedScaleFactor)));
     return desiredLevel;
@@ -2427,8 +2420,7 @@ int RenderableGlobe::desiredLevelByProjectedArea(const Chunk& chunk,
     const double areaABC = 0.5 * glm::length(glm::cross(AC, AB));
     const double projectedChunkAreaApprox = 8 * areaABC;
 
-    const double scaledArea = _currentLodScaleFactor *
-                              projectedChunkAreaApprox;
+    const double scaledArea = _currentLodScaleFactor * projectedChunkAreaApprox;
     return chunk.tileIndex.level + static_cast<int>(round(scaledArea - 1));
 }
 
