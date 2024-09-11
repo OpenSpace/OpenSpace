@@ -176,6 +176,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
+        "AmbientIntensity",
+        "Ambient Intensity",
+        "The intensity factor for the ambient light used for light shading.",
+        openspace::properties::Property::Visibility::User
+    };
+
     constexpr openspace::properties::Property::PropertyInfo LightSourceNodeInfo = {
         "LightSourceNode",
         "Light Source",
@@ -253,13 +260,6 @@ namespace {
         openspace::properties::Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
-        "AmbientIntensity",
-        "Ambient Intensity",
-        "The intensity factor for the ambient light used for light shading.",
-        openspace::properties::Property::Visibility::User
-    };
-
     constexpr openspace::properties::Property::PropertyInfo NActiveLayersInfo = {
         "NActiveLayers",
         "Number of active layers",
@@ -276,8 +276,23 @@ namespace {
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
 
+        // [[codegen::verbatim(AccurateNormalsInfo.description)]]
+        std::optional<bool> useAccurateNormals;
+
+        // [[codegen::verbatim(AmbientIntensityInfo.description)]]
+        std::optional<double> ambientIntensity;
+
+        // [[codegen::verbatim(LightSourceNodeInfo.description)]]
+        std::optional<std::string> lightSourceNode;
+
         // [[codegen::verbatim(RenderAtDistanceInfo.description)]]
         std::optional<bool> renderAtDistance;
+
+        // [[codegen::verbatim(TargetLodScaleFactorInfo.description)]]
+        std::optional<double> targetLodScaleFactor;
+
+        // [[codegen::verbatim(OrenNayarRoughnessInfo.description)]]
+        std::optional<double> orenNayarRoughness;
 
         // A list of layers that should be added to the globe.
         std::optional<std::map<std::string, ghoul::Dictionary>> layers
@@ -314,9 +329,6 @@ namespace {
 
         std::optional<ghoul::Dictionary> shadows
             [[codegen::reference("globebrowsing_shadows_component")]];
-
-        // [[codegen::verbatim(LightSourceNodeInfo.description)]]
-        std::optional<std::string> lightSourceNode;
     };
 #include "renderableglobe_codegen.cpp"
 } // namespace
@@ -640,13 +652,13 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _performShading = p.performShading.value_or(_performShading);
     addProperty(_performShading);
 
-    // TODO: Missing value from parameters
+    _useAccurateNormals = p.useAccurateNormals.value_or(_useAccurateNormals);
     addProperty(_useAccurateNormals);
 
     _renderAtDistance = p.renderAtDistance.value_or(_renderAtDistance);
     addProperty(_renderAtDistance);
 
-    // TODO: Missing value from parameters
+    _ambientIntensity = p.ambientIntensity.value_or(_ambientIntensity);
     addProperty(_ambientIntensity);
 
     _lightSourceNodeName.onChange([this]() {
@@ -694,7 +706,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     });
     addPropertySubOwner(_shadowMappingPropertyOwner);
 
-    // TODO: Missing value from parameters
+    _targetLodScaleFactor = p.targetLodScaleFactor.value_or(_targetLodScaleFactor);
     _targetLodScaleFactor.onChange([this]() {
         const float sf = _targetLodScaleFactor;
         _currentLodScaleFactor = sf;
@@ -703,7 +715,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_targetLodScaleFactor);
     addProperty(_currentLodScaleFactor);
 
-    // TODO: Missing value from parameters
+    _orenNayarRoughness = p.orenNayarRoughness.value_or(_orenNayarRoughness);
     addProperty(_orenNayarRoughness);
 
     _nActiveLayers.setReadOnly(true);
