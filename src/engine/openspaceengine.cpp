@@ -1021,11 +1021,7 @@ void OpenSpaceEngine::preSynchronization() {
                 continue;
             }
 
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript(script);
 
             global::eventEngine->publishEvent<events::EventScheduledScriptExecuted>(
                 script
@@ -1445,11 +1441,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     }
 
     std::string script = ghoul::lua::value<std::string>(s);
-    global::scriptEngine->queueScript(
-        std::move(script),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(std::move(script));
 }
 
 std::vector<std::byte> OpenSpaceEngine::encode() {
@@ -1645,11 +1637,7 @@ void setCameraFromProfile(const Profile& p) {
                         geo.anchor, geo.latitude, geo.longitude
                     );
                 }
-                global::scriptEngine->queueScript(
-                    geoScript,
-                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                    scripting::ScriptEngine::ShouldSendToRemote::Yes
-                );
+                global::scriptEngine->queueScript(geoScript);
             },
             [&checkNodeExists](const Profile::CameraGoToNode& node) {
                 using namespace interaction;
@@ -1677,20 +1665,12 @@ void setModulesFromProfile(const Profile& p) {
             });
         if (it != m.end()) {
             if (mod.loadedInstruction.has_value()) {
-                global::scriptEngine->queueScript(
-                    mod.loadedInstruction.value(),
-                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                    scripting::ScriptEngine::ShouldSendToRemote::Yes
-                );
+                global::scriptEngine->queueScript(mod.loadedInstruction.value());
             }
         }
         else {
             if (mod.notLoadedInstruction.has_value()) {
-                global::scriptEngine->queueScript(
-                    mod.notLoadedInstruction.value(),
-                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                    scripting::ScriptEngine::ShouldSendToRemote::Yes
-                );
+                global::scriptEngine->queueScript(mod.notLoadedInstruction.value());
             }
         }
     }
@@ -1751,11 +1731,7 @@ void setMarkInterestingNodesFromProfile(const Profile& p) {
 
 void setAdditionalScriptsFromProfile(const Profile& p) {
     for (const std::string& a : p.additionalScripts) {
-        global::scriptEngine->queueScript(
-            a,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(a);
     }
 }
 

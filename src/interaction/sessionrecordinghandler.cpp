@@ -136,9 +136,7 @@ void SessionRecordingHandler::tickPlayback(double dt) {
     for (auto& it = _currentEntry; it != probe; it++) {
         if (std::holds_alternative<SessionRecording::Entry::Script>(it->value)) {
             global::scriptEngine->queueScript(
-                std::get<SessionRecording::Entry::Script>(it->value),
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+                std::get<SessionRecording::Entry::Script>(it->value)
             );
         }
     }

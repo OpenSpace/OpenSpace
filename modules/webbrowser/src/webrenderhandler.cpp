@@ -233,6 +233,11 @@ void WebRenderHandler::updateTexture() {
 }
 
 bool WebRenderHandler::hasContent(int x, int y) {
+    // We don't have any content if we are querying outside the window size
+    if (x < 0 || x > _windowSize.x || y < 0 || y > _windowSize.y) {
+        return false;
+    }
+
     if (_acceleratedRendering) {
         // To see the alpha value of the pixel we first have to get the texture from the
         // GPU. Use a PBO for better performance

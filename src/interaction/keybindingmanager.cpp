@@ -52,7 +52,8 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
             global::actionManager->triggerAction(
                 it->second,
                 ghoul::Dictionary(),
-                interaction::ActionManager::ShouldBeSynchronized::Yes
+                interaction::ActionManager::ShouldBeSynchronized::Yes,
+                interaction::ActionManager::ShouldBeLogged::Yes
             );
         }
     }

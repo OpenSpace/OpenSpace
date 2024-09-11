@@ -137,11 +137,9 @@ void IswaCygnet::initializeGL() {
     else {
         _delete.onChange([this]() {
             deinitialize();
-            global::scriptEngine->queueScript(
-                "openspace.removeSceneGraphNode('" + identifier() + "')",
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript(std::format(
+                "openspace.removeSceneGraphNode('{}')", identifier()
+            ));
         });
     }
 
@@ -306,9 +304,7 @@ void IswaCygnet::initializeGroup() {
         [this](ghoul::Dictionary) {
             LDEBUG(identifier() + " Event clearGroup");
             global::scriptEngine->queueScript(
-                "openspace.removeSceneGraphNode('" + identifier() + "')",
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+                "openspace.removeSceneGraphNode('" + identifier() + "')"
             );
         }
     );
