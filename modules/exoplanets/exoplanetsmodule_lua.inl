@@ -357,6 +357,7 @@ void createExoplanetSystem(const std::string& starName,
                 "},"
                 "LightSourceNode = '" + starIdentifier + "'"
             "},"
+            "Tag = { 'exoplanet_planet' }, "
             "Transform = { "
                 "Translation = " + planetKeplerTranslation + ""
             "},"
