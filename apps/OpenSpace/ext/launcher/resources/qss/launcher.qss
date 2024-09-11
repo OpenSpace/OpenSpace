@@ -100,14 +100,12 @@ LauncherWindow  QPushButton#settings:hover {
 
 LauncherWindow QPushButton#small:focus, LauncherWindow QPushButton#large:focus,
 LauncherWindow QComboBox#config:focus {
-  /* border: 2px solid #00b3e7; */
   outline: none;
-  border: 3px solid #3DBDEE;
+  border: 2px solid rgb(61, 189, 238);
 }
 
 LauncherWindow QPushButton#settings:focus {
-  /* outline: 2px solid #00b3e7; */
-  outline: 3px solid #3DBDEE;
+  outline: 2px solid rgb(61, 189, 238);
 }
 /*
  * ProfileEdit
