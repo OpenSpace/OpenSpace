@@ -623,12 +623,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     // For globes, the interaction sphere is always the same as the bounding sphere
     setInteractionSphere(boundingSphere());
 
-    _performShading =
-        p.performShading.value_or(_performShading);
-
-    _renderAtDistance =
-        p.renderAtDistance.value_or(_renderAtDistance);
-
     // Init layer manager
     // @TODO (abock, 2021-03-25) The layermanager should be changed to take a
     // std::map<std::string, ghoul::Dictionary> instead and then we don't need to get it
@@ -642,9 +636,17 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     }
 
     addProperty(Fadeable::_opacity);
+
+    _performShading = p.performShading.value_or(_performShading);
     addProperty(_performShading);
+
+    // TODO: Missing value from parameters
     addProperty(_useAccurateNormals);
+
+    _renderAtDistance = p.renderAtDistance.value_or(_renderAtDistance);
     addProperty(_renderAtDistance);
+
+    // TODO: Missing value from parameters
     addProperty(_ambientIntensity);
 
     _lightSourceNodeName.onChange([this]() {
@@ -679,6 +681,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         }
         _ellipsoid.setShadowConfigurationArray(shadowConfArray);
 
+        // TODO: Missing value from parameters
         addProperty(_eclipseShadowsEnabled);
         addProperty(_eclipseHardShadows);
     }
@@ -691,6 +694,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     });
     addPropertySubOwner(_shadowMappingPropertyOwner);
 
+    // TODO: Missing value from parameters
     _targetLodScaleFactor.onChange([this]() {
         const float sf = _targetLodScaleFactor;
         _currentLodScaleFactor = sf;
@@ -698,7 +702,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     });
     addProperty(_targetLodScaleFactor);
     addProperty(_currentLodScaleFactor);
+
+    // TODO: Missing value from parameters
     addProperty(_orenNayarRoughness);
+
     _nActiveLayers.setReadOnly(true);
     addProperty(_nActiveLayers);
 
@@ -708,6 +715,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
+    addPropertySubOwner(_debugPropertyOwner);
 
     auto notifyShaderRecompilation = [this]() {
         _shadersNeedRecompilation = true;
@@ -717,6 +725,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _eclipseHardShadows.onChange(notifyShaderRecompilation);
     _performShading.onChange(notifyShaderRecompilation);
     _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
+    _shadowMappingProperties.shadowMapping.onChange(notifyShaderRecompilation);
 
     _layerManager.onChange([this](Layer* l) {
         _shadersNeedRecompilation = true;
@@ -724,8 +733,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         _nLayersIsDirty = true;
         _lastChangedLayer = l;
     });
-
-    addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager);
 
     _globalChunkBuffer.resize(2048);
@@ -733,6 +740,11 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _traversalMemory.resize(512);
 
     _labelsDictionary = p.labels.value_or(_labelsDictionary);
+    if (!_labelsDictionary.isEmpty()) {
+        // Fading of the labels should also depend on the fading of the globe
+        _globeLabelsComponent.setParentFadeable(this);
+        addPropertySubOwner(_globeLabelsComponent);
+    }
 
     // Init geojson manager
     _geoJsonManager.initialize(this);
@@ -752,7 +764,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         addPropertySubOwner(_shadowComponent.get());
         _shadowMappingProperties.shadowMapping = true;
     }
-    _shadowMappingProperties.shadowMapping.onChange(notifyShaderRecompilation);
 
     // Use a secondary renderbin for labels, and other things that we want to be able to
     // render with transparency, on top of the globe, after the atmosphere step
@@ -762,10 +773,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 void RenderableGlobe::initializeGL() {
     if (!_labelsDictionary.isEmpty()) {
         _globeLabelsComponent.initialize(_labelsDictionary, this);
-        addPropertySubOwner(_globeLabelsComponent);
-
-        // Fading of the labels should also depend on the fading of the globe
-        _globeLabelsComponent.setParentFadeable(this);
     }
 
     _layerManager.update();
