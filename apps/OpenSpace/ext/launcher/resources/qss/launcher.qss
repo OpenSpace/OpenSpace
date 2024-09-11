@@ -10,7 +10,7 @@ QLabel#heading {
 }
 
 QLabel#error-message {
-  color: rgb(221, 17, 17);
+  color: rgb(217, 13, 13);
 }
 
 /*
@@ -204,7 +204,7 @@ HorizonsDialog  QLabel#thin {
 }
 
 HorizonsDialog  QLabel#error {
-  color: rgb(221, 17, 17);
+  color: rgb(217, 13, 13);
 }
 
 HorizonsDialog  QLabel#normal {
