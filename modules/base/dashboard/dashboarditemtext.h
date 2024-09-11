@@ -29,6 +29,21 @@
 
 #include <openspace/properties/stringproperty.h>
 
+#include <fstream>
+#include <unordered_map>
+#include <string>
+#include <vector>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
+
+#include <chrono>
+#include <iomanip>
+#include <sstream>
+#include <string>
+#include <algorithm>
+#include <iostream>
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }
@@ -46,6 +61,12 @@ public:
 
 private:
     properties::StringProperty _text;
+    std::unordered_map<std::string, double> _data;
+
+    mutable double _lastValue = 0.0;
+
+    void loadDataFromJson(const std::string& filePath);
+    double getValueForCurrentTime() const;
 };
 
 } // namespace openspace

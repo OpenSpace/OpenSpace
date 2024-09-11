@@ -27,11 +27,23 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/profiling.h>
 #include <optional>
+
+#include <json/json.hpp>
+#include <fstream>
+#include <map>
+#include <string>
+#include <iostream>
+
+#include <chrono>
+#include <iomanip>
+#include <sstream>
+#include <string>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextInfo = {
@@ -57,6 +69,24 @@ documentation::Documentation DashboardItemText::Documentation() {
     );
 }
 
+void DashboardItemText::loadDataFromJson(const std::string& filePath) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        throw std::runtime_error("Unable to open JSON file: " + filePath);
+    }
+
+    nlohmann::json jsonData;
+    file >> jsonData;
+
+    _data.clear();
+
+    for (const auto& item : jsonData["data"]) {
+        std::string time = item[0].get<std::string>();
+        double value = item[1].get<double>();
+        _data[time] = value;
+    }
+}
+
 DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _text(TextInfo, "")
@@ -64,10 +94,49 @@ DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _text = p.text.value_or(_text);
     addProperty(_text);
+
+    loadDataFromJson("C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/KPjson/data.json");
 }
+
+std::string formatTimeForData(std::string_view timeStr) {
+    std::string formattedTime(timeStr);
+
+    // Convert to the format YYYY-MM-DDTHH:MM:00Z
+    std::replace(formattedTime.begin(), formattedTime.end(), 'T', ' ');
+    std::replace(formattedTime.begin(), formattedTime.end(), '.', ' '); // Remove milliseconds
+
+    std::tm tm = {};
+    std::istringstream ss(formattedTime);
+    ss >> std::get_time(&tm, "%Y %b %d %H:%M:%S");
+
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%Y-%m-%dT%H:%M:00Z");
+    return oss.str();
+}
+
+double DashboardItemText::getValueForCurrentTime() const {
+    std::string_view currentTimeStr = global::timeManager->time().UTC();
+    std::string formattedTime = formatTimeForData(currentTimeStr);
+
+    // Check if the formatted time exists in the data
+    auto it = _data.find(formattedTime);
+    if (it != _data.end()) {
+        // Exact match found, update last value
+        _lastValue = it->second;
+        return _lastValue;
+    }
+
+    // If no exact match is found, return the last value
+    return _lastValue;
+}
+
 
 void DashboardItemText::render(glm::vec2& penPosition) {
     ZoneScoped;
+
+    double value = getValueForCurrentTime();
+
+    _text = "KP Index: " + std::to_string(value);
 
     penPosition.y -= _font->height();
     RenderFont(*_font, penPosition, _text.value());

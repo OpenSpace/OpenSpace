@@ -50,9 +50,9 @@ asset.require("./may2024assets/rendermodeTest/22") ]]
 asset.require("./actions")
 --asset.require("./auroraImage")
 --asset.require("./ovalGeojson")
-asset.require("./ovalLayer")
+--asset.require("./ovalLayer")
 
-asset.require("./northernViewline")
-asset.require("./southernViewline")
+--asset.require("./northernViewline")
+--asset.require("./southernViewline")
 --asset.require("./mission")
---asset.require("./storm")
+asset.require("./storm")
