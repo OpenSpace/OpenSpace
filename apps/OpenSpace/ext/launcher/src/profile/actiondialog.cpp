@@ -103,7 +103,7 @@ void ActionDialog::createWidgets() {
     //  *----------------------*---------------*-----------------*
 
     QGridLayout* layout = new QGridLayout(this);
-    
+
     createActionWidgets(layout);
     clearActionFields();
 
@@ -243,6 +243,7 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         "`args` variable when this script executes. If no arguments are passed, this "
         "variable does not exist"
     );
+    _actionWidgets.script->setTabChangesFocus(true);
     _actionWidgets.script->setEnabled(false);
     layout->addWidget(_actionWidgets.script, 6, 2, 1, 2);
 
@@ -612,7 +613,7 @@ void ActionDialog::actionSaved() {
         }
         action->identifier = newIdentifier;
     }
-    
+
 
     action->name = _actionWidgets.name->text().toStdString();
     std::string guiPath = _actionWidgets.guiPath->text().toStdString();
@@ -701,7 +702,7 @@ void ActionDialog::keybindingAdd() {
 void ActionDialog::keybindingRemove() {
     const Profile::Keybinding* keybinding = selectedKeybinding();
     ghoul_assert(keybinding, "A keybinding must be selected at this point");
-    
+
     for (size_t i = 0; i < _keybindingsData.size(); i++) {
         if (_keybindingsData[i].key == keybinding->key &&
             _keybindingsData[i].action == keybinding->action)
