@@ -442,6 +442,9 @@ namespace {
             ghoul::getline(stream, tmpReadbackScript);
             size_t start = tmpReadbackScript.find_first_not_of(" ");
             tmpReadbackScript = tmpReadbackScript.substr(start);
+            if (tmpReadbackScript.back() == '\r') {
+                tmpReadbackScript.pop_back();
+            }
             script.append(tmpReadbackScript);
             if (i < (numScriptLines - 1)) {
                 script.append("\n");

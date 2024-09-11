@@ -26,7 +26,9 @@
 #define __OPENSPACE_CORE___SESSIONRECORDING___H__
 
 #include <openspace/navigation/keyframenavigator.h>
+#include <ghoul/misc/dictionary.h>
 #include <filesystem>
+#include <functional>
 #include <string>
 #include <variant>
 #include <vector>
@@ -40,6 +42,8 @@ enum class DataMode {
 
 struct SessionRecording {
     struct Entry {
+        auto operator<=>(const SessionRecording::Entry&) const = default;
+
         using Camera = KeyframeNavigator::CameraPose;
         using Script = std::string;
 
@@ -47,6 +51,8 @@ struct SessionRecording {
         double simulationTime = 0.0;
         std::variant<Camera, Script> value;
     };
+
+    auto operator<=>(const SessionRecording&) const = default;
 
     std::vector<Entry> entries;
 
