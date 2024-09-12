@@ -242,6 +242,10 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     }
 
     setCentralWidget(createCentralWidget());
+    QPushButton* startButton = centralWidget()->findChild<QPushButton*>("start");
+    if (startButton) {
+        startButton->setFocus(Qt::OtherFocusReason);
+    }
 
     populateProfilesList(globalConfig.profile);
     _profileBox->setEnabled(profileEnabled);
@@ -376,7 +380,7 @@ QWidget* LauncherWindow::createCentralWidget() {
         }
     }
     );
-    startButton->setObjectName("large");
+    startButton->setObjectName("start");
     startButton->setGeometry(geometry::StartButton);
     startButton->setCursor(Qt::PointingHandCursor);
     startButton->setAutoDefault(true);
