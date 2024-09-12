@@ -395,6 +395,238 @@ TEST_CASE("SessionRecording: 02.00 Ascii <-> Binary Windows", "[sessionrecording
     CHECK(ascii == binary);
 }
 
+TEST_CASE("SessionRecording: 01.00 Ascii Linux", "[sessionrecording]") {
+    SessionRecording rec = loadSessionRecording(test("0100_ascii_linux.osrectxt"));
+    REQUIRE(rec.entries.size() == 6);
+
+    {
+        const SessionRecording::Entry& e = rec.entries[0];
+        CHECK(e.timestamp == 0.0);
+        CHECK(e.simulationTime == 762933560.401);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Script>(e.value));
+        const auto& script = std::get<SessionRecording::Entry::Script>(e.value);
+        CHECK(script == "openspace.setPropertyValueSingle(\"Modules.CefWebGui.Visible\", true)");
+    }
+    {
+        const SessionRecording::Entry& e = rec.entries[1];
+        CHECK(e.timestamp == 0.0107105);
+        CHECK(e.simulationTime == 762933560.412);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Camera>(e.value));
+        const auto& camera = std::get<SessionRecording::Entry::Camera>(e.value);
+        CHECK(
+            camera.position ==
+            glm::dvec3(-13521714.7579869, -18987604.3886074, -1780842.2573154)
+        );
+        CHECK(
+            camera.rotation ==
+            glm::quat(0.6503710f, 0.6953145f, -0.2337213f, -0.1973068f)
+        );
+        CHECK(camera.scale == 0.00126470590475947f);
+        CHECK(camera.followFocusNodeRotation);
+        CHECK(camera.focusNode == "Earth");
+    }
+    {
+        const SessionRecording::Entry& e = rec.entries[2];
+        CHECK(e.timestamp == 0.0210999);
+        CHECK(e.simulationTime == 762933560.423);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Camera>(e.value));
+        const auto& camera = std::get<SessionRecording::Entry::Camera>(e.value);
+        CHECK(
+            camera.position ==
+            glm::dvec3(-13521714.7579868, -18987604.3885993, -1780842.2573175)
+        );
+        CHECK(
+            camera.rotation ==
+            glm::quat(0.6503710f, 0.6953145f, -0.2337212f, -0.1973068f)
+        );
+        CHECK(camera.scale == 0.00126470590475947f);
+        CHECK(camera.followFocusNodeRotation);
+        CHECK(camera.focusNode == "Earth");
+    }
+    {
+        const SessionRecording::Entry& e = rec.entries[3];
+        CHECK(e.timestamp == 2.48093);
+        CHECK(e.simulationTime == 762933562.877);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Script>(e.value));
+        const auto& script = std::get<SessionRecording::Entry::Script>(e.value);
+        CHECK(script == "openspace.pathnavigation.flyTo(\"Mars\")");
+    }
+    {
+        const SessionRecording::Entry& e = rec.entries[4];
+        CHECK(e.timestamp == 2.48222);
+        CHECK(e.simulationTime == 762933562.886);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Camera>(e.value));
+        const auto& camera = std::get<SessionRecording::Entry::Camera>(e.value);
+        CHECK(
+            camera.position ==
+            glm::dvec3(-13521714.7579865, -18987604.3886450, -1780842.2572641)
+        );
+        CHECK(
+            camera.rotation ==
+            glm::quat(0.6503708f, 0.6953144f, -0.2337212f, -0.1973068f)
+        );
+        CHECK(camera.scale == 0.00126470590475947f);
+        CHECK(camera.followFocusNodeRotation);
+        CHECK(camera.focusNode == "Earth");
+    }
+    {
+        const SessionRecording::Entry& e = rec.entries[5];
+        CHECK(e.timestamp == 2.49067);
+        CHECK(e.simulationTime == 762933562.886);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Camera>(e.value));
+        const auto& camera = std::get<SessionRecording::Entry::Camera>(e.value);
+        CHECK(
+            camera.position ==
+            glm::dvec3(-13523362.1802436, -18989917.8348593, -1781059.2290947)
+        );
+        CHECK(
+            camera.rotation ==
+            glm::quat(0.6503708f, 0.6953144f, -0.2337212f, -0.1973068f)
+        );
+        CHECK(camera.scale == 0.00126449402887374f);
+        CHECK(camera.followFocusNodeRotation);
+        CHECK(camera.focusNode == "Earth");
+    }
+}
+
+TEST_CASE("SessionRecording: 01.00 Ascii Linux Roundtrip", "[sessionrecording]") {
+    SessionRecording rec = loadSessionRecording(test("0100_ascii_linux.osrectxt"));
+    saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
+    saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
+    SessionRecording a = loadSessionRecording(absPath("${TEMPORARY}/ascii"));
+    SessionRecording b = loadSessionRecording(absPath("${TEMPORARY}/binary"));
+
+    CHECK(rec == a);
+    CHECK(rec == b);
+    CHECK(a == b);
+}
+
+TEST_CASE("SessionRecording: 01.00 Binary Linux", "[sessionrecording]") {
+    SessionRecording rec = loadSessionRecording(test("0100_binary_linux.osrec"));
+    REQUIRE(rec.entries.size() == 6);
+
+    {
+        const SessionRecording::Entry& e = rec.entries[0];
+        CHECK(e.timestamp == 0.0);
+        CHECK(e.simulationTime == 763463598.23217);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Script>(e.value));
+        const auto& script = std::get<SessionRecording::Entry::Script>(e.value);
+        CHECK(script == "openspace.time.setPause(false)");
+    }
+    {
+        const SessionRecording::Entry& e = rec.entries[1];
+        CHECK(e.timestamp == 0.01045432000000801);
+        CHECK(e.simulationTime == 763463598.2421138);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Camera>(e.value));
+        const auto& camera = std::get<SessionRecording::Entry::Camera>(e.value);
+        CHECK(
+            camera.position ==
+            glm::dvec3(-15942288.9063634, 8217794.03633486, -14994951.65751712)
+        );
+        CHECK(
+            camera.rotation ==
+            glm::quat(
+                -0.05070944130420685f,
+                0.8491553664207458f,
+                -0.31565767526626587f,
+                -0.42038553953170776f
+            )
+        );
+        CHECK(camera.scale == 0.0012647059047594666f);
+        CHECK(camera.followFocusNodeRotation);
+        CHECK(camera.focusNode == "Earth");
+    }
+    {
+        const SessionRecording::Entry& e = rec.entries[2];
+        CHECK(e.timestamp == 0.21673793700000488);
+        CHECK(e.simulationTime == 763463598.44845);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Camera>(e.value));
+        const auto& camera = std::get<SessionRecording::Entry::Camera>(e.value);
+        CHECK(
+            camera.position ==
+            glm::dvec3(-15942288.906364493, 8217794.036353504, -14994951.657487243)
+        );
+        CHECK(
+            camera.rotation ==
+            glm::quat(
+                -0.05070945620536804f,
+                0.8491553664207458f,
+                -0.31565767526626587f,
+                -0.420385479927063f
+            )
+        );
+        CHECK(camera.scale == 0.0012647059047594666f);
+        CHECK(camera.followFocusNodeRotation);
+        CHECK(camera.focusNode == "Earth");
+    }
+    {
+        const SessionRecording::Entry& e = rec.entries[3];
+        CHECK(e.timestamp == 9.940045733000005);
+        CHECK(e.simulationTime == 763463608.1701536);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Script>(e.value));
+        const auto& script = std::get<SessionRecording::Entry::Script>(e.value);
+        CHECK(script == "openspace.setPropertyValueSingle(\"Scene.Earth.Renderable.Fade\",0,1)");
+    }
+    {
+        const SessionRecording::Entry& e = rec.entries[4];
+        CHECK(e.timestamp == 9.94726788300001);
+        CHECK(e.simulationTime == 763463608.1800178);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Camera>(e.value));
+        const auto& camera = std::get<SessionRecording::Entry::Camera>(e.value);
+        CHECK(
+            camera.position ==
+            glm::dvec3(-15741144.947559996, 14747679.124696942, -9014411.005969524)
+        );
+        CHECK(
+            camera.rotation ==
+            glm::quat(
+                0.23194797337055206f,
+                -0.7898141741752625f,
+                0.2626582682132721f,
+                0.5033928751945496f
+            )
+        );
+        CHECK(camera.scale == 0.001264723134227097f);
+        CHECK(camera.followFocusNodeRotation);
+        CHECK(camera.focusNode == "Earth");
+    }
+    {
+        const SessionRecording::Entry& e = rec.entries[5];
+        CHECK(e.timestamp == 11.485186747);
+        CHECK(e.simulationTime == 763463609.7179065);
+        REQUIRE(std::holds_alternative<SessionRecording::Entry::Camera>(e.value));
+        const auto& camera = std::get<SessionRecording::Entry::Camera>(e.value);
+        CHECK(
+            camera.position ==
+            glm::dvec3(-15741006.774582125, 14747877.286725827, -9014328.087388767)
+        );
+        CHECK(
+            camera.rotation ==
+            glm::quat(
+                0.2319525182247162f,
+                -0.7898122668266296f,
+                0.26266056299209595f,
+                0.5033925771713257f
+            )
+        );
+        CHECK(camera.scale == 0.001264723134227097f);
+        CHECK(camera.followFocusNodeRotation);
+        CHECK(camera.focusNode == "Earth");
+    }
+}
+
+TEST_CASE("SessionRecording: 01.00 Binary Linux Roundtrip", "[sessionrecording]") {
+    SessionRecording rec = loadSessionRecording(test("0100_binary_linux.osrec"));
+    saveSessionRecording(absPath("${TEMPORARY}/ascii"), rec, DataMode::Ascii);
+    saveSessionRecording(absPath("${TEMPORARY}/binary"), rec, DataMode::Binary);
+    SessionRecording a = loadSessionRecording(absPath("${TEMPORARY}/ascii"));
+    SessionRecording b = loadSessionRecording(absPath("${TEMPORARY}/binary"));
+
+    CHECK(rec == a);
+    CHECK(rec == b);
+    CHECK(a == b);
+}
+
 TEST_CASE("SessionRecording: 02.00 Ascii Linux", "[sessionrecording]") {
     SessionRecording rec = loadSessionRecording(test("0200_ascii_linux.osrectxt"));
     REQUIRE(rec.entries.size() == 6);
