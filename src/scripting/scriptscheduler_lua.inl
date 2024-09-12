@@ -78,30 +78,6 @@ namespace {
     global::scriptScheduler->loadScripts(scripts);
 }
 
-/**
- * Sets the time reference for scheduled scripts to application time (seconds since
- * OpenSpace application started).
- */
-[[codegen::luawrap]] void setModeApplicationTime() {
-    openspace::global::scriptScheduler->setModeApplicationTime();
-}
-
-/**
- * Sets the time reference for scheduled scripts to the time since the recording was
- * started (the same relative time applies to playback).
- */
-[[codegen::luawrap]] void setModeRecordedTime() {
-    openspace::global::scriptScheduler->setModeRecordedTime();
-}
-
-/**
- * Sets the time reference for scheduled scripts to the simulated date & time (J2000 epoch
- * seconds).
- */
-[[codegen::luawrap]] void setModeSimulationTime() {
-    openspace::global::scriptScheduler->setModeSimulationTime();
-}
-
 // Clears all scheduled scripts.
 [[codegen::luawrap]] void clear(std::optional<int> group) {
     openspace::global::scriptScheduler->clearSchedule(group);

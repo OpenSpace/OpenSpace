@@ -57,6 +57,7 @@ public:
 
         CameraPose() = default;
         CameraPose(datamessagestructures::CameraKeyframe&& kf);
+        auto operator<=>(const CameraPose&) const = default;
     };
 
     /**

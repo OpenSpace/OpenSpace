@@ -22,51 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_CORE___KEYFRAMERECORDINGHANDLER___H__
+#define __OPENSPACE_CORE___KEYFRAMERECORDINGHANDLER___H__
+
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/interaction/sessionrecording.h>
+#include <openspace/scripting/lualibrary.h>
+#include <filesystem>
+#include <string>
+#include <vector>
+
 namespace openspace::interaction {
 
-template <class T>
-T nextKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer,
-                  std::function<void()> finishedCallback)
-{
-    if (index >= (keyframeContainer.size() - 1)) {
-        if (index == (keyframeContainer.size() - 1)) {
-            finishedCallback();
-        }
-        return keyframeContainer.back();
-    }
-    else if (index < keyframeContainer.size()) {
-        return keyframeContainer[index];
-    }
-    else {
-        return keyframeContainer.back();
-    }
-}
+class KeyframeRecordingHandler : public properties::PropertyOwner {
+public:
+    KeyframeRecordingHandler();
 
-template <class T>
-T prevKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer) {
-    if (index >= keyframeContainer.size()) {
-        return keyframeContainer.back();
-    }
-    else if (index > 0) {
-        return keyframeContainer[index - 1];
-    }
-    else {
-        return keyframeContainer.front();
-    }
-}
+    void newSequence();
+    void addCameraKeyframe(double sequenceTime);
+    void addScriptKeyframe(double sequenceTime, std::string script);
+    void removeKeyframe(int index);
+    void updateKeyframe(int index);
+    void moveKeyframe(int index, double sequenceTime);
+    void saveSequence(std::filesystem::path filename);
+    void loadSequence(std::filesystem::path filename);
+    void play();
+    bool hasKeyframeRecording() const;
+    std::vector<ghoul::Dictionary> keyframes() const;
 
-template <typename T>
-T readFromPlayback(std::ifstream& stream) {
-    T res;
-    stream.read(reinterpret_cast<char*>(&res), sizeof(T));
-    return res;
-}
+    static openspace::scripting::LuaLibrary luaLibrary();
 
-template <typename T>
-T readFromPlayback(std::stringstream& stream) {
-    T res;
-    stream.read(reinterpret_cast<char*>(&res), sizeof(T));
-    return res;
-}
+private:
+    SessionRecording _timeline;
+};
 
-} // namespace openspace::interaction
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___KEYFRAMERECORDINGHANDLER___H__

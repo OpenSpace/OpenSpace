@@ -40,8 +40,8 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/keyframerecording.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/interaction/tasks/convertrecformattask.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
@@ -63,6 +63,7 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
@@ -222,6 +223,11 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
+
+
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "No task factory existed");
+    fTask->registerClass<interaction::ConvertRecFormatTask>("ConvertRecFormatTask");
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {}
@@ -845,7 +851,6 @@ void OpenSpaceEngine::deinitialize() {
             global::renderEngine->scene()->camera()->syncables()
         );
     }
-    global::sessionRecording->deinitialize();
     global::versionChecker->cancel();
 
     _assetManager = nullptr;
@@ -1002,8 +1007,8 @@ void OpenSpaceEngine::preSynchronization() {
     global::syncEngine->preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
         const double dt =
-            global::sessionRecording->isSavingFramesDuringPlayback() ?
-            global::sessionRecording->fixedDeltaTimeDuringFrameOutput() :
+            global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
+            global::sessionRecordingHandler->fixedDeltaTimeDuringFrameOutput() :
             global::windowDelegate->deltaTime();
 
         global::timeManager->preSynchronization(dt);
@@ -1032,8 +1037,7 @@ void OpenSpaceEngine::preSynchronization() {
                 camera->invalidateCache();
             }
         }
-        global::sessionRecording->preSynchronization();
-        global::keyframeRecording->preSynchronization(dt);
+        global::sessionRecordingHandler->preSynchronization(dt);
         global::parallelPeer->preSynchronization();
         global::interactionMonitor->updateActivityState();
     }
@@ -1156,7 +1160,7 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine->renderOverlays(_shutdown);
         global::luaConsole->render();
-        global::sessionRecording->render();
+        global::sessionRecordingHandler->render();
     }
 
     for (const std::function<void()>& func : *global::callback::draw2D) {

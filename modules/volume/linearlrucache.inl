@@ -51,7 +51,7 @@ void LinearLruCache<ValueType>::set(size_t key, ValueType value) {
 
 template <typename ValueType>
 ValueType& LinearLruCache<ValueType>::use(size_t key) {
-    auto& pair = _cache[key];
+    const auto& pair = _cache[key];
     const std::list<size_t>::iterator trackerIter = pair.second;
     _tracker.splice(_tracker.end(), _tracker, trackerIter);
     return pair.first;

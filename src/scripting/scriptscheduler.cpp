@@ -244,10 +244,6 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
     }
 }
 
-void ScriptScheduler::setTimeReferenceMode(interaction::KeyframeTimeRef refType) {
-    _timeframeMode = refType;
-}
-
 double ScriptScheduler::currentTime() const {
     return _currentTime;
 }
@@ -276,27 +272,12 @@ std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts(
     return result;
 }
 
-void ScriptScheduler::setModeApplicationTime() {
-    _timeframeMode = interaction::KeyframeTimeRef::Relative_applicationStart;
-}
-
-void ScriptScheduler::setModeRecordedTime() {
-    _timeframeMode = interaction::KeyframeTimeRef::Relative_recordedStart;
-}
-
-void ScriptScheduler::setModeSimulationTime() {
-    _timeframeMode = interaction::KeyframeTimeRef::Absolute_simTimeJ2000;
-}
-
 LuaLibrary ScriptScheduler::luaLibrary() {
     return {
         "scriptScheduler",
         {
             codegen::lua::LoadFile,
             codegen::lua::LoadScheduledScript,
-            codegen::lua::SetModeApplicationTime,
-            codegen::lua::SetModeRecordedTime,
-            codegen::lua::SetModeSimulationTime,
             codegen::lua::Clear,
             codegen::lua::ScheduledScripts
         }
