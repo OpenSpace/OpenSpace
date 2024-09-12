@@ -131,6 +131,7 @@ local showRedAuroras = {
     Name = "Enable Viewline",
     Command = [[
       openspace.fadeIn("Scene.Earth.Renderable.GeoJson.Viewline_2024-05*")
+      openspace.fadeIn("Scene.Earth.Renderable.GeoJson.southern_viewline_2024-05*")
     ]],
     Documentation = [[]],
     GuiPath = "/Aurorasaurus/Prediction",
@@ -142,6 +143,7 @@ local showRedAuroras = {
     Name = "Disable Viewline",
     Command = [[
         openspace.fadeOut("Scene.Earth.Renderable.GeoJson.Viewline_2024-05*")
+        openspace.fadeOut("Scene.Earth.Renderable.GeoJson.southern_viewline_2024-05*")
     ]],
     Documentation = [[]],
     GuiPath = "/Aurorasaurus/Prediction",

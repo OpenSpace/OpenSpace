@@ -1,7 +1,7 @@
 
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
-local geojsonPath = asset.resource("geojson/southern_viewline_geojsons/")
+local geojsonPath = asset.resource("C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/geojson/geojson_taken_from_master/southern_viewline_geojsons/")
 
 
 local southern_viewline_1 = {

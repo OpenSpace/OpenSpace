@@ -36,13 +36,7 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
-
-#include <chrono>
-#include <iomanip>
-#include <sstream>
-#include <string>
 #include <algorithm>
-#include <iostream>
 
 namespace openspace {
 

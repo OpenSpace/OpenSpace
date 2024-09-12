@@ -130,6 +130,9 @@ asset.onInitialize(function()
   openspace.loadMission(Mission)
   openspace.addScreenSpaceRenderable(Legend)
   openspace.addScreenSpaceRenderable(colorLegend)
+
+  openspace.setPropertyValueSingle("ScreenSpace.color-legend-aurora-oval.CartesianPosition", {-0.730000,-0.140000,-2.780000})
+  openspace.setPropertyValueSingle("ScreenSpace.Legend-aurora-oval.CartesianPosition", {-0.820000,-0.350000,-3.140000})
 end)
 
 asset.onDeinitialize(function()

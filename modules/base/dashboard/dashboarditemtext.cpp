@@ -35,15 +35,8 @@
 #include <optional>
 
 #include <json/json.hpp>
-#include <fstream>
 #include <map>
-#include <string>
 #include <iostream>
-
-#include <chrono>
-#include <iomanip>
-#include <sstream>
-#include <string>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextInfo = {
@@ -138,8 +131,23 @@ void DashboardItemText::render(glm::vec2& penPosition) {
 
     _text = "KP Index: " + std::to_string(value);
 
+    glm::vec4 color = { 1.f, 1.f, 1.f, 1.f };
+
+    if (value > 6)
+    {
+        color = { 1.f, 0.f, 0.f, 1.f };
+    }
+    else if (value > 3)
+    {
+        color = { 1.f, 1.f, 0.f, 1.f };
+    }
+    else
+    {
+        color = { 0.f, 1.f, 0.f, 1.f };
+    }
+
     penPosition.y -= _font->height();
-    RenderFont(*_font, penPosition, _text.value());
+    RenderFont(*_font, penPosition, _text.value(), color);
 }
 
 glm::vec2 DashboardItemText::size() const {

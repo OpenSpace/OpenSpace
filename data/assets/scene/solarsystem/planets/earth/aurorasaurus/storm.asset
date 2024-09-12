@@ -1,38 +1,21 @@
-
--- Function to get KP index from data
-local function getKPIndex(data, currentTime)
-    for _, entry in ipairs(data["data"]) do
-        local dataTime, kpIndex = entry[1], entry[2]
-        if dataTime == currentTime then
-            return kpIndex
-        end
-    end
-    return nil
-end
-
 local filepath = "C:/Users/alundkvi/Documents/work/data/auroraData/stormData/"
 
-local data = "C:/Users/alundkvi/Documents/work/data/auroraData/stormData/kp.json"
-local OpenSpaceTimeId = openspace.time.currentTime()
-
-local kpIndex = "test"
-
 local Dashboard = {
-    Identifier = "ScreenSpaceKPindex",
-    Name = "KPindex",
-    Type = "ScreenSpaceDashboard",
-    FaceCamera = false,
-    Scale = 3.0,
-    Items = {
+  Identifier = "ScreenSpaceKPindex",
+  Name = "KPindex",
+  Type = "ScreenSpaceDashboard",
+  FaceCamera = false,
+  Scale = 3.0,
+  Items = {
       {
-        Type = "DashboardItemText",
-        Identifier = "KPindexText",
-        GuiName = "Storm KP index",
-        Text = "KP Index: 8.87",
-        FontSize = 72
+          Type = "DashboardItemText",
+          Identifier = "KPindexText",
+          GuiName = "Storm KP index",
+          Text = "",
+          FontSize = 72
       }
-    }
   }
+}
 
 local marker = {
     Identifier = "target-marker",
@@ -45,7 +28,8 @@ asset.onInitialize(function()
     --openspace.addScreenSpaceRenderable(marker)
     openspace.addScreenSpaceRenderable(Dashboard)
 
-    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-0.630000,0.380000,-2.310000})
+    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-1.770000,0.850000,-8.950000})
+    --openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-0.630000,0.380000,-2.310000})
     openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.Size", {0.000000,0.000000,640.000000,320.000000})
   end)
 
