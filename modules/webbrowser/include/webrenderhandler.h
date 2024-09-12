@@ -69,7 +69,7 @@ public:
 
     // Used when the "shared_texture" flag is set to true for CEF. Uses a shared texture
     // from CEF that is allocated on another part of the GPU. Skip CPU allocationn for
-    // better performance. Needs OpenGl 4.5 or higher. 
+    // better performance. Needs OpenGl 4.5 or higher.
     void OnAcceleratedPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
         const RectList& dirtyRects, const CefAcceleratedPaintInfo& info) override;
 
@@ -78,7 +78,7 @@ public:
     bool hasContent(int x, int y);
 
     bool isTextureReady() const;
-    void updateTexture(); 
+    void updateTexture();
     void bindTexture();
 
 protected:

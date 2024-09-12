@@ -2088,13 +2088,14 @@ bool SessionRecording::processCameraKeyframe(double now) {
         global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
     }
 
-    return interaction::KeyframeNavigator::updateCamera(
+    interaction::KeyframeNavigator::updateCamera(
         global::navigationHandler->camera(),
         prevPose,
         nextPose,
         t,
         _ignoreRecordedScale
     );
+    return true;
 }
 
 bool SessionRecording::processScriptKeyframe() {

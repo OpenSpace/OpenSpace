@@ -280,7 +280,7 @@ namespace {
         std::optional<bool> useAccurateNormals;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
-        std::optional<double> ambientIntensity;
+        std::optional<float> ambientIntensity;
 
         // [[codegen::verbatim(LightSourceNodeInfo.description)]]
         std::optional<std::string> lightSourceNode;
@@ -289,10 +289,10 @@ namespace {
         std::optional<bool> renderAtDistance;
 
         // [[codegen::verbatim(TargetLodScaleFactorInfo.description)]]
-        std::optional<double> targetLodScaleFactor;
+        std::optional<float> targetLodScaleFactor;
 
         // [[codegen::verbatim(OrenNayarRoughnessInfo.description)]]
-        std::optional<double> orenNayarRoughness;
+        std::optional<float> orenNayarRoughness;
 
         // A list of layers that should be added to the globe.
         std::optional<std::map<std::string, ghoul::Dictionary>> layers

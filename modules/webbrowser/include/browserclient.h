@@ -55,7 +55,7 @@ public:
         bool OnCursorChange(CefRefPtr<CefBrowser> browser,
             CefCursorHandle cursor,
             cef_cursor_type_t type,
-            const CefCursorInfo& custom_cursor_info) override; 
+            const CefCursorInfo& custom_cursor_info) override;
         IMPLEMENT_REFCOUNTING(DisplayHandler);
     };
     BrowserClient(WebRenderHandler* handler, WebKeyboardHandler* keyboardHandler);

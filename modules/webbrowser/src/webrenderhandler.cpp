@@ -117,7 +117,7 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
 }
 
 void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
-                                          PaintElementType type,
+                                          PaintElementType,
                                           const RectList& dirtyRects,
                                           const CefAcceleratedPaintInfo& info)
 {
@@ -135,7 +135,7 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
     // @TODO (ylvse 2024-08-20): minimizing window should be handled with the appropriate
     // function in the CefBrowser called WasHidden
     if (dirtyRects[0].height <= 1 || dirtyRects[0].width <= 1) {
-        return; 
+        return;
     }
     // This function is called asynchronously after a reshape which means we have to check
     // for what we request. Validate the size. This prevents rendering a texture with the
