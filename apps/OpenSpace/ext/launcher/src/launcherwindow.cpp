@@ -281,7 +281,6 @@ QWidget* LauncherWindow::createCentralWidget() {
     logoImage->setPixmap(QPixmap(":/images/openspace-horiz-logo-small.png"));
 
     QLabel* labelChoose = new QLabel("Choose Profile", centralWidget);
-    labelChoose->setObjectName("clear");
     labelChoose->setGeometry(geometry::ChooseLabel);
     labelChoose->setObjectName("label_choose");
 
@@ -321,7 +320,6 @@ QWidget* LauncherWindow::createCentralWidget() {
 
 
     QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
-    optionsLabel->setObjectName("clear");
     optionsLabel->setGeometry(geometry::OptionsLabel);
     optionsLabel->setObjectName("label_options");
 
