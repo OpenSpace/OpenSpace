@@ -140,20 +140,36 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         LINFO(s);
     }
 
-    std::string dumpFile = std::format(
-        "OpenSpace_{}_{}_{}-{}-{}-{}-{}-{}-{}--{}--{}.dmp",
-        OPENSPACE_VERSION_MAJOR,
-        OPENSPACE_VERSION_MINOR,
-        OPENSPACE_VERSION_PATCH,
-        stLocalTime.wYear,
-        stLocalTime.wMonth,
-        stLocalTime.wDay,
-        stLocalTime.wHour,
-        stLocalTime.wMinute,
-        stLocalTime.wSecond,
-        GetCurrentProcessId(),
-        GetCurrentThreadId()
-    );
+    std::string dumpFile;
+    if (OPENSPACE_IS_RELEASE_BUILD) {
+        dumpFile = std::format(
+            "OpenSpace_{}_{}_{}-{}-{}-{}-{}-{}-{}--{}--{}.dmp",
+            OPENSPACE_VERSION_MAJOR,
+            OPENSPACE_VERSION_MINOR,
+            OPENSPACE_VERSION_PATCH,
+            stLocalTime.wYear,
+            stLocalTime.wMonth,
+            stLocalTime.wDay,
+            stLocalTime.wHour,
+            stLocalTime.wMinute,
+            stLocalTime.wSecond,
+            GetCurrentProcessId(),
+            GetCurrentThreadId()
+        );
+    }
+    else {
+        dumpFile = std::format(
+            "OpenSpace_{}-{}-{}-{}-{}-{}--{}--{}.dmp",
+            stLocalTime.wYear,
+            stLocalTime.wMonth,
+            stLocalTime.wDay,
+            stLocalTime.wHour,
+            stLocalTime.wMinute,
+            stLocalTime.wSecond,
+            GetCurrentProcessId(),
+            GetCurrentThreadId()
+        );
+    }
 
     LINFO(std::format("Creating dump file: {}", dumpFile));
 
