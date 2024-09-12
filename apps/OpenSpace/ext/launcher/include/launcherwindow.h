@@ -88,6 +88,13 @@ public:
       */
     bool isUserConfigSelected() const;
 
+    /**
+     * Handles keypress while the Qt launcher window is open.
+     *
+     * \param evt QKeyEevnt object of the key press event
+     */
+    void keyPressEvent(QKeyEvent* evt) override;
+
 private:
     QWidget* createCentralWidget();
     void setBackgroundImage(const std::filesystem::path& syncPath);

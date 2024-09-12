@@ -35,6 +35,7 @@
 #include <sgct/readconfig.h>
 #include <QComboBox>
 #include <QFile>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPainter>
@@ -954,4 +955,14 @@ std::string LauncherWindow::selectedWindowConfig() const {
 bool LauncherWindow::isUserConfigSelected() const {
     const int selectedIndex = _windowConfigBox->currentIndex();
     return (selectedIndex <= _userConfigCount);
+}
+
+
+void LauncherWindow::keyPressEvent(QKeyEvent* evt) {
+    if (evt->key() == Qt::Key_Escape) {
+        _shouldLaunch = false;
+        close();
+        return;
+    }
+    QMainWindow::keyPressEvent(evt);
 }
