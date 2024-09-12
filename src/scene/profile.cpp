@@ -640,7 +640,7 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     for (properties::Property* prop : ps) {
         Property p;
         p.setType = Property::SetType::SetPropertyValueSingle;
-        p.name = prop->fullyQualifiedIdentifier();
+        p.name = prop->uri();
         p.value = prop->stringValue();
         properties.push_back(std::move(p));
     }

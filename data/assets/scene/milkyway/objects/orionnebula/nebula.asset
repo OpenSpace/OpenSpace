@@ -176,7 +176,6 @@ asset.export(OrionNebulaProplydsModel)
 
 asset.meta = {
   Name = "Orion Nebula Model",
-  Version = "1.1",
   Description = [[Digital Universe asset for the Orion nebula 3D model. This asset
     contains seperate models for the nebula, proplyds and shocks. To be used in
     conjunction with orion star cluster. Use orionnebula.asset to include both]],

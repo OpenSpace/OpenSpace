@@ -55,7 +55,6 @@ asset.export(ArtemisModel)
 
 asset.meta = {
   Name = "Artemis-1 Model",
-  Version = "1.0",
   Description = "Orion capsule model for the Artemis-1 mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

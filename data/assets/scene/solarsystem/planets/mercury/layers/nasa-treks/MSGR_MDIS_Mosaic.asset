@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/mercury/mercury").Mercury.Identifier
 
+
+
 local treks_MSGR_Aksakov_Crater_Peak_Ring_Ortho_29m = {
   Identifier = "MSGR_Aksakov_Crater_Peak_Ring_Ortho_29m",
   Name = [[MSGR MDIS Mosaic, Aksakov Crater Peak Ring]],
@@ -86,6 +88,7 @@ local treks_MSGR_Sholem_Aleichem_Crater_Wall_Ortho_8m = {
   Description = [[This is a visible orthoimage for the Sholem Aleichem Crater Wall region on Mercury. This data product class of this data is observational and has been constructed to examine the visible and topographic settings of landforms around Mercury's hollows. Observations of topography, specifically the relationships of hollows to their surroundings, can be used to investigate hollow formation. The visible image has been orthorectified using a digital elevation model (DEM) created from Mercury Dual Imaging System (MDIS) stereo pair images. The DEM used to generate the orthoimage has been aligned and controlled to Mercury Laser Altimeter (MLA) individual elevation points. The orthoimage was then projected onto the DEM and exported. This ortho image has been generated at a resolution of 8m/pixel.]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_MSGR_Aksakov_Crater_Peak_Ring_Ortho_29m)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_MSGR_near_Dali_Crater_Ortho_20m)
@@ -124,9 +127,9 @@ asset.export("MSGR_Sander_Crater_Ortho_22m", treks_MSGR_Sander_Crater_Ortho_22m)
 asset.export("MSGR_Sholem_Aleichem_Crater_Wall_Ortho_8m", treks_MSGR_Sholem_Aleichem_Crater_Wall_Ortho_8m)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Mercury MSGR_MDIS_Mosaic],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mercury MSGR_MDIS_Mosaic]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mercury",
   License = "NASA/Treks",

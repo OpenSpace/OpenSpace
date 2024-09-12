@@ -66,84 +66,20 @@ local RadioSphere = {
   },
   GUI = {
     Name = "Radio Sphere",
-    Path = "/Other/Grids"
-  }
-}
-
-local OortSphere = {
-  Identifier = "OortSphere",
-  Parent = transforms.SolarSystemBarycenter.Name,
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 7.47989845E15
-    },
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = EclipticRotationMatrix
-    }
-  },
-  Renderable = {
-    Type = "RenderableSphericalGrid",
-    Enabled = false,
-    Opacity = 0.8,
-    Color = { 0.8, 0.4, 0.4 },
-    LineWidth = 2.0
-  },
-  GUI = {
-    Name = "Oort Sphere",
-    Path = "/Other/Grids"
-  }
-}
-
-local EclipticSphere = {
-  Identifier = "EclipticSphere",
-  Parent = transforms.SolarSystemBarycenter.Name,
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      Scale = 9.46377307652E17
-    },
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = EclipticRotationMatrix
-    }
-  },
-  Renderable = {
-    Type = "RenderableSphericalGrid",
-    Enabled = false,
-    Opacity = 1.0,
-    Color = { 0.74, 0.26, 0.26 },
-    LineWidth = 2.0
-  },
-  GUI = {
-    Name = "Ecliptic Sphere",
-    Path = "/Other/Grids"
-  }
-}
-
-local EclipticSphereLabels = {
-  Identifier = "EclipticSphereLabels",
-  Parent = transforms.SolarSystemBarycenter.Name,
-  Renderable = {
-    Type = "RenderablePointCloud",
-    Enabled = false,
-    Labels = {
-      Enabled = true,
-      File = speck .. "eclip.label",
-      Color = { 0.5, 0.5, 0.5 },
-      Size = 14.75,
-      MinMaxSize = { 1, 50 },
-      Unit = "pc",
-      TransformationMatrix = EclipticTransformationMatrix
-    },
-    Opacity = 0.65,
-    Unit = "pc",
-    TransformationMatrix = EclipticTransformationMatrix
-  },
-  GUI = {
-    Name = "Ecliptic Sphere Labels",
-    Path = "/Other/Grids"
+    Path = "/Milky Way/Grids",
+    Description = [[The radio sphere describes the theoretical extent of Earth's radio
+      signals in space. Before television carrier waves, early-warning radar first used
+      in World War II, and the detonation of atomic weapons, Earth was radio-quiet to the
+      universe (AM and FM radio signals bounce off the atmosphere and do not escape it).
+      After the use of these and other radio emitters began, in the late 1930s and early
+      1940s, signals were able to escape the atmosphere and travel into space at the speed
+      of light. Since then, we have been broadcasting to the universe. We mention earlier
+      that this is the theoretical extent of these signals. In reality, these signals
+      will dissipate rapidly into the ambient cosmic noise of the universe. All light
+      falls off as the square of the distance, and radio waves are no different. The
+      signals that emanate from Earth are likely lost in the noise before they leave the
+      solar system, but the radio sphere remains a visually compelling astronomical
+      concept.]]
   }
 }
 
@@ -153,7 +89,7 @@ local EquatorialSphere = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 4.28601E17
+      Scale = 80 * LightYear
     },
     Rotation = {
       Type = "StaticRotation",
@@ -163,13 +99,16 @@ local EquatorialSphere = {
   Renderable = {
     Type = "RenderableSphericalGrid",
     Enabled = false,
-    Opacity = 0.8,
-    Color = { 0.69, 0.68, 0.29 },
-    LineWidth = 2.0
+    Opacity = 1.0,
+    Color = { 0.3, 0.3, 0.15 },
+    LineWidth = 2.0,
+    GridSegments = { 18, 24 },
   },
   GUI = {
-    Name = "Equatorial Sphere",
-    Path = "/Other/Grids"
+    Name = "Equatorial Coordinates",
+    Path = "/Night Sky/Coordinate Systems/Equatorial",
+    Description = [[An 80-light-year sphere representing equatorial coordinates (right
+      ascension and declination).]]
   }
 }
 
@@ -193,8 +132,65 @@ local EquatorialSphereLabels = {
     TransformationMatrix = EquatorialTransformationMatrix
   },
   GUI = {
-    Name = "Equatorial Sphere Labels",
-    Path = "/Other/Grids"
+    Name = "Equatorial Coordinates Labels",
+    Path = "/Night Sky/Coordinate Systems/Equatorial",
+    Description = [[Labels on a sphere representing right ascension in hours and
+      declination in degrees.]]
+  }
+}
+
+local EclipticSphere = {
+  Identifier = "EclipticSphere",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 100 * LightYear
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = false,
+    Opacity = 1.0,
+    Color = { 0.3, 0.15, 0.15 },
+    LineWidth = 2.0
+  },
+  GUI = {
+    Name = "Ecliptic Coordinates",
+    Path = "/Night Sky/Coordinate Systems/Ecliptic",
+    Description = [[A 100-light-year sphere representing ecliptic coordinates (ecliptic
+      longitude and latitude).]]
+  }
+}
+
+local EclipticSphereLabels = {
+  Identifier = "EclipticSphereLabels",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    Labels = {
+      Enabled = true,
+      File = speck .. "eclip.label",
+      Color = { 0.5, 0.5, 0.5 },
+      Size = 14.5,
+      MinMaxSize = { 1, 50 },
+      Unit = "pc",
+      TransformationMatrix = EclipticTransformationMatrix
+    },
+    Opacity = 0.65,
+    Unit = "pc",
+    TransformationMatrix = EclipticTransformationMatrix
+  },
+  GUI = {
+    Name = "Ecliptic Coordinates Labels",
+    Path = "/Night Sky/Coordinate Systems/Ecliptic",
+    Description = [[Labels on a sphere representing ecliptic longitude and latitude in
+      degrees.]]
   }
 }
 
@@ -204,7 +200,7 @@ local GalacticSphere = {
   Transform = {
     Scale = {
       Type = "StaticScale",
-      Scale = 9.46377307652E18
+      Scale = 1000 * LightYear
     }
   },
   Renderable = {
@@ -212,11 +208,13 @@ local GalacticSphere = {
     Enabled = false,
     LineWidth = 2.0,
     Opacity = 1.0,
-    Color = { 0.0, 0.6, 0.6 }
+    Color = { 0.05, 0.25, 0.25 }
   },
   GUI = {
-    Name = "Galactic Sphere",
-    Path = "/Other/Grids"
+    Name = "Galactic Coordinates",
+    Path = "/Night Sky/Coordinate Systems/Galactic",
+    Description = [[A 1000-light-year sphere representing galactic coordinates (galactic
+      longitude and latitude).]]
   }
 }
 
@@ -230,7 +228,7 @@ local GalacticSphereLabels = {
       Enabled = true,
       File = speck .. "galac.label",
       Color = { 0.5, 0.5, 0.5 },
-      Size = 15.8,
+      Size = 15.5,
       MinMaxSize = { 1, 100 },
       Unit = "pc"
     },
@@ -238,8 +236,10 @@ local GalacticSphereLabels = {
     Unit = "pc"
   },
   GUI = {
-    Name = "Galactic Sphere Labels",
-    Path = "/Other/Grids"
+    Name = "Galactic Coordinates Labels",
+    Path = "/Night Sky/Coordinate Systems/Galactic",
+    Description = [[Labels on a sphere representing galactic longitude and latitude in
+      degrees.]]
   }
 }
 
@@ -258,7 +258,7 @@ local Plane1lh = {
     Labels = {
       File = speck .. "1lh.label",
       Color = { 0.0, 0.2, 0.5 },
-      Size = 9.5,
+      Size = 8.9,
       MinMaxSize = { 0, 30 },
       Unit = "Km"
     },
@@ -269,8 +269,10 @@ local Plane1lh = {
     Size = { 2 * LightHour, 2 * LightHour }
   },
   GUI = {
-    Name = "1lh Grid",
-    Path = "/Other/Grids"
+    Name = "1-light-hour Grid",
+    Path = "/Solar System/Grids",
+    Description = [[A 1-light-hour Cartesian grid aligned on the plane of the Solar System.]],
+    OrderingNumber = LightHour
   }
 }
 
@@ -300,8 +302,10 @@ local Plane1ld = {
     Size = { 2 * LightDay, 2 * LightDay }
   },
   GUI = {
-    Name = "1ld Grid",
-    Path = "/Other/Grids"
+    Name = "1-light-day Grid",
+    Path = "/Solar System/Grids",
+    Description = [[A 1-light-day Cartesian grid aligned on the plane of the Solar System.]],
+    OrderingNumber = LightDay
   }
 }
 
@@ -331,8 +335,10 @@ local Plane1lm = {
     Size = { 2 * LightMonth, 2 * LightMonth }
   },
   GUI = {
-    Name = "1lm Grid",
-    Path = "/Other/Grids"
+    Name = "1-light-month Grid",
+    Path = "/Solar System/Grids",
+    Description = [[A 1-light-month Cartesian grid aligned on the plane of the Solar System.]],
+    OrderingNumber = LightMonth
   }
 }
 
@@ -362,8 +368,10 @@ local Plane1ly = {
     Size = { 2 * LightYear, 2 * LightYear }
   },
   GUI = {
-    Name = "1ly Grid",
-    Path = "/Other/Grids"
+    Name = "1-light-year Grid",
+    Path = "/Solar System/Grids",
+    Description = [[A 1-light-year Cartesian grid aligned on the plane of the Solar System.]],
+    OrderingNumber = LightYear
   }
 }
 
@@ -393,8 +401,10 @@ local Plane10ly = {
     Size = { 10 * 2 * LightYear, 10 * 2 * LightYear }
   },
   GUI = {
-    Name = "10ly Grid",
-    Path = "/Other/Grids"
+    Name = "10-light-year Grid",
+    Path = "/Milky Way/Grids",
+    Description = [[A 10-light-year Cartesian grid aligned on the plane of the Solar System.]],
+    OrderingNumber = 10 * LightYear
   }
 }
 
@@ -424,8 +434,10 @@ local Plane100ly = {
     Size = { 100 * 2 * LightYear, 100 * 2 * LightYear }
   },
   GUI = {
-    Name = "100ly Grid",
-    Path = "/Other/Grids"
+    Name = "100-light-year Grid",
+    Path = "/Milky Way/Grids",
+    Description = [[A 100-light-year Cartesian grid aligned on the plane of the Solar System.]],
+    OrderingNumber = 100 * LightYear
   }
 }
 
@@ -455,8 +467,10 @@ local Plane1kly = {
     Size = { 1000 * 2 * LightYear, 1000 * 2 * LightYear }
   },
   GUI = {
-    Name = "1kly Grid",
-    Path = "/Other/Grids"
+    Name = "1,000-light-year Grid",
+    Path = "/Milky Way/Grids",
+    Description = [[A 1,000-light-year Cartesian grid aligned on the plane of the Solar System.]],
+    OrderingNumber = 1000 * LightYear
   }
 }
 
@@ -486,8 +500,10 @@ local Plane10kly = {
     Size = { 10000 * 2 * LightYear, 10000 * 2 * LightYear }
   },
   GUI = {
-    Name = "10kly Grid",
-    Path = "/Other/Grids"
+    Name = "10,000-light-year Grid",
+    Path = "/Milky Way/Grids",
+    Description = [[A 10,000-light-year Cartesian grid aligned on the plane of the Solar System.]],
+    OrderingNumber = 10000 * LightYear
   }
 }
 
@@ -499,7 +515,7 @@ local Plane100kly = {
     Labels = {
       File = speck .. "100kly.label",
       Color = { 0.0, 0.2, 0.5 },
-      Size = 18.6,
+      Size = 18.0,
       MinMaxSize = { 0, 30 },
       Unit = "Mpc"
     },
@@ -512,8 +528,10 @@ local Plane100kly = {
     Size = { 100000 * 2 * LightYear, 100000 * 2 * LightYear }
   },
   GUI = {
-    Name = "100kly Grid",
-    Path = "/Other/Grids"
+    Name = "100,000-light-year Grid",
+    Path = "/Universe/Grids",
+    Description = [[A 100,000-light-year Cartesian grid aligned on the plane of the Milky Way.]],
+    OrderingNumber = 100000 * LightYear
   }
 }
 
@@ -525,7 +543,7 @@ local Plane1Mly = {
     Labels = {
       File = speck .. "1Mly.label",
       Color = { 0.0, 0.2, 0.5 },
-      Size = 19.6,
+      Size = 19.0,
       MinMaxSize = { 0, 30 },
       Unit = "Mpc"
     },
@@ -538,8 +556,10 @@ local Plane1Mly = {
     Size = { 1E6 * 2 * LightYear, 1E6 * 2 * LightYear }
   },
   GUI = {
-    Name = "1Mly Grid",
-    Path = "/Other/Grids"
+    Name = "1-million-light-year Grid",
+    Path = "/Universe/Grids",
+    Description = [[A 1-million-light-year Cartesian grid aligned on the plane of the Milky Way.]],
+    OrderingNumber = 1E6 * LightYear
   }
 }
 
@@ -551,7 +571,7 @@ local Plane10Mly = {
     Labels = {
       File = speck .. "10Mly.label",
       Color = { 0.0, 0.2, 0.5 },
-      Size = 20.6,
+      Size = 20.3,
       MinMaxSize = { 0, 30 },
       Unit = "Mpc"
     },
@@ -564,8 +584,10 @@ local Plane10Mly = {
     Size = { 10E6 * 2 * LightYear, 10E6 * 2 * LightYear }
   },
   GUI = {
-    Name = "10Mly Grid",
-    Path = "/Other/Grids"
+    Name = "10-million-light-year Grid",
+    Path = "/Universe/Grids",
+    Description = [[A 10-million-light-year Cartesian grid aligned on the plane of the Milky Way.]],
+    OrderingNumber = 10E6 * LightYear
   }
 }
 
@@ -577,7 +599,7 @@ local Plane100Mly = {
     Labels = {
       File = speck .. "100Mly.label",
       Color = { 0.0, 0.2, 0.5 },
-      Size = 21.6,
+      Size = 20.9,
       MinMaxSize = { 0, 30 },
       Unit = "Mpc"
     },
@@ -590,8 +612,10 @@ local Plane100Mly = {
     Size = { 100E6 * 2 * LightYear, 100E6 * 2 * LightYear }
   },
   GUI = {
-    Name = "100Mly Grid",
-    Path = "/Other/Grids"
+    Name = "100-million-light-year Grid",
+    Path = "/Universe/Grids",
+    Description = [[A 100-million-light-year Cartesian grid aligned on the plane of the Milky Way.]],
+    OrderingNumber = 100E6 * LightYear
   }
 }
 
@@ -603,7 +627,7 @@ local Plane20Gly = {
     Labels = {
       File = speck .. "20Gly.label",
       Color = { 0.0, 0.2, 0.5 },
-      Size = 23.6,
+      Size = 23.1,
       MinMaxSize = { 0, 30 },
       Unit = "Mpc"
     },
@@ -616,15 +640,16 @@ local Plane20Gly = {
     Size = { 20E9 * 2 * LightYear, 20E9 * 2 * LightYear }
   },
   GUI = {
-    Name = "20Gly Grid",
-    Path = "/Other/Grids"
+    Name = "20-billion-light-year Grid",
+    Path = "/Universe/Grids",
+    Description = [[A 20-billion-light-year Cartesian grid aligned on the plane of the Milky Way.]],
+    OrderingNumber = 20E9 * LightYear
   }
 }
 
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(RadioSphere)
-  openspace.addSceneGraphNode(OortSphere)
   openspace.addSceneGraphNode(EclipticSphere)
   openspace.addSceneGraphNode(EclipticSphereLabels)
   openspace.addSceneGraphNode(EquatorialSphere)
@@ -666,12 +691,10 @@ asset.onDeinitialize(function()
     openspace.removeSceneGraphNode(EquatorialSphere)
     openspace.removeSceneGraphNode(EclipticSphereLabels)
     openspace.removeSceneGraphNode(EclipticSphere)
-    openspace.removeSceneGraphNode(OortSphere)
     openspace.removeSceneGraphNode(RadioSphere)
 end)
 
 asset.export(RadioSphere)
-asset.export(OortSphere)
 asset.export(EclipticSphere)
 asset.export(EclipticSphereLabels)
 asset.export(EquatorialSphere)
@@ -696,14 +719,14 @@ asset.export(Plane20Gly)
 
 asset.meta = {
   Name = "Grids",
-  Version = "3.0",
-  Description = [[Various grids for showing size reference. Included: 10,000 light year
-    grid, 10 light year grid, 20 billion light year grid, 10 million light year grid,
-    100 light year grid, 100 million light year grid, Ecliptic Coordinate Sphere
-    (500-light-year radius), Galactic Coordinate Sphere (1000-light-year radius),
-    Galaxy Coordinate Grid, Celestial Coordinates / Radio Sphere (dynamic radius), 1
-    billion light year grid, Celestial Coordinate Sphere (1000000-light-year radius),
-    1,000 light year grid, 1 million light year grid, 1 light year grid]],
+  Description = [[Various grids and spheres for showing size reference. Included:
+    10,000 light year grid, 10 light year grid, 20 billion light year grid, 10 million
+    light year grid, 100 light year grid, 100 million light year grid, Ecliptic
+    Coordinate Sphere (500-light-year radius), Galactic Coordinate Sphere
+    (1000-light-year radius), Galaxy Coordinate Grid, Celestial Coordinates / Radio Sphere
+    (dynamic radius), 1 billion light year grid, Celestial Coordinate Sphere
+    (1000000-light-year radius), 1,000 light year grid, 1 million light year grid,
+    1 light year grid.]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

@@ -41,7 +41,6 @@ asset.export(SaturnTrailEarth)
 
 asset.meta = {
   Name = "Saturn Trail from Earth",
-  Version = "1.1",
   Description = "Alternate trail of Saturn",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

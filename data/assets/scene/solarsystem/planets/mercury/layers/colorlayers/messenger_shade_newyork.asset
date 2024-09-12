@@ -30,7 +30,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger SHADE [New York]",
-  Version = "1.0",
   Description = [[Mercury SHADE layer for Mercury globe. This map is hosted on the
     OpenSpace server in New York]],
   Author = "USGS",

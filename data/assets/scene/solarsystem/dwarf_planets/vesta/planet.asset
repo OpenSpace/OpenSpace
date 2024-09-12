@@ -52,7 +52,6 @@ asset.export("Planet", VestaModel)
 
 asset.meta = {
   Name = "Vesta Model",
-  Version = "1.0",
   Description = [[Model of Vesta]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

@@ -40,7 +40,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Earth Bluemarble Height",
-  Version = "1.1",
   Description = [[Fallback layer for earth height if no internet is available. Contains
     Blue Marble Next Generation Topographic]],
   Author = "NASA",

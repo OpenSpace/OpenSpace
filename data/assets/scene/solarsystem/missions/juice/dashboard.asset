@@ -3,6 +3,7 @@ local jupiter = asset.require("scene/solarsystem/planets/jupiter/jupiter")
 local ganymede = asset.require("scene/solarsystem/planets/jupiter/ganymede/ganymede")
 
 
+
 local DistanceJuiceJupiter = {
   Type = "DashboardItemDistance",
   Identifier = "JuiceJupiterDistance",

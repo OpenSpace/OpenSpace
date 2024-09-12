@@ -72,7 +72,6 @@ asset.export(GaiaAbundanceApogee)
 
 asset.meta = {
   Name = "Gaia Abundance Apogee",
-  Version = "1.0",
   Description = "This asset contains a RenderableStars dataset with metallicity data",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

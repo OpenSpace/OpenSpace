@@ -29,7 +29,6 @@ end)
 
 asset.meta = {
   Name = "DPI Scaling",
-  Version = "1.0",
   Description = [[Retrieves the DPI scaling from the operating system and applies it to a
     few selected places to make them scale better on "large resolution but small size"
     monitors]],

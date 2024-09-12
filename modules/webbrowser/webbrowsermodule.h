@@ -58,6 +58,8 @@ public:
     void detachEventHandler();
     bool isEnabled() const;
 
+    static bool canUseAcceleratedRendering();
+
     std::vector<documentation::Documentation> documentations() const override;
 
 protected:

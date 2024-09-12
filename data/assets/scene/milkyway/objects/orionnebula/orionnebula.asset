@@ -5,7 +5,6 @@ asset.require("./nebula")
 
 asset.meta = {
   Name = "Orion Nebula",
-  Version = "1.0",
   Description = [[This asset is a meta asset, containing all the assets for the Orion
     Nebula from the AMNH Digital Universe. This includes a 3D model and a star cluster]],
   Author = "Brian Abbott (AMNH)",

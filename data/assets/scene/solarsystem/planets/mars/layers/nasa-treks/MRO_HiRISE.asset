@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
 
+
+
 local treks_DTEEC_001918_1735_001984_1735_U01_longlat = {
   Identifier = "DTEEC_001918_1735_001984_1735_U01_longlat",
   Name = [[MRO HiRISE, 001918_1735_001984_1735 DEM]],
@@ -236,6 +238,7 @@ local treks_PSP_001501_2280_RED = {
 The High Resolution Imaging Science Experiment (HiRISE) camera utilizes a 0.5-meter telescope to obtain very high resolution images of Martian landforms and terrains. From an altitude of 300 km, HiRISE has a resolution of 0.3 meters per pixel. In addition to being used for getting very detailed images of surface features, pairs of slightly offset HiRISE images are combined to produce precise digital elevation models of Martian topography.]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_DTEEC_001918_1735_001984_1735_U01_longlat)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_DTEED_042014_1760_042647_1760_A01)
@@ -307,9 +310,9 @@ asset.export("PSP_001521_2025_RED", treks_PSP_001521_2025_RED)
 asset.export("PSP_001501_2280_RED", treks_PSP_001501_2280_RED)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MRO_HiRISE],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MRO_HiRISE]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

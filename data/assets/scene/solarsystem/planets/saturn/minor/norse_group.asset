@@ -17,9 +17,7 @@ local Phoebe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 218800, 217000, 203600 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 218800, 217000, 203600 }
   },
   Tag = {
     "moon_solarSystem",
@@ -89,8 +87,7 @@ local PhoebeLabel = {
   },
   GUI = {
     Name = "Phoebe Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe",
-    Description = "Label for Saturn's moon Phoebe (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Phoebe"
   }
 }
 
@@ -106,9 +103,7 @@ local Skathi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -178,8 +173,7 @@ local SkathiLabel = {
   },
   GUI = {
     Name = "Skathi Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi",
-    Description = "Label for Saturn's moon Skathi (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skathi"
   }
 }
 
@@ -195,9 +189,7 @@ local S2007S2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -267,8 +259,7 @@ local S2007S2Label = {
   },
   GUI = {
     Name = "S/2007 S 2 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2",
-    Description = "Label for Saturn's moon S/2007 S 2 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S2"
   }
 }
 
@@ -284,9 +275,7 @@ local Skoll = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -356,8 +345,7 @@ local SkollLabel = {
   },
   GUI = {
     Name = "Skoll Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll",
-    Description = "Label for Saturn's moon Skoll (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skoll"
   }
 }
 
@@ -373,9 +361,7 @@ local S2004S13 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -445,8 +431,7 @@ local S2004S13Label = {
   },
   GUI = {
     Name = "S/2004 S 13 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13",
-    Description = "Label for Saturn's moon S/2004 S 13 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S13"
   }
 }
 
@@ -462,9 +447,7 @@ local Greip = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -534,8 +517,7 @@ local GreipLabel = {
   },
   GUI = {
     Name = "Greip Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip",
-    Description = "Label for Saturn's moon Greip (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Greip"
   }
 }
 
@@ -551,9 +533,7 @@ local Hyrrokkin = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -623,8 +603,7 @@ local HyrrokkinLabel = {
   },
   GUI = {
     Name = "Hyrrokkin Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin",
-    Description = "Label for Saturn's moon Hyrrokkin (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hyrrokkin"
   }
 }
 
@@ -640,9 +619,7 @@ local Jarnsaxa = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -712,8 +689,7 @@ local JarnsaxaLabel = {
   },
   GUI = {
     Name = "Jarnsaxa Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa",
-    Description = "Label for Saturn's moon Jarnsaxa (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Jarnsaxa"
   }
 }
 
@@ -729,9 +705,7 @@ local Mundilfari = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -801,8 +775,7 @@ local MundilfariLabel = {
   },
   GUI = {
     Name = "Mundilfari Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari",
-    Description = "Label for Saturn's moon Mundilfari (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Mundilfari"
   }
 }
 
@@ -818,9 +791,7 @@ local S2006S1 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -890,8 +861,7 @@ local S2006S1Label = {
   },
   GUI = {
     Name = "S/2006 S 1 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1",
-    Description = "Label for Saturn's moon S/2006 S 1 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S1"
   }
 }
 
@@ -907,9 +877,7 @@ local S2004S17 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -979,8 +947,7 @@ local S2004S17Label = {
   },
   GUI = {
     Name = "S/2004 S 17 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17",
-    Description = "Label for Saturn's moon S/2004 S 17 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S17"
   }
 }
 
@@ -996,9 +963,7 @@ local Bergelmir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1068,8 +1033,7 @@ local BergelmirLabel = {
   },
   GUI = {
     Name = "Bergelmir Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir",
-    Description = "Label for Saturn's moon Bergelmir (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bergelmir"
   }
 }
 
@@ -1085,9 +1049,7 @@ local Narvi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1157,8 +1119,7 @@ local NarviLabel = {
   },
   GUI = {
     Name = "Narvi Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi",
-    Description = "Label for Saturn's moon Narvi (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Narvi"
   }
 }
 
@@ -1174,9 +1135,7 @@ local Suttungr = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1246,8 +1205,7 @@ local SuttungrLabel = {
   },
   GUI = {
     Name = "Suttungr Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr",
-    Description = "Label for Saturn's moon Suttungr (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Suttungr"
   }
 }
 
@@ -1263,9 +1221,7 @@ local Hati = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1335,8 +1291,7 @@ local HatiLabel = {
   },
   GUI = {
     Name = "Hati Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati",
-    Description = "Label for Saturn's moon Hati (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Hati"
   }
 }
 
@@ -1352,9 +1307,7 @@ local S2004S12 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1424,8 +1377,7 @@ local S2004S12Label = {
   },
   GUI = {
     Name = "S/2004 S 12 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12",
-    Description = "Label for Saturn's moon S/2004 S 12 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S12"
   }
 }
 
@@ -1441,9 +1393,7 @@ local Farbauti = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1513,8 +1463,7 @@ local FarbautiLabel = {
   },
   GUI = {
     Name = "Farbauti Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti",
-    Description = "Label for Saturn's moon Farbauti (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Farbauti"
   }
 }
 
@@ -1530,9 +1479,7 @@ local Thrymr = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1602,8 +1549,7 @@ local ThrymrLabel = {
   },
   GUI = {
     Name = "Thrymr Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr",
-    Description = "Label for Saturn's moon Thrymr (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thrymr"
   }
 }
 
@@ -1619,9 +1565,7 @@ local Aegir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1691,8 +1635,7 @@ local AegirLabel = {
   },
   GUI = {
     Name = "Aegir Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir",
-    Description = "Label for Saturn's moon Aegir (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Aegir"
   }
 }
 
@@ -1708,9 +1651,7 @@ local S2007S3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1780,8 +1721,7 @@ local S2007S3Label = {
   },
   GUI = {
     Name = "S/2007 S 3 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3",
-    Description = "Label for Saturn's moon S/2007 S 3 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2007S3"
   }
 }
 
@@ -1797,9 +1737,7 @@ local Bestla = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1869,8 +1807,7 @@ local BestlaLabel = {
   },
   GUI = {
     Name = "Bestla Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla",
-    Description = "Label for Saturn's moon Bestla (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Bestla"
   }
 }
 
@@ -1886,9 +1823,7 @@ local S2004S7 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1958,8 +1893,7 @@ local S2004S7Label = {
   },
   GUI = {
     Name = "S/2004 S 7 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7",
-    Description = "Label for Saturn's moon S/2004 S 7 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S7"
   }
 }
 
@@ -1975,9 +1909,7 @@ local S2006S3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2047,8 +1979,7 @@ local S2006S3Label = {
   },
   GUI = {
     Name = "S/2006 S 3 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3",
-    Description = "Label for Saturn's moon S/2006 S 3 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2006S3"
   }
 }
 
@@ -2064,9 +1995,7 @@ local Fenrir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2136,8 +2065,7 @@ local FenrirLabel = {
   },
   GUI = {
     Name = "Fenrir Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir",
-    Description = "Label for Saturn's moon Fenrir (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fenrir"
   }
 }
 
@@ -2153,9 +2081,7 @@ local Surtur = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2225,8 +2151,7 @@ local SurturLabel = {
   },
   GUI = {
     Name = "Surtur Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur",
-    Description = "Label for Saturn's moon Surtur (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Surtur"
   }
 }
 
@@ -2242,9 +2167,7 @@ local Kari = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2314,8 +2237,7 @@ local KariLabel = {
   },
   GUI = {
     Name = "Kari Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari",
-    Description = "Label for Saturn's moon Kari (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Kari"
   }
 }
 
@@ -2331,9 +2253,7 @@ local Ymir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 18000, 18000, 18000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 18000, 18000, 18000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2403,8 +2323,7 @@ local YmirLabel = {
   },
   GUI = {
     Name = "Ymir Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir",
-    Description = "Label for Saturn's moon Ymir (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Ymir"
   }
 }
 
@@ -2420,9 +2339,7 @@ local Loge = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2492,8 +2409,7 @@ local LogeLabel = {
   },
   GUI = {
     Name = "Loge Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge",
-    Description = "Label for Saturn's moon Loge (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Loge"
   }
 }
 
@@ -2509,9 +2425,7 @@ local Fornjot = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2581,8 +2495,7 @@ local FornjotLabel = {
   },
   GUI = {
     Name = "Fornjot Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot",
-    Description = "Label for Saturn's moon Fornjot (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Fornjot"
   }
 }
 
@@ -2598,9 +2511,7 @@ local Skadi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2670,8 +2581,7 @@ local SkadiLabel = {
   },
   GUI = {
     Name = "Skadi Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi",
-    Description = "Label for Saturn's moon Skadi (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi"
   }
 }
 
@@ -2687,9 +2597,7 @@ local Gridr = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2759,8 +2667,7 @@ local GridrLabel = {
   },
   GUI = {
     Name = "Gridr Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr",
-    Description = "Label for Saturn's moon Gridr (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gridr"
   }
 }
 
@@ -2776,9 +2683,7 @@ local Angrboda = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2848,8 +2753,7 @@ local AngrbodaLabel = {
   },
   GUI = {
     Name = "Angrboda Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda",
-    Description = "Label for Saturn's moon Angrboda (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Angrboda"
   }
 }
 
@@ -2865,9 +2769,7 @@ local Skrymir = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -2937,8 +2839,7 @@ local SkrymirLabel = {
   },
   GUI = {
     Name = "Skrymir Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir",
-    Description = "Label for Saturn's moon Skrymir (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skrymir"
   }
 }
 
@@ -2954,9 +2855,7 @@ local Gerd = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3026,8 +2925,7 @@ local GerdLabel = {
   },
   GUI = {
     Name = "Gerd Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd",
-    Description = "Label for Saturn's moon Gerd (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gerd"
   }
 }
 
@@ -3043,9 +2941,7 @@ local S2004S26 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3115,8 +3011,7 @@ local S2004S26Label = {
   },
   GUI = {
     Name = "S/2004 S 26 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26",
-    Description = "Label for Saturn's moon S/2004 S 26 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S26"
   }
 }
 
@@ -3132,9 +3027,7 @@ local Eggther = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3204,8 +3097,7 @@ local EggtherLabel = {
   },
   GUI = {
     Name = "Eggther Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther",
-    Description = "Label for Saturn's moon Eggther (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Eggther"
   }
 }
 
@@ -3221,9 +3113,7 @@ local Beli = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3293,8 +3183,7 @@ local BeliLabel = {
   },
   GUI = {
     Name = "Beli Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli",
-    Description = "Label for Saturn's moon Beli (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Beli"
   }
 }
 
@@ -3310,9 +3199,7 @@ local Gunnlod = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3382,8 +3269,7 @@ local GunnlodLabel = {
   },
   GUI = {
     Name = "Gunnlod Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod",
-    Description = "Label for Saturn's moon Gunnlod (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Gunnlod"
   }
 }
 
@@ -3399,9 +3285,7 @@ local Thiazzi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3471,8 +3355,7 @@ local ThiazziLabel = {
   },
   GUI = {
     Name = "Thiazzi Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi",
-    Description = "Label for Saturn's moon Thiazzi (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Thiazzi"
   }
 }
 
@@ -3488,9 +3371,7 @@ local S2004S34 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3560,8 +3441,7 @@ local S2004S34Label = {
   },
   GUI = {
     Name = "S/2004 S 34 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34",
-    Description = "Label for Saturn's moon S/2004 S 34 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S34"
   }
 }
 
@@ -3577,9 +3457,7 @@ local Alvaldi = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3649,8 +3527,7 @@ local AlvaldiLabel = {
   },
   GUI = {
     Name = "Alvaldi Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi",
-    Description = "Label for Saturn's moon Alvaldi (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Alvaldi"
   }
 }
 
@@ -3666,9 +3543,7 @@ local Geirrod = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3738,8 +3613,7 @@ local GeirrodLabel = {
   },
   GUI = {
     Name = "Geirrod Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod",
-    Description = "Label for Saturn's moon Geirrod (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Geirrod"
   }
 }
 
@@ -3755,9 +3629,7 @@ local S2004S28 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3827,8 +3699,7 @@ local S2004S28Label = {
   },
   GUI = {
     Name = "S/2004 S 28 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28",
-    Description = "Label for Saturn's moon S/2004 S 28 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S28"
   }
 }
 
@@ -3844,9 +3715,7 @@ local S2004S21 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -3916,8 +3785,7 @@ local S2004S21Label = {
   },
   GUI = {
     Name = "S/2004 S 21 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21",
-    Description = "Label for Saturn's moon S/2004 S 21 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S21"
   }
 }
 
@@ -3933,9 +3801,7 @@ local S2004S36 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -4005,8 +3871,7 @@ local S2004S36Label = {
   },
   GUI = {
     Name = "S/2004 S 36 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36",
-    Description = "Label for Saturn's moon S/2004 S 36 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S36"
   }
 }
 
@@ -4022,9 +3887,7 @@ local S2004S37 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -4094,8 +3957,7 @@ local S2004S37Label = {
   },
   GUI = {
     Name = "S/2004 S 37 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37",
-    Description = "Label for Saturn's moon S/2004 S 37 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S37"
   }
 }
 
@@ -4111,9 +3973,7 @@ local S2004S39 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -4183,8 +4043,7 @@ local S2004S39Label = {
   },
   GUI = {
     Name = "S/2004 S 39 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39",
-    Description = "Label for Saturn's moon S/2004 S 39 (Norse group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/S2004S39"
   }
 }
 
@@ -4761,7 +4620,6 @@ asset.export(S2004S39Label)
 
 asset.meta = {
   Name = "Saturn Norse Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Norse Group moons: Phoebe,
     Skathi, S2007S2, Skoll, S2004S13, Greip, Hyrrokkin, Jarnsaxa, Mundilfari, S2006S1,
     S2004S17, Bergelmir, Narvi, Suttungr, Hati, S2004S12, Farbauti, Thrymr, Aegir,

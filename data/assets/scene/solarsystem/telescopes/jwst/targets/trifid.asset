@@ -33,7 +33,6 @@ asset.export(TrifidImage)
 
 asset.meta = {
   Name = "Trifid Nebula Image",
-  Version = "1.0",
   Description = "Screenspace image of the Trifid Nebula",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

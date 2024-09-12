@@ -41,7 +41,6 @@ asset.export(NeptuneBarycenterTrail)
 
 asset.meta = {
   Name = "Neptune Trail",
-  Version = "1.1",
   Description = "Trail of Neptune's Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

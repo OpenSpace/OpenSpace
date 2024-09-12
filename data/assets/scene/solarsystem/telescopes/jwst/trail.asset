@@ -5,6 +5,7 @@ local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
 
+
 local LaunchTime = "2021 DEC 25 12:20:00"
 local DetachTime = "2021 DEC 25 12:50:00"
 local L2orbitInsertionTime = "2022 JAN 25 00:00:00"
@@ -36,9 +37,7 @@ local JWSTTrailLaunch = {
   GUI = {
     Name = "JWST Launch Trail",
     Path = "/Solar System/Telescopes/JWST/Trails",
-    Description = [[
-      James Webb Space Telescope Launch Trail relative to Earth IAU.
-    ]]
+    Description = "James Webb Space Telescope Launch Trail relative to Earth IAU."
   }
 }
 
@@ -68,9 +67,7 @@ local JWSTTrailCruise = {
   GUI = {
     Name = "JWST Cruise Trail",
     Path = "/Solar System/Telescopes/JWST/Trails",
-    Description = [[
-      James Webb Space Telescope Cruise Trail relative to Earth.
-    ]]
+    Description = "James Webb Space Telescope Cruise Trail relative to Earth."
   }
 }
 
@@ -100,9 +97,7 @@ local JWSTTrailOrbit = {
   GUI = {
     Name = "JWST Orbit Trail",
     Path = "/Solar System/Telescopes/JWST/Trails",
-    Description = [[
-      James Webb Space Telescope Orbit Trail relative to L2.
-    ]]
+    Description = "James Webb Space Telescope Orbit Trail relative to L2."
   }
 }
 
@@ -131,9 +126,7 @@ local JWSTTrailCoRevOrbit = {
   GUI = {
     Name = "JWST L2 Co-revolving Orbit Trail",
     Path = "/Solar System/Telescopes/JWST/Trails",
-    Description = [[
-      James Webb Space Telescope Orbit Trail that Co-revolves with L2.
-    ]]
+    Description = "James Webb Space Telescope Orbit Trail that Co-revolves with L2."
   }
 }
 
@@ -160,9 +153,7 @@ local JWSTSunTrail = {
   GUI = {
     Name = "JWST Sun Trail",
     Path = "/Solar System/Telescopes/JWST/Trails",
-    Description = [[
-      James Webb Space Telescope Trail relative to the Sun.
-    ]]
+    Description = "James Webb Space Telescope Trail relative to the Sun."
   }
 }
 
@@ -193,7 +184,6 @@ asset.export(JWSTSunTrail)
 
 asset.meta = {
   Name = "James Webb Space Telescope Trails",
-  Version = "1.0",
   Description = [[
     Trail of James Webb Space Telescope in respect to Earth, L2 and the Sun
   ]],

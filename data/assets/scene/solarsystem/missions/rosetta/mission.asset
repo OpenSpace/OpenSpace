@@ -1,6 +1,7 @@
 -- Source:  https://solarsystem.nasa.gov/missions/rosetta-philae/in-depth/
 
 local Mission = {
+  Identifier = "Rosetta",
   Name = "Rosetta",
   TimeRange = { Start = "2004 MAR 02 00:00:00", End = "2016 SEP 30 00:00:00" },
   Image = "https://www.cosmos.esa.int/documents/522118/522182/Rosetta_logo.png/cd85878d-2fac-e086-e32a-df0eaee5e505?t=1614026031720",
@@ -113,5 +114,5 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)

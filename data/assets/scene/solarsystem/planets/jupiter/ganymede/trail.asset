@@ -40,7 +40,6 @@ asset.export(GanymedeTrail)
 
 asset.meta = {
   Name = "Ganymede Trail",
-  Version = "1.1",
   Description = "Trail of Ganymede as observed by the Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

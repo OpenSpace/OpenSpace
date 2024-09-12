@@ -1,0 +1,23 @@
+local globe = asset.require("../../earth")
+local noaa21 = asset.require("./definitions/noaa21")
+
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", noaa21.Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", noaa21.Layer)
+end)
+
+
+
+asset.meta = {
+  Name = "VIIRS NOAA21 (Temporal)",
+  Description = "This layer has the best daily Earth Image",
+  Author = "NASA EOSDIS Global Imagery Browse Services",
+  URL =
+    "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",
+  License = "NASA"
+}

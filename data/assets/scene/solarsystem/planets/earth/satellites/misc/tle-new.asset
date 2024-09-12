@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_tle-new",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=last-30-days&FORMAT=kvn",
   Filename = "tle-new.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -48,7 +48,6 @@ asset.export(Last30DaysSatellites)
 
 asset.meta = {
   Name = "Satellites Last 30 Days",
-  Version = "1.0",
   Description = "Satellites asset for Last 30 Days. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

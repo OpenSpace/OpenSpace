@@ -42,7 +42,6 @@ asset.export(NeptuneTrailEarth)
 
 asset.meta = {
   Name = "Neptune Trail from Earth",
-  Version = "1.1",
   Description = [[Alternate trail of Neptune, as observed by the Earth rather then the
     Sun]],
   Author = "OpenSpace Team",

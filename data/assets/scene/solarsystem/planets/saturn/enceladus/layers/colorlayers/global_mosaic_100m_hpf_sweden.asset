@@ -31,7 +31,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Cassini Global Mosaic 100m HPF [Sweden]",
-  Version = "1.0",
   Description = [[Cassini Global mosaic for Enceladus. This map is hosted on the OpenSpace
     server in Sweden]],
   Author = "USGS",

@@ -49,7 +49,7 @@ local DeepSkyObjects = {
   },
   GUI = {
     Name = "Deep Sky Objects Points",
-    Path = "/Universe/Galaxies",
+    Path = "/Universe/Nearby Surveys",
     Description = "Point cloud and labels for Deep Sky Objects"
   }
 }
@@ -87,7 +87,7 @@ local DeepSkyObjectsImages = {
   },
   GUI = {
     Name = "Deep Sky Objects Images",
-    Path = "/Universe/Galaxies",
+    Path = "/Universe/Nearby Surveys",
     Description = [[Census: 63 images and labels. DU Version 1.3. <br> These data are
       2-D images of Messier objects placed in 3-D space. Not only do we place these
       images at the proper location and give them the correct orientation, we also
@@ -119,7 +119,6 @@ asset.export(DeepSkyObjectsImages)
 
 asset.meta = {
   Name = "Deep Sky Objects Images",
-  Version = "3.0",
   Description = "Digital Universe asset for Deep Sky Objects and their Images",
   Author = "Nate Greenstein, Matt Everhart, Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",

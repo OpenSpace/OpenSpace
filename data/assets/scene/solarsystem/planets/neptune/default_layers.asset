@@ -4,7 +4,6 @@ asset.require("./layers/colorlayers/neptune_texture", true)
 
 asset.meta = {
   Name = "Default Neptune Layers",
-  Version = "1.0",
   Description = "Default Neptune layers are: Neptune Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

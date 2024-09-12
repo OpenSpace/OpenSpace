@@ -72,7 +72,7 @@ void to_json(json& j, const PropertyOwner* p) {
 namespace ghoul {
 
 void to_json(json& j, const Dictionary& d) {
-    json object;
+    json object = json::object();
     for (const std::string_view k : d.keys()) {
         const std::string key = std::string(k);
         if (d.hasValue<glm::dvec4>(key)) {

@@ -128,7 +128,6 @@ asset.export(EuclidTrailCoRevOrbit)
 
 asset.meta = {
   Name = "Euclid Trails",
-  Version = "1.0",
   Description = "This asset contains the trails for the Euclid spacecraft relative to the Earth and the Sun.",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

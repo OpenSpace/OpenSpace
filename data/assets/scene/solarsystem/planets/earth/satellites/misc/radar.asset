@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_radar",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=radar&FORMAT=kvn",
   Filename = "radar.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -47,7 +47,6 @@ asset.export(RadarSatellites)
 
 asset.meta = {
   Name = "Satellites Radar Calibration",
-  Version = "1.0",
   Description = "Satellites asset for Radar Calibration. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

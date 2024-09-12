@@ -67,7 +67,6 @@ asset.export(Atmosphere)
 
 asset.meta = {
   Name = "Mars Atmosphere",
-  Version = "1.1",
   Description = "RenderableAtmosphere for Mars",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

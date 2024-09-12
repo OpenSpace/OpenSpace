@@ -33,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Cassini ISS Global Mosaic [New York]",
-  Version = "1.1",
   Description = [[Cassini global image layer for Titan. This layer is hosted on the
     OpenSpace server in New York]],
   Author = "USGS",

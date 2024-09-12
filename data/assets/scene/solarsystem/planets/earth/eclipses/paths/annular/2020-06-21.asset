@@ -27,7 +27,6 @@ end)
 
 asset.meta = {
   Name = "Annular 2020-06-21",
-  Version = "1.0",
   Description = "Annular eclipse map for 2020-06-21",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

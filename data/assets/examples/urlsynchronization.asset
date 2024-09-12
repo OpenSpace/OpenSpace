@@ -20,23 +20,12 @@ asset.resource({
   Type = "UrlSynchronization",
   Identifier = "example_large",
   Url = {
-    "http://speedtest.tele2.net/1000GB.zip",
-    "https://speedtest.tele2.net/100GB.zip",
-    "https://speedtest.tele2.net/50GB.zip",
-    "http://speedtest.tele2.net/10GB.zip",
-    "http://speedtest.tele2.net/1GB.zip",
     "http://speedtest.tele2.net/100MB.zip",
 
-    "https://proof.ovh.net/files/10Gb.dat",
-    "https://proof.ovh.net/files/1Gb.dat",
     "https://proof.ovh.net/files/100Mb.dat",
 
-    "https://speed.hetzner.de/10GB.bin",
-    "https://speed.hetzner.de/1GB.bin",
     "https://speed.hetzner.de/100MB.bin",
 
-    "http://ipv4.download.thinkbroadband.com/1GB.zip",
-    "http://ipv4.download.thinkbroadband.com/512MB.zip",
     "http://ipv4.download.thinkbroadband.com/200MB.zip",
     "http://ipv4.download.thinkbroadband.com/100MB.zip",
     "http://ipv4.download.thinkbroadband.com/50MB.zip",
@@ -62,14 +51,14 @@ asset.resource({
   Name = "Example No Hash",
   Type = "UrlSynchronization",
   Identifier = "no_hash",
-  Url = "http://wms.itn.liu.se/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
+  Url = "http://liu-se.wms.openspaceproject.com/Mercury/Messenger_Mosaic/Messenger_Mosaic.wms",
   UseHash = false
 })
 
 
+
 asset.meta = {
   Name = "UrlSynchronization",
-  Version = "1.0",
   Description = [[Example showing how to load resources (any type of data file) from
     online sources, using the UrlSynchronization resource type. These can then be used
     in other assets. See more information on resources on the OpenSpace wiki page.

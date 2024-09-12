@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Open Clusters Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_openclusters_speck",
-  Version = 3
+  Version = 4
 })
 
 
@@ -20,39 +20,33 @@ local Object = {
     Enabled = false,
     Labels = {
       File = speck .. "oc.label",
-      Color = { 0.05, 0.4, 0.2 },
+      Color = { 0.0, 0.36, 0.14 },
       Size = 15.5,
       MinMaxSize = { 4, 30 },
       Unit = "pc"
     },
     Coloring = {
-      FixedColor = { 0.1, 0.8, 0.4 }
+      FixedColor = { 0.13, 0.99, 0.50 }
     },
-    Opacity = 0.5,
+    Opacity = 0.9,
     File = speck .. "oc.speck",
     Unit = "pc",
     PolygonSides = 12,
     SizeSettings = {
-      ScaleExponent = 17.6,
+      ScaleExponent = 17.8,
       MaxSize = 23.0,
       EnableMaxSizeControl = true
     }
   },
   GUI = {
     Name = "Open Star Clusters",
-    Path = "/Milky Way",
-    Description = [[Census: 1,867 clusters. DU Version 7.8. <br> An open star cluster is a
-      loose assemblage of stars numbering from hundreds to thousands that are bound by
-      their mutual gravitation. Astronomers know from their stellar spectra that stars in
-      open clusters are typically young. (With a star's spectrum, we can determine the
-      spectral type and the luminosity class, revealing the star's age.) Because these are
+    Path = "/Milky Way/Star Clusters",
+    Description = [[An open star cluster is a loose assemblage of stars numbering from
+      hundreds to thousands that are bound by their mutual gravitation. Because these are
       young stars, we expect to see them in the star-forming regions of our Galaxy, namely
       in the spiral arms. For this reason, open clusters exist, for the most part, in the
-      plane of the Galaxy, where we view the arms edge-on as that band of light in the
-      night sky. Because of this, open clusters were originally known as Galactic
-      clusters, but this term fell out of favor once astronomers began to understand that
-      the Galaxy includes objects beyond the Milky Way's disk. <br><br> Data Reference:
-      Galactic spiral structure revealed by Gaia EDR3 (Poggio+, 2021)]]
+      plane of the Galaxy and indicate relatively recent star formation. Census: 1,867 star
+      clusters.]]
   }
 }
 
@@ -71,9 +65,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Open Star Clusters",
-  Version = "3.0",
-  Description = "Digital Universe asset for Open Star Clusters",
-  Author = "Brian Abbott (AMNH)",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

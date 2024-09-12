@@ -77,7 +77,6 @@ public:
 protected:
     properties::UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {

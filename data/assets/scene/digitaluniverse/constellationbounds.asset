@@ -35,10 +35,12 @@ local Object = {
     }
   },
   GUI = {
-    Name = "Constellation Bounds",
+    Name = "Constellation Boundaries",
     Path = "/Milky Way/Constellations",
-    Description = [[A Spherical mesh dividing the sky into regions that fit the
-      constellations]]
+    Description = [[As a continent is divided into countries, astronomers divide the sky
+      into 88 regions called constellations. Every object falls into one of these 88
+      regions. The boundaries of these regions are shown in this asset. Use these in
+      concert with the constellation labels. Census: 88 constellations.]]
   }
 }
 
@@ -57,9 +59,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Constellation Bounds",
-  Version = "1.2",
-  Description = [[DU asset providing a Spherical mesh dividing the sky into regions that
-    fit the constellations]],
+  Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

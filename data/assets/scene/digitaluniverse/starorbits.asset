@@ -4,163 +4,136 @@ local earth_transforms = asset.require("scene/solarsystem/planets/earth/transfor
 
 
 local speck = asset.resource({
-  Name = "Grids Speck Files",
+  Name = "Star Orbits Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_starorbits_speck",
-  Version = 1
+  Version = 2
 })
 
 
 local SunOrbit = {
   Identifier = "SunOrbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-Sun.speck",
     MeshColor = { { 1.0, 0.65, 0.0 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
     Name = "Sun Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of the Sun around the Milky Way"
+    Description = [[Projected orbit of the Sun around the Milky Way over the next 1
+      billion years.]]
   }
 }
 
 local BarnardsOrbit = {
   Identifier = "BarnardsOrbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-BarnardsStar.speck",
     MeshColor = { { 0.39, 0.58, 0.93 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
     Name = "Barnards Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of Barnard's Star around the Milky Way"
+    Description = [[Projected orbit of Barnard's Star around the Milky Way over the next
+      1 billion years.]]
   }
 }
 
 local KapteynsOrbit = {
   Identifier = "KapteynsOrbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-KapteynsStar.speck",
     MeshColor = { { 0.6, 0.6, 0.6 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
     Name = "Kapteyns Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of Kapteyn's Star around the Milky Way"
+    Description = [[Projected orbit of Kapteyn's Star around the Milky Way over the next
+      1 billion years.]]
   }
 }
 
 local Lacaille9352Orbit = {
   Identifier = "Lacaille9352Orbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-Lacaille9352.speck",
     MeshColor = { { 0.58, 0.0, 0.83 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
     Name = "Lacaille 9352 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of Lacaille9352 around the Milky Way"
+    Description = [[Projected orbit of Lacaille9352 around the Milky Way over the next
+      1 billion years.]]
   }
 }
 
 local LSR1826Orbit = {
   Identifier = "LSR1826Orbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-LSR1826+3014.speck",
     MeshColor = { { 0.0, 0.39, 0.0 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
     Name = "LSR1826+3014 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of LSR1826+3014 around the Milky Way"
+    Description = [[Projected orbit of LSR1826+3014 around the Milky Way over the next 1
+      billion years.]]
   }
 }
 
 local LSRJ0822Orbit = {
   Identifier = "LSRJ0822Orbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-LSRJ0822+1700.speck",
     MeshColor = { { 0.5, 1.0, 0.0 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
     Name = "LSRJ0822+1700 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of LSRJ0822+1700 around the Milky Way"
+    Description = [[Projected orbit of LSRJ0822+1700 around the Milky Way over the next 1
+      billion years.]]
   }
 }
 
 local PM_J13420Orbit = {
   Identifier = "PM_J13420Orbit",
-  --Parent = transforms.SolarSystemBarycenter.Name,
   Renderable = {
     Type = "RenderableDUMeshes",
     Enabled = false,
     Opacity = 1.0,
     File = speck .. "starorbits-PM_J13420-3415.speck",
     MeshColor = { { 0.70, 0.13, 0.13 } },
-    --LabelFile = speck .. "1ld.label",
-    -- TextColor = { 0.0, 0.2, 0.5 },
-    -- TextSize = 10.3,
-    -- TextMinMaxSize = { 0, 30 },
     Unit = "pc"
   },
   GUI = {
     Name = "PM_J13420-3415 Orbit",
     Path = "/Milky Way/Stars/Stars Orbits",
-    Description = "Orbits of PM_J13420-3415 around the Milky Way"
+    Description = [[Projected orbit of PM_J13420-3415 around the Milky Way over the next
+      1 billion years.]]
   }
 }
 
@@ -197,12 +170,8 @@ asset.export(PM_J13420Orbit)
 
 asset.meta = {
   Name = "Star Orbits",
-  Version = "1.1",
-  Description = [[Select Star Orbital paths that delineate their trajectory around the
-    Milky Way over 1 billion years into the future. Included: Sun, Barnards, Kapteyns,
-    Lacaille 9352, LSR1826+3014, LSRJ0822+1700, PM_J13420-3415. <br><br> Data
-    Reference: Sebastien Lepine (AMNH)]],
-  Author = "Brian Abbott (AMNH)",
+  Description = [[Projected star orbits for selected stars over the next 1 billion years. Census: 7 star orbits.]],
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

@@ -1,4 +1,5 @@
 local Mission = {
+  Identifier = "Dawn",
   Name = "Dawn",
   Image = "https://photojournal.jpl.nasa.gov/jpegMod/PIA19375_modest.jpg",
   TimeRange = { Start = "2007 SEP 07 11:34:00", End = "2018 OCT 30 00:00:00" },
@@ -38,5 +39,5 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)

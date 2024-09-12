@@ -294,13 +294,15 @@ public:
     const std::string& identifier() const;
 
     /**
-     * Returns the fully qualified name for this Property that uniquely identifies this
-     * Property within OpenSpace. It consists of the identifier preceded by all levels of
-     * PropertyOwner%s separated with `.`; for example: `owner1.owner2.identifier`.
+     * Returns the URI for this Property that uniquely identifies this Property within
+     * OpenSpace. It consists of the identifier preceded by all levels of PropertyOwner%s
+     * separated with `.`; for example: `owner1.owner2.identifier`. If the URI is invalid
+     * (the Property hasn't been added to the property tree yet), it returns an empty
+     * string.
      *
      * \return The fully qualified identifier for this Property
      */
-    std::string fullyQualifiedIdentifier() const;
+    std::string uri() const;
 
     /**
      * Returns the PropertyOwner of this Property or `nullptr`, if it does not have an

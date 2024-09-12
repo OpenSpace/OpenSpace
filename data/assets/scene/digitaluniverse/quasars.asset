@@ -1,15 +1,15 @@
 local textures = asset.resource({
-  Name = "Quasars Textures",
+  Name = "Point Textures",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_quasars_textures",
-  Version = 2
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
 })
 
 local speck = asset.resource({
   Name = "Quasars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_quasars_speck",
-  Version = 2
+  Version = 3
 })
 
 local colormaps = asset.resource({
@@ -26,7 +26,7 @@ local Object = {
     Type = "RenderablePointCloud",
     Enabled = true,
     Opacity = 0.95,
-    File = speck .. "quasars.speck",
+    File = speck .. "qso.speck",
     Texture = {
       File = textures .. "point3A.png",
     },
@@ -35,14 +35,12 @@ local Object = {
       FadeInDistances = { 1000.0, 10000.0 } -- Fade in value in the same unit as "Unit"
     },
     Coloring = {
-      FixedColor = { 1.0, 0.4, 0.2 },
+      FixedColor = { 0.85, 0.35, 0.18 },
       ColorMapping = {
         Enabled = false,
         File = colormaps .. "viridis.cmap",
         ParameterOptions = {
-          { Key = "distMpc", Range = { 440.5, 8852.099609 } },
-          { Key = "redshift", Range = { 0.102, 7.085 } },
-          { Key = "Tlookback", Range = { 1.4, 13.0 } }
+          { Key = "lookback_time", Range = { 1.4, 13.0 } }
         }
       }
     },
@@ -54,15 +52,11 @@ local Object = {
   },
   GUI = {
     Name = "Quasars",
-    Path = "/Universe",
-    Description = [[Census: 569,442 quasars. DU Version 2.2. <br>
-      Quasars are the most distant objects we can see. They are extremely active
-      galaxies that contain supermassive black holes which are gobbling up material
-      at a furious rate. The Million Quasars Catalogue is an aggregate catalog of
-      several surveys, including 2dF and Sloan. So, it should not be surprising that
-      the shape of these data mimic the shape of the Sloan and 2dF galaxy surveys,
-      with large parts of the sky unobserved.(Description from URL) <br><br> Data
-      Reference: The Million Quasars catalog (Flesch, 2017)]]
+    Path = "/Universe/Deep Sky Surveys",
+    Description = [[Quasars are the most distant objects we see. They are extremely
+      active galaxies that contain supermassive black holes which gobble up material at a
+      furious rate. As the material falls into the black hole, it forms a disk and emits
+      high-energy light that we see to great distances. Census: 755,850 quasars.]]
   }
 }
 
@@ -81,9 +75,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Quasars",
-  Version = "3.0",
-  Description = "Digital Universe asset for Quasars",
-  Author = "Brian Abbott (AMNH)",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Sohum Udani (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

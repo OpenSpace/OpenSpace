@@ -51,7 +51,6 @@ asset.export(NeptuneTrail)
 
 asset.meta = {
   Name = "Neptune Trail",
-  Version = "1.1",
   Description = "Main trail of Neptune",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

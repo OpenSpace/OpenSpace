@@ -78,6 +78,7 @@ struct Configuration {
     Logging logging;
 
     std::string scriptLog;
+    bool verboseScriptLog = false;
     int scriptLogRotation = 3;
 
     struct DocumentationInfo {
@@ -104,6 +105,8 @@ struct Configuration {
     float shutdownCountdown = 0.f;
 
     bool shouldUseScreenshotDate = false;
+
+    bool sandboxedLua = true;
 
     std::string onScreenTextScaling = "window";
     bool usePerProfileCache = false;

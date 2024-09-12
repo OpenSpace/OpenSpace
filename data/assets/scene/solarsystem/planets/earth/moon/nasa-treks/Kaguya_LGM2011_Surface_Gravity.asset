@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd = {
   Identifier = "Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd",
   Name = [[Kaguya LGM2011 Surface Gravity, Colorized]],
@@ -22,6 +24,7 @@ local treks_Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd = {
   Description = [[]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd)
@@ -36,9 +39,9 @@ asset.export("Kaguya_LGM2011_SurfaceGravity_Colorized_Global_mgal3m_20ppd", trek
 asset.export("Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd", treks_Kaguya_LGM2011_SurfaceGravity_Gray_Global_mgal3m_20ppd)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon Kaguya_LGM2011_Surface_Gravity],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon Kaguya_LGM2011_Surface_Gravity]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

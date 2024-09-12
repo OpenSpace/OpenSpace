@@ -15,7 +15,6 @@ asset.export("TexturesPath", TexturesPath)
 -- 856:75.
 asset.meta = {
   Name = "Predictive Science Inc. MAS Bastille Day Textures",
-  Version = "1.0",
   Description = [[Magnetograms of the sun as texture color layers]],
   Author = "Jonathan Grangien, Matthias Berg",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

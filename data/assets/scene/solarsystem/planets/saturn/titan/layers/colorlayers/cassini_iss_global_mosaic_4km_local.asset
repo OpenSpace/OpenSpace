@@ -41,7 +41,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Cassini ISS Global Mosaic",
-  Version = "1.1",
   Description = "Cassini global image layer for Titan",
   Author = "USGS",
   URL = "https://astrogeology.usgs.gov/search/map/Titan/Cassini/Global-Mosaic/" ..

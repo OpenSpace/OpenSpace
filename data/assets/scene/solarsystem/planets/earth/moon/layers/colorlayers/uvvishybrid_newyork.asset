@@ -37,7 +37,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Uvvis Hybrid [New York]",
-  Version = "1.1",
   Description = [[Moon Lunar Orbiter - Clementine UVVISv2 Hybrid Mosaic 59m v1 map of the
     Moon. This map is hosted on the OpenSpace server in New York]],
   Author = "USGS",

@@ -22,9 +22,9 @@ end)
 asset.export("layer", Layer)
 
 
+
 asset.meta = {
   Name = "LAMO [Sweden]",
-  Version = "1.0",
   Description = [[]],
   Author = "",
   URL = "",

@@ -16,9 +16,7 @@ local Metis = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 60000, 40000, 34000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 60000, 40000, 34000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -105,9 +103,7 @@ local Adrastea = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 20000, 16000, 14000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 20000, 16000, 14000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -194,9 +190,7 @@ local Amalthea = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 250000, 146000, 128000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 250000, 146000, 128000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -283,9 +277,7 @@ local Thebe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 116000, 98000, 84000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 116000, 98000, 84000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -419,7 +411,6 @@ asset.export(ThebeLabel)
 
 asset.meta = {
   Name = "Jupiter Inner Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Inner Group moons: Metis,
     Adrastea, Amalthea, and Thebe. Blank globes and SPICE trails are generated for each
     moon]],

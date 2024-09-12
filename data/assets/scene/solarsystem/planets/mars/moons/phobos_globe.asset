@@ -21,11 +21,9 @@ local PhobosGlobe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 13030, 11400, 9140 },
---Radius source
---https://naif.jpl.nasa.gov/pub/naif/generic_kernels/dsk/satellites/willner_etal_phobos.pdf
-    SegmentsPerPatch = 90,
-    Layers = {}
+    -- Radius source
+    -- https://naif.jpl.nasa.gov/pub/naif/generic_kernels/dsk/satellites/willner_etal_phobos.pdf
+    Radii = { 13030, 11400, 9140 }
   },
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
@@ -50,7 +48,6 @@ asset.export(PhobosGlobe)
 
 asset.meta = {
   Name = "Phobos Globe",
-  Version = "1.0",
   Description = "RenderableGlobe for Phobos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

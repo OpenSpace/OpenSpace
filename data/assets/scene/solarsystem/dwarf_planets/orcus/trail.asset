@@ -18,8 +18,7 @@ local Trail = {
   Tag = { "planetTrail_dwarf" },
   GUI = {
     Name = "Orcus Trail",
-    Path = "/Solar System/Dwarf Planets/Orcus",
-    Description = "Trail of Orcus"
+    Path = "/Solar System/Dwarf Planets/Orcus"
   }
 }
 
@@ -38,7 +37,6 @@ asset.export("Trail", Trail)
 
 asset.meta = {
   Name = "Orcus Trail",
-  Version = "1.0",
   Description = [[Trail of Orcus]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

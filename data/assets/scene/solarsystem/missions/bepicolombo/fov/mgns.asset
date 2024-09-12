@@ -17,8 +17,7 @@ local MGNS = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO MGNS",
@@ -40,7 +39,6 @@ end)
 
 asset.meta = {
   Name = "MGNS",
-  Version = "1.0",
   Description = [[
     The Mercury Gamma-ray and Neutron Spectrometer (MGNS) on board BepiColombo Mercury
     Planet Orbiter is designed to observe and study the gamma-ray and neutron emissions of

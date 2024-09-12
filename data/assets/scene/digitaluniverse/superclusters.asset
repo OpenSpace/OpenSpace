@@ -1,8 +1,8 @@
 local textures = asset.resource({
-  Name = "Galaxy Superclusters Textures",
+  Name = "Point Textures",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_superclusters_textures",
-  Version = 2
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
 })
 
 local speck = asset.resource({
@@ -40,14 +40,14 @@ local Object = {
     }
   },
   GUI = {
-    Name = "Galaxy Superclusters",
-    Path = "/Universe/Galaxies",
-    Description = [[Census: 33 labels. DU Version 1.3.<br> The superclusters dataset
-      is a set of labels that mark the major galaxy superclusters in the local universe.
-      They correspond to, and should be viewed with, the Abell clusters. Astronomers
-      estimate there are 10 million superclusters in the observable universe.
-      (Description from URL) <br><br> Data Reference: Superclusters of Abell and X-ray
-      clusters (Einasto+, 2001)]]
+    Name = "Supercluster Labels",
+    Path = "/Universe/Deep Sky Surveys",
+    Description = [[The superclusters dataset is a set of labels that mark the major
+      galaxy superclusters in the local universe. They correspond to, and should be viewed
+      with, the Abell clusters. Astronomers estimate there are 10 million superclusters in
+      the observable universe. Often, they carry constellation names because they are
+      viewed in those constellations from our night-sky perspective. Census: 33
+      supercluster labels.]]
   }
 }
 
@@ -66,8 +66,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Galaxy Superclusters",
-  Version = "3.0",
-  Description = "Digital Universe asset for Galaxy Superclusters",
+  Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

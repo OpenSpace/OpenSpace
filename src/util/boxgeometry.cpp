@@ -28,10 +28,6 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 
-namespace {
-    constexpr std::string_view _loggerCat = "BoxGeometry";
-} // namespace
-
 namespace openspace {
 
 BoxGeometry::BoxGeometry(glm::vec3 size) : _size(std::move(size)) {}

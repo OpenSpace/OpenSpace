@@ -13,7 +13,6 @@ asset.require("./weather/weather")
 
 asset.meta = {
   Name = "Satellites Weather",
-  Version = "1.0",
   Description = [[Meta asset for weather satellites of Earth. Containing groups: argos,
     dmc, earth_resources, geos, noaa, planet, sarsat, spire, tdrss, and weather]],
   Author = "OpenSpace Team",

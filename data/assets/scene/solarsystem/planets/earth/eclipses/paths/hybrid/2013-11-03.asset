@@ -27,7 +27,6 @@ end)
 
 asset.meta = {
   Name = "Hybrid 2013-11-03",
-  Version = "1.0",
   Description = "Hybrid eclipse map for 2013-11-03",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -79,7 +79,6 @@ local L5Label = {
 }
 
 
-
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "L5_de431.bsp")
 
@@ -105,7 +104,6 @@ asset.export(L5Label)
 
 asset.meta = {
   Name = "Lagrange point L5",
-  Version = "1.0",
   Description = "Lagrange point L5 node and label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_cosmos-2251-debris",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=cosmos-2251-debris&FORMAT=kvn",
   Filename = "cosmos-2251-debris.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -46,7 +46,6 @@ asset.export(DebrisCosmos)
 
 asset.meta = {
   Name = "Satellites Debris - Kosmos 2251 Debris",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Kosmos 2251 Debris. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
 
+
+
 local treks_msss_atlas_simp_clon = {
   Identifier = "msss_atlas_simp_clon",
   Name = [[MGS MOC Atlas, Global Color Mosaic]],
@@ -15,6 +17,7 @@ local treks_msss_atlas_simp_clon = {
 
 The Mars Orbiter Camera (MOC) consisted of 3 instruments. A black-and-white narrow angle camera captured high resolution images (typically 1.5 to 12 m per pixel) and red and blue wide angle cameras for context (240 m per pixel) and daily global imaging (7.5 km per pixel). This mosaic was assembled from Wide Angle red images (primarily those acquired in May-June 1999) from the Mars Orbiter Camera.]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_msss_atlas_simp_clon)
@@ -27,9 +30,9 @@ end)
 asset.export("msss_atlas_simp_clon", treks_msss_atlas_simp_clon)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Mars MGS_MOC_Atlas],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Mars MGS_MOC_Atlas]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/mars",
   License = "NASA/Treks",

@@ -24,7 +24,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_iss",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25544&FORMAT=kvn",
   Filename = "ISS.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 local tle = asset.resource({
@@ -33,7 +33,7 @@ local tle = asset.resource({
   Identifier = "satellite_tle_data_iss",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25544&FORMAT=tle",
   Filename = "ISS.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -187,7 +187,6 @@ asset.export(IssPosition)
 
 asset.meta = {
   Name = "ISS",
-  Version = "3.0",
   Description = [[Model and Trail for ISS. Model from NASA 3D models, trail from
     Celestrak.]],
   Author = "OpenSpace Team",

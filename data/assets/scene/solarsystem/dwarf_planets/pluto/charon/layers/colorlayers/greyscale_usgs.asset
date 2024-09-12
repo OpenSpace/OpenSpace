@@ -25,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Charon Black & White [USGS]",
-  Version = "1.0",
   Description = [[Charon New Horizons LORRI MVIC Global Mosaic 300m v1. This detailed,
     high-quality global mosaic of Pluto's largest moon, Charon, was assembled from nearly
     all of the highest-resolution images obtained by the Long-Range Reconnaissance Imager

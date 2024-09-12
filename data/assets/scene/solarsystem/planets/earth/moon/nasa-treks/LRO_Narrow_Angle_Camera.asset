@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_NAC_Apollo11_Mosaic_p = {
   Identifier = "LRO_NAC_Apollo11_Mosaic_p",
   Name = [[LRO Narrow Angle Camera, Apollo 11 Landing Site]],
@@ -234,6 +236,7 @@ local treks_NAC_DTM_APOLLO17_SLOPE = {
   Description = [[This is a color slope map derived from a 5m Digital Terrain Model (DTM) of the Apollo 17 landing site created with Narrow Angle Camera (NAC) stereo image pairs from the Lunar Reconnaissance Orbiter Camera (LROC) aboard the Lunar Reconnaissance Orbiter (LRO). Image is 3-channel RGB TIFF, 8 bits/sample, 3 samples/pixel in single image plane configuration]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Apollo11_Mosaic_p)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_Apollo12_Mosaic_p)
@@ -317,9 +320,9 @@ asset.export("small_tranq_skylight_2", treks_small_tranq_skylight_2)
 asset.export("NAC_DTM_APOLLO17_SLOPE", treks_NAC_DTM_APOLLO17_SLOPE)
 
 
+
 asset.meta = {
   Name = [[NASA Treks Layers for Moon LRO_Narrow_Angle_Camera]],
-  Version = "1.0",
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

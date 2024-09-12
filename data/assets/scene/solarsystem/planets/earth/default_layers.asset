@@ -7,7 +7,6 @@ asset.require("./layers/newyork_layers", false)
 
 asset.meta = {
   Name = "Default Earth Layers",
-  Version = "1.1",
   Description = [[Default Earth layers are: Blue Marble,
     ESRI VIIRS Combo, ESRI NOAA20 Combo, ESRI World Imagery, VIIRS SNPP (Temporal),
     Aqua Modis (Temporal), Terra Modis (Temporal),

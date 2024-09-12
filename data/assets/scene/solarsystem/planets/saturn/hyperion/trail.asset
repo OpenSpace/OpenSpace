@@ -18,7 +18,12 @@ local HyperionTrail = {
     Period = 21.276,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn", "moonTrail_major_saturn" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_major_saturn"
+  },
   GUI = {
     Name = "Hyperion Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Hyperion"
@@ -40,7 +45,6 @@ asset.export(HyperionTrail)
 
 asset.meta = {
   Name = "Hyperion Trail",
-  Version = "1.1",
   Description = "Trail of Saturn's moon Hyperion as observed by Saturn",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

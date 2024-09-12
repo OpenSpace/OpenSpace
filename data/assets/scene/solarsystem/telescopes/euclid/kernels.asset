@@ -30,7 +30,6 @@ asset.export("ID", ID)
 
 asset.meta = {
   Name = "Euclid Kernels",
-  Version = "1.0",
   Description = "This asset contains the SPICE kernels for ESA's Euclid mission.",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

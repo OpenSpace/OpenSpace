@@ -41,7 +41,6 @@ asset.export(JuiceTrailJupiter)
 
 asset.meta = {
   Name = "Juice trajectory relative to Jupiter",
-  Version = "1.0",
   Description = [[
     The trajectory of the Juice spacecraft relative to Jupiter
   ]],

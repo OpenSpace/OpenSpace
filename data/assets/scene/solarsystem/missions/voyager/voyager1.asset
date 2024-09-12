@@ -94,9 +94,7 @@ local VoyagerTrailCruiseEarthJupiter = {
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977 SEP 05",
-    EndTime = "1979 MAR 04",
-    -- 545 is the number of days between the Start and End time
-    SampleInterval = 545 * 2
+    EndTime = "1979 MAR 04"
   },
   Tag = { "voyager1_trail" },
   GUI = {
@@ -144,9 +142,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1979 MAR 09",
-    EndTime = "1980 NOV 11",
-    -- 618 is the number of days between the Start and End time
-    SampleInterval = 618 * 2
+    EndTime = "1980 NOV 11"
   },
   Tag = { "voyager1_trail" },
   GUI = {
@@ -194,9 +190,7 @@ local VoyagerTrailCruiseSaturnInf = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1980 NOV 16",
-    EndTime = "2100 JAN 01",
-    -- 43511 is the number of days between the Start and End time
-    SampleInterval = 43511 * 2
+    EndTime = "2100 JAN 01"
   },
   Tag = { "voyager1_trail" },
   GUI = {
@@ -255,7 +249,6 @@ asset.export(VoyagerTrailCruiseSaturnInf)
 
 asset.meta = {
   Name = "Voyager 1 Model and Trails",
-  Version = "2.0",
   Description = [[
     Voyager 1 model and trails from 1977 SEP 05 to 2100 JAN 01. Model credit:
     NASA Visualization Technology Applications And Development (VTAD)

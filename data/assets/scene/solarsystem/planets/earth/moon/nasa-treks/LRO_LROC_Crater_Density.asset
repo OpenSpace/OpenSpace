@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_NAC_CratDen_17S173E_150cmp = {
   Identifier = "LRO_NAC_CratDen_17S173E_150cmp",
   Name = [[LRO LROC Crater Density, Aitken Crater]],
@@ -190,6 +192,7 @@ local treks_LRO_NAC_CratDen_43S349E_150cmp = {
   Description = [[]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratDen_17S173E_150cmp)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratDen_13S358E_2mp)
@@ -267,9 +270,9 @@ asset.export("LRO_NAC_CratDen_20N010E_2mp", treks_LRO_NAC_CratDen_20N010E_2mp)
 asset.export("LRO_NAC_CratDen_43S349E_150cmp", treks_LRO_NAC_CratDen_43S349E_150cmp)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_LROC_Crater_Density],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_LROC_Crater_Density]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

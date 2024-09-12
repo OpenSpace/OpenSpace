@@ -62,7 +62,6 @@ asset.export("TexturesPath", texturesPath)
 
 asset.meta = {
   Name = "Exoplanet Textures",
-  Version = "2.0",
   Description = [[Adds all textures that are required for the exoplanet system
     visualizations]],
   Author = "OpenSpace Team",

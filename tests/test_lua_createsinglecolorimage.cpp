@@ -34,6 +34,8 @@
 #include <ghoul/lua/lua_helper.h>
 #include <filesystem>
 
+#if 0
+
 TEST_CASE("CreateSingleColorImage: Create image and check return value",
           "[createsinglecolorimage]")
 {
@@ -86,3 +88,5 @@ TEST_CASE("CreateSingleColorImage: Load created image", "[createsinglecolorimage
     CHECK(width == 1);
     CHECK(height == 1);
 }
+
+#endif

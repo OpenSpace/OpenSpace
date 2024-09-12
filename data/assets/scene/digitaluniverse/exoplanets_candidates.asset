@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Exoplanets Candidates Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_candidates_speck",
-  Version = 1
+  Version = 2
 })
 
 
@@ -19,13 +19,19 @@ local Object = {
     Type = "RenderablePointCloud",
     Enabled = false,
     Opacity = 0.99,
-    File = speck .. "exoplanet_candidates.speck",
+    File = speck .. "expl_candidates.speck",
     Unit = "pc",
     Texture = {
       File = textures .. "halo.png",
     },
     Coloring = {
-      FixedColor = { 1.0, 1.0, 0.0 }
+      FixedColor = { 1.0, 1.0, 0.0 },
+      ColorMapping = {
+        File = speck .. "expl_candidates.cmap",
+        ParameterOptions = {
+          { Key = "survey_num" }
+        }
+      }
     },
     SizeSettings = {
       ScaleExponent = 17.8,
@@ -34,18 +40,16 @@ local Object = {
     }
   },
   GUI = {
-    Name = "Planetary Candidates",
+    Name = "Exoplanetary Candidates",
     Path = "/Milky Way/Exoplanets",
-    Description = [[Census: 6,082 stars with candidate planetary systems. DU Version 11.8.
-      <br> The exoplanet candidate stars are likely hosts for exoplanets. These are stars
-      plucked from NASA's Kepler and TESS space telescopes. The Kepler mission was
-      designed to stare at one spot, roughly twelve degrees across, in the constellation
-      Cygnus. By staring at one spot, the spacecraft could monitor over 500,000 stars in
-      that field for subtle variations in brightness. The data included here are the stars
-      that are considered good candidates to host planets. Rather than represent them
+    Description = [[The exoplanet candidate stars are likely hosts for exoplanets. These
+      are stars plucked from NASA's Kepler and TESS space telescopes. Further observations
+      are needed to confirm a planet's existence. Rather than represent them
       photo-realistically, with accurate colors, we choose to visualize them as generic,
-      pure yellow stars. (Description from URL) <br><br> Data Reference: NASA Exoplanet
-      Archive (CalTech/NASA)]]
+      colored stars. The nature of these stars is not important, it is the sheer numbers
+      of potential exoplanets that allows us to wonder just how many we will find in the
+      entire Galaxy. Colors: Yellow denote Kepler candidates, Orange stars are from the K2
+      mission, and green stars are from TESS. Census: 7,225 candidate stars.]]
   }
 }
 
@@ -63,10 +67,9 @@ asset.export(Object)
 
 
 asset.meta = {
-  Name = "Planetary Candidates",
-  Version = "3.0",
-  Description = "Digital Universe asset for Planetary Candidates",
-  Author = "Brian Abbott, Emily Rice, and Jason No (AMNH)",
+  Name = "Exoplanetary Candidates",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves, Emily Rice, and Jason No (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Planetary Nebulae Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_planetarynebulae_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -20,7 +20,7 @@ local Object = {
     Enabled = false,
     Labels = {
       File = speck .. "pn.label",
-      Color = { 0.25, 0.25, 0.65 },
+      Color = { 0.35, 0.35, 0.60 },
       Size = 16.24,
       MinMaxSize = { 4, 25 },
       Unit = "pc"
@@ -28,27 +28,29 @@ local Object = {
     Coloring = {
       FixedColor = { 0.4, 0.4, 0.9 }
     },
-    Opacity = 0.65,
+    Opacity = 0.99,
     File = speck .. "pn.speck",
     PolygonSides = 3,
     Unit = "pc",
     SizeSettings = {
-      ScaleExponent = 18.46,
+      ScaleExponent = 18.2,
       MaxSize = 19.0,
       EnableMaxSizeControl = true
     }
   },
   GUI = {
     Name = "Planetary Nebulae",
-    Path = "/Milky Way",
-    Description = [[Census: 283 nebulae. DU Version 2.8. <br> A planetary nebula is an
-      expanding shell of gas ejected from a star late in its life cycle. Appearing
-      like greenish disks to a telescopic observer, planetary nebulae received their
-      name from their resemblance to the gaseous planets of our solar system. In no
-      way are they related to planets, rather, they are products of dying stars.
-      (Description from URL) <br><br> Data Reference: Planetary Nebulae distances
-      in Gaia DR2 (Kimeswenger+, 2018), Strasbourg-ESO Catalog of Planetary Nebulae
-      (Acker+ 1992)]]
+    Path = "/Milky Way/Nebulae",
+    Description = [[A planetary nebula is an expanding shell of gas ejected from an
+      average-sized star late in its life cycle. Appearing like greenish disks to a
+      telescopic observer, planetary nebulae received their name from their resemblance to
+      the gaseous planets of our solar system. In no way are they related to planets,
+      rather, they are products of dying stars. As the gas from the star expands, it
+      sweeps up the cooler gas like a snowplow. The gas glows because of the ultraviolet
+      light from the stellar remnant at the center. Because the planetary nebula phase of
+      a star's evolution is relatively short, we observe only those that have occurred
+      recently in the younger stellar population. Therefore, we expect to see planetary
+      nebulae in the disk of the Galaxy. Census: 1,657 planetary nebulae.]]
   }
 }
 
@@ -67,9 +69,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Planetary Nebulae",
-  Version = "3.0",
-  Description = "Digital Universe asset for Planetary Nebulae",
-  Author = "Brian Abbott (AMNH)",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

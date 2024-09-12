@@ -97,9 +97,7 @@ local VoyagerTrailCruiseEarthJupiter = {
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1977-AUG-20 16:07:06.535",
-    EndTime = "1979 JUL 06",
-    -- 669 is the number of days between the Start and End time
-    SampleInterval = 669 * 2
+    EndTime = "1979 JUL 06"
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -147,9 +145,7 @@ local VoyagerTrailCruiseJupiterSaturn = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1979 JUL 15",
-    EndTime = "1981 AUG 23",
-    -- 770 is the number of days between the Start and End time
-    SampleInterval = 770 * 2
+    EndTime = "1981 AUG 23"
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -197,9 +193,7 @@ local VoyagerTrailCruiseSaturnUranus = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1981 AUG 30",
-    EndTime = "1986 JAN 22",
-    -- 1971 is the number of days between the Start and End time
-    SampleInterval = 1971 * 2
+    EndTime = "1986 JAN 22"
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -247,9 +241,7 @@ local VoyagerTrailCruiseUranusNeptune = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1986 JAN 27",
-    EndTime = "1989 AUG 24",
-    -- 1305 is the number of days between the Start and End time
-    SampleInterval = 1305 * 2
+    EndTime = "1989 AUG 24"
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -297,9 +289,7 @@ local VoyagerTrailCruiseNeptuneInf = {
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1989 AUG 26",
-    EndTime = "2100 JAN 01",
-    -- 40306 is the number of days between the Start and End time
-    SampleInterval = 40306 * 2
+    EndTime = "2100 JAN 01"
   },
   Tag = { "voyager2_trail" },
   GUI = {
@@ -369,7 +359,6 @@ asset.export(VoyagerTrailCruiseNeptuneInf)
 
 asset.meta = {
   Name = "Voyager 2 Model and Trails",
-  Version = "2.0",
   Description = [[
     Voyager 2 model and trails from 1977 AUG 20 16:07:06.535 to 2100 JAN 01. Model credit:
     NASA Visualization Technology Applications And Development (VTAD)

@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "Pulsars Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_pulsars_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -19,9 +19,9 @@ local Object = {
     Type = "RenderablePolygonCloud",
     Enabled = false,
     Labels = {
-      File = speck .. "pulsar.label",
-      Color = { 0.7, 0.2, 0.2 },
-      Size = 15.77,
+      File = speck .. "pulsars.label",
+      Color = { 0.75, 0.21, 0.21 },
+      Size = 15.27,
       MinMaxSize = { 4, 20 },
       Unit = "pc"
     },
@@ -29,30 +29,27 @@ local Object = {
       FixedColor = { 0.7, 0.0, 0.0 }
     },
     Opacity = 1.0,
-    File = speck .. "pulsar.speck",
+    File = speck .. "pulsars.speck",
     PolygonSides = 4,
     Unit = "pc",
     SizeSettings = {
-      ScaleExponent = 18.4,
+      ScaleExponent = 18.1,
       MaxSize = 19.0,
       EnableMaxSizeControl = true
     }
   },
   GUI = {
     Name = "Pulsars",
-    Path = "/Milky Way",
-    Description = [[Census: 2,498 pulsars. DU Version 5.6. <br> Upon death, stars
-      leave behind one of three possible remnants: a white dwarf, a neutron star, or
-      a black hole. Stars that are more massive than the sun will often become
-      neutron stars in a violent explosion called a supernova. During a supernova,
-      the core of the star collapses under such high pressure that the electrons,
-      which normally remain outside the atomic nucleus, are forced to combine with
-      the protons in the nucleus. Atomic nuclei break apart, producing what is
-      called a degenerate state of matter. The collapse is halted when the material
-      cannot be packed any tighter. At this point, the star has a radius of about
-      10-15 kilometers. The density of this material is so high that a teaspoonful
-      would weigh about 100 million tons on Earth. (Description from URL) <br><br>
-      Data Reference: ATNF Pulsar Catalogue, (Manchester+, 2005)]]
+    Path = "/Milky Way/Stellar Remnants",
+    Description = [[A pulsar is a spinning neutron star, an ultra-dense stellar remnant
+      resulting from a supernova-driven collapse of the stellar core. Upon death, stars
+      leave behind one of three possible remnants: a white dwarf, a neutron star, or a
+      black hole. Stars that are more massive than the sun will often become neutron
+      stars in a violent explosion called a supernova. Pulsars are not pulsing but are
+      spinning neutron stars whose beams of radiation point toward Earth just as a
+      lighthouse sweeps the horizon. Their strong magnetic fields funnel beams of light
+      from its poles. When these beams point to Earth, we see a strong radio signal.
+      Census: 3,221 pulsars.]]
   }
 }
 
@@ -71,9 +68,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Pulsars",
-  Version = "3.0",
-  Description = "Digital Universe asset for Pulsars",
-  Author = "Brian Abbott (AMNH)",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

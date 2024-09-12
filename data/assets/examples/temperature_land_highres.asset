@@ -61,7 +61,6 @@ asset.export("Folder", LayerFolder)
 
 asset.meta = {
   Name = "Climate Earth Layers",
-  Version = "1.0",
   Description = "ERA5 data",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

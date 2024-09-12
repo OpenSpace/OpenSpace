@@ -48,6 +48,12 @@ namespace {
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
         // [[codegen::verbatim(UseMainInfo.description)]]
         std::optional<bool> useMainDashboard;
+
+        // A list of DashboardItems that are added automatically upon construction of the
+        // ScreenSpaceDashboard. This value must not be specified if `UseMainDashboard` is
+        // specified.
+        std::optional<std::vector<ghoul::Dictionary>>
+            items [[codegen::reference("dashboarditem")]];
     };
 #include "screenspacedashboard_codegen.cpp"
 } // namespace
@@ -79,8 +85,21 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
     _useMainDashboard = p.useMainDashboard.value_or(_useMainDashboard);
     addProperty(_useMainDashboard);
 
-    _scale = 1.f;
-    _scale.setMaxValue(15.f);
+    if (_useMainDashboard && p.items.has_value()) {
+        throw ghoul::RuntimeError("Cannot specify items when using the main dashboard");
+    }
+
+    if (!_useMainDashboard) {
+        addPropertySubOwner(_dashboard);
+    }
+
+    if (p.items.has_value()) {
+        ghoul_assert(!_useMainDashboard, "Cannot add items to the main dashboard");
+        for (const ghoul::Dictionary& item : *p.items) {
+            std::unique_ptr<DashboardItem> i = DashboardItem::createFromDictionary(item);
+            _dashboard.addDashboardItem(std::move(i));
+        }
+    }
 }
 
 bool ScreenSpaceDashboard::initializeGL() {
@@ -101,15 +120,11 @@ bool ScreenSpaceDashboard::initializeGL() {
 }
 
 bool ScreenSpaceDashboard::deinitializeGL() {
-    //_fontRenderer = nullptr;
     return ScreenSpaceFramebuffer::deinitializeGL();
 }
 
 bool ScreenSpaceDashboard::isReady() const {
-    return /*(_fontRenderer != nullptr) &&
-           (_fontDate != nullptr) &&
-           (_fontInfo != nullptr) &&*/
-           ScreenSpaceFramebuffer::isReady();
+    return ScreenSpaceFramebuffer::isReady();
 }
 
 void ScreenSpaceDashboard::update() {

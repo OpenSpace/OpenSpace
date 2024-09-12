@@ -44,7 +44,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Viking MDIM [New York]",
-  Version = "1.1",
   Description = [[Alternate image layer for Mars. This map is hosted on the OpenSpace
     server in New York]],
   Author = "USGS",

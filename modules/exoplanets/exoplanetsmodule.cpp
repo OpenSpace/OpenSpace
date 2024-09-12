@@ -94,6 +94,15 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PlanetDefaultTextureInfo = {
+        "PlanetDefaultTexture",
+        "Planet Default Texture",
+        "The path to an image that should be used by default for the planets in all "
+        "added exoplanet systems. If not specified, the planets are rendered without a "
+        "texture when added.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo OrbitDiscTextureInfo = {
         "OrbitDiscTexture",
         "Orbit Disc Texture",
@@ -182,6 +191,9 @@ namespace {
        // [[codegen::verbatim(NoDataTextureInfo.description)]]
        std::optional<std::filesystem::path> noDataTexture;
 
+       // [[codegen::verbatim(PlanetDefaultTextureInfo.description)]]
+       std::optional<std::filesystem::path> planetDefaultTexture;
+
        // [[codegen::verbatim(OrbitDiscTextureInfo.description)]]
        std::optional<std::filesystem::path> orbitDiscTexture;
 
@@ -221,6 +233,7 @@ ExoplanetsModule::ExoplanetsModule()
     , _starTexturePath(StarTextureInfo)
     , _starGlareTexturePath(StarGlareTextureInfo)
     , _noDataTexturePath(NoDataTextureInfo)
+    , _planetDefaultTexturePath(PlanetDefaultTextureInfo)
     , _orbitDiscTexturePath(OrbitDiscTextureInfo)
     , _habitableZoneTexturePath(HabitableZoneTextureInfo)
     , _comparisonCircleColor(
@@ -244,6 +257,7 @@ ExoplanetsModule::ExoplanetsModule()
     addProperty(_starTexturePath);
     addProperty(_starGlareTexturePath);
     addProperty(_noDataTexturePath);
+    addProperty(_planetDefaultTexturePath);
     addProperty(_orbitDiscTexturePath);
     addProperty(_habitableZoneTexturePath);
 
@@ -301,6 +315,10 @@ std::filesystem::path ExoplanetsModule::noDataTexturePath() const {
     return _noDataTexturePath.value();
 }
 
+std::filesystem::path ExoplanetsModule::planetDefaultTexturePath() const {
+    return _planetDefaultTexturePath.value();
+}
+
 std::filesystem::path ExoplanetsModule::orbitDiscTexturePath() const {
     return _orbitDiscTexturePath.value();
 }
@@ -352,6 +370,10 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
 
     if (p.starGlareTexture.has_value()) {
         _starGlareTexturePath = p.starGlareTexture->string();
+    }
+
+    if (p.planetDefaultTexture.has_value()) {
+        _planetDefaultTexturePath = p.planetDefaultTexture->string();
     }
 
     if (p.noDataTexture.has_value()) {

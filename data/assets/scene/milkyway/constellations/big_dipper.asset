@@ -50,7 +50,6 @@ asset.export(BigDipper)
 
 asset.meta = {
   Name = "Big Dipper",
-  Version = "1.0",
   Description = "Constellation lines for the Big Dipper",
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

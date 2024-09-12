@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>
 #include <optional>
 
@@ -124,8 +125,13 @@ namespace {
         // [[codegen::verbatim(EndTimeInfo.description)]]
         std::string endTime [[codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // [[codegen::verbatim(SampleIntervalInfo.description)]]
-        double sampleInterval;
+        // The interval between samples of the trajectory. This value (together with
+        // 'TimeStampSubsampleFactor') determines how far apart (in time) the samples are
+        // spaced along the trajectory. The time interval between 'StartTime' and
+        // 'EndTime' is split into 'SampleInterval' * 'TimeStampSubsampleFactor' segments.
+        // If this value is not specified, it will be automatically calculated to produce
+        // one sample every two day between the 'StartTime' and 'EndTime'.
+        std::optional<double> sampleInterval;
 
         // [[codegen::verbatim(TimeSubSampleInfo.description)]]
         std::optional<int> timeStampSubsampleFactor;
@@ -156,16 +162,16 @@ documentation::Documentation RenderableTrailTrajectory::Documentation() {
 
 RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
+    , _sweepChunkSize(SweepChunkSizeInfo, 200, 50, 5000)
+    , _enableSweepChunking(EnableSweepChunkingInfo, false)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
     , _sampleInterval(SampleIntervalInfo, 2.0, 2.0, 1e6)
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 1000000000)
     , _renderFullTrail(RenderFullPathInfo, false)
+    , _numberOfReplacementPoints(AccurateTrailPositionsInfo, 100, 0, 1000)
     , _maxVertex(glm::vec3(-std::numeric_limits<float>::max()))
     , _minVertex(glm::vec3(std::numeric_limits<float>::max()))
-    , _sweepChunkSize(SweepChunkSizeInfo, 200, 50, 5000)
-    , _enableSweepChunking(EnableSweepChunkingInfo, false)
-    , _numberOfReplacementPoints(AccurateTrailPositionsInfo, 100, 0, 1000)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -182,7 +188,13 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     _endTime.onChange([this] { reset(); });
     addProperty(_endTime);
 
-    _sampleInterval = p.sampleInterval;
+    if (p.sampleInterval.has_value()) {
+        _sampleInterval = *p.sampleInterval;
+    }
+    else {
+        const double delta = Time::convertTime(_endTime) - Time::convertTime(_startTime);
+        _sampleInterval = delta / (openspace::SecondsPerYear * 2);
+    }
     _sampleInterval.onChange([this] { reset(); });
     addProperty(_sampleInterval);
 
