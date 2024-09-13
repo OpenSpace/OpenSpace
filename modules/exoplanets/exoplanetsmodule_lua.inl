@@ -335,24 +335,12 @@ void createExoplanetSystem(const std::string& starName,
         "}";
 
         std::string planetLayers = "";
-        if (!planetTexture.empty()) {
-            planetLayers = "{"
-                "Identifier = 'PlanetTexture',"
-                "FilePath = openspace.absPath('" + formatPathToLua(planetTexture) + "'),"
-                "BlendMode = 'Color',"
-                "Enabled = true"
-            "}";
-        }
 
         // Add a color layer with a fixed single color that represent the planet size,
         // that is, approximately what type of planet it is.
-        // @TODO (2024-09-10, emmbr) this should be a color map to use based on radius
-        // that can be set by the user. But, to do that it would be nice to have an
-        // updated transfer function / color map format that suppotrs categorical color
-        // mapping based on thresholds in a better way.
+        // @TODO (2024-09-10, emmbr) Ideally the user should be able to edit this
         if (!std::isnan(planet.r)) {
             float rInMeter = static_cast<float>(planetRadius);
-
             glm::vec3 colorFromSize = glm::vec3(0.f);
 
             // Source for the radius constants:
@@ -375,17 +363,22 @@ void createExoplanetSystem(const std::string& starName,
                 colorFromSize = glm::vec3(0.55f, 0.34f, 0.39f);
             }
 
-            if (!planetLayers.empty()) {
-                planetLayers += ",";
-            }
             planetLayers += "{"
                 "Identifier = 'ColorFromSize',"
                 "Type = 'SolidColor',"
                 "Color = " + ghoul::to_string(colorFromSize) + ","
-                "BlendMode = 'Normal',"
                 "Enabled = true"
             "}";
         }
+
+        if (!planetTexture.empty()) {
+            planetLayers += ",{"
+                "Identifier = 'PlanetTexture',"
+                "FilePath = openspace.absPath('" + formatPathToLua(planetTexture) + "'),"
+                "Enabled = true"
+            "}";
+        }
+
         // @TODO: This needs to be documented somewhere. Layer description?
 
         const std::string planetNode = "{"
