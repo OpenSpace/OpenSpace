@@ -147,6 +147,11 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         _propertiesLabel->setWordWrap(true);
         container->addWidget(_propertiesLabel, 0, 0);
 
+        _propertiesEdit = new QTextEdit;
+        _propertiesEdit->setReadOnly(true);
+        _propertiesEdit->setAccessibleName("Property value settings");
+        container->addWidget(_propertiesEdit, 1, 0, 1, 3);
+
         QPushButton* editProperties = new QPushButton("Edit");
         connect(
             editProperties, &QPushButton::clicked,
@@ -154,10 +159,6 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         );
         editProperties->setAccessibleName("Edit properties");
         container->addWidget(editProperties, 0, 2);
-
-        _propertiesEdit = new QTextEdit;
-        _propertiesEdit->setReadOnly(true);
-        container->addWidget(_propertiesEdit, 1, 0, 1, 3);
 
         leftLayout->addLayout(container);
     }
@@ -171,14 +172,15 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         _assetsLabel->setWordWrap(true);
         container->addWidget(_assetsLabel, 0, 0);
 
+        _assetsEdit = new QTextEdit;
+        _assetsEdit->setReadOnly(true);
+        _assetsEdit->setAccessibleName("Loaded assets");
+        container->addWidget(_assetsEdit, 1, 0, 1, 3);
+
         QPushButton* assetsProperties = new QPushButton("Edit");
         connect(assetsProperties, &QPushButton::clicked, this, &ProfileEdit::openAssets);
         assetsProperties->setAccessibleName("Edit assets");
         container->addWidget(assetsProperties, 0, 2);
-
-        _assetsEdit = new QTextEdit;
-        _assetsEdit->setReadOnly(true);
-        container->addWidget(_assetsEdit, 1, 0, 1, 3);
 
         leftLayout->addLayout(container);
     }
@@ -191,6 +193,11 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         _keybindingsLabel->setObjectName("heading");
         container->addWidget(_keybindingsLabel, 0, 0);
 
+        _keybindingsEdit = new QTextEdit;
+        _keybindingsEdit->setReadOnly(true);
+        _keybindingsEdit->setAccessibleName("Loaded action and keybindings");
+        container->addWidget(_keybindingsEdit, 1, 0, 1, 3);
+
         QPushButton* keybindingsProperties = new QPushButton("Edit");
         connect(
             keybindingsProperties, &QPushButton::clicked,
@@ -198,10 +205,6 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         );
         keybindingsProperties->setAccessibleName("Edit actions & keybindings");
         container->addWidget(keybindingsProperties, 0, 2);
-
-        _keybindingsEdit = new QTextEdit;
-        _keybindingsEdit->setReadOnly(true);
-        container->addWidget(_keybindingsEdit, 1, 0, 1, 3);
 
         leftLayout->addLayout(container);
     }
