@@ -125,6 +125,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
         container->addWidget(profileLabel);
 
         _profileEdit = new QLineEdit(QString::fromStdString(profileName));
+        _profileEdit->setPlaceholderText("required");
         container->addWidget(_profileEdit);
 
         QPushButton* duplicateButton = new QPushButton("Duplicate Profile");
