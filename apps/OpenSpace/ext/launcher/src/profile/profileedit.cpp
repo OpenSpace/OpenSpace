@@ -65,7 +65,7 @@ namespace {
     std::string summarizeAssets(const std::vector<std::string>& assets) {
         std::string results;
         for (const std::string& a : assets) {
-            results += a + '\n';
+            results += std::format("{}<br>", a);
         }
         return results;
     }
@@ -81,7 +81,7 @@ namespace {
             );
 
             std::string name = it != actions.end() ? it->name : "Unknown action";
-            results += std::format("{} ({})\n", name, ghoul::to_string(k.key));
+            results += std::format("{} ({})<br>", name, ghoul::to_string(k.key));
         }
         return results;
     }
@@ -89,7 +89,7 @@ namespace {
     std::string summarizeProperties(const std::vector<Profile::Property>& properties) {
         std::string results;
         for (openspace::Profile::Property p : properties) {
-            results += std::format("{} = {}\n", p.name, p.value);
+            results += std::format("{} = {}<br>", p.name, p.value);
         }
         return results;
     }
