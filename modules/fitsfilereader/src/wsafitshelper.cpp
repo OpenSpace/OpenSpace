@@ -50,33 +50,32 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
 
         const float maxValue = 50.f;// layerValues.max();
         const float minValue = -50.f;// layerValues.min();
-        std::vector<float> imageData;
+        float* imageData = new float[layerValues.size()];
         //test.assign(std::begin(layerValues), std::end(layerValues));
         std::vector<glm::vec3> rgbLayers;
-        for (float mapValue : layerValues) {
+        for (size_t i = 0; i < layerValues.size(); i++) {
             // normalization
-            float normalizedValue = (mapValue - minValue) / (maxValue - minValue);
+            float normalizedValue = (layerValues[i] - minValue) / (maxValue - minValue);
             // clamping causes overexposure above and below max and min values intentionally
             // as desired by Nick Arge from WSA
             normalizedValue = std::clamp(normalizedValue, 0.f, 1.f);
 
-            imageData.emplace_back(normalizedValue);
+            imageData[i] = normalizedValue;
         }
 
         // Create texture from imagedata
         auto texture = std::make_unique<ghoul::opengl::Texture>(
-            imageData.data(),
+            imageData,
             glm::size3_t(fitsValues->width, fitsValues->height, 1),
             GL_TEXTURE_2D,
             ghoul::opengl::Texture::Format::Red,
             GL_RED,
             GL_FLOAT
         );
-        texture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
         // Tell it to use the single color channel as grayscale
         convertTextureFormat(*texture, ghoul::opengl::Texture::Format::RGB);
         texture->uploadTexture();
-        return std::move(texture);
+        return texture;
     }
     catch (CCfits::FitsException& e) {
         LERROR(

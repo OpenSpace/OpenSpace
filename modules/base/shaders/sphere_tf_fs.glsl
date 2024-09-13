@@ -48,13 +48,10 @@ Fragment getFragment() {
   float lookUpVal =
     (dataValue.x - dataMinMaxValues.x) /
     (dataMinMaxValues.y - dataMinMaxValues.x);
-  frag.color = texture(transferFunction, lookUpVal);
-
-  if (frag.color.a == 1.0){
-    if (opacity == 1.0){
-      //frag.color.b = 1.0;
-    }
-  }
+  frag.color = vec4(
+    texture(transferFunction, lookUpVal).rgb,
+    1.0
+  );
 
   frag.color.a *= opacity;
   frag.depth = vs_screenSpaceDepth;

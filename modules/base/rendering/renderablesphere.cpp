@@ -393,7 +393,9 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_CULL_FACE);
     }
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    if (_renderBin != Renderable::RenderBin::Opaque) {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    }
 
     _sphere->render();
 
