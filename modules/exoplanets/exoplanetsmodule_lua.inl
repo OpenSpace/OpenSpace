@@ -344,6 +344,50 @@ void createExoplanetSystem(const std::string& starName,
             "}";
         }
 
+        // Add a color layer with a fixed single color that represent the planet size,
+        // that is, approximately what type of planet it is.
+        // @TODO (2024-09-10, emmbr) this should be a color map to use based on radius
+        // that can be set by the user. But, to do that it would be nice to have an
+        // updated transfer function / color map format that suppotrs categorical color
+        // mapping based on thresholds in a better way.
+        if (!std::isnan(planet.r)) {
+            float rInMeter = static_cast<float>(planetRadius);
+
+            glm::vec3 colorFromSize = glm::vec3(0.f);
+
+            // Source for the radius constants:
+            // https://www.nasa.gov/image-article/sizes-of-known-exoplanets/
+
+            // Terrestrial
+            if (rInMeter < 1.25f * distanceconstants::EarthRadius) {
+                colorFromSize = glm::vec3(0.56f, 0.42f, 0.31f);
+            }
+            // Super-Earths
+            else if (rInMeter < 2.f * distanceconstants::EarthRadius) {
+                colorFromSize = glm::vec3(1.f, 0.76f, 0.65f);
+            }
+            // Neptune-like
+            else if (rInMeter < 6.f * distanceconstants::EarthRadius) {
+                colorFromSize = glm::vec3(0.22f, 0.49f, 0.50f);
+            }
+            // Gas Giants (Saturn and Jupiter size, and much larger!)
+            else {
+                colorFromSize = glm::vec3(0.55f, 0.34f, 0.39f);
+            }
+
+            if (!planetLayers.empty()) {
+                planetLayers += ",";
+            }
+            planetLayers += "{"
+                "Identifier = 'ColorFromSize',"
+                "Type = 'SolidColor',"
+                "Color = " + ghoul::to_string(colorFromSize) + ","
+                "BlendMode = 'Normal',"
+                "Enabled = true"
+            "}";
+        }
+        // @TODO: This needs to be documented somewhere. Layer description?
+
         const std::string planetNode = "{"
             "Identifier = '" + planetIdentifier + "',"
             "Parent = '" + starIdentifier + "',"
@@ -355,7 +399,8 @@ void createExoplanetSystem(const std::string& starName,
                 "Layers = {"
                     "ColorLayers = {" + planetLayers + "}"
                 "},"
-                "LightSourceNode = '" + starIdentifier + "'"
+                "LightSourceNode = '" + starIdentifier + "',"
+                "AmbientIntensity = 0.2"
             "},"
             "Tag = { 'exoplanet_planet' }, "
             "Transform = { "
