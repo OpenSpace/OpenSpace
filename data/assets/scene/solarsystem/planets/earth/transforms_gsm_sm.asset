@@ -81,7 +81,7 @@ asset.export(SolarMagnetospheric)
 asset.meta = {
   Name = "Earth GSM and SM transforms",
   Version = "1.0",
-  Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric, SMReferenceFrame, Solar Magnetic",
+  Description = "Earth transform GSM Reference Frame. Geocentric Solar Magnetospheric, SM Reference Frame, Solar Magnetic",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

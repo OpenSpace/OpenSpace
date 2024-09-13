@@ -53,7 +53,7 @@ asset.export(GeocentricSolarEcliptic)
 asset.meta = {
   Name = "Geocentric Solar Ecliptic (GSE) frame Transform",
   Version = "1.0",
-  Description = "Earth transforms: GSE ReferenceFrame",
+  Description = "Earth transform GSE Reference Frame",
   Author = "CCMC",
   URL = "http://openspaceproject.com",
   License = "MIT license"

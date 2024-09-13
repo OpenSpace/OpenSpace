@@ -247,7 +247,6 @@ local HEEAxes = {
 }
 
 
-
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenterAxes)
   openspace.addSceneGraphNode(EarthInertialAxes)

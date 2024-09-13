@@ -1,8 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 
-local GSM_Kernel = asset.resource("kernels/GSMtime.tf")
-local SM_Kernel = asset.resource("kernels/SMtime.tf")
+local GSM_Kernel = asset.resource("kernels/GSM_time.tf")
+local SM_Kernel = asset.resource("kernels/SM_time.tf")
 
 
 
