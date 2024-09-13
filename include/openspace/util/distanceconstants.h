@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___DISTANCECONSTANTS___H__
 
 namespace openspace::distanceconstants {
-    constexpr double EarthRadius = 6371;
+    constexpr double EarthRadius = 6371E3;
     constexpr double JupiterRadius = 7.1492E7;
     constexpr double SolarRadius = 6.95700E8;
     constexpr double LightYear = 9.4607304725808E15;
