@@ -27,7 +27,7 @@ local GeocentricSolarEcliptic = {
         always pointing toward the North side of the invariant plane.
         +X axis is the component of the Earth-Sun vector that is orthogonal
         to the +Z axis.
-        +Y axis completes the right-handed system.]]
+        +Y axis completes the right-handed system.]],
     Hidden = true
   }
 }
