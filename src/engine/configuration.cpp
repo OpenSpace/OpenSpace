@@ -655,11 +655,13 @@ void parseLuaState(Configuration& configuration) {
 }
 
 void patchConfiguration(Configuration& configuration, const Settings& settings) {
-    if (settings.configuration.has_value()) {
+    if (settings.rememberLastConfiguration.value_or(false) &&
+        settings.configuration.has_value())
+    {
         configuration.windowConfiguration = *settings.configuration;
         configuration.sgctConfigNameInitialized.clear();
     }
-    if (settings.profile.has_value()) {
+    if (settings.rememberLastProfile.value_or(false) && settings.profile.has_value()) {
         configuration.profile = *settings.profile;
     }
     if (settings.visibility.has_value()) {
