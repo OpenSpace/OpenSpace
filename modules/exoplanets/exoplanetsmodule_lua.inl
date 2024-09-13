@@ -360,7 +360,7 @@ void createExoplanetSystem(const std::string& starName,
 
             // Terrestrial
             if (rInMeter < 1.25f * distanceconstants::EarthRadius) {
-                colorFromSize = glm::vec3(0.56f, 0.42f, 0.31f);
+                colorFromSize = glm::vec3(0.32f, 0.2f, 0.1f);
             }
             // Super-Earths
             else if (rInMeter < 2.f * distanceconstants::EarthRadius) {
