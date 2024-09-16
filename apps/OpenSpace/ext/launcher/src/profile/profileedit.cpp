@@ -41,6 +41,7 @@
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
@@ -493,11 +494,6 @@ std::string ProfileEdit::specifiedFilename() const {
     return _profileEdit->text().toStdString();
 }
 
-void ProfileEdit::cancel() {
-    _saveSelected = false;
-    reject();
-}
-
 void ProfileEdit::approved() {
     std::string profileName = _profileEdit->text().toStdString();
     if (profileName.empty()) {
@@ -529,3 +525,36 @@ void ProfileEdit::keyPressEvent(QKeyEvent* evt) {
     QDialog::keyPressEvent(evt);
 }
 
+
+void ProfileEdit::reject()  {
+    // We hijack the reject (i.e., exit window) and emit the signal. The actual shutdown
+    // of the window comes at a later stage.
+    emit raiseExitWindow();
+}
+
+void ProfileEdit::closeWithoutSaving() {
+    _saveSelected = false;
+    QDialog::reject();
+}
+
+void ProfileEdit::promptUserOfUnsavedChanges() {
+    QMessageBox msgBox;
+    msgBox.setText("There are unsaved changes");
+    msgBox.setInformativeText("Do you want to save your changes");
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+    int ret = msgBox.exec();
+
+    switch (ret) {
+        case QMessageBox::Save:
+            approved();
+            break;
+        case QMessageBox::Discard:
+            closeWithoutSaving();
+            break;
+        case QMessageBox::Cancel:
+            break;
+        default:
+            break;
+    }
+}

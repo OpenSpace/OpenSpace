@@ -79,6 +79,13 @@ public:
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 
+    void reject() override;
+    void closeWithoutSaving();
+    void promptUserOfUnsavedChanges();
+
+signals:
+    void raiseExitWindow();
+
 private slots:
     void duplicateProfile();
     void openMeta();
@@ -91,7 +98,6 @@ private slots:
     void openDeltaTimes();
     void openCamera();
     void openMarkNodes();
-    void cancel();
     void approved();
 
 private:
