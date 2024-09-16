@@ -94,6 +94,9 @@ protected:
 private:
     class RenderHandler : public WebRenderHandler {
     public:
+        RenderHandler()
+            : WebRenderHandler(false)
+        {}
         void draw() override;
         void render() override;
 

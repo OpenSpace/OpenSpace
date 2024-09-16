@@ -200,11 +200,11 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         const Time start = Time(p.prototyped->time.start);
         Time end = Time::now();
         _prototyped.startTimeJ2000 = start.j2000Seconds();
-        _prototyped.endTimeJ2000 = Time(p.prototyped->time.end).j2000Seconds();
         if (p.prototyped->time.end == "Yesterday") {
             end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
         }
         else if (p.prototyped->time.end != "Today") {
+            _prototyped.endTimeJ2000 = Time(p.prototyped->time.end).j2000Seconds();
             end.setTime(p.prototyped->time.end);
         }
 

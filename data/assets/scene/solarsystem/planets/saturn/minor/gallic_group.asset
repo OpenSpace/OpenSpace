@@ -86,8 +86,7 @@ local AlbiorixLabel = {
   },
   GUI = {
     Name = "Albiorix Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix",
-    Description = "Label for Saturn's moon Albiorix (Gallic group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix"
   }
 }
 
@@ -173,8 +172,7 @@ local BebhionnLabel = {
   },
   GUI = {
     Name = "Bebhionn Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn",
-    Description = "Label for Saturn's moon Bebhionn (Gallic group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn"
   }
 }
 
@@ -260,8 +258,7 @@ local ErriapusLabel = {
   },
   GUI = {
     Name = "Erriapus Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus",
-    Description = "Label for Saturn's moon Erriapus (Gallic group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus"
   }
 }
 
@@ -347,8 +344,7 @@ local TarvosLabel = {
   },
   GUI = {
     Name = "Tarvos Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos",
-    Description = "Label for Saturn's moon Tarvos (Gallic group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos"
   }
 }
 

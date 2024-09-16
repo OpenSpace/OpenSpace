@@ -50,9 +50,7 @@ local Pioneer11Trail = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1973 APR 06 02:25:00.000",
     EndTime = "1990 JAN 02 00:00:00.000",
-    EnableFade = false,
-    -- 6087 is the number of days between the Start and End time (so sample every 2d)
-    SampleInterval = 6087 * 2
+    EnableFade = false
   },
   GUI = {
     Name = "Pioneer 11 Trail (SPICE)",

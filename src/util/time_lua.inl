@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/timeconversion.h>
+
 namespace {
 
 /**
@@ -372,6 +374,36 @@ namespace {
     else {
         return std::string(Time(std::get<double>(time)).ISO8601());
     }
+}
+
+/**
+ * Returns the number of seconds between the provided start time and end time. If the end
+ * time is before the start time, the return value is negative. If the start time is equal
+ * to the end time, the return value is 0.
+ * Both start and end times must be valid ISO 8601 date strings.
+ */
+[[codegen::luawrap]] double duration(std::string start, std::string end) {
+    using namespace openspace;
+
+    const double tStart = Time::convertTime(start);
+    const double tEnd = Time::convertTime(end);
+    return tEnd - tStart;
+}
+
+/**
+ * Returns the number of seconds per day where a day in this case is exactly 24 hours.
+ * The total number of seconds is equal to 86400.
+ */
+[[codegen::luawrap]] double secondsPerDay() {
+    return openspace::SecondsPerDay;
+}
+
+/**
+ * Returns the number of seconds in a Julian year, which is equal to 31557600.
+ */
+[[codegen::luawrap]] double secondsPerYear() {
+    // We could use a call to SPICE here, but the value is a constant anyway
+    return openspace::SecondsPerYear;
 }
 
 #include "time_lua_codegen.cpp"

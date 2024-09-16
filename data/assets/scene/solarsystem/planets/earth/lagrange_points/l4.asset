@@ -79,7 +79,6 @@ local L4Label = {
 }
 
 
-
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "L4_de431.bsp")
 

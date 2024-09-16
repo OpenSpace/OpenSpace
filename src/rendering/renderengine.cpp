@@ -53,12 +53,14 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/io/model/modelreaderbinary.h>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/io/texture/texturereadercmap.h>
 #include <ghoul/io/texture/texturereaderstb.h>
+#include <ghoul/io/texture/texturewriter.h>
+#include <ghoul/io/texture/texturewriterstb.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/profiling.h>
@@ -109,7 +111,7 @@ namespace {
         "Shows the version on-screen information",
         "This value determines whether the Git version information (branch and commit) "
         "hash are shown on the screen.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowCameraInfo = {
@@ -139,35 +141,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowStatisticsInfo = {
-        "ShowStatistics",
-        "Show Statistics",
-        "Show updating, rendering, and network statistics on all rendering nodes.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo StatisticsScaleInfo = {
-        "StatisticsScale",
-        "Statistics Scale",
-        "This value is scaling the statatistics window by the provided amount. For flat "
-        "projections this is rarely necessary, but it is important when using a setup "
-        "where the cornders of the image are masked out.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ScreenshotUseDateInfo = {
         "ScreenshotUseDate",
         "Screenshot Folder uses Date",
         "If this value is set to 'true', screenshots will be saved to a folder that "
         "contains the time at which this value was enabled.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
-        "ShowFrameInformation",
-        "Show Frame Information",
-        "If this value is enabled, the current frame number and frame times are rendered "
-        "into the window.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -321,10 +299,7 @@ RenderEngine::RenderEngine()
     , _showCameraInfo(ShowCameraInfo, true)
     , _screenshotWindowIds(ScreenshotWindowIdsInfo)
     , _applyWarping(ApplyWarpingInfo, false)
-    , _showStatistics(ShowStatisticsInfo, false)
-    , _statisticsScale(StatisticsScaleInfo, 1.f, 0.f, 1.f)
     , _screenshotUseDate(ScreenshotUseDateInfo, false)
-    , _showFrameInformation(ShowFrameNumberInfo, false)
     , _disableMasterRendering(DisableMasterInfo, false)
     , _globalBlackOutFactor(GlobalBlackoutFactorInfo, 1.f, 0.f, 1.f)
     , _applyBlackoutToMaster(ApplyBlackoutToMasterInfo, true)
@@ -395,19 +370,6 @@ RenderEngine::RenderEngine()
     addProperty(_screenshotWindowIds);
     addProperty(_applyWarping);
 
-    _showStatistics.onChange([this]() {
-        global::windowDelegate->showStatistics(_showStatistics);
-        // We need to reset the scale as it is not updated when the statistics window is
-        // not currently shown
-        global::windowDelegate->setStatisticsGraphScale(_statisticsScale);
-    });
-    addProperty(_showStatistics);
-
-    _statisticsScale.onChange([this]() {
-        global::windowDelegate->setStatisticsGraphScale(_statisticsScale);
-    });
-    addProperty(_statisticsScale);
-
     _screenshotUseDate.onChange([this]() {
         // If there is no screenshot folder, don't bother with handling the change
         if (!FileSys.hasRegisteredToken("${STARTUP_SCREENSHOT}")) {
@@ -453,7 +415,6 @@ RenderEngine::RenderEngine()
     });
     addProperty(_horizFieldOfView);
 
-    addProperty(_showFrameInformation);
 
     addProperty(_framerateLimit);
     addProperty(_globalRotation);
@@ -493,6 +454,10 @@ void RenderEngine::initialize() {
         std::make_unique<ghoul::io::TextureReaderCMAP>()
     );
 
+    ghoul::io::TextureWriter::ref().addWriter(
+        std::make_unique<ghoul::io::TextureWriterSTB>()
+    );
+
     ghoul::io::ModelReader::ref().addReader(
         std::make_unique<ghoul::io::ModelReaderAssimp>()
     );
@@ -500,22 +465,6 @@ void RenderEngine::initialize() {
     ghoul::io::ModelReader::ref().addReader(
         std::make_unique<ghoul::io::ModelReaderBinary>()
     );
-
-    _versionString = OPENSPACE_VERSION_STRING_FULL;
-    if (global::versionChecker->hasLatestVersionInfo()) {
-        VersionChecker::SemanticVersion latest = global::versionChecker->latestVersion();
-
-        const VersionChecker::SemanticVersion current {
-            OPENSPACE_VERSION_MAJOR,
-            OPENSPACE_VERSION_MINOR,
-            OPENSPACE_VERSION_PATCH
-        };
-        if (current < latest) {
-            _versionString += std::format(
-                " [Available: {}.{}.{}]", latest.major, latest.minor, latest.patch
-            );
-        }
-    }
 }
 
 void RenderEngine::initializeGL() {
@@ -540,7 +489,6 @@ void RenderEngine::initializeGL() {
     {
         ZoneScopedN("Fonts");
         TracyGpuZone("Fonts");
-        _fontFrameInfo = global::fontManager->font(KeyFontMono, fontSize.frameInfo);
         _fontShutdown = global::fontManager->font(KeyFontMono, fontSize.shutdown);
         _fontCameraInfo = global::fontManager->font(KeyFontMono, fontSize.cameraInfo);
         _fontVersionInfo = global::fontManager->font(KeyFontMono, fontSize.versionInfo);
@@ -721,35 +669,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         (*global::callback::webBrowserPerformanceHotfix)();
     }
 
-    if (_showFrameInformation) {
-        ZoneScopedN("Show Frame Information");
 
-        glm::vec2 penPosition = glm::vec2(
-            fontResolution().x / 2 - 50,
-            fontResolution().y / 3
-        );
-
-        std::string fn = std::to_string(_frameNumber);
-        const WindowDelegate::Frustum frustum = global::windowDelegate->frustumMode();
-        std::string fr = [](WindowDelegate::Frustum f) -> std::string {
-            switch (f) {
-                case WindowDelegate::Frustum::Mono:     return "";
-                case WindowDelegate::Frustum::LeftEye:  return "(left)";
-                case WindowDelegate::Frustum::RightEye: return "(right)";
-                default:                              throw ghoul::MissingCaseException();
-            }
-        }(frustum);
-
-        std::string sgFn = std::to_string(global::windowDelegate->swapGroupFrameNumber());
-        std::string dt = std::to_string(global::windowDelegate->deltaTime());
-        std::string avgDt = std::to_string(global::windowDelegate->averageDeltaTime());
-
-        const std::string res = std::format(
-            "Frame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
-            fn, fr, sgFn, dt, avgDt
-        );
-        RenderFont(*_fontFrameInfo, penPosition, res);
-    }
 
     if (renderingEnabled && !delegate.isGuiWindow()) {
         ZoneScopedN("Render ScreenSpace Renderable");
@@ -805,11 +725,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RotationalFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
-        global::scriptEngine->queueScript(
-            std::string(ToggleRotationFrictionScript),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(std::string(ToggleRotationFrictionScript));
         return true;
     }
 
@@ -818,11 +734,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.ZoomFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
-        global::scriptEngine->queueScript(
-            std::string(ToggleZoomFrictionScript),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(std::string(ToggleZoomFrictionScript));
         return true;
     }
 
@@ -831,11 +743,7 @@ bool RenderEngine::mouseActivationCallback(const glm::dvec2& mousePosition) cons
             local f = 'NavigationHandler.OrbitalNavigator.Friction.RollFriction';
             openspace.setPropertyValueSingle(f, not openspace.propertyValue(f));)";
 
-        global::scriptEngine->queueScript(
-            std::string(ToggleRollFrictionScript),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(std::string(ToggleRollFrictionScript));
         return true;
     }
 
@@ -1139,8 +1047,6 @@ void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderabl
     ScreenSpaceRenderable* ssr = s.get();
     global::screenSpaceRootPropertyOwner->addPropertySubOwner(ssr);
     global::screenSpaceRenderables->push_back(std::move(s));
-
-    global::eventEngine->publishEvent<events::EventScreenSpaceRenderableAdded>(ssr);
 }
 
 void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
@@ -1151,7 +1057,6 @@ void RenderEngine::removeScreenSpaceRenderable(ScreenSpaceRenderable* s) {
     );
 
     if (it != global::screenSpaceRenderables->end()) {
-        global::eventEngine->publishEvent<events::EventScreenSpaceRenderableRemoved>(s);
         s->deinitializeGL();
         s->deinitialize();
         global::screenSpaceRootPropertyOwner->removePropertySubOwner(s);
@@ -1270,15 +1175,43 @@ void RenderEngine::renderVersionInformation() {
     }
 
     using FR = ghoul::fontrendering::FontRenderer;
-    const glm::vec2 versionBox = _fontVersionInfo->boundingBox(_versionString);
-    const glm::vec2 commitBox = _fontVersionInfo->boundingBox(OPENSPACE_GIT_FULL);
+    glm::vec2 versionBox = glm::vec2(0.f, 0.f);
+    if (OPENSPACE_IS_RELEASE_BUILD) {
+        if (global::versionChecker->hasLatestVersionInfo()) {
+            VersionChecker::SemanticVersion ver = global::versionChecker->latestVersion();
 
-    FR::defaultRenderer().render(
-        *_fontVersionInfo,
-        glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
-        _versionString,
-        glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
-    );
+            std::string versionString = std::string(OPENSPACE_VERSION_STRING_FULL);
+            const VersionChecker::SemanticVersion current {
+                OPENSPACE_VERSION_MAJOR,
+                OPENSPACE_VERSION_MINOR,
+                OPENSPACE_VERSION_PATCH
+            };
+            if (current < ver) {
+                versionString += std::format(
+                    " [Available: {}.{}.{}]", ver.major, ver.minor, ver.patch
+                );
+            }
+
+            versionBox = _fontVersionInfo->boundingBox(versionString);
+            FR::defaultRenderer().render(
+                *_fontVersionInfo,
+                glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
+                versionString,
+                glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
+            );
+        }
+        else {
+            versionBox = _fontVersionInfo->boundingBox(OPENSPACE_VERSION_STRING_FULL);
+            FR::defaultRenderer().render(
+                *_fontVersionInfo,
+                glm::vec2(fontResolution().x - versionBox.x - 10.f, 5.f),
+                OPENSPACE_VERSION_STRING_FULL,
+                glm::vec4(0.5f, 0.5f, 0.5f, 1.f)
+            );
+        }
+    }
+
+    const glm::vec2 commitBox = _fontVersionInfo->boundingBox(OPENSPACE_GIT_FULL);
 
     // If a developer hasn't placed the Git command in the path, this variable will be
     // empty

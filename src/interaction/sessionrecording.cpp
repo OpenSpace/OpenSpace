@@ -976,7 +976,7 @@ void SessionRecording::saveScriptKeyframeAscii(Timestamps& times,
 }
 
 void SessionRecording::savePropertyBaseline(properties::Property& prop) {
-    const std::string propIdentifier = prop.fullyQualifiedIdentifier();
+    const std::string propIdentifier = prop.uri();
     if (isPropertyAllowedForBaseline(propIdentifier)) {
         const bool isPropAlreadySaved = (
             std::find(
@@ -2088,13 +2088,14 @@ bool SessionRecording::processCameraKeyframe(double now) {
         global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
     }
 
-    return interaction::KeyframeNavigator::updateCamera(
+    interaction::KeyframeNavigator::updateCamera(
         global::navigationHandler->camera(),
         prevPose,
         nextPose,
         t,
         _ignoreRecordedScale
     );
+    return true;
 }
 
 bool SessionRecording::processScriptKeyframe() {
@@ -2107,11 +2108,7 @@ bool SessionRecording::processScriptKeyframe() {
         _keyframesScript,
         ([this]() { signalPlaybackFinishedForComponent(RecordedType::Script); })
     );
-    global::scriptEngine->queueScript(
-        nextScript,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(nextScript);
 
     return true;
 }

@@ -161,6 +161,7 @@ local PolyCamFov = {
 --   }
 -- }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OsirisRex)
   openspace.addSceneGraphNode(PolyCam)

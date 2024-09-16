@@ -942,7 +942,7 @@ TEST_CASE("Save settings to profile", "[profile]") {
         Profile::Property::SetType::SetPropertyValueSingle
     );
     CHECK(profile.properties[0].name == "base.p1");
-    CHECK(profile.properties[0].value == "2.000000");
+    CHECK(profile.properties[0].value == "2");
     CHECK(
         profile.properties[1].setType ==
         Profile::Property::SetType::SetPropertyValueSingle

@@ -88,8 +88,7 @@ local AegaeonLabel = {
   },
   GUI = {
     Name = "Aegaeon Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon",
-    Description = "Label for Saturn's moon Aegaeon (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Aegaeon"
   }
 }
 
@@ -175,8 +174,7 @@ local MethoneLabel = {
   },
   GUI = {
     Name = "Methone Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone",
-    Description = "Label for Saturn's moon Methone (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Methone"
   }
 }
 
@@ -262,8 +260,7 @@ local AntheLabel = {
   },
   GUI = {
     Name = "Anthe Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe",
-    Description = "Label for Saturn's moon Anthe (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Anthe"
   }
 }
 
@@ -349,8 +346,7 @@ local PalleneLabel = {
   },
   GUI = {
     Name = "Pallene Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene",
-    Description = "Label for Saturn's moon Pallene (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Pallene"
   }
 }
 
@@ -436,8 +432,7 @@ local TelestoLabel = {
   },
   GUI = {
     Name = "Telesto Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto",
-    Description = "Label for Saturn's moon Telesto (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Telesto"
   }
 }
 
@@ -523,8 +518,7 @@ local CalypsoLabel = {
   },
   GUI = {
     Name = "Calypso Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso",
-    Description = "Label for Saturn's moon Calypso (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Calypso"
   }
 }
 
@@ -610,8 +604,7 @@ local HeleneLabel = {
   },
   GUI = {
     Name = "Helene Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene",
-    Description = "Label for Saturn's moon Helene (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Helene"
   }
 }
 
@@ -697,8 +690,7 @@ local PolydeucesLabel = {
   },
   GUI = {
     Name = "Polydeuces Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces",
-    Description = "Label for Saturn's moon Polydeuces (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/Polydeuces"
   }
 }
 
@@ -784,8 +776,7 @@ local S2004S24Label = {
   },
   GUI = {
     Name = "S/2004 S 24 Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24",
-    Description = "Label for Saturn's moon S/2004 S 24 (Other group)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Other Group/S2004S24"
   }
 }
 

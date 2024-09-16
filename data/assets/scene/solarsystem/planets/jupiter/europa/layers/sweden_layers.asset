@@ -7,7 +7,6 @@ asset.meta = {
   Name = "Default Europa Layers (Sweden)",
   Description = [[Default Europa layers are: Europa Texture & Voyager Global Mosaic.
 
-
     Layers only loaded from the Sweden server
   ]],
   Author = "OpenSpace Team",

@@ -64,10 +64,6 @@ documentation::Documentation LuaTranslation::Documentation() {
 
 LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary)
     : _luaScriptFile(ScriptInfo)
-    , _state(
-        ghoul::lua::LuaState::IncludeStandardLibrary::Yes,
-        ghoul::lua::LuaState::StrictState::No
-    )
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

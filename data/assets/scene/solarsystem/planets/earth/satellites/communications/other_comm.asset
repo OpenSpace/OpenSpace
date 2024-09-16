@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_other-comm",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=other-comm&FORMAT=kvn",
   Filename = "other-comm.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -31,6 +31,7 @@ local OtherCommunicationSatellites = {
     Path = "/Solar System/Planets/Earth/Satellites"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OtherCommunicationSatellites)

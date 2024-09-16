@@ -103,6 +103,24 @@ namespace {
     return contents;
 }
 
+// Reads a file from disk and return its as a list of lines.
+[[codegen::luawrap]] std::vector<std::string> readFileLines(std::filesystem::path file) {
+    std::filesystem::path p = absPath(file);
+    if (!std::filesystem::is_regular_file(p)) {
+        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file));
+    }
+
+    std::ifstream f = std::ifstream(p);
+    std::vector<std::string> contents;
+    while (f.good()) {
+        std::string line;
+        ghoul::getline(f, line);
+        contents.push_back(std::move(line));
+    }
+
+    return contents;
+}
+
 // Checks whether the provided directory exists.
 [[codegen::luawrap]] bool directoryExists(std::filesystem::path file) {
     const bool e = std::filesystem::is_directory(absPath(std::move(file)));

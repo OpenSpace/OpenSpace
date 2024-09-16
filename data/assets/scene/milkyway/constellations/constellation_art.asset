@@ -22,8 +22,6 @@ local data = asset.resource({
 --function that reads the file
 local function createConstellations(baseIdentifier, guiPath, constellationfile)
   local genConstellations = {}
-  --skip the first line
-  local notFirstLine = false
   -- define parsec to meters
   local PARSEC_CONSTANT = 3.0856776E16
   -- how many parsecs away do you want the images to be?
@@ -31,72 +29,77 @@ local function createConstellations(baseIdentifier, guiPath, constellationfile)
   -- but they can really be anywhere since the billboard size will scale with distance.
   local distanceMultiplier = 3.2
   local baseScale = 1e17
-  for line in io.lines(openspace.absPath(constellationfile)) do
-    if (notFirstLine) then
-      -- describes the data
-      local matchstring = "(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-),(.-)$"
-      local group, abbreviation, name, x, y, z, scale, imageName, rotX, rotY, rotZ, centerStar = line:match(matchstring)
-      local magVec = math.sqrt(x*x + y*y + z*z)
-      local normx = x / magVec
-      local normy = y / magVec
-      local normz = z / magVec
+  local lines = openspace.readCSVFile(openspace.absPath(constellationfile))
+  for _, line in ipairs(lines) do
+    -- describes the data
+    local group = line[1]
+    local abbreviation = line[2]
+    local name = line[3]
+    local x = tonumber(line[4])
+    local y = tonumber(line[5])
+    local z = tonumber(line[6])
+    local scale = tonumber(line[7])
+    local imageName = line[8]
+    local rotX = tonumber(line[9])
+    local rotY = tonumber(line[10])
+    local rotZ = tonumber(line[11])
+    local centerStar = line[12]
+    local magVec = math.sqrt(x*x + y*y + z*z)
+    local normx = x / magVec
+    local normy = y / magVec
+    local normz = z / magVec
 
-      -- Use the full name in the data constellations.dat if possible
-      -- Otherwise, use the given name in the constellation_data.csv file
-      local foundName = constellations_helper.findFullName(abbreviation)
-      if foundName ~= nil then
-        name = foundName
-      end
+    -- Use the full name in the data constellations.dat if possible
+    -- Otherwise, use the given name in the constellation_data.csv file
+    local foundName = constellations_helper.findFullName(abbreviation)
+    if foundName ~= nil then
+      name = foundName
+    end
 
-      group = (group == "" and globe or group)
+    group = (group == "" and globe or group)
 
-      local aconstellation = {
-        -- Identifier = guiPath .. "-" .. name,
-        Identifier = baseIdentifier .. "-" .. abbreviation,
-        Parent = transforms.SolarSystemBarycenter.Identifier,
-        Transform = {
-          Translation = {
-            Type = "StaticTranslation",
-            -- position is in parsecs from the SolarSystemBarycenter, so convert to meters
-            Position = {
-              normx * PARSEC_CONSTANT * distanceMultiplier,
-              normy * PARSEC_CONSTANT * distanceMultiplier,
-              normz * PARSEC_CONSTANT * distanceMultiplier
-            }
-          },
-          Rotation = {
-            Type = "StaticRotation",
-            Rotation = { tonumber(rotX), tonumber(rotY), tonumber(rotZ) }
+    local aconstellation = {
+      -- Identifier = guiPath .. "-" .. name,
+      Identifier = baseIdentifier .. "-" .. abbreviation,
+      Parent = transforms.SolarSystemBarycenter.Identifier,
+      Transform = {
+        Translation = {
+          Type = "StaticTranslation",
+          -- position is in parsecs from the SolarSystemBarycenter, so convert to meters
+          Position = {
+            normx * PARSEC_CONSTANT * distanceMultiplier,
+            normy * PARSEC_CONSTANT * distanceMultiplier,
+            normz * PARSEC_CONSTANT * distanceMultiplier
           }
         },
-        Renderable = {
-          Type = "RenderablePlaneImageLocal",
-          Enabled = false,
-          Size = tonumber(baseScale * scale * distanceMultiplier / 10),
-          Origin = "Center",
-          Billboard = false,
-          LazyLoading = true,
-          Texture = images .. imageName,
-          BlendMode = "Additive",
-          Opacity = 0.1,
-          DimInAtmosphere = true
-        },
-        Tag = { "ImageConstellation", group, "daytime_hidden" },
-        GUI = {
-          Name = name .. " Image",
-          Path = "/Milky Way/" .. guiPath,
-          Description = name .. " Image"
+        Rotation = {
+          Type = "StaticRotation",
+          Rotation = { tonumber(rotX), tonumber(rotY), tonumber(rotZ) }
         }
+      },
+      Renderable = {
+        Type = "RenderablePlaneImageLocal",
+        Enabled = false,
+        Size = tonumber(baseScale * scale * distanceMultiplier / 10),
+        Origin = "Center",
+        Billboard = false,
+        LazyLoading = true,
+        Texture = images .. imageName,
+        BlendMode = "Additive",
+        Opacity = 0.1,
+        DimInAtmosphere = true
+      },
+      Tag = { "ImageConstellation", group, "daytime_hidden" },
+      GUI = {
+        Name = name .. " Image",
+        Path = "/Milky Way/Constellations/" .. guiPath,
+        Description = name .. " Image"
       }
-      table.insert(genConstellations, aconstellation)
-
-    else
-      notFirstLine = true
-    end
+    }
+    table.insert(genConstellations, aconstellation)
   end
   return genConstellations
 end
-
 
 local ShowArt = {
   Identifier = "os.constellation_art.ShowArt",
@@ -191,6 +194,8 @@ asset.export("HideArtAction", HideArt.Identifier)
 asset.export("DisableArtAction", DisableArt.Identifier)
 asset.export("ShowZodiacArt", ShowZodiacArt.Identifier)
 asset.export("HideZodiacArt", HideZodiacArt.Identifier)
+
+
 
 asset.meta = {
   Name = "Constellation Images",

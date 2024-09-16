@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2024                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -48,7 +48,7 @@ set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 cmake_policy(SET CMP0074 NEW)
 
 # Specify the CEF distribution version.
-set(CEF_VERSION "102.0.10+gf249b2e+chromium-102.0.5005.115")
+set(CEF_VERSION "127.3.5+g114ea2a+chromium-127.0.6533.120")
 
 # CEF Sandbox is not working with the latest Visual Studio, so we disable it for now.
 if (WIN32 OR UNIX)
@@ -219,6 +219,7 @@ else()
 endif ()
 
 set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "Helper")
+set_openspace_compile_settings(${CEF_HELPER_TARGET})
 
 ##########################################################################################
 # Create OpenSpace module.
@@ -266,6 +267,7 @@ target_precompile_headers(${webbrowser_module} PRIVATE
 )
 
 set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "Helper")
+set_openspace_compile_settings(libcef_dll_wrapper)
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()

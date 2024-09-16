@@ -111,14 +111,6 @@ void VersionChecker::cancel() {
                     currentVersion.patch
                 ));
             }
-            else {
-                LINFO(std::format(
-                    "OpenSpace version {}.{}.{} is up to date",
-                    currentVersion.major,
-                    currentVersion.minor,
-                    currentVersion.patch
-                ));
-            }
             return true;
         }
         if (_request->hasFailed()) {

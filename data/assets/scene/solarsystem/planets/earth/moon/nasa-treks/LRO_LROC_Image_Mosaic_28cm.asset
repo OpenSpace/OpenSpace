@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_apollo14_28cm_mosaic_byte_geo_1_2_highContrast = {
   Identifier = "apollo14_28cm_mosaic_byte_geo_1_2_highContrast",
   Name = [[LRO LROC Image Mosaic 28cm, Apollo 14]],
@@ -13,6 +15,7 @@ local treks_apollo14_28cm_mosaic_byte_geo_1_2_highContrast = {
   FilePath = asset.resource("LRO_LROC_Image_Mosaic_28cm/Apollo_14.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_apollo14_28cm_mosaic_byte_geo_1_2_highContrast)
@@ -23,6 +26,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export("apollo14_28cm_mosaic_byte_geo_1_2_highContrast", treks_apollo14_28cm_mosaic_byte_geo_1_2_highContrast)
+
 
 
 asset.meta = {

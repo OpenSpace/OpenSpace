@@ -32,7 +32,7 @@ local eclipticGrid = {
   },
   GUI = {
     Name = "Earth Ecliptic Grid",
-    Path = "/Solar System/Planets/Earth",
+    Path = "/Solar System/Planets/Earth"
   }
 }
 

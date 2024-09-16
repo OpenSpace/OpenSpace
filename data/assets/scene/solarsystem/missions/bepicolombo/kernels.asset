@@ -120,82 +120,6 @@ local BepiColomboKernels = {
   kernels .. "bc_mpo_schulte_vector_v01.bsp",
   kernels .. "bc_mpo_prelaunch_v01.bsp",
   kernels .. "bc_mpo_fcp_00160_20181020_20260328_v01.bsp"
-
-
---   kernels .. "bc_mpo_step_20240110.tsc",
--- 
---   kernels .. "de432s.bsp",
---   kernels .. "bc_mpo_fcp_00160_20181020_20260328_v01.bsp",
---   kernels .. "bc_mmo_struct_v01.bsp",
---   kernels .. "bc_mtm_struct_v06.bsp",
---   kernels .. "bc_mpo_struct_v09.bsp",
--- 
---   kernels .. "bc_mmo_mppe_v04.ti",
---   kernels .. "bc_mmo_msasi_v03.ti",
---   kernels .. "bc_mmo_ssas_v01.ti",
---   kernels .. "bc_mpo_aux_v01.ti",
---   kernels .. "bc_mpo_bela_v09.ti",
---   kernels .. "bc_mpo_mertis_v08.ti",
---   kernels .. "bc_mpo_mgns_v02.ti",
---   kernels .. "bc_mpo_mixs_v06.ti",
---   kernels .. "bc_mpo_phebus_v06.ti",
---   kernels .. "bc_mpo_serena_v08.ti",
---   kernels .. "bc_mpo_simbio-sys_v10.ti",
---   kernels .. "bc_mpo_sixs_v08.ti",
---   kernels .. "bc_mpo_str_v02.ti",
---   kernels .. "bc_mtm_mcam_v05.ti",
--- 
---   kernels .. "bc_sci_v12.tf",
---   kernels .. "bc_mmo_v13.tf",
---   kernels .. "bc_mpo_v34.tf",
---   kernels .. "bc_mtm_v12.tf",
---   kernels .. "bc_ops_v01.tf",
--- 
---   kernels .. "bc_mpo_sc_fcp_00160_20181020_20240216_f20181127_v01.bc",
---   -- kernels .. "bc_mpo_sc_scm_20240101_20240111_s20240110_v01.bc",
---   -- kernels .. "bc_mpo_sc_scm_20230101_20240101_s20240104_v01.bc",
---   -- kernels .. "bc_mpo_sc_scm_20220101_20230101_s20230309_v01.bc",
---   -- kernels .. "bc_mpo_sc_scm_20210101_20220101_s20230309_v01.bc",
---   -- kernels .. "bc_mpo_sc_scm_20200101_20210101_s20210618_v01.bc",
---   -- kernels .. "bc_mpo_sc_scm_20190101_20200101_s20230309_v01.bc",
---   -- kernels .. "bc_mpo_sc_scm_20181020_20190101_s20230309_v01.bc",
--- 
---   kernels .. "bc_mpo_sc_scc_20240101_20240111_s20240110_v01.bc",
---   kernels .. "bc_mpo_sc_scc_20230101_20240101_s20240104_v01.bc",
---   kernels .. "bc_mpo_sc_scc_20220101_20230101_s20221229_v01.bc",
---   kernels .. "bc_mpo_sc_scc_20210101_20220101_s20230309_v01.bc",
---   kernels .. "bc_mpo_sc_scc_20200101_20210101_s20230309_v01.bc",
---   kernels .. "bc_mpo_sc_scc_20190101_20200101_s20230309_v01.bc",
---   kernels .. "bc_mpo_sc_scc_20181019_20190101_s20230309_v01.bc",
--- 
---   kernels .. "bc_mpo_hga_scm_20240101_20240111_s20240110_v01.bc",
---   kernels .. "bc_mpo_hga_scm_20181020_20190101_s20201020_v02.bc",
---   kernels .. "bc_mpo_hga_scm_20190101_20200101_s20230309_v01.bc",
---   kernels .. "bc_mpo_hga_scm_20200101_20210101_s20230309_v01.bc",
---   kernels .. "bc_mpo_hga_scm_20210101_20220101_s20230309_v01.bc",
---   kernels .. "bc_mpo_hga_scm_20220101_20230101_s20221229_v01.bc",
---   kernels .. "bc_mpo_hga_scm_20230101_20240101_s20240104_v01.bc",
---   kernels .. "bc_mpo_magboom_default_s20191107_v01.bc",
---   kernels .. "bc_mpo_mertis_zero_s20191107_v02.bc",
---   kernels .. "bc_mpo_mga_scm_20181020_20190101_s20200109_v02.bc",
---   kernels .. "bc_mpo_mga_scm_20190101_20200101_s20230309_v01.bc",
---   kernels .. "bc_mpo_mga_scm_20200101_20210101_s20230309_v01.bc",
---   kernels .. "bc_mpo_mga_scm_20210101_20220101_s20230309_v01.bc",
---   kernels .. "bc_mpo_mga_scm_20220101_20230101_s20221229_v01.bc",
---   kernels .. "bc_mpo_mga_scm_20230101_20240101_s20240104_v01.bc",
---   kernels .. "bc_mpo_mga_scm_20240101_20240111_s20240110_v01.bc",
---   kernels .. "bc_mpo_mga_zero_s20191107_v02.bc",
---   kernels .. "bc_mpo_phebus_zero_s20210408_v02.bc",
---   kernels .. "bc_mpo_sa_scm_20181020_20190101_s20211202_v01.bc",
---   kernels .. "bc_mpo_sa_scm_20190101_20200101_s20230309_v01.bc",
---   kernels .. "bc_mpo_sa_scm_20200101_20210101_s20230309_v01.bc",
---   kernels .. "bc_mpo_sa_scm_20210101_20220101_s20230309_v01.bc",
---   kernels .. "bc_mpo_sa_scm_20220101_20230101_s20221229_v01.bc",
---   kernels .. "bc_mpo_sa_scm_20230101_20240101_s20240104_v01.bc",
---   kernels .. "bc_mpo_sa_scm_20240101_20240111_s20240110_v01.bc",
---   kernels .. "bc_mpo_sa_zero_s20191107_v02.bc",
---   kernels .. "bc_mpo_sa_zero_s20191107_v02.bc",
---   kernels .. "bc_mpo_serena_zero_s20191207_v02.bc"
 }
 
 local ID = {
@@ -271,12 +195,7 @@ local Frame = {
   Sixs_X3 = "MPO_SIXS-X-3",
   StarTracker1 = "MPO_STR-1",
   StarTracker2 = "MPO_STR-2",
-  StarTracker3 = "MPO_STR-3",
-
-
-
-
-
+  StarTracker3 = "MPO_STR-3"
 }
 
 

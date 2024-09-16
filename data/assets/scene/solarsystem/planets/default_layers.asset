@@ -10,7 +10,6 @@ asset.meta = {
   Description = [[Adds default layers for all planets. Remove this asset and include
     individual layers for planets to customize planet layers
 
-
     Layers loaded from all servers
   ]],
   Author = "OpenSpace Team",

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2024                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -58,6 +58,8 @@ set(OPENSPACE_SOURCE
   interaction/joystickcamerastates.cpp
   interaction/keybindingmanager.cpp
   interaction/keybindingmanager_lua.inl
+  interaction/keyframerecording.cpp
+  interaction/keyframerecording_lua.inl
   interaction/keyboardinputstate.cpp
   interaction/mousecamerastates.cpp
   interaction/scriptcamerastates.cpp
@@ -250,6 +252,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/joystickcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keybindingmanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyboardinputstate.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyframerecording.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mousecamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.h
@@ -488,13 +491,13 @@ add_dependencies(openspace-core run_codegen)
 configure_file(
   ${PROJECT_SOURCE_DIR}/support/cmake/openspace_header.template
   ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h
-  @ONLY IMMEDIATE
+  @ONLY
 )
 
 configure_file(
   ${PROJECT_SOURCE_DIR}/support/cmake/commit.template
   ${PROJECT_SOURCE_DIR}/COMMIT.md
-  @ONLY IMMEDIATE
+  @ONLY
 )
 
 if (APPLE)

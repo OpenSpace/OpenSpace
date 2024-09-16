@@ -860,25 +860,19 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
     float lat = centroidLat + _latLongOffset.value().x;
     float lon = centroidLon + _latLongOffset.value().y;
 
-    global::scriptEngine->queueScript(
-        std::format(
-            "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
-            _globeNode.owner()->identifier(), lat, lon, d
-        ),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    const std::string script = std::format(
+        "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
+        _globeNode.owner()->identifier(), lat, lon, d
     );
+    global::scriptEngine->queueScript(script);
 }
 
 void GeoJsonComponent::triggerDeletion() const {
-    global::scriptEngine->queueScript(
-        std::format(
-            "openspace.globebrowsing.deleteGeoJson([[{}]], [[{}]])",
-            _globeNode.owner()->identifier(), _identifier
-        ),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    const std::string script = std::format(
+        "openspace.globebrowsing.deleteGeoJson([[{}]], [[{}]])",
+        _globeNode.owner()->identifier(), _identifier
     );
+    global::scriptEngine->queueScript(script);
 }
 
 } // namespace openspace::globebrowsing

@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_NAC_ClrRoughness_15m_17S173E_150cmp = {
   Identifier = "LRO_NAC_ClrRoughness_15m_17S173E_150cmp",
   Name = [[LRO LROC DEM, Aitken Crater, 15m Color Roughness]],
@@ -350,6 +352,7 @@ local treks_LRO_NAC_ClrRoughness_15m_43S349E_150cmp = {
   Description = [[]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_ClrRoughness_15m_17S173E_150cmp)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_ClrRoughness_15m_13S358E_2mp)
@@ -485,6 +488,7 @@ asset.export("LRO_NAC_ClrShade_02S167E_150cmp", treks_LRO_NAC_ClrShade_02S167E_1
 asset.export("LRO_NAC_ClrRoughness_15m_20N010E_2mp", treks_LRO_NAC_ClrRoughness_15m_20N010E_2mp)
 asset.export("LRO_NAC_ClrRoughness_15m_19S129E_150cmp", treks_LRO_NAC_ClrRoughness_15m_19S129E_150cmp)
 asset.export("LRO_NAC_ClrRoughness_15m_43S349E_150cmp", treks_LRO_NAC_ClrRoughness_15m_43S349E_150cmp)
+
 
 
 asset.meta = {

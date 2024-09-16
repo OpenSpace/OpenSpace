@@ -169,6 +169,13 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BorderFeatherInfo = {
+        "BorderFeather",
+        "Border Feather",
+        "If this value is enabled and a border width is set, the border will be rendered "
+        "as a feathered border rather than a hard corner."
+    };
+
     float wrap(float value, float min, float max) {
         return glm::mod(value - min, max - min) + min;
     }
@@ -221,6 +228,9 @@ namespace {
 
         // [[codegen::verbatim(BorderColorInfo.description)]]
         std::optional<glm::vec3> borderColor [[codegen::color()]];
+
+        // [[codegen::verbatim(BorderFeatherInfo.description)]]
+        std::optional<bool> borderFeather;
 
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
@@ -318,6 +328,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     )
     , _borderWidth(BorderWidthInfo, 0.f, 0.f, 1000.f)
     , _borderColor(BorderColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _borderFeather(BorderFeatherInfo, false)
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
     , _gammaOffset(GammaOffsetInfo, 0.f, -1.f, 10.f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -368,6 +379,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     addProperty(_borderColor);
     addProperty(_borderWidth);
+    addProperty(_borderFeather);
 
     _borderWidth = p.borderWidth.value_or(_borderWidth);
 
@@ -422,11 +434,11 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         // No sync or send because this is already inside a Lua script that was triggered
         // when this triggerProperty was pressed in the gui, therefor it has already been
         // synced and sent to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            std::move(script),
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = std::move(script),
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        });
     });
     addProperty(_delete);
 }
@@ -498,9 +510,7 @@ float ScreenSpaceRenderable::scale() const {
     return _scale;
 }
 
-void ScreenSpaceRenderable::createShaders() {
-    ghoul::Dictionary dict = ghoul::Dictionary();
-
+void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
     auto res = global::windowDelegate->currentDrawBufferResolution();
     ghoul::Dictionary rendererData;
     rendererData.setValue(
@@ -667,6 +677,7 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
     _shader->setUniform(_uniformCache.borderColor, _borderColor);
+    _shader->setUniform(_uniformCache.borderFeather, _borderFeather);
     _shader->setUniform(
         _uniformCache.mvpMatrix,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
@@ -686,7 +697,9 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     unbindTexture();
 }
 
-void ScreenSpaceRenderable::unbindTexture() {}
+void ScreenSpaceRenderable::unbindTexture() {
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 glm::vec3 ScreenSpaceRenderable::sanitizeSphericalCoordinates(glm::vec3 spherical) const {
     const float r = spherical.x;

@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/mars/mars").Mars.Identifier
 
+
+
 local treks_b21_017819_2025_xn_22n048w = {
   Identifier = "b21_017819_2025_xn_22n048w",
   Name = [[MRO CTX, 22n048w Mosaic]],
@@ -495,6 +497,7 @@ local treks_Zephyria_CTX_BlockAdj_dd = {
 The Context Camera (CTX) provides black-and-white images with resolutions up to 6 meters/pixel. It provides broader context maps for the higher resolution but narrower fields of view of the HiRISE camera, as well as for other instruments aboard MRO, and is useful for producing mosaicked images of larger areas on Mars' surface.]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_b21_017819_2025_xn_22n048w)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Acheron_Fossae_CTX_BlockAdj_dd)
@@ -648,6 +651,7 @@ asset.export("West_Candor_Chasma_longlat", treks_West_Candor_Chasma_longlat)
 asset.export("West_Candor_Chasma_DEM_longlat", treks_West_Candor_Chasma_DEM_longlat)
 asset.export("Noachis_CTX_BlockAdj_dd", treks_Noachis_CTX_BlockAdj_dd)
 asset.export("Zephyria_CTX_BlockAdj_dd", treks_Zephyria_CTX_BlockAdj_dd)
+
 
 
 asset.meta = {

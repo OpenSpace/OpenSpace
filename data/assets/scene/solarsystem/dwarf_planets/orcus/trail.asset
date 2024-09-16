@@ -18,8 +18,7 @@ local Trail = {
   Tag = { "planetTrail_dwarf" },
   GUI = {
     Name = "Orcus Trail",
-    Path = "/Solar System/Dwarf Planets/Orcus",
-    Description = "Trail of Orcus"
+    Path = "/Solar System/Dwarf Planets/Orcus"
   }
 }
 

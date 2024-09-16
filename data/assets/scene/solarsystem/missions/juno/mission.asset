@@ -1,4 +1,5 @@
 local Mission = {
+  Identifier = "Juno",
   Name = "Juno",
   Image = "https://upload.wikimedia.org/wikipedia/commons/3/32/Juno_mission_insignia.svg",
   Description = "On August 5, 2011, NASA's Juno spacecraft embarked on a 5-year journey to our solar system's largest planet - the gas giant Jupiter. Its mission: to probe beneath the planet's dense clouds and answer questions about the origin and evolution of Jupiter, our solar system, and giant planets in general across the cosmos. Juno arrived at Jupiter on July 4, 2016, after a 5-year, 1.7-billion-mile journey, and settled into a 53-day polar orbit stretching from just above Jupiter's cloud tops to the outer reaches of the Jovian magnetosphere.",
@@ -43,5 +44,5 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.unloadMission(Mission.Name)
+  openspace.unloadMission(Mission)
 end)

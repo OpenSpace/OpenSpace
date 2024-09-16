@@ -206,7 +206,7 @@ namespace {
             std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
             propertyJson[NameKey] = name;
             propertyJson[TypeKey] = p->className();
-            propertyJson[UriKey] = p->fullyQualifiedIdentifier();
+            propertyJson[UriKey] = p->uri();
             propertyJson[IdentifierKey] = p->identifier();
             propertyJson[DescriptionKey] = p->description();
 

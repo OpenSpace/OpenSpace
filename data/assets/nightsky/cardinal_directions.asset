@@ -33,7 +33,7 @@ local CardinalDirectionsPosition = {
   },
   GUI = {
     Name = "Cardinal Directions Position",
-    Path = "/Other/Night Sky",
+    Path = "/Night Sky",
     Hidden = true
   }
 }
@@ -63,7 +63,7 @@ local CardinalDirectionSphere = {
     Description = [[A textured sphere showing the cardinal directions.
       The sphere is placed on the planet surface and follows the camera's movements.
     ]],
-    Path = "/Other/Night Sky"
+    Path = "/Night Sky"
   }
 }
 
@@ -129,6 +129,7 @@ local HideNesw = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CardinalDirectionsPosition)
   openspace.addSceneGraphNode(CardinalDirectionSphere)
@@ -156,6 +157,7 @@ asset.export("ShowNeswBandSmall", ShowNeswBand.Identifier)
 asset.export("ShowNeswLetters", ShowNeswLetters.Identifier)
 asset.export("ShowNeswLettersSmall", ShowNeswLettersSmall.Identifier)
 asset.export("HideNesw", HideNesw.Identifier)
+
 
 
 asset.meta = {
