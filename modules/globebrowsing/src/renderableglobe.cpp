@@ -1202,7 +1202,13 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             _cachedInverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0)
         );
 
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        // The cameraPosition is not used if a globe only has a solid color, but it would
+        // be costlier to figure that out and will only trigger rarely, so instead we just
+        // ignore the location error
         _globalRenderer.program->setUniform("cameraPosition", glm::vec3(cameraPosition));
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
     }
 
     const glm::mat4 modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
