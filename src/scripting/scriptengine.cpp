@@ -605,10 +605,9 @@ void ScriptEngine::registerRepeatedScript(std::string identifier, std::string sc
     }
 
     if (!preScript.empty()) {
-        queueScript(std::move(preScript));
+        runScript({ std::move(preScript) });
     }
     _repeatedScripts.emplace_back(
-        std::move(preScript),
         std::move(script),
         std::move(postScript),
         std::move(identifier),

@@ -146,9 +146,6 @@ private:
     std::vector<std::string> _scriptsToSync;
 
     struct RepeatedScriptInfo {
-        /// This script is run when registering the repeated script
-        std::string preScript;
-
         /// This script is run everytime `timeout` seconds have passed
         std::string script;
 
