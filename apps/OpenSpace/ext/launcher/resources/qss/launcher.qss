@@ -9,10 +9,6 @@ QLabel#heading {
   font-size: 12pt;
 }
 
-QLabel#error-message {
-  color: rgb(217, 13, 13);
-}
-
 /*
  * LauncherWindow
  */
