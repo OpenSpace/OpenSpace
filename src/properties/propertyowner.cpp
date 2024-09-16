@@ -167,7 +167,7 @@ std::string PropertyOwner::uri() const {
         currentOwner = currentOwner->owner();
     }
     // If the uri hasn't been sent at this point it is not valid, so send an empty string
-    return "";
+    return identifier;
 }
 
 bool PropertyOwner::hasProperty(const std::string& uri) const {

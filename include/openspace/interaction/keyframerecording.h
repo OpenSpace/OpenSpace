@@ -22,37 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___ACTIONMANAGER___H__
-#define __OPENSPACE_CORE___ACTIONMANAGER___H__
+#ifndef __OPENSPACE_CORE___KEYFRAMERECORDING___H__
+#define __OPENSPACE_CORE___KEYFRAMERECORDING___H__
 
-#include <openspace/interaction/action.h>
-#include <unordered_map>
-
-namespace ghoul { class Dictionary; }
-namespace openspace::scripting { struct LuaLibrary; }
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/scripting/lualibrary.h>
+#include <json/json.hpp>
+#include <string>
+#include <vector>
 
 namespace openspace::interaction {
 
-class ActionManager {
+class KeyframeRecording : public properties::PropertyOwner {
 public:
-    BooleanType(ShouldBeSynchronized);
-    BooleanType(ShouldBeLogged);
+    struct Keyframe {
+        struct TimeStamp {
+            double application;
+            double sequenceTime;
+            double simulation;
+        };
 
-    bool hasAction(const std::string& identifier) const;
-    void registerAction(Action action);
-    void removeAction(const std::string& identifier);
-    const Action& action(const std::string& identifier) const;
-    std::vector<Action> actions() const;
+        KeyframeNavigator::CameraPose camera;
+        TimeStamp timestamp;
+    };
 
-    void triggerAction(const std::string& identifier, const ghoul::Dictionary& arguments,
-        ShouldBeSynchronized shouldBeSynchronized,
-        ShouldBeLogged shouldBeLogged = ShouldBeLogged::No) const;
-    static scripting::LuaLibrary luaLibrary();
+    KeyframeRecording();
+
+    void newSequence();
+    void addKeyframe(double sequenceTime);
+    void removeKeyframe(int index);
+    void updateKeyframe(int index);
+    void moveKeyframe(int index, double sequenceTime);
+    bool saveSequence(std::optional<std::string> filename);
+    void loadSequence(std::string filename);
+    void preSynchronization(double dt);
+    void play();
+    void pause();
+    void setSequenceTime(double sequenceTime);
+    void jumpToKeyframe(int index);
+    bool hasKeyframeRecording() const;
+    std::vector<ghoul::Dictionary> keyframes() const;
+
+    static openspace::scripting::LuaLibrary luaLibrary();
 
 private:
-    std::unordered_map<unsigned int, Action> _actions;
+    void sortKeyframes();
+
+    Keyframe newKeyframe(double sequenceTime);
+    bool isInRange(int index) const;
+
+    std::vector<Keyframe> _keyframes;
+    std::string _filename;
+    bool _isPlaying = false;
+    bool _hasStateChanged = false;
+    double _sequenceTime = 0.0;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___ACTIONMANAGER___H__
+#endif // __OPENSPACE_CORE___KEYFRAMERECORDING___H__

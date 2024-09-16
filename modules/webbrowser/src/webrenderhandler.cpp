@@ -116,8 +116,9 @@ void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser>, CefRenderHandler::PaintEle
     _needsRepaint = false;
 }
 
+#ifdef WIN32
 void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
-                                          PaintElementType type,
+                                          PaintElementType,
                                           const RectList& dirtyRects,
                                           const CefAcceleratedPaintInfo& info)
 {
@@ -135,7 +136,7 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
     // @TODO (ylvse 2024-08-20): minimizing window should be handled with the appropriate
     // function in the CefBrowser called WasHidden
     if (dirtyRects[0].height <= 1 || dirtyRects[0].width <= 1) {
-        return; 
+        return;
     }
     // This function is called asynchronously after a reshape which means we have to check
     // for what we request. Validate the size. This prevents rendering a texture with the
@@ -177,6 +178,7 @@ void WebRenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
     _texture = sharedTexture;
     _needsRepaint = false;
 }
+#endif // WIN32
 
 void WebRenderHandler::updateTexture() {
     if (_acceleratedRendering || _needsRepaint) {
@@ -233,6 +235,11 @@ void WebRenderHandler::updateTexture() {
 }
 
 bool WebRenderHandler::hasContent(int x, int y) {
+    // We don't have any content if we are querying outside the window size
+    if (x < 0 || x > _windowSize.x || y < 0 || y > _windowSize.y) {
+        return false;
+    }
+
     if (_acceleratedRendering) {
         // To see the alpha value of the pixel we first have to get the texture from the
         // GPU. Use a PBO for better performance

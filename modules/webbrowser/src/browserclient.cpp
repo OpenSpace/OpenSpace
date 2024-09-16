@@ -83,9 +83,9 @@ bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
 }
 
 bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
-                                                  CefCursorHandle cursor,
+                                                  CefCursorHandle,
                                                   cef_cursor_type_t type,
-                                                  const CefCursorInfo& custom_cursor_info)
+                                                  const CefCursorInfo&)
 {
     WindowDelegate::Cursor newCursor;
     switch (type) {
@@ -101,13 +101,13 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser
         case cef_cursor_type_t::CT_HAND:
             newCursor = WindowDelegate::Cursor::PointingHand;
             break;
-        case cef_cursor_type_t::CT_EASTWESTRESIZE: 
+        case cef_cursor_type_t::CT_EASTWESTRESIZE:
         case cef_cursor_type_t::CT_COLUMNRESIZE:
         case cef_cursor_type_t::CT_EASTRESIZE:
         case cef_cursor_type_t::CT_WESTRESIZE:
             newCursor = WindowDelegate::Cursor::ResizeEW;
             break;
-        case cef_cursor_type_t::CT_NORTHSOUTHRESIZE: 
+        case cef_cursor_type_t::CT_NORTHSOUTHRESIZE:
         case cef_cursor_type_t::CT_ROWRESIZE:
         case cef_cursor_type_t::CT_NORTHRESIZE:
         case cef_cursor_type_t::CT_SOUTHRESIZE:
