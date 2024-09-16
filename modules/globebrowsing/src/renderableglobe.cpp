@@ -1457,7 +1457,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             _shadowMappingProperties.zFightingPercentage
         );
     }
-    else if (_shadowMappingProperties.shadowMapping) {
+    else if (_shadowMappingProperties.shadowMapping && _shadowComponent) {
         shadowMapUnit.activate();
         // JCC: Avoiding a to recompiling the shaders or having more than one
         // set of shaders for this step.
@@ -1771,7 +1771,7 @@ void RenderableGlobe::recompileShaders() {
     pairs.emplace_back("useEclipseHardShadows", std::to_string(_eclipseHardShadows));
     pairs.emplace_back(
         "enableShadowMapping",
-        std::to_string(_shadowMappingProperties.shadowMapping)
+        std::to_string(_shadowMappingProperties.shadowMapping && _shadowComponent)
     );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
     pairs.emplace_back("showHeightResolution", "0");
