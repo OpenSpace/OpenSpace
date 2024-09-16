@@ -101,11 +101,6 @@ void AssetEdit::createWidgets() {
     _layout->addWidget(new Line);
     {
         QBoxLayout* footer = new QHBoxLayout;
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footer->addWidget(_errorMsg);
-
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(buttons, &QDialogButtonBox::accepted, this, &AssetEdit::approved);
@@ -188,7 +183,6 @@ void AssetEdit::createWidgets() {
 //}
 
 void AssetEdit::openHorizons() {
-    _errorMsg->clear();
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     HorizonsDialog* horizonsDialog = new HorizonsDialog(this);
     horizonsDialog->exec();

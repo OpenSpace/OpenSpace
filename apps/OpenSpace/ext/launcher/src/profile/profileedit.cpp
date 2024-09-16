@@ -334,11 +334,6 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
 
     {
         QBoxLayout* footer = new QHBoxLayout;
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footer->addWidget(_errorMsg);
-
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(buttons, &QDialogButtonBox::accepted, this, &ProfileEdit::approved);
@@ -375,7 +370,6 @@ void ProfileEdit::initSummaryTextForEachCategory() {
 }
 
 void ProfileEdit::duplicateProfile() {
-    _errorMsg->clear();
     std::string profile = _profileEdit->text().toStdString();
     if (profile.empty()) {
         return;
@@ -420,18 +414,15 @@ void ProfileEdit::duplicateProfile() {
 }
 
 void ProfileEdit::openMeta() {
-    _errorMsg->clear();
     MetaDialog(this, &_profile.meta).exec();
 }
 
 void ProfileEdit::openModules() {
-    _errorMsg->clear();
     ModulesDialog(this, &_profile.modules).exec();
     _modulesLabel->setText(labelText(_profile.modules.size(), "Modules"));
 }
 
 void ProfileEdit::openProperties() {
-    _errorMsg->clear();
     PropertiesDialog(this, &_profile.properties).exec();
     _propertiesLabel->setText(labelText(_profile.properties.size(), "Properties"));
     _propertiesEdit->setText(
@@ -440,7 +431,6 @@ void ProfileEdit::openProperties() {
 }
 
 void ProfileEdit::openKeybindings() {
-    _errorMsg->clear();
     ActionDialog(this, &_profile.actions, &_profile.keybindings).exec();
     _keybindingsLabel->setText(labelText(_profile.keybindings.size(), "Keybindings"));
     _keybindingsEdit->setText(QString::fromStdString(
@@ -449,19 +439,16 @@ void ProfileEdit::openKeybindings() {
 }
 
 void ProfileEdit::openAssets() {
-    _errorMsg->clear();
     AssetsDialog(this, &_profile, _assetBasePath, _userAssetBasePath).exec();
     _assetsLabel->setText(labelText(_profile.assets.size(), "Assets"));
     _assetsEdit->setText(QString::fromStdString(summarizeAssets(_profile.assets)));
 }
 
 void ProfileEdit::openTime() {
-    _errorMsg->clear();
     TimeDialog(this, &_profile.time).exec();
 }
 
 void ProfileEdit::openDeltaTimes() {
-    _errorMsg->clear();
     DeltaTimesDialog(this, &_profile.deltaTimes).exec();
     _deltaTimesLabel->setText(
         labelText(_profile.deltaTimes.size(), "Simulation Time Increments")
@@ -469,17 +456,14 @@ void ProfileEdit::openDeltaTimes() {
 }
 
 void ProfileEdit::openAddedScripts() {
-    _errorMsg->clear();
     AdditionalScriptsDialog(this, &_profile.additionalScripts).exec();
 }
 
 void ProfileEdit::openCamera() {
-    _errorMsg->clear();
     CameraDialog(this, &_profile.camera).exec();
 }
 
 void ProfileEdit::openMarkNodes() {
-    _errorMsg->clear();
     MarkNodesDialog(this, &_profile.markNodes).exec();
     _interestingNodesLabel->setText(
         labelText(_profile.markNodes.size(), "Mark Interesting Nodes")
@@ -497,7 +481,8 @@ std::string ProfileEdit::specifiedFilename() const {
 void ProfileEdit::approved() {
     std::string profileName = _profileEdit->text().toStdString();
     if (profileName.empty()) {
-        _errorMsg->setText("Profile name must be specified");
+        QMessageBox::critical(this, "No profile name", "Profile name must be specified");
+        _profileEdit->setFocus();
         return;
     }
 
@@ -507,13 +492,15 @@ void ProfileEdit::approved() {
     if (std::filesystem::exists(p)) {
         // The filename exists in the OpenSpace-provided folder, so we don't want to allow
         // a user to overwrite it
-        _errorMsg->setText(
-            "This is a read-only profile. Click 'Duplicate' or rename & save"
+        QMessageBox::critical(
+            this,
+            "Reserved profile name",
+            "This is a read-only profile. Click 'Duplicate' or rename profile and save"
         );
+        _profileEdit->setFocus();
     }
     else {
         _saveSelected = true;
-        _errorMsg->setText("");
         accept();
     }
 }

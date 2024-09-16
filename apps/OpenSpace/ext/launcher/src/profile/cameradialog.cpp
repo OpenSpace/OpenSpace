@@ -34,6 +34,7 @@
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QTabWidget>
@@ -173,10 +174,9 @@ void CameraDialog::createWidgets() {
     {
         QBoxLayout* footerLayout = new QHBoxLayout;
 
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footerLayout->addWidget(_errorMsg);
+        _errorMsg = new QMessageBox(this);
+        _errorMsg->setIcon(QMessageBox::Critical);
+        _errorMsg->setText("Invalid input data");
 
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
@@ -441,7 +441,7 @@ QWidget* CameraDialog::createGeoWidget() {
 
 bool CameraDialog::areRequiredFormsFilledAndValid() {
     bool allFormsOk = true;
-    _errorMsg->clear();
+    _errorMsg->setInformativeText("");
 
     if (_tabWidget->currentIndex() == CameraTypeNode) {
         if (_nodeState.anchor->text().isEmpty()) {
@@ -525,16 +525,17 @@ bool CameraDialog::areRequiredFormsFilledAndValid() {
 }
 
 void CameraDialog::addErrorMsg(const QString& errorDescription) {
-    QString contents = _errorMsg->text();
+    QString contents = _errorMsg->informativeText();
     if (!contents.isEmpty()) {
         contents += ", ";
     }
     contents += errorDescription;
-    _errorMsg->setText(contents);
+    _errorMsg->setInformativeText(contents);
 }
 
 void CameraDialog::approved() {
     if (!areRequiredFormsFilledAndValid()) {
+        _errorMsg->exec();
         return;
     }
 
@@ -597,7 +598,7 @@ void CameraDialog::approved() {
 }
 
 void CameraDialog::tabSelect(int tabIndex) {
-    _errorMsg->clear();
+    _errorMsg->setInformativeText("");
 
     if (tabIndex == CameraTypeNode) {
         _nodeState.anchor->setFocus(Qt::OtherFocusReason);

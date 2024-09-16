@@ -32,6 +32,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
+#include <QErrorMessage>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -161,25 +162,17 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
         [this]() {
             // Check if the identifier is legal
             const std::string id = _actionWidgets.identifier->text().toStdString();
-            const bool isLegal = id.find_first_of("\t\n. ") == std::string::npos;
-            if (isLegal) {
-                _actionWidgets.infoText->clear();
-                _actionWidgets.infoText->setHidden(true);
-            }
-            else {
-                _actionWidgets.infoText->setText(
-                    "Identifier must not contain whitespace or ."
+            const bool isLegal = id.find_first_of("\t\n ") == std::string::npos;
+            if (!isLegal) {
+                _actionWidgets.infoText->showMessage(
+                    "Identifier must not contain whitespace"
                 );
-                _actionWidgets.infoText->setHidden(false);
             }
         }
     );
     layout->addWidget(_actionWidgets.identifier, 1, 2);
 
-    _actionWidgets.infoText = new QLabel;
-    _actionWidgets.infoText->setHidden(true);
-    _actionWidgets.infoText->setObjectName("error-message");
-    layout->addWidget(_actionWidgets.infoText, 1, 3);
+    _actionWidgets.infoText = new QErrorMessage(this);
 
     layout->addWidget(new QLabel("Name"), 2, 1);
     _actionWidgets.name = new QLineEdit;
@@ -644,8 +637,6 @@ void ActionDialog::clearActionFields() const {
     _actionWidgets.list->setCurrentRow(-1);
     _actionWidgets.identifier->clear();
     _actionWidgets.identifier->setEnabled(false);
-    _actionWidgets.infoText->clear();
-    _actionWidgets.infoText->setHidden(true);
     _actionWidgets.name->clear();
     _actionWidgets.name->setEnabled(false);
     _actionWidgets.guiPath->clear();

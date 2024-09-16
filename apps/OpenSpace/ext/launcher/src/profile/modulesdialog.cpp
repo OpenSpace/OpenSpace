@@ -31,6 +31,7 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
 
@@ -161,12 +162,6 @@ void ModulesDialog::createWidgets() {
     layout->addWidget(new Line);
     {
         QBoxLayout* footerLayout = new QHBoxLayout;
-
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footerLayout->addWidget(_errorMsg);
-
         _buttonBox = new QDialogButtonBox;
         _buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         QObject::connect(
@@ -229,7 +224,6 @@ void ModulesDialog::listItemAdded() {
         _list->addItem(new QListWidgetItem("  (Enter details below & click 'Save')"));
         //Scroll down to that blank line highlighted
         _list->setCurrentRow(_list->count() - 1);
-        _errorMsg->clear();
     }
 
     // Blank-out the 2 text fields, set combo box to index 0
@@ -256,7 +250,7 @@ void ModulesDialog::listItemAdded() {
 
 void ModulesDialog::listItemSave() {
     if (_moduleEdit->text().isEmpty()) {
-        _errorMsg->setText("Missing module name");
+        QMessageBox::critical(this, "Error", "Missing module name");
         return;
     }
 
@@ -313,7 +307,6 @@ void ModulesDialog::transitionToEditMode() {
     _loadedLabel->setText("<font color='black'>Command if Module is Loaded</font>");
     _notLoadedLabel->setText("<font color='black'>Command if Module is NOT Loaded</font>");
     editBoxDisabled(false);
-    _errorMsg->setText("");
 }
 
 void ModulesDialog::transitionFromEditMode() {
@@ -328,7 +321,6 @@ void ModulesDialog::transitionFromEditMode() {
     _moduleLabel->setText("<font color='light gray'>Module</font>");
     _loadedLabel->setText("<font color='light gray'>Command if Module is Loaded</font>");
     _notLoadedLabel->setText("<font color='light gray'>Command if Module is NOT Loaded</font>");
-    _errorMsg->setText("");
 }
 
 void ModulesDialog::editBoxDisabled(bool disabled) {

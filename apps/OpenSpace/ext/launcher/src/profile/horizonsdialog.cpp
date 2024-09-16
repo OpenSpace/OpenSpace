@@ -125,7 +125,7 @@ void HorizonsDialog::typeOnChange(int index) {
         _timeTypeCombo->insertItem(0, TimeVarying.data());
     }
     else {
-        _errorMsg->setText("Invalid Horizons type");
+        QMessageBox::critical(this, "Error", "Invalid Horizons type");
         styleLabel(_typeLabel, IsDirty::Yes);
     }
 }
@@ -162,12 +162,11 @@ void HorizonsDialog::importTimeRange() {
                 _validTimeRange = std::pair<std::string, std::string>();
                 return;
             }
-
-            _errorMsg->setText("Could not import time range");
             const std::string msg = std::format(
                 "Could not import time range '{}' to '{}'",
                 _validTimeRange.first, _validTimeRange.second
             );
+            QMessageBox::critical(this, "Error", QString::fromStdString(msg));
             appendLog(msg, LogLevel::Error);
             return;
         }
@@ -377,11 +376,6 @@ void HorizonsDialog::createWidgets() {
     }
     {
         QBoxLayout* footer = new QHBoxLayout;
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footer->addWidget(_errorMsg);
-
         QDialogButtonBox* buttons = new QDialogButtonBox;
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(buttons, &QDialogButtonBox::accepted, this, &HorizonsDialog::approved);
@@ -394,7 +388,8 @@ void HorizonsDialog::createWidgets() {
 bool HorizonsDialog::isValidInput() {
     // File
     if (_fileEdit->text().isEmpty()) {
-        _errorMsg->setText("File path not selected");
+        QMessageBox::critical(this, "Error", "File path not selected");
+        _fileEdit->setFocus();
         styleLabel(_fileLabel, IsDirty::Yes);
         return false;
     }
@@ -403,13 +398,15 @@ bool HorizonsDialog::isValidInput() {
     if (_targetEdit->text().isEmpty() && ((_chooseTargetCombo->count() > 0 &&
         _chooseTargetCombo->currentIndex() == 0) || _chooseTargetCombo->count() == 0))
     {
-        _errorMsg->setText("Target not selected");
+        QMessageBox::critical(this, "Error", "Target not selected");
+        _targetEdit->setFocus();
         styleLabel(_targetLabel, IsDirty::Yes);
         return false;
     }
     if (_targetEdit->text().toStdString().find_first_of("¤<>§£´¨€") != std::string::npos)
     {
-        _errorMsg->setText("Target includes illegal characters");
+        QMessageBox::critical(this, "Error", "Target includes illegal characters");
+        _targetEdit->setFocus();
         styleLabel(_targetLabel, IsDirty::Yes);
         return false;
     }
@@ -418,13 +415,15 @@ bool HorizonsDialog::isValidInput() {
     if (_centerEdit->text().isEmpty() && ((_chooseObserverCombo->count() > 0 &&
         _chooseObserverCombo->currentIndex() == 0) || _chooseObserverCombo->count() == 0))
     {
-        _errorMsg->setText("Observer not selected");
+        QMessageBox::critical(this, "Error", "Observer not selected");
+        _centerEdit->setFocus();
         styleLabel(_centerLabel, IsDirty::Yes);
         return false;
     }
     if (_centerEdit->text().toStdString().find_first_of("¤<>§£´¨€") != std::string::npos)
     {
-        _errorMsg->setText("Observer includes illegal characters");
+        QMessageBox::critical(this, "Error", "Observer includes illegal characters");
+        _centerEdit->setFocus();
         styleLabel(_centerLabel, IsDirty::Yes);
         return false;
     }
@@ -432,7 +431,8 @@ bool HorizonsDialog::isValidInput() {
     // Step size
     // Empty
     if (_stepEdit->text().isEmpty()) {
-        _errorMsg->setText("Step size not selected");
+        QMessageBox::critical(this, "Error", "Step size is not selected");
+        _stepEdit->setFocus();
         styleLabel(_stepLabel, IsDirty::Yes);
         return false;
     }
@@ -440,17 +440,23 @@ bool HorizonsDialog::isValidInput() {
     bool couldConvert = false;
     const int32_t step = _stepEdit->text().toInt(&couldConvert);
     if (!couldConvert) {
-        _errorMsg->setText(QString::fromStdString(std::format(
+        QMessageBox::critical(this, "Error", QString::fromStdString(std::format(
             "Step size needs to be a number in range 1 to {}",
             std::numeric_limits<int32_t>::max()
         )));
+        _stepEdit->setFocus();
         styleLabel(_stepLabel, IsDirty::Yes);
         return false;
     }
     // In the case of arcseconds range is different
     if (_timeTypeCombo->currentText().toStdString() == TimeVarying) {
         if (step < 60  || step > 3600) {
-            _errorMsg->setText("Angular step size needs to be in range 60 to 3600");
+            QMessageBox::critical(
+                this,
+                "Error",
+                "Angular step size needs to be in range 60 to 3600"
+            );
+            _stepEdit->setFocus();
             styleLabel(_stepLabel, IsDirty::Yes);
             return false;
         }
@@ -460,10 +466,11 @@ bool HorizonsDialog::isValidInput() {
     // website as a uint32_t. If step size over 32 bit int is sent, this error message is
     // received: Cannot read numeric value -- re-enter
     if (step < 1) {
-        _errorMsg->setText(QString::fromStdString(std::format(
+        QMessageBox::critical(this, "Error", QString::fromStdString(std::format(
             "Step size is outside valid range 1 to '{}'",
             std::numeric_limits<int32_t>::max()
         )));
+        _stepEdit->setFocus();
         styleLabel(_stepLabel, IsDirty::Yes);
         return false;
     }
@@ -660,14 +667,14 @@ std::pair<std::string, std::string> HorizonsDialog::readTimeRange() {
 
             if (!start.isValid() || !end.isValid()) {
                 if (timeRange.first.empty() || timeRange.second.empty()) {
-                    _errorMsg->setText("Could not find time range");
+                    QMessageBox::critical(this, "Error", "Could not find time range");
                     appendLog(
                         "Could not find time range in Horizons file",
                         LogLevel::Error
                     );
                 }
                 else {
-                    _errorMsg->setText("Could not parse time range");
+                    QMessageBox::critical(this, "Error", "Could not parse time range");
                     const std::string msg = std::format(
                         "Could not read time range '{}' to '{}'",
                         timeRange.first, timeRange.second
@@ -695,10 +702,6 @@ bool HorizonsDialog::handleRequest() {
         return false;
     }
 
-    // Reset
-    _errorMsg->clear();
-
-    //
     // Clean all widgets
     styleLabel(_typeLabel, IsDirty::No);
     styleLabel(_fileLabel, IsDirty::No);
@@ -721,7 +724,7 @@ bool HorizonsDialog::handleRequest() {
 
     nlohmann::json answer = sendRequest(url);
     if (answer.empty()) {
-        _errorMsg->setText("Connection error");
+        QMessageBox::critical(this, "Errpr", "Connection error");
         return false;
     }
 
@@ -764,7 +767,7 @@ std::string HorizonsDialog::constructUrl() {
         type = HorizonsType::Observer;
     }
     else {
-        _errorMsg->setText("Invalid Horizons type");
+        QMessageBox::critical(this, "Error", "Invalid Horizons type");
         styleLabel(_typeLabel, IsDirty::Yes);
         return "";
     }
@@ -831,7 +834,7 @@ std::string HorizonsDialog::constructUrl() {
         unit = "";
     }
     else {
-        _errorMsg->setText("Invalid time unit type");
+        QMessageBox::critical(this, "Error", "Invalid time unit type");
         styleLabel(_stepLabel, IsDirty::Yes);
         return "";
     }
@@ -896,11 +899,15 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
                 break;
             case QMessageBox::No:
             case QMessageBox::Cancel:
-                _errorMsg->setText("File already exist, try another file path");
+                QMessageBox::critical(
+                    this,
+                    "Error",
+                    "File already exist, try another file path"
+                );
                 styleLabel(_fileLabel, IsDirty::Yes);
                 return openspace::HorizonsFile();
             default:
-                _errorMsg->setText("Invalid answer");
+                QMessageBox::critical(this, "Error", "Invalid answer");
                 styleLabel(_fileLabel, IsDirty::Yes);
                 return openspace::HorizonsFile();
         }
@@ -929,7 +936,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
             break;
         }
         case HorizonsResultCode::Empty: {
-            _errorMsg->setText("The horizons file is empty");
+            QMessageBox::critical(this, "Error", "The horizons file is empty");
             if (!_latestHorizonsError.empty()) {
                 const std::string msg = std::format(
                     "Latest Horizons error: {}", _latestHorizonsError
@@ -1174,7 +1181,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 );
                 appendLog(msg, LogLevel::Error);
             }
-            _errorMsg->setText("An unknown error occured");
+            QMessageBox::critical(this, "Error", "An unknown error occured");
             break;
         }
         default: {
@@ -1184,7 +1191,7 @@ bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
                 );
                 appendLog(msg, LogLevel::Error);
             }
-            _errorMsg->setText("Invalid result type");
+            QMessageBox::critical(this, "Error", "Invalid result type");
             break;
         }
     }

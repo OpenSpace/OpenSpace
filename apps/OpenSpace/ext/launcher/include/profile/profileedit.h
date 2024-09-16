@@ -125,8 +125,6 @@ private:
     QLabel* _timeLabel = nullptr;
     QLabel* _metaLabel = nullptr;
     QLabel* _additionalScriptsLabel = nullptr;
-
-    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___PROFILEEDIT___H__
