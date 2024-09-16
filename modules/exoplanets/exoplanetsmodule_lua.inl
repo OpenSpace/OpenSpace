@@ -335,6 +335,33 @@ void createExoplanetSystem(const std::string& starName,
         "}";
 
         std::string planetLayers = "";
+        std::string planetTypeDesc = "";
+
+        // Constant for different categories of sizes of planets (in Earth radii)
+        // Source: https://www.nasa.gov/image-article/sizes-of-known-exoplanets/
+        constexpr float MaxR_Terrestrial = 1.25f;
+        constexpr float MaxR_SuperEarth = 2.f;
+        constexpr float MaxR_NeptuneLike = 6.f;
+
+        const std::string TerrestrialDesc = std::format(
+            "Terrestrial planets (R < {} Earth radii)",
+            MaxR_Terrestrial
+        );
+
+        const std::string SuperEarthDesc = std::format(
+            "Super-Earths ({} < R < {} Earth radii)",
+            MaxR_Terrestrial, MaxR_SuperEarth
+        );
+
+        const std::string NeptuneLikeDesc = std::format(
+            "Neptune-like planets ({} < R < {} Earth radii)",
+            MaxR_SuperEarth, MaxR_NeptuneLike
+        );
+
+        const std::string GasGiantDesc = std::format(
+            "Gas giants or larger planets (R > {} Earth radii)",
+            MaxR_NeptuneLike
+        );
 
         // Add a color layer with a fixed single color that represent the planet size,
         // that is, approximately what type of planet it is.
@@ -343,43 +370,67 @@ void createExoplanetSystem(const std::string& starName,
             float rInMeter = static_cast<float>(planetRadius);
             glm::vec3 colorFromSize = glm::vec3(0.f);
 
-            // Source for the radius constants:
-            // https://www.nasa.gov/image-article/sizes-of-known-exoplanets/
-
             // Terrestrial
-            if (rInMeter < 1.25f * distanceconstants::EarthRadius) {
-                colorFromSize = glm::vec3(0.32f, 0.2f, 0.1f);
+            if (rInMeter < MaxR_Terrestrial * distanceconstants::EarthRadius) {
+                colorFromSize = glm::vec3(0.32f, 0.2f, 0.1f); // Brown
+                planetTypeDesc = TerrestrialDesc;
             }
             // Super-Earths
-            else if (rInMeter < 2.f * distanceconstants::EarthRadius) {
-                colorFromSize = glm::vec3(1.f, 0.76f, 0.65f);
+            else if (rInMeter < MaxR_SuperEarth * distanceconstants::EarthRadius) {
+                colorFromSize = glm::vec3(1.f, 0.76f, 0.65f); // Beige
+                planetTypeDesc = SuperEarthDesc;
             }
             // Neptune-like
-            else if (rInMeter < 6.f * distanceconstants::EarthRadius) {
-                colorFromSize = glm::vec3(0.22f, 0.49f, 0.50f);
+            else if (rInMeter < MaxR_NeptuneLike * distanceconstants::EarthRadius) {
+                colorFromSize = glm::vec3(0.22f, 0.49f, 0.50f); // Blue
+                planetTypeDesc = NeptuneLikeDesc;
             }
             // Gas Giants (Saturn and Jupiter size, and much larger!)
             else {
-                colorFromSize = glm::vec3(0.55f, 0.34f, 0.39f);
+                colorFromSize = glm::vec3(0.55f, 0.34f, 0.39f); // Wine red
+                planetTypeDesc = GasGiantDesc;
             }
+
+            std::string description = std::format(
+                "This layer gives a fixed color to the planet surface based on the "
+                "planet radius. The planets are split into four categories based on "
+                "their radius (in Earth radii). 1) {} are Brown, 2) {} are Beige, 3) "
+                "{} are Blue, and 4) {} are Wine red.",
+                TerrestrialDesc, SuperEarthDesc, NeptuneLikeDesc, GasGiantDesc
+            );
 
             planetLayers += "{"
                 "Identifier = 'ColorFromSize',"
+                "Name = 'Color From Size',"
                 "Type = 'SolidColor',"
                 "Color = " + ghoul::to_string(colorFromSize) + ","
-                "Enabled = true"
+                "Enabled = true,"
+                "Description = \"" + description + "\""
             "}";
         }
 
         if (!planetTexture.empty()) {
             planetLayers += ",{"
                 "Identifier = 'PlanetTexture',"
+                "Name = 'Planet Texture',"
                 "FilePath = openspace.absPath('" + formatPathToLua(planetTexture) + "'),"
                 "Enabled = true"
             "}";
         }
 
-        // @TODO: This needs to be documented somewhere. Layer description?
+        std::string planetDescription = std::format(
+            "The exoplanet {} falls into the category of {}. Some key facts: "
+            "Radius: {:.2f} Earth radii, {:.2f} Jupiter radii. "
+            "Orbit Period: {:.1f} (Earth) days. "
+            "Orbit Semi-major axis: {:.2f} (AU). "
+            "Orbit Eccentricity: {:.2f}.",
+            planetName, planetTypeDesc,
+            planetRadius / distanceconstants::EarthRadius,
+            planetRadius / distanceconstants::JupiterRadius,
+            planet.per, planet.a, planet.ecc
+        );
+
+        // TODO: only set ambient intensity if no planetTexture was added
 
         const std::string planetNode = "{"
             "Identifier = '" + planetIdentifier + "',"
@@ -401,15 +452,16 @@ void createExoplanetSystem(const std::string& starName,
             "},"
             "GUI = {"
                 "Name = '" + planetName + "',"
-                "Path = '" + guiPath + "'"
+                "Path = '" + guiPath + "',"
+                "Description = [[" + planetDescription + "]]"
             "}"
         "}";
 
         int trailResolution = 1000;
 
         // Increase the resolution for highly eccentric orbits
-        const float eccentricityThreshold = 0.85f;
-        if (planet.ecc > eccentricityThreshold) {
+        constexpr float EccentricityThreshold = 0.85f;
+        if (planet.ecc > EccentricityThreshold) {
             trailResolution *= 2;
         }
 
