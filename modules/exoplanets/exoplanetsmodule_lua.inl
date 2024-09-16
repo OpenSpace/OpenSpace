@@ -450,7 +450,9 @@ void createExoplanetSystem(const std::string& starName,
             planet.per, planet.a, planet.ecc
         );
 
-        // TODO: only set ambient intensity if no planetTexture was added
+        // Use a higher ambient intensity when only the color from size is used, so that
+        // the color is more clearly visible from any direction
+        float ambientIntensity = planetTexture.empty() ? 0.5f : 0.15f;
 
         const std::string planetNode = "{"
             "Identifier = '" + planetIdentifier + "',"
@@ -464,7 +466,7 @@ void createExoplanetSystem(const std::string& starName,
                     "ColorLayers = {" + planetLayers + "}"
                 "},"
                 "LightSourceNode = '" + starIdentifier + "',"
-                "AmbientIntensity = 0.2"
+                "AmbientIntensity = " + std::to_string(ambientIntensity) +
             "},"
             "Tag = { 'exoplanet_planet' }, "
             "Transform = { "
