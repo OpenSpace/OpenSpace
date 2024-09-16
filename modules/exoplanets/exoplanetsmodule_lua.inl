@@ -200,6 +200,25 @@ void createExoplanetSystem(const std::string& starName,
             "}";
     }
 
+    // @TODO (2024-09-16, emmbr) Compose a more extensive summary of the system,
+    // based on more data in the archive (like number of stars) and the plantes.
+    // Also include more data on the star itself (like spectral type)
+    float distanceToOurSystem = glm::length(starPosInParsec) *
+        distanceconstants::Parsec / distanceconstants::LightYear;
+
+    size_t nPlanets = system.planetNames.size();
+    const std::string starDescription = std::format(
+        "The star {} is the host star of an exoplanet system with {} {} that {}  "
+        "enough data to be visualized. It has a size of {:.2f} Solar radii and an "
+        "effective temperature of {:.0f} Kelvin. The system is located at a "
+        "distance of {:.0f} Light years from Earth.",
+        sanitizedStarName, nPlanets,
+        nPlanets > 1 ? "planets" : "planet",
+        nPlanets > 1 ? "have" : "has",
+        radiusInMeter / distanceconstants::SolarRadius,
+        system.starData.teff, distanceToOurSystem
+    );
+
     const std::string starGlobeRenderableString = "Renderable = {"
         "Type = 'RenderableGlobe',"
         "Radii = " + std::to_string(radiusInMeter) + ","
@@ -226,7 +245,8 @@ void createExoplanetSystem(const std::string& starName,
         "Tag = {'exoplanet_system'},"
         "GUI = {"
             "Name = '" + sanitizedStarName + " (Star)',"
-            "Path = '" + guiPath + "'"
+            "Path = '" + guiPath + "',"
+            "Description = \"" +starDescription + "\""
         "}"
     "}";
 
@@ -418,7 +438,7 @@ void createExoplanetSystem(const std::string& starName,
             "}";
         }
 
-        std::string planetDescription = std::format(
+        const std::string planetDescription = std::format(
             "The exoplanet {} falls into the category of {}. Some key facts: "
             "Radius: {:.2f} Earth radii, {:.2f} Jupiter radii. "
             "Orbit Period: {:.1f} (Earth) days. "
@@ -528,7 +548,11 @@ void createExoplanetSystem(const std::string& starName,
                 "Tag = {'exoplanet_uncertainty_disc'},"
                 "GUI = {"
                     "Name = '" + planetName + " Disc',"
-                    "Path = '" + guiPath + "'"
+                    "Path = '" + guiPath + "',"
+                    "Description = \"The width of this disc around the planet's orbit "
+                        "marks the uncertainty of the orbit (based on the uncertainty of "
+                        "the semi-major axis and eccentricity measures). The wider the "
+                        "disc, the more uncertain the orbit is.\""
                 "}"
             "}";
 
@@ -572,7 +596,9 @@ void createExoplanetSystem(const std::string& starName,
         "Tag = {'exoplanet_1au_ring'},"
         "GUI = {"
             "Name = '1 AU Size Comparison Circle',"
-            "Path = '" + guiPath + "'"
+            "Path = '" + guiPath + "',"
+            "Description = \"A circe with a radius of 1 Astronomical Unit. That is, its "
+                "size corresponds to the size of Earth's orbit.\""
         "}"
     "}";
 
