@@ -286,12 +286,13 @@ std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
  * the framerate at which the application is running. Optionally the `preScript` Lua
  * script is run when registering the repeated script and the `postScript` is run when
  * unregistering it or when the application closes.
+ * If the `timeout` is 0, the script will be executed every frame.
  * The `identifier` has to be a unique name that cannot have been used to register a
  * repeated script before. A registered script is removed with the #removeRepeatedScript
  * function.
  */
 [[codegen::luawrap]] void registerRepeatedScript(std::string identifier,
-                                                 std::string script, double timeout,
+                                                 std::string script, double timeout = 0.0,
                                                  std::string preScript = "",
                                                  std::string postScript = "")
 {
