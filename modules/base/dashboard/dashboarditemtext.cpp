@@ -137,7 +137,7 @@ void DashboardItemText::render(glm::vec2& penPosition) {
     {
         color = { 1.f, 0.f, 0.f, 1.f };
     }
-    else if (value > 3)
+    else if (value > 4)
     {
         color = { 1.f, 1.f, 0.f, 1.f };
     }
