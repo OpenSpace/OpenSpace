@@ -1202,7 +1202,13 @@ void RenderableGlobe::renderChunks(const RenderData& data, RendererTasks&,
             _cachedInverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1.0)
         );
 
+        using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::Yes);
+        // The cameraPosition is not used if a globe only has a solid color, but it would
+        // be costlier to figure that out and will only trigger rarely, so instead we just
+        // ignore the location error
         _globalRenderer.program->setUniform("cameraPosition", glm::vec3(cameraPosition));
+        _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
     }
 
     const glm::mat4 modelViewTransform = glm::mat4(viewTransform * _cachedModelTransform);
@@ -1451,7 +1457,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             _shadowMappingProperties.zFightingPercentage
         );
     }
-    else if (_shadowMappingProperties.shadowMapping) {
+    else if (_shadowMappingProperties.shadowMapping && _shadowComponent) {
         shadowMapUnit.activate();
         // JCC: Avoiding a to recompiling the shaders or having more than one
         // set of shaders for this step.
@@ -1765,7 +1771,7 @@ void RenderableGlobe::recompileShaders() {
     pairs.emplace_back("useEclipseHardShadows", std::to_string(_eclipseHardShadows));
     pairs.emplace_back(
         "enableShadowMapping",
-        std::to_string(_shadowMappingProperties.shadowMapping)
+        std::to_string(_shadowMappingProperties.shadowMapping && _shadowComponent)
     );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
     pairs.emplace_back("showHeightResolution", "0");
