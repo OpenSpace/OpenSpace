@@ -208,48 +208,6 @@ namespace {
             v == versionLegacy18 ||
             v == versionLegacy19;
     }
-
-    bool areFilesDifferent(const std::filesystem::path& file1,
-                                                     const std::filesystem::path& file2) {
-        std::ifstream f1(file1, std::ifstream::binary | std::ifstream::ate);
-        std::ifstream f2(file2, std::ifstream::binary | std::ifstream::ate);
-
-        if (!f1.is_open() || !f2.is_open()) {
-            LERROR(std::format(
-                "Error opening files: '{}' and '{}'",
-                file1.string(), file2.string())
-            );
-            return true;
-        }
-        // Compare file sizes
-        if (f1.tellg() != f2.tellg()) {
-            return true; // Files are different if their sizes are different
-        }
-
-        // Return to beginning of each file
-        f1.seekg(0);
-        f2.seekg(0);
-
-        // Compare contents byte by byte
-        const size_t bufferSize = 4096;
-        char buffer1[bufferSize], buffer2[bufferSize];
-        while (f1.good() && f2.good()) {
-            f1.read(buffer1, bufferSize);
-            f2.read(buffer2, bufferSize);
-            // Get the number of bytes read
-            std::streamsize bytesRead1 = f1.gcount();
-            std::streamsize bytesread2 = f2.gcount();
-            // Compare the chunks
-            if (bytesRead1 != bytesread2 ||
-                std::memcmp(buffer1, buffer2, bytesRead1) != 0)
-            {
-                return true; // Files are different
-            }
-        }
-
-        // If we reached this point, the files are identical
-        return false;
-    }
 } // namespace
 
 using namespace openspace;
@@ -862,18 +820,8 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
             return;
         }
 
-        // Save the profile to a tmp file
-        const std::string tmpPath = std::format("{}{}.tmp",
-            savePath, editor.specifiedFilename()
-            );
-        saveProfile(this, tmpPath, *p);
-
         // Check if the profile is the same as current existing file
-        const bool changesWereMade = areFilesDifferent(tmpPath, origPath);
-        // Cleanup tmp file
-        std::filesystem::remove(tmpPath);
-
-        if (changesWereMade) {
+        if (*p != Profile(origPath)) {
             editor.promptUserOfUnsavedChanges();
         }
         else {
