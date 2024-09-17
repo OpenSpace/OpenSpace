@@ -41,20 +41,20 @@ uniform float gamma = 1.0;
 uniform vec2 borderWidth = vec2(0.1);
 uniform vec3 borderColor = vec3(0.0);
 uniform int borderFeather = 0;
-
 // Accelerated rendering can be used for the CEF browser
-#define USE_ACCELERATED_RENDERING #{useAcceleratedRendering}
+uniform bool useAcceleratedRendering = false;
+
 
 Fragment getFragment() {
   Fragment frag;
   vec4 originalColor;
-  #if USE_ACCELERATED_RENDERING
+  if (useAcceleratedRendering) {
     vec2 flippedTexCoords = vec2(vs_st.x, 1.0 - vs_st.y);
     // Correcting both orientation and color channels
     originalColor = texture(tex, flippedTexCoords).bgra;
-  #else
+  } else {
     originalColor = texture(tex, vs_st);
-  #endif
+  }
 
   vec4 texColor = originalColor * vec4(color, opacity);
 

@@ -653,7 +653,8 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix() {
 }
 
 void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
-                                 const RenderData& renderData)
+                                 const RenderData& renderData,
+                                 bool useAcceleratedRendering)
 {
     glDisable(GL_CULL_FACE);
 
@@ -678,6 +679,7 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
     _shader->setUniform(_uniformCache.borderColor, _borderColor);
     _shader->setUniform(_uniformCache.borderFeather, _borderFeather);
+    _shader->setUniform(_uniformCache.useAcceleratedRendering, useAcceleratedRendering);
     _shader->setUniform(
         _uniformCache.mvpMatrix,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
