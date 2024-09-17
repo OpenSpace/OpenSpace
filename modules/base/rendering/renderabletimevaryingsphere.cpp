@@ -155,6 +155,8 @@ namespace {
         std::optional<std::string> dataURL;
         // An index specifying which layer in the fits file to display
         std::optional<int> fitsLayer;
+        // This is set to true by default and will delete all the downloaded content when
+        // OpenSpace is shut down. Set to false to save all the downloaded fils.
         std::optional<bool> deleteDownloadsOnShutdown;
         enum class [[codegen::map(openspace::RenderableTimeVaryingSphere::TextureFilter)]] TextureFilter {
             NearestNeighbor,
@@ -352,8 +354,8 @@ void RenderableTimeVaryingSphere::setMinMaxValues(
     const void* rawData = t->pixelData();
     const float* pixelData = static_cast<const float*>(rawData);
     size_t dataSize = t->dimensions().x * t->dimensions().y;
-    float min = *std::min_element(pixelData, pixelData + dataSize);
-    float max = *std::max_element(pixelData, pixelData + dataSize);
+    float min = *std::min_element(pixelData, pixelData + dataSize);                      //crash here
+    float max = *std::max_element(pixelData, pixelData + dataSize);                             
     file.dataMinMax = glm::vec2(min, max);
 }
 

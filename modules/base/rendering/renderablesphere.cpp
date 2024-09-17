@@ -229,30 +229,16 @@ void RenderableSphere::initializeGL() {
     _sphere = std::make_unique<Sphere>(_size, _segments);
     _sphere->initialize();
 
-    if (_isUsingColorMap) {
-        _shader = BaseModule::ProgramObjectManager.request(
-            "SphereWithTF",
-            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine->buildRenderProgram(
-                    "SphereWithTF",
-                    absPath("${MODULE_BASE}/shaders/sphere_tf_vs.glsl"),
-                    absPath("${MODULE_BASE}/shaders/sphere_tf_fs.glsl")
-                );
-            }
-        );
-    }
-    else {
-        _shader = BaseModule::ProgramObjectManager.request(
-            "Sphere",
-            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine->buildRenderProgram(
-                    "Sphere",
-                    absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
-                    absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
-                );
-            }
-        );
-    }
+    _shader = BaseModule::ProgramObjectManager.request(
+        "Sphere",
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine->buildRenderProgram(
+                "Sphere",
+                absPath("${MODULE_BASE}/shaders/sphere_vs.glsl"),
+                absPath("${MODULE_BASE}/shaders/sphere_fs.glsl")
+            );
+        }
+    );
 
     definePropertyCallbackFunctions();
 
@@ -364,12 +350,12 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
 
     // TextureUnit cannot be declared in if statement below
     ghoul::opengl::TextureUnit transferfunctionUnit;
-    if (_isUsingColorMap) {
         _shader->setUniform("usingTransferFunction", _isUsingColorMap);
         _shader->setUniform("transferFunction", transferfunctionUnit);
+        _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
+    if (_isUsingColorMap) {
         transferfunctionUnit.activate();
         _transferFunction->bind();
-        _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
     }
 
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);

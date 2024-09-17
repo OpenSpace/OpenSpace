@@ -30,7 +30,11 @@ in vec3 vs_normal;
 in float vs_screenSpaceDepth;
 
 uniform sampler2D colorTexture;
+
+uniform bool usingTransferFunction;
+uniform sampler1D transferFunction;
 uniform vec2 dataMinMaxValues;
+
 uniform float opacity;
 uniform bool mirrorTexture;
 
@@ -42,15 +46,22 @@ Fragment getFragment() {
   if (mirrorTexture) {
     texCoord.x = 1.0 - texCoord.x;
   }
-
-  frag.color = texture(colorTexture, texCoord);
-  if (frag.color.a == 1.0){
-    if (opacity == 1.0){
-      frag.color.r = 1.0;
-    }
+  if(usingTransferFunction) {
+    vec4 dataValue = texture(colorTexture, texCoord);
+    float lookUpVal =
+      (dataValue.x - dataMinMaxValues.x) /
+      (dataMinMaxValues.y - dataMinMaxValues.x);
+    //if opacity in tf:
+    //frag.color = texture(transferFunction, lookUpVal);
+    frag.color = vec4(
+      texture(transferFunction, lookUpVal).rgb,
+      1.0
+    );
   }
-
-  //frag.color.a *= opacity;
+  else {
+    frag.color = texture(colorTexture, texCoord);
+  }
+  frag.color.a *= opacity;
   frag.depth = vs_screenSpaceDepth;
 
   // G-Buffer
