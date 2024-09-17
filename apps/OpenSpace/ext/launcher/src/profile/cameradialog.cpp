@@ -352,6 +352,9 @@ QWidget* CameraDialog::createNavStateWidget() {
                 this,
                 "Select navigate state file"
             );
+            if (file.isEmpty()) {
+                return;
+            }
 
             std::ifstream f = std::ifstream(file.toStdString());
             const std::string contents = std::string(
