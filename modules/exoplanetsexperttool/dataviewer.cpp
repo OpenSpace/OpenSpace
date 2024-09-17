@@ -1216,7 +1216,7 @@ void DataViewer::renderFileMenu() {
                 "saved, even if it was not included in the dataset from the beginning."
             );
 
-            static bool useParsec = false;
+            static bool useParsec = true;
             ImGui::Checkbox("Use Parsec for position", &useParsec);
             ImGui::SameLine();
             view::helper::renderHelpMarker("Otherwise, the position is saved in meters.");
