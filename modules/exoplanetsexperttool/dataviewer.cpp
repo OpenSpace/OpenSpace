@@ -1208,6 +1208,19 @@ void DataViewer::renderFileMenu() {
                 "Otherwise, only include the selected columns."
             );
 
+            static bool savePosition = true;
+            ImGui::Checkbox("Save computed XYZ position", &savePosition);
+            ImGui::SameLine();
+            view::helper::renderHelpMarker(
+                "If checked, the computed x, y and z position of the system will also be "
+                "saved, even if it was not included in the dataset from the beginning."
+            );
+
+            static bool useParsec = false;
+            ImGui::Checkbox("Use Parsec for position", &useParsec);
+            ImGui::SameLine();
+            view::helper::renderHelpMarker("Otherwise, the position is saved in meters.");
+
             // TODO: Also add option to save filtering separately
 
             view::helper::renderDescriptiveText(std::format(
@@ -1245,7 +1258,9 @@ void DataViewer::renderFileMenu() {
                     path,
                     _data,
                     _filteredData,
-                    !incudeAllColumns ? _columns : std::vector<ColumnKey>()
+                    !incudeAllColumns ? _columns : std::vector<ColumnKey>(),
+                    savePosition,
+                    useParsec
                 );
 
                 ImGui::CloseCurrentPopup();

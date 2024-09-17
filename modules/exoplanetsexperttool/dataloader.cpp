@@ -32,6 +32,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/coordinateconversion.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/progressbar.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/csvreader.h>
@@ -465,7 +466,8 @@ std::vector<ExoplanetItem> DataLoader::loadData(const DataSettings& settings) {
 void DataLoader::saveData(const std::filesystem::path& targetPath,
                           const std::vector<ExoplanetItem>& allItems,
                           const std::vector<size_t>& indices,
-                          const std::vector<ColumnKey>& columns)
+                          const std::vector<ColumnKey>& columns,
+                          bool includeCartesianPosition, bool useParsec)
 {
     // TODO: verify csv ending
 
@@ -474,6 +476,10 @@ void DataLoader::saveData(const std::filesystem::path& targetPath,
     if (!f.is_open()) {
         LERROR(std::format("Failed writing data to file: '{}'", targetPath));
         return;
+    }
+
+    if (includeCartesianPosition) {
+        f << "x,y,z,";
     }
 
     if (!columns.empty()) {
@@ -489,6 +495,16 @@ void DataLoader::saveData(const std::filesystem::path& targetPath,
 
     for (const size_t& i : indices) {
         const ExoplanetItem& item = allItems[i];
+
+        if (includeCartesianPosition && item.position.has_value()) {
+            double posFactor = useParsec ? 1.0 : distanceconstants::Parsec;
+            f << posFactor * (*item.position).x << ",";
+            f << posFactor * (*item.position).y << ",";
+            f << posFactor * (*item.position).z << ",";
+        }
+        else if (includeCartesianPosition) {
+            f << ",,,"; // no position exists
+        }
 
         std::string line;
         for (auto [_, value] : item.dataColumns) {

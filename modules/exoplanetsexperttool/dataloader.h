@@ -46,11 +46,15 @@ public:
      * \param indices the indices which to save. If empty, save all
      * \param columns the list of names for the columns to save in the dataset.
      *                If empty, save all
+     * \param includeXyzPosition decides if the computed XYZ position should also be
+     *                           saved
+     * \param useParsec if true, use Parsec for the saved position. Otherwise, use meters
      */
     static void saveData(const std::filesystem::path& targetPath,
         const std::vector<ExoplanetItem>& allItems,
         const std::vector<size_t>& indices = {},
-        const std::vector<ColumnKey>& columns = {});
+        const std::vector<ColumnKey>& columns = {},
+        bool includeXyzPosition = false, bool useParsec = false);
 };
 
 } // namespace openspace::exoplanets
