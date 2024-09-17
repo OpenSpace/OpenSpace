@@ -35,18 +35,9 @@
 #include <modules/imgui/include/imgui_include.h>
 
 namespace {
-    void queueScriptSynced(const std::string& script) {
-        using namespace openspace;
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
-    }
-
     void setRenderableEnabled(std::string_view id, bool value) {
         using namespace openspace;
-        queueScriptSynced(std::format(
+        global::scriptEngine->queueScript(std::format(
             "openspace.setPropertyValueSingle('{}', {});",
             std::format("Scene.{}.Renderable.Enabled", id),
             value ? "true" : "false"
@@ -65,10 +56,11 @@ namespace {
     }
 
     void setDefaultValueOrbitVisuals(bool shouldShowIfDefault) {
+        using namespace openspace;
         const std::string appearanceUri = "{defaultvalues_shape}.Renderable";
         if (shouldShowIfDefault) {
             // Draw using points
-            queueScriptSynced(std::format(
+            global::scriptEngine->queueScript(std::format(
                 "openspace.setPropertyValue('{0}.Appearance.Rendering', 1.0);"
                 "openspace.setPropertyValue('{0}.Appearance.PointSize', 64.0);"
                 "openspace.setPropertyValue('{0}.Appearance.EnableFade', false);"
@@ -78,7 +70,7 @@ namespace {
         }
         else {
             // Draw using lines
-            queueScriptSynced(std::format(
+            global::scriptEngine->queueScript(std::format(
                 "openspace.setPropertyValue('{0}.Appearance.Rendering', 0.0);"
                 "openspace.setPropertyValue('{0}.Appearance.EnableFade', true);",
                 appearanceUri
@@ -89,7 +81,8 @@ namespace {
     // Set increased reach factors of all exoplanet renderables, to trigger fading out of
     // glyph cloud
     void setIncreasedReachfactors() {
-        queueScriptSynced(
+        using namespace openspace;
+        global::scriptEngine->queueScript(
             "openspace.setPropertyValue('{exoplanet}.ApproachFactor', 15000000.0)"
             "openspace.setPropertyValue('{exoplanet_system}.ApproachFactor', 15000000.0)"
         );
@@ -98,6 +91,8 @@ namespace {
     void colorTrail(const openspace::exoplanets::ExoplanetItem& p,
                     const glm::vec3& color)
     {
+        using namespace openspace;
+
         const std::string planetTrailId = planetIdentifier(p) + "_Trail";
         const std::string planetDiscId = planetIdentifier(p) + "_Disc";
 
@@ -105,7 +100,7 @@ namespace {
             std::string propertyId = std::format(
                 "Scene.{}.Renderable.Appearance.Color", planetTrailId
             );
-            queueScriptSynced(std::format(
+            global::scriptEngine->queueScript(std::format(
                 "openspace.setPropertyValueSingle('{}', {});",
                 propertyId, ghoul::to_string(color)
             ));
@@ -115,7 +110,7 @@ namespace {
             std::string propertyId = std::format(
                 "Scene.{}.Renderable.MultiplyColor", planetDiscId
             );
-            queueScriptSynced(std::format(
+            global::scriptEngine->queueScript(std::format(
                 "openspace.setPropertyValueSingle('{}', {});",
                 propertyId, ghoul::to_string(color)
             ));
@@ -125,6 +120,8 @@ namespace {
     void setTrailThicknessAndFade(const openspace::exoplanets::ExoplanetItem& p,
                                   float width, float fade)
     {
+        using namespace openspace;
+
         const std::string id = planetIdentifier(p) + "_Trail";
         if (!openspace::renderable(id)) {
             return;
@@ -132,7 +129,7 @@ namespace {
         std::string appearance =
             std::format("Scene.{}.Renderable.Appearance", id);
 
-        queueScriptSynced(std::format(
+        global::scriptEngine->queueScript(std::format(
             "openspace.setPropertyValueSingle('{0}.LineWidth', {1});"
             "openspace.setPropertyValueSingle('{0}.Fade', {2});",
             appearance, width, fade
@@ -243,7 +240,7 @@ bool SystemViewer::systemCanBeAdded(const std::string& host) const {
 }
 
 void SystemViewer::addExoplanetSystem(const std::string& host) const {
-    queueScriptSynced("openspace.exoplanets.addExoplanetSystem('" + host + "')");
+    global::scriptEngine->queueScript("openspace.exoplanets.addExoplanetSystem('" + host + "')");
 }
 
 void SystemViewer::addOrTargetPlanet(const ExoplanetItem& item) const {
@@ -258,7 +255,7 @@ void SystemViewer::addOrTargetPlanet(const ExoplanetItem& item) const {
         // we can't do it until the system is added to the scene
         setIncreasedReachfactors();
 
-        queueScriptSynced(
+        global::scriptEngine->queueScript(
             "openspace.setPropertyValueSingle("
                 "'NavigationHandler.OrbitalNavigator.Anchor',"
                 "'" + planetIdentifier(item) + "'"
@@ -277,7 +274,7 @@ void SystemViewer::flyToStar(std::string_view hostIdentifier) const {
     // we can't do it until the system is added to the scene
     setIncreasedReachfactors();
 
-    queueScriptSynced(
+    global::scriptEngine->queueScript(
         "openspace.setPropertyValueSingle("
         "'NavigationHandler.OrbitalNavigator.Anchor',"
         "'" + std::string(hostIdentifier) +
@@ -309,7 +306,7 @@ void SystemViewer::renderSystemViewContent(const std::string& host) {
             // we can't do it until the system is added to the scene
             setIncreasedReachfactors();
 
-            queueScriptSynced(std::format(
+            global::scriptEngine->queueScript(std::format(
                 "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '{}');"
                 "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
                 "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);",

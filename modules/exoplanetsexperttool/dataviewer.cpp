@@ -84,18 +84,9 @@ namespace {
     constexpr char GetInTouchLink[] =
         "https://data.openspaceproject.com/release/ExoplanetExplorer/misc/get_in_touch";
 
-    void queueScriptSynced(const std::string& script) {
-        using namespace openspace;
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
-    }
-
     void setRenderableEnabled(std::string_view id, bool value) {
         using namespace openspace;
-        queueScriptSynced(std::format(
+        global::scriptEngine->queueScript(std::format(
             "openspace.setPropertyValueSingle('{}', {});",
             std::format("Scene.{}.Renderable.Enabled", id),
             value ? "true" : "false"
@@ -469,7 +460,7 @@ void DataViewer::initializeRenderables() {
     node.setValue("Renderable", renderable);
     node.setValue("GUI", gui);
 
-    queueScriptSynced(
+    global::scriptEngine->queueScript(
         std::format("openspace.addSceneGraphNode({})", ghoul::formatLua(node))
     );
 }
@@ -1277,7 +1268,7 @@ void DataViewer::renderSettingsMenuContent() {
     _columnSelectionView.renderColumnSettingsView(_columns, _dataSettings);
 
     if (ImGui::Checkbox("Use fixed ring width", &useFixedWidth)) {
-        queueScriptSynced(std::format(
+        global::scriptEngine->queueScript(std::format(
             "openspace.setPropertyValueSingle('{}', {})",
             std::format(
                 "Scene.{}.Renderable.UseFixedWidth",
@@ -1288,7 +1279,7 @@ void DataViewer::renderSettingsMenuContent() {
     }
 
     if (ImGui::Checkbox("Show Kepler FOV cue", &showKepler)) {
-        queueScriptSynced(std::format(
+        global::scriptEngine->queueScript(std::format(
             "openspace.setPropertyValueSingle('{}', {})",
             "Scene.KeplerPrism.Renderable.Enabled",
             showKepler
@@ -1296,7 +1287,7 @@ void DataViewer::renderSettingsMenuContent() {
     }
 
     if (ImGui::Checkbox("Show line to Milky Way center", &showMilkyWayLine)) {
-        queueScriptSynced(std::format(
+        global::scriptEngine->queueScript(std::format(
             "openspace.setPropertyValueSingle('{}', {})",
             "Scene.MilkyWayEarthLine.Renderable.Enabled",
             showMilkyWayLine
@@ -1329,7 +1320,7 @@ void DataViewer::renderSettingsMenuContent() {
         );
 
         if (changed) {
-            queueScriptSynced(std::format(
+            global::scriptEngine->queueScript(std::format(
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.BillboardMinMaxSize', {})",
                 ExoplanetsExpertToolModule::GlyphCloudIdentifier,
                 ghoul::to_string(glm::dvec2(DefaultGlyphSize * glyphSizeScale))
@@ -1425,13 +1416,13 @@ void DataViewer::updateSelectionInRenderable() {
         ExoplanetsExpertToolModule::GlyphCloudIdentifier
     );
 
-    queueScriptSynced(
+    global::scriptEngine->queueScript(
         "openspace.setPropertyValueSingle('" + uri + "', { " + indices + " })"
     );
 }
 
 void DataViewer::refocusView() const {
-    queueScriptSynced(
+    global::scriptEngine->queueScript(
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Earth');"
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '');"
         "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil);"
@@ -1440,7 +1431,7 @@ void DataViewer::refocusView() const {
 
 void DataViewer::flyToOverview() const {
     // Create a linear path to Earth
-    queueScriptSynced(
+    global::scriptEngine->queueScript(
         "openspace.pathnavigation.createPath({"
             "TargetType = 'Node', "
             "Target = 'Earth', "
@@ -1453,7 +1444,7 @@ void DataViewer::flyToOverview() const {
 
 void DataViewer::flyToInsideView() const {
     // Create a linear path to Earth
-    queueScriptSynced(
+    global::scriptEngine->queueScript(
         "openspace.pathnavigation.createPath({"
             "TargetType = 'Node', "
             "Target = 'Earth', "

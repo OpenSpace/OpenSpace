@@ -545,11 +545,11 @@ void createExoplanetSystem(const std::string& starName,
         "}"
     "}";
 
-    global::scriptEngine->queueScript(
-        "openspace.addSceneGraphNode(" + inclinationPlane + ");",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    global::scriptEngine->queueScript({
+        .code = "openspace.addSceneGraphNode(" + inclinationPlane + ")",
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+    });
 
     // Arrow pointing to Earth
     const float maxSemiMajor = maxSemimajorAxisInAu
@@ -571,12 +571,11 @@ void createExoplanetSystem(const std::string& starName,
         "}"
     "}";
 
-
-    global::scriptEngine->queueScript(
-        "openspace.addSceneGraphNode(" + toEarthArrow + ");",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    global::scriptEngine->queueScript({
+        .code = "openspace.addSceneGraphNode(" + toEarthArrow + ")",
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+    });
 
     // Habitable Zone
     bool hasTeff = !std::isnan(system.starData.teff);
