@@ -369,7 +369,7 @@ void createExoplanetSystem(const std::string& starName,
             "Transform = { "
                 "Translation = " + planetKeplerTranslation + ""
             "},"
-            "Tag = {'exoplanet', 'exoplanet_globe'},"
+            "Tag = {'exoplanet_planet', 'exoplanet', 'exoplanet_globe'},"
             "GUI = {"
                 "Name = '" + planetName + "',"
                 "Path = '" + guiPath + "'"
