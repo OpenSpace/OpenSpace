@@ -365,22 +365,22 @@ void createExoplanetSystem(const std::string& starName,
 
         const std::string TerrestrialDesc = std::format(
             "Terrestrial planets (R < {} Earth radii)",
-            MaxR_Terrestrial
+            TerrestrialMaxR
         );
 
         const std::string SuperEarthDesc = std::format(
             "Super-Earths ({} < R < {} Earth radii)",
-            MaxR_Terrestrial, MaxR_SuperEarth
+            TerrestrialMaxR, SuperEarthMaxR
         );
 
         const std::string NeptuneLikeDesc = std::format(
             "Neptune-like planets ({} < R < {} Earth radii)",
-            MaxR_SuperEarth, MaxR_NeptuneLike
+            SuperEarthMaxR, NeptuneLikeMaxR
         );
 
         const std::string GasGiantDesc = std::format(
             "Gas giants or larger planets (R > {} Earth radii)",
-            MaxR_NeptuneLike
+            NeptuneLikeMaxR
         );
 
         // Add a color layer with a fixed single color that represent the planet size,
@@ -390,17 +390,17 @@ void createExoplanetSystem(const std::string& starName,
             float rInMeter = static_cast<float>(planetRadius);
             glm::vec3 colorFromSize = glm::vec3(0.f);
 
-            if (rInMeter < MaxR_Terrestrial * distanceconstants::EarthRadius) {
+            if (rInMeter < TerrestrialMaxR * distanceconstants::EarthRadius) {
                 // Terrestrial
                 colorFromSize = glm::vec3(0.32f, 0.2f, 0.1f); // Brown
                 planetTypeDesc = TerrestrialDesc;
             }
-            else if (rInMeter < MaxR_SuperEarth * distanceconstants::EarthRadius) {
+            else if (rInMeter < SuperEarthMaxR * distanceconstants::EarthRadius) {
                 // Super-Earths
                 colorFromSize = glm::vec3(1.f, 0.76f, 0.65f); // Beige
                 planetTypeDesc = SuperEarthDesc;
             }
-            else if (rInMeter < MaxR_NeptuneLike * distanceconstants::EarthRadius) {
+            else if (rInMeter < NeptuneLikeMaxR * distanceconstants::EarthRadius) {
                 // Neptune-like
                 colorFromSize = glm::vec3(0.22f, 0.49f, 0.50f); // Blue
                 planetTypeDesc = NeptuneLikeDesc;
