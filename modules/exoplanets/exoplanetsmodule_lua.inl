@@ -200,6 +200,25 @@ void createExoplanetSystem(const std::string& starName,
             "}";
     }
 
+    // @TODO (2024-09-16, emmbr) Compose a more extensive summary of the system,
+    // based on more data in the archive (like number of stars) and the planets.
+    // Also include more data on the star itself (like spectral type)
+    float distanceToOurSystem = glm::length(starPosInParsec) *
+        distanceconstants::Parsec / distanceconstants::LightYear;
+
+    size_t nPlanets = system.planetNames.size();
+    const std::string starDescription = std::format(
+        "The star {} is the host star of an exoplanet system with {} {} that {}  "
+        "enough data to be visualized. It has a size of {:.2f} solar radii and an "
+        "effective temperature of {:.0f} Kelvin. The system is located at a "
+        "distance of {:.0f} light-years from Earth.",
+        sanitizedStarName, nPlanets,
+        nPlanets > 1 ? "planets" : "planet",
+        nPlanets > 1 ? "have" : "has",
+        radiusInMeter / distanceconstants::SolarRadius,
+        system.starData.teff, distanceToOurSystem
+    );
+
     const std::string starGlobeRenderableString = "Renderable = {"
         "Type = 'RenderableGlobe',"
         "Radii = " + std::to_string(radiusInMeter) + ","
@@ -226,7 +245,8 @@ void createExoplanetSystem(const std::string& starName,
         "Tag = {'exoplanet_system'},"
         "GUI = {"
             "Name = '" + sanitizedStarName + " (Star)',"
-            "Path = '" + guiPath + "'"
+            "Path = '" + guiPath + "',"
+            "Description = \"" + starDescription + "\""
         "}"
     "}";
 
@@ -343,15 +363,105 @@ void createExoplanetSystem(const std::string& starName,
             "Period = " + std::to_string(periodInSeconds) + ""
         "}";
 
-        std::string planetLayers = "";
+        std::string planetLayers;
+        std::string planetTypeDesc;
+
+        // Constant for different categories of sizes of planets (in Earth radii)
+        // Source: https://www.nasa.gov/image-article/sizes-of-known-exoplanets/
+        constexpr float TerrestrialMaxR = 1.25f;
+        constexpr float SuperEarthMaxR = 2.f;
+        constexpr float NeptuneLikeMaxR = 6.f;
+
+        const std::string TerrestrialDesc = std::format(
+            "Terrestrial planets (R < {} Earth radii)",
+            TerrestrialMaxR
+        );
+
+        const std::string SuperEarthDesc = std::format(
+            "Super-Earths ({} < R < {} Earth radii)",
+            TerrestrialMaxR, SuperEarthMaxR
+        );
+
+        const std::string NeptuneLikeDesc = std::format(
+            "Neptune-like planets ({} < R < {} Earth radii)",
+            SuperEarthMaxR, NeptuneLikeMaxR
+        );
+
+        const std::string GasGiantDesc = std::format(
+            "Gas giants or larger planets (R > {} Earth radii)",
+            NeptuneLikeMaxR
+        );
+
+        // Add a color layer with a fixed single color that represent the planet size,
+        // that is, approximately what type of planet it is.
+        // @TODO (2024-09-10, emmbr) Ideally the user should be able to edit this
+        if (!std::isnan(planet.r)) {
+            float rInMeter = static_cast<float>(planetRadius);
+            glm::vec3 colorFromSize = glm::vec3(0.f);
+
+            if (rInMeter < TerrestrialMaxR * distanceconstants::EarthRadius) {
+                // Terrestrial
+                colorFromSize = glm::vec3(0.32f, 0.2f, 0.1f); // Brown
+                planetTypeDesc = TerrestrialDesc;
+            }
+            else if (rInMeter < SuperEarthMaxR * distanceconstants::EarthRadius) {
+                // Super-Earths
+                colorFromSize = glm::vec3(1.f, 0.76f, 0.65f); // Beige
+                planetTypeDesc = SuperEarthDesc;
+            }
+            else if (rInMeter < NeptuneLikeMaxR * distanceconstants::EarthRadius) {
+                // Neptune-like
+                colorFromSize = glm::vec3(0.22f, 0.49f, 0.50f); // Blue
+                planetTypeDesc = NeptuneLikeDesc;
+            }
+            else {
+                // Gas Giants (Saturn and Jupiter size, and much larger!)
+                colorFromSize = glm::vec3(0.55f, 0.34f, 0.39f); // Wine red
+                planetTypeDesc = GasGiantDesc;
+            }
+
+            const std::string description = std::format(
+                "This layer gives a fixed color to the planet surface based on the "
+                "planet radius. The planets are split into four categories based on "
+                "their radius (in Earth radii). 1) {} are Brown, 2) {} are Beige, 3) "
+                "{} are Blue, and 4) {} are Wine red.",
+                TerrestrialDesc, SuperEarthDesc, NeptuneLikeDesc, GasGiantDesc
+            );
+
+            planetLayers += "{"
+                "Identifier = 'ColorFromSize',"
+                "Name = 'Color From Size',"
+                "Type = 'SolidColor',"
+                "Color = " + ghoul::to_string(colorFromSize) + ","
+                "Enabled = true,"
+                "Description = \"" + description + "\""
+            "}";
+        }
+
         if (!planetTexture.empty()) {
-            planetLayers = "{"
+            planetLayers += ",{"
                 "Identifier = 'PlanetTexture',"
+                "Name = 'Planet Texture',"
                 "FilePath = openspace.absPath('" + formatPathToLua(planetTexture) + "'),"
-                "BlendMode = 'Color',"
                 "Enabled = true"
             "}";
         }
+
+        const std::string planetDescription = std::format(
+            "The exoplanet {} falls into the category of {}. Some key facts: "
+            "Radius: {:.2f} Earth radii, {:.2f} Jupiter radii. "
+            "Orbit Period: {:.1f} (Earth) days. "
+            "Orbit Semi-major axis: {:.2f} (AU). "
+            "Orbit Eccentricity: {:.2f}.",
+            planetName, planetTypeDesc,
+            planetRadius / distanceconstants::EarthRadius,
+            planetRadius / distanceconstants::JupiterRadius,
+            planet.per, planet.a, planet.ecc
+        );
+
+        // Use a higher ambient intensity when only the color from size is used, so that
+        // the color is more clearly visible from any direction
+        float ambientIntensity = planetTexture.empty() ? 0.5f : 0.15f;
 
         const std::string planetNode = "{"
             "Identifier = '" + planetIdentifier + "',"
@@ -364,23 +474,26 @@ void createExoplanetSystem(const std::string& starName,
                 "Layers = {"
                     "ColorLayers = {" + planetLayers + "}"
                 "},"
-                "LightSourceNode = '" + starIdentifier + "'"
+                "LightSourceNode = '" + starIdentifier + "',"
+                "AmbientIntensity = " + std::to_string(ambientIntensity) +
             "},"
+            "Tag = { 'exoplanet_planet' }, "
             "Transform = { "
                 "Translation = " + planetKeplerTranslation + ""
             "},"
             "Tag = {'exoplanet_planet', 'exoplanet', 'exoplanet_globe'},"
             "GUI = {"
                 "Name = '" + planetName + "',"
-                "Path = '" + guiPath + "'"
+                "Path = '" + guiPath + "',"
+                "Description = [[" + planetDescription + "]]"
             "}"
         "}";
 
         int trailResolution = 1000;
 
         // Increase the resolution for highly eccentric orbits
-        const float eccentricityThreshold = 0.85f;
-        if (planet.ecc > eccentricityThreshold) {
+        constexpr float EccentricityThreshold = 0.85f;
+        if (planet.ecc > EccentricityThreshold) {
             trailResolution *= 2;
         }
 
@@ -456,7 +569,11 @@ void createExoplanetSystem(const std::string& starName,
                 "Tag = {'exoplanet_uncertainty_disc', 'exoplanet', 'exoplanet_orbit_disc'},"
                 "GUI = {"
                     "Name = '" + planetName + " Disc',"
-                    "Path = '" + guiPath + "'"
+                    "Path = '" + guiPath + "',"
+                    "Description = \"The width of this disc around the planet's orbit "
+                        "marks the uncertainty of the orbit (based on the uncertainty of "
+                        "the semi-major axis and eccentricity measures). The wider the "
+                        "disc, the more uncertain the orbit is.\""
                 "}"
             "}";
 
@@ -500,7 +617,9 @@ void createExoplanetSystem(const std::string& starName,
         "Tag = {'exoplanet_1au_ring'},"
         "GUI = {"
             "Name = '1 AU Size Comparison Circle',"
-            "Path = '" + guiPath + "'"
+            "Path = '" + guiPath + "',"
+            "Description = \"A circle with a radius of 1 Astronomical Unit. That is, its "
+                "size corresponds to the size of Earth's orbit.\""
         "}"
     "}";
 
