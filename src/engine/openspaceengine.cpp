@@ -1045,6 +1045,10 @@ void OpenSpaceEngine::loadFonts() {
 void OpenSpaceEngine::preSynchronization() {
     ZoneScoped;
     TracyGpuZone("preSynchronization");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
@@ -1111,6 +1115,10 @@ void OpenSpaceEngine::preSynchronization() {
 
     for (const std::function<void()>& func : *global::callback::preSync) {
         ZoneScopedN("[Module] preSync");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
         func();
     }
@@ -1137,6 +1145,10 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     ZoneScoped;
     TracyGpuZone("postSynchronizationPreDraw");
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
     const bool master = global::windowDelegate->isMaster();
     global::syncEngine->postSynchronization(SyncEngine::IsMaster(master));
@@ -1166,6 +1178,10 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     for (const std::function<void()>& func : *global::callback::postSyncPreDraw) {
         ZoneScopedN("[Module] postSyncPreDraw");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
         func();
     }
@@ -1210,6 +1226,10 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 
     for (const std::function<void()>& func : *global::callback::render) {
         ZoneScopedN("[Module] render");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
         func();
     }
@@ -1221,6 +1241,10 @@ void OpenSpaceEngine::drawOverlays() {
     ZoneScoped;
     TracyGpuZone("Draw2D");
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
     viewportChanged();
 
@@ -1237,6 +1261,11 @@ void OpenSpaceEngine::drawOverlays() {
 
     for (const std::function<void()>& func : *global::callback::draw2D) {
         ZoneScopedN("[Module] draw2D");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
+
         func();
     }
 
@@ -1246,12 +1275,20 @@ void OpenSpaceEngine::drawOverlays() {
 void OpenSpaceEngine::postDraw() {
     ZoneScoped;
     TracyGpuZone("postDraw");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
     LTRACE("OpenSpaceEngine::postDraw(begin)");
 
     global::renderEngine->postDraw();
 
     for (const std::function<void()>& func : *global::callback::postDraw) {
         ZoneScopedN("[Module] postDraw");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
         func();
     }
