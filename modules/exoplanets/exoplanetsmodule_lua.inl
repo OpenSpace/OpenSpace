@@ -209,9 +209,9 @@ void createExoplanetSystem(const std::string& starName,
     size_t nPlanets = system.planetNames.size();
     const std::string starDescription = std::format(
         "The star {} is the host star of an exoplanet system with {} {} that {}  "
-        "enough data to be visualized. It has a size of {:.2f} Solar radii and an "
+        "enough data to be visualized. It has a size of {:.2f} solar radii and an "
         "effective temperature of {:.0f} Kelvin. The system is located at a "
-        "distance of {:.0f} Light years from Earth.",
+        "distance of {:.0f} light-years from Earth.",
         sanitizedStarName, nPlanets,
         nPlanets > 1 ? "planets" : "planet",
         nPlanets > 1 ? "have" : "has",
@@ -354,8 +354,8 @@ void createExoplanetSystem(const std::string& starName,
             "Period = " + std::to_string(periodInSeconds) + ""
         "}";
 
-        std::string planetLayers = "";
-        std::string planetTypeDesc = "";
+        std::string planetLayers;
+        std::string planetTypeDesc;
 
         // Constant for different categories of sizes of planets (in Earth radii)
         // Source: https://www.nasa.gov/image-article/sizes-of-known-exoplanets/
@@ -390,28 +390,28 @@ void createExoplanetSystem(const std::string& starName,
             float rInMeter = static_cast<float>(planetRadius);
             glm::vec3 colorFromSize = glm::vec3(0.f);
 
-            // Terrestrial
             if (rInMeter < MaxR_Terrestrial * distanceconstants::EarthRadius) {
+                // Terrestrial
                 colorFromSize = glm::vec3(0.32f, 0.2f, 0.1f); // Brown
                 planetTypeDesc = TerrestrialDesc;
             }
-            // Super-Earths
             else if (rInMeter < MaxR_SuperEarth * distanceconstants::EarthRadius) {
+                // Super-Earths
                 colorFromSize = glm::vec3(1.f, 0.76f, 0.65f); // Beige
                 planetTypeDesc = SuperEarthDesc;
             }
-            // Neptune-like
             else if (rInMeter < MaxR_NeptuneLike * distanceconstants::EarthRadius) {
+                // Neptune-like
                 colorFromSize = glm::vec3(0.22f, 0.49f, 0.50f); // Blue
                 planetTypeDesc = NeptuneLikeDesc;
             }
-            // Gas Giants (Saturn and Jupiter size, and much larger!)
             else {
+                // Gas Giants (Saturn and Jupiter size, and much larger!)
                 colorFromSize = glm::vec3(0.55f, 0.34f, 0.39f); // Wine red
                 planetTypeDesc = GasGiantDesc;
             }
 
-            std::string description = std::format(
+            const std::string description = std::format(
                 "This layer gives a fixed color to the planet surface based on the "
                 "planet radius. The planets are split into four categories based on "
                 "their radius (in Earth radii). 1) {} are Brown, 2) {} are Beige, 3) "
@@ -599,7 +599,7 @@ void createExoplanetSystem(const std::string& starName,
         "GUI = {"
             "Name = '1 AU Size Comparison Circle',"
             "Path = '" + guiPath + "',"
-            "Description = \"A circe with a radius of 1 Astronomical Unit. That is, its "
+            "Description = \"A circle with a radius of 1 Astronomical Unit. That is, its "
                 "size corresponds to the size of Earth's orbit.\""
         "}"
     "}";
