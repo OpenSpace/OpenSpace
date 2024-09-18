@@ -134,6 +134,9 @@ public:
 
     void createUserDirectoriesIfNecessary();
 
+    uint64_t ramInUse() const;
+    uint64_t vramInUse() const;
+
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
      * application.

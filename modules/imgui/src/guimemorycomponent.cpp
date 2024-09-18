@@ -26,6 +26,7 @@
 
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/util/memorymanager.h>
 
 namespace {
@@ -65,11 +66,16 @@ void GuiMemoryComponent::render() {
     _isEnabled = v;
     _isCollapsed = ImGui::IsWindowCollapsed();
 
+    uint64_t ram = global::openSpaceEngine->ramInUse();
+    ImGui::Text("RAM: %u (%.2f MiB)", ram, ram / (1024.f * 1024.f));
+    uint64_t vram = global::openSpaceEngine->vramInUse();
+    ImGui::Text("VRAM: %u (%.2f MiB)", vram, vram / (1024.f * 1024.f));
+
+    ImGui::Spacing();
+
     ImGui::Text("%s", "Persistent Memory Pool");
     renderMemoryPoolInformation(global::memoryManager->PersistentMemory);
 
-    //ImGui::Text("%s", "Temporary Memory Pool");
-    //renderMemoryPoolInformation(global::memoryManager.TemporaryMemory);
     ImGui::End();
 }
 

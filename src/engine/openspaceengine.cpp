@@ -92,6 +92,8 @@
 
 #ifdef WIN32
 #include <Windows.h>
+#include <Pdh.h>
+#include "Psapi.h"
 #endif // WIN32
 
 #ifdef __APPLE__
@@ -106,6 +108,12 @@ namespace {
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     constexpr std::string_view _loggerCat = "OpenSpaceEngine";
+
+#ifdef WIN32
+    // This counter is used to measure the VRAM usage of OpenSpace
+    PDH_HQUERY vramQuery;
+    PDH_HCOUNTER vramCounter;
+#endif // WIN32
 
     constexpr std::string_view stringify(openspace::OpenSpaceEngine::Mode m) {
         using Mode = openspace::OpenSpaceEngine::Mode;
@@ -222,6 +230,22 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
+
+#ifdef WIN32
+    PDH_STATUS status = PdhOpenQueryA(nullptr, 0, &vramQuery);
+    if (status != ERROR_SUCCESS) {
+        LWARNING("Error opening Performance Query for VRAM usage");
+    }
+
+    const std::string queryStr = std::format(
+        "\\GPU Process Memory(pid_{}*)\\Dedicated Usage",
+        GetCurrentProcessId()
+    );
+    status = PdhAddEnglishCounterA(vramQuery, queryStr.c_str(), 0, &vramCounter);
+    if (status != ERROR_SUCCESS) {
+        LWARNING("Error add Performance Query for VRAM usage");
+    }
+#endif // WIN32
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {}
@@ -914,6 +938,53 @@ void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
     }
 }
 
+uint64_t OpenSpaceEngine::ramInUse() const {
+#ifdef WIN32
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    BOOL success = GetProcessMemoryInfo(
+        GetCurrentProcess(),
+        reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
+        sizeof(PROCESS_MEMORY_COUNTERS_EX)
+    );
+    if (!success) {
+        LERROR("Error retrieving RAM usage");
+        return 0;
+    }
+
+    return pmc.PrivateUsage;
+#else // ^^^^ WIN32 // !WIN32 vvvv
+    LWARNING("Unsupported operating");
+    return 0;
+#endif
+}
+
+uint64_t OpenSpaceEngine::vramInUse() const {
+#ifdef WIN32
+    PDH_STATUS status = PdhCollectQueryData(vramQuery);
+    if (status != ERROR_SUCCESS) {
+        LERROR("Error collecting VRAM query data");
+        return 0;
+    }
+
+    PDH_FMT_COUNTERVALUE value;
+    status = PdhGetFormattedCounterValue(
+        vramCounter,
+        PDH_FMT_LARGE | PDH_FMT_NOSCALE,
+        nullptr,
+        &value
+    );
+    if (status != ERROR_SUCCESS) {
+        LERROR("Error formatting VRAM query data");
+        return 0;
+    }
+    LONGLONG v = value.largeValue;
+    return v;
+#else // ^^^^ WIN32 // !WIN32 vvvv
+    LWARNING("Unsupported operating");
+    return 0;
+#endif
+}
+
 void OpenSpaceEngine::runGlobalCustomizationScripts() {
     ZoneScoped;
 
@@ -1127,6 +1198,11 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
     ZoneScoped;
     TracyGpuZone("Render");
     LTRACE("OpenSpaceEngine::render(begin)");
+
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
     viewportChanged();
 
@@ -1551,6 +1627,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::LayerServer,
             codegen::lua::LoadJson,
             codegen::lua::ResolveShortcut,
+            codegen::lua::VramInUse,
+            codegen::lua::RamInUse
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
