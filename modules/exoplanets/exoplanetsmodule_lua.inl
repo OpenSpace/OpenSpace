@@ -201,7 +201,7 @@ void createExoplanetSystem(const std::string& starName,
     }
 
     // @TODO (2024-09-16, emmbr) Compose a more extensive summary of the system,
-    // based on more data in the archive (like number of stars) and the plantes.
+    // based on more data in the archive (like number of stars) and the planets.
     // Also include more data on the star itself (like spectral type)
     float distanceToOurSystem = glm::length(starPosInParsec) *
         distanceconstants::Parsec / distanceconstants::LightYear;
@@ -246,7 +246,7 @@ void createExoplanetSystem(const std::string& starName,
         "GUI = {"
             "Name = '" + sanitizedStarName + " (Star)',"
             "Path = '" + guiPath + "',"
-            "Description = \"" +starDescription + "\""
+            "Description = \"" + starDescription + "\""
         "}"
     "}";
 
@@ -359,9 +359,9 @@ void createExoplanetSystem(const std::string& starName,
 
         // Constant for different categories of sizes of planets (in Earth radii)
         // Source: https://www.nasa.gov/image-article/sizes-of-known-exoplanets/
-        constexpr float MaxR_Terrestrial = 1.25f;
-        constexpr float MaxR_SuperEarth = 2.f;
-        constexpr float MaxR_NeptuneLike = 6.f;
+        constexpr float TerrestrialMaxR = 1.25f;
+        constexpr float SuperEarthMaxR = 2.f;
+        constexpr float NeptuneLikeMaxR = 6.f;
 
         const std::string TerrestrialDesc = std::format(
             "Terrestrial planets (R < {} Earth radii)",
