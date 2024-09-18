@@ -89,9 +89,9 @@ public:
     bool isUserConfigSelected() const;
 
     /**
-     * Handles keypress while the Qt launcher window is open.
+     * Handles keypresses while the Qt launcher window is open.
      *
-     * \param evt QKeyEevnt object of the key press event
+     * \param evt QKeyEevent object of the key press event
      */
     void keyPressEvent(QKeyEvent* evt) override;
 

@@ -204,7 +204,7 @@ void ProfileEdit::createWidgets(const std::string& profileName) {
             keybindingsProperties, &QPushButton::clicked,
             this, &ProfileEdit::openKeybindings
         );
-        keybindingsProperties->setAccessibleName("Edit actions & keybindings");
+        keybindingsProperties->setAccessibleName("Edit actions and keybindings");
         container->addWidget(keybindingsProperties, 0, 2);
 
         leftLayout->addLayout(container);

@@ -440,10 +440,13 @@ bool HorizonsDialog::isValidInput() {
     bool couldConvert = false;
     const int32_t step = _stepEdit->text().toInt(&couldConvert);
     if (!couldConvert) {
-        QMessageBox::critical(this, "Error", QString::fromStdString(std::format(
-            "Step size needs to be a number in range 1 to {}",
-            std::numeric_limits<int32_t>::max()
-        )));
+        QMessageBox::critical(
+            this, "Error",
+            QString::fromStdString(std::format(
+                "Step size needs to be a number in range 1 to {}",
+                std::numeric_limits<int32_t>::max()
+            ))
+        );
         _stepEdit->setFocus();
         styleLabel(_stepLabel, IsDirty::Yes);
         return false;

@@ -96,7 +96,8 @@ LauncherWindow  QPushButton#settings:hover {
 }
 
 LauncherWindow QPushButton#small:focus, LauncherWindow QPushButton#start:focus,
-LauncherWindow QComboBox#config:focus {
+LauncherWindow QComboBox#config:focus
+{
   outline: none;
   border: 2px solid rgb(61, 189, 238);
 }
@@ -224,8 +225,13 @@ WindowControl QLabel#notice {
 /*
  * Settings
  */
-SettingsWidget  QLabel#information {
+ SettingsDialog QLabel#information {
   font-style: italic;
   font-weight: normal;
   font-size: 8pt;
+}
+
+SettingsDialog QComboBox#dropdown:focus {
+  outline: none;
+  border: 2px solid rgb(61, 189, 238);
 }

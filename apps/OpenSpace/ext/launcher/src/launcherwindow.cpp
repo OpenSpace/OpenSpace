@@ -33,8 +33,8 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <sgct/readconfig.h>
-#include <QDialogButtonBox>
 #include <QComboBox>
+#include <QDialogButtonBox>
 #include <QFile>
 #include <QKeyEvent>
 #include <QLabel>
@@ -314,8 +314,8 @@ QWidget* LauncherWindow::createCentralWidget() {
     connect(
         newProfileButton, &QPushButton::released,
         [this]() {
-        openProfileEditor("", true);
-    }
+            openProfileEditor("", true);
+        }
     );
     newProfileButton->setObjectName("small");
     newProfileButton->setGeometry(geometry::NewProfileButton);
@@ -370,18 +370,18 @@ QWidget* LauncherWindow::createCentralWidget() {
     connect(
         startButton, &QPushButton::released,
         [this]() {
-        if (_profileBox->currentText().isEmpty()) {
-            QMessageBox::critical(
-                this,
-                "Empty Profile",
-                "Cannot launch with an empty profile"
-            );
+            if (_profileBox->currentText().isEmpty()) {
+                QMessageBox::critical(
+                    this,
+                    "Empty Profile",
+                    "Cannot launch with an empty profile"
+                );
+            }
+            else {
+                _shouldLaunch = true;
+                close();
+            }
         }
-        else {
-            _shouldLaunch = true;
-            close();
-        }
-    }
     );
     startButton->setObjectName("start");
     startButton->setGeometry(geometry::StartButton);
@@ -810,24 +810,26 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
     );
 
     // Check whether there are unsaved changes from the profile editor.
-    connect(&editor, &ProfileEdit::raiseExitWindow, this,
+    connect(
+        &editor,
+        &ProfileEdit::raiseExitWindow,
         [this, &editor, &savePath, &p, &profile]() {
+            const std::string origPath = std::format("{}{}.profile", savePath, profile);
+            // If this is a new profile we want to prompt the user
+            if (!std::filesystem::exists(origPath)) {
+                editor.promptUserOfUnsavedChanges();
+                return;
+            }
 
-        const std::string origPath = std::format("{}{}.profile", savePath, profile);
-        // If this is a new profile we want to prompt the user
-        if (!std::filesystem::exists(origPath)) {
-            editor.promptUserOfUnsavedChanges();
-            return;
+            // Check if the profile is the same as current existing file
+            if (*p != Profile(origPath)) {
+                editor.promptUserOfUnsavedChanges();
+            }
+            else {
+                editor.closeWithoutSaving();
+            }
         }
-
-        // Check if the profile is the same as current existing file
-        if (*p != Profile(origPath)) {
-            editor.promptUserOfUnsavedChanges();
-        }
-        else {
-            editor.closeWithoutSaving();
-        }
-    });
+    );
 
     editor.exec();
     if (editor.wasSaved()) {
