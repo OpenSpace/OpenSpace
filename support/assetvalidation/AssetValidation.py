@@ -43,6 +43,19 @@ def log(*values: object):
     with open("log.txt", "a") as file:
         file.write(f"{timestamp}: {' '.join(values)}\n")
 
+def incrementLogNames():
+    """Keeps the last 5 logs and increment each log by one in each run"""
+    logs = list(pathlib.Path(".").rglob("log*.txt"))
+    for log in reversed(logs):
+        logname = log.name
+        if "_" in logname:
+            n = int(logname[logname.find("_") + 1])
+            if n == 5:
+                log.unlink()
+                continue
+            log.rename(f"log_{n + 1}.txt")
+        else:
+            log.rename(f"log_{1}.txt")
 
 async def subscribeToErrorlog(api: Api, exit: asyncio.Event):
     topic = api.subscribeToError({"logLevel": "Warning"})
@@ -194,6 +207,7 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
     - `executable` the path to the OpenSpace executable that should be run for the
     validation
     """
+    incrementLogNames()
 
     global verbose
     verbose = args.verbose
