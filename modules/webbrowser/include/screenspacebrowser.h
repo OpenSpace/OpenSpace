@@ -97,6 +97,7 @@ private:
 
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
+    bool _useAcceleratedRendering = false;
     bool _isUrlDirty = false;
     bool _isDimensionsDirty = false;
 };

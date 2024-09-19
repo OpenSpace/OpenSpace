@@ -89,7 +89,8 @@ std::vector<Action> ActionManager::actions() const {
 
 void ActionManager::triggerAction(const std::string& identifier,
                                   const ghoul::Dictionary& arguments,
-                           ActionManager::ShouldBeSynchronized shouldBeSynchronized) const
+                                 ActionManager::ShouldBeSynchronized shouldBeSynchronized,
+                                                      ShouldBeLogged shouldBeLogged) const
 {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
 
@@ -108,18 +109,18 @@ void ActionManager::triggerAction(const std::string& identifier,
         std::format("args = {}\n{}", ghoul::formatLua(arguments), a.command);
 
     if (!shouldBeSynchronized || a.isLocal) {
-        global::scriptEngine->queueScript(
-            std::move(script),
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = std::move(script),
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No,
+            .addToLog = scripting::ScriptEngine::Script::ShouldBeLogged(shouldBeLogged)
+        });
     }
     else {
-        global::scriptEngine->queueScript(
-            std::move(script),
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript({
+            .code = std::move(script),
+            .addToLog = scripting::ScriptEngine::Script::ShouldBeLogged(shouldBeLogged)
+        });
     }
 }
 

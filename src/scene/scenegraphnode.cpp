@@ -334,7 +334,7 @@ namespace {
             //
             // The nodes without a given value will be placed at the bottom of the list
             // and sorted alphabetically.
-            std::optional<double> orderingNumber;
+            std::optional<float> orderingNumber;
         };
         // Additional information that is passed to GUI applications. These are all hints
         // and do not have any impact on the actual function of the scene graph node

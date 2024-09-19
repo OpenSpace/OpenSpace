@@ -47,9 +47,8 @@ TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
     // Compare with Ghoul's Lua conversions. Note that Lua uses '{' for arrays,
     // while we here expect '[' for all glm types
     std::string luaValue = ghoul::to_string(val);
-    luaValue.replace(0, 1, "[");
-    luaValue.replace(luaValue.size() - 1, 1, "]");
-
+    luaValue.front() = '[';
+    luaValue.back() = ']';
     CHECK(json == luaValue);
 }
 

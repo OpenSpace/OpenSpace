@@ -345,7 +345,7 @@ void KeyframeRecording::preSynchronization(double dt) {
         SceneGraphNode* node = scene->sceneGraphNode(curr.focusNode);
 
         global::navigationHandler->orbitalNavigator().setFocusNode(node);
-        bool success = interaction::KeyframeNavigator::updateCamera(
+        interaction::KeyframeNavigator::updateCamera(
             global::navigationHandler->camera(),
             curr,
             next,

@@ -177,10 +177,6 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             // which will no longer be valid once it is deleted
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
-            properties::PropertyOwner* layerGroup = it->get()->owner();
-            properties::PropertyOwner* layerManager = layerGroup->owner();
-            properties::PropertyOwner* globe = layerManager->owner();
-            properties::PropertyOwner* sceneGraphNode = globe->owner();
 
             // We need to keep the name of the layer since we only get it as a reference
             // and the name needs to survive the deletion

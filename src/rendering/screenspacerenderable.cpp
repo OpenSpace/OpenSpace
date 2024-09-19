@@ -434,11 +434,11 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         // No sync or send because this is already inside a Lua script that was triggered
         // when this triggerProperty was pressed in the gui, therefor it has already been
         // synced and sent to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            std::move(script),
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = std::move(script),
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        });
     });
     addProperty(_delete);
 }
@@ -653,7 +653,8 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix() {
 }
 
 void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
-                                 const RenderData& renderData)
+                                 const RenderData& renderData,
+                                 bool useAcceleratedRendering)
 {
     glDisable(GL_CULL_FACE);
 
@@ -678,6 +679,7 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
     _shader->setUniform(_uniformCache.borderColor, _borderColor);
     _shader->setUniform(_uniformCache.borderFeather, _borderFeather);
+    _shader->setUniform(_uniformCache.useAcceleratedRendering, useAcceleratedRendering);
     _shader->setUniform(
         _uniformCache.mvpMatrix,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
