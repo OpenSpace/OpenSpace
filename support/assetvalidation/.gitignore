@@ -1,5 +1,5 @@
 # Custom
-log.txt
+log*.txt
 .prettierignore
 
 # Byte-compiled / optimized / DLL files
