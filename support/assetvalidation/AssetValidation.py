@@ -121,10 +121,13 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
         removeCache(osDir)
 
         # # Special asset rules TODO: solve these issues
-        if asset.name == "temperature_land_highres.asset":
+        if asset.name == "temperature_land_highres.asset": # Causes hard crash (?)
             continue
 
         if asset.name == "gaia_dr2_download_stars.asset": # This is 28Gb of download data
+            continue
+
+        if asset.name == "sun_earth_2012_fieldlines.asset": # Another large download file
             continue
 
         # if asset.name == "videostretchedtotime.asset":
