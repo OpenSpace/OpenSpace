@@ -100,6 +100,11 @@ void HttpSynchronization::start() {
     if (isSyncing()) {
         return;
     }
+
+    if (isRejected()) {
+        return;
+    }
+
     _state = State::Syncing;
 
     const bool isSynced = isEachFileDownloaded();
@@ -108,9 +113,6 @@ void HttpSynchronization::start() {
         return;
     }
 
-    if (isRejected()) {
-        return;
-    }
 
     const std::string query = std::format(
         "?identifier={}&file_version={}&application_version={}",

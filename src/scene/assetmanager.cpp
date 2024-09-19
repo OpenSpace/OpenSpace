@@ -163,6 +163,11 @@ void AssetManager::update() {
         ZoneScopedN("Initializing queued assets");
         Asset* a = *it;
 
+        if (a->isFailed()) {
+            _toBeInitialized.erase(it);
+            break;
+        }
+
         if (!a->isSynchronized()) {
             // nothing to do here
             continue;
