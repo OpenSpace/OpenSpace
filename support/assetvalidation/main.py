@@ -28,6 +28,20 @@ import pathlib
 from AssetValidation import runAssetValidation
 import re
 
+
+# Helper func because argparse does not handle boolean values nicely
+# https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
+def str2bool(v):
+    """Helper function to parse boolean arguments passed in cli"""
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    elif v.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    else:
+        raise argparse.ArgumentTypeError("Boolean value expected")
+
 def setupArgparse():
     """
     Creates and sets up a parser for commandline arguments. This function returns the parsed
@@ -47,7 +61,7 @@ def setupArgparse():
         "-f", "--filter",
         dest="filter",
         type=str,
-        help="",
+        help="Specifies a regex expression to filter on a certain subset of .assets",
         required=False
     )
 
@@ -62,7 +76,8 @@ def setupArgparse():
     parser.add_argument(
         "-s", "--start",
         dest="startOS",
-        help="Whether to start OpenSpace as a subprocess before running the validation",
+        help="Specifies whether to start OpenSpace as a subprocess before running the "
+             "validation",
         required=False,
         default=True,
     )
@@ -72,6 +87,9 @@ def setupArgparse():
 
 
 args = setupArgparse()
+
+args.verbose = str2bool(args.verbose)
+args.startOS = str2bool(args.startOS)
 
 # Find the exectuable location and its name
 if os.name == "nt":
@@ -83,7 +101,6 @@ else:
 
 if not os.path.exists(executable):
     raise FileNotFoundError(f"Could not find OpenSpace executable at '{executable}'")
-
 
 files = list(pathlib.Path(f"{args.dir}/data/").rglob("*.asset"))
 if args.filter:
