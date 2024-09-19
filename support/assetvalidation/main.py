@@ -82,6 +82,17 @@ def setupArgparse():
         default=True,
     )
 
+    parser.add_argument(
+        "-a", "--at",
+        dest="startAt",
+        help="Start validating at asset nr #. Useful if there OpenSpace crashed during "
+             "testing. Note the order in which assets are loaded is not guaranteed to be "
+             "the same between runs.",
+        required=False,
+        default=0,
+        type=int
+    )
+
     args = parser.parse_args()
     return args
 
@@ -106,6 +117,11 @@ files = list(pathlib.Path(f"{args.dir}/data/").rglob("*.asset"))
 if args.filter:
     p = re.compile(args.filter)
     files = [x for x in files if re.search(p, str(x))]
+
+# Make sure the files we've gotten are consistent between runs, this way we can start
+# from a specific index
+files.sort()
+files = files[args.startAt:]
 
 # files = glob.glob(f"{args.dir}/data/**/*.asset", recursive=True)
 
