@@ -163,12 +163,14 @@ void AssetManager::update() {
         ZoneScopedN("Initializing queued assets");
         Asset* a = *it;
 
-        if (a->isInitialized() || !a->isSynchronized()) {
+        if (!a->isSynchronized()) {
             // nothing to do here
             continue;
         }
 
-        a->initialize();
+        if (!a->isInitialized()) {
+            a->initialize();
+        }
 
         // We are only doing one asset per frame to keep the loading screen working a bit
         // smoother, so we remove the current one and then break out of the loop
@@ -293,6 +295,7 @@ void AssetManager::update() {
     // If the _toBeInitialized state has changed in this update call we emit the event
     if (isLoadingAssets && (_toBeInitialized.size() == 0)) {
         global::eventEngine->publishEvent<events::EventAssetLoadingFinished>();
+        LWARNING("AssetLoadingFinished published");
     }
 }
 

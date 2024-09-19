@@ -109,6 +109,9 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
     # Make sure we start on a completely empty scene
     await unloadAssets()
 
+    log("Subscribing to AssetLoadingFinished event")
+    assetLoadingEvent = api.subscribeToEvent("AssetLoadingFinished")
+
     for asset in assets:
         log(f"Handling asset {assetCount}/{len(assets)}")
         log(f"Asset: {asset}")
@@ -118,8 +121,11 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
         removeCache(osDir)
 
         # # Special asset rules TODO: solve these issues
-        # if asset.name == "temperature_land_highres.asset":
-        #     continue
+        if asset.name == "temperature_land_highres.asset":
+            continue
+
+        if asset.name == "gaia_dr2_download_stars.asset": # This is 28Gb of download data
+            continue
 
         # if asset.name == "videostretchedtotime.asset":
         #     openspace.time.setTime("2023-01-29T20:30:00")
@@ -127,32 +133,29 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
         path = str(asset).replace(os.sep, "/")
 
         # Load asset
-        log("Subscribing to AssetLoadingFinished event")
-        event = subscribeToAssetLoadingFinishedEvent(api)
         log(f"Adding asset without cache")
         await openspace.asset.add(path)
         log("Waiting for AssetLoadingFinished event")
-        await event
+        await api.nextValue(assetLoadingEvent)
+        await openspace.printInfo("Recieved the event")
 
         # Printscreen?
+
         # Unload asset
         log("Unloading assets")
-
         await unloadAssets()
         log("Validating empty scene")
         isSceneEmpty = await validateEmptyScene()
         # TODO: manually remove each asset that are still loaded?
-        # openspace.remove.asset(asset)
-        log("Scene is empty")
 
-        log("Subscribing to AssetLoadingFinished event again")
-        event = subscribeToAssetLoadingFinishedEvent(api)
         # Load asset using cache
         log(f"Adding asset from cache")
         await openspace.asset.add(path)
         log("Waiting for AssetLoadingFinished event")
-        await event
-        # printscreen?
+        await api.nextValue(assetLoadingEvent)
+        await openspace.printInfo("Recieved the event")
+
+        # Printscreen?
 
         # Unload assets again
         log("Unloading assets")
@@ -161,10 +164,11 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
         isSceneEmpty = await validateEmptyScene()
 
         assetCount += 1
-        log("Waiting for 5 seconds before next asset")
-        time.sleep(5) # Arbitrary sleep to let OpenSpace breathe
+        log("Waiting for 0.5 seconds before next asset")
+        time.sleep(0.5) # Arbitrary sleep to let OpenSpace breathe
 
     unsubscribeToErrorLogEvent.set()
+    assetLoadingEvent.cancel() # Unsubscribe to event
     # await errorLog
 
 async def mainLoop(files, osDir):
@@ -191,7 +195,9 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
     global verbose
     verbose = args.verbose
 
-    if args.startOS:
+    startOpenSpace = args.startOS
+
+    if startOpenSpace:
         log("Starting OpenSpace...")
         process = subprocess.Popen(
             [executable,
@@ -203,8 +209,9 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
         )
 
     # We wait for OpenSpace to start before trying to connect
-    time.sleep(5)
+    if startOpenSpace:
+        time.sleep(5)
     asyncio.new_event_loop().run_until_complete(mainLoop(files, args.dir))
 
-    if args.startOS:
+    if startOpenSpace:
         process.kill()
