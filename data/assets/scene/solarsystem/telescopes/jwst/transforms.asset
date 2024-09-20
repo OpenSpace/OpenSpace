@@ -105,6 +105,9 @@ asset.onDeinitialize(function()
   openspace.scriptScheduler.clear(1)
 end)
 
+asset.export("LaunchTime", LaunchTime)
+asset.export("DetachTime", DetachTime)
+asset.export("L2orbitInsertionTime", L2orbitInsertionTime)
 asset.export(JWSTPosition)
 asset.export(JWSTRotation)
 
