@@ -5,6 +5,9 @@ asset.require("./mission")
 asset.require("./model")
 asset.require("./viewingband")
 
+asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/l2")
+asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/l2sunline")
+
 
 
 asset.onInitialize(function()
@@ -21,6 +24,8 @@ asset.meta = {
   Description = [[
     This assets adds the content for the James Webb Space Telescope mission, including
     the animated model, safe viewing band, field of view, label, mission file and actions.
+    It also includes visuals about the Lagrange point L2, and a line between L2 and the
+    Sun.
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
