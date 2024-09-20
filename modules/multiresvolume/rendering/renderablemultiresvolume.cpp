@@ -157,12 +157,12 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableMultiresVolume)]] Parameters {
         std::filesystem::path source;
-        std::optional<std::string> errorHistogramsSource;
+        std::optional<std::filesystem::path> errorHistogramsSource;
         std::optional<int> scalingExponent;
         std::optional<float> stepSizeCoefficient;
-        std::optional<glm::dvec3> scaling;
-        std::optional<glm::dvec3> translation;
-        std::optional<glm::dvec3> rotation;
+        std::optional<glm::vec3> scaling;
+        std::optional<glm::vec3> translation;
+        std::optional<glm::vec3> rotation;
 
         std::optional<std::string> startTime;
         std::optional<std::string> endTime;
@@ -217,38 +217,6 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
 
     _transferFunctionPath = p.transferFunction;
     _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
-
-    if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
-        _transferFunctionPath = absPath(
-            dictionary.value<std::string>(KeyTransferFunction)
-        );
-        _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
-    }
-    else {
-        LERROR(std::format("Node did not contain a valid '{}'", KeyTransferFunction));
-        return;
-    }
-
-    //_pscOffset = psc(glm::vec4(0.f));
-    //_boxScaling = glm::vec3(1.f);
-
-
-    /*if (dictionary.hasKey(KeyBoxScaling)) {
-        glm::vec4 scalingVec4(_boxScaling, _w);
-        success = dictionary.getValue(KeyBoxScaling, scalingVec4);
-        if (success) {
-            _boxScaling = scalingVec4.xyz;
-            _w = scalingVec4.w;
-        }
-        else {
-            success = dictionary.getValue(KeyBoxScaling, _boxScaling);
-            if (!success) {
-                LERROR("Node '" << name << "' did not contain a valid '" <<
-                    KeyBoxScaling << "'");
-                return;
-            }
-        }
-    }*/
 
     _tsp = std::make_shared<TSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());

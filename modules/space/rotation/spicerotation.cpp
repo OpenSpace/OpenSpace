@@ -111,13 +111,8 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
 
-    if (dictionary.hasKey(TimeFrameInfo.identifier)) {
-        const ghoul::Dictionary timeFrameDictionary =
-            dictionary.value<ghoul::Dictionary>(TimeFrameInfo.identifier);
-        _timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
-        if (_timeFrame == nullptr) {
-            throw ghoul::RuntimeError("Invalid dictionary for TimeFrame");
-        }
+    if (p.timeFrame.has_value()) {
+        _timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
         addPropertySubOwner(_timeFrame.get());
     }
 
