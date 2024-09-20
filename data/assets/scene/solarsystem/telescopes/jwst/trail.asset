@@ -1,4 +1,4 @@
-local L2transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
+local L2transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
