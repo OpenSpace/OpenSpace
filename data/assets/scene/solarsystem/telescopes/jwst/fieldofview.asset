@@ -12,6 +12,7 @@ local JWSTFov = {
   },
   Renderable = {
     Type = "RenderablePrism",
+    Enabled = asset.enabled,
     Segments = 6,
     Lines = 3,
     Radius = 3.25,

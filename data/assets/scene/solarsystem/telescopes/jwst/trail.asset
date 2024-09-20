@@ -82,6 +82,7 @@ local JWSTTrailOrbit = {
   },
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = asset.enabled,
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.JWST,
@@ -111,6 +112,7 @@ local JWSTTrailCoRevOrbit = {
   },
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = asset.enabled,
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.JWST,
@@ -138,6 +140,7 @@ local JWSTSunTrail = {
   },
   Renderable = {
     Type = "RenderableTrailOrbit",
+    Enabled = asset.enabled,
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.JWST,

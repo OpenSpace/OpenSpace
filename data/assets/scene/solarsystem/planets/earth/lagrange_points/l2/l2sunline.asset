@@ -9,6 +9,7 @@ local L2SunLine = {
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableNodeLine",
+    Enabled = asset.enabled,
     StartNode = sun.Sun.Identifier,
     EndNode = transforms.L2Position.Identifier,
     Color = { 0.5, 0.5, 0.5 },
