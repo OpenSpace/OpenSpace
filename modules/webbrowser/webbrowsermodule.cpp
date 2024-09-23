@@ -90,6 +90,21 @@ namespace {
         return execLocation;
     }
 
+    struct [[codegen::Dictionary(WebBrowserModule)]] Parameters {
+        // The location of the web helper application
+        std::optional<std::filesystem::path> webHelperLocation;
+
+        // Determines whether the WebBrowser module is enabled
+        std::optional<bool> enabled;
+
+        // [[codegen::verbatim(UpdateBrowserBetweenRenderablesInfo.description)]]
+        std::optional<bool> updateBrowserBetweenRenderables;
+
+        // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
+        std::optional<float> browserUpdateInterval;
+    };
+#include "webbrowsermodule_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
@@ -145,31 +160,18 @@ void WebBrowserModule::internalDeinitialize() {
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     ZoneScoped;
 
-    if (dictionary.hasValue<bool>("WebHelperLocation")) {
-        _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
-    }
-    else {
-        _webHelperLocation = findHelperExecutable();
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    if (dictionary.hasValue<bool>("Enabled")) {
-        _enabled = dictionary.value<bool>("Enabled");
-    }
+    _webHelperLocation = p.webHelperLocation.value_or(findHelperExecutable());
+    _enabled = p.enabled.value_or(_enabled);
 
     LDEBUG(std::format("CEF using web helper executable: {}", _webHelperLocation));
     _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
     LDEBUG("Starting CEF... done");
 
-    if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {
-        _updateBrowserBetweenRenderables =
-            dictionary.value<bool>(UpdateBrowserBetweenRenderablesInfo.identifier);
-    }
-
-    if (dictionary.hasValue<double>(BrowserUpdateIntervalInfo.identifier)) {
-        _browserUpdateInterval = static_cast<float>(
-            dictionary.value<double>(BrowserUpdateIntervalInfo.identifier)
-        );
-    }
+    _updateBrowserBetweenRenderables =
+        p.updateBrowserBetweenRenderables.value_or(_updateBrowserBetweenRenderables);
+    _browserUpdateInterval = p.browserUpdateInterval.value_or(_browserUpdateInterval);
 
     _eventHandler->initialize();
 

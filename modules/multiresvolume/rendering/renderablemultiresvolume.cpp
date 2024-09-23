@@ -62,8 +62,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableMultiresVolume";
 
-    constexpr std::string_view KeyBrickSelector = "BrickSelector";
-
     constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
         "Stepsize Coefficient",
@@ -168,6 +166,8 @@ namespace {
         std::optional<std::string> endTime;
 
         std::filesystem::path transferFunction;
+
+        std::optional<std::string> brickSelector;
     };
 #include "renderablemultiresvolume_codegen.cpp"
 } // namespace
@@ -221,9 +221,7 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     _tsp = std::make_shared<TSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
-    if (dictionary.hasValue<std::string>(KeyBrickSelector)) {
-        _selectorName = dictionary.value<std::string>(KeyBrickSelector);
-    }
+    _selectorName = p.brickSelector.value_or(_selectorName);
 
     std::string selectorName = _selectorName;
     if (selectorName == "simple") {
