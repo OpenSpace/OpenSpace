@@ -20,21 +20,22 @@ local Dashboard = {
 local marker = {
     Identifier = "target-marker",
     Name = "ISWA Cygnets",
-    Type = "ScreenSpaceImageLocal",
-    TexturePath = filepath .. "kp.png"
+    Type = "ScreenSpaceImageOnline",
+    URL = "C:/Users/alundkvi/Downloads/FilesInRangeServlet.json"
 }
 
 asset.onInitialize(function()
-    --openspace.addScreenSpaceRenderable(marker)
+    openspace.addScreenSpaceRenderable(marker)
     openspace.addScreenSpaceRenderable(Dashboard)
 
     openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-1.770000,0.850000,-8.950000})
-    --openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-0.630000,0.380000,-2.310000})
+    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-0.630000,0.380000,-2.310000})
+    --openspace.setPropertyValueSingle("ScreenSpace.target-marker.CartesianPosition", {-0.707970, -0.34, -2.2180})
     openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.Size", {0.000000,0.000000,640.000000,320.000000})
   end)
 
   asset.onDeinitialize(function()
-    --openspace.removeScreenSpaceRenderable(marker)
+    openspace.removeScreenSpaceRenderable(marker)
     openspace.addScreenSpaceRenderable(Dashboard)
   end)
 

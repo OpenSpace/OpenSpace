@@ -37,7 +37,7 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _cygnetId = static_cast<int>(dictionary.value<double>("CygnetId"));
     _updateTime = static_cast<int>(dictionary.value<double>("UpdateInterval"));
 
-    _downloadImage = true;
+    //_downloadImage = true;
     _texturePath = IswaManager::ref().iswaUrl(
         _cygnetId,
         global::timeManager->time().j2000Seconds()

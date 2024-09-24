@@ -26,41 +26,58 @@
 #define __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGEONLINE___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
-
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/stringproperty.h>
+#include <future>  // Added for std::future
+#include <string>  // Added for std::string
 
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+    namespace documentation { struct Documentation; }
 
-class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
-public:
-    ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceImageOnline() override;
+    class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
+    public:
+        ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
+        virtual ~ScreenSpaceImageOnline() override;
 
-    bool deinitializeGL() override;
+        bool deinitializeGL() override;
 
-    void update() override;
+        void update() override;
 
-    static documentation::Documentation Documentation();
+        static documentation::Documentation Documentation();
 
-protected:
-    bool _downloadImage = false;
-    bool _textureIsDirty;
-    std::future<DownloadManager::MemoryFile> _imageFuture;
-    properties::StringProperty _texturePath;
+    protected:
+        bool _jsonDownloaded = false; // New flag for JSON download status
+        bool _textureIsDirty;
+        std::future<DownloadManager::MemoryFile> _imageFuture;
+        std::future<DownloadManager::MemoryFile> _jsonFuture;
+        properties::StringProperty _texturePath;
+        std::string _currentTextureUrl;
+        std::chrono::system_clock::time_point _lastCheckedTime;
 
-private:
-    void bindTexture() override;
 
-    std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-        const std::string& url);
+    private:
+        void bindTexture() override;
 
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-};
+        std::future<DownloadManager::MemoryFile> downloadJsonToMemory(
+            const std::string& url);  // Method for downloading JSON
+
+        std::future<DownloadManager::MemoryFile> downloadImageToMemory(
+            const std::string& url);  // Remains for image download
+
+        std::string findClosestTimestampUrl(const std::string& jsonContent, const std::string& currentTimestamp);
+
+        std::unique_ptr<ghoul::opengl::Texture> _texture;
+
+        std::string getCurrentTimestamp();
+        void loadImage(const std::string& imageUrl);
+        // Method for getting current timestamp
+        bool isCloser(const std::string& current, const std::string& newTimestamp, const std::string& closest); // Method for timestamp comparison
+        std::chrono::system_clock::time_point parseTimestamp(const std::string& timestamp);
+        std::string formatTimeForData(std::string_view timeStr);
+    };
 
 } // namespace openspace
 
