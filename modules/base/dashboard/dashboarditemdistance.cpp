@@ -253,13 +253,6 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     addProperty(_destination.nodeName);
 
     _doSimplification = p.simplification.value_or(_doSimplification);
-    _doSimplification.onChange([this]() {
-        _requestedUnit.setVisibility(
-            _doSimplification ?
-            properties::Property::Visibility::Hidden :
-            properties::Property::Visibility::User
-        );
-    });
     addProperty(_doSimplification);
 
     for (const DistanceUnit u : DistanceUnits) {
@@ -273,7 +266,6 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         const DistanceUnit unit = distanceUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
     }
-    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
     _formatString = p.formatString.value_or(_formatString);
