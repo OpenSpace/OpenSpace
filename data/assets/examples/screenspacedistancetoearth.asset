@@ -7,7 +7,7 @@ local Dashboard = {
   FaceCamera = false,
   Scale = 3.0,
   UseRadiusAzimuthElevation = true,
-  RadiusAzimuthElevation = { 2.0, -0.2, -0.2 }
+  RadiusAzimuthElevation = { 2.0, -0.2, -0.2 },
   Items = {
     {
       Type = "DashboardItemDistance",
@@ -36,7 +36,7 @@ asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(Dashboard)
   openspace.setPropertyValueSingle(
     "ScreenSpace.ScreenSpaceDistanceToEarth.Size",
-    {0.000000,0.000000,640.000000,320.000000}
+    {0.0, 0.0, 640.0, 320.0}
   )
 end)
 
