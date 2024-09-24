@@ -41,7 +41,6 @@ documentation::Documentation ScreenSpaceVideo::Documentation() {
     documentation::Documentation doc = VideoPlayer::Documentation();
     doc.name = "ScreenSpaceVideo";
     doc.id = "video_screenspacevideo";
-
     return doc;
 }
 

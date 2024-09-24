@@ -108,15 +108,6 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     for (const std::string_view key : p.interfaces->keys()) {
         ghoul::Dictionary interface = p.interfaces->value<ghoul::Dictionary>(key);
 
-        // @TODO (abock, 2019-09-17);  This is a hack to make the parsing of the
-        // openspace.cfg file not corrupt the heap and cause a potential crash at shutdown
-        // (see ticket https://github.com/OpenSpace/OpenSpace/issues/982)
-        // The AllowAddresses are specified externally and are injected here
-        interface.setValue(
-            "AllowAddresses",
-            p.allowAddresses.value_or(std::vector<std::string>())
-        );
-
         std::unique_ptr<ServerInterface> serverInterface =
             ServerInterface::createFromDictionary(interface);
 

@@ -406,7 +406,7 @@ namespace {
         std::optional<int> lastRow;
 
         // [codegen::verbatim(ColumnNamesInfo.description)]]
-        std::optional<std::vector<std::string>> columnNames;
+        std::optional<ghoul::Dictionary> columnNames;
 
         // [codegen::verbatim(LodPixelThresholdInfo.description)]]
         std::optional<float> lodPixelThreshold;
@@ -636,9 +636,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
         addProperty(_lastRow);
 
         if (p.columnNames.has_value()) {
-            const ghoul::Dictionary tmpDict = dictionary.value<ghoul::Dictionary>(
-                ColumnNamesInfo.identifier
-            );
+            const ghoul::Dictionary tmpDict = *p.columnNames;
 
             // Ugly fix for ASCII sorting when there are more columns read than 10.
             std::set<int> intKeys;
