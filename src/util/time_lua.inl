@@ -133,7 +133,7 @@ namespace {
 /**
  * Toggle the pause function, i.e. if the simulation is paused it will resume, and
  * otherwise it will be paused. Note that to pause means temporarily setting the delta
- * time to 0, and unpausing means restoring it to the value it was before the pause.
+ * time to 0, and unpausing means restoring it to whatever delta time value is set.
  */
 [[codegen::luawrap]] void togglePause() {
     using namespace openspace;
@@ -141,8 +141,10 @@ namespace {
 }
 
 /**
- * Toggles the pause function, i.e. temporarily setting the delta time to 0 and restoring
- * it afterwards. This is done by smoothly interpolating from the current value to 0.
+ * Toggle the pause function, i.e. if the simulation is paused it will resume, and
+ * otherwise it will be paused. This is done by smoothly interpolating from the
+ * current delta time value to 0 (pause), or from 0 to the current delta time value
+ * (unpause).
  *
  * \param interpolationDuration The number of seconds that the interpolation should be
  *                              done over. If excluded, the time is decided based on the
@@ -190,8 +192,8 @@ namespace {
 
 /**
  * Set whether the simulation should be paused or not. Note that to pause means
- * temporarily setting the delta time to 0, and unpausing means restoring it to the value
- * it was before the pause.
+ * temporarily setting the delta time to 0, and unpausing means restoring it to whatever
+ * delta time value is set.
  *
  * \param isPaused True if the simulation should be paused, and false otherwise
  */
@@ -202,7 +204,7 @@ namespace {
 /**
  * Same behaviour as `setPause`, but with interpolation. That is, if it should be paused,
  * the delta time will be interpolated to 0, and if unpausing, the delta time will be
- * interpolated to the speed it was before pausing.
+ * interpolated to whatever delta time value is set.
  *
  * \param isPaused True if the simulation should be paused, and false otherwise
  * \param interpolationDuration The number of seconds that the interpolation should be
