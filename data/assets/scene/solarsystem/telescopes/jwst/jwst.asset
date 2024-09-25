@@ -23,7 +23,7 @@ asset.meta = {
   Name = "James Webb Space Telescope",
   Description = [[
     This assets adds the content for the James Webb Space Telescope mission, including
-    the animated model, safe viewing band, field of view, label, mission file and actions.
+    the animated model, safe viewing band, field of view, label, mission file, and actions.
     It also includes visuals about the Lagrange point L2, and a line between L2 and the
     Sun.
   ]],

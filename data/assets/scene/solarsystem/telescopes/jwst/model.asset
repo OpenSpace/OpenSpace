@@ -42,6 +42,7 @@ local JWSTModel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTModel)
 end)

@@ -36,6 +36,7 @@ local JWSTFov = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(JWSTFov)
 end)

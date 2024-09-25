@@ -56,6 +56,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(JWSTBand)
 end)
 
+asset.export(JWSTBand)
 
 
 asset.meta = {
