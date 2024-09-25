@@ -158,25 +158,9 @@ namespace {
         // Specifies the render settings that should be applied to this layer
         std::optional<Settings> settings;
 
-        struct LayerAdjustment {
-            enum class Type {
-                None,
-                ChromaKey,
-                TransferFunction
-            };
-
-            // Specifies the type of the adjustment that is applied
-            std::optional<Type> type;
-
-            // Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'
-            std::optional<glm::dvec3> chromaKeyColor;
-
-            // Specifies the tolerance to match the color to the chroma key when the
-            // 'ChromaKey' type is selected for the 'Type'
-            std::optional<double> chromaKeyTolerance;
-        };
         // Parameters that set individual adjustment parameters for this layer
-        std::optional<LayerAdjustment> adjustment;
+        std::optional<ghoul::Dictionary> adjustment
+            [[codegen::reference("globebrowsing_layeradjustment")]];
 
         enum class BlendMode {
             Normal,
@@ -540,7 +524,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
 }
 
 void Layer::addVisibleProperties() {
-    switch (type()) {
+    switch (_typeId) {
         // Intentional fall through. Same for all tile layers
         case layers::Layer::ID::DefaultTileProvider:
         case layers::Layer::ID::SingleImageProvider:

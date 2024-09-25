@@ -363,7 +363,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _defaultProperties.pointTexture.onChange([this]() {
         const std::filesystem::path texturePath = _defaultProperties.pointTexture.value();
-        // Not ethat an empty texture is also valid => use default texture from module
+        // Note that an empty texture is also valid => use default texture from module
         if (std::filesystem::is_regular_file(texturePath) || texturePath.empty()) {
             _textureIsDirty = true;
         }
@@ -378,9 +378,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     _defaultProperties.tessellation.enabled.onChange([this]() { _dataIsDirty = true; });
     _defaultProperties.tessellation.useLevel.onChange([this]() { _dataIsDirty = true; });
     _defaultProperties.tessellation.level.onChange([this]() { _dataIsDirty = true; });
-    _defaultProperties.tessellation.distance.onChange([this]() {
-        _dataIsDirty = true;
-    });
+    _defaultProperties.tessellation.distance.onChange([this]() { _dataIsDirty = true; });
 
     _forceUpdateHeightData.onChange([this]() {
         for (GlobeGeometryFeature& f : _geometryFeatures) {

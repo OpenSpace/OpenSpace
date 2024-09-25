@@ -52,7 +52,7 @@ public:
 
     LayerManager();
 
-    void initialize(const ghoul::Dictionary& layerGroupsDict);
+    void initialize(const std::map<layers::Group::ID, ghoul::Dictionary>& dict);
     void deinitialize();
 
     Layer* addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict);

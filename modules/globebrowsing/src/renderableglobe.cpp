@@ -294,6 +294,14 @@ namespace {
         // [[codegen::verbatim(OrenNayarRoughnessInfo.description)]]
         std::optional<float> orenNayarRoughness;
 
+        enum class [[codegen::map(openspace::globebrowsing::layers::Group::ID)]] Group {
+            HeightLayers,
+            ColorLayers,
+            Overlays,
+            NightLayers,
+            WaterMasks,
+        };
+
         // A list of layers that should be added to the globe.
         std::optional<std::map<std::string, ghoul::Dictionary>> layers
             [[codegen::reference("globebrowsing_layermanager")]];
@@ -636,16 +644,13 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     setInteractionSphere(boundingSphere());
 
     // Init layer manager
-    // @TODO (abock, 2021-03-25) The layermanager should be changed to take a
-    // std::map<std::string, ghoul::Dictionary> instead and then we don't need to get it
-    // as a bare dictionary anymore and can use the value from the struct directly
-    if (dictionary.hasValue<ghoul::Dictionary>("Layers")) {
-        const ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>("Layers");
-        _layerManager.initialize(dict);
+    std::map<layers::Group::ID, ghoul::Dictionary> layers;
+    if (p.layers.has_value()) {
+        for (const auto& [key, value] : *p.layers) {
+            //layers[codegen::map]
+        }
     }
-    else {
-        _layerManager.initialize(ghoul::Dictionary());
-    }
+    _layerManager.initialize(layers);
 
     addProperty(Fadeable::_opacity);
 

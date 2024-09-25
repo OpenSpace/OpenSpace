@@ -343,7 +343,6 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::TileProviderByDate::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
-        globebrowsing::GeoJsonManager::Documentation(),
         globebrowsing::GeoJsonComponent::Documentation(),
         globebrowsing::GeoJsonProperties::Documentation(),
         GlobeLabelsComponent::Documentation(),
