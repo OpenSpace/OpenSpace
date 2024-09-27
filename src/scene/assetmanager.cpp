@@ -300,7 +300,6 @@ void AssetManager::update() {
     // If the _toBeInitialized state has changed in this update call we emit the event
     if (isLoadingAssets && (_toBeInitialized.size() == 0)) {
         global::eventEngine->publishEvent<events::EventAssetLoadingFinished>();
-        LWARNING("AssetLoadingFinished published");
     }
 }
 
