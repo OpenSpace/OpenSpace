@@ -56,6 +56,7 @@ namespace openspace {
         properties::StringProperty _texturePath;
         std::string _currentTextureUrl;
         std::chrono::system_clock::time_point _lastCheckedTime;
+        std::string _lastCheckedSoftwareTimestamp;
 
 
     private:
@@ -68,6 +69,7 @@ namespace openspace {
             const std::string& url);  // Remains for image download
 
         std::string findClosestTimestampUrl(const std::string& jsonContent, const std::string& currentTimestamp);
+        std::string getClosestUrl(const std::string& jsonFilePath, const std::string& currentTime);
 
         std::unique_ptr<ghoul::opengl::Texture> _texture;
 
@@ -75,7 +77,7 @@ namespace openspace {
         void loadImage(const std::string& imageUrl);
         // Method for getting current timestamp
         bool isCloser(const std::string& current, const std::string& newTimestamp, const std::string& closest); // Method for timestamp comparison
-        std::chrono::system_clock::time_point parseTimestamp(const std::string& timestamp);
+        std::time_t parseTimestamp(const std::string& timestamp);
         std::string formatTimeForData(std::string_view timeStr);
     };
 

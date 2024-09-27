@@ -41,6 +41,7 @@
 #include <sstream>
 #include <string_view>
 #include <fstream>
+#include <ctime>
 
 namespace {
     constexpr std::string_view _loggerCat = "ScreenSpaceImageOnline";
@@ -87,6 +88,8 @@ namespace openspace {
         _texturePath = p.url.value_or(_texturePath);
         addProperty(_texturePath);
 
+        _lastCheckedSoftwareTimestamp = getCurrentTimestamp();
+
     }
 
     ScreenSpaceImageOnline::~ScreenSpaceImageOnline() {}
@@ -97,63 +100,12 @@ namespace openspace {
     }
 
     //void ScreenSpaceImageOnline::update() {
-    //    std::cout << "Update called. Texture is dirty: " << _textureIsDirty << ", JSON downloaded: " << _jsonDownloaded << std::endl;
+    //    auto currentTime = std::chrono::system_clock::now();
 
-    //    if (_textureIsDirty && !_jsonDownloaded) {
-    //        std::cout << "Initiating JSON download..." << std::endl;
+    //    // Check if one minute has passed since the last check
+    //    if (std::chrono::duration_cast<std::chrono::minutes>(currentTime - _lastCheckedTime).count() >= 1) {
+    //        _lastCheckedTime = std::chrono::system_clock::now();  // Update the last checked time
 
-    //        if (!_jsonFuture.valid()) {
-    //            std::future<DownloadManager::MemoryFile> future = downloadJsonToMemory(_texturePath);
-    //            if (future.valid()) {
-    //                _jsonFuture = std::move(future);
-    //            }
-    //        }
-
-    //        if (_jsonFuture.valid() && DownloadManager::futureReady(_jsonFuture)) {
-    //            const DownloadManager::MemoryFile jsonFile = _jsonFuture.get();
-
-    //            if (jsonFile.corrupted) {
-    //                LERROR(std::format("Error loading JSON from URL '{}'", _texturePath.value()));
-    //                return;
-    //            }
-
-    //            try {
-    //                std::cout << "Parsing JSON..." << std::endl;
-    //                auto jsonData = nlohmann::json::parse(std::string(reinterpret_cast<char*>(jsonFile.buffer), jsonFile.size));
-    //                std::cout << "JSON parsed successfully!" << std::endl;
-    //                std::cout << jsonData.dump(4) << std::endl; // Print formatted JSON for debugging
-
-    //                // Find the image URL with the closest timestamp
-    //                std::string bestImageUrl;
-    //                std::string currentTimestamp = getCurrentTimestamp();
-    //                std::string closestTimestamp;
-    //                for (const auto& file : jsonData["files"]) {
-    //                    std::string timestamp = file["timestamp"];
-    //                    // Compare timestamps and find the closest one
-    //                    if (closestTimestamp.empty() || isCloser(currentTimestamp, timestamp, closestTimestamp)) {
-    //                        closestTimestamp = timestamp;
-    //                        bestImageUrl = file["url"];
-    //                    }
-    //                }
-
-    //                if (!bestImageUrl.empty()) {
-    //                    std::cout << "Image to download URL: " << bestImageUrl << std::endl;
-    //                    downloadImageToMemory(bestImageUrl);
-    //                }
-    //            }
-    //            catch (const std::exception& e) {
-    //                LERRORC("JSON parsing error", e.what());
-    //            }
-
-    //            // Mark JSON as downloaded
-    //            _jsonDownloaded = true;  // Set the flag to true after successful download
-    //        }
-    //    }
-    //}
-
-
-    //void ScreenSpaceImageOnline::update() {
-    //    if (_textureIsDirty) {
     //        // Read the JSON from the local file system
     //        std::string jsonFilePath = _texturePath.value();
     //        std::ifstream file(jsonFilePath);
@@ -167,47 +119,65 @@ namespace openspace {
     //        std::stringstream buffer;
     //        buffer << file.rdbuf();
     //        std::string jsonContent = buffer.str();
+    //        std::string currentTimestamp = getCurrentTimestamp();
 
-    //        // Find the closest image URL based on timestamp
-    //        std::string closestUrl = findClosestTimestampUrl(jsonContent);
+    //        // Find the closest image URL based on the current timestamp
+    //        std::string closestUrl = findClosestTimestampUrl(jsonContent, currentTimestamp);
 
     //        if (!closestUrl.empty()) {
-    //            // Now load the image from the closest URL
-    //            loadImage(closestUrl);
+    //            // Update the currently used texture URL and load the new image
+    //            _currentTextureUrl = closestUrl;
+    //            _textureIsDirty = true;  // Mark texture as dirty to reload
     //        }
+    //    }
+
+    //    // Load the image if the texture is dirty
+    //    if (_textureIsDirty && !_currentTextureUrl.empty()) {
+    //        loadImage(_currentTextureUrl); // Load the image based on the current URL
+    //        _textureIsDirty = false;        // Reset the dirty flag
     //    }
     //}
 
 
+
+
     void ScreenSpaceImageOnline::update() {
-        auto currentTime = std::chrono::system_clock::now();
+        std::string currentTimestamp = getCurrentTimestamp();  // Get the current software timestamp
 
         // Check if one minute has passed since the last check
-        if (std::chrono::duration_cast<std::chrono::minutes>(currentTime - _lastCheckedTime).count() >= 1) {
-            _lastCheckedTime = std::chrono::system_clock::now();  // Update the last checked time
+        if (currentTimestamp != _lastCheckedSoftwareTimestamp) {
 
-            // Read the JSON from the local file system
-            std::string jsonFilePath = _texturePath.value();
-            std::ifstream file(jsonFilePath);
+            std::time_t lastCheckedTime = parseTimestamp(_lastCheckedSoftwareTimestamp);
+            std::time_t currentTime = parseTimestamp(currentTimestamp);
 
-            if (!file.is_open()) {
-                LERROR("Could not open JSON file at " + jsonFilePath);
-                return;
-            }
+            // Calculate the time difference in minutes
+            double timeDiff = std::abs(std::difftime(currentTime, lastCheckedTime)) / 60.0;
 
-            // Parse the JSON data
-            std::stringstream buffer;
-            buffer << file.rdbuf();
-            std::string jsonContent = buffer.str();
-            std::string currentTimestamp = getCurrentTimestamp();
+            if (timeDiff >= 15) {  // If 15 minutes has passed
+                _lastCheckedSoftwareTimestamp = currentTimestamp;  // Update the last checked timestamp
 
-            // Find the closest image URL based on the current timestamp
-            std::string closestUrl = findClosestTimestampUrl(jsonContent, currentTimestamp);
+                // Read the JSON from the local file system
+                std::string jsonFilePath = _texturePath.value();
+                std::ifstream file(jsonFilePath);
 
-            if (!closestUrl.empty() && closestUrl != _currentTextureUrl) {
-                // Update the currently used texture URL and load the new image
-                _currentTextureUrl = closestUrl;
-                _textureIsDirty = true;  // Mark texture as dirty to reload
+                if (!file.is_open()) {
+                    LERROR("Could not open JSON file at " + jsonFilePath);
+                    return;
+                }
+
+                // Parse the JSON data
+                std::stringstream buffer;
+                buffer << file.rdbuf();
+                std::string jsonContent = buffer.str();
+
+                // Find the closest image URL based on the current timestamp
+                std::string closestUrl = findClosestTimestampUrl(jsonContent, currentTimestamp);
+
+                if (!closestUrl.empty()) {
+                    // Update the currently used texture URL and load the new image
+                    _currentTextureUrl = closestUrl;
+                    _textureIsDirty = true;  // Mark texture as dirty to reload
+                }
             }
         }
 
@@ -217,6 +187,8 @@ namespace openspace {
             _textureIsDirty = false;        // Reset the dirty flag
         }
     }
+
+
 
     /*std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadJsonToMemory(const std::string& url) {
         if (url.empty()) {
@@ -256,38 +228,63 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
 std::string ScreenSpaceImageOnline::findClosestTimestampUrl(const std::string& jsonContent, const std::string& currentTimestamp) {
     auto json = nlohmann::json::parse(jsonContent);
 
-    std::string closestUrl;
-    std::string closestTimestamp;
-    bool foundFuture = false; // Flag to indicate if we've found a future timestamp
+    std::cout << "JSON file: " << std::endl << json << std::endl;
 
-    for (const auto& file : json["files"]) {
-        if (file.contains("timestamp") && file.contains("url")) {
-            std::string timestamp = file["timestamp"];
-            std::string url = file["url"];
-            //TODO: fix this
-            // Check if the timestamp is greater than or equal to the current timestamp
-            if (timestamp <= currentTimestamp) {
-                // We found a future timestamp
-                if (!foundFuture || timestamp < closestTimestamp) {
-                    closestTimestamp = timestamp;
-                    closestUrl = url;
-                    foundFuture = true;
-                }
-            }
-            else {
-                // If no future timestamps found yet, track the latest past timestamp
-                if (closestTimestamp.empty() || timestamp > closestTimestamp) {
-                    closestTimestamp = timestamp;
-                    closestUrl = url;
-                }
-            }
+    std::string closestUrl;
+    double closestTimeDiff = std::numeric_limits<double>::max();
+
+    // Parse the current timestamp
+    std::time_t currentTime = parseTimestamp(currentTimestamp);
+
+    for (const auto& fileEntry : json["files"]) {
+        std::string timestamp = fileEntry["timestamp"].get<std::string>();
+        std::time_t fileTime = parseTimestamp(timestamp);
+
+        // Calculate time difference
+        double timeDiff = std::abs(difftime(fileTime, currentTime));
+
+        // Check for the closest timestamp
+        if (timeDiff < closestTimeDiff) {
+            closestTimeDiff = timeDiff;
+            closestUrl = fileEntry["url"].get<std::string>();
+            std::cout << "Closest URL: " << closestUrl << " with time difference: " << closestTimeDiff << std::endl;
         }
     }
 
     if (closestUrl.empty()) {
-        LERROR("No valid URL found for the given timestamps.");
+        std::cerr << "No valid URL found for the given timestamps." << std::endl;
     }
 
+    return closestUrl;
+}
+
+
+
+std::time_t ScreenSpaceImageOnline::parseTimestamp(const std::string& timestamp) {
+    std::tm tm = {};
+    std::istringstream ss(timestamp);
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+    return std::mktime(&tm);
+}
+
+std::string ScreenSpaceImageOnline::getClosestUrl(const std::string& jsonFilePath, const std::string& currentTime)
+{
+    std::ifstream file(jsonFilePath);
+    nlohmann::json root;
+    file >> root;
+
+    std::string closestUrl = "";
+    double closestTimeDiff = std::numeric_limits<double>::max();
+
+    for (const auto& fileEntry : root["files"]) {
+        std::string timestamp = fileEntry["timestamp"].get<std::string>();
+        double timeDiff = std::abs(std::difftime(std::stoi(timestamp.substr(0, 10)), std::stoi(currentTime.substr(0, 10))));
+
+        if (timeDiff < closestTimeDiff) {
+            closestTimeDiff = timeDiff;
+            closestUrl = fileEntry["url"].get<std::string>();
+        }
+    }
     return closestUrl;
 }
 
@@ -353,49 +350,6 @@ void ScreenSpaceImageOnline::loadImage(const std::string& imageUrl) {
     }
 }
 
-
-
-//bool ScreenSpaceImageOnline::isCloser(const std::string& current, const std::string& newTimestamp, const std::string& closest) {
-//    // Convert timestamp strings to std::chrono::time_point
-//    auto parseTimestamp = [](const std::string& timestamp) {
-//        std::tm tm = {};
-//        std::istringstream ss(timestamp);
-//        ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
-//        return std::chrono::system_clock::from_time_t(std::mktime(&tm));
-//        };
-//
-//    auto currentTimePoint = parseTimestamp(current);
-//    auto newTimePoint = parseTimestamp(newTimestamp);
-//    auto closestTimePoint = parseTimestamp(closest);
-//
-//    // Calculate the absolute differences
-//    auto newDiff = std::abs(std::chrono::duration_cast<std::chrono::seconds>(newTimePoint - currentTimePoint).count());
-//    auto closestDiff = std::abs(std::chrono::duration_cast<std::chrono::seconds>(closestTimePoint - currentTimePoint).count());
-//
-//    return newDiff < closestDiff; // Return true if newTimestamp is closer
-//}
-
-
-bool ScreenSpaceImageOnline::isCloser(const std::string& current, const std::string& newTimestamp, const std::string& closest) {
-    if (closest.empty()) {
-        return true;  // If there's no closest yet, the new one is automatically closer
-    }
-
-    // Convert timestamps to a comparable format (e.g., std::chrono::time_point)
-    auto currentTime = parseTimestamp(current);
-    auto newTime = parseTimestamp(newTimestamp);
-    auto closestTime = parseTimestamp(closest);
-
-    // Compare the differences between the current time and the timestamps
-    return std::abs((newTime - currentTime).count()) < std::abs((closestTime - currentTime).count());
-}
-
-std::chrono::system_clock::time_point ScreenSpaceImageOnline::parseTimestamp(const std::string& timestamp) {
-    std::tm t = {};
-    std::stringstream ss(timestamp);
-    ss >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
-    return std::chrono::system_clock::from_time_t(std::mktime(&t));
-}
 
 std::string ScreenSpaceImageOnline::formatTimeForData(std::string_view timeStr) {
     std::string formattedTime(timeStr);
