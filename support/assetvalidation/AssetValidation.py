@@ -22,26 +22,37 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
 
-import asyncio
 from openspace import Api
-import time
+import asyncio
+import logging
 import os
+import pathlib
 import subprocess
 import shutil
-import pathlib
+import time
 
 # Global flag for verbose output
 verbose = False
+# Logging object
+logger = logging.getLogger(__name__)
 
-def log(*values: object):
+def log(*values: object, logLevel = logging.DEBUG):
     """Custom log function to log messages to file and optionally to console"""
+    msg = ' '.join(str(v) for v in values)
     if verbose:
-        print(" ".join(values))
+        print(msg)
 
-    # Get timestamp of current run
-    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-    with open("log.txt", "a") as file:
-        file.write(f"{timestamp}: {' '.join(values)}\n")
+    match logLevel:
+        case logging.DEBUG:
+            logger.debug(msg)
+        case logging.INFO:
+            logger.info(msg)
+        case logging.WARNING:
+            logger.warning(msg)
+        case logging.ERROR:
+            logger.error(msg)
+        case logging.CRITICAL:
+            logger.critical(msg)
 
 def incrementLogNames():
     """Keeps the last 5 logs and increment each log by one in each run"""
@@ -58,16 +69,30 @@ def incrementLogNames():
             log.rename(f"log_{1}.txt")
 
 async def subscribeToErrorlog(api: Api, exit: asyncio.Event):
-    topic = api.subscribeToError({"logLevel": "Warning"})
+    topic = api.subscribeToLogMessages({
+        "timeStamping": False,
+        "dateStamping": False,
+        "logLevel": "Warning"
+    })
+    log("Subscribed to error log", logLevel = logging.INFO)
 
-    log("Subscribed to error log")
     async for future in topic.iterator():
         message = await future
-        log(message)
+
+        level = logging.WARNING
+        if ("Error" in message):
+            level = logging.ERROR
+        if( "Critical" in message):
+            level = logging.CRITICAL
+
+        log(message, logLevel = level)
+
+
         if exit.is_set():
-            log("Unsubscribing from error log")
-            topic.talk({ "event": "stop_subscription" })
+            log("Unsubscribing from error log...")
             topic.cancel()
+            log("Unsubscribed to error log", logLevel = logging.INFO)
+            break
 
 def removeCache(osDir):
     """
@@ -82,18 +107,61 @@ def removeCache(osDir):
                 else:
                     shutil.rmtree(entry.path)
     except OSError as e:
-        log(f"Error removing cache: {e}")
+        log(f"Error removing cache: {e}", logLevel = logging.ERROR)
 
+async def ensureEmptyScene(openspace, loadedAsset: pathlib.Path):
+    """ Make sure that the scene is empty of all assets, actions, and screenspace
+    renderables. Unload and log any existing items
+    """
+    assets = await openspace.asset.allAssets()
+    if assets:
+        log(f"Handling asset: {loadedAsset}: {len(assets)} assets are still loaded",
+            logLevel = logging.ERROR
+        )
+        for asset in assets.values():
+            log(f"Removing asset: '{asset}'", logLevel = logging.ERROR)
+            await openspace.asset.remove(asset)
 
-async def subscribeToAssetLoadingFinishedEvent(api: Api):
-    """
-    Subscribe to the AssetLoadingFinished event, unsubscribe after the event has been
-    received.
-    """
-    topic = api.subscribeToEvent("AssetLoadingFinished")
-    await api.nextValue(topic) # Wait for the event to be fired
-    log("Assets were loaded")
-    topic.cancel() # Unsubscribe to the event
+    sceneGraphNodes = await openspace.sceneGraphNodes()
+    if len(sceneGraphNodes) > 1: # Root is always returned
+        log(f"Handling asset: {loadedAsset}: {len(sceneGraphNodes) - 1} scene graph" + \
+            " nodes are still loaded",
+            logLevel = logging.ERROR
+        )
+        for node in sceneGraphNodes.values():
+            if node == "Root":
+                continue
+            log(f"Removing scene graph node: '{node}'", logLevel = logging.ERROR)
+            await openspace.removeSceneGraphNode(node)
+
+    actions = await openspace.action.actions()
+    if actions:
+        log(f"Handling asset: {loadedAsset}: {len(actions)} actions are still loaded",
+            logLevel = logging.ERROR
+        )
+        for action in actions.values():
+            log(f"Removing action: '{action}'", logLevel = logging.ERROR)
+            await openspace.action.removeAction(action)
+
+    screenSpaceRenderables = await openspace.screenSpaceRenderables()
+    if screenSpaceRenderables:
+        log(f"Handling asset: {loadedAsset}: {len(screenSpaceRenderables)} screen-space" +
+            " renderables are still loaded",
+            logLevel = logging.ERROR
+        )
+        for screenSpace in screenSpaceRenderables.values():
+            log(f"Removing screen space renderable: '{screenSpace}'",
+                logLevel = logging.ERROR
+            )
+            await openspace.removeScreenSpaceRenderable(screenSpace)
+
+    dashboardItems = await openspace.dashboard.dashboardItems()
+    if dashboardItems:
+        log(f"Handling asset: {loadedAsset}: {len(dashboardItems)} dashboard items are" +
+            " still loaded", logLevel = logging.ERROR)
+        for dashboardItem in dashboardItems.values():
+            log(f"Removing dashboard item: '{dashboardItem}'", logLevel = logging.ERROR)
+            await openspace.dashboard.removeDashboardItem(dashboardItem)
 
 async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Api):
     """
@@ -101,50 +169,30 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
     """
     assetCount = 1
 
-    # TODO: subscribe to warnings and errors and report / log them
-    unsubscribeToErrorLogEvent = asyncio.Event()
-    # errorLog = asyncio.create_task(subscribeToErrorlog(api, unsubscribeToErrorLogEvent))
+    eventUnsubscribeToErrorLog = asyncio.Event()
+    errorLog = asyncio.create_task(subscribeToErrorlog(api, eventUnsubscribeToErrorLog))
 
     async def unloadAssets():
-        log("Getting root assets...")
+        log("Getting root assets")
         roots = await openspace.asset.rootAssets()
-        log("Removing assets...")
-        for key, root in roots.items():
+        log("Removing root assets")
+        for root in roots.values():
             await openspace.asset.remove(root)
-
-    async def validateEmptyScene():
-        assets = await openspace.asset.allAssets()
-        if assets:
-            log(f"Error: {len(assets)} assets still loaded: {assets}")
-            return False
-        return True
 
     # Make sure we start on a completely empty scene
     await unloadAssets()
+    await ensureEmptyScene(openspace, "Pre-emptying scene")
 
-    log("Subscribing to AssetLoadingFinished event")
     assetLoadingEvent = api.subscribeToEvent("AssetLoadingFinished")
+    log("Subscribed to AssetLoadingFinished event", logLevel = logging.INFO)
 
     for asset in assets:
-        log(f"Handling asset {assetCount}/{len(assets)}")
+        log(f"Handling asset {assetCount}/{len(assets)}", logLevel = logging.INFO)
         log(f"Asset: {asset}")
 
         # We want to start with a cleared cache to make sure assets load correctly from
         # scratch
         removeCache(osDir)
-
-        # # Special asset rules TODO: solve these issues
-        if asset.name == "temperature_land_highres.asset": # Causes hard crash (?)
-            continue
-
-        if asset.name == "gaia_dr2_download_stars.asset": # This is 28Gb of download data
-            continue
-
-        if asset.name == "sun_earth_2012_fieldlines.asset": # Another large download file
-            continue
-
-        # if asset.name == "videostretchedtotime.asset":
-        #     openspace.time.setTime("2023-01-29T20:30:00")
 
         path = str(asset).replace(os.sep, "/")
 
@@ -153,39 +201,38 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
         await openspace.asset.add(path)
         log("Waiting for AssetLoadingFinished event")
         await api.nextValue(assetLoadingEvent)
-        await openspace.printInfo("Recieved the event")
-
-        # Printscreen?
+        log("AssetLoadingFinished event received")
 
         # Unload asset
         log("Unloading assets")
         await unloadAssets()
-        log("Validating empty scene")
-        isSceneEmpty = await validateEmptyScene()
-        # TODO: manually remove each asset that are still loaded?
+        log("Ensuring scene is empty")
+        await ensureEmptyScene(openspace, asset)
 
         # Load asset using cache
         log(f"Adding asset from cache")
         await openspace.asset.add(path)
         log("Waiting for AssetLoadingFinished event")
         await api.nextValue(assetLoadingEvent)
-        await openspace.printInfo("Recieved the event")
-
-        # Printscreen?
+        log("AssetLoadingFinished event received")
 
         # Unload assets again
         log("Unloading assets")
         await unloadAssets()
-        log("Validating empty scene")
-        isSceneEmpty = await validateEmptyScene()
+        log("Ensuring scene is empty")
+        await ensureEmptyScene(openspace, asset)
 
         assetCount += 1
-        log("Waiting for 0.5 seconds before next asset")
+        log("Finished testing asset", logLevel = logging.INFO)
         time.sleep(0.5) # Arbitrary sleep to let OpenSpace breathe
 
-    unsubscribeToErrorLogEvent.set()
+    eventUnsubscribeToErrorLog.set()
     assetLoadingEvent.cancel() # Unsubscribe to event
-    # await errorLog
+    # We send a last message since we'll otherwise be stuck in the for await loop waiting
+    # for a last message - TODO: fix once there is a solution in the Python API to cleanly
+    # exit / cancel the async for loop.
+    await openspace.printWarning("Asset validation complete")
+    await errorLog
 
 async def mainLoop(files, osDir):
     log("Connecting to OpenSpace...")
@@ -211,6 +258,13 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
 
     global verbose
     verbose = args.verbose
+
+    logging.basicConfig(filename="log.txt",
+                    format='[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s',
+                    datefmt='%Y-%m-%d | %H:%M:%S',
+                    encoding='utf-8',
+                    level=logging.DEBUG if verbose else logging.WARNING
+                    )
 
     startOpenSpace = args.startOS
 

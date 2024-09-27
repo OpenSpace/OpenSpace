@@ -118,14 +118,9 @@ if args.filter:
     p = re.compile(args.filter)
     files = [x for x in files if re.search(p, str(x))]
 
-# Make sure the files we've gotten are consistent between runs, this way we can start
-# from a specific index
+# Sort files to make sure the files we've gotten are consistent between runs, this way we
+# can start from a specific index
 files.sort()
 files = files[args.startAt:]
-
-# files = glob.glob(f"{args.dir}/data/**/*.asset", recursive=True)
-
-# Normalize path endings to forward slashes
-# files = [file.replace(os.sep, "/") for file in files]
 
 runAssetValidation(files, executable, args)
