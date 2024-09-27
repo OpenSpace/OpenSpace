@@ -148,13 +148,23 @@ glm::vec2 Dashboard::getStartPositionOffset() {
     return _startPositionOffset.value();
 }
 
+std::vector<DashboardItem*> Dashboard::dashboardItems() const {
+    std::vector<DashboardItem*> result;
+    result.reserve(_items.size());
+    for (const auto& d : _items) {
+        result.push_back(d.get());
+    }
+    return result;
+}
+
 scripting::LuaLibrary Dashboard::luaLibrary() {
     return {
         "dashboard",
         {
             codegen::lua::AddDashboardItem,
             codegen::lua::RemoveDashboardItem,
-            codegen::lua::ClearDashboardItems
+            codegen::lua::ClearDashboardItems,
+            codegen::lua::DashboardItems
         }
     };
 }

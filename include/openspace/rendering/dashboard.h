@@ -52,6 +52,7 @@ public:
     void removeDashboardItem(int index);
     void clearDashboardItems();
     glm::vec2 getStartPositionOffset();
+    std::vector<DashboardItem*> dashboardItems() const;
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the

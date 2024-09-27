@@ -63,6 +63,20 @@ namespace {
     openspace::global::dashboard->clearDashboardItems();
 }
 
+
+/**
+ * Returns all loaded dashboard-item identifiers from the main dashboard.
+ */
+[[codegen::luawrap]] std::vector<std::string> dashboardItems() {
+    std::vector<std::string> result;
+    auto dashboardItems = openspace::global::dashboard->dashboardItems();
+    result.reserve(dashboardItems.size());
+    for (openspace::DashboardItem* dItem : dashboardItems) {
+        result.push_back(dItem->identifier());
+    }
+    return result;
+}
+
 #include "dashboard_lua_codegen.cpp"
 
 } // namespace
