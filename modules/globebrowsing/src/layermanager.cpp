@@ -35,27 +35,10 @@
 
 namespace openspace::globebrowsing {
 
-documentation::Documentation LayerManager::Documentation() {
-    using namespace documentation;
-    return {
-        "LayerManager",
-        "globebrowsing_layermanager",
-        "",
-        {
-            {
-                "*",
-                new ReferencingVerifier("globebrowsing_layer"),
-                Optional::Yes,
-                Private::No,
-                "Specifies an individual layer"
-            }
-        }
-    };
-}
-
 LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
 
-void LayerManager::initialize(const std::map<layers::Group::ID, ghoul::Dictionary>& dict) {
+void LayerManager::initialize(const std::map<layers::Group::ID, ghoul::Dictionary>& dict)
+{
     ZoneScoped;
 
     // First create empty layer groups in case not all are specified

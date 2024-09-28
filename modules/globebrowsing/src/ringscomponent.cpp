@@ -227,24 +227,20 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 7)
     , _ringsDictionary(dictionary)
 {
-    using ghoul::filesystem::File;
+    // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
+    // term and rather extract the values directly here.  This would require a bit of
+    // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
+    // class-initializer list though
+    // @TODO (abock, 2021-03-25) Righto!  The RenderableGlobe passes this dictionary
+    // in as-is so it would be easy to just pass it directly to the initialize method
+    // instead
+    _ringsDictionary = dictionary.value<ghoul::Dictionary>("Rings");
 
-    if (dictionary.hasValue<ghoul::Dictionary>("Rings")) {
-        // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
-        // term and rather extract the values directly here.  This would require a bit of
-        // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
-        // class-initializer list though
-        // @TODO (abock, 2021-03-25) Righto!  The RenderableGlobe passes this dictionary
-        // in as-is so it would be easy to just pass it directly to the initialize method
-        // instead
-        _ringsDictionary = dictionary.value<ghoul::Dictionary>("Rings");
-
-        documentation::testSpecificationAndThrow(
-            Documentation(),
-            _ringsDictionary,
-            "RingsComponent"
-        );
-    }
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        _ringsDictionary,
+        "RingsComponent"
+    );
 }
 
 void RingsComponent::initialize() {

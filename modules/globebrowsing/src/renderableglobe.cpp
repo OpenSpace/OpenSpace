@@ -303,8 +303,8 @@ namespace {
         };
 
         // A list of layers that should be added to the globe.
-        std::optional<std::map<std::string, ghoul::Dictionary>> layers
-            [[codegen::reference("globebrowsing_layermanager")]];
+        std::optional<std::map<Group, ghoul::Dictionary>> layers
+            [[codegen::reference("globebrowsing_layer")]];
 
         // Specifies information about planetary labels that can be rendered on the
         // object's surface.
@@ -769,14 +769,14 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     // Components
     if (p.rings.has_value()) {
-        _ringsComponent = std::make_unique<RingsComponent>(dictionary);
+        _ringsComponent = std::make_unique<RingsComponent>(*p.rings);
         _ringsComponent->setParentFadeable(this);
         _ringsComponent->initialize();
         addPropertySubOwner(_ringsComponent.get());
     }
 
     if (p.shadows.has_value()) {
-        _shadowComponent = std::make_unique<ShadowComponent>(dictionary);
+        _shadowComponent = std::make_unique<ShadowComponent>(*p.shadows);
         _shadowComponent->initialize();
         addPropertySubOwner(_shadowComponent.get());
         _shadowMappingProperties.shadowMapping = true;

@@ -44,7 +44,6 @@ namespace {
     constexpr std::string_view KeyName = "Name";
     constexpr std::string_view KeyDesc = "Description";
     constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
-    constexpr std::string_view KeyAdjustment = "Adjustment";
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
@@ -248,10 +247,8 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             p.settings->multiplier.value_or(_renderSettings.multiplier);
         _renderSettings.offset = p.settings->offset.value_or(_renderSettings.offset);
     }
-    if (layerDict.hasValue<ghoul::Dictionary>(KeyAdjustment)) {
-        _layerAdjustment.setValuesFromDictionary(
-            layerDict.value<ghoul::Dictionary>(KeyAdjustment)
-        );
+    if (p.adjustment.has_value()) {
+        _layerAdjustment.setValuesFromDictionary(*p.adjustment);
     }
 
     // Add options to option properties

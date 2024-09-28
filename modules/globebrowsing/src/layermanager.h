@@ -70,8 +70,6 @@ public:
 
     void onChange(const std::function<void(Layer* l)>& callback);
 
-    static documentation::Documentation Documentation();
-
 private:
     std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;
 };

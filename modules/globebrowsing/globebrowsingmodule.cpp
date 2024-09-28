@@ -330,7 +330,6 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
     return {
         globebrowsing::Layer::Documentation(),
         globebrowsing::LayerAdjustment::Documentation(),
-        globebrowsing::LayerManager::Documentation(),
         globebrowsing::GlobeTranslation::Documentation(),
         globebrowsing::GlobeRotation::Documentation(),
         globebrowsing::RenderableGlobe::Documentation(),
