@@ -197,6 +197,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation GlobeBrowsingModule::Documentation() {
+    return codegen::doc<Parameters>("module_globebrowsing");
+}
+
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)

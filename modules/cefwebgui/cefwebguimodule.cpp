@@ -90,6 +90,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation CefWebGuiModule::Documentation() {
+    return codegen::doc<Parameters>("module_cefwebgui");
+}
+
 CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
     , _enabled(EnabledInfo, true)

@@ -72,6 +72,10 @@ namespace openspace {
 
 ghoul::opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
 
+documentation::Documentation SpaceModule::Documentation() {
+    return codegen::doc<Parameters>("module_space");
+}
+
 SpaceModule::SpaceModule()
     : OpenSpaceModule(Name)
     , _showSpiceExceptions(SpiceExceptionInfo, true)

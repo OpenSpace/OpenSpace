@@ -52,6 +52,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation ServerModule::Documentation() {
+    return codegen::doc<Parameters>("module_server");
+}
+
 ServerModule::ServerModule()
     : OpenSpaceModule(ServerModule::Name)
     , _interfaceOwner({"Interfaces", "Interfaces", "Server Interfaces"})

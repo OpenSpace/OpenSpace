@@ -380,12 +380,15 @@ void OpenSpaceEngine::initialize() {
 
     // After registering the modules, the documentations for the available classes
     // can be added as well
+    for (documentation::Documentation d : global::moduleEngine->moduleDocumentations()) {
+        DocEng.addDocumentation(std::move(d));
+    }
     for (OpenSpaceModule* m : global::moduleEngine->modules()) {
         for (const documentation::Documentation& doc : m->documentations()) {
             DocEng.addDocumentation(doc);
         }
     }
-    DocEng.addDocumentation(Configuration::Documentation);
+    DocEng.addDocumentation(Configuration::Documentation());
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));

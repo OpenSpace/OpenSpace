@@ -109,6 +109,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation WebBrowserModule::Documentation() {
+    return codegen::doc<Parameters>("module_webbrowser");
+}
+
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
     , _updateBrowserBetweenRenderables(UpdateBrowserBetweenRenderablesInfo, true)
