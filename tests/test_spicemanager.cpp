@@ -229,7 +229,7 @@ TEST_CASE("SpiceManager: Get Target State", "[spicemanager]") {
         res = SpiceManager::ref().targetState("EARTH", "CASSINI", "J2000", corr, et)
     );
 
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 3; i++) {
         CHECK(state[i] == Catch::Approx(res.position[i]));
         CHECK(state[i+3] == Catch::Approx(res.velocity[i]));
     }

@@ -225,7 +225,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
     global::callback::postDraw->emplace_back([this]() {
         bool windowChanged = global::windowDelegate->windowHasResized(); 
-        if (_instance && (windowChanged || _instance->_shouldReshape)){
+        if (_instance && (windowChanged || _instance->_shouldReshape)) {
             const glm::ivec2 res = global::windowDelegate->guiWindowResolution();
             _instance->reshape(static_cast<glm::ivec2>(
                 glm::vec2(res) * global::windowDelegate->dpiScaling()

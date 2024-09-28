@@ -142,21 +142,6 @@ WebBrowserModule::WebBrowserModule()
 
 WebBrowserModule::~WebBrowserModule() {}
 
-void WebBrowserModule::internalDeinitialize() {
-    ZoneScoped;
-
-    if (!_enabled) {
-        return;
-    }
-
-    _eventHandler->resetBrowserInstance();
-
-    const bool forceBrowserShutdown = true;
-    for (BrowserInstance* browser : _browsers) {
-        browser->close(forceBrowserShutdown);
-    }
-}
-
 void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     ZoneScoped;
 
@@ -180,6 +165,21 @@ void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
     fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
+}
+
+void WebBrowserModule::internalDeinitialize() {
+    ZoneScoped;
+
+    if (!_enabled) {
+        return;
+    }
+
+    _eventHandler->resetBrowserInstance();
+
+    const bool forceBrowserShutdown = true;
+    for (BrowserInstance* browser : _browsers) {
+        browser->close(forceBrowserShutdown);
+    }
 }
 
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
