@@ -47,7 +47,7 @@ void LayerManager::initialize(const std::map<layers::Group::ID, ghoul::Dictionar
         addPropertySubOwner(_layerGroups[i].get());
         _layerGroups[i]->initialize();
         auto it = dict.find(layers::Groups[i].id);
-        if (it == dict.end()) {
+        if (!dict.empty() && it == dict.end()) {
             LWARNINGC(
                 "LayerManager",
                 std::format("Unknown layer group '{}'", layers::Groups[i].identifier)
