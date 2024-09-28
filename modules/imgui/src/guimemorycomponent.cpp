@@ -67,9 +67,9 @@ void GuiMemoryComponent::render() {
     _isCollapsed = ImGui::IsWindowCollapsed();
 
     uint64_t ram = global::openSpaceEngine->ramInUse();
-    ImGui::Text("RAM: %u (%.2f MiB)", ram, ram / (1024.f * 1024.f));
+    ImGui::Text("RAM: %u (%f MiB)", ram, ram / (1024.f * 1024.f));
     uint64_t vram = global::openSpaceEngine->vramInUse();
-    ImGui::Text("VRAM: %u (%.2f MiB)", vram, vram / (1024.f * 1024.f));
+    ImGui::Text("VRAM: %u (%f MiB)", vram, vram / (1024.f * 1024.f));
 
     ImGui::Spacing();
 
