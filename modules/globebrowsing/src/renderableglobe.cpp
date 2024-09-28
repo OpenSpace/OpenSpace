@@ -647,7 +647,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     std::map<layers::Group::ID, ghoul::Dictionary> layers;
     if (p.layers.has_value()) {
         for (const auto& [key, value] : *p.layers) {
-            //layers[codegen::map]
+            layers[codegen::map<layers::Group::ID>(key)] = value;
         }
     }
     _layerManager.initialize(layers);
