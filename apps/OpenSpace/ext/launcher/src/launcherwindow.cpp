@@ -323,7 +323,6 @@ QWidget* LauncherWindow::createCentralWidget() {
     newProfileButton->setAutoDefault(true);
     newProfileButton->setAccessibleName("New profile");
 
-
     QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
     optionsLabel->setGeometry(geometry::OptionsLabel);
     optionsLabel->setObjectName("label_options");
@@ -331,7 +330,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     _windowConfigBox = new QComboBox(centralWidget);
     _windowConfigBox->setObjectName("config");
     _windowConfigBox->setGeometry(geometry::WindowConfigBox);
-    _windowConfigBox->setAccessibleName("Select window config");
+    _windowConfigBox->setAccessibleName("Select window configuration");
 
     _editWindowButton = new QPushButton("Edit", centralWidget);
     connect(
@@ -351,7 +350,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     _editWindowButton->setGeometry(geometry::EditWindowButton);
     _editWindowButton->setCursor(Qt::PointingHandCursor);
     _editWindowButton->setAutoDefault(true);
-    _editWindowButton->setAccessibleName("Edit window config");
+    _editWindowButton->setAccessibleName("Edit window configuration");
 
     QPushButton* newWindowButton = new QPushButton("New", centralWidget);
     connect(
@@ -364,7 +363,7 @@ QWidget* LauncherWindow::createCentralWidget() {
     newWindowButton->setGeometry(geometry::NewWindowButton);
     newWindowButton->setCursor(Qt::PointingHandCursor);
     newWindowButton->setAutoDefault(true);
-    newWindowButton->setAccessibleName("New window config");
+    newWindowButton->setAccessibleName("New window configuration");
 
     QPushButton* startButton = new QPushButton("START", centralWidget);
     connect(
@@ -809,7 +808,7 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         this
     );
 
-    // Check whether there are unsaved changes from the profile editor.
+    // Check whether there are unsaved changes from the profile editor
     connect(
         &editor,
         &ProfileEdit::raiseExitWindow,
@@ -982,7 +981,6 @@ bool LauncherWindow::isUserConfigSelected() const {
     const int selectedIndex = _windowConfigBox->currentIndex();
     return (selectedIndex <= _userConfigCount);
 }
-
 
 void LauncherWindow::keyPressEvent(QKeyEvent* evt) {
     if (evt->key() == Qt::Key_Escape) {

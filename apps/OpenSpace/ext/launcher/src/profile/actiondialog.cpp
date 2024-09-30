@@ -607,7 +607,6 @@ void ActionDialog::actionSaved() {
         action->identifier = newIdentifier;
     }
 
-
     action->name = _actionWidgets.name->text().toStdString();
     std::string guiPath = _actionWidgets.guiPath->text().toStdString();
     if (!guiPath.starts_with('/')) {

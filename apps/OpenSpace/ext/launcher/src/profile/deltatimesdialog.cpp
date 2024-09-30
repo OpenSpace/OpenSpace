@@ -129,7 +129,7 @@ void DeltaTimesDialog::createWidgets() {
         layout->addLayout(buttonLayout);
     }
 
-    _adjustLabel = new QLabel("Set Simulation Time Increment for key");
+    _adjustLabel = new QLabel("Set Simulation Time Increment (in seconds) for key");
     layout->addWidget(_adjustLabel);
 
     {
@@ -137,7 +137,7 @@ void DeltaTimesDialog::createWidgets() {
         _seconds = new QLineEdit;
         _seconds->setValidator(new QDoubleValidator);
         connect(_seconds, &QLineEdit::textChanged, this, &DeltaTimesDialog::valueChanged);
-        _seconds->setAccessibleName("Set simulation time increment for key");
+        _seconds->setAccessibleName("Set simulation time increment in seconds for key");
         box->addWidget(_seconds);
 
         _value = new QLabel;
@@ -227,7 +227,7 @@ void DeltaTimesDialog::listItemSelected() {
 }
 
 void DeltaTimesDialog::setLabelForKey(int index, bool editMode, std::string_view color) {
-    std::string labelS = "Set Simulation Time Increment for key";
+    std::string labelS = "Set Simulation Time Increment (in seconds) for key";
     if (index >= static_cast<int>(_deltaTimesData.size())) {
         index = static_cast<int>(_deltaTimesData.size()) - 1;
     }

@@ -9,6 +9,15 @@ QLabel#heading {
   font-size: 12pt;
 }
 
+QPushButton:focus,
+QTextEdit:focus,
+QTabWidget:focus,
+QCheckBox:focus,
+QComboBox:focus {
+  outline: none;
+  border: 2px solid rgb(61, 189, 238);
+}
+
 /*
  * LauncherWindow
  */
@@ -95,7 +104,8 @@ LauncherWindow  QPushButton#settings:hover {
   border-image: url(:/images/cogwheel-highlight);
 }
 
-LauncherWindow QPushButton#small:focus, LauncherWindow QPushButton#start:focus,
+LauncherWindow QPushButton#small:focus,
+LauncherWindow QPushButton#start:focus,
 LauncherWindow QComboBox#config:focus
 {
   outline: none;
@@ -168,10 +178,6 @@ DeltaTimesDialog  QListWidget {
 /*
  * Camera
  */
-CameraDialog  QLabel#error-message {
-  min-width: 10em;
-}
-
 CameraDialog  QLabel#camera-description {
   margin: 1em;
   margin-top: 0.2em;
@@ -200,10 +206,6 @@ HorizonsDialog  QLabel#thin {
   font-weight: normal;
 }
 
-HorizonsDialog  QLabel#error {
-  color: rgb(217, 13, 13);
-}
-
 HorizonsDialog  QLabel#normal {
   color: rgb(0, 0, 0);
 }
@@ -225,7 +227,7 @@ WindowControl QLabel#notice {
 /*
  * Settings
  */
- SettingsDialog QLabel#information {
+SettingsDialog QLabel#information {
   font-style: italic;
   font-weight: normal;
   font-size: 8pt;
