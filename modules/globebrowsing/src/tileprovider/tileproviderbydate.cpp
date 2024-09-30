@@ -32,10 +32,10 @@
 
 namespace {
     struct [[codegen::Dictionary(TileProviderByDate)]] Parameters {
-        // For now we need to inject the LayerGroupID this way. We don't want it to be
+        // The layer needs to know about the LayerGroupID this but we don't want it to be
         // part of the parameters struct as that would mean it would be visible to the end
         // user, which we don't want since this value just comes from whoever creates it,
-        // not the user
+        // not the user.
         int layerGroupID [[codegen::private()]];
 
         // Specifies the list of tile providers and for which times they are used for. The
@@ -60,7 +60,7 @@ TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {
     Parameters p = codegen::bake<Parameters>(dictionary);
 
     for (std::pair<const std::string, ghoul::Dictionary>& prov : p.providers) {
-        prov.second.setValue("LayerGroupID", static_cast<int>(p.layerGroupID));
+        prov.second.setValue("LayerGroupID", p.layerGroupID);
 
         // Pass down the caching information from the enclosing dictionary
         if (dictionary.hasValue<std::string>("GlobeName")) {
@@ -68,12 +68,7 @@ TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {
         }
         layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
 
-        if (prov.second.hasValue<std::string>("Type")) {
-            const std::string type = prov.second.value<std::string>("Type");
-            typeID = ghoul::from_string<layers::Layer::ID>(type);
-        }
-
-        std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, prov.second);
+        std::unique_ptr<TileProvider> tp = createFromDictionary(prov.second);
         const std::string provId = prov.second.value<std::string>("Identifier");
         tp->setIdentifier(provId);
         const std::string providerName = prov.second.value<std::string>("Name");
