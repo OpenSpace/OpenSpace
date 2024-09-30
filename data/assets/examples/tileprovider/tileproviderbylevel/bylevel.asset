@@ -1,0 +1,64 @@
+-- Basic
+-- This example file adds two layers to a globe. The first layer is used for further
+-- distances from the planet and when zooming into the planet, it gets replaced with the
+-- second layer. The place at which this transition occurs is determined by the "level",
+-- a number has to be between 2 and 22. Every increase in level means a transition point
+-- that is closer to the planet by a factor of two. Recommended reading for this example
+-- is the documentation on the DefaultTileProvider.
+
+-- Download some example images that we can use
+local images = asset.resource({
+  Name = "Earth Textures",
+  Type = "HttpSynchronization",
+  Identifier = "earth_textures",
+  Version = 3
+})
+
+-- Define the TileProvider
+local TileProvider = {
+  Identifier = "Example",
+  Type = "TileProviderByLevel",
+  Enabled = true,
+  LevelTileProviders = {
+    {
+      -- Show only a cloud layer for the first 3 layers (2, 3, 4)
+      MaxLevel = 4,
+      TileProvider = {
+        Identifier = "Blue_Marble_Clouds",
+        FilePath = images .. "earth_clouds.jpg"
+      }
+    },
+    {
+      -- Then transition fade into the Blue Marble image representation
+      MaxLevel = 22,
+      TileProvider = {
+        Identifier = "Blue_Marble",
+        FilePath = images .. "earth_bluemarble.jpg"
+      }
+    }
+  }
+}
+
+-- Define the scene graph node
+local Node = {
+  Identifier = "TileProviderByLevel_Example",
+  Renderable = {
+    Type = "RenderableGlobe",
+    Layers = {
+      -- The globe has exactly one layer, which is the one we defined above
+      ColorLayers = { TileProvider }
+    }
+  },
+  GUI = {
+    Name = "TileProviderByLevel - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

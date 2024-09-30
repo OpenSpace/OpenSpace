@@ -27,11 +27,28 @@
 #include <openspace/documentation/documentation.h>
 
 namespace {
+    // This tile provider will switch between different tile providers specified within
+    // based on the level of detail that is requested by the Globe. All other things being
+    // equal, this corresponds to the distance of the camera to the planet, with a closer
+    // distance resulting in a higher lever. Due to technical reasons, the available
+    // levels are in the range [2, 22] and each increase in levels corresponds to a
+    // doubling in the effective resolution. For a given requested level, the tile
+    // provider that has the largest `MaxLevel` that is not greater than the requested
+    // level will be used.
     struct [[codegen::Dictionary(TileProviderByLevel)]] Parameters {
+        // Each collection describes a distinct layer which can be toggled at a specified
+        // max level at which it is requested.
         struct Provider {
+            // The maximum level until which the tile provider is used. This number is
+            // inclusive, meaning that a value of 4 causes the tile provider to be used
+            // at level 4 but not at level 5.
             int maxLevel [[codegen::greaterequal(0)]];
-            ghoul::Dictionary tileProvider;
+
+            // The tile provider that should be used at this stage.
+            ghoul::Dictionary tileProvider [[codegen::reference("globebrowsing_layer")]];
         };
+
+        // The list of all tile providers that are used by this TileProviderByLevel
         std::vector<Provider> levelTileProviders;
     };
 #include "tileproviderbylevel_codegen.cpp"
