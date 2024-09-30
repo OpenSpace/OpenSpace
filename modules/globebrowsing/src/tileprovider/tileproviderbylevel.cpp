@@ -48,7 +48,7 @@ namespace {
             ghoul::Dictionary tileProvider [[codegen::reference("globebrowsing_layer")]];
         };
 
-        // The list of all tile providers that are used by this TileProviderByLevel
+        // The list of all tile providers that are used by this TileProviderByLevel.
         std::vector<Provider> levelTileProviders;
     };
 #include "tileproviderbylevel_codegen.cpp"
