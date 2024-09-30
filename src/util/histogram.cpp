@@ -96,7 +96,7 @@ void Histogram::changeRange(float minValue, float maxValue) {
     const float oldMax = _maxValue;
 
     float* newData = new float[_numBins]{0.0};
-    for (int i=0; i<_numBins; i++) {
+    for (int i = 0; i < _numBins; i++) {
         const float unNormalizedValue = i * (oldMax - oldMin) + oldMin;
         const float normalizedValue = (unNormalizedValue - _minValue) /
                                       (_maxValue - _minValue);      // [0.0, 1.0]
