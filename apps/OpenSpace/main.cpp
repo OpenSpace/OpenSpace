@@ -524,7 +524,9 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
 
     #ifdef SGCT_HAS_GSTREAMER
         //Do one iteration of GStreamer main loop
+    if (glPipeline.loop != nullptr) {
         g_main_context_iteration(g_main_loop_get_context(glPipeline.loop), FALSE);
+    }
     #endif
 
     currentWindow = &data.window;
