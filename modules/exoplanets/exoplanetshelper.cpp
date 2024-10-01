@@ -27,7 +27,11 @@
 #include <modules/exoplanets/exoplanetsmodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timeconversion.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
@@ -177,6 +181,177 @@ void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p
     if (starData.luminosity != p.luminosity && !std::isnan(p.luminosity)) {
         starData.luminosity = p.luminosity;
     }
+}
+
+// KeplerTranslation requires angles in range [0, 360]
+float validAngle(float angle, float defaultValue, bool& usedDefault) {
+    if (std::isnan(angle)) {
+        usedDefault = true;
+        return defaultValue;
+    }
+    if (angle < 0.f) { return angle + 360.f; }
+    if (angle > 360.f) { return angle - 360.f; }
+    return angle;
+};
+
+ghoul::Dictionary toDataDictionary(const ExoplanetSystem& system) {
+    ghoul_assert(
+        system.planetNames.size() == system.planetsData.size(),
+        "The length of the planet names list must match the planet data list"
+    );
+
+    ghoul::Dictionary res;
+
+    res.setValue("SystemId", makeIdentifier(system.starName));
+
+    const glm::dvec3 starPosInParsec = static_cast<glm::dvec3>(system.starData.position);
+
+    if (!isValidPosition(starPosInParsec)) {
+        LERROR(std::format(
+            "Insufficient data available for exoplanet system '{}'. Could not "
+            "determine star position", system.starName
+        ));
+        return ghoul::Dictionary();
+    }
+
+    const glm::dvec3 starPos = starPosInParsec * distanceconstants::Parsec;
+    res.setValue("Position", starPos);
+
+    res.setValue("NumPlanets", static_cast<double>(system.planetNames.size()));
+
+    std::string starName = system.starName;
+    sanitizeNameString(starName);
+    res.setValue("StarName", starName);
+
+    if (!std::isnan(system.starData.radius)) {
+        double radiusInMeter = distanceconstants::SolarRadius * system.starData.radius;
+        res.setValue("StarRadius", radiusInMeter);
+    }
+
+    if (!std::isnan(system.starData.bv)) {
+        res.setValue("StarColor", glm::dvec3(computeStarColor(system.starData.bv)));
+    }
+
+    if (!std::isnan(system.starData.teff)) {
+        res.setValue("StarTeff", static_cast<double>(system.starData.teff));
+    }
+
+    if (!std::isnan(system.starData.luminosity)) {
+        res.setValue("StarLuminosity", static_cast<double>(system.starData.luminosity));
+    }
+
+    ghoul::Dictionary planets;
+
+    for (size_t i = 0; i < system.planetNames.size(); i++) {
+        const ExoplanetDataEntry& data = system.planetsData[i];
+        const std::string& name = system.planetNames[i];
+        const std::string id = makeIdentifier(name);
+
+        ghoul::Dictionary planet;
+
+        planet.setValue("Id", id);
+        planet.setValue("Name", name);
+
+        bool canVisualize = hasSufficientData(data);
+        planet.setValue("HasEnoughData", canVisualize);
+
+        bool hasUsedDefaultValues = false;
+
+        if (!canVisualize) {
+            continue;
+        }
+
+        if (!std::isnan(data.r)) {
+            double planetRadius = data.r * distanceconstants::JupiterRadius;
+            planet.setValue("Radius", planetRadius);
+        }
+
+        // Orbit data
+        {
+            planet.setValue(
+                "SemiMajorAxis",
+                static_cast<double>(data.a) * distanceconstants::AstronomicalUnit
+            );
+
+            if (!std::isnan(data.ecc)) {
+                planet.setValue("Eccentricity", static_cast<double>(data.ecc));
+            }
+            else {
+                planet.setValue("Eccentricity", 0.0);
+                hasUsedDefaultValues = true;
+            }
+
+            float inclination = validAngle(data.i, 90.f, hasUsedDefaultValues);
+            float bigOmega = validAngle(data.bigOmega, 180.f, hasUsedDefaultValues);
+            float omega = validAngle(data.omega, 90.f, hasUsedDefaultValues);
+
+            planet.setValue("Inclination", static_cast<double>(inclination));
+            planet.setValue("AscendingNode", static_cast<double>(bigOmega));
+            planet.setValue("ArgumentOfPeriapsis", static_cast<double>(omega));
+
+            std::string sEpoch;
+            if (!std::isnan(data.tt)) {
+                Time epoch;
+                epoch.setTime("JD " + std::to_string(data.tt));
+                sEpoch = std::string(epoch.ISO8601());
+            }
+            else {
+                hasUsedDefaultValues = true;
+                sEpoch = "2009-05-19T07:11:34.080";
+            }
+            planet.setValue("Epoch", sEpoch);
+            planet.setValue("Period", data.per);
+
+            bool hasUpperAUncertainty = !std::isnan(data.aUpper);
+            bool hasLowerAUncertainty = !std::isnan(data.aLower);
+
+            if (hasUpperAUncertainty && hasLowerAUncertainty) {
+                const float lowerOffset = static_cast<float>(data.aLower / data.a);
+                const float upperOffset = static_cast<float>(data.aUpper / data.a);
+                planet.setValue(
+                    "SemiMajorAxisUncertainty",
+                    glm::dvec2(lowerOffset, lowerOffset)
+                );
+            }
+
+            const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(
+                inclination,
+                bigOmega,
+                omega
+            );
+            const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
+            planet.setValue("OrbitPlaneRotationMatrix", rotationMat3);
+
+            planet.setValue("HasUsedDefaultValues", hasUsedDefaultValues);
+        }
+
+        planets.setValue(id, planet);
+    }
+
+    res.setValue("Planets", planets);
+
+    // Extra stuff that is useful for rendering
+    const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPos);
+    res.setValue("SystemRotation", exoplanetSystemRotation);
+
+    float meanInclination = 0.f;
+    for (const ExoplanetDataEntry& p : system.planetsData) {
+        // Compute a valid inclination value (same as used for the dictionary)
+        bool usedDefault = false; // Dummy value
+        meanInclination += validAngle(p.i, 90.f, usedDefault);
+    }
+    meanInclination /= static_cast<float>(system.planetsData.size());
+    const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
+    const glm::dmat3 meanOrbitPlaneRotationMatrix = static_cast<glm::dmat3>(rotation);
+
+    res.setValue("MeanOrbitRotation", meanOrbitPlaneRotationMatrix);
+
+    double distanceToOurSystem = glm::length(starPosInParsec) *
+        distanceconstants::Parsec / distanceconstants::LightYear;
+
+    res.setValue("DistanceToUs", distanceToOurSystem);
+
+    return res;
 }
 
 } // namespace openspace::exoplanets

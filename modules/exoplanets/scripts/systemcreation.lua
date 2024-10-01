@@ -1,0 +1,521 @@
+openspace.exoplanets.documentation = {
+  {
+    Name = "addExoplanetSystem",
+    Arguments = {
+      { "starName", "String" }
+    },
+    Documentation = "TODO"
+  }
+}
+
+-----------------------------------------------------------------------------------
+-- Some Settings and things that will be used for the creation
+-----------------------------------------------------------------------------------
+
+local ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
+
+local SolarRadius = 6.95700E8 -- TODO: move to OpenSpace
+local EarthRadius = 6371E3 -- TODO: move to OpenSpace
+local JupiterRadius = 7.1492E7 -- TODO: move to OpenSpace
+local AstronomicalUnit = 149597871E3 -- TODO: move to OpenSpace
+
+local SecondsPerDay = 86400.0
+
+-- TODO: move to OpenSpace
+function ternary ( cond , T , F )
+  if cond then return T else return F end
+end
+
+function isEmpty(s)
+  return s == nil or s == ''
+end
+
+function hasValue(v)
+  return v ~= nil
+end
+
+-- Constants for different categories of sizes of planets (in Earth radii)
+-- Source: https://www.nasa.gov/image-article/sizes-of-known-exoplanets/
+local MaxRadius = {
+  Terrestrial = 1.25;
+  SuperEarth = 2.0;
+  NeptuneLike = 6.0;
+}
+
+-- Planets will be colored based on their size (from thresholds above), and
+-- described based on the planet types
+local PlanetType = {
+  Terrestrial = {
+    Description = string.format(
+      "Terrestrial planets (R < %.2f Earth radii)",
+      MaxRadius.Terrestrial
+    ),
+    Color = { 0.32, 0.2, 0.1 },
+    ColorName = "Brown"
+  },
+  SuperEarth = {
+    Description = string.format(
+      "Super-Earths (%.0f < R < %.0f Earth radii)",
+      MaxRadius.Terrestrial, MaxRadius.SuperEarth
+    ),
+    Color = { 1.0, 0.76, 0.65 },
+    ColorName = "Beige"
+  },
+  NeptuneLike = {
+    Description = string.format(
+      "Neptune-like planets (%.0f < R < %.0f Earth radii)",
+      MaxRadius.SuperEarth, MaxRadius.NeptuneLike
+    ),
+    Color = { 0.22, 0.49, 0.50 },
+    ColorName = "Blue"
+  },
+  GasGiant = {
+    Description = string.format(
+      "Gas giants or larger planets (R > %.0f Earth radii)",
+      MaxRadius.NeptuneLike
+    ),
+    Color = { 0.55, 0.34, 0.39 },
+    ColorName = "Wine red"
+  }
+}
+
+local SizeColorLayerDescription = string.format(
+  [[This layer gives a fixed color to the planet surface based on the
+    planet radius. The planets are split into four categories based on
+    their radius (in Earth radii). 1) %s are %s, 2) %s are %s, 3)
+    %s are %s, and 4) %s are %s.]],
+  PlanetType.Terrestrial.Description, PlanetType.Terrestrial.ColorName,
+  PlanetType.SuperEarth.Description, PlanetType.SuperEarth.ColorName,
+  PlanetType.NeptuneLike.Description, PlanetType.NeptuneLike.ColorName,
+  PlanetType.GasGiant.Description, PlanetType.GasGiant.ColorName
+);
+
+function planetTypeKey(radiusInMeter)
+  if radiusInMeter < MaxRadius.Terrestrial * EarthRadius then
+    return "Terrestrial"
+  elseif radiusInMeter < MaxRadius.SuperEarth * EarthRadius then
+    return "SuperEarth"
+  elseif radiusInMeter < MaxRadius.NeptuneLike * EarthRadius then
+    return "NeptuneLike"
+  else
+    return "GasGiant"
+  end
+end
+
+-----------------------------------------------------------------------------------
+
+openspace.exoplanets.addExoplanetSystem = function (starName)
+  local data = openspace.exoplanets.systemData(starName)
+  local starIdentifier = data.SystemId
+  local guiPath = ExoplanetsGuiPath .. data.StarName
+
+  if openspace.hasSceneGraphNode(starIdentifier) then
+    openspace.printError(
+      "Adding of exoplanet system '" .. starName .. "' failed. " ..
+      "The system has already been added"
+    )
+    return
+  end
+
+  if next(data) == nil then
+    -- No data was found
+    return
+  end
+
+  --------------------------------------------------------------------
+  -- Star Globe
+  --------------------------------------------------------------------
+  local starTexture = openspace.propertyValue("Modules.Exoplanets.StarTexture")
+  local starNoDataTexture = openspace.propertyValue("Modules.Exoplanets.NoDataTexture")
+
+  local colorLayers = {}
+  if hasValue(data.StarColor) then
+    -- If a star color was computed, there was enough data to visualize the star
+    colorLayers = {
+      {
+        Identifier = "StarColor",
+        Type = "SolidColor",
+        Color = data.StarColor,
+        BlendMode = "Normal",
+        Enabled = true
+      },
+      {
+        Identifier = "StarTexture",
+        FilePath = openspace.absPath(starTexture),
+        BlendMode = "Color",
+        Enabled = true
+      }
+    }
+  else
+    colorLayers = {
+      Identifier = "NoDataStarTexture",
+      FilePath = openspace.absPath(starNoDataTexture),
+      BlendMode = "Color",
+      Enabled = true
+    }
+  end
+
+  local Star = {
+    Identifier = starIdentifier,
+    Parent = "SolarSystemBarycenter",
+    Renderable = {
+      Type = "RenderableGlobe",
+      Radii =  data.StarRadius, -- TODO: check has value
+      PerformShading = false,
+      Layers = {
+        ColorLayers = colorLayers
+      }
+    },
+    Transform = {
+      Rotation = {
+        Type = "StaticRotation",
+        Rotation = data.SystemRotation
+      },
+      Translation = {
+        Type = "StaticTranslation",
+        Position = data.Position
+      }
+    },
+    Tag = { "exoplanet_system" },
+    GUI = {
+      Name = data.StarName .. " (Star)",
+      Path = guiPath,
+      Description = string.format(
+        [[The star %s is the host star of an exoplanet system with %d %s that %s
+          enough data to be visualized. It has a size of %.2f solar radii and an
+          effective temperature of %.0f Kelvin. The system is located at a
+          distance of %.0f light-years from Earth.]],
+        data.StarName,
+        data.NumPlanets,
+        ternary(data.NumPlanets > 1, "planets", "planet"),
+        ternary(data.NumPlanets > 1, "have", "has"),
+        data.StarRadius / SolarRadius, -- TODO: check has value
+        data.StarTeff, -- TODO: check has value
+        data.DistanceToUs
+      )
+    }
+  }
+  openspace.addSceneGraphNode(Star)
+
+  --------------------------------------------------------------------
+  -- Star Label
+  --------------------------------------------------------------------
+  local StarLabel = {
+    Identifier = starIdentifier .. "_Label",
+    Parent = starIdentifier,
+    Renderable = {
+      Type = "RenderableLabel",
+      Enabled = false,
+      Text = data.StarName,
+      FontSize = 70.0,
+      Size = 14.17,
+      MinMaxSize = { 1, 50 },
+      EnableFading = true,
+      FadeUnit = "pc",
+      FadeDistances = { 1.33, 15.0 },
+      FadeWidths = {1.0, 20.0}
+    },
+    Tag = { "exoplanet_system_labels" },
+    GUI = {
+      Name = data.StarName .. " Label",
+      Path = guiPath
+    }
+  }
+  openspace.addSceneGraphNode(StarLabel)
+
+  --------------------------------------------------------------------
+  -- Star Glare
+  --------------------------------------------------------------------
+  local starGlareTexture = openspace.propertyValue("Modules.Exoplanets.StarGlareTexture")
+
+  if hasValue(data.StarColor) and hasValue(data.StarRadius) then
+    -- This is a little magic to make the size of the glare dependent on the
+    -- size and the temperature of the star. It's kind of based on the fact that
+    -- the luminosity of a star is proportional to: (radius^2)*(temperature^4)
+    -- Maybe a better option would be to compute the size based on the aboslute
+    -- magnitude or star luminosity, but for now this looks good enough.
+    local size = 59.0 * data.StarRadius
+    if data.StarTeff then
+      local SunTeff = 5780.90;
+      local RelativeTeff = (data.StarTeff / SunTeff)
+      size = size * RelativeTeff * RelativeTeff;
+    end
+
+    local StarGlare = {
+      Identifier = starIdentifier .. "_Glare",
+      Parent = starIdentifier,
+      Renderable = {
+        Type = "RenderablePlaneImageLocal",
+        Size = size,
+        Origin = "Center",
+        Billboard = true,
+        Texture = openspace.absPath(starGlareTexture),
+        BlendMode = "Additive",
+        Opacity = 0.65,
+        MultiplyColor = data.StarColor
+      },
+      GUI = {
+        Name = data.StarName .. " Glare",
+        Path = guiPath
+      }
+    }
+    openspace.addSceneGraphNode(StarGlare)
+  end
+
+  --------------------------------------------------------------------
+  -- 1 AU Comparison Circle
+  --------------------------------------------------------------------
+  local showCircle = openspace.propertyValue("Modules.Exoplanets.ShowComparisonCircle")
+  local circleColor = openspace.propertyValue("Modules.Exoplanets.ComparisonCircleColor")
+
+  local Circle = {
+    Identifier = starIdentifier .. "_1AU_Circle",
+    Parent = starIdentifier,
+    Renderable = {
+      Type = "RenderableRadialGrid",
+      Enabled = showCircle,
+      Radii = { 0.0, 1.0 },
+      Color = circleColor,
+      CircleSegments = 64,
+      LineWidth = 2.0
+    },
+    Transform = {
+      Rotation = {
+        Type = "StaticRotation",
+        Rotation = data.MeanOrbitRotation
+      },
+      Scale = {
+        Type = "StaticScale",
+        Scale = AstronomicalUnit
+      }
+    },
+    Tag = { "exoplanet_1au_ring" },
+    GUI = {
+      Name = "1 AU Size Comparison Circle",
+      Path = guiPath,
+      Description = [[A circle with a radius of 1 Astronomical Unit. That is, its
+        size corresponds to the size of Earth's orbit.]]
+    }
+  }
+  openspace.addSceneGraphNode(Circle)
+
+  --------------------------------------------------------------------
+  -- Habitable Zone
+  --------------------------------------------------------------------
+  local showZone = openspace.propertyValue("Modules.Exoplanets.ShowHabitableZone")
+  local zoneOpacity = openspace.propertyValue("Modules.Exoplanets.HabitableZoneOpacity")
+  local zoneTexture = openspace.propertyValue("Modules.Exoplanets.HabitableZoneTexture")
+  local useOptimisticBounds = openspace.propertyValue(
+    "Modules.Exoplanets.UseOptimisticZone"
+  )
+
+  if hasValue(data.StarTeff) and hasValue(data.StarLuminosity) then
+    local HabitableZoneDisc = {
+      Identifier = starIdentifier .. "_HZ_Disc",
+      Parent = starIdentifier,
+      Renderable = {
+        Type = "RenderableHabitableZone",
+        Enabled = showZone,
+        Texture = openspace.absPath(zoneTexture),
+        Luminosity = data.StarLuminosity,
+        EffectiveTemperature = data.StarTeff,
+        Optimistic = useOptimisticBounds,
+        Opacity = zoneOpacity
+      },
+      Transform = {
+        Rotation = {
+          Type = "StaticRotation",
+          Rotation = data.MeanOrbitRotation
+        }
+      },
+      Tag = { "exoplanet_habitable_zone" },
+      GUI = {
+        Name = data.StarName .. " Habitable Zone",
+        Path = guiPath,
+        Description = [[
+          The habitable zone is the region around a star in which an Earth-like planet
+          can potentially have liquid water on its surface. The inner boundary is where
+          the greenhouse gases in the atmosphere would trap any incoming infrared
+          radiation, leading to the planet surface becoming so hot that water boils away.
+          The outer boundary is where the greenhouse effect would not be able to maintain
+          surface temperature above freezing anywhere on the planet.
+        ]]
+      }
+    }
+    openspace.addSceneGraphNode(HabitableZoneDisc)
+  end
+
+  --------------------------------------------------------------------
+  -- Planets
+  --------------------------------------------------------------------
+  local defaultPlanetTexture = openspace.propertyValue(
+    "Modules.Exoplanets.PlanetDefaultTexture"
+  )
+
+  local addExoplanet = function (id, planetData)
+    -- This translation will be used for both the trail and globe
+    local PlanetKeplerTranslation = {
+      Type = "KeplerTranslation",
+      Eccentricity = planetData.Eccentricity,
+      SemiMajorAxis = 0.001 * planetData.SemiMajorAxis, -- km
+      Inclination = planetData.Inclination,
+      AscendingNode = planetData.AscendingNode,
+      ArgumentOfPeriapsis = planetData.ArgumentOfPeriapsis,
+      MeanAnomaly = 0.0,
+      Epoch = planetData.Epoch,
+      Period = planetData.Period * SecondsPerDay
+    }
+
+    --------------------------------------------------------------------
+    -- Planet Globe (if we know how big it is)
+    --------------------------------------------------------------------
+    local ambientIntensity = 0.5 -- High to show the color from size more clearly
+
+    if hasValue(planetData.Radius) then
+      local planetTypeKey = planetTypeKey(planetData.Radius)
+      local planetTypeData = PlanetType[planetTypeKey]
+
+      local planetColorLayers = {
+        {
+          Identifier = "ColorFromSize",
+          Name = "Color From Size",
+          Type = "SolidColor",
+          Color = planetTypeData.Color,
+          Enabled = true,
+          Description = SizeColorLayerDescription
+        }
+      }
+
+      -- If a default texture was provided, use it. Also, reduce the ambient intensity
+      if not isEmpty(defaultPlanetTexture) then
+        local PlanetTextureLayer = {
+          Identifier = "PlanetTexture",
+          Name = "Planet Texture",
+          FilePath = openspace.absPath(defaultPlanetTexture),
+          Enabled = true
+        }
+        table.insert(planetColorLayers, PlanetTextureLayer)
+        ambientIntensity = 0.15
+      end
+
+      local Planet = {
+        Identifier = id,
+        Parent = starIdentifier,
+        Renderable = {
+          Type = "RenderableGlobe",
+          Radii =  planetData.Radius, -- TODO: check if value
+          PerformShading = true,
+          Layers = {
+            ColorLayers = planetColorLayers
+          },
+          LightSourceNode = starIdentifier,
+          AmbientIntensity = ambientIntensity
+        },
+        Tag = { "exoplanet_planet" },
+        Transform = {
+          Translation = PlanetKeplerTranslation
+        },
+        GUI = {
+          Name = planetData.Name,
+          Path = guiPath,
+          Description = string.format(
+            [[The exoplanet %s falls into the category of %s. Some key facts:
+              Radius: %.2f Earth radii, %.2f Jupiter radii.
+              Orbit Period: %.1f (Earth) days.
+              Orbit Semi-major axis: %.2f (AU).
+              Orbit Eccentricity: %.2f.]],
+            planetData.Name,
+            planetTypeData.Description,
+            planetData.Radius / EarthRadius,
+            planetData.Radius / JupiterRadius,
+            planetData.Period,
+            planetData.SemiMajorAxis / AstronomicalUnit,
+            planetData.Eccentricity
+          )
+        }
+      }
+      openspace.addSceneGraphNode(Planet)
+    end
+
+    --------------------------------------------------------------------
+    -- Planet Orbit
+    --------------------------------------------------------------------
+    local trailResolution = 1000.0
+    -- Increase the resolution of very eccentric orbits
+    local EccentricityThreshold = 0.85
+    if planetData.Eccentricity > EccentricityThreshold then
+      trailResolution = trailResolution * 2.0
+    end
+
+    -- TODO: Include information about default values in description
+
+    local Orbit = {
+      Identifier = id .. "_Trail",
+      Parent = starIdentifier,
+      Renderable = {
+        Type = "RenderableTrailOrbit",
+        Period = planetData.Period,
+        Resolution = trailResolution,
+        Translation = PlanetKeplerTranslation,
+        Color = { 1, 1, 1 }
+      },
+      Tag = { "exoplanet_trail" },
+      GUI = {
+        Name = planetData.Name .. " Trail",
+        Path = guiPath
+      }
+    }
+    openspace.addSceneGraphNode(Orbit)
+
+    --------------------------------------------------------------------
+    -- Planet Orbit Uncertainty
+    --------------------------------------------------------------------
+    local showUncertaintyDisc = openspace.propertyValue("Modules.Exoplanets.ShowHabitableZone")
+    local discTexture = openspace.propertyValue("Modules.Exoplanets.OrbitDiscTexture")
+
+    if hasValue(planetData.SemiMajorAxisUncertainty) then
+      local OrbitDisc = {
+        Identifier = id .. "_Disc",
+        Parent = starIdentifier,
+        Renderable = {
+          Type = "RenderableOrbitDisc",
+          Enabled =  showUncertaintyDisc,
+          Texture = openspace.absPath(discTexture),
+          Size = planetData.SemiMajorAxis,
+          Eccentricity = planetData.Eccentricity,
+          Offset = planetData.SemiMajorAxisUncertainty,
+          Opacity = 0.25
+        },
+        Transform = {
+          Rotation = {
+            Type = "StaticRotation",
+            Rotation = planetData.OrbitPlaneRotationMatrix
+          }
+        },
+        Tag = { "exoplanet_uncertainty_disc" },
+        GUI = {
+          Name = planetData.Name .. " Disc",
+          Path = guiPath,
+          Description = [[
+            The width of this disc around the planet's orbit marks the uncertainty of the
+            orbit (based on the uncertainty of the semi-major axis, and the eccentricity
+            of the orbit). The wider the disc, the more uncertain the orbit is.
+          ]]
+        }
+      }
+      openspace.addSceneGraphNode(OrbitDisc)
+    end
+  end
+
+  -- Add all the planets that have sufficient data
+  for planetId,planetData in pairs(data.Planets) do
+    if planetData.HasEnoughData then
+      addExoplanet(planetId, planetData)
+    else
+      openspace.printWarning([[
+        Skipping exoplanet ']] .. planetData.Name .. [[', since there is not enough
+        data to visualize it
+      ]])
+    end
+  end
+end

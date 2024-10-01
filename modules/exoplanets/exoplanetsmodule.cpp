@@ -413,14 +413,17 @@ std::vector<documentation::Documentation> ExoplanetsModule::documentations() con
 
 scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
     return {
-        "exoplanets",
-        {
-            codegen::lua::AddExoplanetSystem,
+        .name = "exoplanets",
+        .functions = {
             codegen::lua::RemoveExoplanetSystem,
+            codegen::lua::SystemData,
             codegen::lua::ListOfExoplanets,
             codegen::lua::ListOfExoplanetsDeprecated,
             codegen::lua::ListAvailableExoplanetSystems,
             codegen::lua::LoadExoplanetsFromCsv
+        },
+        .scripts = {
+            absPath("${MODULE_EXOPLANETS}/scripts/systemcreation.lua")
         }
     };
 }

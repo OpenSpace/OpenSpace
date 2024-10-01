@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__
 
 #include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
 #include <string>
 #include <vector>
@@ -173,6 +174,8 @@ void sanitizeNameString(std::string& s);
  * host star while another does not. So for every planet, update star data if needed.
  */
 void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p);
+
+ghoul::Dictionary toDataDictionary(const ExoplanetSystem& systemData);
 
 } // namespace openspace::exoplanets
 

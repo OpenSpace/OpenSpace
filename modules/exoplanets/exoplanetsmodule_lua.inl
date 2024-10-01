@@ -116,6 +116,7 @@ void queueAddSceneGraphNodeScript(const std::string& sgnTableAsString) {
     });
 }
 
+
 void createExoplanetSystem(const std::string& starName,
                            openspace::exoplanets::ExoplanetSystem system)
 {
@@ -310,9 +311,9 @@ void createExoplanetSystem(const std::string& starName,
         planet.bigOmega = validAngle(planet.bigOmega, 180.f);
         planet.omega = validAngle(planet.omega, 90.f);
 
-        Time epoch;
         std::string sEpoch;
         if (!std::isnan(planet.tt)) {
+            Time epoch;
             epoch.setTime("JD " + std::to_string(planet.tt));
             sEpoch = std::string(epoch.ISO8601());
         }
@@ -761,35 +762,22 @@ std::vector<std::string> hostStarsWithSufficientData() {
 }
 
 /**
- * Add one or multiple exoplanet systems to the scene, as specified by the input. An input
- * string should be the name of the system host star.
+ * Return an object contianing all the information needed to add a specific exoplanet
+ * system.
+ *
+ * TODO: Document parameters (in and out)
  */
-[[codegen::luawrap]] void addExoplanetSystem(
-                            std::variant<std::string, std::vector<std::string>> starNames)
-{
-    std::vector<std::string> starsToAdd;
+[[codegen::luawrap]] ghoul::Dictionary systemData(std::string starName){
+    using namespace openspace;
 
-    if (std::holds_alternative<std::string>(starNames)) {
-        // The user provided a single name
-        const std::string starName = std::get<std::string>(starNames);
-        starsToAdd.push_back(starName);
-    }
-    else {
-        starsToAdd = std::get<std::vector<std::string>>(starNames);
+    exoplanets::ExoplanetSystem systemData = findExoplanetSystemInData(starName);
+
+    if (systemData.planetsData.empty()) {
+        LERROR(std::format("Exoplanet system '{}' could not be found", starName));
+        return ghoul::Dictionary();
     }
 
-    for (const std::string& starName : starsToAdd) {
-        openspace::exoplanets::ExoplanetSystem systemData =
-            findExoplanetSystemInData(starName);
-
-        if (systemData.planetsData.empty()) {
-            LERROR(std::format("Exoplanet system '{}' could not be found", starName));
-            return;
-        }
-
-        createExoplanetSystem(starName, systemData);
-    }
-
+    return exoplanets::toDataDictionary(systemData);
 }
 
 [[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
