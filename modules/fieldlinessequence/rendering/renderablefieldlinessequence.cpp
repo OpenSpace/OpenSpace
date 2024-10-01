@@ -727,8 +727,14 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         if (_maskingRanges.size() > _maskingQuantity) {
             _selectedMaskingRange= _maskingRanges[_maskingQuantity];
         }
-        else {
+        else if (_maskingRanges.size() > 0) {
             _selectedMaskingRange = _maskingRanges[0];
+        }
+        else {
+            LERROR(std::format(
+                "Cannot set selected masking range with: {}",
+                _maskingRanges[_maskingQuantity].x
+            ));
         }
     });
 
