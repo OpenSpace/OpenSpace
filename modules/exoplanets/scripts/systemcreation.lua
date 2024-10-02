@@ -5,8 +5,59 @@ openspace.exoplanets.documentation = {
       { "starName", "String" }
     },
     Documentation = "TODO"
+  },
+  {
+    Name = "addExoplanetSystems",
+    Arguments = {
+      { "listOfStarNames", "String[]" }
+    },
+    Documentation = "TODO"
+  },
+  {
+    Name = "loadExoplanetsFromCsv",
+    Arguments = {
+      { "csvFile", "String" }
+    },
+    Documentation = [[
+      Load a set of exoplanets based on custom data, in the form of a CSV file, and add
+      them to the rendering. Can be used to load custom datasets, or more recent planets
+      than what are included in the internal data file that is released with OpenSpace.
+
+      The format and column names in the CSV should be the same as the ones provided by
+      the NASA Exoplanet Archive. https://exoplanetarchive.ipac.caltech.edu/
+
+      We recommend downloading the file from the Exoplanet Archive's Composite data table,
+      where multiple sources are combined into one row per planet.
+      https://exoplanetarchive.ipac.caltech.edu
+      /cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
+
+      Please remember to include all columns in the file download, as missing data columns
+      may lead to an incomplete visualization.
+
+      Also, avoid loading too large files of planets, as each added system will affect the
+      rendering performance.
+    ]]
   }
 }
+
+openspace.exoplanets.addExoplanetSystem = function (starName)
+  local data = openspace.exoplanets.systemData(starName)
+  addExoplanetSystem(data)
+end
+
+openspace.exoplanets.addExoplanetSystems = function (listOfStarNames)
+  for _,starName in pairs(listOflistOfStarNamesNames) do
+    local data = openspace.exoplanets.systemData(starName)
+    addExoplanetSystem(data)
+  end
+end
+
+openspace.exoplanets.loadExoplanetsFromCsv = function (csvFile)
+  local dataList = openspace.exoplanets.loadSystemDataFromCsv(csvFile)
+  for _,data in pairs(dataList) do
+    addExoplanetSystem(data)
+  end
+end
 
 -----------------------------------------------------------------------------------
 -- Some Settings and things that will be used for the creation
@@ -103,15 +154,16 @@ function planetTypeKey(radiusInMeter)
 end
 
 -----------------------------------------------------------------------------------
-
-openspace.exoplanets.addExoplanetSystem = function (starName)
-  local data = openspace.exoplanets.systemData(starName)
+-- This is the function that adds the scene graph nodes for each exoplanet system.
+-- Edit this to change the visuals of the created exoplanet systems
+-----------------------------------------------------------------------------------
+function addExoplanetSystem(data)
   local starIdentifier = data.SystemId
   local guiPath = ExoplanetsGuiPath .. data.StarName
 
   if openspace.hasSceneGraphNode(starIdentifier) then
     openspace.printError(
-      "Adding of exoplanet system '" .. starName .. "' failed. " ..
+      "Adding of exoplanet system '" .. data.StarName .. "' failed. " ..
       "The system has already been added"
     )
     return

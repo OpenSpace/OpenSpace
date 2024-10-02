@@ -420,7 +420,7 @@ scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
             codegen::lua::ListOfExoplanets,
             codegen::lua::ListOfExoplanetsDeprecated,
             codegen::lua::ListAvailableExoplanetSystems,
-            codegen::lua::LoadExoplanetsFromCsv
+            codegen::lua::LoadSystemDataFromCsv
         },
         .scripts = {
             absPath("${MODULE_EXOPLANETS}/scripts/systemcreation.lua")
