@@ -129,7 +129,7 @@ openspace.exoplanets.addExoplanetSystem = function (starName)
   local starNoDataTexture = openspace.propertyValue("Modules.Exoplanets.NoDataTexture")
 
   local colorLayers = {}
-  if hasValue(data.StarColor) then
+  if hasValue(data.StarColor) and hasValue(data.StarRadius) then
     -- If a star color was computed, there was enough data to visualize the star
     colorLayers = {
       {
@@ -148,24 +148,39 @@ openspace.exoplanets.addExoplanetSystem = function (starName)
     }
   else
     colorLayers = {
-      Identifier = "NoDataStarTexture",
-      FilePath = openspace.absPath(starNoDataTexture),
-      BlendMode = "Color",
-      Enabled = true
+      {
+        Identifier = "NoDataStarTexture",
+        FilePath = openspace.absPath(starNoDataTexture),
+        BlendMode = "Color",
+        Enabled = true
+      }
     }
+  end
+
+  local starSizeAndTempInfo = function (data)
+    if hasValue(data.StarRadius) and hasValue(data.StarTeff) then
+      return string.format(
+        "It has a size of %.2f solar radii and an effective temperature of %.0f Kelvin",
+        data.StarRadius / SolarRadius, data.StarTeff
+      )
+    elseif hasValue(data.StarTeff) then
+      return string.format(
+        "Its size is uknown, but it has an effective temperature of %.0f Kelvin",
+        data.StarTeff
+      )
+    elseif hasValue(data.StarRadius) then
+      return string.format(
+        "It has a size of %.2f solar radii, but its temperature is unknown",
+        data.StarRadius
+      )
+    else
+      return "Both its size and temperature is unknown"
+    end
   end
 
   local Star = {
     Identifier = starIdentifier,
     Parent = "SolarSystemBarycenter",
-    Renderable = {
-      Type = "RenderableGlobe",
-      Radii =  data.StarRadius, -- TODO: check has value
-      PerformShading = false,
-      Layers = {
-        ColorLayers = colorLayers
-      }
-    },
     Transform = {
       Rotation = {
         Type = "StaticRotation",
@@ -176,21 +191,30 @@ openspace.exoplanets.addExoplanetSystem = function (starName)
         Position = data.Position
       }
     },
+    Renderable = {
+      Type = "RenderableGlobe",
+      -- If there is not a value for the radius, render a globe with a default radius,
+      -- to allow us to navigate to something. Note that it can't be too small, due to
+      -- precision issues at this distance
+      Radii = ternary(hasValue(data.StarRadius), data.StarRadius, 0.1 * SolarRadius),
+      PerformShading = false,
+      Layers = {
+        ColorLayers = colorLayers
+      }
+    },
     Tag = { "exoplanet_system" },
     GUI = {
       Name = data.StarName .. " (Star)",
       Path = guiPath,
       Description = string.format(
-        [[The star %s is the host star of an exoplanet system with %d %s that %s
-          enough data to be visualized. It has a size of %.2f solar radii and an
-          effective temperature of %.0f Kelvin. The system is located at a
-          distance of %.0f light-years from Earth.]],
+        [[The star %s is the host star of an exoplanet system with %d known %s that %s
+          enough data to be visualized. %s. The system is located at a distance of %.0f
+          light-years from Earth.]],
         data.StarName,
         data.NumPlanets,
         ternary(data.NumPlanets > 1, "planets", "planet"),
         ternary(data.NumPlanets > 1, "have", "has"),
-        data.StarRadius / SolarRadius, -- TODO: check has value
-        data.StarTeff, -- TODO: check has value
+        starSizeAndTempInfo(data),
         data.DistanceToUs
       )
     }
@@ -218,7 +242,10 @@ openspace.exoplanets.addExoplanetSystem = function (starName)
     Tag = { "exoplanet_system_labels" },
     GUI = {
       Name = data.StarName .. " Label",
-      Path = guiPath
+      Path = guiPath,
+      Description = string.format(
+        "A label for the exoplanet host star %s.", data.StarName
+      )
     }
   }
   openspace.addSceneGraphNode(StarLabel)
@@ -235,10 +262,12 @@ openspace.exoplanets.addExoplanetSystem = function (starName)
     -- Maybe a better option would be to compute the size based on the aboslute
     -- magnitude or star luminosity, but for now this looks good enough.
     local size = 59.0 * data.StarRadius
-    if data.StarTeff then
+    local hasTeffData = false
+    if hasValue(data.StarTeff) then
       local SunTeff = 5780.90;
       local RelativeTeff = (data.StarTeff / SunTeff)
       size = size * RelativeTeff * RelativeTeff;
+      hasTeffData = true
     end
 
     local StarGlare = {
@@ -256,7 +285,17 @@ openspace.exoplanets.addExoplanetSystem = function (starName)
       },
       GUI = {
         Name = data.StarName .. " Glare",
-        Path = guiPath
+        Path = guiPath,
+        Description = string.format(
+          "A glare effect for the star %s. %s",
+          data.StarName,
+          ternary(
+            hasTeffData,
+            [[The size of the glare has been computed based on data of the star's
+              temperature, in a way that's relative to the visualization for our Sun.]],
+            "The size of the glare is not data-based."
+          )
+        )
       }
     }
     openspace.addSceneGraphNode(StarGlare)
@@ -371,6 +410,27 @@ openspace.exoplanets.addExoplanetSystem = function (starName)
     --------------------------------------------------------------------
     local ambientIntensity = 0.5 -- High to show the color from size more clearly
 
+    local planetSizeInfo = function (data)
+      if hasValue(data.Radius) then
+        return string.format(
+          "%.2f Earth radii, %.2f Jupiter radii",
+          planetData.Radius / EarthRadius,
+          planetData.Radius / JupiterRadius
+        )
+      else
+        return "unknown"
+      end
+    end
+
+    local hasUsedDefaultValuesInfo = ""
+    if planetData.HasUsedDefaultValues then
+      hasUsedDefaultValuesInfo = [[
+        OBS! Default values have been used to visualize the orbit (for example for
+        inclination, eccentricity, or argument of periastron), and hence the
+        data specified for the orbit might not be reliable.
+      ]]
+    end
+
     if hasValue(planetData.Radius) then
       local planetTypeKey = planetTypeKey(planetData.Radius)
       local planetTypeData = PlanetType[planetTypeKey]
@@ -420,17 +480,17 @@ openspace.exoplanets.addExoplanetSystem = function (starName)
           Path = guiPath,
           Description = string.format(
             [[The exoplanet %s falls into the category of %s. Some key facts:
-              Radius: %.2f Earth radii, %.2f Jupiter radii.
+              Radius: %s.
               Orbit Period: %.1f (Earth) days.
               Orbit Semi-major axis: %.2f (AU).
-              Orbit Eccentricity: %.2f.]],
+              Orbit Eccentricity: %.2f. %s]],
             planetData.Name,
             planetTypeData.Description,
-            planetData.Radius / EarthRadius,
-            planetData.Radius / JupiterRadius,
+            planetSizeInfo(planetData),
             planetData.Period,
             planetData.SemiMajorAxis / AstronomicalUnit,
-            planetData.Eccentricity
+            planetData.Eccentricity,
+            hasUsedDefaultValuesInfo
           )
         }
       }
@@ -447,7 +507,16 @@ openspace.exoplanets.addExoplanetSystem = function (starName)
       trailResolution = trailResolution * 2.0
     end
 
-    -- TODO: Include information about default values in description
+    local orbitDescription = string.format(
+      "The orbit trail of the exoplanet %s. ", planetData.Name
+    )
+    if planetData.HasUsedDefaultValues then
+      orbitDescription = orbitDescription .. [[
+        OBS! Default values have been used to visualize the orbit (for example for
+        inclination, eccentricity, or argument of periastron). The shape or orientation
+        of the orbit might hence not be completely accurate.
+      ]]
+    end
 
     local Orbit = {
       Identifier = id .. "_Trail",
@@ -462,7 +531,8 @@ openspace.exoplanets.addExoplanetSystem = function (starName)
       Tag = { "exoplanet_trail" },
       GUI = {
         Name = planetData.Name .. " Trail",
-        Path = guiPath
+        Path = guiPath,
+        Description = orbitDescription
       }
     }
     openspace.addSceneGraphNode(Orbit)
