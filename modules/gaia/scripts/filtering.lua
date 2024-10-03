@@ -28,6 +28,11 @@ openspace.gaia.documentation = {
 
       The radius is given in Kiloparsec.
     ]]
+  },
+  {
+    Name = "removeClippingSphere",
+    Arguments = {},
+    Documentation = ""
   }
 }
 
@@ -49,6 +54,10 @@ openspace.gaia.addClippingBox = function (name, size, position)
           position[2] * kilo_parsec_in_meter,
           position[3] * kilo_parsec_in_meter
         }
+      },
+      Scale = {
+        Type = "StaticScale",
+        Scale = kilo_parsec_in_meter
       }
     },
     Renderable = {
@@ -56,9 +65,9 @@ openspace.gaia.addClippingBox = function (name, size, position)
       Color = { 0.6, 0.5, 0.7 },
       LineWidth = 2.0,
       Size = {
-        size[1] * kilo_parsec_in_meter,
-        size[2] * kilo_parsec_in_meter,
-        size[3] * kilo_parsec_in_meter
+        size[1],
+        size[2],
+        size[3]
       }
     },
     GUI = {
@@ -68,18 +77,17 @@ openspace.gaia.addClippingBox = function (name, size, position)
   }
 
   openspace.addSceneGraphNode(grid)
-
   openspace.setPropertyValue(
-    "Scene." .. name .. ".renderable.FilterPosX",
-    { (position[1] - size[1] / 2) * kilo_parsec_in_meter, (position[1] + size[1] / 2) * kilo_parsec_in_meter }
+    "Scene." .. name .. ".Renderable.FilterPosX",
+    { (position[1] - size[1] / 2), (position[1] + size[1] / 2) }
   )
   openspace.setPropertyValue(
-    "Scene." .. name .. ".renderable.FilterPosY",
-    { (position[2] - size[2] / 2) * kilo_parsec_in_meter, (position[2] + size[2] / 2) * kilo_parsec_in_meter }
+    "Scene." .. name .. ".Renderable.FilterPosY",
+    { (position[2] - size[2] / 2), (position[2] + size[2] / 2) }
   )
   openspace.setPropertyValue(
-    "Scene." .. name .. ".renderable.FilterPosZ",
-    { (position[3] - size[3] / 2) * kilo_parsec_in_meter, (position[3] + size[3] / 2) * kilo_parsec_in_meter }
+    "Scene." .. name .. ".Renderable.FilterPosZ",
+    { (position[3] - size[3] / 2), (position[3] + size[3] / 2) }
   )
 end
 
@@ -90,7 +98,6 @@ openspace.gaia.removeClippingBox = function()
     openspace.removeSceneGraphNode(grid_identifier)
   end
 end
-
 
 openspace.gaia.addClippingSphere = function (name, radius)
   local grid_identifier = "Filtering_Sphere"
@@ -120,8 +127,10 @@ openspace.gaia.addClippingSphere = function (name, radius)
   }
 
   openspace.addSceneGraphNode(grid)
-
-  openspace.setPropertyValue("Scene." .. name .. ".renderable.FilterDist", radius * kilo_parsec_in_meter)
+  openspace.setPropertyValue(
+    "Scene." .. name .. ".Renderable.FilterDist",
+    { 0.0, radius }
+  )
 end
 
 openspace.gaia.removeClippingSphere = function()
