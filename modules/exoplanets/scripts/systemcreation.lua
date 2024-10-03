@@ -9,6 +9,8 @@ openspace.exoplanets.documentation = {
 
       Note that the formatting of the name must match the one in the dataset. That is, it
       must match the name as given in the [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/).
+
+      \\param starName The name of the star
     ]]
   },
   {
@@ -21,6 +23,8 @@ openspace.exoplanets.documentation = {
 
       Note that the formatting of the name must match the one in the dataset. That is,
       they must match the names as given in the [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/).
+
+      \\param listOfStarNames A list of star names for which to create the exoplanet systems
     ]]
   },
   {
@@ -44,6 +48,8 @@ openspace.exoplanets.documentation = {
 
       Also, avoid loading too large files of planets, as each added system will affect the
       rendering performance.
+
+      \\param csvFile A path to a .csv file that contains the data for the exoplanets
     ]]
   }
 }
