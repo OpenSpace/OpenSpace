@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/exoplanets/datastructure.h>
+#include <modules/exoplanets/exoplanetshelper.h>
+#include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/stringhelper.h>
@@ -33,15 +36,6 @@
 namespace {
 
 constexpr std::string_view _loggerCat = "ExoplanetsModule";
-
-constexpr std::string_view ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
-
-// Lua cannot handle backslashes, so replace these with forward slashes
-std::string formatPathToLua(const std::filesystem::path& path) {
-    std::string resPath = path.string();
-    std::replace(resPath.begin(), resPath.end(), '\\', '/');
-    return resPath;
-}
 
 openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starName) {
     using namespace openspace;
@@ -169,10 +163,14 @@ std::vector<std::string> hostStarsWithSufficientData() {
 }
 
 /**
- * Return an object contianing all the information needed to add a specific exoplanet
- * system.
+ * Return an object containing the information needed to add a specific exoplanet system.
+ * The data is retrieved from the module's prepared datafile for exoplanets. This file is
+ * in a binary format, for fast retrieval during runtime.
  *
- * TODO: Document parameters (in and out)
+ * \param starName The name of the star to get the information for.
+ *
+ * \return An object of the type [ExoplanetSystemData](#exoplanets_exoplanet_system_data)
+ *         that can be used to create the scene graph nodes for the exoplanet system
  */
 [[codegen::luawrap]] ghoul::Dictionary systemData(std::string starName){
     using namespace openspace;
@@ -184,9 +182,14 @@ std::vector<std::string> hostStarsWithSufficientData() {
         return ghoul::Dictionary();
     }
 
-    return exoplanets::toDataDictionary(systemData);
+    return systemData.toDataDictionary();
 }
 
+/**
+ * Remove a loaded exoplanet system.
+ *
+ * \param starName The name of the host star for the system to remove.
+ */
 [[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
     using namespace openspace;
     using namespace exoplanets;
@@ -205,6 +208,8 @@ std::vector<std::string> hostStarsWithSufficientData() {
  * Returns a list with names of the host star of all the exoplanet systems
  * that have sufficient data for generating a visualization, based on the
  * module's loaded data file.
+ *
+ * \return A list of exoplanet host star names.
  */
 [[codegen::luawrap]] std::vector<std::string> listOfExoplanets() {
     std::vector<std::string> names = hostStarsWithSufficientData();
@@ -225,6 +230,10 @@ listOfExoplanetsDeprecated()
     return listOfExoplanets();
 }
 
+/**
+ * Lists the names of the host stars of all exoplanet systems that have sufficient
+ * data for generating a visualization, and prints the list to the console.
+ */
 [[codegen::luawrap]] void listAvailableExoplanetSystems() {
     std::vector<std::string> names = hostStarsWithSufficientData();
 
@@ -241,14 +250,20 @@ listOfExoplanetsDeprecated()
     ));
 }
 
- /** TODO
-  * Load a set of exoplanets based on custom data, in the form of a CSV file, and add
-  * them to the rendering. Can be used to load custom datasets, or more recent planets
-  * than what are included in the internal data file that is released with OpenSpace.
+ /**
+  * Load a set of exoplanet information based on custom data in the form of a CSV file.
   *
   * The format and column names in the CSV should be the same as the ones provided by the
-  * NASA Exoplanet Archive. https://exoplanetarchive.ipac.caltech.edu/
+  * [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/).
   *
+  * When dowloading the data from the archive we recommend including all columns, since a
+  * few required ones are not selected by default.
+  *
+  * \param csvFile A path to the CSV file to load the data from.
+  *
+  * \return A list of objects of the type
+  *         [ExoplanetSystemData](#exoplanets_exoplanet_system_data), that can be used to
+  *         create the scene graph nodes for the exoplanet systems
   */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> loadSystemDataFromCsv(
                                                                       std::string csvFile)
@@ -319,8 +334,8 @@ listOfExoplanetsDeprecated()
     std::vector<ghoul::Dictionary> result;
     result.reserve(hostNameToSystemDataMap.size());
 
-    for (auto const& [_, data]: hostNameToSystemDataMap) {
-        result.push_back(toDataDictionary(data));
+    for (auto const& [_, system]: hostNameToSystemDataMap) {
+        result.push_back(system.toDataDictionary());
     }
     return result;
 }

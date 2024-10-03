@@ -4,14 +4,24 @@ openspace.exoplanets.documentation = {
     Arguments = {
       { "starName", "String" }
     },
-    Documentation = "TODO"
+    Documentation = [[
+      Add a specific exoplanet system to the scene, based on a star name.
+
+      Note that the formatting of the name must match the one in the dataset. That is, it
+      must match the name as given in the [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/).
+    ]]
   },
   {
     Name = "addExoplanetSystems",
     Arguments = {
       { "listOfStarNames", "String[]" }
     },
-    Documentation = "TODO"
+    Documentation = [[
+      Add multiple exoplanet systems to the scene, based on a list of names.
+
+      Note that the formatting of the name must match the one in the dataset. That is,
+      they must match the names as given in the [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/).
+    ]]
   },
   {
     Name = "loadExoplanetsFromCsv",
@@ -24,12 +34,10 @@ openspace.exoplanets.documentation = {
       than what are included in the internal data file that is released with OpenSpace.
 
       The format and column names in the CSV should be the same as the ones provided by
-      the NASA Exoplanet Archive. https://exoplanetarchive.ipac.caltech.edu/
+      the [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/).
 
-      We recommend downloading the file from the Exoplanet Archive's Composite data table,
+      We recommend downloading the file from the [Exoplanet Archive's Composite data table](https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars),
       where multiple sources are combined into one row per planet.
-      https://exoplanetarchive.ipac.caltech.edu
-      /cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
 
       Please remember to include all columns in the file download, as missing data columns
       may lead to an incomplete visualization.
@@ -631,13 +639,6 @@ function addExoplanetSystem(data)
 
   -- Add all the planets that have sufficient data
   for planetId,planetData in pairs(data.Planets) do
-    if planetData.HasEnoughData then
-      addExoplanet(planetId, planetData)
-    else
-      openspace.printWarning([[
-        Skipping exoplanet ']] .. planetData.Name .. [[', since there is not enough
-        data to visualize it
-      ]])
-    end
+    addExoplanet(planetId, planetData)
   end
 end
