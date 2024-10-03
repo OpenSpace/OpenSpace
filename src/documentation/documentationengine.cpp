@@ -46,6 +46,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 #include <future>
 
@@ -242,7 +243,18 @@ namespace {
 
         function[ArgumentsKey] = arguments;
         function[ReturnTypeKey] = f.returnType;
-        function[HelpKey] = f.helpText;
+
+        // Remove all double whitespaces from the helptext (these may be generated when
+        // using multi-line strings in Lua)
+        std::string cleanedHelpText = f.helpText;
+        ghoul::trimWhitespace(cleanedHelpText);
+        std::size_t doubleSpace = cleanedHelpText.find("  ");
+        while (doubleSpace != std::string::npos) {
+            cleanedHelpText.erase(doubleSpace, 1);
+            doubleSpace = cleanedHelpText.find("  ");
+        }
+
+        function[HelpKey] = cleanedHelpText;
 
         if (includeSourceLocation) {
             nlohmann::json sourceLocation;
