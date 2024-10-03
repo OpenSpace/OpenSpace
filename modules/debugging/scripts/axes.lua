@@ -7,12 +7,15 @@ openspace.debugging.documentation = {
     },
     Documentation = [[
       Creates a new scene graph node that show the coordinate system used for the
-      currently selected focus node. The first argument specifies the name of the
-      scene graph node for which the axes should be added. If this parameter is
-      not specified, the current focus node is used instead. The second argument
-      provides the length of the coordinate axis in meters. If this value is not
-      specified 2.5 times the interaction sphere of the selected node is used
-      instead.
+      currently selected focus node.
+
+      The first argument specifies the name of the scene graph node for which the
+      axes should be added. If this parameter is not specified, the current focus
+      node is used instead.
+
+      The second argument provides the length of the coordinate axis, in meters.
+      If this value is not specified, 2.5 times the interaction sphere of the
+      selected node is used instead.
     ]]
   }
 }

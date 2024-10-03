@@ -6,7 +6,11 @@ openspace.gaia.documentation = {
       { "size", "vec3" },
       { "position", "vec3" }
     },
-    Documentation = "Creates a clipping box for the Gaia renderable in the first argument"
+    Documentation = [[
+      Creates a clipping box for the Gaia renderable specified by the first argument.
+
+      The position and size values are given in Kiloparsec.
+    ]]
   },
   {
     Name = "removeClippingBox",
@@ -19,7 +23,11 @@ openspace.gaia.documentation = {
       { "name", "String" },
       { "radius", "Number" }
     },
-    Documentation = "Creates a clipping sphere for the Gaia renderable in the first argument"
+    Documentation = [[
+      Creates a clipping sphere for the Gaia renderable specified by the first argument.
+
+      The radius is given in Kiloparsec.
+    ]]
   }
 }
 
@@ -87,7 +95,6 @@ end
 openspace.gaia.addClippingSphere = function (name, radius)
   local grid_identifier = "Filtering_Sphere"
   local kilo_parsec_in_meter = 30856775814913700000
-
 
   if openspace.hasSceneGraphNode(grid_identifier) then
     openspace.removeSceneGraphNode(grid_identifier)

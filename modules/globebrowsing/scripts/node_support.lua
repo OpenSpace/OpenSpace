@@ -6,30 +6,40 @@ openspace.globebrowsing.documentation = {
       { "globeIdentifier", "String" },
       { "latitude", "Number" },
       { "longitude", "Number" },
-      { "altitude", "Number" }
+      { "altitude", "Number?" }
     },
     Documentation = [[
-      Sets the position of a SceneGraphNode that has GlobeTranslation/GlobeRotations.
+      Sets the position of a SceneGraphNode that has a
+      [GlobeTranslation](#globebrowsing_translation_globetranslation) and/or
+      [GlobeRotation](#globebrowsing_rotation_globerotation).
+
       Usage:
+      ```
       openspace.globebrowsing.setNodePosition(
         "Scale_StatueOfLiberty", "Earth", 40.000, -117.5, optionalAltitude
       )
+      ```
     ]]
   },
   {
     Name = "setNodePositionFromCamera",
     Arguments = {
       { "nodeIdentifer", "String" },
-      { "useAltitude", "Boolean" }
+      { "useAltitude", "Boolean?" }
     },
     Documentation = [[
-      Sets the position of a SceneGraphNode that has GlobeTranslation/GlobeRotations to
-      match the camera. Only uses camera position not rotation. If useAltitude is true,
-      then the position will also be updated to the camera's altitude.
+      Sets the position of a SceneGraphNode that has a
+      [GlobeTranslation](#globebrowsing_translation_globetranslation) and/or
+      [GlobeRotation](#globebrowsing_rotation_globerotation) to match the camera. Only
+      uses camera position not rotation. If useAltitude is true, then the position
+      will also be updated to the camera's altitude.
+
       Usage:
+      ```
       openspace.globebrowsing.setNodePositionFromCamera(
         "Scale_StatueOfLiberty", optionalUseAltitude
       )
+      ```
     ]]
   }
 }

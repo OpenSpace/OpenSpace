@@ -6,9 +6,10 @@ openspace.globebrowsing.documentation = {
       { "resolution", "String" },
       { "format", "String" }
     },
+    Return = "String",
     Documentation = [[
       Creates an XML configuration for a temporal GIBS dataset to be used in a
-      TemporalTileprovider
+      TemporalTileprovider.
     ]]
   },
   {
@@ -19,13 +20,15 @@ openspace.globebrowsing.documentation = {
       { "resolution",  "String" },
       { "format", "String" }
     },
+    Return = "String",
     Documentation = [[
       Creates an XML configuration for a GIBS dataset.
-      Arguments are: layerName, date, resolution, format.
+
       For all specifications, see
-      https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products
+      [this page](https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products).
 
       Usage:
+      ```
       openspace.globebrowsing.addLayer(
         "Earth",
         "ColorLayers",
@@ -39,6 +42,7 @@ openspace.globebrowsing.documentation = {
           )
         }
       )
+      ```
     ]]
   },
   {
@@ -51,14 +55,17 @@ openspace.globebrowsing.documentation = {
       { "endDate", "String" }
     },
     Documentation = [[
-      Adds a new layer from NASA GIBS to the Earth globe. Arguments are: imagery layer
-      name, imagery resolution, start date, end date, format.
+      Adds a new layer from NASA GIBS to the Earth globe.
+
       For all specifications, see
-      https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products
+      [this page](https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products).
+
       Usage:
+      ```
       openspace.globebrowsing.addGibsLayer(
         "AIRS_Temperature_850hPa_Night", "2km", "2013-07-15", "Present", "png"
       )
+      ```
     ]]
   },
   {
@@ -66,14 +73,20 @@ openspace.globebrowsing.documentation = {
     Arguments = {
       { "file", "String" }
     },
+    Return = "Table",
     Documentation = [[
       Parses the passed info file and return the table with the information provided in
-      the info file. The return table contains the optional keys:
-      'Color', 'Height', 'Node', 'Location', 'Identifier'.
+      the info file.
+
+      The return table contains the optional keys: 'Color', 'Height', 'Node', 'Location',
+      'Identifier'.
+
       Usage:
+      ```
       local t = openspace.globebrowsing.parseInfoFile(file)
       openspace.globebrowsing.addLayer("Earth", "ColorLayers", t.color)
       openspace.globebrowsing.addLayer("Earth", "HeightLayers", t.height)
+      ```
     ]]
   },
   {
@@ -86,8 +99,11 @@ openspace.globebrowsing.documentation = {
       Retrieves all info files recursively in the directory passed as the first argument
       to this function. The color and height tables retrieved from these info files are
       then added to the RenderableGlobe identified by name passed to the second argument.
+
       Usage:
+      ```
       openspace.globebrowsing.addBlendingLayersFromDirectory(directory, "Earth")
+      ```
     ]]
   },
   {
@@ -100,8 +116,11 @@ openspace.globebrowsing.documentation = {
       Retrieves all info files recursively in the directory passed as the first argument
       to this function. The name and location retrieved from these info files are then
       used to create new SceneGraphNodes that can be used as focus nodes.
+
       Usage:
+      ```
       openspace.globebrowsing.addFocusNodesFromDirectory(directory, "Mars")
+      ```
     ]]
   },
   {
@@ -111,14 +130,18 @@ openspace.globebrowsing.documentation = {
       { "globeIdentifier", "String" },
       { "latitude", "Number" },
       { "longitude", "Number" },
-      { "altitude", "Number" }
+      { "altitude", "Number?" }
     },
     Documentation = [[
-      Creates a new SceneGraphNode that can be used as focus node.
+      Creates a new SceneGraphNode that can be used as focus node for a specific point on
+      a globe. If no altitude is specified, an altitude of 0 will be used.
+
       Usage:
+      ```
       openspace.globebrowsing.addFocusNodeFromLatLong(
         "Olympus Mons", "Mars", -18.65, 226.2, optionalAltitude
       )
+      ```
     ]]
   },
   {
