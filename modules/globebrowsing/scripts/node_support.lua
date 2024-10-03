@@ -2,7 +2,7 @@ openspace.globebrowsing.documentation = {
   {
     Name = "setNodePosition",
     Arguments = {
-      { "nodeIdentifer", "String" },
+      { "nodeIdentifier", "String" },
       { "globeIdentifier", "String" },
       { "latitude", "Number" },
       { "longitude", "Number" },
@@ -19,6 +19,14 @@ openspace.globebrowsing.documentation = {
         "Scale_StatueOfLiberty", "Earth", 40.000, -117.5, optionalAltitude
       )
       ```
+
+      \\param nodeIdentifier The identifier of the SceneGraphNode to move
+      \\param globeIdentifier The identifier of the RenderableGlobe that the object should
+                              be put on
+      \\param latitude The latitude value for the new position, in degrees
+      \\param longitude The longitude value for the new position, in degrees
+      \\param altitude An optional altitude value for the new position, in meters. If
+                       excluded, an altitude of 0 will be used
     ]]
   },
   {
@@ -40,6 +48,10 @@ openspace.globebrowsing.documentation = {
         "Scale_StatueOfLiberty", optionalUseAltitude
       )
       ```
+
+      \\param nodeIdentifier The identifier of the SceneGraphNode to move
+      \\param useAltitude If true, the camera's altitude will also be used for the new
+                          positions. Otherwise, it will not.
     ]]
   }
 }
