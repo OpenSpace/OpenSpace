@@ -123,7 +123,7 @@ namespace {
         "TextureFilter",
         "Texture Filter",
         "Option to choose nearest neighobr or linear filter to texture.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
     constexpr openspace::properties::Property::PropertyInfo DeleteDownloadsOnShutdown = {
         "DeleteDownloadsOnShutdown",
@@ -355,7 +355,7 @@ void RenderableTimeVaryingSphere::setMinMaxValues(
     const float* pixelData = static_cast<const float*>(rawData);
     size_t dataSize = t->dimensions().x * t->dimensions().y;
     float min = *std::min_element(pixelData, pixelData + dataSize);                      //TODO crash here
-    float max = *std::max_element(pixelData, pixelData + dataSize);                             
+    float max = *std::max_element(pixelData, pixelData + dataSize);
     file.dataMinMax = glm::vec2(min, max);
 }
 

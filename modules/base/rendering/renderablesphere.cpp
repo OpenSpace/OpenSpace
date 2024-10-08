@@ -107,7 +107,7 @@ namespace {
         "Is Using Color Map",
         "Used to toggle color map on or off on sphere. Mainly used for grayscale textures "
         "from data, such as magnetograms for the sun.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionPathInfo = {
@@ -115,7 +115,7 @@ namespace {
         "Transfer Function Path",
         "Color Table/Transfer Function to use mainly for grayscale data such as "
         "magnetograms on the sun.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
