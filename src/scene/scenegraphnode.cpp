@@ -29,6 +29,7 @@
 #include <modules/base/translation/statictranslation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
@@ -629,6 +630,11 @@ SceneGraphNode::~SceneGraphNode() {}
 void SceneGraphNode::initialize() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
+
 
     LDEBUG(std::format("Initializing: {}", identifier()));
 
@@ -657,7 +663,11 @@ void SceneGraphNode::initialize() {
 void SceneGraphNode::initializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
-    TracyGpuZone("initializeGL")
+    TracyGpuZone("initializeGL");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
     LDEBUG(std::format("Initializing GL: {}", identifier()));
 
@@ -735,6 +745,10 @@ void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)
 void SceneGraphNode::update(const UpdateData& data) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
     if (_state != State::Initialized && _state != State::GLInitialized) {
         return;
@@ -785,6 +799,10 @@ void SceneGraphNode::update(const UpdateData& data) {
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
     if (_state != State::GLInitialized) {
         return;

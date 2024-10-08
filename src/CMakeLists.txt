@@ -505,6 +505,9 @@ configure_file(
 if (APPLE)
   target_link_libraries(openspace-core INTERFACE external-system-apple)
 endif ()
+if (WIN32)
+  target_link_libraries(openspace-core PUBLIC "pdh")
+endif ()
 
 set_openspace_compile_settings(openspace-core)
 target_link_libraries(openspace-core PUBLIC Ghoul spice external-curl)

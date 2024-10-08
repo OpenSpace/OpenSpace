@@ -732,8 +732,8 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
         }
         else {
             LERROR(std::format(
-                "Cannot set selected masking range with: {}",
-                _maskingRanges[_maskingQuantity].x
+                "Cannot set selected masking range with: "//,
+                //_maskingRanges[_maskingQuantity].x
             ));
         }
     });
