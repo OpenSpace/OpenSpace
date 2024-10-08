@@ -84,27 +84,12 @@ local EarthRadius = 6371E3 -- TODO: move to OpenSpace
 local JupiterRadius = 7.1492E7 -- TODO: move to OpenSpace
 local AstronomicalUnit = 149597871E3 -- TODO: move to OpenSpace
 
-local SecondsPerDay = 86400.0
-
--- TODO: move to OpenSpace
-function ternary ( cond , T , F )
-  if cond then return T else return F end
-end
-
-function isEmpty(s)
-  return s == nil or s == ''
-end
-
-function hasValue(v)
-  return v ~= nil
-end
-
 -- Constants for different categories of sizes of planets (in Earth radii)
 -- Source: https://www.nasa.gov/image-article/sizes-of-known-exoplanets/
 local MaxRadius = {
-  Terrestrial = 1.25;
-  SuperEarth = 2.0;
-  NeptuneLike = 6.0;
+  Terrestrial = 1.25,
+  SuperEarth = 2.0,
+  NeptuneLike = 6.0
 }
 
 -- Planets will be colored based on their size (from thresholds above), and
@@ -167,11 +152,20 @@ function planetTypeKey(radiusInMeter)
   end
 end
 
+function hasValue(v)
+  return v ~= nil
+end
+
 -----------------------------------------------------------------------------------
 -- This is the function that adds the scene graph nodes for each exoplanet system.
 -- Edit this to change the visuals of the created exoplanet systems
 -----------------------------------------------------------------------------------
 function addExoplanetSystem(data)
+  if openspace.isEmpty(data) then
+    -- No data was found
+    return
+  end
+
   local starIdentifier = data.SystemId
   local guiPath = ExoplanetsGuiPath .. data.StarName
 
@@ -180,11 +174,6 @@ function addExoplanetSystem(data)
       "Adding of exoplanet system '" .. data.StarName .. "' failed. " ..
       "The system has already been added"
     )
-    return
-  end
-
-  if next(data) == nil then
-    -- No data was found
     return
   end
 
@@ -262,7 +251,11 @@ function addExoplanetSystem(data)
       -- If there is not a value for the radius, render a globe with a default radius,
       -- to allow us to navigate to something. Note that it can't be too small, due to
       -- precision issues at this distance
-      Radii = ternary(hasValue(data.StarRadius), data.StarRadius, 0.1 * SolarRadius),
+      Radii = openspace.ternary(
+        hasValue(data.StarRadius),
+        data.StarRadius,
+        0.1 * SolarRadius
+      ),
       PerformShading = false,
       Layers = {
         ColorLayers = colorLayers
@@ -278,8 +271,8 @@ function addExoplanetSystem(data)
           light-years from Earth.]],
         data.StarName,
         data.NumPlanets,
-        ternary(data.NumPlanets > 1, "planets", "planet"),
-        ternary(data.NumPlanets > 1, "have", "has"),
+        openspace.ternary(data.NumPlanets > 1, "planets", "planet"),
+        openspace.ternary(data.NumPlanets > 1, "have", "has"),
         starSizeAndTempInfo(data),
         data.DistanceToUs
       )
@@ -355,7 +348,7 @@ function addExoplanetSystem(data)
         Description = string.format(
           "A glare effect for the star %s. %s",
           data.StarName,
-          ternary(
+          openspace.ternary(
             hasTeffData,
             [[The size of the glare has been computed based on data of the star's
               temperature, in a way that's relative to the visualization for our Sun.]],
@@ -468,7 +461,7 @@ function addExoplanetSystem(data)
       ArgumentOfPeriapsis = planetData.ArgumentOfPeriapsis,
       MeanAnomaly = 0.0,
       Epoch = planetData.Epoch,
-      Period = planetData.Period * SecondsPerDay
+      Period = planetData.Period * openspace.time.secondsPerDay()
     }
 
     --------------------------------------------------------------------
@@ -513,7 +506,7 @@ function addExoplanetSystem(data)
       }
 
       -- If a default texture was provided, use it. Also, reduce the ambient intensity
-      if not isEmpty(defaultPlanetTexture) then
+      if not openspace.isEmpty(defaultPlanetTexture) then
         local PlanetTextureLayer = {
           Identifier = "PlanetTexture",
           Name = "Planet Texture",
@@ -529,7 +522,7 @@ function addExoplanetSystem(data)
         Parent = starIdentifier,
         Renderable = {
           Type = "RenderableGlobe",
-          Radii =  planetData.Radius, -- TODO: check if value
+          Radii =  planetData.Radius,
           PerformShading = true,
           Layers = {
             ColorLayers = planetColorLayers
