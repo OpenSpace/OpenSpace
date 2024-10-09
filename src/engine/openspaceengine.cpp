@@ -831,6 +831,9 @@ void OpenSpaceEngine::loadAssets() {
     global::renderEngine->updateScene();
 
     global::syncEngine->addSyncables(global::timeManager->syncables());
+    global::syncEngine->addSyncables(
+        global::navigationHandler->orbitalNavigator().syncables()
+    );
     if (_scene && _scene->camera()) {
         global::syncEngine->addSyncables(_scene->camera()->syncables());
     }
@@ -1173,6 +1176,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     global::luaConsole->update();
 
     if (!master) {
+        global::navigationHandler->orbitalNavigator().updateAnchor();
         _scene->camera()->invalidateCache();
     }
 
@@ -1308,7 +1312,6 @@ void OpenSpaceEngine::postDraw() {
     }
     global::eventEngine->triggerActions();
     global::eventEngine->triggerTopics();
-
 
     global::eventEngine->postFrameCleanup();
     global::memoryManager->PersistentMemory.housekeeping();
