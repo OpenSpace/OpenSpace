@@ -2087,6 +2087,8 @@ double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
 
 // This should only be run on nodes and not on master
 void OrbitalNavigator::updateAnchor() {
+    ghoul_assert(!global::windowDelegate->isMaster());
+
     if (!_syncedAnchorNode.data().empty()) {
         setAnchorNode(_syncedAnchorNode);
     }
