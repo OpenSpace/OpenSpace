@@ -1,9 +1,14 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
-local Eclipdate = asset.resource("kernels/ECLIPDATE.tf")
-local GSEKernel = asset.resource("kernels/GSE.tf")
 
 
+
+local earthcentricKernels = asset.resource({
+  Name = "Earthcenteric frame kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earthcentric_frame_kernels",
+  Version = 1
+})
 
 local Frame = {
   GSE = "GSE"
@@ -34,15 +39,15 @@ local GeocentricSolarEcliptic = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(Eclipdate)
-  openspace.spice.loadKernel(GSEKernel)
+  openspace.spice.loadKernel(earthcentricKernels .."ECLIPDATE.tf")
+  openspace.spice.loadKernel(earthcentricKernels .."GSE.tf")
   openspace.addSceneGraphNode(GeocentricSolarEcliptic)
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GeocentricSolarEcliptic)
-  openspace.spice.unloadKernel(GSEKernel)
-  openspace.spice.unloadKernel(Eclipdate)
+  openspace.spice.unloadKernel(earthcentricKernels .."GSE.tf")
+  openspace.spice.unloadKernel(earthcentricKernels .."ECLIPDATE.tf")
 end)
 
 asset.export("Frame", Frame)

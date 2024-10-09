@@ -4,8 +4,6 @@ local coreKernels = asset.require("spice/core")
 local GSM_Kernel = asset.resource("kernels/GSM_time.tf")
 local SM_Kernel = asset.resource("kernels/SM_time.tf")
 
-
-
 local kernels = {
   "C:/Users/eolsson/Downloads/earthnpole_19500101_20251231_v01.bsp",
   "C:/Users/eolsson/Downloads/earthnpole_runout.bsp",

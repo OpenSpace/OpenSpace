@@ -1,9 +1,14 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
 
-local GSM_Static_Kernel = asset.resource("kernels/GSM_static.tf")
 
 
+local earthcentricKernels = asset.resource({
+  Name = "Earthcenteric frame kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earthcentric_frame_kernels",
+  Version = 1
+})
 
 local Frame = {
   GSM_static = "GSM_STATIC" -- Geocentric Solar Magnetospheric
@@ -36,13 +41,13 @@ local GeocentricSolarMagnetosphericStatic  = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(GSM_Static_Kernel)
+  openspace.spice.loadKernel(earthcentricKernels .. "GSM_static.tf")
   openspace.addSceneGraphNode(GeocentricSolarMagnetosphericStatic )
 end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GeocentricSolarMagnetosphericStatic )
-  openspace.spice.unloadKernel(GSM_Static_Kernel)
+  openspace.spice.unloadKernel(earthcentricKernels .. "GSM_static.tf")
 end)
 
 asset.export("Frame", Frame)
