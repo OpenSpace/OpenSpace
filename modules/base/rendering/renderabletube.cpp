@@ -407,7 +407,7 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
     , _selectedSample(SelectedSampleInfo)
     , _sampleLineWidth(SampleLineWidthInfo, 3.f, 1.f, 10.f)
     , _sampleColor(SampleColorInfo, glm::vec3(0.f, 0.8f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
-    , _useTubeFade(EnableFadeInfo, true)
+    , _useTubeFade(EnableFadeInfo, false)
     , _tubeLength(TubeLengthInfo, 1.f, 0.f, 1.f)
     , _tubeFadeAmount(TubeFadeAmountInfo, 1.f, 0.f, 1.f)
 {
@@ -528,6 +528,15 @@ RenderableTube::RenderableTube(const ghoul::Dictionary& dictionary)
         _kernelsDirectory = absPath(folder).string();
     }
 
+    _useTubeFade.onChange([this]() {
+        if (_useTubeFade) {
+            setRenderBin(RenderBin::PostDeferredTransparent);
+        }
+        else {
+            setRenderBin(RenderBin::Opaque);
+            setRenderBinFromOpacity();
+        }
+    });
     _useTubeFade = p.enableFade.value_or(_useTubeFade);
     addProperty(_useTubeFade);
 
@@ -1608,6 +1617,7 @@ RenderableTube::FindTimeStruct RenderableTube::findTime(double time) const {
                  std::numeric_limits<double>::epsilon())
         {
             result.lastPolygonBeforeTime = i;
+            result.firstPolygonAfterTime = std::min(i + 1, _data.size() - 1);
             result.foundPrev = true;
             result.onSlice = true;
         }
