@@ -88,7 +88,7 @@ DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
     _text = p.text.value_or(_text);
     addProperty(_text);
 
-    loadDataFromJson("C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/KPjson/data.json");
+    loadDataFromJson("C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/KPjson/observed_data.json");
 }
 
 std::string formatTimeForData(std::string_view timeStr) {

@@ -1,5 +1,5 @@
 local filepath = "C:/Users/alundkvi/Documents/work/data/auroraData/stormData/"
-
+local globe = asset.require("scene/solarsystem/planets/earth/earth")
 local Dashboard = {
   Identifier = "ScreenSpaceKPindex",
   Name = "KPindex",
@@ -24,9 +24,21 @@ local marker = {
     URL = "C:/Users/alundkvi/Downloads/FilesInRangeServlet.json"
 }
 
+--[[ local Layer = {
+  Identifier = "gilliam",
+  Name = "gilliam",
+  Enabled = asset.enabled,
+  ZIndex = 50000,
+  FilePath = "C:/Users/alundkvi/Documents/work/scripts/scripts/aurorasaurus/images/layer_image.png",
+  Description = "Earth image from Blue Marble Next Generation",
+  CacheSettings = { Enabled = false }
+} ]]
+
+
 asset.onInitialize(function()
     openspace.addScreenSpaceRenderable(marker)
     openspace.addScreenSpaceRenderable(Dashboard)
+    --openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 
     openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-1.770000,0.850000,-8.950000})
     openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-0.630000,0.380000,-2.310000})
@@ -36,7 +48,9 @@ asset.onInitialize(function()
 
   asset.onDeinitialize(function()
     openspace.removeScreenSpaceRenderable(marker)
-    openspace.addScreenSpaceRenderable(Dashboard)
+  --openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Dashboard)
   end)
 
-  asset.export(Dashboard)
+--asset.export("layer", Layer)
+asset.export(Dashboard)

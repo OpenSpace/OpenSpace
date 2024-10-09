@@ -429,10 +429,10 @@ void TimeQuantizer::verifyResolutionRestrictions(const int value, const char uni
             }
             break;
         case 'm':
-            if (value != 15 && value != 30) {
+            if (value != 15 && value != 30 && value != 1) {
                 throw ghoul::RuntimeError(std::format(
                     "Invalid resolution count of {} for (m)inute option. Valid counts "
-                    "are 15 or 30", value
+                    "are 1 or 15 or 30", value
                 ));
             }
             break;

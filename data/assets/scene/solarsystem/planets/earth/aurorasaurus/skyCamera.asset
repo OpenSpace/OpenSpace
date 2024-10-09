@@ -1,0 +1,35 @@
+local globe = asset.require("scene/solarsystem/planets/earth/earth")
+
+local imagePath = "C:/Users/alundkvi/Downloads/mothers_day_storm_data_for_bea/mothers_day_storm_data_for_bea/grid_gillam/rgb/2024/05/11/images/"
+
+
+local Layer = {
+    Identifier = "Skycamera",
+    Name = "Skycamera",
+    Enabled = asset.enabled,
+    ZIndex = 8990,
+    Type = "TemporalTileProvider",
+    Mode = "Prototyped",
+    RenderBinMode = "PostDeferredTransparent",
+    Prototyped = {
+        Time = {
+            Start = "2024-05-11",
+            End = "2024-05-12"
+        },
+        TemporalResolution = "1m",
+        TimeFormat = "YYYY-MM-DD-HR-MN",
+        Prototype = imagePath .. "${OpenSpaceTimeId}.png"
+    },
+    Description = "Earth image from Blue Marble Next Generation",
+    Opacity = 1
+}
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("Prototype", Layer)
