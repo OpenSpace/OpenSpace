@@ -152,7 +152,7 @@ void setEarthProximitySettings() {
     if (usingPulse) {
       int speed = 2;
       int modulusResult = int(speed * time) % 2;
-      if (fluxValue > thresholdFlux){
+      if (fluxValue > thresholdFlux) {
         if (modulusResult == 1) {
           vs_color.a = 0.01;
         }
@@ -199,7 +199,7 @@ void main() {
         vs_color.a = 0.0;
       }
     }
-    else if (colorMode == uniformColor){
+    else if (colorMode == uniformColor) {
       vs_color = streamColor;
     }
     setEarthProximitySettings();

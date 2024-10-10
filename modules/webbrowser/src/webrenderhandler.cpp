@@ -27,11 +27,6 @@
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 
-namespace {
-    constexpr std::string_view _loggerCat = "WebRenderHandler";
-} // namespace
-
-
 namespace openspace {
 
 WebRenderHandler::WebRenderHandler(bool accelerate)
@@ -259,7 +254,7 @@ bool WebRenderHandler::hasContent(int x, int y) {
         glBindTexture(GL_TEXTURE_2D, _texture);
 
         // Read the texture data into the PBO
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
         // Map the PBO to the CPU memory space
         GLubyte* pixels = reinterpret_cast<GLubyte*>(

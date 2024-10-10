@@ -50,6 +50,12 @@ namespace {
 
         // The list of all tile providers that are used by this TileProviderByLevel.
         std::vector<Provider> levelTileProviders;
+
+        // The layer needs to know about the LayerGroupID this but we don't want it to be
+        // part of the parameters struct as that would mean it would be visible to the end
+        // user, which we don't want since this value just comes from whoever creates it,
+        // not the user.
+        int layerGroupID [[codegen::private()]];
     };
 #include "tileproviderbylevel_codegen.cpp"
 } // namespace
@@ -65,17 +71,9 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // For now we need to inject the LayerGroupID this way. We don't want it to be part of
-    // the parameters struct as that would mean it would be visible to the end user, which
-    // we don't want since this value just comes from whoever creates it, not the user
-    ghoul_assert(dictionary.hasValue<int>("LayerGroupID"), "No Layer Group ID provided");
-    const layers::Group::ID group = static_cast<layers::Group::ID>(
-        dictionary.value<int>("LayerGroupID")
-    );
-
     for (Parameters::Provider provider : p.levelTileProviders) {
         ghoul::Dictionary& tileProviderDict = provider.tileProvider;
-        tileProviderDict.setValue("LayerGroupID", static_cast<int>(group));
+        tileProviderDict.setValue("LayerGroupID", p.layerGroupID);
 
         // Pass down the caching information from the enclosing dictionary
         if (dictionary.hasValue<std::string>("GlobeName")) {
@@ -84,13 +82,8 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
                 dictionary.value<std::string>("GlobeName")
             );
         }
-        layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
-        if (tileProviderDict.hasValue<std::string>("Type")) {
-            const std::string type = tileProviderDict.value<std::string>("Type");
-            typeID = ghoul::from_string<layers::Layer::ID>(type);
-        }
 
-        std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, tileProviderDict);
+        std::unique_ptr<TileProvider> tp = createFromDictionary(tileProviderDict);
 
         const std::string provId = tileProviderDict.value<std::string>("Identifier");
         tp->setIdentifier(provId);

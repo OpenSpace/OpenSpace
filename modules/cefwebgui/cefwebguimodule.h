@@ -46,6 +46,8 @@ public:
 
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
+    static documentation::Documentation Documentation();
+
 private:
     void startOrStopGui();
 

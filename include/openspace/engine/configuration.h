@@ -156,7 +156,7 @@ struct Configuration {
     // Values not read from the openspace.cfg file
     std::string sgctConfigNameInitialized;
 
-    static documentation::Documentation Documentation;
+    static documentation::Documentation Documentation();
     ghoul::lua::LuaState state;
 };
 

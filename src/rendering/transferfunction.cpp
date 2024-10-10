@@ -129,7 +129,7 @@ void TransferFunction::setTextureFromTxt() {
             float intensity = 0.f;
             glm::vec4 rgba;
             iss >> intensity;
-            for(int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++) {
                 iss >> rgba[i];
             }
             mappingKeys.emplace_back(intensity, rgba);

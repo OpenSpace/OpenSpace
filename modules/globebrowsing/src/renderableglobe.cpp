@@ -294,9 +294,17 @@ namespace {
         // [[codegen::verbatim(OrenNayarRoughnessInfo.description)]]
         std::optional<float> orenNayarRoughness;
 
+        enum class [[codegen::map(openspace::globebrowsing::layers::Group::ID)]] Group {
+            HeightLayers,
+            ColorLayers,
+            Overlays,
+            NightLayers,
+            WaterMasks,
+        };
+
         // A list of layers that should be added to the globe.
-        std::optional<std::map<std::string, ghoul::Dictionary>> layers
-            [[codegen::reference("globebrowsing_layermanager")]];
+        std::optional<std::map<Group, ghoul::Dictionary>> layers
+            [[codegen::reference("globebrowsing_layer")]];
 
         // Specifies information about planetary labels that can be rendered on the
         // object's surface.
@@ -636,16 +644,13 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     setInteractionSphere(boundingSphere());
 
     // Init layer manager
-    // @TODO (abock, 2021-03-25) The layermanager should be changed to take a
-    // std::map<std::string, ghoul::Dictionary> instead and then we don't need to get it
-    // as a bare dictionary anymore and can use the value from the struct directly
-    if (dictionary.hasValue<ghoul::Dictionary>("Layers")) {
-        const ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>("Layers");
-        _layerManager.initialize(dict);
+    std::map<layers::Group::ID, ghoul::Dictionary> layers;
+    if (p.layers.has_value()) {
+        for (const auto& [key, value] : *p.layers) {
+            layers[codegen::map<layers::Group::ID>(key)] = value;
+        }
     }
-    else {
-        _layerManager.initialize(ghoul::Dictionary());
-    }
+    _layerManager.initialize(layers);
 
     addProperty(Fadeable::_opacity);
 
@@ -764,14 +769,14 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     // Components
     if (p.rings.has_value()) {
-        _ringsComponent = std::make_unique<RingsComponent>(dictionary);
+        _ringsComponent = std::make_unique<RingsComponent>(*p.rings);
         _ringsComponent->setParentFadeable(this);
         _ringsComponent->initialize();
         addPropertySubOwner(_ringsComponent.get());
     }
 
     if (p.shadows.has_value()) {
-        _shadowComponent = std::make_unique<ShadowComponent>(dictionary);
+        _shadowComponent = std::make_unique<ShadowComponent>(*p.shadows);
         _shadowComponent->initialize();
         addPropertySubOwner(_shadowComponent.get());
         _shadowMappingProperties.shadowMapping = true;

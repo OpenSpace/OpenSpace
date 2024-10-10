@@ -78,7 +78,7 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     // redundant!
 
     std::string seqStartStr;
-    if (kameleon->doesAttributeExist("start_time")){
+    if (kameleon->doesAttributeExist("start_time")) {
         seqStartStr =
                 kameleon->getGlobalAttribute("start_time").getAttributeString();
     }

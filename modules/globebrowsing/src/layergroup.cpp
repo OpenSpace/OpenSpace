@@ -57,19 +57,6 @@ LayerGroup::LayerGroup(layers::Group group)
     addProperty(_levelBlendingEnabled);
 }
 
-void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
-    for (size_t i = 1; i <= dict.size(); i++) {
-        const ghoul::Dictionary layer = dict.value<ghoul::Dictionary>(std::to_string(i));
-
-        try {
-            addLayer(layer);
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-        }
-    }
-}
-
 void LayerGroup::initialize() {
     ZoneScoped;
 

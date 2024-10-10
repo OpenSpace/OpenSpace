@@ -451,14 +451,18 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
         properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
-        properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
+        properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f),
+        nullptr,
+        nullptr
     }
     , _glare {
         properties::PropertyOwner(GlareOwnerInfo),
         properties::StringProperty(TextureInfo),
         properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
         properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
-        properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
+        properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f),
+        nullptr,
+        nullptr
     }
     , _parameters {
         properties::PropertyOwner(SizeCompositionInfo),

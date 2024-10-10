@@ -219,9 +219,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     setRenderBin(RenderBin::Overlay);
     addProperty(Fadeable::_opacity);
 
-    _translation = Translation::createFromDictionary(
-        dictionary.value<ghoul::Dictionary>("Translation")
-    );
+    _translation = Translation::createFromDictionary(p.translation);
     addPropertySubOwner(_translation.get());
 
     _appearance.lineColor = p.color;

@@ -197,6 +197,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation GlobeBrowsingModule::Documentation() {
+    return codegen::doc<Parameters>("module_globebrowsing");
+}
+
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
@@ -330,7 +334,6 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
     return {
         globebrowsing::Layer::Documentation(),
         globebrowsing::LayerAdjustment::Documentation(),
-        globebrowsing::LayerManager::Documentation(),
         globebrowsing::GlobeTranslation::Documentation(),
         globebrowsing::GlobeRotation::Documentation(),
         globebrowsing::RenderableGlobe::Documentation(),
@@ -343,7 +346,6 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::TileProviderByDate::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
-        globebrowsing::GeoJsonManager::Documentation(),
         globebrowsing::GeoJsonComponent::Documentation(),
         globebrowsing::GeoJsonProperties::Documentation(),
         GlobeLabelsComponent::Documentation(),
