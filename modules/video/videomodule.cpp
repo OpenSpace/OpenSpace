@@ -50,6 +50,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation VideoModule::Documentation() {
+    return codegen::doc<Parameters>("module_video");
+}
+
 VideoModule::VideoModule()
     : OpenSpaceModule(VideoModule::Name)
     , _enabled(EnabledInfo)

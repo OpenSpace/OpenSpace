@@ -363,7 +363,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     _defaultProperties.pointTexture.onChange([this]() {
         const std::filesystem::path texturePath = _defaultProperties.pointTexture.value();
-        // Not ethat an empty texture is also valid => use default texture from module
+        // Note that an empty texture is also valid => use default texture from module
         if (std::filesystem::is_regular_file(texturePath) || texturePath.empty()) {
             _textureIsDirty = true;
         }
@@ -378,9 +378,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     _defaultProperties.tessellation.enabled.onChange([this]() { _dataIsDirty = true; });
     _defaultProperties.tessellation.useLevel.onChange([this]() { _dataIsDirty = true; });
     _defaultProperties.tessellation.level.onChange([this]() { _dataIsDirty = true; });
-    _defaultProperties.tessellation.distance.onChange([this]() {
-        _dataIsDirty = true;
-    });
+    _defaultProperties.tessellation.distance.onChange([this]() { _dataIsDirty = true; });
 
     _forceUpdateHeightData.onChange([this]() {
         for (GlobeGeometryFeature& f : _geometryFeatures) {
@@ -834,25 +832,19 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
     float lat = centroidLat + _latLongOffset.value().x;
     float lon = centroidLon + _latLongOffset.value().y;
 
-    global::scriptEngine->queueScript(
-        std::format(
-            "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
-            _globeNode.owner()->identifier(), lat, lon, d
-        ),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    const std::string script = std::format(
+        "openspace.globebrowsing.flyToGeo([[{}]], {}, {}, {})",
+        _globeNode.owner()->identifier(), lat, lon, d
     );
+    global::scriptEngine->queueScript(script);
 }
 
 void GeoJsonComponent::triggerDeletion() const {
-    global::scriptEngine->queueScript(
-        std::format(
-            "openspace.globebrowsing.deleteGeoJson([[{}]], [[{}]])",
-            _globeNode.owner()->identifier(), _identifier
-        ),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+    const std::string script = std::format(
+        "openspace.globebrowsing.deleteGeoJson([[{}]], [[{}]])",
+        _globeNode.owner()->identifier(), _identifier
     );
+    global::scriptEngine->queueScript(script);
 }
 
 } // namespace openspace::globebrowsing

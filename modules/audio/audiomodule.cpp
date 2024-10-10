@@ -47,6 +47,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation AudioModule::Documentation() {
+    return codegen::doc<Parameters>("module_audio");
+}
+
 AudioModule::AudioModule()
     : OpenSpaceModule(Name)
     , _engine(std::make_unique<SoLoud::Soloud>())

@@ -43,6 +43,7 @@ public:
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
 
     scripting::LuaLibrary luaLibrary() const override;
+    static documentation::Documentation Documentation();
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;

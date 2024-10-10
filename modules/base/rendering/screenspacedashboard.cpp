@@ -46,6 +46,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
+        std::optional<std::string> identifier;
+
         // [[codegen::verbatim(UseMainInfo.description)]]
         std::optional<bool> useMainDashboard;
 
@@ -72,15 +74,8 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string identifier;
-    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
-        identifier = dictionary.value<std::string>(KeyIdentifier);
-    }
-    else {
-        identifier = "ScreenSpaceDashboard";
-    }
-    identifier = makeUniqueIdentifier(identifier);
-    setIdentifier(std::move(identifier));
+    std::string identifier = p.identifier.value_or("ScreenSpaceDashboard");
+    setIdentifier(makeUniqueIdentifier(std::move(identifier)));
 
     _useMainDashboard = p.useMainDashboard.value_or(_useMainDashboard);
     addProperty(_useMainDashboard);

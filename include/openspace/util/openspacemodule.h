@@ -93,6 +93,12 @@ public:
     virtual std::vector<documentation::Documentation> documentations() const;
 
     /**
+     * Returns the documentation that describes the parameters that can be passed to the
+     * initialize function of this module.
+     */
+    static documentation::Documentation Documentation();
+
+    /**
      * Returns the Lua library with functions defined by this OpenSpaceModule. The default
      * implementation returns an empty library.
      *

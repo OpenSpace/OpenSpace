@@ -52,6 +52,8 @@ namespace {
     // To load an image from a web URL, see
     // [ScreenSpaceImageOnline](#base_screenspace_image_online).
     struct [[codegen::Dictionary(ScreenSpaceImageLocal)]] Parameters {
+        std::optional<std::string> identifier;
+
         // [[codegen::verbatim(TexturePathInfo.description)]]
         std::optional<std::string> texturePath;
     };
@@ -70,15 +72,8 @@ ScreenSpaceImageLocal::ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string identifier;
-    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
-        identifier = dictionary.value<std::string>(KeyIdentifier);
-    }
-    else {
-        identifier = "ScreenSpaceImageLocal";
-    }
-    identifier = makeUniqueIdentifier(identifier);
-    setIdentifier(identifier);
+    std::string identifier = p.identifier.value_or("ScreenSpaceImageLocal");
+    setIdentifier(makeUniqueIdentifier(std::move(identifier)));
 
     _texturePath.onChange([this]() {
         if (!std::filesystem::is_regular_file(absPath(_texturePath))) {

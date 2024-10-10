@@ -142,7 +142,7 @@ bool InstrumentTimesParser::create() {
                 };
                 _subsetMap[_target]._subset.push_back(std::move(image));
             }
-            if (successfulRead){
+            if (successfulRead) {
                 _subsetMap[_target]._range.include(instrumentActiveTimeRange);
                 _instrumentTimes.emplace_back(instrumentID, instrumentActiveTimeRange);
             }

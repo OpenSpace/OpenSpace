@@ -117,7 +117,7 @@ bool TouchModule::isDefaultDirectTouchType(std::string_view renderableType) cons
         _sortedDefaultRenderableTypes.end();
 }
 
-void TouchModule::internalInitialize(const ghoul::Dictionary&){
+void TouchModule::internalInitialize(const ghoul::Dictionary&) {
     _ear.reset(new TuioEar());
 
     global::callback::initializeGL->push_back([this]() {

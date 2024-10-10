@@ -40,8 +40,8 @@ public:
     std::filesystem::path synchronizationRoot() const;
 
     std::vector<documentation::Documentation> documentations() const override;
-
     scripting::LuaLibrary luaLibrary() const override;
+    static documentation::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;

@@ -259,11 +259,7 @@ void ScriptScheduler::setCurrentTime(double time) {
     if (_shouldRunAllTimeJump) {
         // Queue all scripts for the time jump
         for (const std::string& script : scheduledScripts) {
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript(script);
         }
     }
 }

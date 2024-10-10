@@ -225,6 +225,10 @@ namespace openspace {
 
 using namespace exoplanets;
 
+documentation::Documentation ExoplanetsModule::Documentation() {
+    return codegen::doc<Parameters>("module_exoplanets");
+}
+
 ExoplanetsModule::ExoplanetsModule()
     : OpenSpaceModule(Name)
     , _enabled(EnabledInfo)

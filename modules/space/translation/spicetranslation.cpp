@@ -41,34 +41,39 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "Target",
         "Target",
-        "This is the SPICE NAIF name for the body whose translation is to be computed by "
-        "the SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') "
-        "or a NAIF integer id code (such as '399').",
+        "This is the SPICE name for the body whose translation is to be computed by the "
+        "SpiceTranslation. It can either be a fully qualified name (such as 'EARTH') or "
+        "a NAIF integer id code (such as '399'). The resulting translation will be a "
+        "vector leading from the `Target` to the `Observer`.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
-        "This is the SPICE NAIF name for the parent of the body whose translation is to "
-        "be computed by the SpiceTranslation. It can either be a fully qualified name "
-        "(such as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0').",
+        "This is the SPICE name for the parent of the body whose translation is to be "
+        "computed by the SpiceTranslation. It can either be a fully qualified name (such "
+        "as 'SOLAR SYSTEM BARYCENTER') or a NAIF integer id code (such as '0'). The "
+        "resulting translation will be a vector leading from the `Target` to the "
+        "`Observer`.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "Frame",
         "Reference Frame",
-        "This is the SPICE NAIF name for the reference frame in which the position "
-        "should be retrieved. The default value is GALACTIC.",
+        "This is the SPICE name of the reference frame in which the position should be "
+        "calculated. The default value is GALACTIC.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed Date",
-        "A time to lock the position to. Setting this to an empty string will "
-        "unlock the time and return to position based on current simulation time.",
+        "If this value is specified, the position will be locked to a specific time "
+        "rather than following the in-game in the system. Setting this to an empty "
+        "string will unlock the time and return to position based on current simulation "
+        "time.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -82,8 +87,8 @@ namespace {
         std::optional<std::string> frame
             [[codegen::annotation("A valid SPICE NAIF name for a reference frame")]];
 
-        std::optional<std::string> fixedDate
-            [[codegen::annotation("A date to lock the position to")]];
+        // [[codegen::verbatim(FixedDateInfo.description)]]
+        std::optional<std::string> fixedDate;
     };
 #include "spicetranslation_codegen.cpp"
 } // namespace
@@ -155,16 +160,13 @@ SpiceTranslation::SpiceTranslation(const ghoul::Dictionary& dictionary)
 glm::dvec3 SpiceTranslation::position(const UpdateData& data) const {
     double lightTime = 0.0;
 
-    double time = data.time.j2000Seconds();
-    if (_fixedEphemerisTime.has_value()) {
-        time = *_fixedEphemerisTime;
-    }
+    // Spice handles positions in KM, but we use meters in OpenSpace
     return SpiceManager::ref().targetPosition(
         _cachedTarget,
         _cachedObserver,
         _cachedFrame,
         {},
-        time,
+        _fixedEphemerisTime.value_or(data.time.j2000Seconds()),
         lightTime
     ) * 1000.0;
 }

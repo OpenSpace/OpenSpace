@@ -119,6 +119,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation WebGuiModule::Documentation() {
+    return codegen::doc<Parameters>("module_webgui");
+}
+
 WebGuiModule::WebGuiModule()
     : OpenSpaceModule(WebGuiModule::Name)
     , _enabled(ServerProcessEnabledInfo, true)
