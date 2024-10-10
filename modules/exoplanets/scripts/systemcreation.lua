@@ -296,7 +296,7 @@ function addExoplanetSystem(data)
       EnableFading = true,
       FadeUnit = "pc",
       FadeDistances = { 1.33, 15.0 },
-      FadeWidths = {1.0, 20.0}
+      FadeWidths = { 1.0, 20.0 }
     },
     Tag = { "exoplanet_system_labels" },
     GUI = {
@@ -318,7 +318,7 @@ function addExoplanetSystem(data)
     -- This is a little magic to make the size of the glare dependent on the
     -- size and the temperature of the star. It's kind of based on the fact that
     -- the luminosity of a star is proportional to: (radius^2)*(temperature^4)
-    -- Maybe a better option would be to compute the size based on the aboslute
+    -- Maybe a better option would be to compute the size based on the absolute
     -- magnitude or star luminosity, but for now this looks good enough.
     local size = 59.0 * data.StarRadius
     local hasTeffData = false
@@ -450,7 +450,7 @@ function addExoplanetSystem(data)
     "Modules.Exoplanets.PlanetDefaultTexture"
   )
 
-  local addExoplanet = function (id, planetData)
+  local addExoplanet = function(id, planetData)
     -- This translation will be used for both the trail and globe
     local PlanetKeplerTranslation = {
       Type = "KeplerTranslation",
@@ -497,7 +497,7 @@ function addExoplanetSystem(data)
       local planetColorLayers = {
         {
           Identifier = "ColorFromSize",
-          Name = "Color From Size",
+          Name = "Color From Size Classification",
           Type = "SolidColor",
           Color = planetTypeData.Color,
           Enabled = true,
@@ -522,7 +522,7 @@ function addExoplanetSystem(data)
         Parent = starIdentifier,
         Renderable = {
           Type = "RenderableGlobe",
-          Radii =  planetData.Radius,
+          Radii = planetData.Radius,
           PerformShading = true,
           Layers = {
             ColorLayers = planetColorLayers
@@ -567,10 +567,10 @@ function addExoplanetSystem(data)
     end
 
     local orbitDescription = string.format(
-      "The orbit trail of the exoplanet %s. ", planetData.Name
+      "The orbit trail of the exoplanet %s.", planetData.Name
     )
     if planetData.HasUsedDefaultValues then
-      orbitDescription = orbitDescription .. [[
+      orbitDescription = orbitDescription .. " " .. [[
         OBS! Default values have been used to visualize the orbit (for example for
         inclination, eccentricity, or argument of periastron). The shape or orientation
         of the orbit might hence not be completely accurate.
@@ -585,7 +585,7 @@ function addExoplanetSystem(data)
         Period = planetData.Period,
         Resolution = trailResolution,
         Translation = PlanetKeplerTranslation,
-        Color = { 1, 1, 1 }
+        Color = { 1.0, 1.0, 1.0 }
       },
       Tag = { "exoplanet_trail" },
       GUI = {
@@ -608,7 +608,7 @@ function addExoplanetSystem(data)
         Parent = starIdentifier,
         Renderable = {
           Type = "RenderableOrbitDisc",
-          Enabled =  showUncertaintyDisc,
+          Enabled = showUncertaintyDisc,
           Texture = openspace.absPath(discTexture),
           Size = planetData.SemiMajorAxis,
           Eccentricity = planetData.Eccentricity,

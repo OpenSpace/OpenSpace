@@ -114,7 +114,7 @@ openspace.documentation = {
     },
     Return = "Boolean",
     Documentation = [[
-      A utility function to check whether an object is empty or not. Idetifies `nil`
+      A utility function to check whether an object is empty or not. Identifies `nil`
       objects, Tables without any keys, and empty strings.
 
       \\param object The object to check
