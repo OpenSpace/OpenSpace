@@ -54,45 +54,45 @@ namespace {
     // specific planets and star, some values may be undefined.
     struct [[codegen::Dictionary(ExoplanetSystemData)]] Parameters {
         // The identifier of the system, which equals the identifier of the host star
-        // created based on the star name
+        // created based on the star name.
         std::string systemId;
 
-        // The position of the host star, expressed in meters
+        // The position of the host star, expressed in meters.
         glm::dvec3 position;
 
         // The number of known planets in the system that have enough data to be
-        // visualized
+        // visualized.
         int numPlanets;
 
-        // The name of the star
+        // The name of the star.
         std::string starName;
 
-        // The radius of the star, in meters, if data exists
+        // The radius of the star, in meters, if data exists.
         std::optional<double> starRadius;
 
         // An RGB color for the host star, computed from the star's B-V value, if data
-        // exists
+        // exists.
         std::optional<glm::dvec3> starColor [[codegen::color()]];
 
-        // The effective temperature of the star, in Kelvin, if data exists
+        // The effective temperature of the star, in Kelvin, if data exists.
         std::optional<double> starTeff;
 
         // The luminosity for the star, in units of solar luminosities [log10(Solar)], if
-        // data exists
+        // data exists.
         std::optional<double> starLuminosity;
 
         struct Planet {
-            // An identifier to use for the planet, created based on the planet name
+            // An identifier to use for the planet, created based on the planet name.
             std::string id;
 
-            // The name of the exoplanet
+            // The name of the exoplanet.
             std::string name;
 
-            // The radius of the planet, in meters, if data exists
+            // The radius of the planet, in meters, if data exists.
             std::optional<double> starRadius;
 
             // The semi-major axis of the planet's orbit, in meters. That is, the orbit
-            // size. This is required to be able to be visualize the planetary orbit
+            // size. This is required to be able to be visualize the planetary orbit.
             double semiMajorAxis;
 
             // The uncertainty of the semi-major axis, given as an asymmetric uncertainty
@@ -106,37 +106,37 @@ namespace {
             std::optional<glm::dvec2> semiMajorAxisUncertainty;
 
             // The eccentricity of the planet's orbit. If it does not exist in the data,
-            // it is given a default value of 0
+            // it is given a default value of 0.
             double eccentricity;
 
             // The inclination of the planet's orbit, given as an angle in degrees in the
             // range 0-360. If it does not exist in the data, it is given a default value
-            // of 90 degrees
-            double inlination;
+            // of 90 degrees.
+            double inclination;
 
             // The longitude of ascending node, that is, the angle for the direction of
-            // the point where the orbit passes through the plane of reference. Also
+            // the point where the orbit passes through a reference plane. Also
             // known as the right ascension of the ascending node. The angle is given as
             // degrees in the range 0-360. If it does not exist in the data, it is given
-            // a default value of 180 degrees
+            // a default value of 180 degrees.
             double ascendingNode;
 
             // The argument of periapsis of the orbit, given as an angle in degrees in
             // the range 0-360. It is the angle between the planet's periapsis (the point
             // where it is closest to its star) and its ascending node, that is, where it
             // passes through its reference plane. If it does not exist in the data, it
-            // is given a default value of 90 degrees
+            // is given a default value of 90 degrees.
             double argumentOfPeriapsis;
 
             // The epoch to use when computing the planet's initial position in its orbit,
             // given as an ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS.
             //
             // Computed based on the \"Time of Conjunction (Transit Midpoint)\" value in
-            // the data from the exoplanet archive
+            // the data from the exoplanet archive.
             std::string epoch;
 
             // Time the planet takes to make a complete orbit around the host star or
-            // system, in days
+            // system, in days.
             double period;
 
             // A rotation matrix that represents the rotation of the plane of the orbit.
@@ -145,26 +145,26 @@ namespace {
             glm::dmat3 orbitPlaneRotationMatrix;
 
             // True if default values have been used for any of the orbit parameters, due
-            // to missing data
+            // to missing data.
             bool hasUsedDefaultValues;
         };
 
         // A list of data tables for the planets in the system (that have enough data to be
-        // visualized), with data about the planet and its orbit
+        // visualized), with data about the planet and its orbit.
         std::vector<Planet> planets;
 
         // A rotation matrix to use for the entire system's rotation. Broadly speaking, it
         // rotates the system so that the reference plane is perpendicular to the
         // line-of-sight from Earth (and so that a 90 degree orbit inclination leads to
-        // an orbit that passes in front of its star, relative to the line-of-sight)
+        // an orbit that passes in front of its star, relative to the line-of-sight).
         glm::dmat3 systemRotation;
 
         // A rotation matrix that represents the average of all the orbit planes in the
-        // system. Computed using the average planets' inclination, ascending node, and
-        // argument of periapsis values.
+        // system. Computed using the planets' average inclinations, ascending nodes, and
+        // arguments of periapsis.
         glm::dmat3 meanOrbitRotation;
 
-        // The distance from this system to our solar system, in light years
+        // The distance from this system to our solar system, in light years.
         double distanceToUs;
     };
 #include "datastructure_codegen.cpp"
