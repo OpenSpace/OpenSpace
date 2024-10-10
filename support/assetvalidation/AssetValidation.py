@@ -82,7 +82,7 @@ async def subscribeToErrorlog(api: Api, exit: asyncio.Event):
         level = logging.WARNING
         if ("Error" in message):
             level = logging.ERROR
-        if( "Critical" in message):
+        if( "Fatal" in message):
             level = logging.CRITICAL
 
         log(message, logLevel = level)
@@ -169,8 +169,21 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
     """
     assetCount = 1
 
-    eventUnsubscribeToErrorLog = asyncio.Event()
-    errorLog = asyncio.create_task(subscribeToErrorlog(api, eventUnsubscribeToErrorLog))
+    logsettings = {
+        "timeStamping": False,
+        "dateStamping": False,
+        "logLevel": "Warning"
+    }
+    def onMessage(message):
+        level = logging.WARNING
+        if ("Error" in message):
+            level = logging.ERROR
+        if( "Fatal" in message):
+            level = logging.CRITICAL
+
+        log(message, logLevel = level)
+
+    cancelSubscriptionToErrorLog = api.subscribeToLogMessages(logsettings, onMessage)
 
     async def unloadAssets():
         log("Getting root assets")
@@ -193,7 +206,6 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
         # We want to start with a cleared cache to make sure assets load correctly from
         # scratch
         removeCache(osDir)
-
         path = str(asset).replace(os.sep, "/")
 
         # Load asset
@@ -226,13 +238,9 @@ async def internalRun(openspace, assets: list[pathlib.Path], osDir: str, api: Ap
         log("Finished testing asset", logLevel = logging.INFO)
         time.sleep(0.5) # Arbitrary sleep to let OpenSpace breathe
 
-    eventUnsubscribeToErrorLog.set()
+    # eventUnsubscribeToErrorLog.set()
     assetLoadingEvent.cancel() # Unsubscribe to event
-    # We send a last message since we'll otherwise be stuck in the for await loop waiting
-    # for a last message - TODO: fix once there is a solution in the Python API to cleanly
-    # exit / cancel the async for loop.
-    await openspace.printWarning("Asset validation complete")
-    await errorLog
+    await cancelSubscriptionToErrorLog()
 
 async def mainLoop(files, osDir):
     log("Connecting to OpenSpace...")
