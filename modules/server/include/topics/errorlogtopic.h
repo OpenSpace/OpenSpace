@@ -22,51 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DASHBOARD___H__
-#define __OPENSPACE_CORE___DASHBOARD___H__
+#ifndef __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
+#define __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/vector/ivec2property.h>
-#include <openspace/rendering/dashboarditem.h>
-#include <ghoul/glm.h>
-#include <memory>
-#include <vector>
+#include <modules/server/include/topics/topic.h>
+#include <ghoul/logging/log.h>
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
-
-class Dashboard : public properties::PropertyOwner {
+class ErrorLogTopic : public Topic {
 public:
-    Dashboard();
-    virtual ~Dashboard() override = default;
+    ErrorLogTopic() = default;
+    ~ErrorLogTopic() override;
 
-    void render(glm::vec2& penPosition);
-
-    void addDashboardItem(std::unique_ptr<DashboardItem> item);
-    bool hasItem(int index) const;
-    const DashboardItem& item(int index) const;
-    void removeDashboardItem(const std::string& identifier);
-    void removeDashboardItem(int index);
-    void clearDashboardItems();
-    glm::vec2 getStartPositionOffset();
-    std::vector<DashboardItem*> dashboardItems() const;
-
-    /**
-     * Returns the Lua library that contains all Lua functions available to affect the
-     * rendering.
-     */
-    static scripting::LuaLibrary luaLibrary();
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
 private:
-    properties::BoolProperty _isEnabled;
-    properties::IVec2Property _startPositionOffset;
-
-    std::vector<std::unique_ptr<DashboardItem>> _items;
+    bool _isSubscribedTo = false;
+    // Non owning but we remove the log from LogManager on destruction
+    ghoul::logging::Log* _log = nullptr;
 };
 
-} // openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___DASHBOARD___H__
+#endif // !__OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
