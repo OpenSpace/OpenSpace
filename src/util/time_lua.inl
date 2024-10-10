@@ -125,6 +125,8 @@ namespace {
 
 /**
  * Returns the amount of simulated time that passes in one second of real time.
+ *
+ * \return The simulated delta time, in seconds per real time second
  */
 [[codegen::luawrap]] double deltaTime() {
     return openspace::global::timeManager->deltaTime();
@@ -228,6 +230,8 @@ namespace {
 
 /**
  * Returns whether the simulation time is currently paused or is progressing.
+ *
+ * \return True if the simulation is paused, and false otherwise
  */
 [[codegen::luawrap]] bool isPaused() {
     return openspace::global::timeManager->isPaused();
@@ -325,6 +329,8 @@ namespace {
 
 /**
  * Returns the current time as the number of seconds since the J2000 epoch.
+ *
+ * \return The current time, as the number of seconds since the J2000 epoch
  */
 [[codegen::luawrap]] double currentTime() {
     return openspace::global::timeManager->time().j2000Seconds();
@@ -332,6 +338,8 @@ namespace {
 
 /**
  * Returns the current time as an ISO 8601 date string (YYYY-MM-DDTHH:MN:SS).
+ *
+ * \return The current time, as an ISO 8601 date string
  */
 [[codegen::luawrap("UTC")]] std::string currentTimeUTC() {
     return std::string(openspace::global::timeManager->time().ISO8601());
@@ -341,6 +349,8 @@ namespace {
 /**
  * Returns the current time as an date string of the form
  * (YYYY MON DDTHR:MN:SC.### ::RND) as returned by SPICE.
+ *
+ * \return The current time, in the format used by SPICE (YYYY MON DDTHR:MN:SC.### ::RND)
  */
 [[codegen::luawrap("SPICE")]] std::string currentTimeSpice() {
     return std::string(openspace::global::timeManager->time().UTC());
@@ -349,6 +359,8 @@ namespace {
 /**
  * Returns the current wall time as an ISO 8601 date string (YYYY-MM-DDTHH-MN-SS) in the
  * UTC timezone.
+ *
+ * \return The current wall time, in the UTC time zone, as an ISO 8601 date string
  */
 [[codegen::luawrap]] std::string currentWallTime() {
     return openspace::Time::currentWallTime();
@@ -357,6 +369,8 @@ namespace {
 /**
  * Returns the current application time as the number of seconds since the OpenSpace
  * application started.
+ *
+ * \return The number of seconds since OpenSpace started
  */
 [[codegen::luawrap]] double currentApplicationTime() {
     return openspace::global::windowDelegate->applicationTime();
@@ -376,6 +390,8 @@ namespace {
  *               the form [-]XX(s,m,h,d,M,y] with (s)econds, (m)inutes, (h)ours, (d)ays,
  *               (M)onths, and (y)ears as units and an optional - sign to move backwards
  *               in time.
+ *
+ * \return The updated timestamp
  */
 [[codegen::luawrap]] std::variant<std::string, double> advancedTime(
                                                    std::variant<std::string, double> base,
@@ -420,6 +436,8 @@ namespace {
  *
  * \param time The timestamp to convert, either given as an ISO 8601 date string or a
  *             number of seconds past the J2000 epoch.
+ *
+ * \return The converted timestamp
  */
 [[codegen::luawrap]] std::variant<std::string, double> convertTime(
                                                    std::variant<std::string, double> time)
@@ -444,6 +462,8 @@ namespace {
  *
  * \param start The start time for the computation, given as an ISO 8601 date string
  * \param end The end time for the computation, given as an ISO 8601 date string
+ *
+ * \return The time between the start time and end time
  */
 [[codegen::luawrap]] double duration(std::string start, std::string end) {
     using namespace openspace;
@@ -456,6 +476,8 @@ namespace {
 /**
  * Returns the number of seconds per day, where a day in this case is exactly 24 hours.
  * The total number of seconds is equal to 86400.
+ *
+ * \return The number of seconds in a day
  */
 [[codegen::luawrap]] double secondsPerDay() {
     return openspace::SecondsPerDay;
@@ -463,6 +485,8 @@ namespace {
 
 /**
  * Returns the number of seconds in a Gregorian year, which is equal to 31556952.
+ *
+ * \return The number of seconds in a Gregorian year
  */
 [[codegen::luawrap]] double secondsPerYear() {
     // We could use a call to SPICE here, but the value is a constant anyway
