@@ -107,6 +107,7 @@ documentation::Documentation ConvertRecFileVersionTask::documentation() {
                 "InputFilePath",
                 new StringAnnotationVerifier("A valid filename to convert"),
                 Optional::No,
+                Private::No,
                 "The filename to update to the current file format",
             },
         },

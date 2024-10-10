@@ -689,7 +689,13 @@ std::string TableVerifier::type() const {
 
 StringListVerifier::StringListVerifier(std::string elementDocumentation)
     : TableVerifier({
-        { "*", new StringVerifier, Optional::No, std::move(elementDocumentation) }
+        {
+            "*",
+            new StringVerifier,
+            Optional::No,
+            Private::No,
+            std::move(elementDocumentation)
+        }
     })
 {}
 
@@ -699,7 +705,13 @@ std::string StringListVerifier::type() const {
 
 IntListVerifier::IntListVerifier(std::string elementDocumentation)
     : TableVerifier({
-        { "*", new IntVerifier, Optional::No, std::move(elementDocumentation) }
+        {
+            "*",
+            new IntVerifier,
+            Optional::No,
+            Private::No,
+            std::move(elementDocumentation)
+        }
     })
 {}
 

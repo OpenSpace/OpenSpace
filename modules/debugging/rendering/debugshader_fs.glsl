@@ -30,7 +30,7 @@ in vec4 fs_vertexPosition;
 
 uniform vec4 color;
 
-Fragment getFragment(){
+Fragment getFragment() {
     Fragment frag;
     frag.color = color;
     frag.depth = fs_vertexPosition.w;

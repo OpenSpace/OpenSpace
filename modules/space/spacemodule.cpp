@@ -59,11 +59,22 @@ namespace {
         "disabled, the errors will be ignored silently.",
         openspace::properties::Property::Visibility::Developer
     };
+
+    struct [[codegen::Dictionary(SpaceModule)]] Parameters {
+        // [[codegen::verbatim(SpiceExceptionInfo.description)]]
+        std::optional<bool> showExceptions;
+    };
+#include "spacemodule_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
+
+documentation::Documentation SpaceModule::Documentation() {
+    return codegen::doc<Parameters>("module_space");
+}
 
 SpaceModule::SpaceModule()
     : OpenSpaceModule(Name)
@@ -109,9 +120,8 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
 
     fRotation->registerClass<SpiceRotation>("SpiceRotation");
 
-    if (dictionary.hasValue<bool>(SpiceExceptionInfo.identifier)) {
-        _showSpiceExceptions = dictionary.value<bool>(SpiceExceptionInfo.identifier);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _showSpiceExceptions = p.showExceptions.value_or(_showSpiceExceptions);
 }
 
 void SpaceModule::internalDeinitializeGL() {

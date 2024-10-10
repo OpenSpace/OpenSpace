@@ -50,6 +50,8 @@ public:
     CallbackHandle addEndpointChangeCallback(EndpointCallback cb);
     void removeEndpointChangeCallback(CallbackHandle);
 
+    static documentation::Documentation Documentation();
+
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
 

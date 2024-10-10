@@ -39,6 +39,7 @@ namespace openspace {
 
 class OpenSpaceModule;
 
+namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
 /**
@@ -121,6 +122,11 @@ public:
      * modules.
      */
     static scripting::LuaLibrary luaLibrary();
+
+    /**
+     * Returns the list of all documentations for all modules.
+     */
+    std::vector<documentation::Documentation> moduleDocumentations() const;
 
 private:
     /// The list of all names of all registered OpenSpaceModules

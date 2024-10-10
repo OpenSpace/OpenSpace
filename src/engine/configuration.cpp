@@ -25,7 +25,9 @@
 #include <openspace/engine/configuration.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/settings.h>
+#include <openspace/engine/moduleengine.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -327,9 +329,6 @@ namespace {
         // Values in this table describe the behavior of the loading screen that is
         // displayed while the scene graph is created and initialized
         std::optional<LoadingScreen> loadingScreen;
-
-        // Configurations for each module
-        std::optional<std::map<std::string, ghoul::Dictionary>> moduleConfigurations;
     };
 #include "configuration_codegen.cpp"
 } // namespace
@@ -522,9 +521,7 @@ void parseLuaState(Configuration& configuration) {
 
     // We go through all of the entries and lift them from global scope into the table on
     // the stack so that we can create a ghoul::Dictionary from this new table
-    const documentation::Documentation doc = codegen::doc<Parameters>(
-        "core_configuration"
-    );
+    const documentation::Documentation doc = Configuration::Documentation();
     for (const documentation::DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());
         lua_getglobal(s, e.key.c_str());
@@ -611,7 +608,14 @@ void parseLuaState(Configuration& configuration) {
             l.showLogMessages.value_or(c.loadingScreen.isShowingLogMessages);
     }
 
-    c.moduleConfigurations = p.moduleConfigurations.value_or(c.moduleConfigurations);
+    // ModuleConfigurations depend on the list of modules that are added, which has to be
+    // done dynamically. Hence we can't have it written directly into the struct
+    if (d.hasValue<ghoul::Dictionary>("ModuleConfigurations")) {
+        ghoul::Dictionary dict = d.value<ghoul::Dictionary>("ModuleConfigurations");
+        for (std::string_view key : dict.keys()) {
+            c.moduleConfigurations[std::string(key)] = dict.value<ghoul::Dictionary>(key);
+        }
+    }
 
     if (p.openGLDebugContext.has_value()) {
         const Parameters::OpenGLDebugContext& l = *p.openGLDebugContext;
@@ -691,8 +695,38 @@ void patchConfiguration(Configuration& configuration, const Settings& settings) 
     }
 }
 
-documentation::Documentation Configuration::Documentation =
-    codegen::doc<Parameters>("core_configuration");
+documentation::Documentation Configuration::Documentation() {
+    using namespace documentation;
+
+    documentation::Documentation doc = codegen::doc<Parameters>("core_configuration");
+
+    auto moduleConfiguration = std::make_shared<TableVerifier>();
+    for (OpenSpaceModule* mod : global::moduleEngine->modules()) {
+        std::string name = mod->identifier();
+        std::string id = mod->Documentation().id;
+
+        if (id.empty()) {
+            continue;
+        }
+
+        moduleConfiguration->documentations.push_back({
+            name,
+            new ReferencingVerifier(id),
+            Optional::Yes,
+            Private::No,
+            mod->Documentation().description
+        });
+    }
+    doc.entries.push_back({
+        "ModuleConfigurations",
+        std::move(moduleConfiguration),
+        Optional::Yes,
+        Private::No,
+        "Configurations for each module"
+    });
+
+    return doc;
+}
 
 std::filesystem::path findConfiguration(const std::string& filename) {
     std::filesystem::path directory = absPath("${BIN}");

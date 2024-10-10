@@ -179,7 +179,7 @@ void RenderableSphericalGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
+void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
     auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =

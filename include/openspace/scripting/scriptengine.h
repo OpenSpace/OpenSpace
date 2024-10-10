@@ -76,7 +76,7 @@ public:
 
         /// A callback that will be called when the script finishes executing and that
         /// provides access to the return value of the script
-        Callback callback;
+        Callback callback = Callback();
     };
 
     static constexpr std::string_view OpenSpaceLibraryName = "openspace";

@@ -462,7 +462,7 @@ namespace {
 }
 
 /**
- * Returns the number of seconds in a Julian year, which is equal to 31557600.
+ * Returns the number of seconds in a Gregorian year, which is equal to 31556952.
  */
 [[codegen::luawrap]] double secondsPerYear() {
     // We could use a call to SPICE here, but the value is a constant anyway

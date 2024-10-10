@@ -28,6 +28,7 @@
 #include <modules/cefwebgui/include/guirenderhandler.h>
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
@@ -72,9 +73,26 @@ namespace {
         "GUI scale multiplier.",
         openspace::properties::Property::Visibility::Always
     };
+
+    struct [[codegen::Dictionary(CefWebGuiModule)]] Parameters {
+        // [[codegen::verbatim(GuiScaleInfo.description)]]
+        std::optional<float> guiScale;
+
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        std::optional<bool> enabled;
+
+        // [[codegen::verbatim(VisibleInfo.description)]]
+        std::optional<bool> visible;
+
+    };
+#include "cefwebguimodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation CefWebGuiModule::Documentation() {
+    return codegen::doc<Parameters>("module_cefwebgui");
+}
 
 CefWebGuiModule::CefWebGuiModule()
     : OpenSpaceModule(CefWebGuiModule::Name)
@@ -200,17 +218,10 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
         }
     );
 
-    if (configuration.hasValue<double>(GuiScaleInfo.identifier)) {
-        _guiScale = static_cast<float>(
-            configuration.value<double>(GuiScaleInfo.identifier)
-        );
-    }
-
-    _enabled = configuration.hasValue<bool>(EnabledInfo.identifier) &&
-               configuration.value<bool>(EnabledInfo.identifier);
-
-    _visible = configuration.hasValue<bool>(VisibleInfo.identifier) &&
-               configuration.value<bool>(VisibleInfo.identifier);
+    const Parameters p = codegen::bake<Parameters>(configuration);
+    _guiScale = p.guiScale.value_or(_guiScale);
+    _enabled = p.enabled.value_or(_enabled);
+    _visible = p.visible.value_or(_visible);
 
     global::callback::initializeGL->emplace_back([this]() {
         startOrStopGui();
@@ -218,7 +229,7 @@ void CefWebGuiModule::internalInitialize(const ghoul::Dictionary& configuration)
 
     global::callback::postDraw->emplace_back([this]() {
         bool windowChanged = global::windowDelegate->windowHasResized(); 
-        if (_instance && (windowChanged || _instance->_shouldReshape)){
+        if (_instance && (windowChanged || _instance->_shouldReshape)) {
             const glm::ivec2 res = global::windowDelegate->guiWindowResolution();
             _instance->reshape(static_cast<glm::ivec2>(
                 glm::vec2(res) * global::windowDelegate->dpiScaling()

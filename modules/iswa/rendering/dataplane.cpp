@@ -144,7 +144,7 @@ void DataPlane::setUniforms() {
     _shader->setUniform("transparency", _alpha);
 }
 
-std::vector<float*> DataPlane::textureData(){
+std::vector<float*> DataPlane::textureData() {
     // if the buffer in the datafile is empty, do not proceed
     if (_dataBuffer.empty()) {
         return std::vector<float*>();
