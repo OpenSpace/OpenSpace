@@ -1,176 +1,31 @@
 asset.require("./actions")
+asset.require("./fieldofview")
+asset.require("./label")
 asset.require("./mission")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local transforms = asset.require("./transforms")
+asset.require("./model")
+asset.require("./viewingband")
 
+asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/l2")
+asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/l2sunline")
 
-
-local models = asset.resource({
-  Name = "JWST Model",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_model",
-  Version = 3
-})
-
-local band = asset.resource({
-  Name = "JWST band texture",
-  Type = "HttpSynchronization",
-  Identifier = "jwst_band_texture",
-  Version = 1
-})
-
-
-local LaunchTime = "2021 DEC 25 12:20:00"
-
-local JWSTBand = {
-  Identifier = "JWSTBand",
-  Parent = transforms.JWSTPosition.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = LaunchTime
-  },
-  Transform = {
-    Rotation = {
-      Type = "FixedRotation",
-      Attached = "JWSTBand",
-      XAxis = { 1.0, 0.0, 0.0 },
-      XAxisOrthogonal = true,
-      ZAxis = sunTransforms.SolarSystemBarycenter.Identifier
-    }
-  },
-  Renderable = {
-    Type = "RenderableSphereImageLocal",
-    Texture = band .. "JWST-band.png",
-    Size = 9.2E15,
-    Segments = 50,
-    DisableFadeInOut = true,
-    Orientation = "Inside",
-    Opacity = 0.05
-  },
-  Tag = { "mission_jwst_fov" },
-  GUI = {
-    Name = "JWST Safe Viewing Band",
-    Path = "/Solar System/Telescopes/JWST",
-    Description = [[
-      The safe viewing band for the James Webb Space Telescope at its current position
-    ]]
-  }
-}
-
-local JWSTModel = {
-  Identifier = "JWSTModel",
-  Parent = transforms.JWSTRotation.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = LaunchTime
-  },
-  Renderable = {
-    Type = "RenderableModel",
-    GeometryFile = models .. "jwst_anim74_2fps_2018_nb.osmodel",
-    ModelScale = 0.0328, -- First scale down with centimeters then scale up with feet
-    EnableAnimation = true,
-    AnimationStartTime = "2021 12 25 12:20:00",
-    AnimationTimeScale = "Millisecond",
-    AnimationMode = "Once",
-    LightSources = {
-      sunTransforms.LightSource
-    },
-    PerformShading = true
-  },
-  GUI = {
-    Name = "James Webb Space Telescope Model",
-    Path = "/Solar System/Telescopes/JWST",
-    Description = [[
-      Animated model of the James Webb Space Telescope that shows its deployment in
-      real time
-    ]]
-  }
-}
-
-local JWSTFov = {
-  Identifier = "JWSTFov",
-  Parent = JWSTModel.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = LaunchTime
-  },
-  Renderable = {
-    Type = "RenderablePrism",
-    Segments = 6,
-    Lines = 3,
-    Radius = 3.25,
-    LineWidth = 1.0,
-    Color = { 1.0, 1.0, 1.0 },
-    Length = 9.2E15
-  },
-  Transform = {
-    Rotation = {
-      Type = "StaticRotation",
-      Rotation = { 0, 0, math.rad(30) }
-    }
-  },
-  Tag = { "mission_jwst_fov" },
-  GUI = {
-    Name = "JWST Field of View",
-    Path = "/Solar System/Telescopes/JWST",
-    Description = [[
-      The field of view for the James Webb Space Telescope at its current position
-    ]]
-  }
-}
-
-local JWSTLabel = {
-  Identifier = "JWSTLabel",
-  Parent = transforms.JWSTPosition.Identifier,
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = LaunchTime
-  },
-  Renderable = {
-    Type = "RenderableLabel",
-    Text = "JWST",
-    FontSize = 50,
-    Size = 6.5,
-    MinMaxSize = { 4.0, 30.0 },
-    OrientationOption = "Camera View Direction",
-    BlendMode = "Normal",
-    EnableFading = false
-  },
-  GUI = {
-    Name = "JWST Label",
-    Path = "/Solar System/Telescopes/JWST",
-    Description = "Main label for the James Webb Space Telescope"
-  }
-}
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(JWSTBand)
-  openspace.addSceneGraphNode(JWSTModel)
-  openspace.addSceneGraphNode(JWSTFov)
-  openspace.addSceneGraphNode(JWSTLabel)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(JWSTLabel)
-  openspace.removeSceneGraphNode(JWSTFov)
-  openspace.removeSceneGraphNode(JWSTModel)
-  openspace.removeSceneGraphNode(JWSTBand)
-
   openspace.scriptScheduler.clear(2)
 end)
-
-asset.export(JWSTBand)
-asset.export(JWSTModel)
-asset.export(JWSTFov)
-asset.export(JWSTLabel)
 
 
 
 asset.meta = {
   Name = "James Webb Space Telescope",
   Description = [[
-    James Webb Space Telescope animated model, safe viewing band, field of view and label.
+    This assets adds the content for the James Webb Space Telescope mission, including
+    the animated model, safe viewing band, field of view, label, mission file, and actions.
+    It also includes visuals about the Lagrange point L2, and a line between L2 and the
+    Sun.
   ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

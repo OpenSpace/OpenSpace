@@ -1,0 +1,60 @@
+local transforms = asset.require("./transforms")
+local model = asset.require("./model")
+
+
+
+local JWSTFov = {
+  Identifier = "JWSTFov",
+  Parent = model.JWSTModel.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.LaunchTime
+  },
+  Renderable = {
+    Type = "RenderablePrism",
+    Enabled = asset.enabled,
+    Segments = 6,
+    Lines = 3,
+    Radius = 3.25,
+    LineWidth = 1.0,
+    Color = { 1.0, 1.0, 1.0 },
+    Length = 9.2E15
+  },
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0, 0, math.rad(30) }
+    }
+  },
+  Tag = { "mission_jwst_fov" },
+  GUI = {
+    Name = "JWST Field of View",
+    Path = "/Solar System/Telescopes/JWST",
+    Description = [[
+      The field of view for the James Webb Space Telescope at its current position.
+    ]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTFov)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTFov)
+end)
+
+asset.export(JWSTFov)
+
+
+
+asset.meta = {
+  Name = "JWST Field of View",
+  Description = [[
+    The field of view for the James Webb Space Telescope at its current position.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,49 @@
+local transforms = asset.require("./transforms")
+
+
+
+local JWSTLabel = {
+  Identifier = "JWSTLabel",
+  Parent = transforms.JWSTPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.LaunchTime
+  },
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "JWST",
+    FontSize = 50,
+    Size = 6.5,
+    MinMaxSize = { 4.0, 30.0 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = false
+  },
+  GUI = {
+    Name = "JWST Label",
+    Path = "/Solar System/Telescopes/JWST",
+    Description = "Main label for the James Webb Space Telescope."
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTLabel)
+end)
+
+asset.export(JWSTLabel)
+
+
+
+asset.meta = {
+  Name = "JWST Label",
+  Description = "Main label for the James Webb Space Telescope",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

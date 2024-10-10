@@ -1,5 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-local coreKernels = asset.require("spice/core")
+local transforms = asset.require("./transforms")
 
 
 
@@ -10,41 +9,13 @@ local circle = asset.resource({
   Version = 1
 })
 
-local kernels = asset.resource({
-  Name = "Lagrange Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "earth_lagrange_kernels",
-  Version = 1
-})
-
-
-local ID = {
-  L5 = 395
-}
-
-local L5Position = {
-  Identifier = "L5Position",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = ID.L5,
-      Observer = coreKernels.ID.SolarSystemBarycenter
-    }
-  },
-  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
-  GUI = {
-    Name = "L5 Position",
-    Path = "/Solar System/Planets/Earth/Lagrange Points",
-    Hidden = true
-  }
-}
 
 local L5 = {
   Identifier = "L5",
-  Parent = L5Position.Identifier,
+  Parent = transforms.L5Position.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = asset.enabled,
     Billboard = true,
     Size = 800000000,
     Texture = circle .. "circle.png",
@@ -59,9 +30,10 @@ local L5 = {
 
 local L5Label = {
   Identifier = "L5Label",
-  Parent = L5Position.Identifier,
+  Parent = transforms.L5Position.Identifier,
   Renderable = {
     Type = "RenderableLabel",
+    Enabled = asset.enabled,
     Text = "L5",
     FontSize = 50,
     Size = 8.5,
@@ -80,9 +52,6 @@ local L5Label = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "L5_de431.bsp")
-
-  openspace.addSceneGraphNode(L5Position)
   openspace.addSceneGraphNode(L5)
   openspace.addSceneGraphNode(L5Label)
 end)
@@ -90,13 +59,9 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(L5Label)
   openspace.removeSceneGraphNode(L5)
-  openspace.removeSceneGraphNode(L5Position)
 
-  openspace.spice.unloadKernel(kernels .. "L5_de431.bsp")
 end)
 
-asset.export("ID", ID)
-asset.export(L5Position)
 asset.export(L5)
 asset.export(L5Label)
 
