@@ -151,7 +151,7 @@ glm::vec2 Dashboard::getStartPositionOffset() {
 std::vector<DashboardItem*> Dashboard::dashboardItems() const {
     std::vector<DashboardItem*> result;
     result.reserve(_items.size());
-    for (const auto& d : _items) {
+    for (const std::unique_ptr<DashboardItem>& d : _items) {
         result.push_back(d.get());
     }
     return result;

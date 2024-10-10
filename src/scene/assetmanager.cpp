@@ -148,7 +148,7 @@ void AssetManager::update() {
     ZoneScoped;
 
     // Flag to keep track of when to emit synchronization event
-    const bool isLoadingAssets = _toBeInitialized.size() > 0;
+    const bool isLoadingAssets = !_toBeInitialized.empty();
 
     // Delete all the assets that have been marked for deletion in the previous frame
     {
@@ -298,7 +298,7 @@ void AssetManager::update() {
     }
 
     // If the _toBeInitialized state has changed in this update call we emit the event
-    if (isLoadingAssets && (_toBeInitialized.size() == 0)) {
+    if (isLoadingAssets && _toBeInitialized.empty()) {
         global::eventEngine->publishEvent<events::EventAssetLoadingFinished>();
     }
 }

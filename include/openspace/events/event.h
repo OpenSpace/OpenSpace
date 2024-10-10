@@ -152,14 +152,14 @@ struct EventProfileLoadingFinished : public Event {
 /**
 * This event is created when the loading of all assets are finished. This is emitted
 * regardless of whether it is the initial startup of a profile, or any subsequent asset
-* being loaded e.g., through add or drag-and-drop
+* being loaded e.g., through add or drag-and-drop.
 */
 struct EventAssetLoadingFinished : public Event {
     static constexpr Type Type = Event::Type::AssetLoadingFinished;
 
     /**
-    * Creates an instance of an AssetLoadingFinished event.
-    */
+     * Creates an instance of an AssetLoadingFinished event.
+     */
     EventAssetLoadingFinished();
 };
 

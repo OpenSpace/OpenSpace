@@ -66,10 +66,13 @@ namespace {
 
 /**
  * Returns all loaded dashboard-item identifiers from the main dashboard.
+ *
+ * \return a list of loaded dashboard-item identifiers from the main dashbaord
  */
 [[codegen::luawrap]] std::vector<std::string> dashboardItems() {
     std::vector<std::string> result;
-    auto dashboardItems = openspace::global::dashboard->dashboardItems();
+    std::vector<openspace::DashboardItem*> dashboardItems =
+        openspace::global::dashboard->dashboardItems();
     result.reserve(dashboardItems.size());
     for (openspace::DashboardItem* dItem : dashboardItems) {
         result.push_back(dItem->identifier());

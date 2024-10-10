@@ -97,11 +97,7 @@ std::filesystem::path HttpSynchronization::directory() const {
 }
 
 void HttpSynchronization::start() {
-    if (isSyncing()) {
-        return;
-    }
-
-    if (isRejected()) {
+    if (isSyncing() || isRejected()) {
         return;
     }
 

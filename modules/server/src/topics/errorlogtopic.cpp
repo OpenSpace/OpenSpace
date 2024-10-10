@@ -37,20 +37,18 @@ namespace {
     constexpr std::string_view CategoryStampingKey = "categoryStamping";
     constexpr std::string_view LogLevelStampingKey = "logLevelStamping";
     constexpr std::string_view LogLevelKey = "logLevel";
-}
+} // namespace
 
 namespace openspace {
 
-ErrorLogTopic::~ErrorLogTopic()
-{
+ErrorLogTopic::~ErrorLogTopic() {
     if (_log) {
         ghoul::logging::LogManager::ref().removeLog(_log);
         _log = nullptr;
     }
 }
 
-void ErrorLogTopic::handleJson(const nlohmann::json& json)
-{
+void ErrorLogTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
     if (event == StartSubscription) {
@@ -65,30 +63,25 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json)
         auto settings = json.find(SettingsKey);
 
         if (settings != json.end()) {
-            auto ts = settings->find(TimeStampingKey);
-            if (ts != settings->end()) {
+            if (auto ts = settings->find(TimeStampingKey); ts != settings->end()) {
                 timeStamping = ghoul::logging::Log::TimeStamping(ts->get<bool>()).value;
             }
 
-            auto ds = settings->find(DateStampingKey);
-            if (ds != settings->end()) {
+            if (auto ds = settings->find(DateStampingKey); ds != settings->end()) {
                 dateStamping = ghoul::logging::Log::DateStamping(ds->get<bool>()).value;
             }
 
-            auto cs = settings->find(CategoryStampingKey);
-            if (cs != settings->end()) {
+            if (auto cs = settings->find(CategoryStampingKey); cs != settings->end()) {
                 categoryStamping = ghoul::logging::Log::CategoryStamping(
                     cs->get<bool>()).value;
             }
 
-            auto lls = settings->find(LogLevelStampingKey);
-            if(lls != settings->end()){
+            if(auto lls = settings->find(LogLevelStampingKey); lls != settings->end()){
                 logLevelStamping = ghoul::logging::Log::LogLevelStamping(
                     lls->get<bool>()).value;
             }
 
-            auto ls = settings->find(LogLevelKey);
-            if (ls != settings->end()) {
+            if (auto ls = settings->find(LogLevelKey); ls != settings->end()) {
                 std::string level = ls->get<std::string>();
                 logLevel = ghoul::from_string<ghoul::logging::LogLevel>(level);
             }
@@ -121,8 +114,7 @@ void ErrorLogTopic::handleJson(const nlohmann::json& json)
     }
 }
 
-bool ErrorLogTopic::isDone() const
-{
+bool ErrorLogTopic::isDone() const {
     return !_isSubscribedTo;
 }
 

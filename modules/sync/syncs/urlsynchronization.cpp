@@ -390,7 +390,8 @@ bool UrlSynchronization::trySyncUrls() {
         if (ec) {
             LERRORC(
                 "URLSynchronization",
-                std::format("Error renaming file '{}' to '{}' error code {}",
+                std::format(
+                    "Error renaming file '{}' to '{}' error code {}",
                     tempName, originalName, ec.message())
             );
 
