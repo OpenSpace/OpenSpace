@@ -185,4 +185,8 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
     };
 }
 
+std::vector<documentation::Documentation> ModuleEngine::moduleDocumentations() const {
+    return AllModuleDocumentation();
+}
+
 } // namespace openspace

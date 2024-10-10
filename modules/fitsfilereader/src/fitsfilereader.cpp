@@ -81,7 +81,7 @@ std::shared_ptr<ImageData<T>> FitsFileReader::readImage(const std::filesystem::p
         }
         // Extension HDU Object
         return readImageInternal<T>(_infile->currentExtension());
-    } catch (const FitsException& e){
+    } catch (const FitsException& e) {
         LERROR("Could not read FITS image from table. " + e.message());
     }
 

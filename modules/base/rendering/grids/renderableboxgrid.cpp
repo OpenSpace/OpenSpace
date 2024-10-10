@@ -163,7 +163,7 @@ void RenderableBoxGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableBoxGrid::render(const RenderData& data, RendererTasks&){
+void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
     auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =

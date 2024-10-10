@@ -553,7 +553,7 @@ void IswaManager::createSphere(MetadataFuture& data) {
     // check if this sphere already exist
     std::string name = _type[data.type] + _geom[data.geom] + std::to_string(data.id);
 
-    if (!data.group.empty()){
+    if (!data.group.empty()) {
         std::string type = typeid(DataSphere).name();
         registerGroup(data.group, type);
 
@@ -693,7 +693,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
 
         if (jsonFile.is_open()) {
             nlohmann::json cdfGroups = nlohmann::json::parse(jsonFile);
-            for(size_t i = 0; i < cdfGroups.size(); i++) {
+            for (size_t i = 0; i < cdfGroups.size(); i++) {
                 nlohmann::json cdfGroup = cdfGroups.at(i);
 
                 std::string groupName = cdfGroup["group"];

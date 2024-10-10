@@ -160,6 +160,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation SkyBrowserModule::Documentation() {
+    return codegen::doc<Parameters>("module_skybrowser");
+}
+
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
     , _enabled(EnabledInfo)

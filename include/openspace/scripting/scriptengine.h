@@ -76,7 +76,7 @@ public:
 
         /// A callback that will be called when the script finishes executing and that
         /// provides access to the return value of the script
-        Callback callback;
+        Callback callback = Callback();
     };
 
     static constexpr std::string_view OpenSpaceLibraryName = "openspace";
@@ -102,7 +102,6 @@ public:
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
 
-
     virtual void preSync(bool isMaster) override;
     virtual void encode(SyncBuffer* syncBuffer) override;
     virtual void decode(SyncBuffer* syncBuffer) override;
@@ -110,6 +109,11 @@ public:
 
     void queueScript(Script script);
     void queueScript(std::string script);
+
+    // Runs the `script` every `timeout` seconds wallclock time 
+    void registerRepeatedScript(std::string identifier, std::string script,
+        double timeout, std::string preScript = "", std::string postScript = "");
+    void removeRepeatedScript(std::string_view identifier);
 
     std::vector<std::string> allLuaFunctions() const;
     const std::vector<LuaLibrary>& allLuaLibraries() const;
@@ -140,6 +144,19 @@ private:
     std::queue<Script> _masterScriptQueue;
 
     std::vector<std::string> _scriptsToSync;
+
+    struct RepeatedScriptInfo {
+        /// This script is run everytime `timeout` seconds have passed
+        std::string script;
+
+        /// This script is run when the repeated script is unregistered
+        std::string postScript;
+
+        std::string identifier;
+        double timeout = 0.0;
+        double lastRun = 0.0;
+    };
+    std::vector<RepeatedScriptInfo> _repeatedScripts;
 
     // Logging variables
     bool _logFileExists = false;

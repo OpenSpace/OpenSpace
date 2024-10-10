@@ -82,10 +82,9 @@ bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
     return true;
 }
 
-bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
-                                                  CefCursorHandle,
-                                                  cef_cursor_type_t type,
-                                                  const CefCursorInfo&)
+bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle,
+                                                   cef_cursor_type_t type,
+                                                   const CefCursorInfo&)
 {
     WindowDelegate::Cursor newCursor;
     switch (type) {

@@ -52,7 +52,7 @@ public:
 
     LayerManager();
 
-    void initialize(const ghoul::Dictionary& layerGroupsDict);
+    void initialize(const std::map<layers::Group::ID, ghoul::Dictionary>& dict);
     void deinitialize();
 
     Layer* addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict);
@@ -69,8 +69,6 @@ public:
     void reset(bool includeDisabled = false);
 
     void onChange(const std::function<void(Layer* l)>& callback);
-
-    static documentation::Documentation Documentation();
 
 private:
     std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;
