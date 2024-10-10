@@ -24,6 +24,7 @@
 
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -2085,9 +2086,11 @@ double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
         1.0;
 }
 
-// This should only be run on nodes and not on master
 void OrbitalNavigator::updateAnchor() {
-    ghoul_assert(!global::windowDelegate->isMaster());
+    ghoul_assert(
+        !global::windowDelegate->isMaster(),
+        "Anchor should only be synced on nodes, not on master"
+    );
 
     if (!_syncedAnchorNode.data().empty()) {
         setAnchorNode(_syncedAnchorNode);
