@@ -48,8 +48,6 @@ private:
 
     QBoxLayout* _layout = nullptr;
     QLineEdit* _nameEdit = nullptr;
-
-    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ASSETEDIT___H__

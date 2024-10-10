@@ -86,8 +86,6 @@ private:
     QPushButton* _buttonSave = nullptr;
     QPushButton* _buttonCancel = nullptr;
     QDialogButtonBox* _buttonBox = nullptr;
-
-    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___MODULESDIALOG___H__

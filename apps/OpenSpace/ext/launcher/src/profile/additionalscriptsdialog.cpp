@@ -64,6 +64,7 @@ void AdditionalScriptsDialog::createWidgets() {
 
     _textScripts = new QTextEdit;
     _textScripts->setAcceptRichText(false);
+    _textScripts->setTabChangesFocus(true);
     layout->addWidget(_textScripts, 1);
 
     _chooseScriptsButton = new QPushButton("Choose Scripts");

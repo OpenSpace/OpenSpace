@@ -121,7 +121,6 @@ private:
     QLabel* _downloadLabel = nullptr;
     QPlainTextEdit* _log = nullptr;
 
-    QLabel* _errorMsg = nullptr;
     std::string _latestHorizonsError;
 };
 
