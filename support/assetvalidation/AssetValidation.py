@@ -56,7 +56,8 @@ def log(*values: object, logLevel = logging.DEBUG):
 
 def incrementLogNames():
     """Keeps the last 5 logs and increment each log by one in each run"""
-    logs = list(pathlib.Path(".").rglob("log*.txt"))
+    scriptDirectory = pathlib.Path(__file__).parent.resolve()
+    logs = list(pathlib.Path(scriptDirectory).rglob("log*.txt"))
     for log in reversed(logs):
         logname = log.name
         if "_" in logname:
@@ -64,9 +65,9 @@ def incrementLogNames():
             if n == 5:
                 log.unlink()
                 continue
-            log.rename(f"log_{n + 1}.txt")
+            log.rename(f"{scriptDirectory}/log_{n + 1}.txt")
         else:
-            log.rename(f"log_{1}.txt")
+            log.rename(f"{scriptDirectory}/log_{1}.txt")
 
 async def subscribeToErrorlog(api: Api, exit: asyncio.Event):
     topic = api.subscribeToLogMessages({
@@ -266,8 +267,8 @@ def runAssetValidation(files: list[pathlib.Path], executable: str, args):
 
     global verbose
     verbose = args.verbose
-
-    logging.basicConfig(filename="log.txt",
+    scriptDirectory = pathlib.Path(__file__).parent.resolve()
+    logging.basicConfig(filename=f"{scriptDirectory}/log.txt",
                     format='[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s',
                     datefmt='%Y-%m-%d | %H:%M:%S',
                     encoding='utf-8',
