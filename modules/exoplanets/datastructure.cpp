@@ -101,7 +101,7 @@ namespace {
 
             // The uncertainty of the semi-major axis, given as an asymmetric uncertainty
             // with two values: the lower and upper uncertainty for the orbit size. The
-            // values are given as values relative to the size of the SemiMajorAxis. For
+            // values are given as values relative to the size of the `SemiMajorAxis`. For
             // example, the lower (first) value is computed as the lower uncertainty
             // value divided by the value for the semi-major axis.
             //
@@ -148,7 +148,7 @@ namespace {
             // periapsis values. Hence, it may be derived from default values.
             glm::dmat3 orbitPlaneRotationMatrix;
 
-            // True if default values have been used for any of the orbit parameters, due
+            // True, if default values have been used for any of the orbit parameters, due
             // to missing data.
             bool hasUsedDefaultValues;
         };
@@ -169,7 +169,7 @@ namespace {
         glm::dmat3 meanOrbitRotation;
 
         // The distance from this system to our solar system, in light years.
-        double distanceToUs;
+        double distance;
     };
 #include "datastructure_codegen.cpp"
 } // namespace
