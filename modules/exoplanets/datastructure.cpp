@@ -324,7 +324,7 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
     double distanceToOurSystem = glm::length(starPosInParsec) *
         distanceconstants::Parsec / distanceconstants::LightYear;
 
-    res.setValue("DistanceToUs", distanceToOurSystem);
+    res.setValue("Distance", distanceToOurSystem);
 
     return res;
 }

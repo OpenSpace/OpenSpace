@@ -274,7 +274,7 @@ function addExoplanetSystem(data)
         openspace.ternary(data.NumPlanets > 1, "planets", "planet"),
         openspace.ternary(data.NumPlanets > 1, "have", "has"),
         starSizeAndTempInfo(data),
-        data.DistanceToUs
+        data.Distance
       )
     }
   }
@@ -321,12 +321,10 @@ function addExoplanetSystem(data)
     -- Maybe a better option would be to compute the size based on the absolute
     -- magnitude or star luminosity, but for now this looks good enough.
     local size = 59.0 * data.StarRadius
-    local hasTeffData = false
     if hasValue(data.StarTeff) then
       local SunTeff = 5780.90;
       local RelativeTeff = (data.StarTeff / SunTeff)
       size = size * RelativeTeff * RelativeTeff;
-      hasTeffData = true
     end
 
     local StarGlare = {
@@ -481,15 +479,6 @@ function addExoplanetSystem(data)
       end
     end
 
-    local hasUsedDefaultValuesInfo = ""
-    if planetData.HasUsedDefaultValues then
-      hasUsedDefaultValuesInfo = [[
-        OBS! Default values have been used to visualize the orbit (for example for
-        inclination, eccentricity, or argument of periastron), and hence the
-        data specified for the orbit might not be reliable.
-      ]]
-    end
-
     if hasValue(planetData.Radius) then
       local planetTypeKey = planetTypeKey(planetData.Radius)
       local planetTypeData = PlanetType[planetTypeKey]
@@ -549,7 +538,13 @@ function addExoplanetSystem(data)
             planetData.Period,
             planetData.SemiMajorAxis / AstronomicalUnit,
             planetData.Eccentricity,
-            hasUsedDefaultValuesInfo
+            openspace.ternary(
+              planetData.HasUsedDefaultValues,
+              [[OBS! Default values have been used to visualize the orbit (for example for
+                inclination, eccentricity, or argument of periastron), and hence the data
+                specified for the orbit might not be reliable.]],
+              ""
+            )
           )
         }
       }
