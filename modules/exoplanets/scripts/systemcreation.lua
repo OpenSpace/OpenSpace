@@ -79,10 +79,13 @@ end
 
 local ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
 
-local SolarRadius = 6.95700E8 -- TODO: move to OpenSpace
-local EarthRadius = 6371E3 -- TODO: move to OpenSpace
-local JupiterRadius = 7.1492E7 -- TODO: move to OpenSpace
-local AstronomicalUnit = 149597871E3 -- TODO: move to OpenSpace
+-- @TODO (2024-10-11, emmbr) We should add a way of getting constants like this from
+-- OpenSpace instead (for example though the Lua API) so we don't have to redefine them
+-- everywhere we need a value for e.g. the Earth radius
+local SolarRadius = 6.95700E8
+local EarthRadius = 6371E3
+local JupiterRadius = 7.1492E7
+local AstronomicalUnit = 149597871E3
 
 -- Constants for different categories of sizes of planets (in Earth radii)
 -- Source: https://www.nasa.gov/image-article/sizes-of-known-exoplanets/
