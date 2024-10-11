@@ -46,15 +46,17 @@ openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starNam
     const std::filesystem::path binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
-        LERROR(std::format("Failed to open exoplanets data file '{}'", binPath));
-        return ExoplanetSystem();
+        throw ghoul::lua::LuaError(std::format(
+            "Failed to open exoplanets data file '{}'", binPath
+        ));
     }
 
     const std::filesystem::path lutPath = module->lookUpTablePath();
     std::ifstream lut(absPath(lutPath));
     if (!lut.good()) {
-        LERROR(std::format("Failed to open exoplanets look-up table '{}'", lutPath));
-        return ExoplanetSystem();
+        throw ghoul::lua::LuaError(std::format(
+            "Failed to open exoplanets look-up table '{}'", lutPath
+        ));
     }
 
     ExoplanetSystem system;
@@ -104,22 +106,21 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     if (!module->hasDataFiles()) {
         // If no data file path has been configured at all, we just bail out early here
-        LINFO("No data path was configured for the exoplanets");
-        return {};
+        throw ghoul::lua::LuaError("No data path was configured for the exoplanets");
     }
 
     const std::filesystem::path lutPath = module->lookUpTablePath();
     std::ifstream lookupTableFile(absPath(lutPath));
     if (!lookupTableFile.good()) {
-        LERROR(std::format("Failed to open lookup table file '{}'", lutPath));
-        return {};
+        throw ghoul::lua::LuaError(std::format(
+            "Failed to open lookup table file '{}'", lutPath
+        ));
     }
 
     const std::filesystem::path binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
-        LERROR(std::format("Failed to open data file '{}'", binPath));
-        return {};
+        throw ghoul::lua::LuaError(std::format("Failed to open data file '{}'", binPath));
     }
 
     std::vector<std::string> names;
@@ -178,8 +179,9 @@ std::vector<std::string> hostStarsWithSufficientData() {
     exoplanets::ExoplanetSystem systemData = findSystemInData(starName);
 
     if (systemData.planetsData.empty()) {
-        LERROR(std::format("Exoplanet system '{}' could not be found", starName));
-        return ghoul::Dictionary();
+        throw ghoul::lua::LuaError(std::format(
+            "Exoplanet system '{}' could not be found", starName
+        ));
     }
 
     return systemData.toDataDictionary();
@@ -275,8 +277,7 @@ listOfExoplanetsDeprecated()
 
     std::ifstream inputDataFile(csvFile);
     if (!inputDataFile.good()) {
-        LERROR(std::format("Failed to open input file '{}'", csvFile));
-        return {};
+        throw ghoul::lua::LuaError(std::format("Failed to open input file '{}'", csvFile));
     }
 
     std::vector<std::string> columnNames =
