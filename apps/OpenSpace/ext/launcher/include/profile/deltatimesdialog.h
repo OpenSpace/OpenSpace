@@ -97,8 +97,6 @@ private:
     QPushButton* _saveButton = nullptr;
     QPushButton* _discardButton = nullptr;
     QDialogButtonBox* _buttonBox = nullptr;
-
-    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___DELTATIMESDIALOG___H__

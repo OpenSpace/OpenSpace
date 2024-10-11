@@ -230,6 +230,7 @@ void SettingsDialog::createWidgets() {
                 updateSaveButton();
             }
         );
+        _propertyVisibility->setObjectName("dropdown");
         layout->addWidget(_propertyVisibility, 9, 1);
 
         _bypassLauncher = new QCheckBox("Bypass Launcher");
@@ -299,6 +300,7 @@ void SettingsDialog::createWidgets() {
                 updateSaveButton();
             }
         );
+        _layerServer->setObjectName("dropdown");
         layout->addWidget(_layerServer, 14, 1);
 
         _mrf.isEnabled = new QCheckBox("Enable MRF Caching");
