@@ -24,6 +24,7 @@
 
 #include <modules/exoplanets/exoplanetsmodule.h>
 
+#include <modules/exoplanets/datastructure.h>
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
@@ -411,20 +412,24 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
 std::vector<documentation::Documentation> ExoplanetsModule::documentations() const {
     return {
         ExoplanetsDataPreparationTask::documentation(),
-        RenderableOrbitDisc::Documentation()
+        RenderableOrbitDisc::Documentation(),
+        ExoplanetSystem::Documentation()
     };
 }
 
 scripting::LuaLibrary ExoplanetsModule::luaLibrary() const {
     return {
-        "exoplanets",
-        {
-            codegen::lua::AddExoplanetSystem,
+        .name = "exoplanets",
+        .functions = {
             codegen::lua::RemoveExoplanetSystem,
+            codegen::lua::SystemData,
             codegen::lua::ListOfExoplanets,
             codegen::lua::ListOfExoplanetsDeprecated,
             codegen::lua::ListAvailableExoplanetSystems,
-            codegen::lua::LoadExoplanetsFromCsv
+            codegen::lua::LoadSystemDataFromCsv
+        },
+        .scripts = {
+            absPath("${MODULE_EXOPLANETS}/scripts/systemcreation.lua")
         }
     };
 }
