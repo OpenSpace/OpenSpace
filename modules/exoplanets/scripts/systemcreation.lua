@@ -349,7 +349,7 @@ function addExoplanetSystem(data)
           "A glare effect for the star %s. %s",
           data.StarName,
           openspace.ternary(
-            hasTeffData,
+            hasValue(data.StarTeff),
             [[The size of the glare has been computed based on data of the star's
               temperature, in a way that's relative to the visualization for our Sun.]],
             "The size of the glare is not data-based."
@@ -520,6 +520,9 @@ function addExoplanetSystem(data)
       local Planet = {
         Identifier = id,
         Parent = starIdentifier,
+        Transform = {
+          Translation = PlanetKeplerTranslation
+        },
         Renderable = {
           Type = "RenderableGlobe",
           Radii = planetData.Radius,
@@ -531,9 +534,6 @@ function addExoplanetSystem(data)
           AmbientIntensity = ambientIntensity
         },
         Tag = { "exoplanet_planet" },
-        Transform = {
-          Translation = PlanetKeplerTranslation
-        },
         GUI = {
           Name = planetData.Name,
           Path = guiPath,
@@ -606,6 +606,12 @@ function addExoplanetSystem(data)
       local OrbitDisc = {
         Identifier = id .. "_Disc",
         Parent = starIdentifier,
+        Transform = {
+          Rotation = {
+            Type = "StaticRotation",
+            Rotation = planetData.OrbitPlaneRotationMatrix
+          }
+        },
         Renderable = {
           Type = "RenderableOrbitDisc",
           Enabled = showUncertaintyDisc,
@@ -614,12 +620,6 @@ function addExoplanetSystem(data)
           Eccentricity = planetData.Eccentricity,
           Offset = planetData.SemiMajorAxisUncertainty,
           Opacity = 0.25
-        },
-        Transform = {
-          Rotation = {
-            Type = "StaticRotation",
-            Rotation = planetData.OrbitPlaneRotationMatrix
-          }
         },
         Tag = { "exoplanet_uncertainty_disc" },
         GUI = {

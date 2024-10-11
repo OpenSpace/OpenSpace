@@ -41,8 +41,12 @@ namespace {
             usedDefault = true;
             return defaultValue;
         }
-        if (angle < 0.f) { return angle + 360.f; }
-        if (angle > 360.f) { return angle - 360.f; }
+        while (angle < 0.f) {
+            angle += 360.f;
+        }
+        while (angle > 360.f) {
+            angle =- 360.f;
+        }
         return angle;
     };
 

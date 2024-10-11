@@ -63,7 +63,6 @@ void sanitizeNameString(std::string& s);
  */
 void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p);
 
-
 } // namespace openspace::exoplanets
 
 #endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__
