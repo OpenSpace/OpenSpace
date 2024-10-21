@@ -35,21 +35,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsModule";
 
-    // KeplerTranslation requires angles in range [0, 360]
-    float validAngle(float angle, float defaultValue, bool& usedDefault) {
-        if (std::isnan(angle)) {
-            usedDefault = true;
-            return defaultValue;
-        }
-        while (angle < 0.f) {
-            angle += 360.f;
-        }
-        while (angle > 360.f) {
-            angle =- 360.f;
-        }
-        return angle;
-    };
-
     // This is the documentation for the data object that is returned from the
     // `openspace.exoplanets.systemData` function in the Scripting API.
     //
@@ -223,6 +208,8 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
     }
 
     ghoul::Dictionary planets;
+    std::vector<float> inclinations;
+    inclinations.reserve(planetNames.size());
 
     for (size_t i = 0; i < planetNames.size(); i++) {
         const ExoplanetDataEntry& data = planetsData[i];
@@ -268,9 +255,26 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
                 hasUsedDefaultValues = true;
             }
 
-            float inclination = validAngle(data.i, 90.f, hasUsedDefaultValues);
-            float bigOmega = validAngle(data.bigOmega, 180.f, hasUsedDefaultValues);
-            float omega = validAngle(data.omega, 90.f, hasUsedDefaultValues);
+            // KeplerTranslation requires angles in range [0, 360]
+            auto validAngle = [&hasUsedDefaultValues](float angle, float defaultValue) {
+                if (std::isnan(angle)) {
+                    hasUsedDefaultValues = true;
+                    return defaultValue;
+                }
+                while (angle < 0.f) {
+                    angle += 360.f;
+                }
+                while (angle > 360.f) {
+                    angle = -360.f;
+                }
+                return angle;
+            };
+
+            float inclination = validAngle(data.i, 90.f);
+            float bigOmega = validAngle(data.bigOmega, 180.f);
+            float omega = validAngle(data.omega, 90.f);
+
+            inclinations.push_back(inclination);
 
             planet.setValue("Inclination", static_cast<double>(inclination));
             planet.setValue("AscendingNode", static_cast<double>(bigOmega));
@@ -310,12 +314,9 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
     res.setValue("SystemRotation", exoplanetSystemRotation);
 
     float meanInclination = 0.f;
-    for (const ExoplanetDataEntry& p : planetsData) {
-        // Compute a valid inclination value (same as used for the dictionary)
-        bool usedDefault = false; // Dummy value
-        meanInclination += validAngle(p.i, 90.f, usedDefault);
+    for (const float& i : inclinations) {
+        meanInclination += i / static_cast<float>(inclinations.size());
     }
-    meanInclination /= static_cast<float>(planetsData.size());
     const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
     const glm::dmat3 meanOrbitPlaneRotationMatrix = static_cast<glm::dmat3>(rotation);
 
