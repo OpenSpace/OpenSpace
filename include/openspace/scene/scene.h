@@ -241,7 +241,7 @@ public:
      * \return Vector of Property objs containing property names that matched the regex
      */
     std::vector<properties::Property*> propertiesMatchingRegex(
-        const std::string& propertyString);
+        std::string_view propertyString);
 
     /**
      * Returns a list of all unique tags that are used in the currently loaded scene.

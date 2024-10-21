@@ -178,8 +178,8 @@ namespace {
 
     OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
-        bool isPlaybackPaused = global::sessionRecording->isPlaybackPaused();
-        global::sessionRecording->setPlaybackPause(!isPlaybackPaused);
+        bool isPlaybackPaused = global::sessionRecordingHandler->isPlaybackPaused();
+        global::sessionRecordingHandler->setPlaybackPause(!isPlaybackPaused);
     }
     else {
         const bool isPaused = !global::timeManager->isPaused();

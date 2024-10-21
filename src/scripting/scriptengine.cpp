@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/documentation/documentation.h>
@@ -482,8 +483,8 @@ void ScriptEngine::preSync(bool isMaster) {
             // Not really a received script but the master also needs to run the script...
             _masterScriptQueue.push(item);
 
-            if (global::sessionRecording->isRecording()) {
-                global::sessionRecording->saveScriptKeyframeToTimeline(item.code);
+            if (global::sessionRecordingHandler->isRecording()) {
+                global::sessionRecordingHandler->saveScriptKeyframeToTimeline(item.code);
             }
 
             // Sync out to other nodes (cluster)
@@ -562,8 +563,8 @@ void ScriptEngine::postSync(bool isMaster) {
     }
 
     double now =
-        global::sessionRecording->isSavingFramesDuringPlayback() ?
-        global::sessionRecording->currentApplicationInterpolationTime() :
+        global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
+        global::sessionRecordingHandler->currentApplicationInterpolationTime() :
         global::windowDelegate->applicationTime();
     for (RepeatedScriptInfo& info : _repeatedScripts) {
         if (now - info.lastRun >= info.timeout) {
