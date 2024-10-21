@@ -62,6 +62,8 @@ public:
     CallbackHandle addPreSyncCallback(CallbackFunction cb);
     void removePreSyncCallback(CallbackHandle handle);
 
+    static documentation::Documentation Documentation();
+
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 

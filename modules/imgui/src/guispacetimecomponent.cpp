@@ -420,12 +420,9 @@ void GuiSpaceTimeComponent::render() {
             if (_slidingDelta != 0.f) {
                 // No sync or send because time settings are always synced and sent
                 // to the connected nodes and peers
-                const std::string script = std::format(
+                global::scriptEngine->queueScript(std::format(
                     "openspace.time.setDeltaTime({})", _oldDeltaTime
-                );
-
-                using Script = scripting::ScriptEngine::Script;
-                global::scriptEngine->queueScript(script);
+                ));
 
             }
             _slidingDelta = 0.f;

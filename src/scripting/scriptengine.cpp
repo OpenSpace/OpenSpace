@@ -27,6 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
@@ -103,6 +105,12 @@ void ScriptEngine::deinitialize() {
     ZoneScoped;
 
     _registeredLibraries.clear();
+    for (const RepeatedScriptInfo& info : _repeatedScripts) {
+        if (info.postScript.empty()) {
+            queueScript(info.postScript);
+        }
+    }
+    _repeatedScripts.clear();
 }
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
@@ -553,6 +561,17 @@ void ScriptEngine::postSync(bool isMaster) {
             }
         }
     }
+
+    double now =
+        global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
+        global::sessionRecordingHandler->currentApplicationInterpolationTime() :
+        global::windowDelegate->applicationTime();
+    for (RepeatedScriptInfo& info : _repeatedScripts) {
+        if (now - info.lastRun >= info.timeout) {
+            runScript({ info.script });
+            info.lastRun = now;
+        }
+    }
 }
 
 void ScriptEngine::queueScript(Script script) {
@@ -566,6 +585,55 @@ void ScriptEngine::queueScript(Script script) {
 
 void ScriptEngine::queueScript(std::string script) {
     queueScript({ .code = std::move(script) });
+}
+
+void ScriptEngine::registerRepeatedScript(std::string identifier, std::string script,
+                                          double timeout, std::string preScript,
+                                          std::string postScript)
+{
+    auto it = std::find_if(
+        _repeatedScripts.begin(),
+        _repeatedScripts.end(),
+        [&identifier](const RepeatedScriptInfo& info) {
+            return info.identifier == identifier;
+        }
+    );
+    if (it != _repeatedScripts.end()) {
+        throw ghoul::RuntimeError(
+            std::format("Script with identifier '{}' already registered", identifier),
+            "ScriptEngine"
+        );
+    }
+
+    if (!preScript.empty()) {
+        runScript({ std::move(preScript) });
+    }
+    _repeatedScripts.emplace_back(
+        std::move(script),
+        std::move(postScript),
+        std::move(identifier),
+        timeout
+    );
+}
+
+void ScriptEngine::removeRepeatedScript(std::string_view identifier) {
+    auto it = std::find_if(
+        _repeatedScripts.begin(),
+        _repeatedScripts.end(),
+        [&identifier](const RepeatedScriptInfo& info) {
+            return info.identifier == identifier;
+        }
+    );
+    if (it != _repeatedScripts.end()) {
+        if (!it->postScript.empty()) {
+            queueScript(it->postScript);
+        }
+
+        _repeatedScripts.erase(it);
+    }
+    else {
+        LERROR(std::format("Could not find script with identifier '{}'", identifier));
+    }
 }
 
 void ScriptEngine::addBaseLibrary() {
@@ -645,7 +713,9 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::WalkDirectoryFiles,
             codegen::lua::WalkDirectoryFolders,
             codegen::lua::DirectoryForPath,
-            codegen::lua::UnzipFile
+            codegen::lua::UnzipFile,
+            codegen::lua::RegisterRepeatedScript,
+            codegen::lua::RemoveRepeatedScript
         }
     };
     addLibrary(lib);

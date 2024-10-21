@@ -266,6 +266,9 @@ namespace {
         // masked by. Should be entered as {min value, max value} per range
         std::optional<std::vector<glm::vec2>> maskingRanges;
 
+        // [[codegen::verbatim(DomainEnabledInfo.description)]]
+        std::optional<bool> domainEnabled;
+
         // Value should be path to folder where states are saved. Specifying this
         // makes it use file type converter
         // (JSON/CDF input => osfls output & oslfs input => JSON output)
@@ -477,6 +480,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     else {
         _maskingRanges.push_back(glm::vec2(-100000.f, 100000.f)); // some default values
     }
+
+    _domainEnabled = p.domainEnabled.value_or(_domainEnabled);
 
     _outputFolderPath = p.outputFolder.value_or(_outputFolderPath);
     if (!_outputFolderPath.empty() && !std::filesystem::is_directory(_outputFolderPath)) {

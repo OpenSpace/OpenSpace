@@ -1,6 +1,9 @@
 -- Create a state machine with a few different states. The state machine can be controlled through
 -- the scripting commands from the state machine module.
 
+asset.require("scene/solarsystem/planets/earth/earth")
+asset.require("scene/digitaluniverse/constellations")
+
 local function targetNode(nodeIdentifier)
   return [[
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
