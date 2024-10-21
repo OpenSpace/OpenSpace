@@ -257,13 +257,47 @@ ExoplanetsModule::ExoplanetsModule()
 
     addProperty(_enabled);
 
+    _exoplanetsDataFolder.onChange([this]() {
+        std::filesystem::path f = _exoplanetsDataFolder.value();
+       if (!std::filesystem::is_directory(f)) {
+            LERROR(std::format(
+                "Could not find directory: '{}' for module setting '{}'",
+                f, _exoplanetsDataFolder.identifier()
+            ));
+        }
+    });
     addProperty(_exoplanetsDataFolder);
+
+    auto createPathOnChange = [](const properties::StringProperty& p) {
+        return [&p]() {
+            std::filesystem::path f = p.value();
+            if (!std::filesystem::is_regular_file(f)) {
+                LERROR(std::format(
+                    "Could not find file: '{}' for module setting '{}'",
+                    f, p.identifier()
+                ));
+            }
+        };
+    };
+    _bvColorMapPath.onChange(createPathOnChange(_bvColorMapPath));
     addProperty(_bvColorMapPath);
+
+    _starTexturePath.onChange(createPathOnChange(_starTexturePath));
     addProperty(_starTexturePath);
+
+    _starGlareTexturePath.onChange(createPathOnChange(_starGlareTexturePath));
     addProperty(_starGlareTexturePath);
+
+    _noDataTexturePath.onChange(createPathOnChange(_noDataTexturePath));
     addProperty(_noDataTexturePath);
+
+    _planetDefaultTexturePath.onChange(createPathOnChange(_planetDefaultTexturePath));
     addProperty(_planetDefaultTexturePath);
+
+    _orbitDiscTexturePath.onChange(createPathOnChange(_orbitDiscTexturePath));
     addProperty(_orbitDiscTexturePath);
+
+    _habitableZoneTexturePath.onChange(createPathOnChange(_habitableZoneTexturePath));
     addProperty(_habitableZoneTexturePath);
 
     _comparisonCircleColor.setViewOption(properties::Property::ViewOptions::Color);
