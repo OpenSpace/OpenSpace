@@ -148,19 +148,46 @@ void SessionRecordingHandler::tickPlayback(double dt) {
     {
         prevCamera--;
     }
+    // We need to check this here as there might be a chance that the first camera entry
+    // is after the current elapsed time, which would result in `prevCamera` being equal
+    // to `begin()` but not being a camera keyframe
+    const bool hasValidPrevCamera =
+        std::holds_alternative<SessionRecording::Entry::Camera>(prevCamera->value);
+
     std::vector<SessionRecording::Entry>::const_iterator nextCamera = probe;
     while (nextCamera != _timeline.entries.end() &&
            !std::holds_alternative<SessionRecording::Entry::Camera>(nextCamera->value))
     {
         nextCamera++;
     }
+    // Same argument but in reverse from the `hasValidPrevCamera` comment
+    const bool hasValidNextCamera =
+        (nextCamera != _timeline.entries.end()) &&
+        std::holds_alternative<SessionRecording::Entry::Camera>(nextCamera->value);
+
+
+    if (!hasValidPrevCamera && !hasValidNextCamera) {
+        throw ghoul::RuntimeError("No valid camera keyframes found in recording");
+    }
 
     // update camera with or without new keyframes
-    const auto& prevPose = std::get<SessionRecording::Entry::Camera>(prevCamera->value);
-    const double prevTime = prevCamera->timestamp;
+    const auto& prevPose =
+        hasValidPrevCamera ?
+        std::get<SessionRecording::Entry::Camera>(prevCamera->value) :
+        std::get<SessionRecording::Entry::Camera>(nextCamera->value);
+    const double prevTime =
+        hasValidPrevCamera ?
+        prevCamera->timestamp :
+        0.0;
 
-    const auto& nextPose = std::get<SessionRecording::Entry::Camera>(nextCamera->value);
-    const double nextTime = nextCamera->timestamp;
+    const auto& nextPose =
+        hasValidNextCamera ?
+        std::get<SessionRecording::Entry::Camera>(nextCamera->value) :
+        std::get<SessionRecording::Entry::Camera>(prevCamera->value);
+    const double nextTime =
+        hasValidNextCamera ?
+        nextCamera->timestamp :
+        _timeline.entries.back().timestamp;
 
     // Need to actively update the focusNode position of the camera in relation to
     // the rendered objects will be unstable and actually incorrect
