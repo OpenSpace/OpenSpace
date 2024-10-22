@@ -37,7 +37,8 @@ namespace openspace::globebrowsing {
 
 LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
 
-void LayerManager::initialize(const std::map<layers::Group::ID, ghoul::Dictionary>& dict)
+void LayerManager::initialize(
+                  const std::map<layers::Group::ID, std::vector<ghoul::Dictionary>>& dict)
 {
     ZoneScoped;
 
@@ -47,20 +48,14 @@ void LayerManager::initialize(const std::map<layers::Group::ID, ghoul::Dictionar
         addPropertySubOwner(_layerGroups[i].get());
         _layerGroups[i]->initialize();
         auto it = dict.find(layers::Groups[i].id);
-        if (!dict.empty() && it == dict.end()) {
-            LWARNINGC(
-                "LayerManager",
-                std::format("Unknown layer group '{}'", layers::Groups[i].identifier)
-            );
+        if (it == dict.end()) {
             continue;
         }
 
-        for (size_t j = 1; j <= dict.size(); j++) {
-            const ghoul::Dictionary layer =
-                it->second.value<ghoul::Dictionary>(std::to_string(j));
-
+        for (const ghoul::Dictionary& layer : it->second) {
             try {
-                _layerGroups[i]->addLayer(layer);
+                Layer* l = _layerGroups[i]->addLayer(layer);
+                l->initialize();
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);

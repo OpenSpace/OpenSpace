@@ -303,7 +303,7 @@ namespace {
         };
 
         // A list of layers that should be added to the globe.
-        std::optional<std::map<Group, ghoul::Dictionary>> layers
+        std::optional<std::map<Group, std::vector<ghoul::Dictionary>>> layers
             [[codegen::reference("globebrowsing_layer")]];
 
         // Specifies information about planetary labels that can be rendered on the
@@ -644,7 +644,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     setInteractionSphere(boundingSphere());
 
     // Init layer manager
-    std::map<layers::Group::ID, ghoul::Dictionary> layers;
+    std::map<layers::Group::ID, std::vector<ghoul::Dictionary>> layers;
     if (p.layers.has_value()) {
         for (const auto& [key, value] : *p.layers) {
             layers[codegen::map<layers::Group::ID>(key)] = value;
