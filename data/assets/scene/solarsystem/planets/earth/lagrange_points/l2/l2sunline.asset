@@ -1,0 +1,44 @@
+local sun = asset.require("scene/solarsystem/sun/sun")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local L2SunLine = {
+  Identifier = "L2SunLine",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableNodeLine",
+    Enabled = asset.enabled,
+    StartNode = sun.Sun.Identifier,
+    EndNode = transforms.L2Position.Identifier,
+    Color = { 0.5, 0.5, 0.5 },
+    LineWidth = 2
+  },
+  Tag = { "lagrange_points_earth_l2_small" },
+  GUI = {
+    Name = "Sun to L2 Line",
+    Path = "/Solar System/Planets/Earth/Lagrange Points"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(L2SunLine)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(L2SunLine)
+end)
+
+asset.export(L2SunLine)
+
+
+
+asset.meta = {
+  Name = "Lagrange Point L2 to Sun Line",
+  Description = [[Lagrange point L2 to Sun line]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

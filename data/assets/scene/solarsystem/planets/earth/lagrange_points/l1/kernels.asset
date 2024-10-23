@@ -1,0 +1,22 @@
+local kernels = asset.resource({
+  Name = "Lagrange Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earth_lagrange_kernels",
+  Version = 1
+})
+
+
+local ID = {
+  L1 = 391
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "L1_de431.bsp")
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels .. "L1_de431.bsp")
+end)
+
+asset.export("ID", ID)
