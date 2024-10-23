@@ -1,10 +1,106 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+--local magnetosphereTransforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
+local GSM_SM_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_sm")
+local GSE_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_gse")
+local GSM_SM_Time_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_sm_timedependent")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local heliosphereTransforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
 
 
 local SunRadius = 6.957E8
 local EarthRadius = 6.371E6
+
+
+local GSEAxes = {
+  Identifier = "GSECoordinateAxes",
+  Parent = GSE_Transforms.GeocentricSolarEcliptic.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = EarthRadius * 3.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GSE Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local GSMAxes = {
+  Identifier = "GSMCoordinateAxes",
+  Parent = GSM_SM_Transforms.GeocentricSolarMagnetospheric.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = EarthRadius * 3.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GSM Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local SMAxes = {
+  Identifier = "SMCoordinateAxes",
+  Parent = GSM_SM_Transforms.SolarMagnetospheric.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = EarthRadius * 3.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "SM Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local SMTimeAxes = {
+  Identifier = "SMTimeCoordinateAxes",
+  Parent = GSM_SM_Time_Transforms.SolarMagnetosphericTimeDependent.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = EarthRadius * 5.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "SM-Time Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local GSMTimeAxes = {
+  Identifier = "GSMTimeCoordinateAxes",
+  Parent = GSM_SM_Time_Transforms.GeocentricSolarMagnetosphericTimeDependent.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = EarthRadius * 5.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GSM-Time Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
 
 local EarthBarycenterAxes = {
   Identifier = "EarthBarycenterAxes",
@@ -96,6 +192,60 @@ local SolarSystemBarycenterAxes = {
   }
 }
 
+local HEEQAxes = {
+  Identifier = "HEEQAxes",
+  Parent = heliosphereTransforms.HeliocentricEarthEquatorial.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = SunRadius * 300
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "HEEQ Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local HEEQ180Axes = {
+  Identifier = "HEEQ180Axes",
+  Parent = heliosphereTransforms.HeliocentricEarthEquatorial180.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = SunRadius * 300
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "HEEQ 180 Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
+local HEEAxes = {
+  Identifier = "HEEAxes",
+  Parent = heliosphereTransforms.HeliocentricEarthEquatorial.Identifier,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = SunRadius * 300
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "HEE Axes",
+    Path = "/Other/Coordinate Systems"
+  }
+}
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthBarycenterAxes)
@@ -103,10 +253,25 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthIAUAxes)
   openspace.addSceneGraphNode(SunIAUAxes)
   openspace.addSceneGraphNode(SolarSystemBarycenterAxes)
-
+  openspace.addSceneGraphNode(GSEAxes)
+  openspace.addSceneGraphNode(GSMTimeAxes)
+  openspace.addSceneGraphNode(GSMAxes)
+  openspace.addSceneGraphNode(SMAxes)
+  openspace.addSceneGraphNode(SMTimeAxes)
+  openspace.addSceneGraphNode(HEEQAxes)
+  openspace.addSceneGraphNode(HEEQ180Axes)
+  openspace.addSceneGraphNode(HEEAxes)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HEEAxes)
+  openspace.removeSceneGraphNode(HEEQ180Axes)
+  openspace.removeSceneGraphNode(HEEQAxes)
+  openspace.removeSceneGraphNode(SMTimeAxes)
+  openspace.removeSceneGraphNode(SMAxes)
+  openspace.removeSceneGraphNode(GSMAxes)
+  openspace.removeSceneGraphNode(GSMTimeAxes)
+  openspace.removeSceneGraphNode(GSEAxes)
   openspace.removeSceneGraphNode(SolarSystemBarycenterAxes)
   openspace.removeSceneGraphNode(SunIAUAxes)
   openspace.removeSceneGraphNode(EarthIAUAxes)
@@ -119,6 +284,14 @@ asset.export(EarthInertialAxes)
 asset.export(EarthIAUAxes)
 asset.export(SunIAUAxes)
 asset.export(SolarSystemBarycenterAxes)
+asset.export(GSEAxes)
+asset.export(GSMTimeAxes)
+asset.export(GSMAxes)
+asset.export(SMAxes)
+asset.export(SMTimeAxes)
+asset.export(HEEQAxes)
+asset.export(HEEQ180Axes)
+asset.export(HEEAxes)
 
 
 

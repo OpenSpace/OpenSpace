@@ -1,6 +1,5 @@
 Geocentric Solar Magnetospheric (GSM) frame:
 Used by the BATSRUS model
-This Kernel's ID is not a valid ID!
 
  +X is parallel to the geometric earth-sun position vector.
 
@@ -9,10 +8,13 @@ This Kernel's ID is not a valid ID!
 
  +Y completes the right-handed frame.
 
+This is a static version of the correct GSM.
+Instead of using 'IAU_EARTH' for SEC_FRAME, 'ECLIPJ2000' is used
+
 \begindata
 
-FRAME_GSM = 13371333
-FRAME_13371333_NAME = 'GSM'
+FRAME_GSM_STATIC = 13371333
+FRAME_13371333_NAME = 'GSM_STATIC'
 FRAME_13371333_CLASS = 5
 FRAME_13371333_CLASS_ID = 13371333
 FRAME_13371333_CENTER = 399
