@@ -16,13 +16,11 @@ local Layer = {
 
 
 asset.onInitialize(function()
-  openspace.printWarning("The map for the total eclipse of 20th March 2034 contains a geometry that cannot be read right now")
-  -- @TODO:  The file contains a non-simple geometry which is currently not supported
-  -- openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Layer)
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, Layer)
 end)
 
 asset.onDeinitialize(function()
-  -- openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Layer)
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, Layer)
 end)
 
 
