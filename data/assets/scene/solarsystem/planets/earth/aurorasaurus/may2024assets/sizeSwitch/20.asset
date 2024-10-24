@@ -1,5 +1,5 @@
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
-
+--ELON: change this to aurorasaurus_data folder
 local data_folder = "C:/Users/alundkvi/Documents/work/OpenSpaceData/aurorasaurus_data/"
 
 local notSeenAuroraIcon3612 = {
