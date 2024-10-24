@@ -49,7 +49,7 @@ namespace openspace {
         static documentation::Documentation Documentation();
 
     protected:
-        bool _jsonDownloaded = false; // New flag for JSON download status
+        bool _jsonDownloaded = false;
         bool _textureIsDirty;
         std::future<DownloadManager::MemoryFile> _imageFuture;
         std::future<DownloadManager::MemoryFile> _jsonFuture;
@@ -63,21 +63,20 @@ namespace openspace {
         void bindTexture() override;
 
         std::future<DownloadManager::MemoryFile> downloadJsonToMemory(
-            const std::string& url);  // Method for downloading JSON
+            const std::string& url); 
 
         std::future<DownloadManager::MemoryFile> downloadImageToMemory(
-            const std::string& url);  // Remains for image download
+            const std::string& url);  
 
-        std::string findClosestTimestampUrl(const std::string& jsonContent, const std::string& currentTimestamp);
+        std::string findClosestTimestampUrl(const std::string& jsonContent, std::string& currentTimestamp);
         std::string getClosestUrl(const std::string& jsonFilePath, const std::string& currentTime);
 
         std::unique_ptr<ghoul::opengl::Texture> _texture;
 
         std::string getCurrentTimestamp();
         void loadImage(const std::string& imageUrl);
-        // Method for getting current timestamp
         bool isCloser(const std::string& current, const std::string& newTimestamp, const std::string& closest); // Method for timestamp comparison
-        std::time_t parseTimestamp(const std::string& timestamp);
+        std::time_t parseTimestamp(std::string& timestamp);
         std::string formatTimeForData(std::string_view timeStr);
     };
 

@@ -87,7 +87,7 @@ DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _text = p.text.value_or(_text);
     addProperty(_text);
-
+    //ELON: change this to observed_data.json
     loadDataFromJson("C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/KPjson/observed_data.json");
 }
 
@@ -129,21 +129,55 @@ void DashboardItemText::render(glm::vec2& penPosition) {
 
     double value = getValueForCurrentTime();
 
-    _text = "KP Index: " + std::to_string(value);
+    _text = "Observed KP Index: " + std::to_string(value);
 
     glm::vec4 color = { 1.f, 1.f, 1.f, 1.f };
 
-    if (value > 6)
+
+    if (value > 8)
     {
-        color = { 1.f, 0.f, 0.f, 1.f };
+        color = {
+            255.f / 255.f,
+            0.f / 255.f,
+            0.f / 255.f,
+            1.f
+        };
     }
-    else if (value > 4)
+    else if (value > 7)
     {
-        color = { 1.f, 1.f, 0.f, 1.f };
+        color = {
+            255.f / 255.f,
+            150.f / 255.f,
+            0.f / 255.f,
+            1.f
+        };
+    }
+    else if (value > 6)
+    {
+        color = {
+            255.f / 255.f,
+            200.f / 255.f,
+            0.f / 255.f,
+            1.f
+        };
+    }
+    else if (value > 5)
+    {
+        color = {
+            246.f / 255.f,
+            235.f / 255.f,
+            20.f / 255.f,
+            1.f
+        };
     }
     else
     {
-        color = { 0.f, 1.f, 0.f, 1.f };
+        color = {
+            146.f / 255.f,
+            208.f / 255.f,
+            80.f / 255.f,
+            1.f 
+        };
     }
 
     penPosition.y -= _font->height();

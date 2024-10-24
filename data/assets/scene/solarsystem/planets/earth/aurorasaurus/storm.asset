@@ -1,5 +1,9 @@
-local filepath = "C:/Users/alundkvi/Documents/work/data/auroraData/stormData/"
+--local filepath = "C:/Users/alundkvi/Documents/work/data/auroraData/stormData/"
 local globe = asset.require("scene/solarsystem/planets/earth/earth")
+
+--ELON: change this to skycamera_images folder
+local imagePath = "C:/Users/alundkvi/Downloads/mothers_day_storm_data_for_bea/mothers_day_storm_data_for_bea/grid_gillam/rgb/2024/05/11/images3/"
+
 local Dashboard = {
   Identifier = "ScreenSpaceKPindex",
   Name = "KPindex",
@@ -21,36 +25,160 @@ local marker = {
     Identifier = "target-marker",
     Name = "ISWA Cygnets",
     Type = "ScreenSpaceImageOnline",
-    URL = "C:/Users/alundkvi/Downloads/FilesInRangeServlet.json"
+    FaceCamera = false,
+    --ELON: change this to magnetopause.json
+    URL = "C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/ISWAcygnets/magnetopause.json"
 }
 
---[[ local Layer = {
-  Identifier = "gilliam",
-  Name = "gilliam",
-  Enabled = asset.enabled,
-  ZIndex = 50000,
-  FilePath = "C:/Users/alundkvi/Documents/work/scripts/scripts/aurorasaurus/images/layer_image.png",
-  Description = "Earth image from Blue Marble Next Generation",
-  CacheSettings = { Enabled = false }
-} ]]
+
+local Browser = {
+  Type = "ScreenSpaceBrowser",
+  Identifier = "ScreenSpaceBrowserExample",
+  Name = "Screen Space Browser Example",
+  Url = "https://iswa.ccmc.gsfc.nasa.gov/IswaSystemWebApp/?layout=SuperStormMay2024Indices"
+}
+
+local Skycamera_sphere = {
+  Identifier = "Skycamera_sphere",
+  Parent = globe.Earth.Identifier,
+  Enabled = asset.disabled,
+  InteractionSphere = 6379137,
+  Renderable = {
+    Type = "RenderableTimeVaryingSphere",
+    Size = 6379137.0, -- Slightly bigger than the sun renderable,
+    Enabled = false,
+    TextureSource = imagePath,
+    Opacity = 1,
+    Segments = 532
+  },
+  GUI = {
+    Name = "Skycamera sphere",
+    Path = "/Sky-Camera",
+    Description = [[Texture sequence of an extreme ultra violet (EUV) simulation, during
+      the CME. This asset contains data from 2000-07-14 08:38 to 2000-07-14 19:48]]
+  }
+}
+
+local Toggleskycamera = {
+  Identifier = "os.solarsystem.Toggleskycamera",
+  Name = "Toggle Sky Camera",
+  Command = [[
+    if openspace.propertyValue("Scene.Skycamera_sphere.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.Skycamera_sphere.Renderable.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.Skycamera_sphere.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.Skycamera_sphere.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.Skycamera_sphere.Renderable.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle Sky Camera Layer",
+  GuiPath = "/Sky-Camera",
+  IsLocal = false
+}
+
+local ToggleKPindex = {
+  Identifier = "os.ToggleKPindex",
+  Name = "Toggle KP index",
+  Command = [[
+    if openspace.propertyValue("ScreenSpace.ScreenSpaceKPindex.Enabled") then
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.ScreenSpaceKPindex.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.ScreenSpaceKPindex.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle observed KP index",
+  GuiPath = "/Aurorasaurus",
+  IsLocal = false
+}
+
+local ToggleISWACygnet = {
+  Identifier = "os.ToggleISWACygnet",
+  Name = "Toggle ISWA cygnet",
+  Command = [[
+    if openspace.propertyValue("ScreenSpace.target-marker.Enabled") then
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.target-marker.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("ScreenSpace.target-marker.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("ScreenSpace.target-marker.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "ScreenSpace.target-marker.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle ISWA Cygnet",
+  GuiPath = "/Aurorasaurus",
+  IsLocal = false
+}
 
 
 asset.onInitialize(function()
-    openspace.addScreenSpaceRenderable(marker)
-    openspace.addScreenSpaceRenderable(Dashboard)
-    --openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(marker)
+  openspace.addScreenSpaceRenderable(Dashboard)
+  --openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 
-    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-1.770000,0.850000,-8.950000})
-    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-0.630000,0.380000,-2.310000})
-    --openspace.setPropertyValueSingle("ScreenSpace.target-marker.CartesianPosition", {-0.707970, -0.34, -2.2180})
-    openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.Size", {0.000000,0.000000,640.000000,320.000000})
-  end)
+  openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.CartesianPosition", {-0.540000,0.130000,-1.960000})
+  --openspace.setPropertyValueSingle("ScreenSpace.target-marker.CartesianPosition", {-0.707970, -0.34, -2.2180})
+  openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.Scale", 0.750000)
+  openspace.setPropertyValueSingle("ScreenSpace.ScreenSpaceKPindex.Size", {0.000000,0.000000,640.000000,320.000000})
+  openspace.setPropertyValueSingle("ScreenSpace.target-marker.CartesianPosition", {-0.630000,0.220000,-2.000000})
+  openspace.setPropertyValueSingle("ScreenSpace.target-marker.Scale", 0.130000)
+  --openspace.addScreenSpaceRenderable(Browser)
 
-  asset.onDeinitialize(function()
-    openspace.removeScreenSpaceRenderable(marker)
+
+  openspace.action.registerAction(Toggleskycamera)
+  openspace.action.registerAction(ToggleISWACygnet)
+  openspace.action.registerAction(ToggleKPindex)
+  openspace.addSceneGraphNode(Skycamera_sphere)
+  openspace.setPropertyValueSingle("Scene.Skycamera_sphere.Rotation.Rotation", {0.000000,0.000000,-3.140000})
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(marker)
   --openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
   openspace.addScreenSpaceRenderable(Dashboard)
-  end)
+  --openspace.removeScreenSpaceRenderable(Browser)
+
+  openspace.action.removeAction(Toggleskycamera)
+  openspace.action.removeAction(ToggleISWACygnet)
+  openspace.action.removeAction(ToggleKPindex)
+  openspace.removeSceneGraphNode(Skycamera_sphere)
+end)
 
 --asset.export("layer", Layer)
+--asset.export(Browser)
 asset.export(Dashboard)
+
+asset.export("Toggleskycamera", Toggleskycamera.Identifier)
+asset.export("ToggleISWACygnet", ToggleISWACygnet.Identifier)
+asset.export("ToggleKPindex", ToggleKPindex.Identifier)
+asset.export(Skycamera_sphere)

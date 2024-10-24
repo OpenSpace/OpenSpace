@@ -1,5 +1,7 @@
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
+local data_folder = "C:/Users/alundkvi/Documents/work/OpenSpaceData/aurorasaurus_data/"
+
 local Aurora1521 = {
   Identifier = "Aurora1521",
   Parent = earth.Earth.Identifier,

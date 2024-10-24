@@ -1,4 +1,14 @@
 {
+  "actions": [
+    {
+      "documentation": "Sets up scene for all-sky camera",
+      "gui_path": "/sky-camera",
+      "identifier": "sky-camera_setup_loop",
+      "is_local": false,
+      "name": "sky-camera setup",
+      "script": "openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.ColorLayers.Oval_North.Enabled', false);openspace.setPropertyValueSingle('Scene.Earth.Renderable.Layers.ColorLayers.Oval_South.Enabled', false);openspace.setPropertyValueSingle('ScreenSpace.color-legend-aurora-oval.Enabled', false);openspace.setPropertyValueSingle('ScreenSpace.Legend-aurora-oval.Enabled', false);openspace.setPropertyValueSingle('ScreenSpace.ScreenSpaceKPindex.Enabled', false);openspace.setPropertyValueSingle('ScreenSpace.target-marker.Enabled', false);openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.FollowAnchorNodeRotationDistance', 16.360000);openspace.setPropertyValueSingle('Scene.EarthAtmosphere.Renderable.Enabled', false);openspace.scriptScheduler.clear();openspace.time.setDeltaTime(300);openspace.time.setTime('2024-MAY-11 04:22:00.00');Endtime2012 = \"2024 MAY 11 08:10:00\";Starttimescript12 = \"openspace.time.setTime('2024 MAY 11 04:22:00')\";openspace.scriptScheduler.loadScheduledScript(Endtime2012, Starttimescript12);"
+    }
+  ],
   "assets": [
     "base",
     "base_keybindings",
@@ -38,16 +48,60 @@
   ],
   "keybindings": [
     {
-      "action": "os.solarsystem.ToggleSatelliteTrails",
+      "action": "os.solarsystem.FocusEarth",
+      "key": "HOME"
+    },
+    {
+      "action": "sky-camera_setup_loop",
+      "key": "R"
+    },
+    {
+      "action": "os.solarsystem.Toggleskycamera",
+      "key": "E"
+    },
+    {
+      "action": "os.disableAllAuroras",
+      "key": "D"
+    },
+    {
+      "action": "os.allAuroras",
       "key": "S"
     },
     {
-      "action": "os.solarsystem.FocusIss",
-      "key": "I"
+      "action": "os.ToggleNorthLayer",
+      "key": "Q"
     },
     {
-      "action": "os.solarsystem.FocusEarth",
-      "key": "HOME"
+      "action": "os.ToggleSouthLayer",
+      "key": "W"
+    },
+    {
+      "action": "os.toggleNotSeenAuroras",
+      "key": "N"
+    },
+    {
+      "action": "os.ToggleColorLegend",
+      "key": "O"
+    },
+    {
+      "action": "os.ToggleLegend",
+      "key": "P"
+    },
+    {
+      "action": "os.enableViewline",
+      "key": "Z"
+    },
+    {
+      "action": "os.disableViewline",
+      "key": "X"
+    },
+    {
+      "action": "os.ToggleKPindex",
+      "key": "H"
+    },
+    {
+      "action": "os.ToggleISWACygnet",
+      "key": "J"
     }
   ],
   "mark_nodes": [

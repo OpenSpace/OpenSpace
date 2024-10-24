@@ -11,6 +11,19 @@ local showAllAuroras = {
     IsLocal = false
   }
 
+
+  local disableAllAuroras = {
+    Identifier = "os.disableAllAuroras",
+    Name = "Disable all Auroras",
+    Command = [[
+        openspace.setPropertyValue("Scene.Aurora*.Renderable.Enabled", false)
+        openspace.setPropertyValue("Scene.icon*.Renderable.Enabled", false)
+    ]],
+    Documentation = [[]],
+    GuiPath = "/Aurorasaurus/Icons",
+    IsLocal = false
+  }
+
   local toggleNotSeenAuroras = {
     Identifier = "os.toggleNotSeenAuroras",
     Name = "Toggle not seen Auroras",
@@ -188,6 +201,7 @@ local showRedAuroras = {
 
   asset.onInitialize(function()
     openspace.action.registerAction(showAllAuroras)
+    openspace.action.registerAction(disableAllAuroras)
     openspace.action.registerAction(toggleNotSeenAuroras)
     openspace.action.registerAction(toggleShapeIcons)
     openspace.action.registerAction(showGreenAuroras)
@@ -202,6 +216,7 @@ local showRedAuroras = {
 
   asset.onDeinitialize(function()
     openspace.action.removeAction(showAllAuroras)
+    openspace.action.removeAction(disableAllAuroras)
     openspace.action.removeAction(toggleNotSeenAuroras)
     openspace.action.removeAction(toggleShapeIcons)
     openspace.action.removeAction(showGreenAuroras)
@@ -215,6 +230,7 @@ local showRedAuroras = {
   end)
 
   asset.export("showAllAuroras", showAllAuroras.Identifier)
+  asset.export("disableAllAuroras", disableAllAuroras.Identifier)
   asset.export("enableNotSeenAuroras", toggleNotSeenAuroras.Identifier)
   asset.export("toggleShapeIcons", toggleShapeIcons.Identifier)
   asset.export("showGreenAuroras", showGreenAuroras.Identifier)

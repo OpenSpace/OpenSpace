@@ -1,7 +1,15 @@
 local globe = asset.require("scene/solarsystem/planets/earth/earth")
 
+--ELON: change this to oval_layer_images/north_images
 local northPath = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_north/combined_images/"
+
+--ELON: change this to oval_layer_images/south_images
 local southPath = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_south/combined_images/"
+
+local northPathNameChange = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_north/combined_images_namechange"
+local southPathNameChange = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_south/combined_images_namechange"
+
+
 
 local NorthLayer = {
     Identifier = "Oval_North",
@@ -45,29 +53,188 @@ local SouthLayer = {
   Opacity = 1
 }
 
-local AuroraLayer = {
-  Identifier = "Aurora_Image",
-  Name = "Arurora Image",
-  Enabled = asset.enabled,
-  ZIndex = 5,
-  FilePath = "C:/Users/alundkvi/Documents/work/scripts/us_image_transparent.png",
-  Description = "Lower Resolution offline version of WAC layer",
-  CacheSettings = { Enabled = false }
+
+
+local NorthLayerNameChange = {
+  Identifier = "North_Oval_LayerNameChange",
+  Parent = globe.Earth.Identifier,
+  Enabled = asset.disabled,
+  InteractionSphere = 6379137,
+  Renderable = {
+    Type = "RenderableTimeVaryingSphere",
+    Size = 6379137.0, -- Slightly bigger than the sun renderable,
+    Enabled = true,
+    TextureSource = northPathNameChange,
+    Opacity = 1,
+    Segments = 532
+  },
+  GUI = {
+    Name = "North Oval",
+    Path = "/test",
+    Description = [[Texture sequence of an extreme ultra violet (EUV) simulation, during
+      the CME. This asset contains data from 2000-07-14 08:38 to 2000-07-14 19:48]]
+  }
 }
 
+local SouthLayerNameChange = {
+  Identifier = "South_Oval_LayerNameChange",
+  Parent = globe.Earth.Identifier,
+  Enabled = asset.disabled,
+  InteractionSphere = 6379137,
+  Renderable = {
+    Type = "RenderableTimeVaryingSphere",
+    Size = 6379137.0, -- Slightly bigger than the sun renderable,
+    Enabled = true,
+    TextureSource = southPathNameChange,
+    Opacity = 1,
+    Segments = 532
+  },
+  GUI = {
+    Name = "South Oval",
+    Path = "/test",
+    Description = [[Texture sequence of an extreme ultra violet (EUV) simulation, during
+      the CME. This asset contains data from 2000-07-14 08:38 to 2000-07-14 19:48]]
+  }
+}
+
+local ToggleNorthLayer = {
+  Identifier = "os.ToggleNorthLayer",
+  Name = "Toggle North Oval Layer",
+  Command = [[
+    if openspace.propertyValue("Scene.Earth.Renderable.Layers.ColorLayers.Oval_North.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.Earth.Renderable.Layers.ColorLayers.Oval_North.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.Oval_North.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.Oval_North.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.Earth.Renderable.Layers.ColorLayers.Oval_North.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle EUV layer of sun",
+  GuiPath = "/Aurorasaurus",
+  IsLocal = false
+}
+
+local ToggleSouthLayer = {
+  Identifier = "os.ToggleSouthLayer",
+  Name = "Toggle South Oval Layer",
+  Command = [[
+    if openspace.propertyValue("Scene.Earth.Renderable.Layers.ColorLayers.Oval_South.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.Earth.Renderable.Layers.ColorLayers.Oval_South.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.Oval_South.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.Earth.Renderable.Layers.ColorLayers.Oval_South.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.Earth.Renderable.Layers.ColorLayers.Oval_South.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle EUV layer of sun",
+  GuiPath = "/Aurorasaurus",
+  IsLocal = false
+}
+
+local ToggleNorthLayerNameChange = {
+  Identifier = "os.solarsystem.ToggleNorthLayerNameChange",
+  Name = "Toggle EUV layer",
+  Command = [[
+    if openspace.propertyValue("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.EUV-Layer-bastille-day-2000.Renderable.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.EUV-Layer-bastille-day-2000.Renderable.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle EUV layer of sun",
+  GuiPath = "/Bastille-Day 2000",
+  IsLocal = false
+}
+
+local ToggleSouthLayerNameChange = {
+  Identifier = "os.solarsystem.ToggleSouthLayerNameChange",
+  Name = "Toggle EUV layer",
+  Command = [[
+    if openspace.propertyValue("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled") then
+      openspace.setPropertyValueSingle(
+        "Scene.EUV-Layer-bastille-day-2000.Renderable.Fade",
+        0.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear",
+        'openspace.setPropertyValueSingle("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled", false)'
+      )
+    else
+      openspace.setPropertyValueSingle("Scene.EUV-Layer-bastille-day-2000.Renderable.Enabled", true)
+      openspace.setPropertyValueSingle(
+        "Scene.EUV-Layer-bastille-day-2000.Renderable.Fade",
+        1.0,
+        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
+        "Linear"
+      )
+    end
+  ]],
+  Documentation = "Toggle EUV layer of sun",
+  GuiPath = "/Bastille-Day 2000",
+  IsLocal = false
+}
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", NorthLayer)
   openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", SouthLayer)
-  --openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", AuroraLayer)
+  openspace.action.registerAction(ToggleNorthLayer)
+  openspace.action.registerAction(ToggleSouthLayer)
+--[[   openspace.action.registerAction(ToggleNorthLayerNameChange)
+  openspace.action.registerAction(ToggleSouthLayerNameChange)
+  openspace.addSceneGraphNode(NorthLayerNameChange)
+  openspace.addSceneGraphNode(SouthLayerNameChange)
+  openspace.setPropertyValueSingle("Scene.North_Oval_LayerNameChange.Rotation.Rotation", {0.000000,0.000000,-3.140000})
+  openspace.setPropertyValueSingle("Scene.South_Oval_LayerNameChange.Rotation.Rotation", {0.000000,0.000000,-3.140000}) ]]
 end)
 
 asset.onDeinitialize(function()
+  --[[ openspace.action.removeAction(ToggleNorthLayerNameChange)
+  openspace.action.removeAction(ToggleSouthLayerNameChange)
+  openspace.removeSceneGraphNode(NorthLayerNameChange)
+  openspace.removeSceneGraphNode(SouthLayerNameChange) ]]
+  openspace.action.removeAction(ToggleNorthLayer)
+  openspace.action.removeAction(ToggleSouthLayer)
   openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", NorthLayer)
   openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", SouthLayer)
-  --openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", AuroraLayer)
 end)
 
 asset.export("Prototype", NorthLayer)
 asset.export("Prototype", SouthLayer)
---asset.export("Layer", AuroraLayer)
+asset.export("ToggleNorthLayer", ToggleNorthLayer.Identifier)
+asset.export("ToggleSouthLayer", ToggleSouthLayer.Identifier)
+
+--[[ asset.export("ToggleNorthLayerNameChange", ToggleNorthLayerNameChange.Identifier)
+asset.export("ToggleSouthLayerNameChange", ToggleSouthLayerNameChange.Identifier)
+asset.export(NorthLayerNameChange)
+asset.export(SouthLayerNameChange) ]]

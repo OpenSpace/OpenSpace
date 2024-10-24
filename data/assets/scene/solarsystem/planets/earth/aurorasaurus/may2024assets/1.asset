@@ -1,5 +1,7 @@
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
+local data_folder = "C:/Users/alundkvi/Documents/work/OpenSpaceData/aurorasaurus_data/"
+
 local notSeenAuroraIcon1 = {
   Identifier = "notSeenAuroraIcon1",
   Parent = earth.Earth.Identifier,
@@ -23,7 +25,7 @@ local notSeenAuroraIcon1 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -57,7 +59,7 @@ local notSeenAuroraIcon2 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -93,7 +95,7 @@ local AuroraGreenRed3 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_3.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -102,7 +104,7 @@ local AuroraGreenRed3 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -140,7 +142,7 @@ local AuroraGreenPinkRed4 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_4.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_4.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -149,7 +151,7 @@ local AuroraGreenPinkRed4 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedPinkCamera.png",
+        Texture = data_folder .. "icons/greenRedPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -187,7 +189,7 @@ local AuroraPinkWhite5 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_5.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_5.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -196,7 +198,7 @@ local AuroraPinkWhite5 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/whitePinkCamera.png",
+        Texture = data_folder .. "icons/whitePinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -232,7 +234,7 @@ local notSeenAuroraIcon6 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -266,7 +268,7 @@ local notSeenAuroraIcon7 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -300,7 +302,7 @@ local notSeenAuroraIcon8 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -334,7 +336,7 @@ local notSeenAuroraIcon9 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -370,7 +372,7 @@ local AuroraGreenPink10 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_10.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_10.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -379,7 +381,7 @@ local AuroraGreenPink10 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPinkCamera.png",
+        Texture = data_folder .. "icons/greenPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -415,7 +417,7 @@ local notSeenAuroraIcon11 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -449,7 +451,7 @@ local icon12 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+      Texture = data_folder .. "icons/green2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -483,7 +485,7 @@ local notSeenAuroraIcon13 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -517,7 +519,7 @@ local icon14 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+      Texture = data_folder .. "icons/green2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -551,7 +553,7 @@ local notSeenAuroraIcon15 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -585,7 +587,7 @@ local notSeenAuroraIcon16 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -619,7 +621,7 @@ local notSeenAuroraIcon17 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -653,7 +655,7 @@ local notSeenAuroraIcon18 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -687,7 +689,7 @@ local notSeenAuroraIcon19 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -721,7 +723,7 @@ local notSeenAuroraIcon20 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -755,7 +757,7 @@ local notSeenAuroraIcon21 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -789,7 +791,7 @@ local notSeenAuroraIcon22 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -823,7 +825,7 @@ local notSeenAuroraIcon23 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -857,7 +859,7 @@ local notSeenAuroraIcon24 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -891,7 +893,7 @@ local notSeenAuroraIcon25 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -925,7 +927,7 @@ local notSeenAuroraIcon26 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -961,7 +963,7 @@ local AuroraRed27 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_27.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_27.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -970,7 +972,7 @@ local AuroraRed27 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redCamera.png",
+        Texture = data_folder .. "icons/redCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -1008,7 +1010,7 @@ local AuroraRed28 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_28.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_28.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -1017,7 +1019,7 @@ local AuroraRed28 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redCamera.png",
+        Texture = data_folder .. "icons/redCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -1053,7 +1055,7 @@ local icon29 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+      Texture = data_folder .. "icons/green2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -1087,7 +1089,7 @@ local iconRed30 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/red2.png",
+      Texture = data_folder .. "icons/red2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -1121,7 +1123,7 @@ local notSeenAuroraIcon31 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1155,7 +1157,7 @@ local notSeenAuroraIcon32 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1189,7 +1191,7 @@ local notSeenAuroraIcon33 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1223,7 +1225,7 @@ local notSeenAuroraIcon34 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1259,7 +1261,7 @@ local AuroraRed35 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_35.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_35.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -1268,7 +1270,7 @@ local AuroraRed35 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redCamera.png",
+        Texture = data_folder .. "icons/redCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -1306,7 +1308,7 @@ local AuroraRed36 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_36.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_36.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -1315,7 +1317,7 @@ local AuroraRed36 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redCamera.png",
+        Texture = data_folder .. "icons/redCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -1353,7 +1355,7 @@ local AuroraPink37 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_37.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_37.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -1362,7 +1364,7 @@ local AuroraPink37 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pinkCamera.png",
+        Texture = data_folder .. "icons/pinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -1398,7 +1400,7 @@ local notSeenAuroraIcon38 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1432,7 +1434,7 @@ local iconPink39 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pink2.png",
+      Texture = data_folder .. "icons/pink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -1466,7 +1468,7 @@ local notSeenAuroraIcon40 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1500,7 +1502,7 @@ local notSeenAuroraIcon41 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1534,7 +1536,7 @@ local notSeenAuroraIcon42 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1570,7 +1572,7 @@ local Aurora43 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_43.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_43.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -1579,7 +1581,7 @@ local Aurora43 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+        Texture = data_folder .. "icons/green2.png",
         Opacity = 1,
         Enabled = true
       },
@@ -1615,7 +1617,7 @@ local iconRed44 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/red2.png",
+      Texture = data_folder .. "icons/red2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -1649,7 +1651,7 @@ local iconGreenRed45 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRed2.png",
+      Texture = data_folder .. "icons/greenRed2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -1683,7 +1685,7 @@ local notSeenAuroraIcon46 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1719,7 +1721,7 @@ local AuroraGreenPink47 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_47.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_47.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -1728,7 +1730,7 @@ local AuroraGreenPink47 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPinkCamera.png",
+        Texture = data_folder .. "icons/greenPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -1764,7 +1766,7 @@ local notSeenAuroraIcon48 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1798,7 +1800,7 @@ local notSeenAuroraIcon49 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1832,7 +1834,7 @@ local notSeenAuroraIcon50 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1866,7 +1868,7 @@ local notSeenAuroraIcon51 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -1902,7 +1904,7 @@ local AuroraPink52 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_52.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_52.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -1911,7 +1913,7 @@ local AuroraPink52 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pinkCamera.png",
+        Texture = data_folder .. "icons/pinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -1949,7 +1951,7 @@ local AuroraGreenPinkWhite53 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_53.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_53.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -1958,7 +1960,7 @@ local AuroraGreenPinkWhite53 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenWhitePinkCamera.png",
+        Texture = data_folder .. "icons/greenWhitePinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -1994,7 +1996,7 @@ local iconPink54 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pink2.png",
+      Texture = data_folder .. "icons/pink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -2030,7 +2032,7 @@ local AuroraRed55 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_55.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_55.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -2039,7 +2041,7 @@ local AuroraRed55 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redCamera.png",
+        Texture = data_folder .. "icons/redCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -2075,7 +2077,7 @@ local notSeenAuroraIcon56 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2109,7 +2111,7 @@ local iconPink57 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pink2.png",
+      Texture = data_folder .. "icons/pink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -2143,7 +2145,7 @@ local iconPinkRed58 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redPink2.png",
+      Texture = data_folder .. "icons/redPink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -2177,7 +2179,7 @@ local iconRed59 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/red2.png",
+      Texture = data_folder .. "icons/red2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -2211,7 +2213,7 @@ local iconGreenRed60 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRed2.png",
+      Texture = data_folder .. "icons/greenRed2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -2247,7 +2249,7 @@ local AuroraPink61 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_61.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_61.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -2256,7 +2258,7 @@ local AuroraPink61 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pinkCamera.png",
+        Texture = data_folder .. "icons/pinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -2292,7 +2294,7 @@ local notSeenAuroraIcon62 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2326,7 +2328,7 @@ local iconGreen63 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+      Texture = data_folder .. "icons/green2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -2360,7 +2362,7 @@ local notSeenAuroraIcon64 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2394,7 +2396,7 @@ local notSeenAuroraIcon65 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2428,7 +2430,7 @@ local notSeenAuroraIcon66 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2462,7 +2464,7 @@ local iconGreenPink67 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPink2.png",
+      Texture = data_folder .. "icons/greenPink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -2496,7 +2498,7 @@ local iconGreenPink68 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPink2.png",
+      Texture = data_folder .. "icons/greenPink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -2530,7 +2532,7 @@ local notSeenAuroraIcon69 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2564,7 +2566,7 @@ local notSeenAuroraIcon70 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2598,7 +2600,7 @@ local notSeenAuroraIcon71 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2632,7 +2634,7 @@ local notSeenAuroraIcon72 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2666,7 +2668,7 @@ local notSeenAuroraIcon73 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2700,7 +2702,7 @@ local notSeenAuroraIcon74 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2736,7 +2738,7 @@ local AuroraGreenRed75 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_75.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_75.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -2745,7 +2747,7 @@ local AuroraGreenRed75 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -2781,7 +2783,7 @@ local iconPink76 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pink2.png",
+      Texture = data_folder .. "icons/pink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -2815,7 +2817,7 @@ local notSeenAuroraIcon77 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2849,7 +2851,7 @@ local notSeenAuroraIcon78 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2883,7 +2885,7 @@ local notSeenAuroraIcon79 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2919,7 +2921,7 @@ local AuroraPink80 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_80.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_80.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -2928,7 +2930,7 @@ local AuroraPink80 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pinkCamera.png",
+        Texture = data_folder .. "icons/pinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -2964,7 +2966,7 @@ local notSeenAuroraIcon81 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -2998,7 +3000,7 @@ local notSeenAuroraIcon82 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3032,7 +3034,7 @@ local notSeenAuroraIcon83 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3066,7 +3068,7 @@ local notSeenAuroraIcon84 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3102,7 +3104,7 @@ local AuroraRed85 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_85.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_85.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -3111,7 +3113,7 @@ local AuroraRed85 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redCamera.png",
+        Texture = data_folder .. "icons/redCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -3147,7 +3149,7 @@ local notSeenAuroraIcon86 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3183,7 +3185,7 @@ local AuroraRed87 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_87.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_87.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -3192,7 +3194,7 @@ local AuroraRed87 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redCamera.png",
+        Texture = data_folder .. "icons/redCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -3230,7 +3232,7 @@ local AuroraGreenRed88 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_88.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_88.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -3239,7 +3241,7 @@ local AuroraGreenRed88 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -3275,7 +3277,7 @@ local notSeenAuroraIcon89 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3309,7 +3311,7 @@ local icon90 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+      Texture = data_folder .. "icons/green2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -3343,7 +3345,7 @@ local notSeenAuroraIcon91 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3377,7 +3379,7 @@ local notSeenAuroraIcon92 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3411,7 +3413,7 @@ local notSeenAuroraIcon93 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3447,7 +3449,7 @@ local AuroraGreenRed94 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_94.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_94.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -3456,7 +3458,7 @@ local AuroraGreenRed94 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -3492,7 +3494,7 @@ local notSeenAuroraIcon95 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3528,7 +3530,7 @@ local AuroraRed96 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_96.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_96.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -3537,7 +3539,7 @@ local AuroraRed96 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redCamera.png",
+        Texture = data_folder .. "icons/redCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -3573,7 +3575,7 @@ local notSeenAuroraIcon97 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3609,7 +3611,7 @@ local Aurora98 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_98.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_98.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -3618,7 +3620,7 @@ local Aurora98 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+        Texture = data_folder .. "icons/green2.png",
         Opacity = 1,
         Enabled = true
       },
@@ -3654,7 +3656,7 @@ local iconRed99 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/red2.png",
+      Texture = data_folder .. "icons/red2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -3690,7 +3692,7 @@ local AuroraPinkRed100 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_100.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_100.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -3699,7 +3701,7 @@ local AuroraPinkRed100 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redPinkCamera.png",
+        Texture = data_folder .. "icons/redPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -3735,7 +3737,7 @@ local notSeenAuroraIcon101 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3771,7 +3773,7 @@ local AuroraGreenPink102 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_102.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_102.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -3780,7 +3782,7 @@ local AuroraGreenPink102 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPinkCamera.png",
+        Texture = data_folder .. "icons/greenPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -3818,7 +3820,7 @@ local AuroraRed103 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_103.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_103.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -3827,7 +3829,7 @@ local AuroraRed103 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redCamera.png",
+        Texture = data_folder .. "icons/redCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -3863,7 +3865,7 @@ local notSeenAuroraIcon104 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3897,7 +3899,7 @@ local notSeenAuroraIcon105 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3931,7 +3933,7 @@ local notSeenAuroraIcon106 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -3967,7 +3969,7 @@ local AuroraGreen107 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_107.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_107.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -3976,7 +3978,7 @@ local AuroraGreen107 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenCamera.png",
+        Texture = data_folder .. "icons/greenCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -4012,7 +4014,7 @@ local notSeenAuroraIcon108 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -4046,7 +4048,7 @@ local iconRed109 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/red2.png",
+      Texture = data_folder .. "icons/red2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -4080,7 +4082,7 @@ local notSeenAuroraIcon110 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -4114,7 +4116,7 @@ local notSeenAuroraIcon111 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -4148,7 +4150,7 @@ local notSeenAuroraIcon112 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -4182,7 +4184,7 @@ local iconPink113 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pink2.png",
+      Texture = data_folder .. "icons/pink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -4216,7 +4218,7 @@ local iconGreenRed114 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRed2.png",
+      Texture = data_folder .. "icons/greenRed2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -4250,7 +4252,7 @@ local iconPinkRed115 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redPink2.png",
+      Texture = data_folder .. "icons/redPink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -4286,7 +4288,7 @@ local AuroraGreen116 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_116.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_116.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -4295,7 +4297,7 @@ local AuroraGreen116 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenCamera.png",
+        Texture = data_folder .. "icons/greenCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -4331,7 +4333,7 @@ local iconGreenRed117 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRed2.png",
+      Texture = data_folder .. "icons/greenRed2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -4365,7 +4367,7 @@ local notSeenAuroraIcon118 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -4399,7 +4401,7 @@ local notSeenAuroraIcon119 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -4433,7 +4435,7 @@ local notSeenAuroraIcon120 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -4469,7 +4471,7 @@ local AuroraPink121 = {
         Size = 75000,
         Origin = "Center",
         Billboard = false,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_121.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_121.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -4478,7 +4480,7 @@ local AuroraPink121 = {
         Size = 1,
         Origin = "Center",
         Billboard = false,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pinkCamera.png",
+        Texture = data_folder .. "icons/pinkCamera.png",
         Opacity = 1,
         Enabled = true,
         ScaleByDistance = true,
@@ -4520,7 +4522,7 @@ local AuroraPink122 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_122.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_122.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -4529,7 +4531,7 @@ local AuroraPink122 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pinkCamera.png",
+        Texture = data_folder .. "icons/pinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -4565,7 +4567,7 @@ local iconPink123 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pink2.png",
+      Texture = data_folder .. "icons/pink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -4599,7 +4601,7 @@ local notSeenAuroraIcon124 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -4635,7 +4637,7 @@ local AuroraGreenPinkRed125 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_125.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_125.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -4644,7 +4646,7 @@ local AuroraGreenPinkRed125 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedPinkCamera.png",
+        Texture = data_folder .. "icons/greenRedPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -4682,7 +4684,7 @@ local AuroraPink126 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_126.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_126.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -4691,7 +4693,7 @@ local AuroraPink126 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pinkCamera.png",
+        Texture = data_folder .. "icons/pinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -4727,7 +4729,7 @@ local iconPinkRed127 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redPink2.png",
+      Texture = data_folder .. "icons/redPink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -4761,7 +4763,7 @@ local notSeenAuroraIcon128 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -4797,7 +4799,7 @@ local AuroraGreenPinkWhite129 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_129.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_129.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -4806,7 +4808,7 @@ local AuroraGreenPinkWhite129 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenWhitePinkCamera.png",
+        Texture = data_folder .. "icons/greenWhitePinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -4844,7 +4846,7 @@ local AuroraGreen130 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_130.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_130.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -4853,7 +4855,7 @@ local AuroraGreen130 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenCamera.png",
+        Texture = data_folder .. "icons/greenCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -4889,7 +4891,7 @@ local notSeenAuroraIcon131 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -4923,7 +4925,7 @@ local iconGreenRed132 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRed2.png",
+      Texture = data_folder .. "icons/greenRed2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -4957,7 +4959,7 @@ local iconGreenPink133 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPink2.png",
+      Texture = data_folder .. "icons/greenPink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -4993,7 +4995,7 @@ local AuroraGreenRedWhite134 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_134.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_134.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -5002,7 +5004,7 @@ local AuroraGreenRedWhite134 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedWhiteCamera.png",
+        Texture = data_folder .. "icons/greenRedWhiteCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -5038,7 +5040,7 @@ local iconGreen135 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+      Texture = data_folder .. "icons/green2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -5074,7 +5076,7 @@ local AuroraPink136 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_136.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_136.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -5083,7 +5085,7 @@ local AuroraPink136 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pinkCamera.png",
+        Texture = data_folder .. "icons/pinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -5119,7 +5121,7 @@ local notSeenAuroraIcon137 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -5153,7 +5155,7 @@ local iconGreenRed138 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRed2.png",
+      Texture = data_folder .. "icons/greenRed2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -5187,7 +5189,7 @@ local iconGreen139 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+      Texture = data_folder .. "icons/green2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -5223,7 +5225,7 @@ local AuroraGreenRed140 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_140.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_140.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -5232,7 +5234,7 @@ local AuroraGreenRed140 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -5268,7 +5270,7 @@ local notSeenAuroraIcon141 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -5302,7 +5304,7 @@ local notSeenAuroraIcon142 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -5336,7 +5338,7 @@ local notSeenAuroraIcon143 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -5370,7 +5372,7 @@ local iconGreen144 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+      Texture = data_folder .. "icons/green2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -5406,7 +5408,7 @@ local AuroraGreenWhite145 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_145.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_145.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -5415,7 +5417,7 @@ local AuroraGreenWhite145 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenWhiteCamera.png",
+        Texture = data_folder .. "icons/greenWhiteCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -5451,7 +5453,7 @@ local notSeenAuroraIcon146 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -5485,7 +5487,7 @@ local notSeenAuroraIcon147 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -5519,7 +5521,7 @@ local iconGreenRed148 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRed2.png",
+      Texture = data_folder .. "icons/greenRed2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -5553,7 +5555,7 @@ local notSeenAuroraIcon149 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -5589,7 +5591,7 @@ local AuroraPink150 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_150.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_150.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -5598,7 +5600,7 @@ local AuroraPink150 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pinkCamera.png",
+        Texture = data_folder .. "icons/pinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -5634,7 +5636,7 @@ local notSeenAuroraIcon151 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -5668,7 +5670,7 @@ local iconGreenPink152 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPink2.png",
+      Texture = data_folder .. "icons/greenPink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -5702,7 +5704,7 @@ local iconGreenWhite153 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenWhite2.png",
+      Texture = data_folder .. "icons/greenWhite2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -5738,7 +5740,7 @@ local AuroraGreen154 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_154.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_154.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -5747,7 +5749,7 @@ local AuroraGreen154 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenCamera.png",
+        Texture = data_folder .. "icons/greenCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -5785,7 +5787,7 @@ local AuroraGreenRed155 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_155.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_155.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -5794,7 +5796,7 @@ local AuroraGreenRed155 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -5832,7 +5834,7 @@ local AuroraGreenPink156 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_156.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_156.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -5841,7 +5843,7 @@ local AuroraGreenPink156 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPinkCamera.png",
+        Texture = data_folder .. "icons/greenPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -5877,7 +5879,7 @@ local iconPinkRed157 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/redPink2.png",
+      Texture = data_folder .. "icons/redPink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -5913,7 +5915,7 @@ local AuroraPink158 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_158.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_158.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -5922,7 +5924,7 @@ local AuroraPink158 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/pinkCamera.png",
+        Texture = data_folder .. "icons/pinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -5960,7 +5962,7 @@ local AuroraGreenPink159 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_159.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_159.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -5969,7 +5971,7 @@ local AuroraGreenPink159 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPinkCamera.png",
+        Texture = data_folder .. "icons/greenPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6005,7 +6007,7 @@ local iconGreen160 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+      Texture = data_folder .. "icons/green2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -6039,7 +6041,7 @@ local notSeenAuroraIcon161 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -6073,7 +6075,7 @@ local notSeenAuroraIcon162 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -6109,7 +6111,7 @@ local AuroraGreen163 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_163.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_163.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6118,7 +6120,7 @@ local AuroraGreen163 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenCamera.png",
+        Texture = data_folder .. "icons/greenCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6156,7 +6158,7 @@ local AuroraGreenWhite164 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_164.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_164.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6165,7 +6167,7 @@ local AuroraGreenWhite164 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenWhiteCamera.png",
+        Texture = data_folder .. "icons/greenWhiteCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6201,7 +6203,7 @@ local notSeenAuroraIcon165 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -6235,7 +6237,7 @@ local iconGreenRedWhite166 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedWhite2.png",
+      Texture = data_folder .. "icons/greenRedWhite2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -6271,7 +6273,7 @@ local AuroraGreenRed167 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_167.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_167.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6280,7 +6282,7 @@ local AuroraGreenRed167 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6318,7 +6320,7 @@ local AuroraGreenPink168 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_168.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_168.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6327,7 +6329,7 @@ local AuroraGreenPink168 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPinkCamera.png",
+        Texture = data_folder .. "icons/greenPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6365,7 +6367,7 @@ local AuroraGreen169 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_169.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_169.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6374,7 +6376,7 @@ local AuroraGreen169 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenCamera.png",
+        Texture = data_folder .. "icons/greenCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6410,7 +6412,7 @@ local notSeenAuroraIcon170 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -6446,7 +6448,7 @@ local AuroraGreenWhite171 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_171.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_171.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6455,7 +6457,7 @@ local AuroraGreenWhite171 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenWhiteCamera.png",
+        Texture = data_folder .. "icons/greenWhiteCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6493,7 +6495,7 @@ local AuroraGreenPink172 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_172.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_172.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6502,7 +6504,7 @@ local AuroraGreenPink172 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPinkCamera.png",
+        Texture = data_folder .. "icons/greenPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6538,7 +6540,7 @@ local notSeenAuroraIcon173 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -6574,7 +6576,7 @@ local AuroraGreenPink174 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_174.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_174.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6583,7 +6585,7 @@ local AuroraGreenPink174 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPinkCamera.png",
+        Texture = data_folder .. "icons/greenPinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6619,7 +6621,7 @@ local iconGreenRed175 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRed2.png",
+      Texture = data_folder .. "icons/greenRed2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -6655,7 +6657,7 @@ local AuroraGreenRed176 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_176.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_176.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6664,7 +6666,7 @@ local AuroraGreenRed176 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6702,7 +6704,7 @@ local AuroraGreenPinkWhite177 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_177.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_177.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6711,7 +6713,7 @@ local AuroraGreenPinkWhite177 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenWhitePinkCamera.png",
+        Texture = data_folder .. "icons/greenWhitePinkCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6749,7 +6751,7 @@ local AuroraGreenRed178 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_178.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_178.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6758,7 +6760,7 @@ local AuroraGreenRed178 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6796,7 +6798,7 @@ local AuroraGreen179 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_179.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_179.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6805,7 +6807,7 @@ local AuroraGreen179 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenCamera.png",
+        Texture = data_folder .. "icons/greenCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6843,7 +6845,7 @@ local Aurora180 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_180.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_180.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -6852,7 +6854,7 @@ local Aurora180 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+        Texture = data_folder .. "icons/green2.png",
         Opacity = 1,
         Enabled = true
       },
@@ -6888,7 +6890,7 @@ local notSeenAuroraIcon181 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -6922,7 +6924,7 @@ local iconWhite182 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/white2.png",
+      Texture = data_folder .. "icons/white2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -6956,7 +6958,7 @@ local iconGreenPinkRed183 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedPink2.png",
+      Texture = data_folder .. "icons/greenRedPink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -6992,7 +6994,7 @@ local AuroraGreenRed184 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_184.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_184.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -7001,7 +7003,7 @@ local AuroraGreenRed184 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -7039,7 +7041,7 @@ local AuroraGreenRed185 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_185.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_185.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -7048,7 +7050,7 @@ local AuroraGreenRed185 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -7086,7 +7088,7 @@ local AuroraGreenRed186 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_186.jpg",
+        Texture = data_folder .. "mayImagesCompressed/image_186.jpg",
         Opacity = 1,
         Enabled = true
       },
@@ -7095,7 +7097,7 @@ local AuroraGreenRed186 = {
         Size = 75000,
         Origin = "Center",
         Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedCamera.png",
+        Texture = data_folder .. "icons/greenRedCamera.png",
         Opacity = 1,
         Enabled = true
       },
@@ -7131,7 +7133,7 @@ local notSeenAuroraIcon187 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },
@@ -7165,7 +7167,7 @@ local iconGreenPink188 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenPink2.png",
+      Texture = data_folder .. "icons/greenPink2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -7199,7 +7201,7 @@ local iconGreen189 = {
     Size = 75000,
       Origin = "Center",
       Billboard = true,
-      Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/green2.png",
+      Texture = data_folder .. "icons/green2.png",
       Opacity = 1.0,
       Enabled = true
   },
@@ -7233,7 +7235,7 @@ local notSeenAuroraIcon190 = {
     Size = 75000,
   Origin = "Center",
   Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
+  Texture = data_folder .. "icons/grayIcon.png",
   Opacity = 1.0,
   Enabled = true
   },

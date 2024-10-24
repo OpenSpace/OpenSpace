@@ -51,7 +51,7 @@ local Mission = {
 
 
 local ToggleColorLegend = {
-  Identifier = "os.bastilleday.colorLegend.ToggleColorLegend",
+  Identifier = "os.ToggleColorLegend",
   Name = "Toggle the color legend image",
   Command = [[
     if openspace.propertyValue("ScreenSpace.color-legend-aurora-oval.Enabled") then
@@ -78,7 +78,7 @@ local ToggleColorLegend = {
 }
 
 local ToggleLegend = {
-  Identifier = "os.bastilleday.auroraovallegend.ToggleLegend",
+  Identifier = "os.ToggleLegend",
   Name = "Toggle the legend image",
   Command = [[
     if openspace.propertyValue("ScreenSpace.Legend-aurora-oval.Enabled") then
