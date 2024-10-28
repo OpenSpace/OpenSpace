@@ -31,6 +31,7 @@
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/distanceconversion.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "NodesSonification";
@@ -145,9 +146,12 @@ NodesSonification::NodesSonification(const std::string& ip, int port)
     addProperty(_highAnglePrecision);
     _highAnglePrecision.setExponent(20.f);
 
+    // Add all distance units as options in the drop down menu
     for (int i = 0; i < static_cast<int>(DistanceUnit::League) + 1; ++i) {
         _distanceUnitOption.addOption(i, DistanceUnitNamesSingular[i].data());
     }
+
+    // Select Kilometers as the default distance unit
     _distanceUnitOption.setValue(static_cast<int>(DistanceUnit::Kilometer));
     addProperty(_distanceUnitOption);
 }
@@ -156,7 +160,7 @@ NodesSonification::~NodesSonification() {
     stop();
 }
 
-void NodesSonification::sendSettings(int nodeIndex) {
+void NodesSonification::sendData(int nodeIndex) {
     if (_nodes.size() <= nodeIndex) {
         LWARNING(std::format("Node list does not include index {}", nodeIndex));
         return;
@@ -261,7 +265,7 @@ void NodesSonification::update(const Camera* camera) {
 
         // Only send data if something new has happened
         if (hasNewData) {
-            sendSettings(i);
+            sendData(i);
         }
     }
 }

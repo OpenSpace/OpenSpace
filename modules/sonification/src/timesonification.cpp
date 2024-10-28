@@ -24,6 +24,7 @@
 
 #include <modules/sonification/include/timesonification.h>
 
+#include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 
 namespace {
@@ -32,15 +33,15 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         TimeSonificationInfo =
     {
-       "TimeSonification",
-       "Time Sonification",
-       "Sonification that alters all other sonificatoins based on the current delta time"
+        "TimeSonification",
+        "Time Sonification",
+        "Sonification that sends out time information over the OSC connection"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UnitOptionInfo = {
-        "UnitOption",
+    constexpr openspace::properties::Property::PropertyInfo TimeUnitOptionInfo = {
+        "TimeUnitOption",
         "Time Unit",
-        "Choose a ´time unit that the sonification should use"
+        "Choose a time unit that the sonification should use"
     };
 
 } // namespace
@@ -49,27 +50,19 @@ namespace openspace {
 
 TimeSonification::TimeSonification(const std::string& ip, int port)
     : SonificationBase(TimeSonificationInfo, ip, port)
-    , _unitOption(UnitOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _timeUnitOption(
+        TimeUnitOptionInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
 {
-    _timeSpeed = 0.0;
+    // Add all time units as options in the drop down menu
+    for (int i = 0; i < static_cast<int>(TimeUnit::Year) + 1; ++i) {
+        _timeUnitOption.addOption(i, TimeUnitNamesSingular[i].data());
+    }
 
-    // Add time units option
-    _unitOption.addOptions({
-        { 0, "Seconds" },
-        { 1, "Minutes" },
-        { 2, "Hours" },
-        { 3, "Days" },
-        { 4, "Months" },
-        { 5, "Years" }
-    });
-
-    // Set days as default unit
-    _unitOption.setValue(3);
-    _unit = TimeUnit::Day;
-
-    _unitOption.onChange([this]() { reCalculateTimeUnit(); });
-
-    addProperty(_unitOption);
+    // Set days as default time unit
+    _timeUnitOption.setValue(static_cast<int>(TimeUnit::Day));
+    addProperty(_timeUnitOption);
 }
 
 void TimeSonification::update(const Camera*) {
@@ -77,37 +70,37 @@ void TimeSonification::update(const Camera*) {
         return;
     }
 
-    double timeSpeed = convertTime(global::timeManager->deltaTime(), TimeUnit::Second, _unit);
+    double timeSpeed = convertTime(
+        global::timeManager->deltaTime(),
+        TimeUnit::Second,
+        TimeUnits[_timeUnitOption]
+    );
 
-    if (_unitDirty || abs(_timeSpeed - timeSpeed) > TimePrecision) {
+    // Check if this data is new, otherwise don't send it
+    double prevTimeSpeed = _timeSpeed;
+    bool shouldSendData = false;
+
+    if (abs(prevTimeSpeed - timeSpeed) > TimePrecision) {
         _timeSpeed = timeSpeed;
+        shouldSendData = true;
+    }
 
-        std::string label = "/Time";
-        std::vector<OscDataType> data(2);
-        data[0] = _timeSpeed;
-        data[1] = nameForTimeUnit(_unit).data();
-
-        _connection->send(label, data);
-
-        if (_unitDirty) {
-            _unitDirty = false;
-        }
+    // Only send data if something new has happened
+    if (shouldSendData) {
+        sendData();
     }
 }
 
 void TimeSonification::stop() {}
 
-void TimeSonification::reCalculateTimeUnit() {
-    std::string selectedUnit = _unitOption.getDescriptionByValue(_unitOption.value());
-    std::transform(
-        selectedUnit.begin(),
-        selectedUnit.end(),
-        selectedUnit.begin(),
-        [](unsigned char c) { return std::tolower(c); }
-    );
+void TimeSonification::sendData() {
+    std::string label = "/Time";
+    std::vector<OscDataType> data(NumDataItems);
+    data[TimeSpeedIndex] = _timeSpeed;
+    data[TimeSpeedUnitIndex] =
+        _timeUnitOption.getDescriptionByValue(_timeUnitOption.value());
 
-    _unit = timeUnitFromString(selectedUnit);
-    _unitDirty = true;
+    _connection->send(label, data);
 }
 
 } // namespace openspace

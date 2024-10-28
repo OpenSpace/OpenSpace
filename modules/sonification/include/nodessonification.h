@@ -30,7 +30,6 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/util/distanceconversion.h>
 
 namespace openspace {
 
@@ -99,10 +98,10 @@ private:
     bool getData(const Camera* camera, int nodeIndex);
 
     /**
-     * Send current sonification settings for the indicated node over the osc connection
+     * Send current sonification data for the indicated node over the osc connection
      * Order of data: distance, horizontal angle, vertical angle
      */
-    void sendSettings(int nodeIndex);
+    void sendData(int nodeIndex);
 
     // Properties
     properties::DoubleProperty _lowDistancePrecision;
@@ -112,8 +111,8 @@ private:
     properties::OptionProperty _distanceUnitOption;
 
     // Variables
-    double _anglePrecision;
-    double _distancePrecision;
+    double _anglePrecision = 0.0;
+    double _distancePrecision = 0.0;
     std::vector<SonificationNode> _nodes;
 };
 

@@ -51,13 +51,23 @@ public:
     virtual void stop() override;
 
 private:
-    void reCalculateTimeUnit();
+    // Indices for data items
+    static constexpr int NumDataItems = 2;
+    static constexpr int TimeSpeedIndex = 0;
+    static constexpr int TimeSpeedUnitIndex = 1;
 
-    properties::OptionProperty _unitOption;
-    TimeUnit _unit;
-    bool _unitDirty = false;
+    /**
+     * Send current sonification data over the osc connection
+     * Order of data: time speed, unit of time speed, current simulation time in J2000
+     * number of seconds.
+     */
+    void sendData();
 
-    double _timeSpeed;
+    // Properties
+    properties::OptionProperty _timeUnitOption;
+
+    // Variables
+    double _timeSpeed = 0.0;
 };
 
 } // namespace openspace
