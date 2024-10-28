@@ -25,10 +25,10 @@
 #include <modules/sonification/sonificationmodule.h>
 
 #include <openspace/documentation/documentation.h>
-#include <modules/sonification/include/comparesonification.h>
 #include <modules/sonification/include/focussonification.h>
+#include <modules/sonification/include/planetscomparesonification.h>
+#include <modules/sonification/include/planetssolarsonification.h>
 #include <modules/sonification/include/planetssonification.h>
-#include <modules/sonification/include/solarsonification.h>
 #include <modules/sonification/include/timesonification.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
@@ -143,7 +143,7 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     }
 
     // Fill sonification list
-    SonificationBase* sonification = new CompareSonification(_ipAddress, _port);
+    SonificationBase* sonification = new PlanetsCompareSonification(_ipAddress, _port);
     addSonification(sonification);
 
     sonification = new FocusSonification(_ipAddress, _port);
@@ -152,7 +152,7 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     sonification = new PlanetsSonification(_ipAddress, _port);
     addSonification(sonification);
 
-    sonification = new SolarSonification(_ipAddress, _port);
+    sonification = new PlanetsSolarSonification(_ipAddress, _port);
     addSonification(sonification);
 
     sonification = new TimeSonification(_ipAddress, _port);

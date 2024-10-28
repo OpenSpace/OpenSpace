@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/sonification/include/comparesonification.h>
+#include <modules/sonification/include/planetscomparesonification.h>
 
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -30,13 +30,13 @@
 #include <openspace/scripting/scriptengine.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "CompareSonification";
+    constexpr std::string_view _loggerCat = "PlanetsCompareSonification";
 
     // Property info
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        CompareSonificationInfo =
+        PlanetsCompareSonificationInfo =
     {
-       "CompareSonification",
+       "PlanetsCompareSonification",
        "Compare Sonification",
        "Sonification that compares two different planets to each other in different "
        "aspects"
@@ -99,8 +99,8 @@ namespace {
 
 namespace openspace {
 
-CompareSonification::CompareSonification(const std::string& ip, int port)
-    : SonificationBase(CompareSonificationInfo, ip, port)
+PlanetsCompareSonification::PlanetsCompareSonification(const std::string& ip, int port)
+    : SonificationBase(PlanetsCompareSonificationInfo, ip, port)
     , _firstPlanet(FirstOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _secondPlanet(SecondOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _toggleAll(ToggleAllInfo, false)
@@ -160,11 +160,11 @@ CompareSonification::CompareSonification(const std::string& ip, int port)
     addProperty(_ringsEnabled);
 }
 
-CompareSonification::~CompareSonification() {
+PlanetsCompareSonification::~PlanetsCompareSonification() {
     stop();
 }
 
-osc::Blob CompareSonification::createSettingsBlob() const {
+osc::Blob PlanetsCompareSonification::createSettingsBlob() const {
     bool settings[6] = { false };
 
     settings[0] = _sizeDayEnabled;
@@ -177,7 +177,7 @@ osc::Blob CompareSonification::createSettingsBlob() const {
     return osc::Blob(settings, 6);
 }
 
-void CompareSonification::sendSettings() {
+void PlanetsCompareSonification::sendSettings() {
     if (!_enabled) {
         return;
     }
@@ -192,7 +192,7 @@ void CompareSonification::sendSettings() {
     _connection->send(label, data);
 }
 
-void CompareSonification::planetSelectionChanged(
+void PlanetsCompareSonification::planetSelectionChanged(
                                                 properties::OptionProperty& changedPlanet,
                                              properties::OptionProperty& notChangedPlanet,
                                                  std::string& prevChangedPlanet)
@@ -229,15 +229,15 @@ void CompareSonification::planetSelectionChanged(
     sendSettings();
 }
 
-void CompareSonification::onFirstChanged() {
+void PlanetsCompareSonification::onFirstChanged() {
     planetSelectionChanged(_firstPlanet, _secondPlanet, _oldFirst);
 }
 
-void CompareSonification::onSecondChanged() {
+void PlanetsCompareSonification::onSecondChanged() {
     planetSelectionChanged(_secondPlanet, _firstPlanet, _oldSecond);
 }
 
-void CompareSonification::onToggleAllChanged() {
+void PlanetsCompareSonification::onToggleAllChanged() {
     _sizeDayEnabled.setValue(_toggleAll);
     _gravityEnabled.setValue(_toggleAll);
     _temperatureEnabled.setValue(_toggleAll);
@@ -246,9 +246,9 @@ void CompareSonification::onToggleAllChanged() {
     _ringsEnabled.setValue(_toggleAll);
 }
 
-void CompareSonification::update(const Camera*) {}
+void PlanetsCompareSonification::update(const Camera*) {}
 
-void CompareSonification::stop() {
+void PlanetsCompareSonification::stop() {
     _toggleAll = false;
 
     _firstPlanet = 0;

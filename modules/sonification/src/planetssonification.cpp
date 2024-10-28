@@ -593,14 +593,14 @@ void PlanetsSonification::update(const Camera* camera) {
         LERROR("Could not find the SonificationModule");
         return;
     }
-    const SonificationBase* solar = module->sonification("SolarSonification");
+    const SonificationBase* solar = module->sonification("PlanetsSolarSonification");
     if (!solar) {
-        LERROR("Could not find the SolarSonification");
+        LERROR("Could not find the PlanetsSolarSonification");
         return;
     }
-    const SonificationBase* compare = module->sonification("CompareSonification");
+    const SonificationBase* compare = module->sonification("PlanetsCompareSonification");
     if (!compare) {
-        LERROR("Could not find the CompareSonification");
+        LERROR("Could not find the PlanetsCompareSonification");
         return;
     }
 

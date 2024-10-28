@@ -22,18 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/sonification/include/solarsonification.h>
+#include <modules/sonification/include/planetssolarsonification.h>
 
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "SolarSonification";
+    constexpr std::string_view _loggerCat = "PlanetsSolarSonification";
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        SolarSonificationInfo =
+        PlanetsSolarSonificationInfo =
     {
-       "SolarSonification",
+       "PlanetsSolarSonification",
        "Solar Sonification",
        "Sonification that gives an overview of the planets in the solarsystem with "
        "simpler sounds"
@@ -96,8 +96,8 @@ namespace {
 
 namespace openspace {
 
-SolarSonification::SolarSonification(const std::string& ip, int port)
-    : SonificationBase(SolarSonificationInfo, ip, port)
+PlanetsSolarSonification::PlanetsSolarSonification(const std::string& ip, int port)
+    : SonificationBase(PlanetsSolarSonificationInfo, ip, port)
     , _toggleAll(ToggleAllInfo, false)
     , _mercuryEnabled(EnableMercuryInfo, false)
     , _venusEnabled(EnableVenusInfo, false)
@@ -131,11 +131,11 @@ SolarSonification::SolarSonification(const std::string& ip, int port)
     addProperty(_neptuneEnabled);
 }
 
-SolarSonification::~SolarSonification() {
+PlanetsSolarSonification::~PlanetsSolarSonification() {
     stop();
 }
 
-osc::Blob SolarSonification::createSettingsBlob() const {
+osc::Blob PlanetsSolarSonification::createSettingsBlob() const {
     bool settings[8] = { false };
 
     settings[0] = _mercuryEnabled;
@@ -150,7 +150,7 @@ osc::Blob SolarSonification::createSettingsBlob() const {
     return osc::Blob(settings, 8);
 }
 
-void SolarSonification::sendSettings() {
+void PlanetsSolarSonification::sendSettings() {
     if (!_enabled) {
         return;
     }
@@ -163,7 +163,7 @@ void SolarSonification::sendSettings() {
     _connection->send(label, data);
 }
 
-void SolarSonification::onToggleAllChanged() {
+void PlanetsSolarSonification::onToggleAllChanged() {
     _mercuryEnabled.setValue(_toggleAll);
     _venusEnabled.setValue(_toggleAll);
     _earthEnabled.setValue(_toggleAll);
@@ -174,9 +174,9 @@ void SolarSonification::onToggleAllChanged() {
     _neptuneEnabled.setValue(_toggleAll);
 }
 
-void SolarSonification::update(const Camera*) {}
+void PlanetsSolarSonification::update(const Camera*) {}
 
-void SolarSonification::stop() {
+void PlanetsSolarSonification::stop() {
     _toggleAll = false;
 }
 

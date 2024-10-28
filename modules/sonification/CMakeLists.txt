@@ -25,30 +25,30 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/include/comparesonification.h
-	${CMAKE_CURRENT_SOURCE_DIR}/include/focussonification.h
-	${CMAKE_CURRENT_SOURCE_DIR}/include/planetssonification.h
-	${CMAKE_CURRENT_SOURCE_DIR}/include/solarsonification.h
-	${CMAKE_CURRENT_SOURCE_DIR}/include/sonificationbase.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/focussonification.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/planetscomparesonification.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/planetssolarsonification.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/planetssonification.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/sonificationbase.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/timesonification.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/comparesonification.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/focussonification.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification_lua.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/solarsonification.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/sonificationbase.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/focussonification.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/planetscomparesonification.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/planetssolarsonification.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification_lua.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/sonificationbase.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/timesonification.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
-	"Sonification"
-	sonification
-	STATIC
-	${HEADER_FILES}
-	${SOURCE_FILES}
+    "Sonification"
+    sonification
+    STATIC
+    ${HEADER_FILES}
+    ${SOURCE_FILES}
 )

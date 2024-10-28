@@ -22,19 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SONIFICATION___SOLARSONIFICATION___H__
-#define __OPENSPACE_MODULE_SONIFICATION___SOLARSONIFICATION___H__
+#ifndef __OPENSPACE_MODULE_SONIFICATION___PLANETSCOMPARESONIFICATION___H__
+#define __OPENSPACE_MODULE_SONIFICATION___PLANETSCOMPARESONIFICATION___H__
 
 #include <modules/sonification/include/sonificationbase.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/optionproperty.h>
 
 namespace openspace {
 
-class SolarSonification : public SonificationBase {
+class PlanetsCompareSonification : public SonificationBase {
 public:
-    SolarSonification(const std::string& ip, int port);
-    virtual ~SolarSonification() override;
+    PlanetsCompareSonification(const std::string& ip, int port);
+    virtual ~PlanetsCompareSonification() override;
 
     /**
      * Main update function for the sonification
@@ -51,7 +52,7 @@ public:
 private:
     /**
      * Create a osc::Blob object with current sonification settings.
-     * Order of settings: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
+     * Order of settings: size/day, gravity, temperature, atmosphere, moons, rings
      *
      * \return a osc::Blob object with current sonificaiton settings
      */
@@ -59,24 +60,43 @@ private:
 
     /**
      * Send current sonification settings over the osc connection
+     * Order of data: name of first planet, name of second planet, settings
      */
     void sendSettings();
 
+    /**
+     * Function that gets called when either the first or second planet selection
+     * was changed
+     *
+     * \param changedPlanet the planet that was recently changed
+     * \param notChangedPlanet the planet that was NOT changed
+     * \param prevChangedPlanet the previous value of the planet that was recently changed
+     */
+    void planetSelectionChanged(properties::OptionProperty& changedPlanet,
+        properties::OptionProperty& notChangedPlanet, std::string& prevChangedPlanet);
+
     // Properties onChange
+    void onFirstChanged();
+    void onSecondChanged();
     void onToggleAllChanged();
 
+    float _focusScale = 2000.f;
+    std::string _oldFirst;
+    std::string _oldSecond;
+
     // Properties
+    properties::OptionProperty _firstPlanet;
+    properties::OptionProperty _secondPlanet;
+
     properties::BoolProperty _toggleAll;
-    properties::BoolProperty _mercuryEnabled;
-    properties::BoolProperty _venusEnabled;
-    properties::BoolProperty _earthEnabled;
-    properties::BoolProperty _marsEnabled;
-    properties::BoolProperty _jupiterEnabled;
-    properties::BoolProperty _saturnEnabled;
-    properties::BoolProperty _uranusEnabled;
-    properties::BoolProperty _neptuneEnabled;
+    properties::BoolProperty _sizeDayEnabled;
+    properties::BoolProperty _gravityEnabled;
+    properties::BoolProperty _temperatureEnabled;
+    properties::BoolProperty _atmosphereEnabled;
+    properties::BoolProperty _moonsEnabled;
+    properties::BoolProperty _ringsEnabled;
 };
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_SONIFICATION___SOLARSONIFICATION___H__
+#endif __OPENSPACE_MODULE_SONIFICATION___PLANETSCOMPARESONIFICATION___H__
