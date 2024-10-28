@@ -174,7 +174,7 @@ void SolarSonification::onToggleAllChanged() {
     _neptuneEnabled.setValue(_toggleAll);
 }
 
-void SolarSonification::update(const Camera* camera) {}
+void SolarSonification::update(const Camera*) {}
 
 void SolarSonification::stop() {
     _toggleAll = false;

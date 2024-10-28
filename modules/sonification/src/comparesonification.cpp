@@ -209,11 +209,7 @@ void CompareSonification::planetSelectionChanged(
             "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
             prevChangedPlanet, 1
         );
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(script);
     }
 
     if (changedPlanet != 0) {
@@ -222,11 +218,7 @@ void CompareSonification::planetSelectionChanged(
             "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
             changedPlanet.getDescriptionByValue(changedPlanet.value()), _focusScale
         );
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(script);
 
         prevChangedPlanet = changedPlanet.getDescriptionByValue(changedPlanet.value());
     }
@@ -254,7 +246,7 @@ void CompareSonification::onToggleAllChanged() {
     _ringsEnabled.setValue(_toggleAll);
 }
 
-void CompareSonification::update(const Camera* camera) {}
+void CompareSonification::update(const Camera*) {}
 
 void CompareSonification::stop() {
     _toggleAll = false;
