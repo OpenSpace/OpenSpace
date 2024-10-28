@@ -27,7 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
@@ -223,6 +223,9 @@ scripting::LuaLibrary Time::luaLibrary() {
             codegen::lua::CurrentApplicationTime,
             codegen::lua::AdvancedTime,
             codegen::lua::ConvertTime,
+            codegen::lua::Duration,
+            codegen::lua::SecondsPerDay,
+            codegen::lua::SecondsPerYear
         }
     };
 }

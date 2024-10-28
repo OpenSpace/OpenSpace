@@ -199,7 +199,6 @@ asset.export(L2Label)
 
 asset.meta = {
   Name = "Lagrange point L2",
-  Version = "1.0",
   Description = [[Lagrange point L2 large and small nodes, sun line, and large and small
     labels]],
   Author = "OpenSpace Team",

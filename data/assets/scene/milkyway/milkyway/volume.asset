@@ -45,7 +45,7 @@ local MilkyWayVolume = {
     }
   },
   GUI = {
-    Path = "/Milky Way",
+    Path = "/Milky Way/Galaxy",
     Name = "Milky Way Volume",
     Description = "Volumetric rendering of Milky Way galaxy based on simulation from NAOJ"
   }
@@ -66,7 +66,6 @@ asset.export(MilkyWayVolume)
 
 asset.meta = {
   Name = "Milky Way Volume",
-  Version = "1.1",
   Description = "Volumetric rendering of Milky Way galaxy based on simulations from NAOJ",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

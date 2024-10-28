@@ -50,9 +50,7 @@ local Pioneer11Trail = {
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1973 APR 06 02:25:00.000",
     EndTime = "1990 JAN 02 00:00:00.000",
-    EnableFade = false,
-    -- 6087 is the number of days between the Start and End time (so sample every 2d)
-    SampleInterval = 6087 * 2
+    EnableFade = false
   },
   GUI = {
     Name = "Pioneer 11 Trail (SPICE)",
@@ -84,7 +82,6 @@ asset.export(Pioneer11Trail)
 
 asset.meta = {
   Name = "Pioneer 11",
-  Version = "1.0",
   Description = [[Pioneer 11 Model and Trail. Driven by SPICE data for high accuracy from
     April 6th, 1973 to January 2nd, 1990]],
   Author = "OpenSpace Team",

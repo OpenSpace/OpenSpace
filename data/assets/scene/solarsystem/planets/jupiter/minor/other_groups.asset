@@ -16,9 +16,7 @@ local Eupheme = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -105,9 +103,7 @@ local S2003J19 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -194,9 +190,7 @@ local Valetudo = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -316,7 +310,6 @@ asset.export(ValetudoLabel)
 
 asset.meta = {
   Name = "Jupiter Pasiphae Other Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Other Group moons: S2003J12,
     S/2003J3, S2011J1, S2003J19, S2003J10, S2003J9, and S2003J2. Blank globes
     and SPICE trails are generated for each moon]],

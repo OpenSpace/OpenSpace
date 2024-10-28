@@ -42,7 +42,6 @@ asset.export("Label", Label)
 
 asset.meta = {
   Name = "Vesta Label",
-  Version = "1.0",
   Description = [[Label of Vesta]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

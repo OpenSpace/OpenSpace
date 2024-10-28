@@ -22,8 +22,7 @@ local Gala = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Gala FOV",
@@ -31,7 +30,6 @@ local Gala = {
     Description = "The field-of-view for the Ganymede Laster Altimeter (GALA) instrument"
   }
 }
-
 
 
 asset.onInitialize(function()
@@ -49,7 +47,6 @@ asset.export(Gala)
 
 asset.meta = {
   Name = "GALA",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Ganymede Laser Altimeter (GALA) instrument onboard Juice,
     measuring a 2.5D heightfield of Ganymede and Europa. See

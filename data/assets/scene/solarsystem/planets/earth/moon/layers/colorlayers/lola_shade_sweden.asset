@@ -33,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Lola Shade [Sweden]",
-  Version = "1.1",
   Description = [[Moon LRO LOLA Shaded Relief 237m v4 layer for Moon globe. This
     map is hosted on the OpenSpace server in Sweden]],
   Author = "USGS",

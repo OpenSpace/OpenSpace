@@ -264,6 +264,9 @@ bool UrlSynchronization::isEachFileValid() {
 }
 
 void UrlSynchronization::createSyncFile(bool) const {
+    // We need to mutex-protect the access to the time conversion for now
+    std::lock_guard guard(_mutex);
+
     std::filesystem::path dir = directory();
     std::filesystem::create_directories(dir);
 
@@ -387,7 +390,9 @@ bool UrlSynchronization::trySyncUrls() {
         if (ec) {
             LERRORC(
                 "URLSynchronization",
-                std::format("Error renaming file '{}' to '{}'", tempName, originalName)
+                std::format(
+                    "Error renaming file '{}' to '{}' error code {}",
+                    tempName, originalName, ec.message())
             );
 
             failed = true;

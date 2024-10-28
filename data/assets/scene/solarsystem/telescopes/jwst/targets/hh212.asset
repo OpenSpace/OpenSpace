@@ -13,9 +13,7 @@ local HH212Image = {
   Opacity = 1.0,
   TexturePath = hh212.image .. "hh212.png",
   Tag = { "mission_jwst_target" },
-  Description = [[
-    Image of HH 212 by ESO/M. McCaughrean.
-  ]]
+  Description = "Image of HH 212 by ESO/M. McCaughrean."
 }
 
 
@@ -33,7 +31,6 @@ asset.export(HH212Image)
 
 asset.meta = {
   Name = "HH 212 Image",
-  Version = "1.0",
   Description = "Screenspace image of HH 212",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

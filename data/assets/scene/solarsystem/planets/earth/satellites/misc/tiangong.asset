@@ -16,14 +16,14 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_tiangong",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=48274&FORMAT=kvn",
   Filename = "Tiangong.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
 local TiangongPosition = {
   Identifier = "TiangongPosition",
   Parent = transforms.EarthInertial.Identifier,
-  BoundingSphere = 54.5, -- half the width
+  BoundingSphere = 27.8, -- half the width
   Transform = {
     Translation = {
       Type = "GPTranslation",
@@ -145,7 +145,6 @@ asset.export(TiangongPosition)
 
 asset.meta = {
   Name = "Tiangong",
-  Version = "2.0",
   Description = [[Model and Trail for Tiangong. Model from Turbosquid, trail from
     Celestrak.]],
   Author = "OpenSpace Team",

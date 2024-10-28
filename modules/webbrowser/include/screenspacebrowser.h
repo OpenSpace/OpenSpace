@@ -77,7 +77,6 @@ public:
 protected:
     properties::UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
@@ -98,6 +97,7 @@ private:
 
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 
+    bool _useAcceleratedRendering = false;
     bool _isUrlDirty = false;
     bool _isDimensionsDirty = false;
 };

@@ -103,6 +103,24 @@ namespace {
     return contents;
 }
 
+// Reads a file from disk and return its as a list of lines.
+[[codegen::luawrap]] std::vector<std::string> readFileLines(std::filesystem::path file) {
+    std::filesystem::path p = absPath(file);
+    if (!std::filesystem::is_regular_file(p)) {
+        throw ghoul::lua::LuaError(std::format("Could not open file '{}'", file));
+    }
+
+    std::ifstream f = std::ifstream(p);
+    std::vector<std::string> contents;
+    while (f.good()) {
+        std::string line;
+        ghoul::getline(f, line);
+        contents.push_back(std::move(line));
+    }
+
+    return contents;
+}
+
 // Checks whether the provided directory exists.
 [[codegen::luawrap]] bool directoryExists(std::filesystem::path file) {
     const bool e = std::filesystem::is_directory(absPath(std::move(file)));
@@ -259,6 +277,39 @@ std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
     if (deleteSource && std::filesystem::is_regular_file(source)) {
         std::filesystem::remove(source);
     }
+}
+
+/**
+ * This function registers another Lua script that will be periodically executed as long
+ * as the application is running. The `identifier` is used to later remove the script. The
+ * `script` is being executed every `timeout` seconds. This timeout is only as accurate as
+ * the framerate at which the application is running. Optionally the `preScript` Lua
+ * script is run when registering the repeated script and the `postScript` is run when
+ * unregistering it or when the application closes.
+ * If the `timeout` is 0, the script will be executed every frame.
+ * The `identifier` has to be a unique name that cannot have been used to register a
+ * repeated script before. A registered script is removed with the #removeRepeatedScript
+ * function.
+ */
+[[codegen::luawrap]] void registerRepeatedScript(std::string identifier,
+                                                 std::string script, double timeout = 0.0,
+                                                 std::string preScript = "",
+                                                 std::string postScript = "")
+{
+    openspace::global::scriptEngine->registerRepeatedScript(
+        std::move(identifier),
+        std::move(script),
+        timeout,
+        std::move(preScript),
+        std::move(postScript)
+    );
+}
+
+/**
+ * Removes a previously registered repeated script (see #registerRepeatedScript)
+ */
+[[codegen::luawrap]] void removeRepeatedScript(std::string identifier) {
+    openspace::global::scriptEngine->removeRepeatedScript(identifier);
 }
 
 #include "scriptengine_lua_codegen.cpp"

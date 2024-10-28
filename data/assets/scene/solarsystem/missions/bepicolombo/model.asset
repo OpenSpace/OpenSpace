@@ -76,7 +76,6 @@ asset.export(BepiColombo)
 
 asset.meta = {
   Name = "BepiColombo Model",
-  Version = "1.0",
   Description = "This asset contains the model of the BepiColombo spacecraft. The model is retrieved from https://s2e2.cosmos.esa.int/bitbucket/projects/SPICE_KERNELS/repos/bepicolombo",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

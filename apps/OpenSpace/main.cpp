@@ -140,20 +140,36 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         LINFO(s);
     }
 
-    std::string dumpFile = std::format(
-        "OpenSpace_{}_{}_{}-{}-{}-{}-{}-{}-{}--{}--{}.dmp",
-        OPENSPACE_VERSION_MAJOR,
-        OPENSPACE_VERSION_MINOR,
-        OPENSPACE_VERSION_PATCH,
-        stLocalTime.wYear,
-        stLocalTime.wMonth,
-        stLocalTime.wDay,
-        stLocalTime.wHour,
-        stLocalTime.wMinute,
-        stLocalTime.wSecond,
-        GetCurrentProcessId(),
-        GetCurrentThreadId()
-    );
+    std::string dumpFile;
+    if (OPENSPACE_IS_RELEASE_BUILD) {
+        dumpFile = std::format(
+            "OpenSpace_{}_{}_{}-{}-{}-{}-{}-{}-{}--{}--{}.dmp",
+            OPENSPACE_VERSION_MAJOR,
+            OPENSPACE_VERSION_MINOR,
+            OPENSPACE_VERSION_PATCH,
+            stLocalTime.wYear,
+            stLocalTime.wMonth,
+            stLocalTime.wDay,
+            stLocalTime.wHour,
+            stLocalTime.wMinute,
+            stLocalTime.wSecond,
+            GetCurrentProcessId(),
+            GetCurrentThreadId()
+        );
+    }
+    else {
+        dumpFile = std::format(
+            "OpenSpace_{}-{}-{}-{}-{}-{}--{}--{}.dmp",
+            stLocalTime.wYear,
+            stLocalTime.wMonth,
+            stLocalTime.wDay,
+            stLocalTime.wHour,
+            stLocalTime.wMinute,
+            stLocalTime.wSecond,
+            GetCurrentProcessId(),
+            GetCurrentThreadId()
+        );
+    }
 
     LINFO(std::format("Creating dump file: {}", dumpFile));
 
@@ -992,6 +1008,57 @@ void setSgctDelegateFunctions() {
 
         return mousePosition;
     };
+    sgctDelegate.setStatisticsGraphScale = [](float scale) {
+        sgct::Engine::instance().setStatsGraphScale(scale);
+    };
+    sgctDelegate.setMouseCursor = [](WindowDelegate::Cursor mouse) {
+        static std::unordered_map<WindowDelegate::Cursor, GLFWcursor*> Cursors = {
+            {
+                WindowDelegate::Cursor::Arrow,
+                glfwCreateStandardCursor(GLFW_ARROW_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::IBeam,
+                glfwCreateStandardCursor(GLFW_IBEAM_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::CrossHair,
+                glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::PointingHand,
+                glfwCreateStandardCursor(GLFW_POINTING_HAND_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::ResizeEW,
+                glfwCreateStandardCursor(GLFW_RESIZE_EW_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::ResizeNS,
+                glfwCreateStandardCursor(GLFW_RESIZE_NS_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::ResizeNWSE,
+                glfwCreateStandardCursor(GLFW_RESIZE_NWSE_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::ResizeNESW,
+                glfwCreateStandardCursor(GLFW_RESIZE_NESW_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::ResizeAll,
+                glfwCreateStandardCursor(GLFW_RESIZE_ALL_CURSOR)
+            },
+            {
+                WindowDelegate::Cursor::NotAllowed,
+                glfwCreateStandardCursor(GLFW_NOT_ALLOWED_CURSOR)
+            },
+        };
+        ghoul_assert(
+            Cursors.find(mouse) != Cursors.end(), "Tried to create non-existent cursor"
+        );
+        glfwSetCursor(glfwGetCurrentContext(), Cursors[mouse]);
+    };
 }
 
 std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,
@@ -1013,11 +1080,13 @@ std::string setWindowConfigPresetForGui(const std::string& labelFromCfgFile,
     return preset;
 }
 
-std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTConfig,
-                                            const std::string& windowConfiguration,
-                                            const std::string& labelFromCfgFile)
+std::pair<std::string, bool> selectedSgctProfileFromLauncher(LauncherWindow& lw,
+                                                             bool hasCliSGCTConfig,
+                                                   const std::string& windowConfiguration,
+                                                      const std::string& labelFromCfgFile)
 {
     std::string config = windowConfiguration;
+    bool isGeneratedConfig = false;
     if (!hasCliSGCTConfig) {
         config = lw.selectedWindowConfig();
         if (config.find(labelFromCfgFile) != std::string::npos) {
@@ -1026,6 +1095,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
             }
             else {
                 config = windowConfiguration;
+                isGeneratedConfig = true;
             }
         }
         else {
@@ -1051,7 +1121,7 @@ std::string selectedSgctProfileFromLauncher(LauncherWindow& lw, bool hasCliSGCTC
         }
         global::configuration->windowConfiguration = config;
     }
-    return config;
+    return { config, isGeneratedConfig };
 }
 
 } // namespace
@@ -1164,6 +1234,7 @@ int main(int argc, char* argv[]) {
 
     // Create the OpenSpace engine and get arguments for the SGCT engine
     std::string windowConfiguration;
+    bool isGeneratedWindowConfig = true;
     try {
         // Find configuration
         std::filesystem::path configurationFilePath;
@@ -1368,12 +1439,13 @@ int main(int argc, char* argv[]) {
         );
 
         global::configuration->profile = win.selectedProfile();
-        windowConfiguration = selectedSgctProfileFromLauncher(
-            win,
-            commandlineArguments.windowConfig.has_value(),
-            windowConfiguration,
-            labelFromCfgFile
-        );
+        std::tie(windowConfiguration, isGeneratedWindowConfig) =
+            selectedSgctProfileFromLauncher(
+                win,
+                commandlineArguments.windowConfig.has_value(),
+                windowConfiguration,
+                labelFromCfgFile
+            );
     }
     else {
         glfwInit();
@@ -1383,6 +1455,20 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
+
+    {
+        openspace::Settings settings = loadSettings();
+        settings.hasStartedBefore = true;
+
+        const std::filesystem::path p = global::configuration->profile;
+        const std::filesystem::path reducedName = p.filename().replace_extension();
+        settings.profile = reducedName.string();
+
+        settings.configuration =
+            isGeneratedWindowConfig ? "" : global::configuration->windowConfiguration;
+
+        saveSettings(settings, findSettings());
+    }
 
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
@@ -1472,27 +1558,6 @@ int main(int argc, char* argv[]) {
     // Do not print message if clients are waiting for the master
     // Only timeout after 15 minutes
     Engine::instance().setSyncParameters(false, 15.f * 60.f);
-
-    {
-        openspace::Settings settings = loadSettings();
-        settings.hasStartedBefore = true;
-
-        if (settings.rememberLastProfile) {
-            const std::filesystem::path p = global::configuration->profile;
-            const std::filesystem::path reducedName = p.filename().replace_extension();
-            settings.profile = reducedName.string();
-        }
-
-        if (settings.rememberLastConfiguration &&
-            !global::configuration->sgctConfigNameInitialized.empty())
-        {
-            // We only want to store the window configuration if it was not a dynamically
-            // created one
-            settings.configuration = global::configuration->windowConfiguration;
-        }
-
-        saveSettings(settings, findSettings());
-    }
 
     LINFO("Starting rendering loop");
     Engine::instance().exec();

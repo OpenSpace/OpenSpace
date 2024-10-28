@@ -267,7 +267,7 @@ TestResult FileVerifier::operator()(const ghoul::Dictionary& dict,
         TestResult::Offense o = {
             .offender = key,
             .reason = TestResult::Offense::Reason::Verification,
-            .explanation = "File did not exist"
+            .explanation = std::format("File '{}' did not exist", file)
         };
         res.offenses.push_back(std::move(o));
     }
@@ -294,7 +294,7 @@ TestResult DirectoryVerifier::operator()(const ghoul::Dictionary& dict,
         TestResult::Offense o = {
             .offender = key,
             .reason = TestResult::Offense::Reason::Verification,
-            .explanation = "Directory did not exist"
+            .explanation = std::format("Directory '{}' did not exist", dir)
         };
         res.offenses.push_back(std::move(o));
     }
@@ -689,7 +689,13 @@ std::string TableVerifier::type() const {
 
 StringListVerifier::StringListVerifier(std::string elementDocumentation)
     : TableVerifier({
-        { "*", new StringVerifier, Optional::No, std::move(elementDocumentation) }
+        {
+            "*",
+            new StringVerifier,
+            Optional::No,
+            Private::No,
+            std::move(elementDocumentation)
+        }
     })
 {}
 
@@ -699,7 +705,13 @@ std::string StringListVerifier::type() const {
 
 IntListVerifier::IntListVerifier(std::string elementDocumentation)
     : TableVerifier({
-        { "*", new IntVerifier, Optional::No, std::move(elementDocumentation) }
+        {
+            "*",
+            new IntVerifier,
+            Optional::No,
+            Private::No,
+            std::move(elementDocumentation)
+        }
     })
 {}
 

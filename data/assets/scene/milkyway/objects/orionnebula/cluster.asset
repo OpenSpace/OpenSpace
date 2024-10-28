@@ -67,7 +67,6 @@ asset.export(OrionClusterStars)
 
 asset.meta = {
   Name = "Orion Nebula Star Cluster",
-  Version = "1.1",
   Description = [[Digital Universe asset for the Orion star cluster. To be used in
     conjunction with nebula model. Use orionnebula.asset to include both]],
   Author = "AMNH Digital Universe",

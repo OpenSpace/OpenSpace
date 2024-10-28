@@ -29,6 +29,7 @@ in vec3 vs_normalViewSpace;
 in vec4 vs_positionCameraSpace;
 in float vs_screenSpaceDepth;
 in mat3 vs_TBN;
+in vec3 vs_color;
 
 uniform float ambientIntensity = 0.2;
 uniform float diffuseIntensity = 1.0;
@@ -36,6 +37,7 @@ uniform float specularIntensity = 1.0;
 uniform bool performShading = true;
 
 uniform bool use_forced_color = false;
+uniform bool use_vertex_colors = false;
 uniform bool has_texture_diffuse;
 uniform bool has_texture_normal;
 uniform bool has_texture_specular;
@@ -95,12 +97,22 @@ Fragment getFragment() {
   }
 
   // Base color
-  vec4 diffuseAlbedo;
+  vec4 diffuseAlbedo = vec4(0.0);
   if (has_texture_diffuse) {
     diffuseAlbedo = texture(texture_diffuse, vs_st);
   }
   else {
     diffuseAlbedo = color_diffuse;
+  }
+
+  // Multiply with vertex color if specified
+  if (use_vertex_colors) {
+    diffuseAlbedo.rgb *= vs_color;
+
+    // Make sure to not go beyond color range
+    diffuseAlbedo.r = clamp(diffuseAlbedo.r, 0.0, 1.0);
+    diffuseAlbedo.g = clamp(diffuseAlbedo.g, 0.0, 1.0);
+    diffuseAlbedo.b = clamp(diffuseAlbedo.b, 0.0, 1.0);
   }
 
   if (performShading) {
@@ -118,7 +130,7 @@ Fragment getFragment() {
       }
     }
 
-    // Bumb mapping
+    // Bump mapping
     vec3 normal;
     if (has_texture_normal) {
       vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;

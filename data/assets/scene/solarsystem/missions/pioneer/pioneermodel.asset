@@ -29,7 +29,6 @@ asset.export("PioneerModel", ModelRenderable)
 
 asset.meta = {
   Name = "Pioneer Model",
-  Version = "1.0",
   Description = [[Pioneer model asset. Used by both pioneer 10 and pioneer 11 asset.
     Untextured version of model from NASA 3D resources]],
   Author = "NASA",

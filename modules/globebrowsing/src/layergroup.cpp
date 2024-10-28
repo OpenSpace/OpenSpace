@@ -57,19 +57,6 @@ LayerGroup::LayerGroup(layers::Group group)
     addProperty(_levelBlendingEnabled);
 }
 
-void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
-    for (size_t i = 1; i <= dict.size(); i++) {
-        const ghoul::Dictionary layer = dict.value<ghoul::Dictionary>(std::to_string(i));
-
-        try {
-            addLayer(layer);
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-        }
-    }
-}
-
 void LayerGroup::initialize() {
     ZoneScoped;
 
@@ -88,6 +75,11 @@ void LayerGroup::deinitialize() {
 
 void LayerGroup::update() {
     ZoneScoped;
+
+    for (const std::string& layer : _layersToDelete) {
+        deleteLayer(layer);
+    }
+    _layersToDelete.clear();
 
     _activeLayers.clear();
 
@@ -159,23 +151,6 @@ Layer* LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     std::stable_sort(_subOwners.begin(), _subOwners.end(), compareZIndexSubOwners);
 
     _levelBlendingEnabled.setVisibility(properties::Property::Visibility::User);
-
-    properties::PropertyOwner* layerGroup = ptr->owner();
-    properties::PropertyOwner* layerManager = layerGroup->owner();
-
-    // @TODO (emmbr, 2021-11-03) If the layer is added as part of the globe's
-    // dictionary during construction this function is called in the LayerManager's
-    // initialize function. This means that the layerManager does not exists yet, and
-    // we cannot find which SGN it belongs to... Want to avoid doing this check, so
-    // this should be fixed (probably as part of a cleanup/rewite of the LayerManager)
-    if (layerManager) {
-        properties::PropertyOwner* globe = layerManager->owner();
-        properties::PropertyOwner* sceneGraphNode = globe->owner();
-        global::eventEngine->publishEvent<events::EventLayerAdded>(
-            ptr->uri()
-        );
-    }
-
     return ptr;
 }
 
@@ -189,13 +164,7 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             // which will no longer be valid once it is deleted
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
-            properties::PropertyOwner* layerGroup = it->get()->owner();
-            properties::PropertyOwner* layerManager = layerGroup->owner();
-            properties::PropertyOwner* globe = layerManager->owner();
-            properties::PropertyOwner* sceneGraphNode = globe->owner();
-            global::eventEngine->publishEvent<events::EventLayerRemoved>(
-                it->get()->uri()
-            );
+
             // We need to keep the name of the layer since we only get it as a reference
             // and the name needs to survive the deletion
             const std::string lName = layerName;
@@ -215,6 +184,10 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
         }
     }
     LERROR("Could not find layer " + layerName);
+}
+
+void LayerGroup::scheduleDeleteLayer(const std::string& layerName) {
+    _layersToDelete.push_back(layerName);
 }
 
 void LayerGroup::moveLayer(int oldPosition, int newPosition) {
@@ -292,6 +265,9 @@ void LayerGroup::moveLayer(int oldPosition, int newPosition) {
     RenderableGlobe* renderable = dynamic_cast<RenderableGlobe*>(manager->owner());
     ghoul_assert(manager, "Hierarchy error: LayerManager. Owner is not RenderableGlobe");
     renderable->invalidateShader();
+
+    // Notify that the layers are in a different order
+    global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(uri());
 }
 
 std::vector<Layer*> LayerGroup::layers() const {

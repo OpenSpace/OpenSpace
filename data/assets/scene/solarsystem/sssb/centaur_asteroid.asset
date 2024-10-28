@@ -46,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Centaur Asteroids",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Centaur group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

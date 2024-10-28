@@ -24,7 +24,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Earth Reference Features",
-  Version = "1.0",
   Description = "Reference Features layer for Earth globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

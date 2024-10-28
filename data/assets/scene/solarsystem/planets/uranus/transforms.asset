@@ -35,7 +35,6 @@ asset.export(UranusBarycenter)
 
 asset.meta = {
   Name = "Uranus Transforms",
-  Version = "1.1",
   Description = "Uranus Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

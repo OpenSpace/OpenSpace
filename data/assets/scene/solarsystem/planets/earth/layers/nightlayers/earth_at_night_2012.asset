@@ -27,7 +27,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Earth at Night 2012",
-  Version = "1.1",
   Description = "Main web loaded night layer for Earth. This layer is hosted by GIBS",
   Author = "OpenSpace Team",
   URL = "https://visibleearth.nasa.gov/images/79765/night-lights-2012-map",

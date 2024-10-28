@@ -29,6 +29,7 @@
 #include <modules/base/translation/statictranslation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
@@ -175,6 +176,23 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
+    constexpr openspace::properties::Property::PropertyInfo GuiOrderInfo = {
+        "GuiOrderingNumber",
+        "Gui Ordering Number",
+        "This is an optional numerical value that will affect the sorting of this scene "
+        "graph node in relation to its neighbors in the GUI. Nodes with the same value "
+        "will be sorted alphabetically.",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseGuiOrderInfo = {
+        "UseGuiOrdering",
+        "Use Gui Ordering",
+        "If true, use the 'GuiOrderingNumber' to place this scene graph node in a "
+        "sorted way in relation to its neighbors in the GUI",
+        openspace::properties::Property::Visibility::Hidden
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ShowDebugSphereInfo = {
         "ShowDebugSphere",
         "Show Debug Sphere",
@@ -309,6 +327,15 @@ namespace {
             // scene graph node. This is most useful to trim collective lists of nodes and
             // not display, for example, barycenters
             std::optional<bool> hidden;
+
+            // If this value is specified, the scene graph node will be ordered in
+            // relation to its neighbors in the GUI based on this value, so that nodes
+            // with a higher value appear later in the list. Scene graph nodes with the
+            // same value will be sorted alphabetically.
+            //
+            // The nodes without a given value will be placed at the bottom of the list
+            // and sorted alphabetically.
+            std::optional<float> orderingNumber;
         };
         // Additional information that is passed to GUI applications. These are all hints
         // and do not have any impact on the actual function of the scene graph node
@@ -361,6 +388,11 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
                 throw ghoul::RuntimeError("GuiPath must start with /");
             }
             result->_guiPath = *p.gui->path;
+        }
+
+        result->_useGuiOrdering = p.gui->orderingNumber.has_value();
+        if (p.gui->orderingNumber.has_value()) {
+            result->_guiOrderingNumber = *p.gui->orderingNumber;
         }
     }
 
@@ -425,9 +457,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         ghoul_assert(result->_renderable, "Failed to create Renderable");
         result->_renderable->_parent = result.get();
         result->addPropertySubOwner(result->_renderable.get());
-        //LDEBUG(std::format(
-        //    "Successfully created renderable for '{}'", result->identifier()
-        //));
     }
 
     // Extracting the actions from the dictionary
@@ -481,15 +510,12 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
         if (std::holds_alternative<std::string>(*p.tag)) {
             result->addTag(std::get<std::string>(*p.tag));
         }
-        else if (std::holds_alternative<std::vector<std::string>>(*p.tag)) {
+        else {
             for (const std::string& tag : std::get<std::vector<std::string>>(*p.tag)) {
                 if (!tag.empty()) {
                     result->addTag(tag);
                 }
             }
-        }
-        else {
-            throw ghoul::MissingCaseException();
         }
     }
 
@@ -512,6 +538,8 @@ SceneGraphNode::SceneGraphNode()
     , _guiPath(GuiPathInfo, "/")
     , _guiDisplayName(GuiNameInfo)
     , _guiDescription(GuiDescriptionInfo)
+    , _useGuiOrdering(UseGuiOrderInfo, false)
+    , _guiOrderingNumber(GuiOrderInfo, 0.f)
     , _transform {
         ghoul::mm_unique_ptr<Translation>(
             global::memoryManager->PersistentMemory.alloc<StaticTranslation>()
@@ -593,6 +621,8 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_guiDescription);
     addProperty(_guiHidden);
     addProperty(_guiPath);
+    addProperty(_guiOrderingNumber);
+    addProperty(_useGuiOrdering);
 }
 
 SceneGraphNode::~SceneGraphNode() {}
@@ -600,6 +630,11 @@ SceneGraphNode::~SceneGraphNode() {}
 void SceneGraphNode::initialize() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
+
 
     LDEBUG(std::format("Initializing: {}", identifier()));
 
@@ -628,7 +663,11 @@ void SceneGraphNode::initialize() {
 void SceneGraphNode::initializeGL() {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
-    TracyGpuZone("initializeGL")
+    TracyGpuZone("initializeGL");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
     LDEBUG(std::format("Initializing GL: {}", identifier()));
 
@@ -706,6 +745,10 @@ void SceneGraphNode::traversePostOrder(const std::function<void(SceneGraphNode*)
 void SceneGraphNode::update(const UpdateData& data) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
     if (_state != State::Initialized && _state != State::GLInitialized) {
         return;
@@ -756,6 +799,10 @@ void SceneGraphNode::update(const UpdateData& data) {
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
     if (_state != State::GLInitialized) {
         return;

@@ -32,7 +32,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Callisto Texutre",
-  Version = "2.0",
   Description = "Default texture for Callisto",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

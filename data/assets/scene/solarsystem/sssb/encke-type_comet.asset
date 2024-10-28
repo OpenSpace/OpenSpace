@@ -46,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Encke-Type Comets",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Encke-Type group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

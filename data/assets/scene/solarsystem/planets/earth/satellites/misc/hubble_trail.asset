@@ -9,7 +9,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_hst",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=20580&FORMAT=kvn",
   Filename = "hst.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -81,7 +81,6 @@ asset.export(HubbleTrail)
 
 asset.meta = {
   Name = "Hubble Space Telescope Trail",
-  Version = "1.0",
   Description = "Position and Trail for Hubble Space Telescope, trail from Celestrak",
   Author = "Dan Tell",
   URL = "www.calacademy.org",

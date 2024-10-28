@@ -9,7 +9,7 @@ local speck = asset.resource({
   Name = "HII Regions Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_h2regions_speck",
-  Version = 3
+  Version = 4
 })
 
 
@@ -33,25 +33,23 @@ local Object = {
     PolygonSides = 6,
     Unit = "pc",
     SizeSettings = {
-      ScaleExponent = 18.24,
+      ScaleExponent = 18.5,
       MaxSize = 8.0,
       EnableMaxSizeControl = true
     }
   },
   GUI = {
     Name = "HII Regions",
-    Path = "/Milky Way",
-    Description = [[Census: 1,271 nebulae. DU Version 4.6. <br> H ii (pronounced
-      H-two) regions are stellar nurseries for newborn stars. Stars are born from
-      condensing clouds of hydrogen gas. As these clouds condense, the densities
-      become high enough to form stars. From Earth's perspective, you'll notice that
-      the H ii regions all lie close to the Galactic plane. This is not an accident
-      of nature. These star-forming regions lie in the plane of the Galaxy because
-      that is where star formation occurs in spiral galaxies such as our Milky Way.
-      Because of this, they are great tracers of the spiral arms of the Galaxy, and
-      were instrumental in our understanding of the Galaxy's overall structure
-      (Description from URL) <br><br> Data Reference: The WISE catalog of Galactic
-      HII Regions (Anderson+, 2014)]]
+    Path = "/Milky Way/Nebulae",
+    Description = [[HII (pronounced "H-two") regions are stellar nurseries for newborn
+      stars. Stars are born from condensing clouds of hydrogen gas. As these clouds
+      condense, the densities become high enough to form stars. An HII region is the
+      surrounding clouds of hydrogen that glow from the stars born within them. The
+      result is a bright, glowing nebula which is seen to great distances. One local
+      celebrity among HII regions is the Orion Nebula (M42). These star-forming regions
+      lie in the plane of the Galaxy because that is where star formation occurs in
+      spiral galaxies such as our Milky Way. Because of this, they are great tracers of
+      the spiral arms of the Galaxy. Census: 1,108 star-forming regions.]]
   }
 }
 
@@ -70,9 +68,7 @@ asset.export(Object)
 
 asset.meta = {
   Name = "HII Regions",
-  Version = "2.0",
-  Description = "Digital Universe asset for HII Regions",
-  Author = "Carter Emmart, Brian Abbott (AMNH)",
+  Description = Object.GUI.Description,
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

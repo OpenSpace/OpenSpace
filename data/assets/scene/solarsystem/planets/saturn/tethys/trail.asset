@@ -18,7 +18,12 @@ local TethysTrail = {
     Period = 45.0 / 24.0,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn", "moonTrail_major_saturn" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_major_saturn"
+  },
   GUI = {
     Name = "Tethys Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Tethys",
@@ -41,7 +46,6 @@ asset.export(TethysTrail)
 
 asset.meta = {
   Name = "Tethys Trail",
-  Version = "1.0",
   Description = "Main trail for Tethys",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

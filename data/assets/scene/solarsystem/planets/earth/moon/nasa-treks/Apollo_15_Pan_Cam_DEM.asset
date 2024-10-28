@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_Apollo15_PanCam_ClrShade_25N311E_5mp = {
   Identifier = "Apollo15_PanCam_ClrShade_25N311E_5mp",
   Name = [[Apollo 15 Pan Cam DEM, Aristarchus Plateau 1, ColorHillshade]],
@@ -30,6 +32,7 @@ local treks_Apollo15_PanCam_ClrShade_19S129E_5mp = {
   Description = [[]]
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_ClrShade_25N311E_5mp)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_Apollo15_PanCam_ClrShade_28N307E_3mp)
@@ -47,9 +50,9 @@ asset.export("Apollo15_PanCam_ClrShade_28N307E_3mp", treks_Apollo15_PanCam_ClrSh
 asset.export("Apollo15_PanCam_ClrShade_19S129E_5mp", treks_Apollo15_PanCam_ClrShade_19S129E_5mp)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon Apollo_15_Pan_Cam_DEM],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon Apollo_15_Pan_Cam_DEM]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

@@ -17,9 +17,7 @@ local Carpo = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -137,9 +135,7 @@ local S2018J4 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -278,7 +274,6 @@ asset.export(S2018J4Label)
 
 asset.meta = {
   Name = "Jupiter Carpo Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Carpo Group moons: Carpo.
     Blank globes and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",

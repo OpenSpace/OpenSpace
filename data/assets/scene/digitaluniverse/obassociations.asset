@@ -48,18 +48,14 @@ local Object = {
   },
   GUI = {
     Name = "OB Associations",
-    Path = "/Milky Way",
-    Description = [[Census: 61 OB associations. DU Version 2.4. <br> OB associations
-      are young groups of stars that were formed within a giant molecular cloud, but
-      have dispersed after the original gas and dust from the cloud was blown away
-      by the star's radiation pressure. Although an association's stars are no
-      longer gravitationally bound to one another, they share a common motion in
-      space because they were formed from the same cloud. This allows astronomers to
-      easily determine OB association membership stars. These objects are color
-      coded by their spiral arm membership. Blue associations trace the Sagittarius
-      Arm. Purple associations are in the local Orion Spur. Orange associations are
-      in the Perseus Arm (Description from URL) <br><br> Data Reference: New List of
-      OB Associations (Melnik+)]]
+    Path = "/Milky Way/Star Clusters",
+    Description = [[Stellar associations are loose agglomerations of stars that form from
+      the same gas cloud. OB associations typically have on the order of dozens of O and
+      B stars in them (hotter, massive, younger stars) in addition to cooler stars. Over
+      time the stars dispurse and the association is less concentrated. These associations
+      track relatviey recent star formation. Colors: Blue trace the Sagittarius Arm,
+      Purple are in the local Orion Spur, and Orange are in the Perseus Arm. Census: 61 OB
+      associations.]]
   }
 }
 
@@ -78,9 +74,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "OB Associations",
-  Version = "3.0",
-  Description = "Digital Universe asset for OB Associations",
-  Author = "Brian Abbott (AMNH)",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

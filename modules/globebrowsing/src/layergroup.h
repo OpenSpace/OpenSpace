@@ -41,8 +41,6 @@ struct TileProvider;
 struct LayerGroup : public properties::PropertyOwner {
     LayerGroup(layers::Group group);
 
-    void setLayersFromDict(const ghoul::Dictionary& dict);
-
     void initialize();
     void deinitialize();
 
@@ -53,6 +51,9 @@ struct LayerGroup : public properties::PropertyOwner {
 
     Layer* addLayer(const ghoul::Dictionary& layerDict);
     void deleteLayer(const std::string& layerName);
+
+    // The same as `deleteLayer` but executed later before the next frame
+    void scheduleDeleteLayer(const std::string& layerName);
     void moveLayer(int oldPosition, int newPosition);
 
     /**
@@ -80,6 +81,8 @@ private:
     const layers::Group::ID _groupId;
     std::vector<std::unique_ptr<Layer>> _layers;
     std::vector<Layer*> _activeLayers;
+
+    std::vector<std::string> _layersToDelete;
 
     properties::BoolProperty _levelBlendingEnabled;
     std::function<void(Layer*)> _onChangeCallback;

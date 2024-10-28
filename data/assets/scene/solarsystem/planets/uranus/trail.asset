@@ -40,7 +40,6 @@ asset.export(UranusTrail)
 
 asset.meta = {
   Name = "Uranus Trail",
-  Version = "1.1",
   Description = "Main trail of Uranus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

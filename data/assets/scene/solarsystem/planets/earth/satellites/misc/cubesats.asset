@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_cubesat",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=cubesat&FORMAT=kvn",
   Filename = "cubesat.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -47,7 +47,6 @@ asset.export(Cubesats)
 
 asset.meta = {
   Name = "Satellites CubeSat",
-  Version = "1.0",
   Description = "Satellites asset for CubeSat. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

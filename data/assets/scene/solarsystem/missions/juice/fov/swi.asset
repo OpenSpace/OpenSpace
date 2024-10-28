@@ -23,8 +23,7 @@ local SwiCh2 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "SWI CH2 FOV",
@@ -58,8 +57,7 @@ local SwiFull = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "SWI Full FOV",
@@ -96,8 +94,7 @@ local SwiFullGCO500 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "SWI Full GCO500 FOV",
@@ -131,7 +128,6 @@ asset.export(SwiFull)
 
 asset.meta = {
   Name = "SWI",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Submillimetre Wave Instrument (SWI), which is measuring
     the chemistry, meteorology, and structure of Jupiters middle atmosphere as well as the

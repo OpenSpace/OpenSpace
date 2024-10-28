@@ -37,7 +37,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Themis IR Night [New York]",
-  Version = "1.1",
   Description = [[Themis Night layer for Mars. This map is hosted on the OpenSpace
     server in New York]],
   Author = "USGS",

@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_gps-ops",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=gps-ops&FORMAT=kvn",
   Filename = "gps-ops.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -48,7 +48,6 @@ asset.export(GpsSatellites)
 
 asset.meta = {
   Name = "Satellites Navigation GPS",
-  Version = "1.0",
   Description = "Satellites asset for Navigation GPS. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

@@ -42,7 +42,7 @@ public:
      * Constructor for modules class.
      *
      * \param parent Pointer to parent Qt widget
-     * \param profile The #openspace::Profile::Module object containing all data of the
+     * \param modules The #openspace::Profile::Module object containing all data of the
      *        new or imported profile
      */
     ModulesDialog(QWidget* parent, std::vector<openspace::Profile::Module>* modules);
@@ -86,8 +86,6 @@ private:
     QPushButton* _buttonSave = nullptr;
     QPushButton* _buttonCancel = nullptr;
     QDialogButtonBox* _buttonBox = nullptr;
-
-    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___MODULESDIALOG___H__

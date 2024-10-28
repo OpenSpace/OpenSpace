@@ -32,7 +32,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -91,8 +91,8 @@ namespace {
 
     std::chrono::steady_clock::time_point currentTimeForInterpolation() {
         using namespace openspace::global;
-        if (sessionRecording->isSavingFramesDuringPlayback()) {
-            return sessionRecording->currentPlaybackInterpolationTime();
+        if (sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+            return sessionRecordingHandler->currentPlaybackInterpolationTime();
         }
         else {
             return std::chrono::steady_clock::now();
@@ -166,7 +166,6 @@ void Scene::registerNode(SceneGraphNode* node) {
     _nodesByIdentifier[node->identifier()] = node;
     addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
-    global::eventEngine->publishEvent<events::EventSceneGraphNodeAdded>(node);
 }
 
 void Scene::unregisterNode(SceneGraphNode* node) {
@@ -186,7 +185,6 @@ void Scene::unregisterNode(SceneGraphNode* node) {
     }
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
-    global::eventEngine->publishEvent<events::EventSceneGraphNodeRemoved>(node);
 }
 
 void Scene::markNodeRegistryDirty() {
@@ -556,11 +554,12 @@ void Scene::updateInterpolations() {
                 // triggered when the interpolation of the property was triggered,
                 // therefore it has already been synced and sent to the connected nodes
                 // and peers
-                global::scriptEngine->queueScript(
-                    std::move(i.postScript),
-                    scripting::ScriptEngine::ShouldBeSynchronized::No,
-                    scripting::ScriptEngine::ShouldSendToRemote::No
-                );
+                using Script = scripting::ScriptEngine::Script;
+                global::scriptEngine->queueScript({
+                    .code = std::move(i.postScript),
+                    .synchronized = Script::ShouldBeSynchronized::No,
+                    .sendToRemote = Script::ShouldSendToRemote::No
+                });
             }
 
             global::eventEngine->publishEvent<events::EventInterpolationFinished>(i.prop);
@@ -578,7 +577,7 @@ void Scene::updateInterpolations() {
 }
 
 void Scene::setPropertiesFromProfile(const Profile& p) {
-    ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+    ghoul::lua::LuaState L;
 
     for (const Profile::Property& prop : p.properties) {
         if (prop.name.empty()) {
@@ -776,12 +775,12 @@ PropertyValueType Scene::propertyValueType(const std::string& value) {
 }
 
 std::vector<properties::Property*> Scene::propertiesMatchingRegex(
-                                                        const std::string& propertyString)
+                                                          std::string_view propertyString)
 {
     return findMatchesInAllProperties(propertyString, allProperties(), "");
 }
 
-std::vector<std::string> Scene::allTags() {
+std::vector<std::string> Scene::allTags() const {
     std::set<std::string> result;
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         const std::vector<std::string>& tags = node->tags();
@@ -789,6 +788,21 @@ std::vector<std::string> Scene::allTags() {
     }
 
     return std::vector<std::string>(result.begin(), result.end());
+}
+
+void Scene::setGuiTreeOrder(const std::string& guiPath,
+                            const std::vector<std::string>& list)
+{
+    _guiTreeOrderMap[guiPath] = list;
+    global::eventEngine->publishEvent<events::EventGuiTreeUpdated>();
+}
+
+ghoul::Dictionary Scene::guiTreeOrder() const {
+    ghoul::Dictionary dict;
+    for (const auto& [key, list] : _guiTreeOrderMap) {
+        dict.setValue(key, list);
+    }
+    return dict;
 }
 
 scripting::LuaLibrary Scene::luaLibrary() {
@@ -879,7 +893,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
             codegen::lua::SetParent,
             codegen::lua::BoundingSphere,
             codegen::lua::InteractionSphere,
-            codegen::lua::MakeIdentifier
+            codegen::lua::MakeIdentifier,
+            codegen::lua::SetGuiOrder,
+            codegen::lua::GuiOrder
         }
     };
 }

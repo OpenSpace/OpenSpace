@@ -15,9 +15,7 @@ local Nix = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 45000, 45000, 45000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 45000, 45000, 45000 }
   },
   Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "moon_minor_pluto" },
   GUI = {
@@ -98,7 +96,6 @@ asset.export(NixLabel)
 
 asset.meta = {
   Name = "Nix",
-  Version = "1.0",
   Description = "Globe and trail for Pluto's moon Nix",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

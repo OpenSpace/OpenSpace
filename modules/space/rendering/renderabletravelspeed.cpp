@@ -74,7 +74,8 @@ namespace {
         "Indicator Length",
         "The length of the speed indicator line, given in seconds. The length will be "
         "computed as the speed times this value. For example, a value of 1 will make it "
-        "as long as the distance it would travel over one second with the specified speed.",
+        "as long as the distance it would travel over one second with the specified "
+        "speed.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -100,7 +101,7 @@ namespace {
     // selected speed.
     struct [[codegen::Dictionary(RenderableTravelSpeed)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
-        std::string target [[codegen::identifier()]];;
+        std::string target [[codegen::identifier()]];
 
         // [[codegen::verbatim(SpeedInfo.description)]]
         std::optional<double> travelSpeed [[codegen::greater(0.f)]];
@@ -286,9 +287,6 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     else { // in case we've reached the target
         reinitiateTravel();
     }
-
-    _shaderProgram->setUniform("lineColor", _lineColor);
-    _shaderProgram->setUniform("opacity", opacity());
 }
 
 void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
@@ -302,6 +300,9 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
         glm::mat4(calcModelViewTransform(data))
     );
     _shaderProgram->setUniform("projectionTransform", data.camera.projectionMatrix());
+
+    _shaderProgram->setUniform("lineColor", _lineColor);
+    _shaderProgram->setUniform("opacity", opacity());
 
 #ifndef __APPLE__
     glLineWidth(_lineWidth);

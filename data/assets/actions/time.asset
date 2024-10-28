@@ -52,7 +52,6 @@ asset.export("SiderealDayDecrease", SiderealDayDecrease.Identifier)
 
 asset.meta = {
   Name = "Actions - Time",
-  Version = "1.0",
   Description = "Asset providing actions around time",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

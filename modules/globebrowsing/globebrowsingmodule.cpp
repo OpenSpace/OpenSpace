@@ -48,6 +48,7 @@
 #include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/src/tileprovider/tileproviderbydate.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
 #include <openspace/camera/camera.h>
@@ -196,6 +197,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation GlobeBrowsingModule::Documentation() {
+    return codegen::doc<Parameters>("module_globebrowsing");
+}
+
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(Name)
     , _tileCacheSizeMB(TileCacheSizeInfo, 1024)
@@ -310,6 +315,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     fTileProvider->registerClass<TemporalTileProvider>("TemporalTileProvider");
     fTileProvider->registerClass<TileIndexTileProvider>("TileIndexTileProvider");
     fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileProvider");
+    fTileProvider->registerClass<TileProviderByDate>("TileProviderByDate");
     fTileProvider->registerClass<TileProviderByLevel>("TileProviderByLevel");
     fTileProvider->registerClass<TileProviderByIndex>("TileProviderByIndex");
 
@@ -328,7 +334,6 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
     return {
         globebrowsing::Layer::Documentation(),
         globebrowsing::LayerAdjustment::Documentation(),
-        globebrowsing::LayerManager::Documentation(),
         globebrowsing::GlobeTranslation::Documentation(),
         globebrowsing::GlobeRotation::Documentation(),
         globebrowsing::RenderableGlobe::Documentation(),
@@ -338,9 +343,9 @@ std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() 
         globebrowsing::SizeReferenceTileProvider::Documentation(),
         globebrowsing::TemporalTileProvider::Documentation(),
         globebrowsing::TileIndexTileProvider::Documentation(),
+        globebrowsing::TileProviderByDate::Documentation(),
         globebrowsing::TileProviderByIndex::Documentation(),
         globebrowsing::TileProviderByLevel::Documentation(),
-        globebrowsing::GeoJsonManager::Documentation(),
         globebrowsing::GeoJsonComponent::Documentation(),
         globebrowsing::GeoJsonProperties::Documentation(),
         GlobeLabelsComponent::Documentation(),
@@ -385,7 +390,9 @@ void GlobeBrowsingModule::goToGeo(const globebrowsing::RenderableGlobe& globe,
 
 glm::vec3 GlobeBrowsingModule::cartesianCoordinatesFromGeo(
                                               const globebrowsing::RenderableGlobe& globe,
-                                       double latitude, double longitude, std::optional<double> altitude)
+                                                                          double latitude,
+                                                                         double longitude,
+                                                           std::optional<double> altitude)
 {
     using namespace globebrowsing;
 

@@ -28,8 +28,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Labels",
-    Path = "/Examples/RenderablePointCloud/Advanced"
+    Name = "RenderablePointCloud - Labels",
+    Path = "/Examples/Advanced"
   }
 }
 

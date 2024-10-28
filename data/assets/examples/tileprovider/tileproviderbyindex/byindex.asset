@@ -45,8 +45,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Basic",
-    Path = "/Examples/TileProviderByIndex"
+    Name = "TileProviderByIndex - Basic",
+    Path = "/Examples"
   }
 }
 

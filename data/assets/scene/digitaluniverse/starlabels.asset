@@ -2,7 +2,7 @@ local speck = asset.resource({
   Name = "Star Labels Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_starlabels_speck",
-  Version = 2
+  Version = 3
 })
 
 
@@ -15,7 +15,7 @@ local Object = {
       Enabled = true,
       File = speck .. "stars.label",
       Color = { 0.4, 0.4, 0.4 },
-      Size = 14.7,
+      Size = 14.4,
       MinMaxSize = { 6, 50 },
       Unit = "pc"
     },
@@ -25,7 +25,8 @@ local Object = {
   GUI = {
     Name = "Stars Labels",
     Path = "/Milky Way/Stars",
-    Description = "Labels for stars in the Milky Way. See 'Stars' for more info"
+    Description = [[Common name labels for nearby stars in the Milky Way. See 'Stars'
+      for more information.]]
   }
 }
 
@@ -44,9 +45,8 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Star Labels",
-  Version = "3.0",
-  Description = "Digital Universe asset for labels of the stars",
-  Author = "Brian Abbott (AMNH)",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott, Zack Reeves, Andrew Ayala, Jackie Faherty (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
 }

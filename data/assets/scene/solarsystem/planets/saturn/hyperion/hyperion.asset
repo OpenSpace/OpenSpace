@@ -28,8 +28,6 @@ local Hyperion = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 360200, 266000, 205400 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       -- @TODO (2021-05-21, emmbr26) These labels do not seem to be visible
       Enabled = false,
@@ -93,7 +91,6 @@ asset.export(HyperionLabel)
 
 asset.meta = {
   Name = "Hyperion",
-  Version = "1.1",
   Description = "Hyperion globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

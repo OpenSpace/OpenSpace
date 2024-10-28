@@ -18,8 +18,8 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Point Size / Scaling",
-    Path = "/Examples/RenderablePointCloud",
+    Name = "RenderablePointCloud - Point Size / Scaling",
+    Path = "/Examples",
     Description = "Point cloud with configured point size"
   }
 }

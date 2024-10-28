@@ -103,7 +103,6 @@ asset.export("Frame", Frame)
 
 asset.meta = {
   Name = "Spice Kernels for the Juice Mission",
-  Version = "1.0",
   Description = [[
     Kernels were acquired from the official Juice mailing list and extended with the
     GPHIO kernel provided by Ronan Modolo for the fieldline and plane data visualization

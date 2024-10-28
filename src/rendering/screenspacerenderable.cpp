@@ -100,9 +100,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale Value",
-        "A scale factor for the plane that can be used to increase or decrease the visual "
-        "size. The default size is determined separately for each screen space renderable "
-        "type and may for example be affected by the size of an image being displayed.",
+        "A scale factor for the plane that can be used to increase or decrease the "
+        "visual size. The default size is determined separately for each screen space "
+        "renderable type and may for example be affected by the size of an image being "
+        "displayed.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -168,6 +169,13 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo BorderFeatherInfo = {
+        "BorderFeather",
+        "Border Feather",
+        "If this value is enabled and a border width is set, the border will be rendered "
+        "as a feathered border rather than a hard corner."
+    };
+
     float wrap(float value, float min, float max) {
         return glm::mod(value - min, max - min) + min;
     }
@@ -221,8 +229,14 @@ namespace {
         // [[codegen::verbatim(BorderColorInfo.description)]]
         std::optional<glm::vec3> borderColor [[codegen::color()]];
 
+        // [[codegen::verbatim(BorderFeatherInfo.description)]]
+        std::optional<bool> borderFeather;
+
         // [[codegen::verbatim(ScaleInfo.description)]]
         std::optional<float> scale;
+
+        // [[codegen::verbatim(LocalRotationInfo.description)]]
+        std::optional<glm::vec3> rotation;
 
         // [[codegen::verbatim(GammaOffsetInfo.description)]]
         std::optional<float> gammaOffset;
@@ -317,6 +331,7 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     )
     , _borderWidth(BorderWidthInfo, 0.f, 0.f, 1000.f)
     , _borderColor(BorderColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , _borderFeather(BorderFeatherInfo, false)
     , _scale(ScaleInfo, 0.25f, 0.f, 2.f)
     , _gammaOffset(GammaOffsetInfo, 0.f, -1.f, 10.f)
     , _multiplyColor(MultiplyColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -338,15 +353,31 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         setGuiName(*p.name);
     }
 
+    _enabled = p.enabled.value_or(_enabled);
     addProperty(_enabled);
+
     _renderDuringBlackout = p.renderDuringBlackout.value_or(_renderDuringBlackout);
     addProperty(_renderDuringBlackout);
+
+    _useRadiusAzimuthElevation =
+        p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
     addProperty(_useRadiusAzimuthElevation);
+
+    _usePerspectiveProjection =
+        p.usePerspectiveProjection.value_or(_usePerspectiveProjection);
     addProperty(_usePerspectiveProjection);
+
+    _faceCamera = p.faceCamera.value_or(_faceCamera);
     addProperty(_faceCamera);
+
+    if (_useRadiusAzimuthElevation) {
+        _raePosition = p.radiusAzimuthElevation.value_or(_raePosition);
+    }
+    else {
+        _cartesianPosition = p.cartesianPosition.value_or(_cartesianPosition);
+    }
     addProperty(_cartesianPosition);
     addProperty(_raePosition);
-    addProperty(_gammaOffset);
 
     // Setting spherical/euclidean onchange handler
     _useRadiusAzimuthElevation.onChange([this]() {
@@ -358,46 +389,35 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         }
     });
 
+    _gammaOffset = p.gammaOffset.value_or(_gammaOffset);
+    addProperty(_gammaOffset);
+
+    _scale = p.scale.value_or(_scale);
     addProperty(_scale);
-    addProperty(_multiplyColor);
-    addProperty(_backgroundColor);
-    addProperty(Fadeable::_opacity);
-    addProperty(Fadeable::_fade);
-    addProperty(_localRotation);
-
-    addProperty(_borderColor);
-    addProperty(_borderWidth);
-
-    _borderWidth = p.borderWidth.value_or(_borderWidth);
-
-    _borderColor = p.borderColor.value_or(_borderColor);
-    _borderColor.setViewOption(properties::Property::ViewOptions::Color);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
     _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_multiplyColor);
 
     _backgroundColor = p.backgroundColor.value_or(_backgroundColor);
     _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_backgroundColor);
 
-    _enabled = p.enabled.value_or(_enabled);
-    _gammaOffset = p.gammaOffset.value_or(_gammaOffset);
-
-    _useRadiusAzimuthElevation =
-        p.useRadiusAzimuthElevation.value_or(_useRadiusAzimuthElevation);
-
-    if (_useRadiusAzimuthElevation) {
-        _raePosition = p.radiusAzimuthElevation.value_or(_raePosition);
-    }
-    else {
-        _cartesianPosition = p.cartesianPosition.value_or(_cartesianPosition);
-    }
-
-    _scale = p.scale.value_or(_scale);
     _opacity = p.opacity.value_or(_opacity);
-    _usePerspectiveProjection =
-        p.usePerspectiveProjection.value_or(_usePerspectiveProjection);
+    addProperty(Fadeable::_opacity);
+    addProperty(Fadeable::_fade);
 
-    _faceCamera = p.faceCamera.value_or(_faceCamera);
+    _localRotation = p.rotation.value_or(_localRotation);
+    addProperty(_localRotation);
+
+    _borderColor = p.borderColor.value_or(_borderColor);
+    _borderColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_borderColor);
+
+    addProperty(_borderFeather);
+
+    _borderWidth = p.borderWidth.value_or(_borderWidth);
+    addProperty(_borderWidth);
 
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {
@@ -421,11 +441,11 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
         // No sync or send because this is already inside a Lua script that was triggered
         // when this triggerProperty was pressed in the gui, therefor it has already been
         // synced and sent to the connected nodes and peers
-        global::scriptEngine->queueScript(
-            std::move(script),
-            scripting::ScriptEngine::ShouldBeSynchronized::No,
-            scripting::ScriptEngine::ShouldSendToRemote::No
-        );
+        global::scriptEngine->queueScript({
+            .code = std::move(script),
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        });
     });
     addProperty(_delete);
 }
@@ -497,9 +517,7 @@ float ScreenSpaceRenderable::scale() const {
     return _scale;
 }
 
-void ScreenSpaceRenderable::createShaders() {
-    ghoul::Dictionary dict = ghoul::Dictionary();
-
+void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
     auto res = global::windowDelegate->currentDrawBufferResolution();
     ghoul::Dictionary rendererData;
     rendererData.setValue(
@@ -642,7 +660,8 @@ glm::mat4 ScreenSpaceRenderable::translationMatrix() {
 }
 
 void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
-                                 const RenderData& renderData)
+                                 const RenderData& renderData,
+                                 bool useAcceleratedRendering)
 {
     glDisable(GL_CULL_FACE);
 
@@ -666,6 +685,8 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     _shader->setUniform(_uniformCache.backgroundColor, _backgroundColor);
     _shader->setUniform(_uniformCache.borderWidth, borderUV);
     _shader->setUniform(_uniformCache.borderColor, _borderColor);
+    _shader->setUniform(_uniformCache.borderFeather, _borderFeather);
+    _shader->setUniform(_uniformCache.useAcceleratedRendering, useAcceleratedRendering);
     _shader->setUniform(
         _uniformCache.mvpMatrix,
         global::renderEngine->scene()->camera()->viewProjectionMatrix() * modelTransform
@@ -685,7 +706,9 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     unbindTexture();
 }
 
-void ScreenSpaceRenderable::unbindTexture() {}
+void ScreenSpaceRenderable::unbindTexture() {
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 glm::vec3 ScreenSpaceRenderable::sanitizeSphericalCoordinates(glm::vec3 spherical) const {
     const float r = spherical.x;

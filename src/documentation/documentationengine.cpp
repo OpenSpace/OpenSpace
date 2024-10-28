@@ -46,12 +46,11 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 #include <future>
 
 namespace {
-    constexpr std::string_view _loggerCat = "DocumentationEngine";
-
     // General keys
     constexpr const char* NameKey = "name";
     constexpr const char* IdentifierKey = "identifier";
@@ -68,12 +67,10 @@ namespace {
     constexpr const char* CommandKey = "command";
 
     // Factory
-    constexpr const char* FactoryTitle = "Asset Components";
     constexpr const char* MembersKey = "members";
     constexpr const char* OptionalKey = "optional";
     constexpr const char* ReferenceKey = "reference";
     constexpr const char* FoundKey = "found";
-    constexpr const char* RestrictionsKey = "restrictions";
     constexpr const char* ClassesKey = "classes";
 
     constexpr const char* OtherName = "Other";
@@ -90,7 +87,6 @@ namespace {
     constexpr const char* UriKey = "uri";
 
     // Scripting
-    constexpr const char* ScriptingTitle = "Scripting API";
     constexpr const char* DefaultValueKey = "defaultValue";
     constexpr const char* ArgumentsKey = "arguments";
     constexpr const char* ReturnTypeKey = "returnType";
@@ -116,7 +112,6 @@ namespace {
     constexpr const char* AuthorKey = "author";
     constexpr const char* UrlKey = "url";
     constexpr const char* LicenseKey = "license";
-    constexpr const char* NoLicenseKey = "noLicense";
     constexpr const char* IdentifiersKey = "identifiers";
     constexpr const char* PathKey = "path";
     constexpr const char* AssetKey = "assets";
@@ -131,17 +126,19 @@ namespace {
     constexpr const char* FiltersKey = "filters";
     constexpr const char* ActionsKey = "actions";
 
-    nlohmann::json documentationToJson(const openspace::documentation::Documentation& d) {
+    nlohmann::json documentationToJson(
+                             const openspace::documentation::Documentation& documentation)
+    {
         using namespace openspace::documentation;
 
         nlohmann::json json;
 
-        json[NameKey] = d.name;
-        json[IdentifierKey] = d.id;
-        json[DescriptionKey] = d.description;
+        json[NameKey] = documentation.name;
+        json[IdentifierKey] = documentation.id;
+        json[DescriptionKey] = documentation.description;
         json[MembersKey] = nlohmann::json::array();
 
-        for (const DocumentationEntry& p : d.entries) {
+        for (const DocumentationEntry& p : documentation.entries) {
             nlohmann::json entry;
             entry[NameKey] = p.key;
             entry[OptionalKey] = p.optional.value;
@@ -156,7 +153,7 @@ namespace {
                 auto it = std::find_if(
                     doc.begin(),
                     doc.end(),
-                    [rv](const Documentation& doc) { return doc.id == rv->identifier; }
+                    [rv](const Documentation& d) { return d.id == rv->identifier; }
                 );
 
                 if (it == doc.end()) {
@@ -196,7 +193,8 @@ namespace {
 
         using namespace openspace;
         nlohmann::json json;
-        json[NameKey] = !owner->guiName().empty() ? owner->guiName() : owner->identifier();
+        json[NameKey] =
+            !owner->guiName().empty() ? owner->guiName() : owner->identifier();
 
         json[DescriptionKey] = owner->description();
         json[PropertiesKeys] = nlohmann::json::array();
@@ -209,7 +207,7 @@ namespace {
             std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
             propertyJson[NameKey] = name;
             propertyJson[TypeKey] = p->className();
-            propertyJson[UriKey] = p->fullyQualifiedIdentifier();
+            propertyJson[UriKey] = p->uri();
             propertyJson[IdentifierKey] = p->identifier();
             propertyJson[DescriptionKey] = p->description();
 
@@ -245,7 +243,18 @@ namespace {
 
         function[ArgumentsKey] = arguments;
         function[ReturnTypeKey] = f.returnType;
-        function[HelpKey] = f.helpText;
+
+        // Remove all double whitespaces from the helptext (these may be generated when
+        // using multi-line strings in Lua)
+        std::string cleanedHelpText = f.helpText;
+        ghoul::trimWhitespace(cleanedHelpText);
+        std::size_t doubleSpace = cleanedHelpText.find("  ");
+        while (doubleSpace != std::string::npos) {
+            cleanedHelpText.erase(doubleSpace, 1);
+            doubleSpace = cleanedHelpText.find("  ");
+        }
+
+        function[HelpKey] = cleanedHelpText;
 
         if (includeSourceLocation) {
             nlohmann::json sourceLocation;
@@ -332,14 +341,16 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
     nlohmann::json json;
 
     if (global::profile->meta.has_value()) {
+        Profile::Meta meta = *global::profile->meta;
+
         nlohmann::json metaJson;
         metaJson[NameKey] = ProfileName;
-        metaJson[ProfileNameKey] = global::profile->meta->name.value_or(NoDataName);
-        metaJson[VersionKey] = global::profile->meta->version.value_or(NoDataName);
-        metaJson[DescriptionKey] = global::profile->meta->description.value_or(NoDataName);
-        metaJson[AuthorKey] = global::profile->meta->author.value_or(NoDataName);
-        metaJson[UrlKey] = global::profile->meta->url.value_or(NoDataName);
-        metaJson[LicenseKey] = global::profile->meta->license.value_or(NoDataName);
+        metaJson[ProfileNameKey] = meta.name.value_or(NoDataName);
+        metaJson[VersionKey] = meta.version.value_or(NoDataName);
+        metaJson[DescriptionKey] = meta.description.value_or(NoDataName);
+        metaJson[AuthorKey] = meta.author.value_or(NoDataName);
+        metaJson[UrlKey] = meta.url.value_or(NoDataName);
+        metaJson[LicenseKey] = meta.license.value_or(NoDataName);
         json.push_back(std::move(metaJson));
     }
 
@@ -361,8 +372,8 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
         assetJson[NameKey] = meta.has_value() ? meta->name : NoDataName;
         assetJson[VersionKey] = meta.has_value() ? meta->version : NoDataName;
         assetJson[DescriptionKey] = meta.has_value() ? meta->description : NoDataName;
-        assetJson[AuthorKey] = meta.has_value() ? meta->author : NoDataName; 
-        assetJson[UrlKey] = meta.has_value() ? meta->url : NoDataName; 
+        assetJson[AuthorKey] = meta.has_value() ? meta->author : NoDataName;
+        assetJson[UrlKey] = meta.has_value() ? meta->url : NoDataName;
         assetJson[LicenseKey] = licenseName;
         assetJson[PathKey] = asset->path().string();
         assetJson[IdKey] = asset->path().string();
@@ -483,7 +494,7 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
     return result;
 }
 
-nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {                 
+nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
     nlohmann::json json;
 
     std::vector<Documentation> docs = _documentations; // Copy the documentations

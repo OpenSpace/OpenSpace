@@ -42,7 +42,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "5000 Years of Total Solar Eclipses",
-  Version = "1.0",
   Description = Layer.Description,
   Author = "OpenSpace Team",
   URL = "https://svs.gsfc.nasa.gov/5222",

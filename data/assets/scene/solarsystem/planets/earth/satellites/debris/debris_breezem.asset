@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_2012-044",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=2012-044&FORMAT=kvn",
   Filename = "2012-044.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -47,7 +47,6 @@ asset.export(DebrisBreezem)
 
 asset.meta = {
   Name = "Satellites Debris - Breeze-M Breakup",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Breeze-M Breakup. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/events/38746-Breakup/",

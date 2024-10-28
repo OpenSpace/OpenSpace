@@ -33,7 +33,6 @@ asset.export("layer", layer)
 
 asset.meta = {
   Name = "Iapetus Texutre",
-  Version = "1.0",
   Description = "Default jpg texture for Iapetus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

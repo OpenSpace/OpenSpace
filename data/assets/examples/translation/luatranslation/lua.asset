@@ -30,8 +30,8 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "Basic",
-    Path = "/Examples/LuaTranslation"
+    Name = "LuaTranslation - Basic",
+    Path = "/Examples"
   }
 }
 

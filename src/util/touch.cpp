@@ -98,7 +98,7 @@ bool TouchInputHolder::tryAddInput(TouchInput input) {
         _inputs.emplace_front(input);
         successful = true;
     }
-    else if (!sameTimeAsLastInput){
+    else if (!sameTimeAsLastInput) {
         _inputs.front().timestamp = input.timestamp;
         successful = true;
     }

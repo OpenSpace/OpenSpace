@@ -6,7 +6,7 @@ local coreKernels = asset.require("spice/core")
 local SolarSystemBarycenter = {
   Identifier = "SolarSystemBarycenter",
   -- No parent; this node is attached to the scene graph root
-  TimeFrame = { -- Using Spice kernels for 1850-2150
+  TimeFrame = {
     Type = "TimeFrameInterval",
     Start = "1550-JAN-01",
     End = "2650-JAN-22"
@@ -113,7 +113,6 @@ asset.export("LightSource", LightSource)
 
 asset.meta = {
   Name = "Sun Transforms",
-  Version = "1.1",
   Description = "Sun transforms: Solar System Barycenter, SUN IAU and SUN J2000",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

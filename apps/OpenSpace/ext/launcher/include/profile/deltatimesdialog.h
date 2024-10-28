@@ -40,8 +40,8 @@ public:
      * Constructor for deltaTimes class.
      *
      * \param parent Pointer to parent Qt widget
-     * \param profile The list of delta times containing all data of the new or imported
-     *        profile
+     * \param deltaTimes The list of delta times containing all data of the new or
+     *        imported profile
      */
     DeltaTimesDialog(QWidget* parent, std::vector<double>* deltaTimes);
 
@@ -97,8 +97,6 @@ private:
     QPushButton* _saveButton = nullptr;
     QPushButton* _discardButton = nullptr;
     QDialogButtonBox* _buttonBox = nullptr;
-
-    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___DELTATIMESDIALOG___H__

@@ -26,6 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/tileindex.h>
@@ -42,7 +44,6 @@ namespace {
     constexpr std::string_view KeyName = "Name";
     constexpr std::string_view KeyDesc = "Description";
     constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
-    constexpr std::string_view KeyAdjustment = "Adjustment";
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
@@ -130,8 +131,8 @@ namespace {
         std::optional<std::string> type [[codegen::inlist("DefaultTileProvider",
             "SingleImageProvider", "ImageSequenceTileProvider",
             "SizeReferenceTileProvider", "TemporalTileProvider", "TileIndexTileProvider",
-            "TileProviderByIndex", "TileProviderByLevel", "SolidColor",
-            "SpoutImageProvider", "VideoTileProvider")]];
+            "TileProviderByDate", "TileProviderByIndex", "TileProviderByLevel",
+            "SolidColor", "SpoutImageProvider", "VideoTileProvider")]];
 
         // Determine whether the layer is enabled or not. If this value is not specified,
         // the layer is disabled
@@ -156,25 +157,9 @@ namespace {
         // Specifies the render settings that should be applied to this layer
         std::optional<Settings> settings;
 
-        struct LayerAdjustment {
-            enum class Type {
-                None,
-                ChromaKey,
-                TransferFunction
-            };
-
-            // Specifies the type of the adjustment that is applied
-            std::optional<Type> type;
-
-            // Specifies the chroma key used when selecting 'ChromaKey' for the 'Type'
-            std::optional<glm::dvec3> chromaKeyColor;
-
-            // Specifies the tolerance to match the color to the chroma key when the
-            // 'ChromaKey' type is selected for the 'Type'
-            std::optional<double> chromaKeyTolerance;
-        };
         // Parameters that set individual adjustment parameters for this layer
-        std::optional<LayerAdjustment> adjustment;
+        std::optional<ghoul::Dictionary> adjustment
+            [[codegen::reference("globebrowsing_layeradjustment")]];
 
         enum class BlendMode {
             Normal,
@@ -209,7 +194,6 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     , _guiDescription(GuiDescriptionInfo)
     , _solidColor(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _layerGroupId(id)
-
 {
     const Parameters p = codegen::bake<Parameters>(layerDict);
 
@@ -263,10 +247,8 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             p.settings->multiplier.value_or(_renderSettings.multiplier);
         _renderSettings.offset = p.settings->offset.value_or(_renderSettings.offset);
     }
-    if (layerDict.hasValue<ghoul::Dictionary>(KeyAdjustment)) {
-        _layerAdjustment.setValuesFromDictionary(
-            layerDict.value<ghoul::Dictionary>(KeyAdjustment)
-        );
+    if (p.adjustment.has_value()) {
+        _layerAdjustment.setValuesFromDictionary(*p.adjustment);
     }
 
     // Add options to option properties
@@ -320,7 +302,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     _remove.onChange([this]() {
         if (_tileProvider) {
             _tileProvider->reset();
-            _parent.deleteLayer(identifier());
+            _parent.scheduleDeleteLayer(identifier());
         }
     });
 
@@ -342,6 +324,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
             case layers::Layer::ID::SizeReferenceTileProvider:
             case layers::Layer::ID::TemporalTileProvider:
             case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByDate:
             case layers::Layer::ID::TileProviderByIndex:
             case layers::Layer::ID::TileProviderByLevel:
             case layers::Layer::ID::VideoTileProvider:
@@ -513,6 +496,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
         case layers::Layer::ID::SizeReferenceTileProvider:
         case layers::Layer::ID::TemporalTileProvider:
         case layers::Layer::ID::TileIndexTileProvider:
+        case layers::Layer::ID::TileProviderByDate:
         case layers::Layer::ID::TileProviderByIndex:
         case layers::Layer::ID::TileProviderByLevel:
         case layers::Layer::ID::VideoTileProvider:
@@ -526,7 +510,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
                 const std::string name = initDict.value<std::string>(KeyName);
                 LDEBUG("Initializing tile provider for layer: '" + name + "'");
             }
-            _tileProvider = TileProvider::createFromDictionary(id, initDict);
+            _tileProvider = TileProvider::createFromDictionary(initDict);
             break;
         case layers::Layer::ID::SolidColor:
             if (initDict.hasValue<glm::dvec3>(ColorInfo.identifier)) {
@@ -537,7 +521,7 @@ void Layer::initializeBasedOnType(layers::Layer::ID id, ghoul::Dictionary initDi
 }
 
 void Layer::addVisibleProperties() {
-    switch (type()) {
+    switch (_typeId) {
         // Intentional fall through. Same for all tile layers
         case layers::Layer::ID::DefaultTileProvider:
         case layers::Layer::ID::SingleImageProvider:
@@ -546,6 +530,7 @@ void Layer::addVisibleProperties() {
         case layers::Layer::ID::SizeReferenceTileProvider:
         case layers::Layer::ID::TemporalTileProvider:
         case layers::Layer::ID::TileIndexTileProvider:
+        case layers::Layer::ID::TileProviderByDate:
         case layers::Layer::ID::TileProviderByIndex:
         case layers::Layer::ID::TileProviderByLevel:
         case layers::Layer::ID::VideoTileProvider:

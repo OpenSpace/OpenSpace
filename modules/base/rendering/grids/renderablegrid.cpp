@@ -76,7 +76,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
         "Highlight Line Width",
-        "The width of the highlighted grid lines. The larger number, the thicker the lines.",
+        "The width of the highlighted grid lines. The larger number, the thicker the "
+        "lines.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -236,7 +237,7 @@ void RenderableGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableGrid::render(const RenderData& data, RendererTasks&){
+void RenderableGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
     const glm::dmat4 modelTransform = calcModelTransform(data);

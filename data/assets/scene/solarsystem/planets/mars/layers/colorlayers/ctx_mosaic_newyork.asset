@@ -26,7 +26,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "CTX Mosaic [New York]",
-  Version = "1.0",
   Description = [[CTX Mosaic layer for Mars globe. This layer is served from the
     OpenSpace servers in New York]],
   Author = "OpenSpace Team",

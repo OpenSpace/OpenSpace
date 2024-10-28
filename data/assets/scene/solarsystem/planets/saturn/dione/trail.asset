@@ -41,7 +41,6 @@ asset.export(DioneTrail)
 
 asset.meta = {
   Name = "Dione Trail",
-  Version = "1.0",
   Description = "Trail for Dione",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

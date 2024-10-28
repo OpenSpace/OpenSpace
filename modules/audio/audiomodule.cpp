@@ -47,6 +47,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation AudioModule::Documentation() {
+    return codegen::doc<Parameters>("module_audio");
+}
+
 AudioModule::AudioModule()
     : OpenSpaceModule(Name)
     , _engine(std::make_unique<SoLoud::Soloud>())
@@ -70,8 +74,14 @@ void AudioModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         }
     });
 
-    LDEBUG(std::format("Audio backend: {}", _engine->getBackendString()));
-    LDEBUG(std::format("Number of channels: {}", _engine->getBackendChannels()));
+    const char* backend = _engine->getBackendString();
+    if (backend) {
+        LDEBUG(std::format("Audio backend: {}", backend));
+        LDEBUG(std::format("Number of channels: {}", _engine->getBackendChannels()));
+    }
+    else {
+        LINFO(std::format("Audio subsystem disabled as no backend was detected"));
+    }
 }
 
 void AudioModule::internalDeinitializeGL() {

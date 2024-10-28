@@ -29,7 +29,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Deimos Global Mosaic [USGS]",
-  Version = "1.1",
   Author = "Philip Stooke/NASA",
   URL = "https://astrowebmaps.wr.usgs.gov/webmapatlas/Layers/maps.html",
   License = "NASA/PDS"

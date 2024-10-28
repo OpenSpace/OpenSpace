@@ -16,9 +16,7 @@ local Halimede = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 62000, 62000, 62000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 62000, 62000, 62000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -98,9 +96,7 @@ local Psamathe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 40000, 40000, 40000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 40000, 40000, 40000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -180,9 +176,7 @@ local Sao = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 44000, 44000, 44000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 44000, 44000, 44000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -262,9 +256,7 @@ local Laomedeia = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 42000, 42000, 42000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 42000, 42000, 42000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -344,9 +336,7 @@ local Neso = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 60000, 60000, 60000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 60000, 60000, 60000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -483,7 +473,6 @@ asset.export(NesoLabel)
 
 asset.meta = {
   Name = "Neptune Irregular Prograde Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Neptune' irregular prograde
     moons: Halimede, Psamathe and Neso. Blank globes and SPICE trails are generated for
     each moon]],

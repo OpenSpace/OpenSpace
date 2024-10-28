@@ -450,7 +450,7 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
         "{}/positions{}", _binarySourceFolderPath, energybin
     );
     const std::string file2 = std::format(
-        "{}/fluxes/{}", _binarySourceFolderPath, energybin
+        "{}/fluxes{}", _binarySourceFolderPath, energybin
     );
     const std::string file3 = std::format(
         "{}/radiuses{}", _binarySourceFolderPath, energybin

@@ -17,7 +17,6 @@ local kernels = {
   syncedKernels .. "sat393_daphnis.bsp"
 }
 
-
 local Prometheus = {
   Identifier = "Prometheus",
   Parent = transforms.SaturnBarycenter.Identifier,
@@ -30,9 +29,7 @@ local Prometheus = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 135600, 79400, 59400 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 135600, 79400, 59400 }
   },
   Tag = {
     "moon_solarSystem",
@@ -102,8 +99,7 @@ local PrometheusLabel = {
   },
   GUI = {
     Name = "Prometheus Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus",
-    Description = "Label for Saturn's moon Prometheus (Shepherd Moons)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Prometheus"
   }
 }
 
@@ -119,9 +115,7 @@ local Pandora = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 104000, 81000, 64000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 104000, 81000, 64000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -191,8 +185,7 @@ local PandoraLabel = {
   },
   GUI = {
     Name = "Pandora Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora",
-    Description = "Label for Saturn's moon Pandora (Shepherd Moons)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pandora"
   }
 }
 
@@ -208,9 +201,7 @@ local Atlas = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 40800, 35400, 18800 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 40800, 35400, 18800 }
   },
   Tag = {
     "moon_solarSystem",
@@ -280,8 +271,7 @@ local AtlasLabel = {
   },
   GUI = {
     Name = "Atlas Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas",
-    Description = "Label for Saturn's moon Atlas (Shepherd Moons)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Atlas"
   }
 }
 
@@ -297,9 +287,7 @@ local Janus = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 203000, 185000, 152600 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 203000, 185000, 152600 }
   },
   Tag = {
     "moon_solarSystem",
@@ -369,8 +357,7 @@ local JanusLabel = {
   },
   GUI = {
     Name = "Janus Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus",
-    Description = "Label for Saturn's moon Janus (Shepherd Moons)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Janus"
   }
 }
 
@@ -386,9 +373,7 @@ local Epimetheus = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 129800, 114000, 106200 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 129800, 114000, 106200 }
   },
   Tag = {
     "moon_solarSystem",
@@ -458,8 +443,7 @@ local EpimetheusLabel = {
   },
   GUI = {
     Name = "Epimetheus Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus",
-    Description = "Label for Saturn's moon Epimetheus (Shepherd Moons)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Epimetheus"
   }
 }
 
@@ -475,9 +459,7 @@ local Daphnis = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8600, 8200, 6400 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8600, 8200, 6400 }
   },
   Tag = {
     "moon_solarSystem",
@@ -547,8 +529,7 @@ local DaphnisLabel = {
   },
   GUI = {
     Name = "Daphnis Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis",
-    Description = "Label for Saturn's moon Daphnis (Shepherd Moons)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Daphnis"
   }
 }
 
@@ -564,9 +545,7 @@ local Pan = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 34400, 31400, 20800 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 34400, 31400, 20800 }
   },
   Tag = {
     "moon_solarSystem",
@@ -636,10 +615,10 @@ local PanLabel = {
   },
   GUI = {
     Name = "Pan Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan",
-    Description = "Label for Saturn's moon Pan (Shepherd Moons)"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Shepherd Moons/Pan"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(syncedKernels .. "sat393_daphnis.bsp")
@@ -741,7 +720,6 @@ asset.export(PanLabel)
 
 asset.meta = {
   Name = "Saturn Shepherd Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Shepherd moons: Prometheus,
     Pandora, Atlas, Janus, Epimetheus, Daphnis and Pan. Blank globes and SPICE trails are
     generated for each moon]],

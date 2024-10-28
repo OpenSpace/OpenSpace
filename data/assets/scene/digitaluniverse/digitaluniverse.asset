@@ -3,45 +3,46 @@ asset.require("./2dF")
 asset.require("./2mass")
 asset.require("./6dF")
 asset.require("./abell")
-asset.require("./alternatestarlabels")
+asset.require("./allsky_hydrogenalpha")
+asset.require("./allsky_visible")
 asset.require("./backgroundradiation")
 asset.require("./backgroundradiation_multiverse")
-asset.require("./clusters")
+asset.require("./brown_dwarfs")
+asset.require("./galaxy_clusters")
 asset.require("./constellationbounds")
 asset.require("./constellations")
-asset.require("./deepsky")
-asset.require("./dwarfs")
 asset.require("./exoplanets")
 asset.require("./exoplanets_candidates")
 asset.require("./globularclusters")
 asset.require("./grids")
-asset.require("./groups")
+asset.require("./galaxy_groups")
 asset.require("./h2regions")
-asset.require("./localdwarfs")
+asset.require("./local_group_dwarfs")
 asset.require("./milkyway")
 asset.require("./milkyway_arm_labels")
 asset.require("./milkyway_label")
-asset.require("./milkyway_sphere")
 asset.require("./obassociations")
+asset.require("./oort_cloud")
 asset.require("./openclusters")
 asset.require("./planetarynebulae")
 asset.require("./pulsars")
 asset.require("./quasars")
 asset.require("./starlabels")
+asset.require("./alternatestarlabels")
 asset.require("./starorbits")
+asset.require("./star_uncertainty")
 asset.require("./stars")
 asset.require("./superclusters")
 asset.require("./supernovaremnants")
 asset.require("./tully")
 asset.require("./voids")
+asset.require("./white_dwarfs")
 
 
 
 asset.meta = {
   Name = "Digital Universe",
-  Version = "1.0",
-  Description = [[This asset is a meta asset, containing all the assets from the AMNH
-    Digital Universe]],
+  Description = [[This asset is a meta asset, containing all the assets from the AMNH Digital Universe.]],
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

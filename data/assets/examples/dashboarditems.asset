@@ -1,3 +1,6 @@
+asset.require("scene/solarsystem/planets/earth/earth")
+asset.require("scene/solarsystem/planets/earth/moon/moon")
+
 local Angle = {
   Type = "DashboardItemAngle",
   Identifier = "Angle",
@@ -186,9 +189,9 @@ asset.export(ElapsedTime)
 asset.export(InputState)
 
 
+
 asset.meta = {
   Name = "Dashboard Items Example",
-  Version = "1.0",
   Description = [[Examples of different types of dashboard items. These are dynamic
     information texts that will be shown over the rendering (per default in the top
     left corner, on flat screens).]],

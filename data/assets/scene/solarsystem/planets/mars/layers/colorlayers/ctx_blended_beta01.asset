@@ -45,7 +45,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "CTX Blended beta01",
-  Version = "1.1",
   Description = [[New blended CTX map for Mars from CalTech Murray lab. This map is
     hosted by ESRI]],
   Author = "Caltech Murray Lab",

@@ -51,8 +51,8 @@ public:
      * \param sgctConfigEnabled `true` if window selection combo box will be enabled
      * \param sgctConfigName The name of the sgct configuration function used to generate
      *        window config (blank if file is used)
-     * \param parentItem The parent that contains this (and possibly other) children
-     *                   in the tree structure.
+     * \param parent The parent that contains this (and possibly other) children in the
+     *        tree structure.
      */
     LauncherWindow(bool profileEnabled, const openspace::Configuration& globalConfig,
         bool sgctConfigEnabled, std::string sgctConfigName, QWidget* parent);
@@ -87,6 +87,13 @@ public:
       * \return `true` if window configuration is a user configuration file
       */
     bool isUserConfigSelected() const;
+
+    /**
+     * Handles keypresses while the Qt launcher window is open.
+     *
+     * \param evt QKeyEevent object of the key press event
+     */
+    void keyPressEvent(QKeyEvent* evt) override;
 
 private:
     QWidget* createCentralWidget();

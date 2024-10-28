@@ -38,6 +38,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <filesystem>
 
 namespace {
@@ -89,9 +90,28 @@ namespace {
         return execLocation;
     }
 
+    struct [[codegen::Dictionary(WebBrowserModule)]] Parameters {
+        // The location of the web helper application
+        std::optional<std::filesystem::path> webHelperLocation;
+
+        // Determines whether the WebBrowser module is enabled
+        std::optional<bool> enabled;
+
+        // [[codegen::verbatim(UpdateBrowserBetweenRenderablesInfo.description)]]
+        std::optional<bool> updateBrowserBetweenRenderables;
+
+        // [[codegen::verbatim(BrowserUpdateIntervalInfo.description)]]
+        std::optional<float> browserUpdateInterval;
+    };
+#include "webbrowsermodule_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation WebBrowserModule::Documentation() {
+    return codegen::doc<Parameters>("module_webbrowser");
+}
 
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule(WebBrowserModule::Name)
@@ -126,6 +146,31 @@ WebBrowserModule::WebBrowserModule()
 
 WebBrowserModule::~WebBrowserModule() {}
 
+void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
+    ZoneScoped;
+
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _webHelperLocation = p.webHelperLocation.value_or(findHelperExecutable());
+    _enabled = p.enabled.value_or(_enabled);
+
+    LDEBUG(std::format("CEF using web helper executable: {}", _webHelperLocation));
+    _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
+    LDEBUG("Starting CEF... done");
+
+    _updateBrowserBetweenRenderables =
+        p.updateBrowserBetweenRenderables.value_or(_updateBrowserBetweenRenderables);
+    _browserUpdateInterval = p.browserUpdateInterval.value_or(_browserUpdateInterval);
+
+    _eventHandler->initialize();
+
+    // register ScreenSpaceBrowser
+    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
+        FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+    fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
+}
+
 void WebBrowserModule::internalDeinitialize() {
     ZoneScoped;
 
@@ -139,44 +184,6 @@ void WebBrowserModule::internalDeinitialize() {
     for (BrowserInstance* browser : _browsers) {
         browser->close(forceBrowserShutdown);
     }
-}
-
-void WebBrowserModule::internalInitialize(const ghoul::Dictionary& dictionary) {
-    ZoneScoped;
-
-    if (dictionary.hasValue<bool>("WebHelperLocation")) {
-        _webHelperLocation = absPath(dictionary.value<std::string>("WebHelperLocation"));
-    }
-    else {
-        _webHelperLocation = findHelperExecutable();
-    }
-
-    if (dictionary.hasValue<bool>("Enabled")) {
-        _enabled = dictionary.value<bool>("Enabled");
-    }
-
-    LDEBUG(std::format("CEF using web helper executable: {}", _webHelperLocation));
-    _cefHost = std::make_unique<CefHost>(_webHelperLocation.string());
-    LDEBUG("Starting CEF... done");
-
-    if (dictionary.hasValue<bool>(UpdateBrowserBetweenRenderablesInfo.identifier)) {
-        _updateBrowserBetweenRenderables =
-            dictionary.value<bool>(UpdateBrowserBetweenRenderablesInfo.identifier);
-    }
-
-    if (dictionary.hasValue<double>(BrowserUpdateIntervalInfo.identifier)) {
-        _browserUpdateInterval = static_cast<float>(
-            dictionary.value<double>(BrowserUpdateIntervalInfo.identifier)
-        );
-    }
-
-    _eventHandler->initialize();
-
-    // register ScreenSpaceBrowser
-    ghoul::TemplateFactory<ScreenSpaceRenderable>* fScreenSpaceRenderable =
-        FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
-    fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }
 
 void WebBrowserModule::addBrowser(BrowserInstance* browser) {
@@ -223,6 +230,25 @@ void WebBrowserModule::detachEventHandler() {
 
 bool WebBrowserModule::isEnabled() const {
     return _enabled;
+}
+
+bool WebBrowserModule::canUseAcceleratedRendering() {
+// Linux doesn't have a problem with the rendering, Apple doesn't support OpenGL 4.5
+#ifdef WIN32
+    ghoul::systemcapabilities::Version acceleratedVersion = {
+        .major = 4, .minor = 5, .release = 0
+    };
+    auto it = std::find(
+        OpenGLCap.extensions().begin(),
+        OpenGLCap.extensions().end(),
+        "GL_EXT_memory_object_win32"
+    );
+    bool isVersionOk = OpenGLCap.openGLVersion() >= acceleratedVersion;
+    bool isExtensionsOk = it != OpenGLCap.extensions().end();
+    return isVersionOk && isExtensionsOk;
+#else
+    return false;
+#endif
 }
 
 std::vector<documentation::Documentation> WebBrowserModule::documentations() const {

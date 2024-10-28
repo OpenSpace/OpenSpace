@@ -5,6 +5,7 @@ local coreKernels = asset.require("spice/core")
 
 local GSMKernel = asset.resource("../kernels/GSM.ti")
 
+
 local Frame = {
   GSM = "GSM" -- Geocentric Solar Magnetospheric
 }
@@ -46,7 +47,6 @@ asset.export(GSMReferenceFrame)
 
 asset.meta = {
   Name = "Earth magnetosphere transforms",
-  Version = "1.1",
   Description = "Earth transforms: GSMReferenceFrame. Geocentric Solar Magnetospheric",
   Author = "CCMC",
   URL = "http://openspaceproject.com",

@@ -23,8 +23,7 @@ local RimeBase = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Rime Base FOV",
@@ -53,8 +52,7 @@ local Rime = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Rime FOV",
@@ -81,7 +79,6 @@ asset.export(RimeBase)
 
 asset.meta = {
   Name = "RIME",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Radar for Icy Moons Exploration (RIME) onboard Juice,
     which is a ground-penetrating radar meant to measure the subsurface structure of the

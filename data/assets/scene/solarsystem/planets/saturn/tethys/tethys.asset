@@ -31,8 +31,6 @@ local Tethys = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 531100,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "tethys.labels",
@@ -72,8 +70,7 @@ local TethysLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels", "moon_major_saturn" },
   GUI = {
     Name = "Tethys Label",
-    Path = "/Solar System/Planets/Saturn/Major Moons/Tethys",
-    Description = "Label for Saturn's moon Tethys"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Tethys"
   }
 }
 
@@ -95,7 +92,6 @@ asset.export(TethysLabel)
 
 asset.meta = {
   Name = "Tethys",
-  Version = "1.0",
   Description = "Tethys globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

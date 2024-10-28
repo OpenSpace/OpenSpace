@@ -17,8 +17,7 @@ local MIXS_C = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO MIXS-C",
@@ -40,8 +39,7 @@ local MIXS_T = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO MIXS-T",
@@ -64,7 +62,6 @@ end)
 
 asset.meta = {
   Name = "MIXS",
-  Version = "1.0",
   Description = [[
     The MIXS instrument contains two parallel telescopes, designed to map the X-ray
     emission from Mercury at two angular resolutions. The narrow-field telescope (MIXS-T)

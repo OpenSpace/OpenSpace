@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_iridium-33-debris",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=iridium-33-debris&FORMAT=kvn",
   Filename = "iridium-33-debris.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -47,7 +47,6 @@ asset.export(DebrisIridium)
 
 asset.meta = {
   Name = "Satellites Debris - Iridium 33 Debris",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Iridium 33 Debris. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

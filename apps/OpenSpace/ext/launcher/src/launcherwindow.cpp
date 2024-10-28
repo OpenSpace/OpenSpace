@@ -34,9 +34,12 @@
 #include <ghoul/logging/logmanager.h>
 #include <sgct/readconfig.h>
 #include <QComboBox>
+#include <QDialogButtonBox>
 #include <QFile>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QMessageBox>
+#include <QPainter>
 #include <QPushButton>
 #include <QStandardItemModel>
 #include <filesystem>
@@ -51,6 +54,8 @@
 using namespace openspace;
 
 namespace {
+    constexpr std::string_view _loggerCat = "LauncherWindow";
+
     constexpr int ScreenWidth = 480;
     constexpr int ScreenHeight = 640;
 
@@ -66,7 +71,7 @@ namespace {
     namespace geometry {
         constexpr QRect BackgroundImage(0, 0, ScreenWidth, ScreenHeight);
         constexpr QRect LogoImage(LeftRuler, TopRuler, ItemWidth, ItemHeight);
-        constexpr QRect ChooseLabel(LeftRuler, TopRuler + 80, 151, 24);
+        constexpr QRect ChooseLabel(LeftRuler + 10, TopRuler + 80, 151, 24);
         constexpr QRect ProfileBox(LeftRuler, TopRuler + 110, ItemWidth, ItemHeight);
         constexpr QRect NewProfileButton(
             LeftRuler + 160, TopRuler + 180, SmallItemWidth, SmallItemHeight
@@ -74,7 +79,7 @@ namespace {
         constexpr QRect EditProfileButton(
             LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
         );
-        constexpr QRect OptionsLabel(LeftRuler, TopRuler + 230, 151, 24);
+        constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 230, 151, 24);
         constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
             LeftRuler + 160, TopRuler + 330, SmallItemWidth, SmallItemHeight
@@ -224,7 +229,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
 
     qInstallMessageHandler(
         [](QtMsgType type, const QMessageLogContext&, const QString& msg) {
-            if (type == QtCriticalMsg || type == QtFatalMsg || type == QtSystemMsg) {
+            if (type == QtCriticalMsg || type == QtFatalMsg || type == QtCriticalMsg) {
                 std::cerr << msg.toStdString() << '\n';
             }
         }
@@ -242,6 +247,10 @@ LauncherWindow::LauncherWindow(bool profileEnabled,
     }
 
     setCentralWidget(createCentralWidget());
+    QPushButton* startButton = centralWidget()->findChild<QPushButton*>("start");
+    if (startButton) {
+        startButton->setFocus(Qt::OtherFocusReason);
+    }
 
     populateProfilesList(globalConfig.profile);
     _profileBox->setEnabled(profileEnabled);
@@ -277,43 +286,29 @@ QWidget* LauncherWindow::createCentralWidget() {
     logoImage->setPixmap(QPixmap(":/images/openspace-horiz-logo-small.png"));
 
     QLabel* labelChoose = new QLabel("Choose Profile", centralWidget);
-    labelChoose->setObjectName("clear");
     labelChoose->setGeometry(geometry::ChooseLabel);
     labelChoose->setObjectName("label_choose");
 
     _profileBox = new QComboBox(centralWidget);
     _profileBox->setObjectName("config");
     _profileBox->setGeometry(geometry::ProfileBox);
+    _profileBox->setAccessibleName("Choose profile");
 
-    QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
-    optionsLabel->setObjectName("clear");
-    optionsLabel->setGeometry(geometry::OptionsLabel);
-    optionsLabel->setObjectName("label_options");
-
-    _windowConfigBox = new QComboBox(centralWidget);
-    _windowConfigBox->setObjectName("config");
-    _windowConfigBox->setGeometry(geometry::WindowConfigBox);
-
-    QPushButton* startButton = new QPushButton("START", centralWidget);
+    QPushButton* editProfileButton = new QPushButton("Edit", centralWidget);
     connect(
-        startButton, &QPushButton::released,
+        editProfileButton, &QPushButton::released,
         [this]() {
-            if (_profileBox->currentText().isEmpty()) {
-                QMessageBox::critical(
-                    this,
-                    "Empty Profile",
-                    "Cannot launch with an empty profile"
-                );
-            }
-            else {
-                _shouldLaunch = true;
-                close();
-            }
-        }
+        const std::string selection = _profileBox->currentText().toStdString();
+        const int selectedIndex = _profileBox->currentIndex();
+        const bool isUserProfile = selectedIndex < _userAssetCount;
+        openProfileEditor(selection, isUserProfile);
+    }
     );
-    startButton->setObjectName("large");
-    startButton->setGeometry(geometry::StartButton);
-    startButton->setCursor(Qt::PointingHandCursor);
+    editProfileButton->setObjectName("small");
+    editProfileButton->setGeometry(geometry::EditProfileButton);
+    editProfileButton->setCursor(Qt::PointingHandCursor);
+    editProfileButton->setAutoDefault(true);
+    editProfileButton->setAccessibleName("Edit profile");
 
     QPushButton* newProfileButton = new QPushButton("New", centralWidget);
     connect(
@@ -325,31 +320,17 @@ QWidget* LauncherWindow::createCentralWidget() {
     newProfileButton->setObjectName("small");
     newProfileButton->setGeometry(geometry::NewProfileButton);
     newProfileButton->setCursor(Qt::PointingHandCursor);
+    newProfileButton->setAutoDefault(true);
+    newProfileButton->setAccessibleName("New profile");
 
-    QPushButton* editProfileButton = new QPushButton("Edit", centralWidget);
-    connect(
-        editProfileButton, &QPushButton::released,
-        [this]() {
-            const std::string selection = _profileBox->currentText().toStdString();
-            const int selectedIndex = _profileBox->currentIndex();
-            const bool isUserProfile = selectedIndex < _userAssetCount;
-            openProfileEditor(selection, isUserProfile);
-        }
-    );
-    editProfileButton->setObjectName("small");
-    editProfileButton->setGeometry(geometry::EditProfileButton);
-    editProfileButton->setCursor(Qt::PointingHandCursor);
+    QLabel* optionsLabel = new QLabel("Window Options", centralWidget);
+    optionsLabel->setGeometry(geometry::OptionsLabel);
+    optionsLabel->setObjectName("label_options");
 
-    QPushButton* newWindowButton = new QPushButton("New", centralWidget);
-    connect(
-        newWindowButton, &QPushButton::released,
-        [this]() {
-            openWindowEditor("", true);
-        }
-    );
-    newWindowButton->setObjectName("small");
-    newWindowButton->setGeometry(geometry::NewWindowButton);
-    newWindowButton->setCursor(Qt::PointingHandCursor);
+    _windowConfigBox = new QComboBox(centralWidget);
+    _windowConfigBox->setObjectName("config");
+    _windowConfigBox->setGeometry(geometry::WindowConfigBox);
+    _windowConfigBox->setAccessibleName("Select window configuration");
 
     _editWindowButton = new QPushButton("Edit", centralWidget);
     connect(
@@ -368,7 +349,44 @@ QWidget* LauncherWindow::createCentralWidget() {
     _editWindowButton->setObjectName("small");
     _editWindowButton->setGeometry(geometry::EditWindowButton);
     _editWindowButton->setCursor(Qt::PointingHandCursor);
+    _editWindowButton->setAutoDefault(true);
+    _editWindowButton->setAccessibleName("Edit window configuration");
 
+    QPushButton* newWindowButton = new QPushButton("New", centralWidget);
+    connect(
+        newWindowButton, &QPushButton::released,
+        [this]() {
+            openWindowEditor("", true);
+        }
+    );
+    newWindowButton->setObjectName("small");
+    newWindowButton->setGeometry(geometry::NewWindowButton);
+    newWindowButton->setCursor(Qt::PointingHandCursor);
+    newWindowButton->setAutoDefault(true);
+    newWindowButton->setAccessibleName("New window configuration");
+
+    QPushButton* startButton = new QPushButton("START", centralWidget);
+    connect(
+        startButton, &QPushButton::released,
+        [this]() {
+            if (_profileBox->currentText().isEmpty()) {
+                QMessageBox::critical(
+                    this,
+                    "Empty Profile",
+                    "Cannot launch with an empty profile"
+                );
+            }
+            else {
+                _shouldLaunch = true;
+                close();
+            }
+        }
+    );
+    startButton->setObjectName("start");
+    startButton->setGeometry(geometry::StartButton);
+    startButton->setCursor(Qt::PointingHandCursor);
+    startButton->setAutoDefault(true);
+    startButton->setAccessibleName("Start OpenSpace");
 
     QLabel* versionLabel = new QLabel(centralWidget);
     versionLabel->setVisible(true);
@@ -379,9 +397,6 @@ QWidget* LauncherWindow::createCentralWidget() {
     versionLabel->setGeometry(geometry::VersionString);
 
     QPushButton* settingsButton = new QPushButton(centralWidget);
-    settingsButton->setObjectName("settings");
-    settingsButton->setGeometry(geometry::SettingsButton);
-    settingsButton->setIconSize(QSize(SettingsIconSize, SettingsIconSize));
     connect(
         settingsButton,
         &QPushButton::released,
@@ -410,6 +425,11 @@ QWidget* LauncherWindow::createCentralWidget() {
             dialog.exec();
         }
     );
+    settingsButton->setObjectName("settings");
+    settingsButton->setGeometry(geometry::SettingsButton);
+    settingsButton->setIconSize(QSize(SettingsIconSize, SettingsIconSize));
+    settingsButton->setAutoDefault(true);
+    settingsButton->setAccessibleName("Settings");
 
     return centralWidget;
 }
@@ -454,27 +474,33 @@ void LauncherWindow::setBackgroundImage(const std::filesystem::path& syncPath) {
     // We know there has to be at least one folder, so it's fine to just pick the first
     while (!files.empty()) {
         const std::filesystem::path& p = files.front();
-        if (p.extension() == ".png") {
-            // If the top path starts with the png extension, we have found our candidate
-            break;
+        if (p.extension() != ".png" || p.filename() == "overlay.png") {
+            files.erase(files.begin());
         }
         else {
-            // There shouldn't be any non-png images in here, but you never know. So we 
-            // just remove non-image files here
-            files.erase(files.begin());
+            // If the top path starts with the png extension, we have found our candidate
+            break;
         }
     }
 
     // There better be at least one file left, but just in in case
     if (!files.empty()) {
+        // Take the selected image and overpaint the overlay increasing the contrast
         std::string image = files.front().string();
-        _backgroundImage->setPixmap(QPixmap(QString::fromStdString(image)));
+        QPixmap pixmap = QPixmap(QString::fromStdString(image));
+        QPainter painter = QPainter(&pixmap);
+        painter.setOpacity(0.7);
+        QPixmap overlay = QPixmap(QString::fromStdString(
+            std::format("{}/overlay.png", latest.path.path())
+        ));
+        painter.drawPixmap(pixmap.rect(), overlay);
+        _backgroundImage->setPixmap(pixmap);
     }
 }
 
 void LauncherWindow::populateProfilesList(const std::string& preset) {
     namespace fs = std::filesystem;
-    
+
     _profileBox->clear();
     _userAssetCount = 0;
 
@@ -745,7 +771,7 @@ void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
                     versionMin.versionString()
                 )));
                 return;
-            } 
+            }
         }
         catch (const std::runtime_error&) {
             // Ignore an exception here because clicking the edit button will
@@ -781,6 +807,29 @@ void LauncherWindow::openProfileEditor(const std::string& profile, bool isUserPr
         savePath,
         this
     );
+
+    // Check whether there are unsaved changes from the profile editor
+    connect(
+        &editor,
+        &ProfileEdit::raiseExitWindow,
+        [this, &editor, &savePath, &p, &profile]() {
+            const std::string origPath = std::format("{}{}.profile", savePath, profile);
+            // If this is a new profile we want to prompt the user
+            if (!std::filesystem::exists(origPath)) {
+                editor.promptUserOfUnsavedChanges();
+                return;
+            }
+
+            // Check if the profile is the same as current existing file
+            if (*p != Profile(origPath)) {
+                editor.promptUserOfUnsavedChanges();
+            }
+            else {
+                editor.closeWithoutSaving();
+            }
+        }
+    );
+
     editor.exec();
     if (editor.wasSaved()) {
         if (editor.specifiedFilename() != profile) {
@@ -931,4 +980,13 @@ std::string LauncherWindow::selectedWindowConfig() const {
 bool LauncherWindow::isUserConfigSelected() const {
     const int selectedIndex = _windowConfigBox->currentIndex();
     return (selectedIndex <= _userConfigCount);
+}
+
+void LauncherWindow::keyPressEvent(QKeyEvent* evt) {
+    if (evt->key() == Qt::Key_Escape) {
+        _shouldLaunch = false;
+        close();
+        return;
+    }
+    QMainWindow::keyPressEvent(evt);
 }

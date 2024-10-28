@@ -25,8 +25,8 @@ local Node = {
     Width = 900000.0
   },
   GUI = {
-    Name = "Basic",
-    Path = "/Examples/RenderableNodeArrow"
+    Name = "RenderableNodeArrow - Basic",
+    Path = "/Examples"
   }
 }
 

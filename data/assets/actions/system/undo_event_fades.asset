@@ -25,7 +25,6 @@ asset.export("UndoEventFade", UndoEventFade.Identifier)
 
 asset.meta = {
   Name = "Actions - Undo All Event Fading",
-  Version = "1.0",
   Description = "Asset providing debug ability to undo all event fading",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

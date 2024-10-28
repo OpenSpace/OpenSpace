@@ -48,9 +48,9 @@ asset.export("ID", ID)
 asset.export("Frame", Frame)
 
 
+
 asset.meta = {
   Name = "Saturn Spice Kernels",
-  Version = "1.0",
   Description = "Generic SPICE kernels for Saturn",
   Author = "OpenSpace Team",
   URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",

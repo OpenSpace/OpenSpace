@@ -8,7 +8,6 @@ asset.require("./debris/debris_kosmos2251")
 
 asset.meta = {
   Name = "Satellites Debris",
-  Version = "1.0",
   Description = [[Meta asset for space debris of Earth. Containing groups: debris_asat,
     debris_breezem, debris_fengyun, debris_iridium33, and debris_kosmos2251]],
   Author = "OpenSpace Team",

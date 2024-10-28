@@ -71,7 +71,9 @@ bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
             //    lua_pushnil(state);
             //    while (lua_next(state, -2)) {
             //        PrintTable(state);
-            //        std::string color = static_cast<std::string>(lua_tostring(state, -1));
+            //        std::string color = static_cast<std::string>(
+            //            lua_tostring(state, -1)
+            //        );
             //        lua_pop(state, 1);
             //        lua_pushnil(state);
             //        lua_next(state, -2);

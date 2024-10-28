@@ -71,7 +71,6 @@ asset.export(ArtemisMoonTrail)
 
 asset.meta = {
   Name = "Artemis-1 Trails",
-  Version = "1.0",
   Description = "Trail of Artemis-1 in respect to Earth and the Moon",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

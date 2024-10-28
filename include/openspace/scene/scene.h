@@ -241,14 +241,33 @@ public:
      * \return Vector of Property objs containing property names that matched the regex
      */
     std::vector<properties::Property*> propertiesMatchingRegex(
-        const std::string& propertyString);
+        std::string_view propertyString);
 
     /**
      * Returns a list of all unique tags that are used in the currently loaded scene.
      *
      * \return A list of all unique tags that are used in the currently loaded scene.
      */
-    std::vector<std::string> allTags();
+    std::vector<std::string> allTags() const;
+
+    /**
+     * Set a custom order for items in a given branch in the Scene GUI tree.
+     *
+     * \param guiPath The GUI path for which to set the order
+     * \param list A list of names of scene graph nodes or subgroups in the GUI, in the
+     *             order of which they should appear in the tree.
+     */
+    void setGuiTreeOrder(const std::string& guiPath,
+        const std::vector<std::string>& list);
+
+    /**
+     * Returns a dictionary containing all the currently set custom orderings for the
+     * Scene GUI tree.
+     *
+     * \return A dictionary containing key value pairs with custom item orderings for
+     *         specific paths in the Scene GUI tree
+     */
+    ghoul::Dictionary guiTreeOrder() const;
 
 private:
     /**
@@ -333,6 +352,8 @@ private:
     std::vector<PropertyInterpolationInfo> _propertyInterpolationInfos;
 
     ghoul::MemoryPool<4096> _memoryPool;
+
+    std::unordered_map<std::string, std::vector<std::string>> _guiTreeOrderMap;
 };
 
 // Convert the input string to a format that is valid as an identifier

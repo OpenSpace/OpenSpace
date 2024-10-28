@@ -14,8 +14,8 @@ local Node = {
     Target = moonAsset.Moon.Identifier
   },
    GUI = {
-     Name = "Light Speed Indicator",
-    Path = "/Examples/RenderableTravelSpeed"
+     Name = "RenderableTravelSpeed - Light Speed Indicator",
+    Path = "/Examples"
   }
 }
 

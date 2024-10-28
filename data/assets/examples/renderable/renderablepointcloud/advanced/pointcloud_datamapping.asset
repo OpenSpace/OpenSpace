@@ -38,11 +38,10 @@ local Node = {
     }
   },
   GUI = {
-    Name = "Custom Data Mapping",
-    Path = "/Examples/RenderablePointCloud/Advanced"
+    Name = "RenderablePointCloud - Custom Data Mapping",
+    Path = "/Examples/Advanced"
   }
 }
-
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Node)

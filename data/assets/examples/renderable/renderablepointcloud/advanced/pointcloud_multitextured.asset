@@ -27,7 +27,7 @@ local Node = {
     UseAdditiveBlending = false
   },
   GUI = {
-    Name = "Multi-Textured",
+    Name = "RenderablePointCloud - Multi-Textured",
     Path = "/Examples/RenderablePointCloud/Advanced"
   }
 }

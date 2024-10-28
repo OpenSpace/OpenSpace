@@ -17,9 +17,7 @@ local Leda = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 16000, 16000, 16000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 16000, 16000, 16000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -106,9 +104,7 @@ local Himalia = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 170000, 170000, 170000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 170000, 170000, 170000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -195,9 +191,7 @@ local Lysithea = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 36000, 36000, 36000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 36000, 36000, 36000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -284,9 +278,7 @@ local Elara = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 86000, 86000, 86000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 86000, 86000, 86000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -373,9 +365,7 @@ local Dia = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -462,9 +452,7 @@ local S2011J3 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -551,9 +539,7 @@ local S2018J2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -640,9 +626,7 @@ local Pandia = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -729,9 +713,7 @@ local Ersa = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -923,7 +905,6 @@ asset.export(ErsaLabel)
 
 asset.meta = {
   Name = "Jupiter Himalia Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Himalia Group moons: Leda,
     Himalia, Lysithea, Elara and Dia. Blank globes and SPICE trails are generated for each
     moon]],

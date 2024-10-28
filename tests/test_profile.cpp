@@ -41,108 +41,7 @@
 // compiler to agree
 // NOLINTBEGIN(modernize-use-emplace)
 
-namespace openspace {
-    bool operator==(const openspace::Profile::Version& lhs,
-                    const openspace::Profile::Version& rhs) noexcept
-    {
-        return lhs.major == rhs.major && lhs.minor == rhs.minor;
-    }
-
-    bool operator==(const openspace::Profile::Module& lhs,
-                    const openspace::Profile::Module& rhs) noexcept
-    {
-        return lhs.name == rhs.name &&
-               lhs.loadedInstruction == rhs.loadedInstruction &&
-               lhs.notLoadedInstruction == rhs.notLoadedInstruction;
-    }
-
-    bool operator==(const openspace::Profile::Meta& lhs,
-                    const openspace::Profile::Meta& rhs) noexcept
-    {
-        return lhs.name == rhs.name &&
-               lhs.version == rhs.version &&
-               lhs.description == rhs.description &&
-               lhs.author == rhs.author &&
-               lhs.url == rhs.url &&
-               lhs.license == rhs.license;
-    }
-
-    bool operator==(const openspace::Profile::Property& lhs,
-                    const openspace::Profile::Property& rhs) noexcept
-    {
-        return lhs.setType == rhs.setType &&
-               lhs.name == rhs.name &&
-               lhs.value == rhs.value;
-    }
-
-    bool operator==(const openspace::Profile::Action& lhs,
-                    const openspace::Profile::Action& rhs) noexcept
-    {
-        return lhs.identifier == rhs.identifier &&
-               lhs.documentation == rhs.documentation &&
-               lhs.name == rhs.name &&
-               lhs.guiPath == rhs.guiPath &&
-               lhs.isLocal == rhs.isLocal &&
-               lhs.script == rhs.script;
-    }
-
-    bool operator==(const openspace::Profile::Keybinding& lhs,
-                    const openspace::Profile::Keybinding& rhs) noexcept
-    {
-        return lhs.key == rhs.key && lhs.action == rhs.action;
-    }
-
-    bool operator==(const openspace::Profile::Time& lhs,
-                    const openspace::Profile::Time& rhs) noexcept
-    {
-        return lhs.type == rhs.type && lhs.value == rhs.value;
-    }
-
-    bool operator==(const openspace::Profile::CameraGoToNode& lhs,
-        const openspace::Profile::CameraGoToNode& rhs) noexcept
-    {
-        return lhs.anchor == rhs.anchor && lhs.height == rhs.height;
-    }
-
-    bool operator==(const openspace::Profile::CameraNavState& lhs,
-                    const openspace::Profile::CameraNavState& rhs) noexcept
-    {
-        return lhs.anchor == rhs.anchor &&
-               lhs.aim == rhs.aim &&
-               lhs.referenceFrame == rhs.referenceFrame &&
-               lhs.position == rhs.position &&
-               lhs.up == rhs.up &&
-               lhs.yaw == rhs.yaw &&
-               lhs.pitch == rhs.pitch;
-    }
-
-    bool operator==(const openspace::Profile::CameraGoToGeo& lhs,
-                    const openspace::Profile::CameraGoToGeo& rhs) noexcept
-    {
-        return lhs.anchor == rhs.anchor &&
-               lhs.latitude == rhs.latitude &&
-               lhs.longitude == rhs.longitude &&
-               lhs.altitude == rhs.altitude;
-    }
-
-    bool operator==(const openspace::Profile& lhs,
-                    const openspace::Profile& rhs) noexcept
-    {
-        return lhs.version == rhs.version &&
-               lhs.modules == rhs.modules &&
-               lhs.meta == rhs.meta &&
-               lhs.assets == rhs.assets &&
-               lhs.properties == rhs.properties &&
-               lhs.actions == rhs.actions &&
-               lhs.keybindings == rhs.keybindings &&
-               lhs.time == rhs.time &&
-               lhs.deltaTimes == rhs.deltaTimes &&
-               lhs.camera == rhs.camera &&
-               lhs.markNodes == rhs.markNodes &&
-               lhs.additionalScripts == rhs.additionalScripts &&
-               lhs.ignoreUpdates == rhs.ignoreUpdates;
-    }
-
+namespace {
     std::ostream& operator<<(std::ostream& os, const openspace::Profile& profile) {
         os << profile.serialize();
         return os;
@@ -942,7 +841,7 @@ TEST_CASE("Save settings to profile", "[profile]") {
         Profile::Property::SetType::SetPropertyValueSingle
     );
     CHECK(profile.properties[0].name == "base.p1");
-    CHECK(profile.properties[0].value == "2.000000");
+    CHECK(profile.properties[0].value == "2");
     CHECK(
         profile.properties[1].setType ==
         Profile::Property::SetType::SetPropertyValueSingle

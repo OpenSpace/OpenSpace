@@ -189,13 +189,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseOrientationDataInfo = {
         "UseOrientationData",
         "Use Orientation Data",
-        "If true, the orientation data in the dataset is included when rendering the points, "
-        "if there is any. To see the rotation, you also need to set the \"Orientation "
-        "Render Option\" to \"Fixed Rotation\".",
+        "If true, the orientation data in the dataset is included when rendering the "
+        "points, if there is any. To see the rotation, you also need to set the "
+        "\"Orientation Render Option\" to \"Fixed Rotation\".",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo = {
+    constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo =
+    {
         "OrientationRenderOption",
         "Orientation Render Option",
         "Controls how the planes for the points will be oriented. \"Camera View "
@@ -263,24 +264,6 @@ namespace {
         "In the background, the computations are made by limiting the size to a certain "
         "angle based on the field of view of the camera. So a value of 1 limits the "
         "point size to take up a maximum of one degree of the view space.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SizeMappingEnabledInfo = {
-        "Enabled",
-        "Size Mapping Enabled",
-        "Decides whether size mapping should be enabled. If true and at least one column "
-        "was loaded as an option for size mapping, the chosen data column will be used "
-        "to scale the size of the points.",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SizeMappingOptionInfo = {
-        "Parameter",
-        "Parameter Option",
-        "The name of a data parameter used for scaling of the points. The parameter "
-        "value will be used as a multiplicative factor to scale the size of the points. "
-        "Note that they may still be scaled by max size adjustment effects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -652,8 +635,8 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
     , _colorSettings(dictionary)
     , _fading(dictionary)
     , _useAdditiveBlending(UseAdditiveBlendingInfo, true)
-    , _drawElements(DrawElementsInfo, true)
     , _useRotation(UseOrientationDataInfo, false)
+    , _drawElements(DrawElementsInfo, true)
     , _renderOption(
         OrientationRenderOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
@@ -730,9 +713,6 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
             _textureMode = TextureInputMode::Single;
             _hasSpriteTexture = true;
             _texture.spriteTexturePath = absPath(*t.file).string();
-            _texture.spriteTexturePath.onChange(
-                [this]() { _spriteTextureIsDirty = true; }
-            );
         }
 
         _texture.enabled = t.enabled.value_or(_texture.enabled);
@@ -741,6 +721,10 @@ RenderablePointCloud::RenderablePointCloud(const ghoul::Dictionary& dictionary)
         _texture.useAlphaChannel = t.useAlphaChannel.value_or(_texture.useAlphaChannel);
     }
 
+    _texture.spriteTexturePath.onChange([this]() {
+        _spriteTextureIsDirty = true;
+        _hasSpriteTexture = !_texture.spriteTexturePath.value().empty();
+    });
     _texture.allowCompression.onChange([this]() { _spriteTextureIsDirty = true; });
     _texture.useAlphaChannel.onChange([this]() { _spriteTextureIsDirty = true; });
 
@@ -1116,7 +1100,14 @@ void RenderablePointCloud::generateArrayTextures() {
         unsigned int layer = 0;
         for (const size_t& i : textureListIndices) {
             ghoul::opengl::Texture* texture = _textures[i].get();
-            fillAndUploadTextureLayer(arrayIndex, layer, i, res, useAlpha, texture->pixelData());
+            fillAndUploadTextureLayer(
+                arrayIndex,
+                layer,
+                i,
+                res,
+                useAlpha,
+                texture->pixelData()
+            );
             layer++;
 
             // At this point we don't need the keep the texture data around anymore. If
@@ -1451,7 +1442,7 @@ int RenderablePointCloud::nAttributesPerPoint() const {
 }
 
 int RenderablePointCloud::bufferVertexAttribute(const std::string& name, GLint nValues,
-                                                 int nAttributesPerPoint, int offset) const
+                                                int nAttributesPerPoint, int offset) const
 {
     GLint attrib = _program->attributeLocation(name);
     glEnableVertexAttribArray(attrib);
@@ -1493,25 +1484,25 @@ void RenderablePointCloud::updateBufferData() {
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
 
-    const int attibutesPerPoint = nAttributesPerPoint();
+    const int attibsPerPoint = nAttributesPerPoint();
     int offset = 0;
 
-    offset = bufferVertexAttribute("in_position", 3, attibutesPerPoint, offset);
+    offset = bufferVertexAttribute("in_position", 3, attibsPerPoint, offset);
 
     if (hasColorData()) {
-        offset = bufferVertexAttribute("in_colorParameter", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_colorParameter", 1, attibsPerPoint, offset);
     }
 
     if (hasSizeData()) {
-        offset = bufferVertexAttribute("in_scalingParameter", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_scalingParameter", 1, attibsPerPoint, offset);
     }
 
     if (useOrientationData()) {
-        offset = bufferVertexAttribute("in_orientation", 4, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_orientation", 4, attibsPerPoint, offset);
     }
 
     if (_hasSpriteTexture) {
-        offset = bufferVertexAttribute("in_textureLayer", 1, attibutesPerPoint, offset);
+        offset = bufferVertexAttribute("in_textureLayer", 1, attibsPerPoint, offset);
     }
 
     glBindVertexArray(0);
@@ -1543,7 +1534,8 @@ void RenderablePointCloud::updateSpriteTexture() {
             initializeSingleTexture();
             // Note that these are usually set when the data slice initialized. However,
             // we want to avoid reinitializing the data, and here we know that all points
-            // will be rendered using the same texture array and hence the data can stay fixed
+            // will be rendered using the same texture array and hence the data can stay
+            // fixed
             _textureArrays.front().nPoints = _nDataPoints;
             _textureArrays.front().startOffset = 0;
             _dataIsDirty = false;

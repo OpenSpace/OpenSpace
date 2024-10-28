@@ -18,6 +18,7 @@ local TogglePlanetLabels = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.action.registerAction(TogglePlanetLabels)
   openspace.bindKey("L", TogglePlanetLabels.Identifier)

@@ -27,7 +27,6 @@ asset.export("ToggleMinorMoonTrails", ToggleMinorMoonTrails.Identifier)
 
 asset.meta = {
   Name = "Actions - Toggle Minor Moon Trails",
-  Version = "1.0",
   Description = "Asset providing actions to toggle all minor moon trails on and off",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

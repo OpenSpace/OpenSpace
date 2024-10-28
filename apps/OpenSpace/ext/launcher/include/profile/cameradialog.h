@@ -32,6 +32,7 @@
 
 class QLabel;
 class QLineEdit;
+class QMessageBox;
 class QTabWidget;
 
 class CameraDialog final : public QDialog {
@@ -41,8 +42,8 @@ public:
      * Constructor for camera gui class
      *
      * \param parent Pointer to parent Qt widget
-     * \param profile The #openspace::Profile::CameraType object containing all data of
-     *        the new or imported profile
+     * \param camera The #openspace::Profile::CameraType object containing all data of the
+     *        new or imported profile
      */
     CameraDialog(QWidget* parent, std::optional<openspace::Profile::CameraType>* camera);
 
@@ -88,7 +89,7 @@ private:
         QLineEdit* altitude = nullptr;
     } _geoState;
 
-    QLabel* _errorMsg = nullptr;
+    QMessageBox* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___CAMERA___H__

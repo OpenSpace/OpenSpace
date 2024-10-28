@@ -1,6 +1,9 @@
+asset.require("scene/solarsystem/planets/earth/earth")
+asset.require("scene/solarsystem/planets/mars/mars")
 local bookmarkHelper = asset.require("util/generate_bookmarks")
 
-local dataProvider = "http://data.openspaceproject.com/files/bookmarks/v2/bookmarks.csv"
+
+local dataProvider = "http://data.openspaceproject.com/files/bookmarks/v3/bookmarks.csv"
 
 local bookmarksCSV = asset.resource({
   Identifier = "openspace_bookmarks",
@@ -11,7 +14,9 @@ local bookmarksCSV = asset.resource({
   Url = dataProvider
 })
 
+
 local nodes = {}
+
 
 asset.onInitialize(function()
   nodes = bookmarkHelper.loadBookmarks("OpenSpace Bookmarks", bookmarksCSV .. "bookmarks.csv")

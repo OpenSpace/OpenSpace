@@ -14,14 +14,11 @@ local Planet = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 615000, 615000, 615000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 615000, 615000, 615000 }
   },
   GUI = {
     Name = "Gonggong",
-    Path = "/Solar System/Dwarf Planets/Gonggong",
-    Description = "Globe of Gonggong"
+    Path = "/Solar System/Dwarf Planets/Gonggong"
   }
 }
 
@@ -40,7 +37,6 @@ asset.export("Planet", Planet)
 
 asset.meta = {
   Name = "Gonggong Globe",
-  Version = "1.0",
   Description = [[Globe of Gonggong]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

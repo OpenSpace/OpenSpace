@@ -44,14 +44,18 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
         "Source Folder",
-       "An image directory that is loaded from disk and contains the textures to use "
-       "for this plane.",
+        "An image directory that is loaded from disk and contains the textures to use "
+        "for this plane.",
        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
         // [[codegen::verbatim(SourceFolderInfo.description)]]
         std::string sourceFolder;
+
+        // If set to `true` the images are only loaded when it is about to be shown
+        // instead of preloading them
+        std::optional<bool> lazyLoading;
     };
 #include "renderableplanetimevaryingimage_codegen.cpp"
 } // namespace
@@ -72,8 +76,6 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_blendMode);
-
     _sourceFolder = p.sourceFolder;
     if (!std::filesystem::is_directory(absPath(_sourceFolder))) {
         LERROR(std::format(
@@ -85,20 +87,17 @@ RenderablePlaneTimeVaryingImage::RenderablePlaneTimeVaryingImage(
     addProperty(_sourceFolder);
     _sourceFolder.onChange([this]() { _texture = loadTexture(); });
 
-    if (dictionary.hasKey(KeyLazyLoading)) {
-        _isLoadingLazily = dictionary.value<bool>(KeyLazyLoading);
-
-        if (_isLoadingLazily) {
-            _enabled.onChange([this]() {
-                if (_enabled) {
-                    _textureIsDirty = true;
-                }
-                else {
-                    BaseModule::TextureManager.release(_texture);
-                    _texture = nullptr;
-                }
-            });
-        }
+    _isLoadingLazily = p.lazyLoading.value_or(_isLoadingLazily);
+    if (_isLoadingLazily) {
+        _enabled.onChange([this]() {
+            if (_enabled) {
+                _textureIsDirty = true;
+            }
+            else {
+                BaseModule::TextureManager.release(_texture);
+                _texture = nullptr;
+            }
+        });
     }
 }
 

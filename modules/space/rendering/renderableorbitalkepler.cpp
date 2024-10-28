@@ -257,13 +257,13 @@ RenderableOrbitalKepler::Appearance::Appearance()
     , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , trailWidth(TrailWidthInfo, 2.f, 1.f, 20.f)
     , pointSizeExponent(PointSizeExponentInfo, 1.0f, 0.f, 11.f)
+    , enableMaxSize(EnableMaxSizeInfo, true)
+    , maxSize(MaxSizeInfo, 5.f, 0.f, 45.f)
     , renderingModes(
         RenderingModeInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
     , trailFade(TrailFadeInfo, 20.f, 0.f, 30.f)
-    , enableMaxSize(EnableMaxSizeInfo, true)
-    , maxSize(MaxSizeInfo, 5.f, 0.f, 45.f)
     , enableOutline(EnableOutlineInfo, true)
     , outlineColor(OutlineColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , outlineWidth(OutlineWidthInfo, 0.2f, 0.f, 1.f)
@@ -504,7 +504,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         );
         _pointProgram->setUniform(
             _uniformPointCache.cameraUpWorld,
-            data.camera.lookUpVectorWorldSpace()
+            static_cast<glm::vec3>(data.camera.lookUpVectorWorldSpace())
         );
         _pointProgram->setUniform(
             _uniformPointCache.inGameTime,

@@ -22,8 +22,7 @@ local UVS = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "UVS FOV",
@@ -47,7 +46,6 @@ asset.export(UVS)
 
 asset.meta = {
   Name = "UVS",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Ultraviolet Spectograph (UVS), which is measuring the
     composition, chemistry, structure, and variability of Europa's atmopshere. See

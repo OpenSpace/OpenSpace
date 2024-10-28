@@ -6,6 +6,8 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_DIVINER_ClrCF_Global_128ppd = {
   Identifier = "LRO_DIVINER_ClrCF_Global_128ppd",
   Name = [[LRO Diviner CF Mosaic 128ppd, Colorized]],
@@ -13,6 +15,7 @@ local treks_LRO_DIVINER_ClrCF_Global_128ppd = {
   FilePath = asset.resource("LRO_Diviner_CF_Mosaic_128ppd/Colorized.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_DIVINER_ClrCF_Global_128ppd)
@@ -25,9 +28,9 @@ end)
 asset.export("LRO_DIVINER_ClrCF_Global_128ppd", treks_LRO_DIVINER_ClrCF_Global_128ppd)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_Diviner_CF_Mosaic_128ppd],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_Diviner_CF_Mosaic_128ppd]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

@@ -15,8 +15,8 @@ local Node = {
     PolygonSides = 6
   },
   GUI = {
-    Name = "Basic",
-    Path = "/Examples/RenderablePolygonCloud"
+    Name = "RenderablePolygonCloud - Basic",
+    Path = "/Examples"
   }
 }
 

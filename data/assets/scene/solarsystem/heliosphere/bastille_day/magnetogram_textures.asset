@@ -65,7 +65,6 @@ asset.export("SwitchColorLayer", SwitchColorLayer.Identifier)
 
 asset.meta = {
   Name = "Bastille Day magnetogram textures",
-  Version = "1.1",
   Description = [[This asset adds multiple magnetogram textures to the Sun. In addition
   it provides an action to cycle through the textures. See magnetogram.asset for details
   of the textures]],

@@ -58,7 +58,10 @@ public:
     void detachEventHandler();
     bool isEnabled() const;
 
+    static bool canUseAcceleratedRendering();
+
     std::vector<documentation::Documentation> documentations() const override;
+    static documentation::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;

@@ -1,47 +1,20 @@
 local globe = asset.require("../../earth")
+local noaa20 = asset.require("./definitions/noaa20")
 
-
-
-local Layer = {
-  Identifier = "VIIRS_NOAA20_Temporal",
-  Name = "VIIRS NOAA20 (Temporal)",
-  Enabled = asset.enabled,
-  ZIndex = 30,
-  Type = "TemporalTileProvider",
-  Mode = "Prototyped",
-  Prototyped = {
-    Time = {
-      Start = "2020-04-25",
-      End = "Yesterday"
-    },
-    TemporalResolution = "1d",
-    TimeFormat = "YYYY-MM-DD",
-    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
-      "VIIRS_NOAA20_CorrectedReflectance_TrueColor",
-      "250m",
-      "jpg"
-    )
-  },
-  Description = [[Temporal coverage: 11 November 2015 - Present. The imagery resolution
-    is 0.25 km, and the temporal resolution is daily]]
-}
 
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", noaa20.Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", noaa20.Layer)
 end)
-
-asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "VIIRS NOAA20 (Temporal)",
-  Version = "1.1",
   Description = "This layer has the best daily Earth Image",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL =

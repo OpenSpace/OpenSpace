@@ -40,12 +40,23 @@ uniform float saturation;
 uniform float gamma = 1.0;
 uniform vec2 borderWidth = vec2(0.1);
 uniform vec3 borderColor = vec3(0.0);
+uniform int borderFeather = 0;
+// Accelerated rendering can be used for the CEF browser
+uniform bool useAcceleratedRendering = false;
 
 
 Fragment getFragment() {
   Fragment frag;
+  vec4 originalColor;
+  if (useAcceleratedRendering) {
+    vec2 flippedTexCoords = vec2(vs_st.x, 1.0 - vs_st.y);
+    // Correcting both orientation and color channels
+    originalColor = texture(tex, flippedTexCoords).bgra;
+  } else {
+    originalColor = texture(tex, vs_st);
+  }
 
-  vec4 texColor = texture(tex, vs_st) * vec4(color, opacity);
+  vec4 texColor = originalColor * vec4(color, opacity);
 
   frag.color = texColor.a * texColor + (1.0 - texColor.a) * backgroundColor;
 
@@ -53,7 +64,14 @@ Fragment getFragment() {
   if (vs_st.x < borderWidth.x || vs_st.x > 1 - borderWidth.x ||
       vs_st.y < borderWidth.y || vs_st.y > 1 - borderWidth.y)
   {
-    frag.color = vec4(borderColor, 1.0);
+    frag.color = vec4(borderColor, opacity);
+    if (borderFeather == 1) {
+      vec2 f1 = vs_st / borderWidth;
+      float g1 = min(f1.x, f1.y);
+      vec2 f2 = (vec2(1) - vs_st) / borderWidth;
+      float g2 = min(f2.x, f2.y);
+      frag.color *= min(g1, g2);
+    }
   }
 
   if (frag.color.a == 0.0) {

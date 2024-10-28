@@ -168,8 +168,9 @@ namespace {
 }
 
 /**
- * Create a path to the navigation state described by the input table. Note that roll must be
- * included for the target up direction in the navigation state to be taken into account.
+ * Create a path to the navigation state described by the input table. Note that roll must
+ * be included for the target up direction in the navigation state to be taken into
+ * account.
  *
  * \param navigationState A [NavigationState](#core_navigation_state) to fly to
  * \param duration An optional duration for the motion to take, in seconds. For example,
@@ -332,11 +333,14 @@ namespace {
  * Fade rendering to black, jump to the specified node, and then fade in. This is done by
  * triggering another script that handles the logic.
  *
- * \param navigationState A [NavigationState](#core_navigation_state) to jump to
+ * \param navigationState A [NavigationState](#core_navigation_state) to jump to.
+ * \param useTimeStamp if true, and the provided NavigationState includes a timestamp,
+ *                     the time will be set as well.
  * \param fadeDuration An optional duration for the fading. If not included, the
- *                     property in Navigation Handler will be used
+ *                     property in Navigation Handler will be used.
  */
 [[codegen::luawrap]] void jumpToNavigationState(ghoul::Dictionary navigationState,
+                                                std::optional<bool> useTimeStamp,
                                                 std::optional<double> fadeDuration)
 {
     using namespace openspace;
@@ -361,8 +365,11 @@ namespace {
     // (@TODO emmbr 2024-04-03, This formatting problem should probably be fixed)
     interaction::NavigationState ns = interaction::NavigationState(navigationState);
 
+    bool setTime = (ns.timestamp.has_value() && useTimeStamp.value_or(false));
+
     const std::string script = std::format(
-        "openspace.navigation.setNavigationState({})", ghoul::formatLua(ns.dictionary())
+        "openspace.navigation.setNavigationState({}, {})",
+        ghoul::formatLua(ns.dictionary()), setTime
     );
 
     if (fadeDuration.has_value()) {
@@ -410,8 +417,9 @@ namespace {
 /**
  * Create a camera path as described by the instruction in the input argument.
  *
- * \param pathInstruction A table representing a [PathInstruction](#core_path_instruction),
- *                        that describes a camera path to be created
+ * \param pathInstruction A table representing a
+ *                        [PathInstruction](#core_path_instruction) that describes a
+ *                        camera path to be created
  */
 [[codegen::luawrap]] void createPath(ghoul::Dictionary pathInstruction) {
     using namespace openspace;

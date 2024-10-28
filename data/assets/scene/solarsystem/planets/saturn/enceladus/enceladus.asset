@@ -31,8 +31,6 @@ local Enceladus = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 252000,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "enceladus.labels",
@@ -49,8 +47,7 @@ local Enceladus = {
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
   GUI = {
     Name = "Enceladus",
-    Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus",
-    Description = "Enceladus globe with labels"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Enceladus"
   }
 }
 
@@ -96,10 +93,9 @@ asset.export(EnceladusLabel)
 
 
 asset.meta = {
-    Name = "Enceladus",
-    Version = "1.1",
-    Description = "Enceladus globe with labels and map layers",
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Enceladus",
+  Description = "Enceladus globe with labels and map layers",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }
