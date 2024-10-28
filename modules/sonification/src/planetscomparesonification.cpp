@@ -37,7 +37,7 @@ namespace {
         PlanetsCompareSonificationInfo =
     {
        "PlanetsCompareSonification",
-       "Compare Sonification",
+       "Planets Compare Sonification",
        "Sonification that compares two different planets to each other in different "
        "aspects"
     };

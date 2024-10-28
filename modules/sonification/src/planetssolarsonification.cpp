@@ -34,7 +34,7 @@ namespace {
         PlanetsSolarSonificationInfo =
     {
        "PlanetsSolarSonification",
-       "Solar Sonification",
+       "Planets Solar Sonification",
        "Sonification that gives an overview of the planets in the solarsystem with "
        "simpler sounds"
     };

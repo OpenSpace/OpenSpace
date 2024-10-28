@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <modules/sonification/include/focussonification.h>
+#include <modules/sonification/include/nodessonification.h>
 #include <modules/sonification/include/planetscomparesonification.h>
 #include <modules/sonification/include/planetssolarsonification.h>
 #include <modules/sonification/include/planetssonification.h>
@@ -100,8 +101,13 @@ SonificationModule::SonificationModule()
         properties::OptionProperty::DisplayType::Dropdown
     )
 {
+    addProperty(_enabled);
+
     _ipAddress.setReadOnly(true);
+    addProperty(_ipAddress);
+
     _port.setReadOnly(true);
+    addProperty(_port);
 
     // Add options to the drop down menues
     _mode.addOptions({
@@ -111,12 +117,7 @@ SonificationModule::SonificationModule()
         { 3, "Circular With Elevation" },
         { 4, "None" }
     });
-
     _mode.onChange([this]() { guiChangeSurroundMode(); });
-
-    addProperty(_enabled);
-    addProperty(_ipAddress);
-    addProperty(_port);
     addProperty(_mode);
 }
 
@@ -147,6 +148,9 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     addSonification(sonification);
 
     sonification = new FocusSonification(_ipAddress, _port);
+    addSonification(sonification);
+
+    sonification = new NodesSonification(_ipAddress, _port);
     addSonification(sonification);
 
     sonification = new PlanetsSonification(_ipAddress, _port);
