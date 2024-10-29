@@ -33,10 +33,10 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         PlanetsSolarSonificationInfo =
     {
-       "PlanetsSolarSonification",
-       "Planets Solar Sonification",
-       "Sonification that gives an overview of the planets in the solarsystem with "
-       "simpler sounds"
+        "PlanetsSolarSonification",
+        "Planets Solar Sonification",
+        "Sonification that gives an overview of the planets in the solarsystem with "
+        "simpler sounds"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {

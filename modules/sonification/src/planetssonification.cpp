@@ -39,9 +39,9 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         PlanetsSonificationInfo =
     {
-       "PlanetsSonification",
-       "Planets Sonification",
-       "Sonification of the planets in our solarsystem"
+        "PlanetsSonification",
+        "Planets Sonification",
+        "Sonification of the planets in our solarsystem"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
@@ -324,7 +324,7 @@ PlanetsSonification::PlanetProperty::PlanetProperty(
 }
 
 PlanetsSonification::PrecisionProperty::PrecisionProperty(
-    properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
+                               properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
     : properties::PropertyOwner(precisionInfo)
     , lowDistancePrecision(
         LowDistancePrecisionInfo,
@@ -436,7 +436,7 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
     return osc::Blob(settings, 6);
 }
 
-void PlanetsSonification::sendSettings(int planetIndex) {
+void PlanetsSonification::sendPlanetData(int planetIndex) {
     if (_planets.size() <= planetIndex) {
         LWARNING(std::format("Planet list does not include index {}", planetIndex));
         return;
@@ -493,7 +493,7 @@ void PlanetsSonification::onMercuryAllChanged() {
     _mercuryProperty.temperatureEnabled.setValue(_mercuryProperty.toggleAll);
 }
 void PlanetsSonification::onMercurySettingChanged() {
-    sendSettings(MercuryIndex);
+    sendPlanetData(MercuryIndex);
 }
 
 // Venus
@@ -504,7 +504,7 @@ void PlanetsSonification::onVenusAllChanged() {
     _venusProperty.atmosphereEnabled.setValue(_venusProperty.toggleAll);
 }
 void PlanetsSonification::onVenusSettingChanged() {
-    sendSettings(VenusIndex);
+    sendPlanetData(VenusIndex);
 }
 
 // Earth
@@ -516,7 +516,7 @@ void PlanetsSonification::onEarthAllChanged() {
     _earthProperty.moonsEnabled.setValue(_earthProperty.toggleAll);
 }
 void PlanetsSonification::onEarthSettingChanged() {
-    sendSettings(EarthIndex);
+    sendPlanetData(EarthIndex);
 }
 
 // Mars
@@ -528,7 +528,7 @@ void PlanetsSonification::onMarsAllChanged() {
     _marsProperty.moonsEnabled.setValue(_marsProperty.toggleAll);
 }
 void PlanetsSonification::onMarsSettingChanged() {
-    sendSettings(MarsIndex);
+    sendPlanetData(MarsIndex);
 }
 
 // Jupiter
@@ -540,7 +540,7 @@ void PlanetsSonification::onJupiterAllChanged() {
     _jupiterProperty.moonsEnabled.setValue(_jupiterProperty.toggleAll);
 }
 void PlanetsSonification::onJupiterSettingChanged() {
-    sendSettings(JupiterIndex);
+    sendPlanetData(JupiterIndex);
 }
 
 // Saturn
@@ -553,7 +553,7 @@ void PlanetsSonification::onSaturnAllChanged() {
     _saturnProperty.ringsEnabled.setValue(_saturnProperty.toggleAll);
 }
 void PlanetsSonification::onSaturnSettingChanged() {
-    sendSettings(SaturnIndex);
+    sendPlanetData(SaturnIndex);
 }
 
 // Uranus
@@ -565,7 +565,7 @@ void PlanetsSonification::onUranusAllChanged() {
     _uranusProperty.moonsEnabled.setValue(_uranusProperty.toggleAll);
 }
 void PlanetsSonification::onUranusSettingChanged() {
-    sendSettings(UranusIndex);
+    sendPlanetData(UranusIndex);
 }
 
 // Neptune
@@ -577,7 +577,7 @@ void PlanetsSonification::onNeptuneAllChanged() {
     _neptuneProperty.moonsEnabled.setValue(_neptuneProperty.toggleAll);
 }
 void PlanetsSonification::onNeptuneSettingChanged() {
-    sendSettings(NeptuneIndex);
+    sendPlanetData(NeptuneIndex);
 }
 
 // Extract data from the given identifier
@@ -719,7 +719,7 @@ void PlanetsSonification::update(const Camera* camera) {
 
         // Only send data if something new has happened
         if (hasNewData) {
-            sendSettings(i);
+            sendPlanetData(i);
         }
     }
 }

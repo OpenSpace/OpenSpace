@@ -36,10 +36,10 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         PlanetsCompareSonificationInfo =
     {
-       "PlanetsCompareSonification",
-       "Planets Compare Sonification",
-       "Sonification that compares two different planets to each other in different "
-       "aspects"
+        "PlanetsCompareSonification",
+        "Planets Compare Sonification",
+        "Sonification that compares two different planets to each other in different "
+        "aspects"
     };
 
     constexpr openspace::properties::Property::PropertyInfo FirstOptionInfo = {

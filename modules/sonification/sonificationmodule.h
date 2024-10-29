@@ -78,26 +78,73 @@ public:
     SonificationModule();
     ~SonificationModule();
 
+    /**
+     * Returns the Lua library that contains all Lua functions available to for the
+     * sonification module.
+     *
+     * \return The Lua library that contains all Lua functions available to for the
+     * sonification module
+     */
     std::vector<scripting::LuaLibrary> luaLibraries() const override;
 
     virtual void internalInitialize(const ghoul::Dictionary& dictionary) override;
     virtual void internalDeinitialize() override;
 
+    /**
+     * Get the list of sonifications that are currently registered in the sonification
+     * module
+     *
+     * \return the list of registered sonifications
+     */
     const std::vector<SonificationBase*>& sonifications() const;
+
+    /**
+     * Get a specified sonification from the list of registered sonifications in the
+     * sonification module
+     *
+     * \param id the identifier for the sonification to get
+     *
+     * \return the requested sonification
+     */
     const SonificationBase* sonification(std::string id) const;
     SonificationBase* sonification(std::string id);
+
+    /**
+     * Get the current surround mode used in the sonification module
+     *
+     * \return the current surround mode
+     */
     SurroundMode surroundMode() const;
 
 private:
+    /**
+     * Main update function that keeps track of all sonificaitons and keeps the thread
+     * running
+     *
+     * \param isRunning whether the thread should be kept running or not
+     */
     void update(std::atomic<bool>& isRunning);
-    void addSonification(SonificationBase* sonification);
-    void guiChangeSurroundMode();
 
+    /**
+     * Add the a specified sonification to the list of registered sonifications in the
+     * sonification module
+     *
+     * \param sonification the sonification to add
+     */
+    void addSonification(SonificationBase* sonification);
+
+    /**
+     * Function that gets called when the surround mode is changed in the GUI
+     */
+    void guiOnChangeSurroundMode();
+
+    // Properties
     properties::BoolProperty _enabled;
     properties::StringProperty _ipAddress;
     properties::IntProperty _port;
     properties::OptionProperty _mode;
 
+    // Variables
     std::thread _updateThread;
     std::atomic<bool> _isRunning = false;
     std::vector<SonificationBase*> _sonifications;

@@ -134,7 +134,7 @@ NodesSonification::~NodesSonification() {
 }
 
 NodesSonification::PrecisionProperty::PrecisionProperty(
-    properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
+                               properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
     : properties::PropertyOwner(precisionInfo)
     , lowDistancePrecision(
         LowDistancePrecisionInfo,
@@ -217,27 +217,23 @@ bool NodesSonification::getData(const Camera* camera, int nodeIndex) {
         return false;
     }
 
-    // Check if this data is new, otherwise don't send it
+    // Check if this data is new, otherwise don't update it
     double prevDistance = _nodes[nodeIndex].data[DistanceIndex];
     double prevHAngle = _nodes[nodeIndex].data[HAngleIndex];
     double prevVAngle = _nodes[nodeIndex].data[VAngleIndex];
     bool shouldSendData = false;
 
     if (std::abs(prevDistance - distance) > _distancePrecision) {
-        // Update the saved data for the node
         _nodes[nodeIndex].data[DistanceIndex] = distance;
         shouldSendData = true;
     }
 
     if (std::abs(prevHAngle - HAngle) > _anglePrecision) {
-        // Update the saved data for the node
         _nodes[nodeIndex].data[HAngleIndex] = HAngle;
         shouldSendData = true;
     }
 
-    if (std::abs(prevVAngle - VAngle) > _anglePrecision)
-    {
-        // Update the saved data for the node
+    if (std::abs(prevVAngle - VAngle) > _anglePrecision) {
         _nodes[nodeIndex].data[VAngleIndex] = VAngle;
         shouldSendData = true;
     }
@@ -265,7 +261,7 @@ void NodesSonification::update(const Camera* camera) {
 
     // Update data for all nodes
     for (int i = 0; i < _nodes.size(); ++i) {
-        // Increase presision if the node is in focus
+        // Increase precision if the node is in focus
         if (focusNode->identifier() == _nodes[i].identifier) {
             _anglePrecision = _precisionProperty.highAnglePrecision;
             _distancePrecision = _precisionProperty.highDistancePrecision;

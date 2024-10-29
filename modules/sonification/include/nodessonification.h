@@ -91,7 +91,7 @@ private:
      * Update distance and angle data for the given node
      *
      * \param camera pointer to the camera in the scene. Used to calculated the data for
-     *               the node
+     *        the node
      * \param nodeIndex index to the internally stored node data that should be updated
      *
      * \return true if the data is new compared to before, otherwise false

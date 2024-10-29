@@ -51,7 +51,25 @@ public:
     virtual void stop() override;
 
 private:
-    std::string _prevFocus;
+    // Indices for data items
+    static constexpr int NumDataItems = 1;
+    static constexpr int FocusNodeIndex = 0;
+
+    /**
+     * Update focus node data
+     *
+     * \return true if the data is new compared to before, otherwise false
+     */
+    bool getData();
+
+    /**
+     * Send current sonification data for the indicated node over the osc connection
+     * Order of data: distance, horizontal angle, vertical angle
+     */
+    void sendData();
+
+    // Variables
+    std::string _currentFocus;
 };
 
 } // namespace openspace

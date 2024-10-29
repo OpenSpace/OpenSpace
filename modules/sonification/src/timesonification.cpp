@@ -97,7 +97,7 @@ void TimeSonification::update(const Camera*) {
 void TimeSonification::stop() {}
 
 TimeSonification::PrecisionProperty::PrecisionProperty(
-    properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
+                               properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
     : properties::PropertyOwner(precisionInfo)
     , timePrecision(
         TimePrecisionInfo,

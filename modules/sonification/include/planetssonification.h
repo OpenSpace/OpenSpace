@@ -61,6 +61,7 @@ public:
     /**
      * Returns the Lua library that contains all Lua functions available to change the
      * planets sonification.
+     *
      * \return The Lua library that contains all Lua functions available to change the
      * planets sonification
      */
@@ -133,7 +134,7 @@ private:
      * Send current sonification settings for the indicated planet over the osc connection
      * Order of data: distance, angle, settings, moon angles
      */
-    void sendSettings(int planetIndex);
+    void sendPlanetData(int planetIndex);
 
     // Properties onChange
     void onToggleAllChanged();

@@ -117,7 +117,7 @@ SonificationModule::SonificationModule()
         { 3, "Circular With Elevation" },
         { 4, "None" }
     });
-    _mode.onChange([this]() { guiChangeSurroundMode(); });
+    _mode.onChange([this]() { guiOnChangeSurroundMode(); });
     addProperty(_mode);
 }
 
@@ -128,7 +128,7 @@ SonificationModule::~SonificationModule() {
     }
 }
 
-void SonificationModule::guiChangeSurroundMode() {
+void SonificationModule::guiOnChangeSurroundMode() {
     _surroundMode = static_cast<SurroundMode>(_mode.value());
 }
 
@@ -144,10 +144,10 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     }
 
     // Fill sonification list
-    SonificationBase* sonification = new PlanetsCompareSonification(_ipAddress, _port);
+    SonificationBase* sonification = new FocusSonification(_ipAddress, _port);
     addSonification(sonification);
 
-    sonification = new FocusSonification(_ipAddress, _port);
+    sonification = new TimeSonification(_ipAddress, _port);
     addSonification(sonification);
 
     sonification = new NodesSonification(_ipAddress, _port);
@@ -159,7 +159,7 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     sonification = new PlanetsSolarSonification(_ipAddress, _port);
     addSonification(sonification);
 
-    sonification = new TimeSonification(_ipAddress, _port);
+    sonification = new PlanetsCompareSonification(_ipAddress, _port);
     addSonification(sonification);
 
     // Only the master runs the SonificationModule

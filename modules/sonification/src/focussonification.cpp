@@ -33,9 +33,9 @@ namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         FocusSonificationInfo =
     {
-       "FocusSonification",
-       "Focus Sonification",
-       "Sonification that keeps track of the current focus node in the scene"
+        "FocusSonification",
+        "Focus Sonification",
+        "Sonification that keeps track of the current focus node in the scene"
     };
 
 } // namespace
@@ -51,24 +51,44 @@ void FocusSonification::update(const Camera*) {
         return;
     }
 
-    const SceneGraphNode* focusNode =
-        global::navigationHandler->orbitalNavigator().anchorNode();
+    bool hasNewData = getData();
 
-    if (!focusNode) {
-        return;
-    }
-
-    if (focusNode->identifier() != _prevFocus) {
-        std::string label = "/Focus";
-        std::vector<OscDataType> data(1);
-        data[0] = focusNode->identifier();
-
-        _connection->send(label, data);
-
-        _prevFocus = focusNode->identifier();
+    // Only send data if something new has happened
+    if (hasNewData) {
+        sendData();
     }
 }
 
 void FocusSonification::stop() {}
+
+bool FocusSonification::getData() {
+    const SceneGraphNode* focusNode =
+        global::navigationHandler->orbitalNavigator().anchorNode();
+
+    if (!focusNode) {
+        // Scene is likely not yet initialized
+        return false;
+    }
+
+    // Check if this data is new, otherwise don't update it
+    std::string prevFocus = _currentFocus;
+    bool shouldSendData = false;
+
+    if (focusNode->identifier() != prevFocus) {
+        _currentFocus = focusNode->identifier();
+        shouldSendData = true;
+    }
+
+    return shouldSendData;
+}
+
+void FocusSonification::sendData() {
+    std::string label = "/Focus";
+
+    std::vector<OscDataType> data(NumDataItems);
+    data[FocusNodeIndex] = _currentFocus;
+
+    _connection->send(label, data);
+}
 
 } // namespace openspace
