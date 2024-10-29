@@ -6,6 +6,7 @@
       "swapinterval": 0
     }
   },
+  "webrtcid": 0,
   "nodes": [
     {
       "address": "localhost",
