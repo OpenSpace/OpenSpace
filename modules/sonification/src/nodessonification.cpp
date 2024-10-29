@@ -167,16 +167,16 @@ void NodesSonification::sendData(int nodeIndex) {
     }
 
     std::string label = "/" + _nodes[nodeIndex].identifier;
-    std::vector<OscDataType> data;
+    std::vector<OscDataType> data(NumDataItems);
 
     // Distance
-    data.push_back(_nodes[nodeIndex].data[DistanceIndex]);
+    data[DistanceIndex] = _nodes[nodeIndex].data[DistanceIndex];
 
     // Horizontal Angle
-    data.push_back(_nodes[nodeIndex].data[HAngleIndex]);
+    data[HAngleIndex] = _nodes[nodeIndex].data[HAngleIndex];
 
     // Vertical Angle
-    data.push_back(_nodes[nodeIndex].data[VAngleIndex]);
+    data[VAngleIndex] = _nodes[nodeIndex].data[VAngleIndex];
 
     _connection->send(label, data);
 }

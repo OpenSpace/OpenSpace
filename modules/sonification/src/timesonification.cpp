@@ -70,14 +70,28 @@ void TimeSonification::update(const Camera*) {
         return;
     }
 
+    bool hasNewData = getData();
+
+    // Only send data if something new has happened
+    if (hasNewData) {
+        sendData();
+    }
+}
+
+void TimeSonification::stop() {}
+
+bool TimeSonification::getData() {
     double timeSpeed = convertTime(
         global::timeManager->deltaTime(),
         TimeUnit::Second,
         TimeUnits[_timeUnitOption]
     );
 
+    double currentTime = global::timeManager->time().j2000Seconds();
+
     // Check if this data is new, otherwise don't send it
     double prevTimeSpeed = _timeSpeed;
+    double prevTime = _currentTime;
     bool shouldSendData = false;
 
     if (abs(prevTimeSpeed - timeSpeed) > TimePrecision) {
@@ -85,20 +99,22 @@ void TimeSonification::update(const Camera*) {
         shouldSendData = true;
     }
 
-    // Only send data if something new has happened
-    if (shouldSendData) {
-        sendData();
+    if (abs(prevTime - currentTime) > TimePrecision) {
+        _currentTime = currentTime;
+        shouldSendData = true;
     }
-}
 
-void TimeSonification::stop() {}
+    return shouldSendData;
+}
 
 void TimeSonification::sendData() {
     std::string label = "/Time";
     std::vector<OscDataType> data(NumDataItems);
+
     data[TimeSpeedIndex] = _timeSpeed;
     data[TimeSpeedUnitIndex] =
         _timeUnitOption.getDescriptionByValue(_timeUnitOption.value());
+    data[CurrentTimeIndex] = _currentTime;
 
     _connection->send(label, data);
 }

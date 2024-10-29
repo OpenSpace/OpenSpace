@@ -52,9 +52,17 @@ public:
 
 private:
     // Indices for data items
-    static constexpr int NumDataItems = 2;
+    static constexpr int NumDataItems = 3;
     static constexpr int TimeSpeedIndex = 0;
     static constexpr int TimeSpeedUnitIndex = 1;
+    static constexpr int CurrentTimeIndex = 2;
+
+    /**
+     * Update the sonification data
+     *
+     * \return true if the data is new compared to before, otherwise false
+     */
+    bool getData();
 
     /**
      * Send current sonification data over the osc connection
@@ -68,6 +76,7 @@ private:
 
     // Variables
     double _timeSpeed = 0.0;
+    double _currentTime = 0.0;
 };
 
 } // namespace openspace
