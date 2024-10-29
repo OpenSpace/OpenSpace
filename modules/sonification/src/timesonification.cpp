@@ -28,8 +28,6 @@
 #include <openspace/util/timemanager.h>
 
 namespace {
-    constexpr double TimePrecision = 0.0001;
-
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         TimeSonificationInfo =
     {
@@ -44,6 +42,20 @@ namespace {
         "Choose a time unit that the sonification should use"
     };
 
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+        "Precision",
+        "Precision",
+        "Settings for the precision of the sonification"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TimePrecisionInfo = {
+        "TimePrecision",
+        "TimePrecision",
+        "The precision in seconds used to determin when to send updated time data "
+        "over the OSC connection.",
+        openspace::properties::Property::Visibility::User
+    };
+
 } // namespace
 
 namespace openspace {
@@ -54,15 +66,19 @@ TimeSonification::TimeSonification(const std::string& ip, int port)
         TimeUnitOptionInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _precisionProperty(TimeSonification::PrecisionProperty(PrecisionInfo))
 {
     // Add all time units as options in the drop down menu
-    for (int i = 0; i < static_cast<int>(TimeUnit::Year) + 1; ++i) {
+    for (int i = 0; i < TimeUnitNamesSingular.size(); ++i) {
         _timeUnitOption.addOption(i, TimeUnitNamesSingular[i].data());
     }
 
     // Set days as default time unit
     _timeUnitOption.setValue(static_cast<int>(TimeUnit::Day));
     addProperty(_timeUnitOption);
+
+    // Precision
+    addPropertySubOwner(_precisionProperty);
 }
 
 void TimeSonification::update(const Camera*) {
@@ -80,6 +96,20 @@ void TimeSonification::update(const Camera*) {
 
 void TimeSonification::stop() {}
 
+TimeSonification::PrecisionProperty::PrecisionProperty(
+    properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
+    : properties::PropertyOwner(precisionInfo)
+    , timePrecision(
+        TimePrecisionInfo,
+        0.0001,
+        0,
+        1e8
+    )
+{
+    addProperty(timePrecision);
+    timePrecision.setExponent(10.f);
+}
+
 bool TimeSonification::getData() {
     double timeSpeed = convertTime(
         global::timeManager->deltaTime(),
@@ -94,12 +124,12 @@ bool TimeSonification::getData() {
     double prevTime = _currentTime;
     bool shouldSendData = false;
 
-    if (abs(prevTimeSpeed - timeSpeed) > TimePrecision) {
+    if (abs(prevTimeSpeed - timeSpeed) > _precisionProperty.timePrecision) {
         _timeSpeed = timeSpeed;
         shouldSendData = true;
     }
 
-    if (abs(prevTime - currentTime) > TimePrecision) {
+    if (abs(prevTime - currentTime) > _precisionProperty.timePrecision) {
         _currentTime = currentTime;
         shouldSendData = true;
     }

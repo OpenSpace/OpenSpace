@@ -142,6 +142,49 @@ namespace {
         "Toggle the rings sonification for the planet"
     };
 
+    // Precision settings
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+        "Precision",
+        "Precision",
+        "Settings for the precision of the sonification"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LowDistancePrecisionInfo = {
+        "LowDistancePrecision",
+        "Distance Precision (Low)",
+        "The precision in meters used to determin when to send updated distance data "
+        "over the OSC connection. This is the lower precision used, for nodes that are "
+        "not the current focus",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HighDistancePrecisionInfo = {
+        "HighDistancePrecision",
+        "Distance Precision (High)",
+        "The precision in meters used to determin when to send updated distance data "
+        "over the OSC connection. This is the higher precision used, for nodes the "
+        "current focus",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LowAnglePrecisionInfo = {
+        "LowAnglePrecision",
+        "Angle Precision (Low)",
+        "The precision in radians used to determin when to send updated angle data "
+        "over the OSC connection. This is the lower precision used, for nodes that are "
+        "not the current focus",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HighAnglePrecisionInfo = {
+        "HighAnglePrecision",
+        "Angle Precision (High)",
+        "The precision in radians used to determin when to send updated angle data "
+        "over the OSC connection. This is the higher precision used, for nodes the "
+        "current focus",
+        openspace::properties::Property::Visibility::User
+    };
+
     struct [[codegen::Dictionary(PlanetsSonification)]] Parameters {
         // The name of the planet
         std::string name;
@@ -166,18 +209,18 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     , _saturnProperty(PlanetsSonification::PlanetProperty(SaturnInfo))
     , _uranusProperty(PlanetsSonification::PlanetProperty(UranusInfo))
     , _neptuneProperty(PlanetsSonification::PlanetProperty(NeptuneInfo))
+    , _precisionProperty(PlanetsSonification::PrecisionProperty(PrecisionInfo))
 {
-    _anglePrecision = LowAnglePrecision;
-    _distancePrecision = LowDistancePrecision;
-
-    // Add onChange for the properties
+    // Toggle all
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
+    addProperty(_toggleAll);
 
     // Mercury
     _mercuryProperty.toggleAll.onChange([this]() { onMercuryAllChanged(); });
     _mercuryProperty.sizeDayEnabled.onChange([this]() { onMercurySettingChanged(); });
     _mercuryProperty.gravityEnabled.onChange([this]() { onMercurySettingChanged(); });
     _mercuryProperty.temperatureEnabled.onChange([this]() { onMercurySettingChanged(); });
+    addPropertySubOwner(_mercuryProperty);
 
     // Venus
     _venusProperty.toggleAll.onChange([this]() { onVenusAllChanged(); });
@@ -185,6 +228,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _venusProperty.gravityEnabled.onChange([this]() { onVenusSettingChanged(); });
     _venusProperty.temperatureEnabled.onChange([this]() { onVenusSettingChanged(); });
     _venusProperty.atmosphereEnabled.onChange([this]() { onVenusSettingChanged(); });
+    addPropertySubOwner(_venusProperty);
 
     // Earth
     _earthProperty.toggleAll.onChange([this]() { onEarthAllChanged(); });
@@ -193,6 +237,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _earthProperty.temperatureEnabled.onChange([this]() { onEarthSettingChanged(); });
     _earthProperty.atmosphereEnabled.onChange([this]() { onEarthSettingChanged(); });
     _earthProperty.moonsEnabled.onChange([this]() { onEarthSettingChanged(); });
+    addPropertySubOwner(_earthProperty);
 
     // Mars
     _marsProperty.toggleAll.onChange([this]() { onMarsAllChanged(); });
@@ -201,6 +246,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _marsProperty.temperatureEnabled.onChange([this]() { onMarsSettingChanged(); });
     _marsProperty.atmosphereEnabled.onChange([this]() { onMarsSettingChanged(); });
     _marsProperty.moonsEnabled.onChange([this]() { onMarsSettingChanged(); });
+    addPropertySubOwner(_marsProperty);
 
     // Jupiter
     _jupiterProperty.toggleAll.onChange([this]() { onJupiterAllChanged(); });
@@ -209,6 +255,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _jupiterProperty.temperatureEnabled.onChange([this]() { onJupiterSettingChanged(); });
     _jupiterProperty.atmosphereEnabled.onChange([this]() { onJupiterSettingChanged(); });
     _jupiterProperty.moonsEnabled.onChange([this]() { onJupiterSettingChanged(); });
+    addPropertySubOwner(_jupiterProperty);
 
     // Saturn
     _saturnProperty.toggleAll.onChange([this]() { onSaturnAllChanged(); });
@@ -218,6 +265,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _saturnProperty.atmosphereEnabled.onChange([this]() { onSaturnSettingChanged(); });
     _saturnProperty.moonsEnabled.onChange([this]() { onSaturnSettingChanged(); });
     _saturnProperty.ringsEnabled.onChange([this]() { onSaturnSettingChanged(); });
+    addPropertySubOwner(_saturnProperty);
 
     // Uranus
     _uranusProperty.toggleAll.onChange([this]() { onUranusAllChanged(); });
@@ -226,6 +274,7 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _uranusProperty.temperatureEnabled.onChange([this]() { onUranusSettingChanged(); });
     _uranusProperty.atmosphereEnabled.onChange([this]() { onUranusSettingChanged(); });
     _uranusProperty.moonsEnabled.onChange([this]() { onUranusSettingChanged(); });
+    addPropertySubOwner(_uranusProperty);
 
     // Neptune
     _neptuneProperty.toggleAll.onChange([this]() { onNeptuneAllChanged(); });
@@ -234,17 +283,12 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     _neptuneProperty.temperatureEnabled.onChange([this]() { onNeptuneSettingChanged(); });
     _neptuneProperty.atmosphereEnabled.onChange([this]() { onNeptuneSettingChanged(); });
     _neptuneProperty.moonsEnabled.onChange([this]() { onNeptuneSettingChanged(); });
-
-    // Add the properties
-    addProperty(_toggleAll);
-    addPropertySubOwner(_mercuryProperty);
-    addPropertySubOwner(_venusProperty);
-    addPropertySubOwner(_earthProperty);
-    addPropertySubOwner(_marsProperty);
-    addPropertySubOwner(_jupiterProperty);
-    addPropertySubOwner(_saturnProperty);
-    addPropertySubOwner(_uranusProperty);
     addPropertySubOwner(_neptuneProperty);
+
+    // Precision
+    _anglePrecision = _precisionProperty.lowAnglePrecision;
+    _distancePrecision = _precisionProperty.lowDistancePrecision;
+    addPropertySubOwner(_precisionProperty);
 }
 
 PlanetsSonification::~PlanetsSonification() {
@@ -277,6 +321,47 @@ PlanetsSonification::PlanetProperty::PlanetProperty(
     if (planetInfo.guiName == "Saturn") {
         addProperty(ringsEnabled);
     }
+}
+
+PlanetsSonification::PrecisionProperty::PrecisionProperty(
+    properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
+    : properties::PropertyOwner(precisionInfo)
+    , lowDistancePrecision(
+        LowDistancePrecisionInfo,
+        10000.0,
+        0,
+        1e+25
+    )
+    , highDistancePrecision(
+        HighDistancePrecisionInfo,
+        1000.0,
+        0,
+        1e+25
+    )
+    , lowAnglePrecision(
+        LowAnglePrecisionInfo,
+        0.1,
+        0,
+        1e+25
+    )
+    , highAnglePrecision(
+        HighAnglePrecisionInfo,
+        0.05,
+        0,
+        1e+25
+    )
+{
+    addProperty(lowDistancePrecision);
+    lowDistancePrecision.setExponent(20.f);
+
+    addProperty(highDistancePrecision);
+    highDistancePrecision.setExponent(20.f);
+
+    addProperty(lowAnglePrecision);
+    lowAnglePrecision.setExponent(20.f);
+
+    addProperty(highAnglePrecision);
+    highAnglePrecision.setExponent(20.f);
 }
 
 osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
@@ -622,12 +707,12 @@ void PlanetsSonification::update(const Camera* camera) {
     for (int i = 0; i < _planets.size(); ++i) {
         // Increase presision if the planet is in focus
         if (focusNode->identifier() == _planets[i].identifier) {
-            _anglePrecision = HighAnglePrecision;
-            _distancePrecision = HighDistancePrecision;
+            _anglePrecision = _precisionProperty.highAnglePrecision;
+            _distancePrecision = _precisionProperty.highDistancePrecision;
         }
         else {
-            _anglePrecision = LowAnglePrecision;
-            _distancePrecision = LowDistancePrecision;
+            _anglePrecision = _precisionProperty.lowAnglePrecision;
+            _distancePrecision = _precisionProperty.lowDistancePrecision;
         }
 
         bool hasNewData = getData(camera, i);

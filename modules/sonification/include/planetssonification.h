@@ -28,6 +28,7 @@
 #include <modules/sonification/include/sonificationbase.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {
 
@@ -67,34 +68,28 @@ public:
 
 private:
     // Indices for data items
-    const int NumDataItems = 3;
-    const int DistanceIndex = 0;
-    const int HAngleIndex = 1;
-    const int VAngleIndex = 2;
-
-    // Set the differnet levels of precision
-    const double LowDistancePrecision = 10000.0;
-    const double HighDistancePrecision = 1000.0;
-    const double LowAnglePrecision = 0.1;
-    const double HighAnglePrecision = 0.05;
+    static constexpr int NumDataItems = 3;
+    static constexpr int DistanceIndex = 0;
+    static constexpr int HAngleIndex = 1;
+    static constexpr int VAngleIndex = 2;
 
     // Indices for the planets
-    const int MercuryIndex = 0;
-    const int VenusIndex = 1;
-    const int EarthIndex = 2;
-    const int MarsIndex = 3;
-    const int JupiterIndex = 4;
-    const int SaturnIndex = 5;
-    const int UranusIndex = 6;
-    const int NeptuneIndex = 7;
+    static constexpr int MercuryIndex = 0;
+    static constexpr int VenusIndex = 1;
+    static constexpr int EarthIndex = 2;
+    static constexpr int MarsIndex = 3;
+    static constexpr int JupiterIndex = 4;
+    static constexpr int SaturnIndex = 5;
+    static constexpr int UranusIndex = 6;
+    static constexpr int NeptuneIndex = 7;
 
     // Indices for the settings for the planets
-    const int SizeDayIndex = 0;
-    const int GravityIndex = 1;
-    const int TemperatureIndex = 2;
-    const int AtmosphereIndex = 3;
-    const int MoonsIndex = 4;
-    const int RingsIndex = 5;
+    static constexpr int SizeDayIndex = 0;
+    static constexpr int GravityIndex = 1;
+    static constexpr int TemperatureIndex = 2;
+    static constexpr int AtmosphereIndex = 3;
+    static constexpr int MoonsIndex = 4;
+    static constexpr int RingsIndex = 5;
 
     // Struct to hold data for all the planets
     struct Planet {
@@ -105,7 +100,7 @@ private:
         std::string identifier;
 
         // Distance, horizontal angle, vertical angle
-        std::vector<double> data = std::vector<double>(3);
+        std::vector<double> data = std::vector<double>(NumDataItems);
 
         // <name of moon, <distance, horizontal angle, vertical angle>>
         std::vector<std::pair<std::string, std::vector<double>>> moons;
@@ -195,6 +190,15 @@ private:
         properties::BoolProperty ringsEnabled;
     };
 
+    struct PrecisionProperty : properties::PropertyOwner {
+        PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+
+        properties::DoubleProperty lowDistancePrecision;
+        properties::DoubleProperty highDistancePrecision;
+        properties::DoubleProperty lowAnglePrecision;
+        properties::DoubleProperty highAnglePrecision;
+    };
+
     properties::BoolProperty _toggleAll;
     PlanetProperty _mercuryProperty;
     PlanetProperty _venusProperty;
@@ -204,6 +208,7 @@ private:
     PlanetProperty _saturnProperty;
     PlanetProperty _uranusProperty;
     PlanetProperty _neptuneProperty;
+    PrecisionProperty _precisionProperty;
 };
 
 } // namespace openspace

@@ -51,6 +51,12 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+        "Precision",
+        "Precision",
+        "Settings for the precision of the sonification"
+    };
+
     constexpr openspace::properties::Property::PropertyInfo LowDistancePrecisionInfo = {
         "LowDistancePrecision",
         "Distance Precision (Low)",
@@ -106,58 +112,66 @@ NodesSonification::NodesSonification(const std::string& ip, int port)
         DistanceUnitInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _lowDistancePrecision(
-        LowDistancePrecisionInfo,
-        10000.0,
-        std::numeric_limits<double>::epsilon(),
-        1e+25
-    )
-    , _highDistancePrecision(
-        HighDistancePrecisionInfo,
-        1000.0,
-        std::numeric_limits<double>::epsilon(),
-        1e+25
-    )
-    , _lowAnglePrecision(
-        LowAnglePrecisionInfo,
-        0.1,
-        std::numeric_limits<double>::epsilon(),
-        1e+25
-    )
-    , _highAnglePrecision(
-        HighAnglePrecisionInfo,
-        0.05,
-        std::numeric_limits<double>::epsilon(),
-        1e+25
-    )
+    , _precisionProperty(NodesSonification::PrecisionProperty(PrecisionInfo))
 {
-    _anglePrecision = _lowAnglePrecision;
-    _distancePrecision = _lowDistancePrecision;
-
-    addProperty(_lowDistancePrecision);
-    _lowDistancePrecision.setExponent(20.f);
-
-    addProperty(_highDistancePrecision);
-    _highDistancePrecision.setExponent(20.f);
-
-    addProperty(_lowAnglePrecision);
-    _lowAnglePrecision.setExponent(20.f);
-
-    addProperty(_highAnglePrecision);
-    _highAnglePrecision.setExponent(20.f);
-
     // Add all distance units as options in the drop down menu
-    for (int i = 0; i < static_cast<int>(DistanceUnit::League) + 1; ++i) {
+    for (int i = 0; i < DistanceUnitNamesSingular.size(); ++i) {
         _distanceUnitOption.addOption(i, DistanceUnitNamesSingular[i].data());
     }
 
     // Select Kilometers as the default distance unit
     _distanceUnitOption.setValue(static_cast<int>(DistanceUnit::Kilometer));
     addProperty(_distanceUnitOption);
+
+    // Precision
+    _anglePrecision = _precisionProperty.lowAnglePrecision;
+    _distancePrecision = _precisionProperty.lowDistancePrecision;
+    addPropertySubOwner(_precisionProperty);
 }
 
 NodesSonification::~NodesSonification() {
     stop();
+}
+
+NodesSonification::PrecisionProperty::PrecisionProperty(
+    properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
+    : properties::PropertyOwner(precisionInfo)
+    , lowDistancePrecision(
+        LowDistancePrecisionInfo,
+        10000.0,
+        0,
+        1e+25
+    )
+    , highDistancePrecision(
+        HighDistancePrecisionInfo,
+        1000.0,
+        0,
+        1e+25
+    )
+    , lowAnglePrecision(
+        LowAnglePrecisionInfo,
+        0.1,
+        0,
+        1e+25
+    )
+    , highAnglePrecision(
+        HighAnglePrecisionInfo,
+        0.05,
+        0,
+        1e+25
+    )
+{
+    addProperty(lowDistancePrecision);
+    lowDistancePrecision.setExponent(20.f);
+
+    addProperty(highDistancePrecision);
+    highDistancePrecision.setExponent(20.f);
+
+    addProperty(lowAnglePrecision);
+    lowAnglePrecision.setExponent(20.f);
+
+    addProperty(highAnglePrecision);
+    highAnglePrecision.setExponent(20.f);
 }
 
 void NodesSonification::sendData(int nodeIndex) {
@@ -253,12 +267,12 @@ void NodesSonification::update(const Camera* camera) {
     for (int i = 0; i < _nodes.size(); ++i) {
         // Increase presision if the node is in focus
         if (focusNode->identifier() == _nodes[i].identifier) {
-            _anglePrecision = _highAnglePrecision;
-            _distancePrecision = _highDistancePrecision;
+            _anglePrecision = _precisionProperty.highAnglePrecision;
+            _distancePrecision = _precisionProperty.highDistancePrecision;
         }
         else {
-            _anglePrecision = _lowAnglePrecision;
-            _distancePrecision = _lowDistancePrecision;
+            _anglePrecision = _precisionProperty.lowAnglePrecision;
+            _distancePrecision = _precisionProperty.lowDistancePrecision;
         }
 
         bool hasNewData = getData(camera, i);

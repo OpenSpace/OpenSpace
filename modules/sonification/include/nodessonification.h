@@ -62,6 +62,7 @@ public:
     /**
      * Returns the Lua library that contains all Lua functions available to change the
      * nodes sonification.
+     *
      * \return The Lua library that contains all Lua functions available to change the
      * nodes sonification
      */
@@ -104,11 +105,17 @@ private:
     void sendData(int nodeIndex);
 
     // Properties
-    properties::DoubleProperty _lowDistancePrecision;
-    properties::DoubleProperty _highDistancePrecision;
-    properties::DoubleProperty _lowAnglePrecision;
-    properties::DoubleProperty _highAnglePrecision;
+    struct PrecisionProperty : properties::PropertyOwner {
+        PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+
+        properties::DoubleProperty lowDistancePrecision;
+        properties::DoubleProperty highDistancePrecision;
+        properties::DoubleProperty lowAnglePrecision;
+        properties::DoubleProperty highAnglePrecision;
+    };
+
     properties::OptionProperty _distanceUnitOption;
+    PrecisionProperty _precisionProperty;
 
     // Variables
     double _anglePrecision = 0.0;

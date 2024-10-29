@@ -28,6 +28,7 @@
 #include <modules/sonification/include/sonificationbase.h>
 
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/util/timeconversion.h>
 
 namespace openspace {
@@ -72,7 +73,14 @@ private:
     void sendData();
 
     // Properties
+    struct PrecisionProperty : properties::PropertyOwner {
+        PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+
+        properties::DoubleProperty timePrecision;
+    };
+
     properties::OptionProperty _timeUnitOption;
+    PrecisionProperty _precisionProperty;
 
     // Variables
     double _timeSpeed = 0.0;
