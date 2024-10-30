@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SONIFICATION___PLANETSSOLARSONIFICATION___H__
-#define __OPENSPACE_MODULE_SONIFICATION___PLANETSSOLARSONIFICATION___H__
+#ifndef __OPENSPACE_MODULE_SONIFICATION___PLANETSOVERVIEWSONIFICATION___H__
+#define __OPENSPACE_MODULE_SONIFICATION___PLANETSOVERVIEWSONIFICATION___H__
 
 #include <modules/sonification/include/sonificationbase.h>
 
@@ -31,10 +31,10 @@
 
 namespace openspace {
 
-class PlanetsSolarSonification : public SonificationBase {
+class PlanetsOverviewSonification : public SonificationBase {
 public:
-    PlanetsSolarSonification(const std::string& ip, int port);
-    virtual ~PlanetsSolarSonification() override;
+    PlanetsOverviewSonification(const std::string& ip, int port);
+    virtual ~PlanetsOverviewSonification() override;
 
     /**
      * Main update function for the sonification
@@ -49,6 +49,10 @@ public:
     virtual void stop() override;
 
 private:
+    // Indices for data items
+    static constexpr int NumDataItems = 1;
+    static constexpr int GuiSettingsIndex = 0;
+
     /**
      * Create a osc::Blob object with current sonification settings.
      * Order of settings: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
@@ -58,9 +62,9 @@ private:
     osc::Blob createSettingsBlob() const;
 
     /**
-     * Send current sonification settings over the osc connection
+     * Send current sonification data over the osc connection
      */
-    void sendSettings();
+    void sendData();
 
     // Properties onChange
     void onToggleAllChanged();
@@ -79,4 +83,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_SONIFICATION___PLANETSSOLARSONIFICATION___H__
+#endif __OPENSPACE_MODULE_SONIFICATION___PLANETSOVERVIEWSONIFICATION___H__

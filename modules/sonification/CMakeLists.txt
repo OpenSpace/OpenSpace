@@ -28,7 +28,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/include/focussonification.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/nodessonification.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/planetscomparesonification.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/planetssolarsonification.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/planetsoverviewsonification.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/planetssonification.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/sonificationbase.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/timesonification.h
@@ -40,7 +40,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/nodessonification.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/nodessonification_lua.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/src/planetscomparesonification.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/planetssolarsonification.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/planetsoverviewsonification.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/planetssonification_lua.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/src/sonificationbase.cpp

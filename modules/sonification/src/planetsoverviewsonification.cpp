@@ -22,20 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/sonification/include/planetssolarsonification.h>
+#include <modules/sonification/include/planetsoverviewsonification.h>
 
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "PlanetsSolarSonification";
+    constexpr std::string_view _loggerCat = "PlanetsOverviewSonification";
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        PlanetsSolarSonificationInfo =
+        PlanetsOverviewSonificationInfo =
     {
-        "PlanetsSolarSonification",
-        "Planets Solar Sonification",
-        "Sonification that gives an overview of the planets in the solarsystem with "
+        "PlanetsOverviewSonification",
+        "Planets Overview Sonification",
+        "Sonification that gives an overview of the planets in the overviewsystem with "
         "simpler sounds"
     };
 
@@ -96,8 +96,8 @@ namespace {
 
 namespace openspace {
 
-PlanetsSolarSonification::PlanetsSolarSonification(const std::string& ip, int port)
-    : SonificationBase(PlanetsSolarSonificationInfo, ip, port)
+PlanetsOverviewSonification::PlanetsOverviewSonification(const std::string& ip, int port)
+    : SonificationBase(PlanetsOverviewSonificationInfo, ip, port)
     , _toggleAll(ToggleAllInfo, false)
     , _mercuryEnabled(EnableMercuryInfo, false)
     , _venusEnabled(EnableVenusInfo, false)
@@ -110,14 +110,14 @@ PlanetsSolarSonification::PlanetsSolarSonification(const std::string& ip, int po
 {
     // Add onChange functions to the properties
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
-    _mercuryEnabled.onChange([this]() { sendSettings(); });
-    _venusEnabled.onChange([this]() { sendSettings(); });
-    _earthEnabled.onChange([this]() { sendSettings(); });
-    _marsEnabled.onChange([this]() { sendSettings(); });
-    _jupiterEnabled.onChange([this]() { sendSettings(); });
-    _saturnEnabled.onChange([this]() { sendSettings(); });
-    _uranusEnabled.onChange([this]() { sendSettings(); });
-    _neptuneEnabled.onChange([this]() { sendSettings(); });
+    _mercuryEnabled.onChange([this]() { sendData(); });
+    _venusEnabled.onChange([this]() { sendData(); });
+    _earthEnabled.onChange([this]() { sendData(); });
+    _marsEnabled.onChange([this]() { sendData(); });
+    _jupiterEnabled.onChange([this]() { sendData(); });
+    _saturnEnabled.onChange([this]() { sendData(); });
+    _uranusEnabled.onChange([this]() { sendData(); });
+    _neptuneEnabled.onChange([this]() { sendData(); });
 
     // Add the properties
     addProperty(_toggleAll);
@@ -131,11 +131,11 @@ PlanetsSolarSonification::PlanetsSolarSonification(const std::string& ip, int po
     addProperty(_neptuneEnabled);
 }
 
-PlanetsSolarSonification::~PlanetsSolarSonification() {
+PlanetsOverviewSonification::~PlanetsOverviewSonification() {
     stop();
 }
 
-osc::Blob PlanetsSolarSonification::createSettingsBlob() const {
+osc::Blob PlanetsOverviewSonification::createSettingsBlob() const {
     bool settings[8] = { false };
 
     settings[0] = _mercuryEnabled;
@@ -150,20 +150,20 @@ osc::Blob PlanetsSolarSonification::createSettingsBlob() const {
     return osc::Blob(settings, 8);
 }
 
-void PlanetsSolarSonification::sendSettings() {
+void PlanetsOverviewSonification::sendData() {
     if (!_enabled) {
         return;
     }
 
     std::string label = "/Sun";
-    std::vector<OscDataType> data(1);
+    std::vector<OscDataType> data(NumDataItems);
 
-    data[0] = createSettingsBlob();
+    data[GuiSettingsIndex] = createSettingsBlob();
 
     _connection->send(label, data);
 }
 
-void PlanetsSolarSonification::onToggleAllChanged() {
+void PlanetsOverviewSonification::onToggleAllChanged() {
     _mercuryEnabled.setValue(_toggleAll);
     _venusEnabled.setValue(_toggleAll);
     _earthEnabled.setValue(_toggleAll);
@@ -174,9 +174,9 @@ void PlanetsSolarSonification::onToggleAllChanged() {
     _neptuneEnabled.setValue(_toggleAll);
 }
 
-void PlanetsSolarSonification::update(const Camera*) {}
+void PlanetsOverviewSonification::update(const Camera*) {}
 
-void PlanetsSolarSonification::stop() {
+void PlanetsOverviewSonification::stop() {
     _toggleAll = false;
 }
 

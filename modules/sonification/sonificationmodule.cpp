@@ -28,7 +28,7 @@
 #include <modules/sonification/include/focussonification.h>
 #include <modules/sonification/include/nodessonification.h>
 #include <modules/sonification/include/planetscomparesonification.h>
-#include <modules/sonification/include/planetssolarsonification.h>
+#include <modules/sonification/include/planetsoverviewsonification.h>
 #include <modules/sonification/include/planetssonification.h>
 #include <modules/sonification/include/timesonification.h>
 #include <openspace/camera/camera.h>
@@ -156,7 +156,7 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     sonification = new PlanetsSonification(_ipAddress, _port);
     addSonification(sonification);
 
-    sonification = new PlanetsSolarSonification(_ipAddress, _port);
+    sonification = new PlanetsOverviewSonification(_ipAddress, _port);
     addSonification(sonification);
 
     sonification = new PlanetsCompareSonification(_ipAddress, _port);
