@@ -1,4 +1,5 @@
 local L2transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
+local L2kernels = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/kernels")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
@@ -86,7 +87,7 @@ local JWSTTrailOrbit = {
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.JWST,
-      Observer = L2transforms.ID.L2,
+      Observer = L2kernels.ID.L2,
       Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.863, 0.0, 0.902 },
@@ -116,7 +117,7 @@ local JWSTTrailCoRevOrbit = {
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.JWST,
-      Observer = L2transforms.ID.L2,
+      Observer = L2kernels.ID.L2,
       Frame = "L2_COREV"
     },
     Color = { 1.0, 0.663, 0.157 },
