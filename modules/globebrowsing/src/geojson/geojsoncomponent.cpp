@@ -50,6 +50,7 @@ namespace geos_nlohmann = nlohmann;
 #include <geos/geom/Geometry.h>
 #include <geos/io/GeoJSON.h>
 #include <geos/io/GeoJSONReader.h>
+#include <geos/operation/valid/MakeValid.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "GeoJsonComponent";
@@ -635,8 +636,18 @@ void GeoJsonComponent::readFile() {
 void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& feature,
                                           int indexInFile
 ) {
-    // Read the geometry
-    const geos::geom::Geometry* geom = feature.getGeometry();
+    const geos::geom::Geometry* nonValidatedGeometry = feature.getGeometry();
+
+    if (!nonValidatedGeometry->isValid()) {
+        LWARNING(std::format(
+            "Feature {} in GeoJson file '{}' has invalid geometry (for example due to "
+            "self-intersections or other non-simple geometry). If possible, the feature "
+            "will be split into separate features with valid geometry. However, note "
+            "that this may introduce artifacts.", indexInFile, _geoJsonFile.value()
+        ));
+    }
+    geos::operation::valid::MakeValid makeValid;
+    std::unique_ptr<geos::geom::Geometry> geom = makeValid.build(nonValidatedGeometry);
 
     // Read the properties
     GeoJsonOverrideProperties propsFromFile = propsFromGeoJson(feature);
@@ -652,7 +663,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
     }
     else if (geom->isPuntal()) {
         // If points, handle all point features as one feature, even multi-points
-        geomsToAdd = { geom };
+        geomsToAdd = { geom.get()};
     }
     else {
         const size_t nGeom = geom->getNumGeometries();
