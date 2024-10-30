@@ -21,7 +21,7 @@ local L2Small = {
     Texture = circle .. "circle.png",
     BlendMode = "Additive"
   },
-  Tag = { "lagrange_points_earth_l2_small" },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l2_small" },
   GUI = {
     Name = "L2 Small",
     Path = "/Solar System/Planets/Earth/Lagrange Points"
@@ -60,7 +60,7 @@ local L2SmallLabel = {
     BlendMode = "Normal",
     EnableFading = false
   },
-  Tag = { "lagrange_points_earth_l2_small" },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l2_small" },
   GUI = {
     Name = "L2 Small Label",
     Path = "/Solar System/Planets/Earth/Lagrange Points",
