@@ -22,8 +22,8 @@ local L2Position = {
   }
 }
 
--- This ref. frame co-revolves with L2 and is needed for a more intuitive trail of JWST in
--- relation to L2
+-- This reference frame co-revolves with L2 and can be useful for trails for certain
+-- spacecraft that orbit in relation to L2. It is for exmaple used for JWST
 local L2CoRevFrame = {
   Identifier = "L2CoRevFrame",
   Parent = L2Position.Identifier,
