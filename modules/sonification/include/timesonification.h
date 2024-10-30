@@ -40,7 +40,7 @@ public:
 
     /**
      * Main update function for the sonification. Checks the current delta time and sends
-     * it via the osc connection in the unit of days/second.
+     * it via the osc connection in the specified time unit per second.
      *
      * \param camera pointer to the camera in the scene (not used in this sonification)
      */

@@ -37,7 +37,7 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeUnitOptionInfo = {
-        "TimeUnitOption",
+        "TimeUnit",
         "Time Unit",
         "Choose a time unit that the sonification should use"
     };

@@ -22,26 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SONIFICATION___NODESSONIFICATION___H__
-#define __OPENSPACE_MODULE_SONIFICATION___NODESSONIFICATION___H__
+#ifndef __OPENSPACE_MODULE_SONIFICATION___CAMERASONIFICATION___H__
+#define __OPENSPACE_MODULE_SONIFICATION___CAMERASONIFICATION___H__
 
 #include <modules/sonification/include/sonificationbase.h>
 
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
-
-class NodesSonification : public SonificationBase {
+class CameraSonification : public SonificationBase {
 public:
-    NodesSonification(const std::string& ip, int port);
-    virtual ~NodesSonification() override;
+    CameraSonification(const std::string& ip, int port);
+    virtual ~CameraSonification() override = default;
 
     /**
-     * Main update function for the sonification
+     * Main update function for the sonification. Checks the current camera information
+     * (position, rotation, and speed) and sends it via the osc connection.
      *
      * \param camera pointer to the camera in the scene
      */
@@ -52,78 +50,50 @@ public:
      */
     virtual void stop() override;
 
-    /**
-    * Add the given node to the list of nodes
-    *
-    * \param dict the node that should be added
-    */
-    void addNode(ghoul::Dictionary dict);
-
-    /**
-     * Returns the Lua library that contains all Lua functions available to change the
-     * nodes sonification.
-     *
-     * \return The Lua library that contains all Lua functions available to change the
-     * nodes sonification
-     */
-    static scripting::LuaLibrary luaLibrary();
-
 private:
     // Indices for data items
     static constexpr int NumDataItems = 4;
-    static constexpr int DistanceIndex = 0;
-    static constexpr int HAngleIndex = 1;
-    static constexpr int VAngleIndex = 2;
-    static constexpr int DistanceUnitIndex = 3;
-
-    // Struct to hold data for all the nodes
-    struct SonificationNode {
-        SonificationNode(std::string id = "") {
-            identifier = id;
-        }
-
-        std::string identifier;
-
-        // Distance, horizontal angle, vertical angle
-        std::vector<double> data = std::vector<double>(NumDataItems);
-    };
+    static constexpr int CameraPosIndex = 0;
+    static constexpr int CameraQuatRotIndex = 1;
+    static constexpr int CameraSpeedIndex = 2;
+    static constexpr int CameraSpeedUnitIndex = 3;
 
     /**
-     * Update distance and angle data for the given node
+     * Update the sonification data
      *
-     * \param camera pointer to the camera in the scene. Used to calculated the data for
-     *        the node
-     * \param nodeIndex index to the internally stored node data that should be updated
+     * \param camera pointer to the camera in the scene
      *
      * \return true if the data is new compared to before, otherwise false
      */
-    bool getData(const Camera* camera, int nodeIndex);
+    bool getData(const Camera* camera);
 
     /**
-     * Send current sonification data for the indicated node over the osc connection
-     * Order of data: distance, horizontal angle, vertical angle
+     * Send current sonification data over the osc connection
+     * Order of data: Camera position, rotation, speed, and speed distance unit.
      */
-    void sendData(int nodeIndex);
+    void sendData();
+
+    osc::Blob createBlob(glm::dvec3 data);
+    osc::Blob createBlob(glm::dquat data);
 
     // Properties
     struct PrecisionProperty : properties::PropertyOwner {
         PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
 
-        properties::DoubleProperty lowDistancePrecision;
-        properties::DoubleProperty highDistancePrecision;
-        properties::DoubleProperty lowAnglePrecision;
-        properties::DoubleProperty highAnglePrecision;
+        properties::DoubleProperty positionPrecision;
+        properties::DoubleProperty rotationPrecision;
+        properties::DoubleProperty speedPrecision;
     };
 
-    properties::OptionProperty _distanceUnitOption;
+    properties::OptionProperty _cameraSpeedDistanceUnitOption;
     PrecisionProperty _precisionProperty;
 
     // Variables
-    double _anglePrecision = 0.0;
-    double _distancePrecision = 0.0;
-    std::vector<SonificationNode> _nodes;
+    glm::dvec3 _cameraPosition = glm::dvec3(0.0);
+    glm::dquat _cameraRotation = glm::dquat(0.0, 0.0, 0.0, 0.0);
+    double _cameraSpeed = 0.0;
 };
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_SONIFICATION___NODESSONIFICATION___H__
+#endif __OPENSPACE_MODULE_SONIFICATION___CAMERASONIFICATION___H__

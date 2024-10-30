@@ -25,6 +25,7 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/camerasonification.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/focussonification.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/nodessonification.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/planetscomparesonification.h
@@ -36,6 +37,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/camerasonification.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/focussonification.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/nodessonification.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/nodessonification_lua.inl

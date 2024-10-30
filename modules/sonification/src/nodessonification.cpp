@@ -152,13 +152,13 @@ NodesSonification::PrecisionProperty::PrecisionProperty(
         LowAnglePrecisionInfo,
         0.1,
         0,
-        1e+25
+        10
     )
     , highAnglePrecision(
         HighAnglePrecisionInfo,
         0.05,
         0,
-        1e+25
+        10
     )
 {
     addProperty(lowDistancePrecision);
@@ -168,10 +168,8 @@ NodesSonification::PrecisionProperty::PrecisionProperty(
     highDistancePrecision.setExponent(20.f);
 
     addProperty(lowAnglePrecision);
-    lowAnglePrecision.setExponent(20.f);
 
     addProperty(highAnglePrecision);
-    highAnglePrecision.setExponent(20.f);
 }
 
 void NodesSonification::sendData(int nodeIndex) {
@@ -191,6 +189,11 @@ void NodesSonification::sendData(int nodeIndex) {
 
     // Vertical Angle
     data[VAngleIndex] = _nodes[nodeIndex].data[VAngleIndex];
+
+    // Distance Unit
+    data[DistanceUnitIndex] = _distanceUnitOption.getDescriptionByValue(
+        _distanceUnitOption.value()
+    );
 
     _connection->send(label, data);
 }
