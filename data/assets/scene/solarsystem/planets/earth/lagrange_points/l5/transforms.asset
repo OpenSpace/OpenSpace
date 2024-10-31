@@ -1,0 +1,34 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local L5Position = {
+  Identifier = "L5Position",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.L5,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    }
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l5" },
+  GUI = {
+    Name = "L5 Position",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(L5Position)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(L5Position)
+end)
+
+asset.export(L5Position)

@@ -1,9 +1,3 @@
---voyager/mission.asset
-
--- Source:  http://pluto.jhuapl.edu/Mission/index.php
--- Many of the values (especially days of the month if 01 or 30 or 31  and  hh::mm::ss if all 0)
--- are approximate and need fixing
-
 local Mission = {
   Identifier = "JWST",
   Name = "James Webb Space Telescope",
