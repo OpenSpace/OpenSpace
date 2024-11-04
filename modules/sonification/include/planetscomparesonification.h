@@ -50,6 +50,21 @@ public:
     virtual void stop() override;
 
 private:
+    // Indices for data items
+    static constexpr int NumDataItems = 3;
+    static constexpr int FirstPlanetIndex = 0;
+    static constexpr int SecondPlanetIndex = 1;
+    static constexpr int SettingsIndex = 2;
+
+    // Indicies for the gui settings
+    static constexpr int NumSettings = 6;
+    static constexpr int SizeDayIndex = 0;
+    static constexpr int GravityIndex = 1;
+    static constexpr int TemperatureIndex = 2;
+    static constexpr int AtmosphereIndex = 3;
+    static constexpr int MoonsIndex = 4;
+    static constexpr int RingsIndex = 5;
+
     /**
      * Create a osc::Blob object with current sonification settings.
      * Order of settings: size/day, gravity, temperature, atmosphere, moons, rings

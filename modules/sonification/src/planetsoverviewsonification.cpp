@@ -26,6 +26,7 @@
 
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/util/memorymanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsOverviewSonification";
@@ -136,18 +137,20 @@ PlanetsOverviewSonification::~PlanetsOverviewSonification() {
 }
 
 osc::Blob PlanetsOverviewSonification::createSettingsBlob() const {
-    bool settings[8] = { false };
+    int8_t* settings = reinterpret_cast<int8_t*>(
+        global::memoryManager->TemporaryMemory.allocate(NumPlanets)
+    );
 
-    settings[0] = _mercuryEnabled;
-    settings[1] = _venusEnabled;
-    settings[2] = _earthEnabled;
-    settings[3] = _marsEnabled;
-    settings[4] = _jupiterEnabled;
-    settings[5] = _saturnEnabled;
-    settings[6] = _uranusEnabled;
-    settings[7] = _neptuneEnabled;
+    settings[MercuryIndex] = _mercuryEnabled;
+    settings[VenusIndex] = _venusEnabled;
+    settings[EarthIndex] = _earthEnabled;
+    settings[MarsIndex] = _marsEnabled;
+    settings[JupiterIndex] = _jupiterEnabled;
+    settings[SaturnIndex] = _saturnEnabled;
+    settings[UranusIndex] = _uranusEnabled;
+    settings[NeptuneIndex] = _neptuneEnabled;
 
-    return osc::Blob(settings, 8);
+    return osc::Blob(settings, NumPlanets);
 }
 
 void PlanetsOverviewSonification::sendData() {

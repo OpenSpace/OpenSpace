@@ -28,6 +28,7 @@
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/memorymanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsCompareSonification";
@@ -165,16 +166,18 @@ PlanetsCompareSonification::~PlanetsCompareSonification() {
 }
 
 osc::Blob PlanetsCompareSonification::createSettingsBlob() const {
-    bool settings[6] = { false };
+    int8_t* settings = reinterpret_cast<int8_t*>(
+        global::memoryManager->TemporaryMemory.allocate(NumSettings)
+    );
 
-    settings[0] = _sizeDayEnabled;
-    settings[1] = _gravityEnabled;
-    settings[2] = _temperatureEnabled;
-    settings[3] = _atmosphereEnabled;
-    settings[4] = _moonsEnabled;
-    settings[5] = _ringsEnabled;
+    settings[SizeDayIndex] = _sizeDayEnabled;
+    settings[GravityIndex] = _gravityEnabled;
+    settings[TemperatureIndex] = _temperatureEnabled;
+    settings[AtmosphereIndex] = _atmosphereEnabled;
+    settings[MoonsIndex] = _moonsEnabled;
+    settings[RingsIndex] = _ringsEnabled;
 
-    return osc::Blob(settings, 6);
+    return osc::Blob(settings, NumSettings);
 }
 
 void PlanetsCompareSonification::sendSettings() {
@@ -183,11 +186,11 @@ void PlanetsCompareSonification::sendSettings() {
     }
 
     std::string label = "/Compare";
-    std::vector<OscDataType> data(3);
+    std::vector<OscDataType> data(NumDataItems);
 
-    data[0] = _firstPlanet;
-    data[1] = _secondPlanet;
-    data[2] = createSettingsBlob();
+    data[FirstPlanetIndex] = _firstPlanet;
+    data[SecondPlanetIndex] = _secondPlanet;
+    data[SettingsIndex] = createSettingsBlob();
 
     _connection->send(label, data);
 }

@@ -31,11 +31,13 @@
 #include <modules/sonification/include/planetsoverviewsonification.h>
 #include <modules/sonification/include/planetssonification.h>
 #include <modules/sonification/include/timesonification.h>
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -174,7 +176,7 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
         // Make sure the sonification thread is synced with the main thread
         global::callback::postSyncPreDraw->emplace_back([this]() {
             // Tell the sonification thread that a new frame is starting
-            LDEBUG("The main thread signals to the sonification thread");
+            //LDEBUG("The main thread signals to the sonification thread");
             syncToMain.notify_one();
         });
     }
@@ -227,13 +229,13 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
 
     while (isRunning) {
         // Wait for the main thread
-        LDEBUG("The sonification thread is waiting for a signal from the main thread");
+        //LDEBUG("The sonification thread is waiting for a signal from the main thread");
         std::unique_lock<std::mutex> lk(mutexLock);
         syncToMain.wait(lk);
-        LDEBUG(
-            "The sonification thread is working after having received a signal from the "
-            "main thread"
-        );
+        //LDEBUG(
+        //    "The sonification thread is working after having received a signal from "
+        //    "the main thread"
+        //);
 
         // Check if the sonification is even enabled
         if (_enabled) {

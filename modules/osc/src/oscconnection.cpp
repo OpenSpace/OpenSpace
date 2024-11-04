@@ -58,7 +58,7 @@ void OscConnection::send(const std::string& label, const std::vector<OscDataType
     _stream.Clear();
     _stream << osc::BeginMessage(label.c_str());
 
-    LDEBUG(std::format("Sending: {}", label));
+    //LDEBUG(std::format("Sending: {}", label));
 
     for (const OscDataType& item : data) {
         std::visit(overloaded {

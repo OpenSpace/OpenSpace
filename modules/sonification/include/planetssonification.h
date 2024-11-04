@@ -85,6 +85,7 @@ private:
     static constexpr int NeptuneIndex = 7;
 
     // Indices for the settings for the planets
+    static constexpr int NumSettings = 6;
     static constexpr int SizeDayIndex = 0;
     static constexpr int GravityIndex = 1;
     static constexpr int TemperatureIndex = 2;

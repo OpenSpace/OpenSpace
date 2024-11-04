@@ -28,12 +28,10 @@
 #include "openspace/util/openspacemodule.h"
 
 #include <modules/sonification/include/sonificationbase.h>
-#include <openspace/camera/camera.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/scene/scene.h>
 #include <atomic>
 #include <condition_variable>
 

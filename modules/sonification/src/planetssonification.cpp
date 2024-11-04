@@ -32,6 +32,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
+#include <openspace/util/memorymanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsSonification";
@@ -365,13 +366,18 @@ PlanetsSonification::PrecisionProperty::PrecisionProperty(
 }
 
 osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
-    bool settings[6] = { false };
+    int8_t* settings = reinterpret_cast<int8_t*>(
+        global::memoryManager->TemporaryMemory.allocate(NumSettings)
+    );
 
     if (planetIndex == MercuryIndex) {
         // Mercury
         settings[SizeDayIndex] = _mercuryProperty.sizeDayEnabled;
         settings[GravityIndex] = _mercuryProperty.gravityEnabled;
         settings[TemperatureIndex] = _mercuryProperty.temperatureEnabled;
+        settings[AtmosphereIndex] = 0;
+        settings[MoonsIndex] = 0;
+        settings[RingsIndex] = 0;
     }
     else if (planetIndex == VenusIndex) {
         // Venus
@@ -379,6 +385,8 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
         settings[GravityIndex] = _venusProperty.gravityEnabled;
         settings[TemperatureIndex] = _venusProperty.temperatureEnabled;
         settings[AtmosphereIndex] = _venusProperty.atmosphereEnabled;
+        settings[MoonsIndex] = 0;
+        settings[RingsIndex] = 0;
     }
     else if (planetIndex == EarthIndex) {
         // Earth
@@ -387,6 +395,7 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
         settings[TemperatureIndex] = _earthProperty.temperatureEnabled;
         settings[AtmosphereIndex] = _earthProperty.atmosphereEnabled;
         settings[MoonsIndex] = _earthProperty.moonsEnabled;
+        settings[RingsIndex] = 0;
     }
     else if (planetIndex == MarsIndex) {
         // Mars
@@ -395,6 +404,7 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
         settings[TemperatureIndex] = _marsProperty.temperatureEnabled;
         settings[AtmosphereIndex] = _marsProperty.atmosphereEnabled;
         settings[MoonsIndex] = _marsProperty.moonsEnabled;
+        settings[RingsIndex] = 0;
     }
     else if (planetIndex == JupiterIndex) {
         // Jupiter
@@ -403,6 +413,7 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
         settings[TemperatureIndex] = _jupiterProperty.temperatureEnabled;
         settings[AtmosphereIndex] = _jupiterProperty.atmosphereEnabled;
         settings[MoonsIndex] = _jupiterProperty.moonsEnabled;
+        settings[RingsIndex] = 0;
     }
     else if (planetIndex == SaturnIndex) {
         // Saturn
@@ -420,6 +431,7 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
         settings[TemperatureIndex] = _uranusProperty.temperatureEnabled;
         settings[AtmosphereIndex] = _uranusProperty.atmosphereEnabled;
         settings[MoonsIndex] = _uranusProperty.moonsEnabled;
+        settings[RingsIndex] = 0;
     }
     else if (planetIndex == NeptuneIndex) {
         // Neptune
@@ -428,12 +440,13 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
         settings[TemperatureIndex] = _neptuneProperty.temperatureEnabled;
         settings[AtmosphereIndex] = _neptuneProperty.atmosphereEnabled;
         settings[MoonsIndex] = _neptuneProperty.moonsEnabled;
+        settings[RingsIndex] = 0;
     }
     else {
         throw ghoul::MissingCaseException();
     }
 
-    return osc::Blob(settings, 6);
+    return osc::Blob(settings, NumSettings);
 }
 
 void PlanetsSonification::sendPlanetData(int planetIndex) {
