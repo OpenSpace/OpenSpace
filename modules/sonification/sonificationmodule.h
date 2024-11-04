@@ -35,6 +35,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/scene/scene.h>
 #include <atomic>
+#include <condition_variable>
 
 namespace openspace {
 
@@ -117,9 +118,6 @@ public:
      * \return the current surround mode
      */
     SurroundMode surroundMode() const;
-
-    // For syncing the sonification thread with the main thread
-    static bool isMainDone;
 
 private:
     /**

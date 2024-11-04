@@ -92,8 +92,6 @@ namespace {
 
 namespace openspace {
 
-bool SonificationModule::isMainDone = false;
-
 SonificationModule::SonificationModule()
     : OpenSpaceModule("Sonification")
     , _enabled(EnabledInfo, false)
@@ -175,12 +173,8 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
 
         // Make sure the sonification thread is synced with the main thread
         global::callback::postSyncPreDraw->emplace_back([this]() {
-            // Send data to the sonification thread
-            {
-                LINFO("Main signals sonificaiton thread");
-                std::lock_guard lg(mutexLock);
-                isMainDone = true;
-            }
+            // Tell the sonification thread that a new frame is starting
+            LDEBUG("The main thread signals to the sonification thread");
             syncToMain.notify_one();
         });
     }
@@ -233,12 +227,15 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
 
     while (isRunning) {
         // Wait for the main thread
-        LINFO("Sonificaiton is waiting for the main thread");
-        std::unique_lock lg(mutexLock);
-        syncToMain.wait(lg, [] { return isMainDone; });
-        LINFO("Sonificaiton doing work");
+        LDEBUG("The sonification thread is waiting for a signal from the main thread");
+        std::unique_lock<std::mutex> lk(mutexLock);
+        syncToMain.wait(lk);
+        LDEBUG(
+            "The sonification thread is working after having received a signal from the "
+            "main thread"
+        );
 
-        // Check if the sonificaiton is even enabled
+        // Check if the sonification is even enabled
         if (_enabled) {
             // Initialize the scena and camera information
             if (!isInitialized) {
@@ -264,7 +261,7 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
                 }
             }
 
-            if (isInitialized && scene && camera) {
+            if (isInitialized) {
                 // Process the sonifications
                 for (SonificationBase* sonification : _sonifications) {
                     if (!sonification) {
@@ -277,14 +274,6 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
         else {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-
-        // Reset
-        isMainDone = false;
-
-        // Manually unlock before notifying, this is to avoid waking up
-        // the waiting thread only to block it again (see notify_one for details)
-        lg.unlock();
-        syncToMain.notify_one();
     }
 }
 
