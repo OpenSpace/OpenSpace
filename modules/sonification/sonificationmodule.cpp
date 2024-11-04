@@ -231,7 +231,7 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
         // Wait for the main thread
         //LDEBUG("The sonification thread is waiting for a signal from the main thread");
         std::unique_lock<std::mutex> lk(mutexLock);
-        syncToMain.wait(lk);
+        syncToMain.wait_for(lk, std::chrono::seconds(30));
         //LDEBUG(
         //    "The sonification thread is working after having received a signal from "
         //    "the main thread"
