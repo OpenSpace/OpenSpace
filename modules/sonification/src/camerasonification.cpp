@@ -161,17 +161,17 @@ bool CameraSonification::getData(const Camera* camera) {
     );
 
     // Speed
-    double averageFrameTime = global::windowDelegate->averageDeltaTime();
+    double frameTime = global::windowDelegate->deltaTime();
     bool hasFps = false;
     double cameraSpeed = 0.0;
-    if (std::abs(averageFrameTime) > std::numeric_limits<double>::epsilon()) {
+    if (std::abs(frameTime) > std::numeric_limits<double>::epsilon()) {
         // Avoid division by 0 by first checking the average frame time
         hasFps = true;
         double distanceMovedInUnit = convertMeters(
             distanceMoved,
             DistanceUnits[_cameraSpeedDistanceUnitOption]
         );
-        cameraSpeed = distanceMovedInUnit / averageFrameTime;
+        cameraSpeed = distanceMovedInUnit / frameTime;
     }
 
     // Check if this data is new, otherwise don't send it
