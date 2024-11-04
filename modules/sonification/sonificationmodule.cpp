@@ -31,11 +31,12 @@
 #include <modules/sonification/include/planetsoverviewsonification.h>
 #include <modules/sonification/include/planetssonification.h>
 #include <modules/sonification/include/timesonification.h>
-#include <openspace/camera/camera.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "SonificationModule";
@@ -90,6 +91,8 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+bool SonificationModule::isMainDone = false;
 
 SonificationModule::SonificationModule()
     : OpenSpaceModule("Sonification")
@@ -169,6 +172,17 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     if (global::windowDelegate->isMaster()) {
         _isRunning = true;
         _updateThread = std::thread([this]() { update(std::ref(_isRunning)); });
+
+        // Make sure the sonification thread is synced with the main thread
+        global::callback::postSyncPreDraw->emplace_back([this]() {
+            // Send data to the sonification thread
+            {
+                LINFO("Main signals sonificaiton thread");
+                std::lock_guard lg(mutexLock);
+                isMainDone = true;
+            }
+            syncToMain.notify_one();
+        });
     }
 }
 
@@ -218,42 +232,68 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
     bool isInitialized = false;
 
     while (isRunning) {
-        // Wait for the scene to initialize, then user can trigger enabled
-        if (!_enabled) {
+        // Wait for the main thread
+        LINFO("Sonificaiton is waiting for the main thread");
+        std::unique_lock lg(mutexLock);
+        syncToMain.wait(lg, [] { return isMainDone; });
+        LINFO("Sonificaiton doing work");
+
+        // Check if the sonificaiton is even enabled
+        if (_enabled) {
+            // Initialize the scena and camera information
+            if (!isInitialized) {
+                isInitialized = initialize(scene, camera);
+            }
+
+            if (isInitialized && scene && camera) {
+                // Process the sonifications
+                for (SonificationBase* sonification : _sonifications) {
+                    if (!sonification) {
+                        continue;
+                    }
+                    sonification->update(camera);
+                }
+            }
+        }
+        else {
             std::this_thread::sleep_for(std::chrono::seconds(1));
-            continue;
         }
 
-        if (!isInitialized) {
-            // Find scene
-            if (!scene) {
-                scene = global::renderEngine->scene();
-            }
+        // Reset
+        isMainDone = false;
 
-            // Find camera
-            if (!camera) {
-                camera = scene ? scene->camera() : nullptr;
-            }
-
-            // Check status
-            if (!scene || scene->isInitializing() || scene->root()->children().empty() ||
-                !camera || glm::length(camera->positionVec3()) <
-                std::numeric_limits<glm::f64>::epsilon())
-            {
-                continue;
-            }
-
-            isInitialized = true;
-        }
-
-        for (SonificationBase* sonification : _sonifications) {
-            if (!sonification) {
-                continue;
-            }
-
-            sonification->update(camera);
-        }
+        // Manually unlock before notifying, this is to avoid waking up
+        // the waiting thread only to block it again (see notify_one for details)
+        lg.unlock();
+        syncToMain.notify_one();
     }
+}
+
+bool SonificationModule::initialize(Scene* scene, Camera* camera) {
+    // Find the scene
+    if (!scene) {
+        scene = global::renderEngine->scene();
+    }
+    if (!scene) {
+        return false;
+    }
+
+    // Find the camera in the scene
+    if (!camera) {
+        camera = scene ? scene->camera() : nullptr;
+    }
+    if (!camera) {
+        return false;
+    }
+
+    // Check status
+    if (scene->isInitializing() || scene->root()->children().empty() ||
+        glm::length(camera->positionVec3()) < std::numeric_limits<glm::f64>::epsilon())
+    {
+        return false;
+    }
+
+    return true;
 }
 
 std::vector<scripting::LuaLibrary> SonificationModule::luaLibraries() const {

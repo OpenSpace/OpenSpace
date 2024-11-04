@@ -28,10 +28,12 @@
 #include "openspace/util/openspacemodule.h"
 
 #include <modules/sonification/include/sonificationbase.h>
+#include <openspace/camera/camera.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/scene/scene.h>
 #include <atomic>
 
 namespace openspace {
@@ -116,6 +118,9 @@ public:
      */
     SurroundMode surroundMode() const;
 
+    // For syncing the sonification thread with the main thread
+    static bool isMainDone;
+
 private:
     /**
      * Main update function that keeps track of all sonificaitons and keeps the thread
@@ -124,6 +129,18 @@ private:
      * \param isRunning whether the thread should be kept running or not
      */
     void update(std::atomic<bool>& isRunning);
+
+    /**
+     * Initializs the data required for the sonificaiton
+     *
+     * \param scene pointer to the scene, should be set by this function if the scene has
+     *        already been initialized
+     * \param camera pointer to the camera, should be set by this function if the scene
+     *        and camera has already been initialized
+     *
+     * \return whether the sonification was successfully initialized or not
+     */
+    bool initialize(Scene* scene, Camera* camera);
 
     /**
      * Add the a specified sonification to the list of registered sonifications in the
@@ -137,6 +154,10 @@ private:
      * Function that gets called when the surround mode is changed in the GUI
      */
     void guiOnChangeSurroundMode();
+
+    // To sync the sonificaiton thread with the main thread
+    std::mutex mutexLock;
+    std::condition_variable syncToMain;
 
     // Properties
     properties::BoolProperty _enabled;
