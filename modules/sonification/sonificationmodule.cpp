@@ -242,7 +242,26 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
         if (_enabled) {
             // Initialize the scena and camera information
             if (!isInitialized) {
-                isInitialized = initialize(scene, camera);
+                // Find the scene
+                if (!scene) {
+                    scene = global::renderEngine->scene();
+                }
+
+                // Find the camera in the scene
+                if (!camera) {
+                    camera = scene ? scene->camera() : nullptr;
+                }
+
+                // Check status
+                if (!scene || scene->isInitializing() || scene->root()->children().empty() ||
+                    !camera ||glm::length(camera->positionVec3()) <
+                    std::numeric_limits<glm::f64>::epsilon())
+                {
+                    isInitialized = false;
+                }
+                else {
+                    isInitialized = true;
+                }
             }
 
             if (isInitialized && scene && camera) {
@@ -267,33 +286,6 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
         lg.unlock();
         syncToMain.notify_one();
     }
-}
-
-bool SonificationModule::initialize(Scene* scene, Camera* camera) {
-    // Find the scene
-    if (!scene) {
-        scene = global::renderEngine->scene();
-    }
-    if (!scene) {
-        return false;
-    }
-
-    // Find the camera in the scene
-    if (!camera) {
-        camera = scene ? scene->camera() : nullptr;
-    }
-    if (!camera) {
-        return false;
-    }
-
-    // Check status
-    if (scene->isInitializing() || scene->root()->children().empty() ||
-        glm::length(camera->positionVec3()) < std::numeric_limits<glm::f64>::epsilon())
-    {
-        return false;
-    }
-
-    return true;
 }
 
 std::vector<scripting::LuaLibrary> SonificationModule::luaLibraries() const {

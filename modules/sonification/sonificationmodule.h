@@ -131,18 +131,6 @@ private:
     void update(std::atomic<bool>& isRunning);
 
     /**
-     * Initializs the data required for the sonificaiton
-     *
-     * \param scene pointer to the scene, should be set by this function if the scene has
-     *        already been initialized
-     * \param camera pointer to the camera, should be set by this function if the scene
-     *        and camera has already been initialized
-     *
-     * \return whether the sonification was successfully initialized or not
-     */
-    bool initialize(Scene* scene, Camera* camera);
-
-    /**
      * Add the a specified sonification to the list of registered sonifications in the
      * sonification module
      *
