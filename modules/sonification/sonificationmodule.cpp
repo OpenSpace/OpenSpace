@@ -24,7 +24,6 @@
 
 #include <modules/sonification/sonificationmodule.h>
 
-#include <openspace/documentation/documentation.h>
 #include <modules/sonification/include/camerasonification.h>
 #include <modules/sonification/include/focussonification.h>
 #include <modules/sonification/include/nodessonification.h>

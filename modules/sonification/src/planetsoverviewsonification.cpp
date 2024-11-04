@@ -155,7 +155,7 @@ void PlanetsOverviewSonification::sendData() {
         return;
     }
 
-    std::string label = "/Sun";
+    std::string label = "/Overview";
     std::vector<OscDataType> data(NumDataItems);
 
     data[GuiSettingsIndex] = createSettingsBlob();

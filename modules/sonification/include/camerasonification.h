@@ -52,11 +52,16 @@ public:
 
 private:
     // Indices for data items
-    static constexpr int NumDataItems = 4;
-    static constexpr int CameraPosIndex = 0;
-    static constexpr int CameraQuatRotIndex = 1;
-    static constexpr int CameraSpeedIndex = 2;
-    static constexpr int CameraSpeedUnitIndex = 3;
+    static constexpr int NumDataItems = 9;
+    static constexpr int CameraPosXIndex = 0;
+    static constexpr int CameraPosYIndex = 1;
+    static constexpr int CameraPosZIndex = 2;
+    static constexpr int CameraQuatRotWIndex = 3;
+    static constexpr int CameraQuatRotXIndex = 4;
+    static constexpr int CameraQuatRotYIndex = 5;
+    static constexpr int CameraQuatRotZIndex = 6;
+    static constexpr int CameraSpeedIndex = 7;
+    static constexpr int CameraSpeedUnitIndex = 8;
 
     /**
      * Update the sonification data
@@ -69,12 +74,9 @@ private:
 
     /**
      * Send current sonification data over the osc connection
-     * Order of data: Camera position, rotation, speed, and speed distance unit.
+     * Order of data: Camera position x, y,, and z, rotation, speed, and speed distance unit.
      */
     void sendData();
-
-    osc::Blob createBlob(glm::dvec3 data);
-    osc::Blob createBlob(glm::dquat data);
 
     // Properties
     struct PrecisionProperty : properties::PropertyOwner {

@@ -101,7 +101,8 @@ private:
 
     /**
      * Send current sonification data for the indicated node over the osc connection
-     * Order of data: distance, horizontal angle, vertical angle
+     * Order of data: distance, horizontal angle, vertical angle, unit used for the
+     * distance value
      */
     void sendData(int nodeIndex);
 

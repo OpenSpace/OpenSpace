@@ -127,7 +127,7 @@ CameraSonification::PrecisionProperty::PrecisionProperty(
         RotationPrecisionInfo,
         0.05,
         0,
-        1e+25
+        10
     )
     , speedPrecision(
         SpeedPrecisionInfo,
@@ -140,7 +140,6 @@ CameraSonification::PrecisionProperty::PrecisionProperty(
     positionPrecision.setExponent(20.f);
 
     addProperty(rotationPrecision);
-    rotationPrecision.setExponent(20.f);
 
     addProperty(speedPrecision);
     speedPrecision.setExponent(100.f);
@@ -153,12 +152,13 @@ bool CameraSonification::getData(const Camera* camera) {
 
     // Rotation
     const glm::dquat cameraRotation = camera->rotationQuaternion();
-    // The difference between two quaternions q and k is defined as diff = q * inverse(k).
-    // Multiplying quaternions is done with cross protuct (x), not dot product (*).
-    // To get the magnitude of rotational change, the lenght of the resulting difference
-    // quaternion is used.
-    const double rotationDifference =
-        glm::length(glm::cross(_cameraRotation, glm::inverse(cameraRotation)));
+    // To check if the rotation has changed above the precission threshold, check the
+    // angle and axis of the quaternion seperatly
+    const double rotationAngleDifference = std::abs(_cameraRotation.w - cameraRotation.w);
+    const double rotationAxisDifference = glm::length(
+        glm::dvec3(_cameraRotation.x, _cameraRotation.y, _cameraRotation.z) -
+        glm::dvec3(cameraRotation.x, cameraRotation.y, cameraRotation.z)
+    );
 
     // Speed
     double averageFrameTime = global::windowDelegate->averageDeltaTime();
@@ -183,7 +183,9 @@ bool CameraSonification::getData(const Camera* camera) {
         shouldSendData = true;
     }
 
-    if (rotationDifference > _precisionProperty.rotationPrecision) {
+    if (rotationAngleDifference > _precisionProperty.rotationPrecision ||
+        rotationAxisDifference > _precisionProperty.rotationPrecision)
+    {
         _cameraRotation = cameraRotation;
         shouldSendData = true;
     }
@@ -202,10 +204,15 @@ void CameraSonification::sendData() {
     std::vector<OscDataType> data(NumDataItems);
 
     // Position
-    data[CameraPosIndex] = createBlob(_cameraPosition);
+    data[CameraPosXIndex] = _cameraPosition.x;
+    data[CameraPosYIndex] = _cameraPosition.y;
+    data[CameraPosZIndex] = _cameraPosition.z;
 
     // Rotation
-    data[CameraQuatRotIndex] = createBlob(_cameraRotation);
+    data[CameraQuatRotWIndex] = _cameraRotation.w;
+    data[CameraQuatRotXIndex] = _cameraRotation.x;
+    data[CameraQuatRotYIndex] = _cameraRotation.y;
+    data[CameraQuatRotZIndex] = _cameraRotation.z;
 
     // Speed
     data[CameraSpeedIndex] = _cameraSpeed;
@@ -216,29 +223,6 @@ void CameraSonification::sendData() {
     );
 
     _connection->send(label, data);
-}
-
-osc::Blob CameraSonification::createBlob(glm::dvec3 data) {
-    constexpr int Size = 3;
-    double blob[Size] = { 0.0 };
-
-    blob[0] = data.x;
-    blob[1] = data.y;
-    blob[2] = data.z;
-
-    return osc::Blob(blob, Size);
-}
-
-osc::Blob CameraSonification::createBlob(glm::dquat data) {
-    constexpr int Size = 4;
-    double blob[Size] = { 0.0 };
-
-    blob[0] = data.w;
-    blob[1] = data.x;
-    blob[2] = data.y;
-    blob[3] = data.z;
-
-    return osc::Blob(blob, Size);
 }
 
 } // namespace openspace
