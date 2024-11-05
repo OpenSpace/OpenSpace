@@ -188,11 +188,11 @@ void SonificationModule::addSonification(SonificationBase* sonification) {
 }
 
 void SonificationModule::internalDeinitialize() {
-    // Join the thread
+    // Stop the loop before joining and tell the thread it is ok to run last itteration
     _isRunning = false;
+    syncToMain.notify_one();
 
-    // Wait before joining the thread
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    // Join the thread
     _updateThread.join();
 }
 
@@ -231,7 +231,7 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
         // Wait for the main thread
         //LDEBUG("The sonification thread is waiting for a signal from the main thread");
         std::unique_lock<std::mutex> lk(mutexLock);
-        syncToMain.wait_for(lk, std::chrono::seconds(30));
+        syncToMain.wait(lk);
         //LDEBUG(
         //    "The sonification thread is working after having received a signal from "
         //    "the main thread"
