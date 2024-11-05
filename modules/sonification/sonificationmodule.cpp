@@ -26,6 +26,7 @@
 
 #include <modules/sonification/include/camerasonification.h>
 #include <modules/sonification/include/focussonification.h>
+#include <modules/sonification/include/modesonification.h>
 #include <modules/sonification/include/nodessonification.h>
 #include <modules/sonification/include/planetscomparesonification.h>
 #include <modules/sonification/include/planetsoverviewsonification.h>
@@ -114,13 +115,16 @@ SonificationModule::SonificationModule()
 
     // Add options to the drop down menues
     _mode.addOptions({
-        { 0, "Horizontal" },
-        { 1, "Horizontal With Elevation" },
-        { 2, "Circular" },
-        { 3, "Circular With Elevation" },
-        { 4, "None" }
+        { 0, "None" },
+        { 1, "Horizontal" },
+        { 2, "Horizontal With Elevation" },
+        { 3, "Circular" },
+        { 4, "Circular With Elevation" }
     });
     _mode.onChange([this]() { guiOnChangeSurroundMode(); });
+
+    // Select Horizontal as the default surround mode
+    _mode.setValue(static_cast<int>(SurroundMode::Horizontal));
     addProperty(_mode);
 }
 
@@ -147,10 +151,13 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     }
 
     // Fill sonification list
-    SonificationBase* sonification = new FocusSonification(_ipAddress, _port);
+    SonificationBase* sonification = new CameraSonification(_ipAddress, _port);
     addSonification(sonification);
 
-    sonification = new CameraSonification(_ipAddress, _port);
+    sonification = new FocusSonification(_ipAddress, _port);
+    addSonification(sonification);
+
+    sonification = new ModeSonification(_ipAddress, _port);
     addSonification(sonification);
 
     sonification = new TimeSonification(_ipAddress, _port);
@@ -159,13 +166,13 @@ void SonificationModule::internalInitialize(const ghoul::Dictionary& dictionary)
     sonification = new NodesSonification(_ipAddress, _port);
     addSonification(sonification);
 
-    sonification = new PlanetsSonification(_ipAddress, _port);
+    sonification = new PlanetsCompareSonification(_ipAddress, _port);
     addSonification(sonification);
 
     sonification = new PlanetsOverviewSonification(_ipAddress, _port);
     addSonification(sonification);
 
-    sonification = new PlanetsCompareSonification(_ipAddress, _port);
+    sonification = new PlanetsSonification(_ipAddress, _port);
     addSonification(sonification);
 
     // Only the master runs the SonificationModule

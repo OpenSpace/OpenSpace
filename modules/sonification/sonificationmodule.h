@@ -44,6 +44,7 @@ public:
     constexpr static const char* Name = "Sonification";
 
     /**
+    * None: Mono. No directional information at all.
     * Horizontal: Calculate the angle to the object in the horizontal direction of
     *             the camera view plane. Where straight forwards in the camera view
     *             direction is zero degrees. TODO: Where is + and -?. (Norrköping dome)
@@ -65,15 +66,13 @@ public:
     *                        from -pi/2 to pi/2 and zero is straight forwards in the
     *                        camera view direction. Positive elevation angles in the up
     *                        direction of the camera. (Hayden planetarium)
-    *
-    * None: Mono. No directional information at all.
     */
     enum class SurroundMode {
-        Horizontal = 0,
+        None = 0,
+        Horizontal,
         HorizontalWithElevation,
         Circular,
         CircularWithElevation,
-        None
     };
 
     SonificationModule();
