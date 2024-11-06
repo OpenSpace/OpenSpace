@@ -288,7 +288,8 @@ void SonificationModule::update(std::atomic<bool>& isRunning) {
 
 std::vector<scripting::LuaLibrary> SonificationModule::luaLibraries() const {
     return {
-        PlanetsSonification::luaLibrary()
+        PlanetsSonification::luaLibrary(),
+        NodesSonification::luaLibrary()
     };
 }
 

@@ -2,7 +2,6 @@
   "assets": [
     "base",
     "events/toggle_sun",
-    "modules/sonification/actions",
     "modules/sonification/planets",
     "scene/solarsystem/planets/earth/earth",
     "scene/solarsystem/planets/earth/satellites/satellites"

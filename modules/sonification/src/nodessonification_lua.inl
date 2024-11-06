@@ -44,8 +44,8 @@ namespace {
     openspace::NodesSonification* nodesSonification =
         reinterpret_cast<openspace::NodesSonification*>(ptr);
 
-    for (const std::string_view& n : nodes.keys()) {
-        const ghoul::Dictionary& node = nodes.value<ghoul::Dictionary>(n);
+    for (const std::string_view& k : nodes.keys()) {
+        std::string node = nodes.value<std::string>(k);
         nodesSonification->addNode(node);
     }
 }

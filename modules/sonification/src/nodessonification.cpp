@@ -93,14 +93,6 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(NodesSonification)]] Parameters {
-        // The name of the node
-        std::string name;
-
-        // [[codegen::verbatim(DistanceUnitInfo.description)]]
-        std::optional<std::string> distanceUnit;
-    };
-#include "nodessonification_codegen.cpp"
 } // namespace
 #include "nodessonification_lua.inl"
 
@@ -119,8 +111,8 @@ NodesSonification::NodesSonification(const std::string& ip, int port)
         _distanceUnitOption.addOption(i, DistanceUnitNamesSingular[i].data());
     }
 
-    // Select Kilometers as the default distance unit
-    _distanceUnitOption.setValue(static_cast<int>(DistanceUnit::Kilometer));
+    // Select Meters as the default distance unit
+    _distanceUnitOption.setValue(static_cast<int>(DistanceUnit::Meter));
     addProperty(_distanceUnitOption);
 
     // Precision
@@ -285,10 +277,7 @@ void NodesSonification::update(const Camera* camera) {
 
 void NodesSonification::stop() {}
 
-void NodesSonification::addNode(ghoul::Dictionary dict) {
-    const Parameters p = codegen::bake<Parameters>(dict);
-    SonificationNode node = p.name;
-
+void NodesSonification::addNode(const std::string& node) {
     _nodes.push_back(node);
 }
 

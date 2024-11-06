@@ -55,9 +55,9 @@ public:
     /**
     * Add the given node to the list of nodes
     *
-    * \param dict the node that should be added
+    * \param node the identifier of the node that should be added
     */
-    void addNode(ghoul::Dictionary dict);
+    void addNode(const std::string& node);
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the
