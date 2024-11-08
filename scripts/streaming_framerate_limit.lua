@@ -1,0 +1,1 @@
+openspace.setPropertyValueSingle("RenderEngine.FramerateLimit", 30.000000)
