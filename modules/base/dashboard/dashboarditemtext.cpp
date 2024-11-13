@@ -103,7 +103,7 @@ std::string formatTimeForData(std::string_view timeStr) {
     ss >> std::get_time(&tm, "%Y %b %d %H:%M:%S");
 
     std::ostringstream oss;
-    oss << std::put_time(&tm, "%Y-%m-%dT%H:%M:00Z");
+    oss << std::put_time(&tm, "%Y-%m-%dT%H:00:00Z");
     return oss.str();
 }
 
@@ -127,9 +127,17 @@ double DashboardItemText::getValueForCurrentTime() const {
 void DashboardItemText::render(glm::vec2& penPosition) {
     ZoneScoped;
 
+    //double value = round(getValueForCurrentTime() * 10.0) / 10.0;
+
     double value = getValueForCurrentTime();
 
-    _text = "Observed KP Index: " + std::to_string(value);
+
+    // Use ostringstream for formatting
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(1) << value;
+
+    //_text = "Observed KP Index: " + std::to_string(value);
+    _text = "Observed KP Index: " + oss.str();
 
     glm::vec4 color = { 1.f, 1.f, 1.f, 1.f };
 

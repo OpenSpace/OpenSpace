@@ -15,6 +15,20 @@
       }
     },
     { "type": "wait", "value": 45 },
+    {
+      "type": "time",
+      "value": "1969-07-20T20:16:50.00"
+    },
+    { "type": "screenshot" },
+    {
+      "type": "time",
+      "value": "1969-07-20T20:17:50.00"
+    },
+    { "type": "screenshot" },
+    {
+      "type": "time",
+      "value": "1969-07-20T20:18:50.00"
+    },
     { "type": "screenshot" }
   ]
 }

@@ -4,7 +4,11 @@ local globe = asset.require("scene/solarsystem/planets/earth/earth")
 local northPath = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_north/combined_images/"
 
 --ELON: change this to oval_layer_images/south_images
-local southPath = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_south/combined_images/"
+--local southPath = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_south/combined_images/"
+local southPath = "C:/Users/alundkvi/Documents/work/scripts/scriptTest/oval/combined_images/"
+
+
+
 
 local northPathNameChange = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_north/combined_images_namechange"
 local southPathNameChange = "C:/Users/alundkvi/Documents/work/scripts/oval_geojsons_south/combined_images_namechange"

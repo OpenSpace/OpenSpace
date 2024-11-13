@@ -1,5 +1,9 @@
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
+local image_filepath = "${USER_ASSETS}/aurorasaurus/mayImagesCompressed/"
+
+local icon_filepath = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/"
+
 local notSeenAuroraIcon3997 = {
   Identifier = "notSeenAuroraIcon3997",
   Parent = earth.Earth.Identifier,
@@ -14,19 +18,23 @@ local notSeenAuroraIcon3997 = {
       Globe = earth.Earth.Identifier,
       Latitude = 53.31583556755319,
       Longitude = -1.6365926625630527,
-      Altitude = 95000,
+      Altitude = 9500,
       UseHeightmap = false
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 75000,
-  Origin = "Center",
-  Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-  Opacity = 1.0,
-  Enabled = true,
-  RenderBinMode = "PostDeferredTransparent"
+    Size = 1,
+    Origin = "Center",
+    Billboard = true,
+    Texture = icon_filepath .. "grayIcon.png",
+    Opacity = 1.0,
+    Enabled = true,
+    ScaleByDistance = true,
+    ScaleRatio = 0.01,
+    ScaleByDistanceMaxHeight = 200000,
+    RenderBinMode = "PostDeferredTransparent",
+    ScaleByDistanceMinHeight = 30000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -35,8 +43,8 @@ local notSeenAuroraIcon3997 = {
 }
 
 
-local shapeAuroraGreenPinkRed3998 = {
-  Identifier = "shapeAuroraGreenPinkRed3998",
+local AuroraGreenPinkRed3998 = {
+  Identifier = "AuroraGreenPinkRed3998",
   Parent = earth.Earth.Identifier,
   TimeFrame = {
     Type = "TimeFrameInterval",
@@ -49,7 +57,7 @@ local shapeAuroraGreenPinkRed3998 = {
       Globe = earth.Earth.Identifier,
       Latitude = 34.62354389575096,
       Longitude = -86.29359909040306,
-      Altitude = 120000,
+      Altitude = 15000,
       UseHeightmap = false
     }
   },
@@ -57,25 +65,28 @@ local shapeAuroraGreenPinkRed3998 = {
     Type = "RenderableSwitch",
     Renderable1 = {
         Type = "RenderablePlaneImageLocal",
-        Size = 75000,
+        Size = 50000,
         Origin = "Center",
         Billboard = true,
-        Texture = "C:/Users/alundkvi/Documents/work/data/auroraData/mayImagesCompressed/image_3998.jpg",
+        Texture = image_filepath .. "image_3998.jpg",
         Opacity = 1,
-        Enabled = true,
-        RenderBinMode = "PostDeferredTransparent"
+        Enabled = true
       },
-      Renderable2 = {
-        Type = "RenderablePlaneImageLocal",
-        Size = 75000,
-        Origin = "Center",
-        Billboard = true,
-        Texture = "${USER_ASSETS}/aurorasaurus/icons/newIcons2/greenRedPink2.png",
-        Opacity = 1,
-        Enabled = true,
-        RenderBinMode = "PostDeferredTransparent"
-      },
-      DistanceThreshold = 1000000
+    Renderable2 = {
+      Type = "RenderablePlaneImageLocal",
+      Size = 1,
+      Origin = "Center",
+      Billboard = true,
+      Texture = icon_filepath .. "greenRedPinkCamera.png",
+      Opacity = 1,
+      Enabled = true,
+      ScaleByDistance = true,
+      ScaleRatio = 0.01,
+      ScaleByDistanceMaxHeight = 200000,
+      ScaleByDistanceMinHeight = 30000
+    },
+    RenderBinMode = "PostDeferredTransparent",
+    DistanceThreshold = 1000000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -98,19 +109,23 @@ local notSeenAuroraIcon3999 = {
       Globe = earth.Earth.Identifier,
       Latitude = 51.28942210363611,
       Longitude = 1.0417401624862959,
-      Altitude = 95000,
+      Altitude = 9500,
       UseHeightmap = false
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 75000,
-  Origin = "Center",
-  Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-  Opacity = 1.0,
-  Enabled = true,
-  RenderBinMode = "PostDeferredTransparent"
+    Size = 1,
+    Origin = "Center",
+    Billboard = true,
+    Texture = icon_filepath .. "grayIcon.png",
+    Opacity = 1.0,
+    Enabled = true,
+    ScaleByDistance = true,
+    ScaleRatio = 0.01,
+    ScaleByDistanceMaxHeight = 200000,
+    RenderBinMode = "PostDeferredTransparent",
+    ScaleByDistanceMinHeight = 30000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -133,19 +148,23 @@ local notSeenAuroraIcon4000 = {
       Globe = earth.Earth.Identifier,
       Latitude = 53.10005720754886,
       Longitude = -1.125139789746984,
-      Altitude = 95000,
+      Altitude = 9500,
       UseHeightmap = false
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 75000,
-  Origin = "Center",
-  Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-  Opacity = 1.0,
-  Enabled = true,
-  RenderBinMode = "PostDeferredTransparent"
+    Size = 1,
+    Origin = "Center",
+    Billboard = true,
+    Texture = icon_filepath .. "grayIcon.png",
+    Opacity = 1.0,
+    Enabled = true,
+    ScaleByDistance = true,
+    ScaleRatio = 0.01,
+    ScaleByDistanceMaxHeight = 200000,
+    RenderBinMode = "PostDeferredTransparent",
+    ScaleByDistanceMinHeight = 30000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -168,19 +187,23 @@ local notSeenAuroraIcon4001 = {
       Globe = earth.Earth.Identifier,
       Latitude = 52.3912327325193,
       Longitude = 0.238438744710565,
-      Altitude = 95000,
+      Altitude = 9500,
       UseHeightmap = false
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 75000,
-  Origin = "Center",
-  Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-  Opacity = 1.0,
-  Enabled = true,
-  RenderBinMode = "PostDeferredTransparent"
+    Size = 1,
+    Origin = "Center",
+    Billboard = true,
+    Texture = icon_filepath .. "grayIcon.png",
+    Opacity = 1.0,
+    Enabled = true,
+    ScaleByDistance = true,
+    ScaleRatio = 0.01,
+    ScaleByDistanceMaxHeight = 200000,
+    RenderBinMode = "PostDeferredTransparent",
+    ScaleByDistanceMinHeight = 30000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -203,19 +226,23 @@ local notSeenAuroraIcon4002 = {
       Globe = earth.Earth.Identifier,
       Latitude = 52.13388471773215,
       Longitude = -0.4856795164493719,
-      Altitude = 95000,
+      Altitude = 9500,
       UseHeightmap = false
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 75000,
-  Origin = "Center",
-  Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-  Opacity = 1.0,
-  Enabled = true,
-  RenderBinMode = "PostDeferredTransparent"
+    Size = 1,
+    Origin = "Center",
+    Billboard = true,
+    Texture = icon_filepath .. "grayIcon.png",
+    Opacity = 1.0,
+    Enabled = true,
+    ScaleByDistance = true,
+    ScaleRatio = 0.01,
+    ScaleByDistanceMaxHeight = 200000,
+    RenderBinMode = "PostDeferredTransparent",
+    ScaleByDistanceMinHeight = 30000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -238,19 +265,23 @@ local notSeenAuroraIcon4003 = {
       Globe = earth.Earth.Identifier,
       Latitude = 58.667247475098975,
       Longitude = 17.047855454073645,
-      Altitude = 95000,
+      Altitude = 9500,
       UseHeightmap = false
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 75000,
-  Origin = "Center",
-  Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-  Opacity = 1.0,
-  Enabled = true,
-  RenderBinMode = "PostDeferredTransparent"
+    Size = 1,
+    Origin = "Center",
+    Billboard = true,
+    Texture = icon_filepath .. "grayIcon.png",
+    Opacity = 1.0,
+    Enabled = true,
+    ScaleByDistance = true,
+    ScaleRatio = 0.01,
+    ScaleByDistanceMaxHeight = 200000,
+    RenderBinMode = "PostDeferredTransparent",
+    ScaleByDistanceMinHeight = 30000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -273,19 +304,23 @@ local notSeenAuroraIcon4004 = {
       Globe = earth.Earth.Identifier,
       Latitude = 52.53882441644673,
       Longitude = -1.527877906533233,
-      Altitude = 95000,
+      Altitude = 9500,
       UseHeightmap = false
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 75000,
-  Origin = "Center",
-  Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-  Opacity = 1.0,
-  Enabled = true,
-  RenderBinMode = "PostDeferredTransparent"
+    Size = 1,
+    Origin = "Center",
+    Billboard = true,
+    Texture = icon_filepath .. "grayIcon.png",
+    Opacity = 1.0,
+    Enabled = true,
+    ScaleByDistance = true,
+    ScaleRatio = 0.01,
+    ScaleByDistanceMaxHeight = 200000,
+    RenderBinMode = "PostDeferredTransparent",
+    ScaleByDistanceMinHeight = 30000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -308,19 +343,23 @@ local notSeenAuroraIcon4005 = {
       Globe = earth.Earth.Identifier,
       Latitude = 51.309025792387146,
       Longitude = 0.673219821421318,
-      Altitude = 95000,
+      Altitude = 9500,
       UseHeightmap = false
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
-    Size = 75000,
-  Origin = "Center",
-  Billboard = true,
-  Texture = "${USER_ASSETS}/aurorasaurus/icons/grayIcon.png",
-  Opacity = 1.0,
-  Enabled = true,
-  RenderBinMode = "PostDeferredTransparent"
+    Size = 1,
+    Origin = "Center",
+    Billboard = true,
+    Texture = icon_filepath .. "grayIcon.png",
+    Opacity = 1.0,
+    Enabled = true,
+    ScaleByDistance = true,
+    ScaleRatio = 0.01,
+    ScaleByDistanceMaxHeight = 200000,
+    RenderBinMode = "PostDeferredTransparent",
+    ScaleByDistanceMinHeight = 30000
   },
   GUI = {
     Path = "/Aurorasaurus",
@@ -332,7 +371,7 @@ local notSeenAuroraIcon4005 = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(notSeenAuroraIcon3997)
-  openspace.addSceneGraphNode(shapeAuroraGreenPinkRed3998)
+  openspace.addSceneGraphNode(AuroraGreenPinkRed3998)
   openspace.addSceneGraphNode(notSeenAuroraIcon3999)
   openspace.addSceneGraphNode(notSeenAuroraIcon4000)
   openspace.addSceneGraphNode(notSeenAuroraIcon4001)
@@ -344,7 +383,7 @@ end)
 
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(notSeenAuroraIcon3997)
-  openspace.removeSceneGraphNode(shapeAuroraGreenPinkRed3998)
+  openspace.removeSceneGraphNode(AuroraGreenPinkRed3998)
   openspace.removeSceneGraphNode(notSeenAuroraIcon3999)
   openspace.removeSceneGraphNode(notSeenAuroraIcon4000)
   openspace.removeSceneGraphNode(notSeenAuroraIcon4001)
@@ -355,7 +394,7 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(notSeenAuroraIcon3997)
-asset.export(shapeAuroraGreenPinkRed3998)
+asset.export(AuroraGreenPinkRed3998)
 asset.export(notSeenAuroraIcon3999)
 asset.export(notSeenAuroraIcon4000)
 asset.export(notSeenAuroraIcon4001)

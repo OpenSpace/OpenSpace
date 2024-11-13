@@ -49,6 +49,7 @@ local Skycamera_sphere = {
     Enabled = false,
     TextureSource = imagePath,
     Opacity = 1,
+    RenderBinMode = "PostDeferredTransparent",
     Segments = 532
   },
   GUI = {
