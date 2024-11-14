@@ -201,7 +201,7 @@ namespace {
         std::optional<bool> preventHeightUpdate;
 
         // [[codegen::verbatim(FileInfo.description)]]
-        std::filesystem::path file;
+        std::string file;
 
         // [[codegen::verbatim(HeightOffsetInfo.description)]]
         std::optional<float> heightOffset;
@@ -334,7 +334,7 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
     addProperty(_opacity);
     addProperty(_fade);
 
-    _geoJsonFile = p.file.string();
+    _geoJsonFile = absPath(p.file).string();
     _geoJsonFile.setReadOnly(true);
     addProperty(_geoJsonFile);
 

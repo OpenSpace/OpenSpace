@@ -56,10 +56,6 @@
       "key": "R"
     },
     {
-      "action": "os.solarsystem.Toggleskycamera",
-      "key": "E"
-    },
-    {
       "action": "os.disableAllAuroras",
       "key": "D"
     },
