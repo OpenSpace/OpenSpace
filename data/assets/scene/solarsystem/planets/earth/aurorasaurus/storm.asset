@@ -38,55 +38,6 @@ local Browser = {
   Url = "https://iswa.ccmc.gsfc.nasa.gov/IswaSystemWebApp/?layout=SuperStormMay2024Indices"
 }
 
-local Skycamera_sphere = {
-  Identifier = "Skycamera_sphere",
-  Parent = globe.Earth.Identifier,
-  Enabled = asset.disabled,
-  InteractionSphere = 6379137,
-  Renderable = {
-    Type = "RenderableTimeVaryingSphere",
-    Size = 6379137.0, -- Slightly bigger than the sun renderable,
-    Enabled = false,
-    TextureSource = imagePath,
-    Opacity = 1,
-    RenderBinMode = "PostDeferredTransparent",
-    Segments = 532
-  },
-  GUI = {
-    Name = "Skycamera sphere",
-    Path = "/Sky-Camera",
-    Description = [[Texture sequence of an extreme ultra violet (EUV) simulation, during
-      the CME. This asset contains data from 2000-07-14 08:38 to 2000-07-14 19:48]]
-  }
-}
-
-local Toggleskycamera = {
-  Identifier = "os.solarsystem.Toggleskycamera",
-  Name = "Toggle Sky Camera",
-  Command = [[
-    if openspace.propertyValue("Scene.Skycamera_sphere.Renderable.Enabled") then
-      openspace.setPropertyValueSingle(
-        "Scene.Skycamera_sphere.Renderable.Fade",
-        0.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear",
-        'openspace.setPropertyValueSingle("Scene.Skycamera_sphere.Renderable.Enabled", false)'
-      )
-    else
-      openspace.setPropertyValueSingle("Scene.Skycamera_sphere.Renderable.Enabled", true)
-      openspace.setPropertyValueSingle(
-        "Scene.Skycamera_sphere.Renderable.Fade",
-        1.0,
-        openspace.propertyValue("OpenSpaceEngine.FadeDuration"),
-        "Linear"
-      )
-    end
-  ]],
-  Documentation = "Toggle Sky Camera Layer",
-  GuiPath = "/Sky-Camera",
-  IsLocal = false
-}
-
 local ToggleKPindex = {
   Identifier = "os.ToggleKPindex",
   Name = "Toggle KP index",
@@ -155,12 +106,8 @@ asset.onInitialize(function()
   openspace.setPropertyValueSingle("ScreenSpace.target-marker.Scale", 0.130000)
   --openspace.addScreenSpaceRenderable(Browser)
 
-
-  openspace.action.registerAction(Toggleskycamera)
   openspace.action.registerAction(ToggleISWACygnet)
   openspace.action.registerAction(ToggleKPindex)
-  openspace.addSceneGraphNode(Skycamera_sphere)
-  openspace.setPropertyValueSingle("Scene.Skycamera_sphere.Rotation.Rotation", {0.000000,0.000000,-3.140000})
 end)
 
 asset.onDeinitialize(function()
@@ -169,17 +116,13 @@ asset.onDeinitialize(function()
   openspace.addScreenSpaceRenderable(Dashboard)
   --openspace.removeScreenSpaceRenderable(Browser)
 
-  openspace.action.removeAction(Toggleskycamera)
   openspace.action.removeAction(ToggleISWACygnet)
   openspace.action.removeAction(ToggleKPindex)
-  openspace.removeSceneGraphNode(Skycamera_sphere)
 end)
 
 --asset.export("layer", Layer)
 --asset.export(Browser)
 asset.export(Dashboard)
 
-asset.export("Toggleskycamera", Toggleskycamera.Identifier)
 asset.export("ToggleISWACygnet", ToggleISWACygnet.Identifier)
 asset.export("ToggleKPindex", ToggleKPindex.Identifier)
-asset.export(Skycamera_sphere)
