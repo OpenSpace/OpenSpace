@@ -54,8 +54,17 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo DataFileInfo = {
+        "JsonFilePath",
+        "Json File Path",
+        "The file path to the JSON data.",
+        openspace::properties::Property::Visibility::User
+    };
+
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
         std::optional<std::string> url [[codegen::key("URL")]];
+        std::string jsonFilePath;
+
     };
 #include "screenspaceimageonline_codegen.cpp"
 } // namespace
@@ -85,7 +94,8 @@ namespace openspace {
         setIdentifier(std::move(identifier));
 
         _texturePath.onChange([this]() { _textureIsDirty = true; });
-        _texturePath = p.url.value_or(_texturePath);
+        //_texturePath = p.url.value_or(_texturePath);
+        _texturePath = absPath(p.jsonFilePath).string();
         addProperty(_texturePath);
 
         _lastCheckedSoftwareTimestamp = getCurrentTimestamp();

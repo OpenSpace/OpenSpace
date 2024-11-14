@@ -16,6 +16,7 @@ local Dashboard = {
           Identifier = "KPindexText",
           GuiName = "Storm KP index",
           Text = "",
+          DataFile = "${USER_ASSETS}/aurorasaurus/KPjson/observed_data.json",
           FontSize = 72
       }
   }
@@ -26,8 +27,7 @@ local marker = {
     Name = "ISWA Cygnets",
     Type = "ScreenSpaceImageOnline",
     FaceCamera = false,
-    --ELON: change this to magnetopause.json
-    URL = "C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/ISWAcygnets/magnetopause.json"
+    JsonFilePath = "${USER_ASSETS}/aurorasaurus/ISWAcygnets/magnetopause.json"
 }
 
 

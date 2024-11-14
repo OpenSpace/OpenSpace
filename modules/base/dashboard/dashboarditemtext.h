@@ -53,8 +53,12 @@ public:
 
     static documentation::Documentation Documentation();
 
+protected:
+    
+
 private:
     properties::StringProperty _text;
+    properties::StringProperty _dataFile;
     std::unordered_map<std::string, double> _data;
 
     mutable double _lastValue = 0.0;

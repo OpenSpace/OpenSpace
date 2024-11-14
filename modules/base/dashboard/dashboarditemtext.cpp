@@ -27,6 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
@@ -45,10 +47,17 @@ namespace {
         "The text to be displayed.",
         openspace::properties::Property::Visibility::User
     };
+    constexpr openspace::properties::Property::PropertyInfo DataFileInfo = {
+        "DataFile",
+        "Data File Path",
+        "The file path to the JSON data.",
+        openspace::properties::Property::Visibility::User
+    };
 
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
         // [[codegen::verbatim(TextInfo.description)]]
         std::optional<std::string> text;
+        std::string dataFile;
     };
 #include "dashboarditemtext_codegen.cpp"
 } // namespace
@@ -83,12 +92,14 @@ void DashboardItemText::loadDataFromJson(const std::string& filePath) {
 DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _text(TextInfo, "")
+    , _dataFile(DataFileInfo, "")
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _text = p.text.value_or(_text);
     addProperty(_text);
-    //ELON: change this to observed_data.json
-    loadDataFromJson("C:/Users/alundkvi/Documents/work/OpenSpace/user/data/assets/aurorasaurus/KPjson/observed_data.json");
+    _dataFile = absPath(p.dataFile).string();
+    addProperty(_dataFile);
+    loadDataFromJson(_dataFile);
 }
 
 std::string formatTimeForData(std::string_view timeStr) {
