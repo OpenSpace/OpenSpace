@@ -512,10 +512,17 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     // To not change peoples masking settings i kept the parameter for the assets
     // to be "MaskingRanges", but a single vec2-value instead of a vector.
     // What is given from the asset, is stored as the selected range.
-    _maskingRanges = p.maskingRanges.value_or(_maskingRanges);
-    if (!_maskingRanges.empty()) {
-        _selectedMaskingRange = _maskingRanges[_maskingQuantityTemp];
+    if (p.maskingRanges.has_value()) {
+        _maskingRanges = p.maskingRanges.value_or(_maskingRanges);
+        //if (!_maskingRanges.empty()) {
+        //    _selectedMaskingRange = _maskingRanges[_maskingQuantityTemp];
+        //}
     }
+    else {
+        _maskingRanges.push_back(glm::vec2(0.f, 1.f));
+        _selectedMaskingRange = glm::vec2(0.f, 1.f);
+    }
+
 
     if (p.maskingMinMaxRange.has_value()) {
         _selectedMaskingRange.setMinValue(glm::vec2(p.maskingMinMaxRange->x));
@@ -706,7 +713,9 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
 
     // This is to save the changes done in the gui for when you switch between options
     _selectedColorRange.onChange([this]() {
-        _colorTableRanges[_colorQuantity] = _selectedColorRange;
+        if (_colorTableRanges.size() > _colorQuantity) {
+            _colorTableRanges[_colorQuantity] = _selectedColorRange;
+        }
     });
 
     _colorTablePath.onChange([this]() {
@@ -735,6 +744,12 @@ void RenderableFieldlinesSequence::definePropertyCallbackFunctions() {
                 "Cannot set selected masking range with: "//,
                 //_maskingRanges[_maskingQuantity].x
             ));
+        }
+    });
+
+    _selectedMaskingRange.onChange([this]() {
+        if (_maskingRanges.size() > _maskingQuantity) {
+            _maskingRanges[_maskingQuantity] = _selectedMaskingRange;
         }
     });
 

@@ -254,6 +254,7 @@ void RenderableTimeVaryingSphere::setupDynamicDownloading(
 void RenderableTimeVaryingSphere::deinitializeGL() {
     _texture = nullptr;
     _files.clear();
+
     // Stall main thread until thread that's loading states is done
     bool printedWarning = false;
     while (_dynamicFileDownloader->filesCurrentlyDownloading()) {
@@ -414,9 +415,12 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
             // true => We stepped forward to a time represented by another state
             (nextIdx < _files.size() && currentTime >= _files[nextIdx].time))
         {
+            int previousIndex = _activeTriggerTimeIndex;
             updateActiveTriggerTimeIndex(currentTime);
-            loadTexture();
-            showCorrectFileName();
+            if (previousIndex != _activeTriggerTimeIndex) {
+                loadTexture();
+                showCorrectFileName();
+            }
         } // else {we're still in same state as previous frame (no changes needed)}
     }
     else {
