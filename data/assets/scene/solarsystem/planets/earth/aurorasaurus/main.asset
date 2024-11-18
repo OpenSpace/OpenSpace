@@ -1,4 +1,4 @@
-asset.require("./may2024assets/rendermodeTest/1")
+--[[ asset.require("./may2024assets/rendermodeTest/1")
 asset.require("./may2024assets/rendermodeTest/2")
 asset.require("./may2024assets/rendermodeTest/3")
 asset.require("./may2024assets/rendermodeTest/4")
@@ -19,15 +19,18 @@ asset.require("./may2024assets/rendermodeTest/17")
 asset.require("./may2024assets/rendermodeTest/18")
 asset.require("./may2024assets/rendermodeTest/19")
 asset.require("./may2024assets/rendermodeTest/21")
-asset.require("./may2024assets/rendermodeTest/22")
+asset.require("./may2024assets/rendermodeTest/22") ]]
 
 --asset.require("./timeline")
-asset.require("./actions")
 --asset.require("./ovalGeojson")
-asset.require("./ovalLayer")
---asset.require("./skyCamera")
 
+--Aurorasaurus
+asset.require("./actions")
+asset.require("./ovalLayer")
 asset.require("./northernViewline")
 asset.require("./southernViewline")
 asset.require("./mission")
 asset.require("./storm")
+
+--Skycamera
+--asset.require("./skyCamera")

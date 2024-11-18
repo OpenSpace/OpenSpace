@@ -1,6 +1,6 @@
 local globe = asset.require("scene/solarsystem/planets/earth/earth")
-local imagePath = "C:/Users/alundkvi/Downloads/mothers_day_storm_data_for_bea/mothers_day_storm_data_for_bea/grid_gillam/rgb/2024/05/11/images3/"
-
+--local imagePath = "C:/Users/alundkvi/Downloads/mothers_day_storm_data_for_bea/mothers_day_storm_data_for_bea/grid_gillam/rgb/2024/05/11/images3/"
+local imagePath = "C:/Users/alundkvi/Documents/work/scripts/scriptTest/skycameraImages/"
 
 local Skycamera_sphere = {
   Identifier = "Skycamera_sphere",
