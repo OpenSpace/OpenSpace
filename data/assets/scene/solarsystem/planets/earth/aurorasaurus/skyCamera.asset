@@ -1,6 +1,9 @@
 local globe = asset.require("scene/solarsystem/planets/earth/earth")
 --local imagePath = "C:/Users/alundkvi/Downloads/mothers_day_storm_data_for_bea/mothers_day_storm_data_for_bea/grid_gillam/rgb/2024/05/11/images3/"
-local imagePath = "C:/Users/alundkvi/Documents/work/scripts/scriptTest/skycameraImages/"
+--local imagePath = "C:/Users/alundkvi/Documents/work/scripts/scriptTest/skycameraImages/"
+local imagePath = "C:/Users/alundkvi/Documents/work/scripts/scriptTest/skycameraImages/combined_images"
+
+
 
 local Skycamera_sphere = {
   Identifier = "Skycamera_sphere",
@@ -9,12 +12,12 @@ local Skycamera_sphere = {
   InteractionSphere = 6379137,
   Renderable = {
     Type = "RenderableTimeVaryingSphere",
-    Size = 6379137.0, -- Slightly bigger than the sun renderable,
+    Size = 6381137.0, -- Slightly bigger than the sun renderable,
     Enabled = false,
     TextureSource = imagePath,
     Opacity = 1,
     RenderBinMode = "PostDeferredTransparent",
-    Segments = 532
+    Segments = 200
   },
   GUI = {
     Name = "Skycamera sphere",

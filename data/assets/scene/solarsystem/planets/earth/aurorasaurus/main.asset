@@ -1,4 +1,4 @@
---[[ asset.require("./may2024assets/rendermodeTest/1")
+asset.require("./may2024assets/rendermodeTest/1")
 asset.require("./may2024assets/rendermodeTest/2")
 asset.require("./may2024assets/rendermodeTest/3")
 asset.require("./may2024assets/rendermodeTest/4")
@@ -19,7 +19,7 @@ asset.require("./may2024assets/rendermodeTest/17")
 asset.require("./may2024assets/rendermodeTest/18")
 asset.require("./may2024assets/rendermodeTest/19")
 asset.require("./may2024assets/rendermodeTest/21")
-asset.require("./may2024assets/rendermodeTest/22") ]]
+asset.require("./may2024assets/rendermodeTest/22")
 
 --asset.require("./timeline")
 --asset.require("./ovalGeojson")
