@@ -25,16 +25,16 @@
 */
 
 /*
-	The text above constitutes the entire oscpack license; however, 
+	The text above constitutes the entire oscpack license; however,
 	the oscpack developer(s) also make the following non-binding requests:
 
 	Any person wishing to distribute modifications to the Software is
 	requested to send the modifications to the original developer so that
-	they can be incorporated into the canonical version. It is also 
+	they can be incorporated into the canonical version. It is also
 	requested that these non-binding requests be included whenever the
 	above license is reproduced.
 */
-#include "modules/sonification/ext/osc/ip/NetworkingUtils.h"
+#include "modules/osc/ext/osc/ip/NetworkingUtils.h"
 
 #include <netdb.h>
 #include <sys/socket.h>

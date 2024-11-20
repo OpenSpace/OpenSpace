@@ -1,0 +1,18 @@
+asset.onInitialize(function ()
+  local nodes = {
+    "ISS",
+    "Tiangong"
+  }
+
+  openspace.telemetry.addNodes(nodes)
+end)
+
+
+asset.meta = {
+  Name = "Nodes telemetry for ISS and Tiangong",
+  Version = "1.0",
+  Description = "The list of nodes in an example NodesTelemetry",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
