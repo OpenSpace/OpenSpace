@@ -23,7 +23,7 @@ local SunGlare = {
     Opacity = 0.65
   },
   GUI = {
-    Name = "Sun Glare",
+    Name = "Solar Glare",
     Path = "/Solar System/Sun",
     Description = "Sun glare effect. Enabled by default instead of sun globe"
   }
