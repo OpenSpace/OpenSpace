@@ -35,7 +35,7 @@ local COBE = {
     DisableDepth = true
   },
   GUI = {
-    Name = "1990 COBE CMB",
+    Name = "COBE",
     Path = "/Universe/Cosmic Microwave Background",
     Description = [[In 1990, COBE, the Cosmic Background Explorer, took the first
       detailed map of the cosmic microwave background light. The red areas are
@@ -69,7 +69,7 @@ local WMAP = {
     DisableDepth = true
   },
   GUI = {
-    Name = "2003 WMAP CMB",
+    Name = "WMAP",
     Path = "/Universe/Cosmic Microwave Background",
     Description = [[WMAP, the Wilkinson Microwave Anisotropy Probe, released this all-sky
       image of the cosmic microwave background light in 2003. The blue colors are slightly
@@ -102,7 +102,7 @@ local Planck = {
     DisableDepth = true
   },
   GUI = {
-    Name = "2013 Planck CMB",
+    Name = "Planck",
     Path = "/Universe/Cosmic Microwave Background",
     Description = [[The Planck mission's 2013 image of the cosmic microwave background
       light release is the most detailed view of the CMB we have to date. The orange
