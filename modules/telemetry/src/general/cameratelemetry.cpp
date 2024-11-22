@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/util/distanceconversion.h>
 
 namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo

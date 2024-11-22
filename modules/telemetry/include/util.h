@@ -27,7 +27,6 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/util/distanceconversion.h>
-#include <variant>
 
 namespace openspace {
 
@@ -35,81 +34,155 @@ namespace openspace {
      * Calculate the distance from the camera to the node with the given identifier, in
      * the given distance unit
      *
-     * \param camera pointer to the camera in the scene that the distance should be
+     * \param camera Pointer to the camera in the scene that the distance should be
      *        calculated from
-     * \param nodeIdOrPos either the identifier or the position of the node, that the
-     *        distance should be calculate to
-     * \param unit the distance unit the answer should be in, default is meter
+     * \param nodeIdentifier The identifier of the node that the distance should be
+     *        calculated to
+     * \param unit The distance unit that the answer should be in, the default is meters
      *
-     * \return distance from the camera to the node with the given identifier in the
+     * \return The distance from the camera to the node with the given identifier in the
      *         given distance unit
      */
-    double calculateDistanceTo(const Camera* camera,
-        std::variant<std::string, glm::dvec3> nodeIdOrPos,
+    double calculateDistanceTo(const Camera* camera, std::string nodeIdentifier,
         DistanceUnit unit = DistanceUnit::Meter);
 
     /**
-     * Calculate the angle from the camera to the node with the given identifier,
-     * in radians
+     * Calculate the distance from the camera to the node with the given position, in
+     * the given distance unit
      *
-     * \param camera pointer to the camera in the scene that the angle should be
+     * \param camera Pointer to the camera in the scene that the distance should be
      *        calculated from
-     * \param nodeIdOrPos either the identifier or the position of the node, that the
-     *        angle should be calculate to
+     * \param nodePosition The world position of the node that the distance should be
+     *        calculated to
+     * \param unit The distance unit that the answer should be in, the default is meters
      *
-     * \return angle from the camera to the node with the given identifier in radians
+     * \return The distance from the camera to the node with the given position in the
+     *         given distance unit
      */
-    double calculateAngleTo(const Camera* camera,
-        std::variant<std::string, glm::dvec3> nodeIdOrPos);
+    double calculateDistanceTo(const Camera* camera, glm::dvec3 nodePosition,
+        DistanceUnit unit = DistanceUnit::Meter);
+
 
     /**
-     * Calculate the angle from the first node with the given identifier to the second
-     * node with the given identifier, in radians
+     * Calculate the angle in radians from the camera to the node with the given
+     * identifier
      *
-     * \param camera pointer to the camera in the scene
-     * \param nodeIdOrPosA either the identifier or the position of the first node that
-     *        the angle should be calculated from
-     * \param nodeIdOrPosB either the identifier or the position of the second node that
-     *        the angle should be calculated to
-     *
-     * \return angle from the first node with the given identifier to the second node with
-     *         the given identifier in radians
-     */
-    double calculateAngleFromAToB(const Camera* camera,
-        std::variant<std::string, glm::dvec3> nodeIdOrPosA,
-        std::variant<std::string, glm::dvec3> nodeIdOrPosB);
-
-    /**
-     * Calculate the elevation angle from the camera to the node with the given
-     * identifier, in radians
-     *
-     * \param camera pointer to the camera in the scene that the elevation angle should be
+     * \param camera Pointer to the camera in the scene that the angle should be
      *        calculated from
-     * \param nodeIdOrPos either the identifier or the position of the node, that the
-     *        elevation angle should be calculate to
+     * \param nodeIdentifier The identifier of the node, that the angle should be
+     *        calculated to
      *
-     * \return elevation angle from the camera to the node with the given identifier in
-     *         radians
+     * \return The angle in radians from the camera to the node with the given identifier
      */
-    double calculateElevationAngleTo(const Camera* camera,
-        std::variant<std::string, glm::dvec3> nodeIdOrPos);
+    double calculateAngleTo(const Camera* camera, std::string nodeIdentifier);
 
     /**
-     * Calculate the elevation angle from the first node with the given identifier to the
-     * second node with the given identifier, in radians
+     * Calculate the angle in radians from the camera to the node with the given
+     * position
      *
-     * \param camera pointer to the camera in the scene
-     * \param nodeIdOrPosA either the identifier or the position of the first node that
-     *        the elevation angle should be calculated from
-     * \param nodeIdOrPosB either the identifier or the position of the second node that
-     *        the elevation angle should be calculated to
+     * \param camera Pointer to the camera in the scene that the angle should be
+     *        calculated from
+     * \param nodePosition The position of the node, that the angle should be
+     *        calculated to
      *
-     * \return elevation angle from the first node with the given identifier to the second
-     *         node with the given identifier in radians
+     * \return The angle in radians from the camera to the node with the given position
+     */
+    double calculateAngleTo(const Camera* camera, glm::dvec3 nodePosition);
+
+
+    /**
+     * Calculate the angle in radians from the first node (A) with the given identifier
+     * to the second node (B) with the given identifier
+     *
+     * \param camera Pointer to the camera in the scene
+     * \param nodeIdentifierA The identifier of the first node (A) that the angle should
+     *        be calculated from
+     * \param nodeIdentifierB The identifier of the second node (B) that the angle should
+     *        be calculated to
+     *
+     * \return The angle in radians from the first node (A) with the given identifier to
+     *         the second node (B) with the given identifier
+     */
+    double calculateAngleFromAToB(const Camera* camera, std::string nodeIdentifierA,
+        std::string nodeIdentifierB);
+
+    /**
+     * Calculate the angle in radians from the first node (A) with the given position
+     * to the second node (B) with the given position
+     *
+     * \param camera Pointer to the camera in the scene
+     * \param nodePositionA The position of the first node (A) that the angle should
+     *        be calculated from
+     * \param nodePositionB The position of the second node (B) that the angle should
+     *        be calculated to
+     *
+     * \return The angle in radians from the first node (A) with the given position to
+     *         the second node (B) with the given position
+     */
+    double calculateAngleFromAToB(const Camera* camera, glm::dvec3 nodePositionA,
+        glm::dvec3 nodePositionB);
+
+
+    /**
+     * Calculate the elevation angle in radians from the camera to the node with the given
+     * identifier
+     *
+     * \param camera Pointer to the camera in the scene that the elevation angle should be
+     *        calculated from
+     * \param nodeIdentifier The identifier of the node that the elevation angle should be
+     *        calculated to
+     *
+     * \return The elevation angle in radians from the camera to the node with the given
+     *         identifier
+     */
+    double calculateElevationAngleTo(const Camera* camera, std::string nodeIdentifier);
+
+    /**
+     * Calculate the elevation angle in radians from the camera to the node with the given
+     * position
+     *
+     * \param camera Pointer to the camera in the scene that the elevation angle should be
+     *        calculated from
+     * \param nodePosition The position of the node that the elevation angle should be
+     *        calculated to
+     *
+     * \return The elevation angle in radians from the camera to the node with the given
+     *         position
+     */
+    double calculateElevationAngleTo(const Camera* camera, glm::dvec3 nodePosition);
+
+
+    /**
+     * Calculate the elevation angle in radians from the first node (A) with the given
+     * identifier to the second node (B) with the given identifier
+     *
+     * \param camera Pointer to the camera in the scene
+     * \param nodeIdentifierA The identifier of the first node (A) that the elevation
+     *        angle should be calculated from
+     * \param nodeIdentifierB The identifier of the second node (B) that the elevation
+     *        angle should be calculated to
+     *
+     * \return The elevation angle in radians from the first node (A) with the given
+     *         identifier to the second node (B) with the given identifier
      */
     double calculateElevationAngleFromAToB(const Camera* camera,
-        std::variant<std::string, glm::dvec3> nodeIdOrPosA,
-        std::variant<std::string, glm::dvec3> nodeIdOrPosB);
+        std::string nodeIdentifierA, std::string nodeIdentifierB);
+
+    /**
+     * Calculate the elevation angle in radians from the first node (A) with the given
+     * position to the second node (B) with the given position
+     *
+     * \param camera Pointer to the camera in the scene
+     * \param nodePositionA The position of the first node (A) that the elevation angle
+     *        should be calculated from
+     * \param nodePositionB The position of the second node (B) that the elevation angle
+     *        should be calculated to
+     *
+     * \return The elevation angle in radians from the first node (A) with the given
+     *         position to the second node (B) with the given position
+     */
+    double calculateElevationAngleFromAToB(const Camera* camera,
+        glm::dvec3 nodePositionA, glm::dvec3 nodePositionB);
 
 } // namespace openspace
 

@@ -60,7 +60,7 @@ asset.onInitialize(function ()
     }
   }
 
-  openspace.telemetry.addPlanets(planets)
+  openspace.sonification.addPlanets(planets)
 end)
 
 

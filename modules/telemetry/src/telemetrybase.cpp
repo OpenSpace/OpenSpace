@@ -35,14 +35,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Is Enabled",
-        "This setting determines whether this sonification will be enabled or not"
+        "This setting determines whether this telemetry gathering is enabled or not"
     };
 } // namespace
 
 namespace openspace {
 
 TelemetryBase::TelemetryBase(properties::PropertyOwner::PropertyOwnerInfo info,
-                                   const std::string& ip, int port)
+                             const std::string& ip, int port)
     : properties::PropertyOwner(info)
     , _enabled(EnabledInfo, false)
 {

@@ -30,8 +30,6 @@
 #include <modules/osc/include/oscconnection.h>
 #include <openspace/camera/camera.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/util/distanceconversion.h>
-#include <variant>
 
 namespace openspace {
 
@@ -42,24 +40,25 @@ public:
     virtual ~TelemetryBase();
 
     /**
-     * Main update function for the sonification
+     * Main update function to gather telemetry data and send it over the osc connection
      *
      * \param camera pointer to the camera in the scene
      */
     virtual void update(const Camera* camera) = 0;
 
     /**
-     * Function to stop the sonification
+     * Function to stop the gathering of telemetry data
      */
     virtual void stop() = 0;
 
     /**
-    * \return identifier of the sonification
+    * \return The identifier of the telemetry class, the type of data that is gathered
+    *         and sent
     */
     std::string identifier() const;
 
     /**
-    * \return if the sonification is enabled or not
+    * \return Whether the telemetry monitoring is enabled or not for this type of data
     */
     bool enabled() const;
 
