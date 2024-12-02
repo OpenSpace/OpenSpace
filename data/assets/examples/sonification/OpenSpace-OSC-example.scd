@@ -1,6 +1,29 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2024                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 NetAddr.langPort;
 NetAddr.localAddr;
-
 
 (
 
@@ -15,15 +38,16 @@ OSCdef.new(
 		//          specified in relation to the Solar System barycenter
 		// msg[2] = The Y position of the camera in the world
 		// msg[3] = The Z position of the camera in the world
-		// msg[4] = The angle in radians for the current quaternion rotation of the camera (w)
-		// msg[5] = The X component of the unit rotation axis in the current quaternion rotation
-		//          of the camera
+		// msg[4] = The angle in radians for the current quaternion rotation of the
+		//          camera (w)
+		// msg[5] = The X component of the unit rotation axis in the current quaternion
+		//          rotation of the camera
 		// msg[6] = The Y component of the rotation axis in the quaternion rotation
 		// msg[7] = The Z component of the rotation axis in the quaternion rotation
 		// msg[8] = The current speed of the camera,
 		//          specified in the selected distance unit per second
-		// msg[9] = The selected distance unit for the speed of the camera, as a string with the
-		//          first letter capitalised
+		// msg[9] = The selected distance unit for the speed of the camera, as a string
+		//          with the first letter capitalised
 
 		("Camera: " + msg).postln;
 	},
@@ -56,8 +80,8 @@ OSCdef.new(
 		//          Sonifications are sending. More documentaiton on how these angles work
 		//          can be found on the general OpenSpace documentation page
 		//          https://docs.openspaceproject.com/en/latest/
-		//          0 -> Horizontal, the angle is horizontal to the screen and any additional
-		//                           elevatoin angle is up/down the screen.
+		//          0 -> Horizontal, the angle is horizontal to the screen and any
+		//                           additional elevatoin angle is up/down the screen.
 		//          1 -> Circular, the angle is a circular azimuth angle. Similar to
 		//                         polar coordinates. In the case of an added elevation
 		//                         angle, this would be the radius angle.
@@ -77,7 +101,8 @@ OSCdef.new(
 
 		// msg[0] = OSC Label
 		// msg[1] = Speed of simulation time,
-		//          specified in the selected time unit in the simulation per real-life second
+		//          specified in the selected time unit in the simulation per real-life
+		//          second
 		// msg[2] = The selected time unit for the speed of simulation time,
 		//          as a string with the first letter capitalized
 		// msg[3] = Current simulation time specified in J2000 seconds.
@@ -97,8 +122,8 @@ OSCdef.new(
 //          with the current surround mode taken into account
 // msg[3] = The vertical/elevation angle in radians to the node on the master screen,
 //          with the current angle calculation mode taken into account
-// msg[4] = The selected distance unit for the distance to the camera, as a string with the
-//          first letter capitalised
+// msg[4] = The selected distance unit for the distance to the camera, as a string with
+//          the first letter capitalised
 
 // ISS node
 OSCdef.new(
@@ -145,10 +170,10 @@ OSCdef.new(
 		//          6 -> Saturn
 		//          7 -> Uranus
 		//          8 -> Neptune
-		// msg[2] = The second planet to be compared, see list above (will never be the same
-		//          as the first)
-		// msg[3] = List of GUI settings for the comparison, which aspects of the sonification
-		//          should be turned on or off
+		// msg[2] = The second planet to be compared, see list above (will never be the
+		//          same as the first)
+		// msg[3] = List of GUI settings for the comparison, which aspects of the
+		//          sonification should be turned on or off
 		//     msg[3][0] = Size/day, 0: off, 1: on
 		//     msg[3][1] = Gravity
 		//     msg[3][2] = Temperature
@@ -169,8 +194,8 @@ OSCdef.new(
 		arg msg;
 
 		// msg[0] = OSC Label
-		// msg[1] = List of planets for the overview, which planets of the overview sonification
-		//          should be turned on or off
+		// msg[1] = List of planets for the overview, which planets of the overview
+		//          sonification should be turned on or off
 		//     msg[1][0] = Mercury, 0: off, 1: on
 		//     msg[1][1] = Venus
 		//     msg[1][2] = Earth
@@ -192,8 +217,9 @@ OSCdef.new(
 //          with the current angle calculation mode taken into account
 // msg[3] = The vertical/elevation angle in radians to the planet on the master screen,
 //          with the current angle calculation mode taken into account
-// msg[4] = List of GUI settings for the planet, what features of the sonification should be
-//          turned on or off. If the setting does not exist for a planet, the value is always 0
+// msg[4] = List of GUI settings for the planet, what features of the sonification should
+//          be turned on or off. If the setting does not exist for a planet, the value is
+//          always 0
 //     msg[4][0] = Size/day, 0: off, 1: on
 //     msg[4][1] = Gravity
 //     msg[4][2] = Temperature
@@ -208,7 +234,8 @@ OSCdef.new(
 // msg[8] = The distance from the camera to the second moon in kilometers
 // msg[9] = Horizontal angle in radians from the planet to the second moon
 // msg[10] = Vertical/Elevation angle in radians from the planet to the second moon
-// msg[...] = Data continues in the same pattern for as many moons there are for the planet
+// msg[...] = Data continues in the same pattern for as many moons there are for the
+//            planet
 
 // Mercury
 OSCdef.new(
