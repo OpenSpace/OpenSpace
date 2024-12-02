@@ -55,7 +55,8 @@ asset.onInitialize(function ()
     {
       Name = "Neptune",
       Moons = {
-        "Triton"
+        "Triton",
+        "Nereid"
       }
     }
   }
