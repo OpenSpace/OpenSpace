@@ -4,7 +4,7 @@ local coreKernels = asset.require("spice/core")
 
 
 local earthcentricKernels = asset.resource({
-  Name = "Earthcenteric frame kernels",
+  Name = "Earthcenteric Frame Kernels",
   Type = "HttpSynchronization",
   Identifier = "earthcentric_frame_kernels",
   Version = 1
