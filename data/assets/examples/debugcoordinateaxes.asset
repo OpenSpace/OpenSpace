@@ -26,7 +26,8 @@ local GSEAxes = {
   },
   GUI = {
     Name = "GSE Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems",
+    Description = [[Axes visualizing the Geocentric Solar Ecliptic coordinate system]]
   }
 }
 
@@ -44,13 +45,14 @@ local GSMAxes = {
   },
   GUI = {
     Name = "GSM Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems",
+    Description = [[Axes visualizing the Geocentric Solar Magnetospheric coordinate system]]
   }
 }
 
 local SMAxes = {
   Identifier = "SMCoordinateAxes",
-  Parent = GSM_SM_Transforms.SolarMagnetospheric.Identifier,
+  Parent = GSM_SM_Transforms.SolarMagnetic.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -62,13 +64,14 @@ local SMAxes = {
   },
   GUI = {
     Name = "SM Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems",
+    Description = [[Axes visualizing the Solar Magnetic coordinate system]]
   }
 }
 
 local SMTimeAxes = {
   Identifier = "SMTimeCoordinateAxes",
-  Parent = GSM_SM_Time_Transforms.SolarMagnetosphericTimeDependent.Identifier,
+  Parent = GSM_SM_Time_Transforms.SolarMagneticTimeDependent.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -80,7 +83,8 @@ local SMTimeAxes = {
   },
   GUI = {
     Name = "SM-Time Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems",
+    Description = [[Axes visualizing the Solar Magnetic coordinate system based on Earth's moving magnetic poles in large time scales]]
   }
 }
 
@@ -98,7 +102,8 @@ local GSMTimeAxes = {
   },
   GUI = {
     Name = "GSM-Time Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems",
+    Description = [[Axes visualizing the Geocentric Solar Magnetospheric coordinate system based on Earth's moving magnetic poles in large time scales]]
   }
 }
 
@@ -116,7 +121,7 @@ local EarthBarycenterAxes = {
   },
   GUI = {
     Name = "Earth Barycenter Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems"
   }
 }
 
@@ -134,7 +139,7 @@ local EarthInertialAxes = {
   },
   GUI = {
     Name = "Earth Inertial Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems"
   }
 }
 
@@ -152,7 +157,7 @@ local EarthIAUAxes = {
   },
   GUI = {
     Name = "Earth IAU Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems"
   }
 }
 
@@ -170,7 +175,7 @@ local SunIAUAxes = {
   },
   GUI = {
     Name = "Sun IAU Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems"
   }
 }
 
@@ -188,7 +193,7 @@ local SolarSystemBarycenterAxes = {
   },
   GUI = {
     Name = "Solar System Barycenter Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems"
   }
 }
 
@@ -206,7 +211,8 @@ local HEEQAxes = {
   },
   GUI = {
     Name = "HEEQ Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems",
+    Description = [[Axes visualizing the Heliocentric Earth Equatorial coordinate system]]
   }
 }
 
@@ -224,7 +230,8 @@ local HEEQ180Axes = {
   },
   GUI = {
     Name = "HEEQ 180 Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems",
+    Description = [[Axes visualizing the Heliocentric Earth Equatorial coordinate system, rotated 180 degrees around Z axis]]
   }
 }
 
@@ -242,7 +249,8 @@ local HEEAxes = {
   },
   GUI = {
     Name = "HEE Axes",
-    Path = "/Other/Coordinate Systems"
+    Path = "/Examples/Coordinate Systems",
+    Description = [[Axes visualizing the Heliocentric Earth Ecliptic coordinate system]]
   }
 }
 
@@ -297,7 +305,7 @@ asset.export(HEEAxes)
 
 asset.meta = {
   Name = "Debug Coordinates",
-  Description = [[A set of coordinate axes demonstrating different XYZ coordinate
+  Description = [[A set of coordinate axis demonstrating different XYZ coordinate
     reference frames that are useful for debugging, such as the Earth or Solar
     System Barycenter.]],
   Author = "OpenSpace Team",

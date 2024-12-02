@@ -1,11 +1,14 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local coreKernels = asset.require("spice/core")
 
-local heeq180Kernel = asset.resource("kernels/HEEQ180.tf")
-local heeqKernel = asset.resource("kernels/HEEQ.tf")
-local heeKernel = asset.resource("kernels/HEE.tf")
 
 
+local SunCentricFrameKernels = asset.resource({
+  Name = "Sun Centric Frame Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "suncentric_frame_kernels",
+  Version = 1
+})
 
 local HeliocentricEarthEquatorial180  = {
   Identifier = "HeliocentricEarthEquatorial180",
@@ -97,10 +100,9 @@ local HeliocentricEarthEcliptic = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(heeq180Kernel)
-  openspace.spice.loadKernel(heeqKernel)
-  openspace.spice.loadKernel(heeKernel)
-
+  openspace.spice.loadKernel(SunCentricFrameKernels .. "HEEQ180.tf")
+  openspace.spice.loadKernel(SunCentricFrameKernels .. "HEEQ.tf")
+  openspace.spice.loadKernel(SunCentricFrameKernels .. "HEE.tf")
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial180)
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.addSceneGraphNode(HeliocentricEarthEcliptic)
@@ -110,10 +112,9 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HeliocentricEarthEcliptic)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial180)
-
-  openspace.spice.unloadKernel(heeKernel)
-  openspace.spice.unloadKernel(heeqKernel)
-  openspace.spice.unloadKernel(heeq180Kernel)
+  openspace.spice.unloadKernel(SunCentricFrameKernels .."HEE.tf")
+  openspace.spice.unloadKernel(SunCentricFrameKernels .."HEEQ.tf")
+  openspace.spice.unloadKernel(SunCentricFrameKernels .."HEEQ180.tf")
 end)
 
 asset.export(HeliocentricEarthEquatorial180)

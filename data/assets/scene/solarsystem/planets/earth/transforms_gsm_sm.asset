@@ -37,8 +37,8 @@ local GeocentricSolarMagnetospheric = {
   }
 }
 
-local SolarMagnetospheric = {
-  Identifier = "SolarMagnetospheric",
+local SolarMagnetic = {
+  Identifier = "SolarMagnetic",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
     Rotation = {
@@ -48,7 +48,7 @@ local SolarMagnetospheric = {
     }
   },
   GUI = {
-    Name = "Solar Magnetospheric",
+    Name = "Solar Magnetic",
     Path = "/Solar System/Planets/Earth",
     Description = [[+Z axis is the direction of Earth's magnetic dipole axis
       (positive North); it's the primary vector.
@@ -66,11 +66,11 @@ asset.onInitialize(function()
   openspace.spice.loadKernel(earthcentricKernels .. "GSM.tf")
   openspace.spice.loadKernel(earthcentricKernels .. "SM.tf")
   openspace.addSceneGraphNode(GeocentricSolarMagnetospheric)
-  openspace.addSceneGraphNode(SolarMagnetospheric)
+  openspace.addSceneGraphNode(SolarMagnetic)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(SolarMagnetospheric)
+  openspace.removeSceneGraphNode(SolarMagnetic)
   openspace.removeSceneGraphNode(GeocentricSolarMagnetospheric)
   openspace.spice.unloadKernel(earthcentricKernels .. "SM.tf")
   openspace.spice.unloadKernel(earthcentricKernels .. "GSM.tf")
@@ -78,7 +78,7 @@ end)
 
 asset.export("Frame", Frame)
 asset.export(GeocentricSolarMagnetospheric)
-asset.export(SolarMagnetospheric)
+asset.export(SolarMagnetic)
 
 
 
