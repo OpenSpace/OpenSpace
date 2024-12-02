@@ -37,19 +37,19 @@ namespace {
         "Telemetry that sends out camera information over the OSC connection"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CmaeraSpeedDistanceUnitInfo =
+    constexpr openspace::properties::Property::PropertyInfo CameraSpeedDistanceUnitInfo =
     {
-        "CmaeraSpeedDistanceUnit",
-        "Cmaera Speed Unit (Distance)",
-        "Choose a unit that the sonification should use for the camera speed distance. "
+        "CameraSpeedDistanceUnit",
+        "Camera Speed Unit (Distance)",
+        "Choose a distance unit that is used for the camera speed. "
         "For example, if the distacne unit 'Kilometer' is chosen, then the unit used for "
-        "the camera speed would be kilometers per second."
+        "the camera speed will be kilometers per second."
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
-        "Settings for the precision of the sonification"
+        "Settings for the precision of the camera telemetry information"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PositionPrecisionInfo = {
@@ -83,12 +83,12 @@ namespace openspace {
 CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
     : TelemetryBase(CameraTelemetryInfo, ip, port)
     , _cameraSpeedDistanceUnitOption(
-        CmaeraSpeedDistanceUnitInfo,
+        CameraSpeedDistanceUnitInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
     , _precisionProperty(CameraTelemetry::PrecisionProperty(PrecisionInfo))
 {
-    // Add all camera units as options in the drop down menu
+    // Add all distance units as options in the camera speed unit option drop down menu
     for (int i = 0; i < DistanceUnitNamesSingular.size(); ++i) {
         _cameraSpeedDistanceUnitOption.addOption(i, DistanceUnitNamesSingular[i].data());
     }
@@ -119,32 +119,17 @@ void CameraTelemetry::stop() {}
 CameraTelemetry::PrecisionProperty::PrecisionProperty(
                                properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
     : properties::PropertyOwner(precisionInfo)
-    , positionPrecision(
-        PositionPrecisionInfo,
-        1000.0,
-        0,
-        1e+25
-    )
-    , rotationPrecision(
-        RotationPrecisionInfo,
-        0.05,
-        0,
-        10
-    )
-    , speedPrecision(
-        SpeedPrecisionInfo,
-        1000.0,
-        0,
-        std::numeric_limits<double>::max()
-    )
+    , positionPrecision(PositionPrecisionInfo, 1000.0, 0, 1e+25)
+    , rotationPrecision(RotationPrecisionInfo, 0.05, 0, 10)
+    , speedPrecision(SpeedPrecisionInfo, 1000.0, 0, std::numeric_limits<double>::max())
 {
-    addProperty(positionPrecision);
     positionPrecision.setExponent(20.f);
+    addProperty(positionPrecision);
 
     addProperty(rotationPrecision);
 
-    addProperty(speedPrecision);
     speedPrecision.setExponent(100.f);
+    addProperty(speedPrecision);
 }
 
 bool CameraTelemetry::getData(const Camera* camera) {
@@ -154,7 +139,7 @@ bool CameraTelemetry::getData(const Camera* camera) {
 
     // Rotation
     const glm::dquat cameraRotation = camera->rotationQuaternion();
-    // To check if the rotation has changed above the precission threshold, check the
+    // To check if the rotation has changed above the precision threshold, check the
     // angle and axis of the quaternion seperatly
     const double rotationAngleDifference = std::abs(_cameraRotation.w - cameraRotation.w);
     const double rotationAxisDifference = glm::length(
@@ -167,7 +152,7 @@ bool CameraTelemetry::getData(const Camera* camera) {
     bool hasFps = false;
     double cameraSpeed = 0.0;
     if (std::abs(frameTime) > std::numeric_limits<double>::epsilon()) {
-        // Avoid division by 0 by first checking the average frame time
+        // Avoid division by 0 by first checking the current frame time
         hasFps = true;
         double distanceMovedInUnit = convertMeters(
             distanceMoved,

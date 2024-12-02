@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-    using OscDataType = std::variant<osc::Blob, double, int, std::string>;
+using OscDataType = std::variant<osc::Blob, double, int, std::string>;
 
 class OscConnection {
 public:

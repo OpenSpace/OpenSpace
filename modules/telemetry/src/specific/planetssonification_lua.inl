@@ -32,21 +32,21 @@ namespace {
     openspace::TelemetryModule* module =
         openspace::global::moduleEngine->module<openspace::TelemetryModule>();
     if (!module) {
-        LERRORC("PlanetsSonification", "Could not find the SonificationModule");
+        LERRORC("PlanetsSonification_lua", "Could not find the TelemetryModule");
         return;
     }
-    openspace::TelemetryBase* ptr = module->sonification("PlanetsSonification");
+    openspace::TelemetryBase* ptr = module->telemetry("PlanetsSonification");
     if (!ptr) {
-        LERRORC("PlanetsSonification", "Could not find the PlanetsSonification");
+        LERRORC("PlanetsSonification_lua", "Could not find the PlanetsSonification");
         return;
     }
 
-    openspace::PlanetsSonification* planetary =
+    openspace::PlanetsSonification* planetsSonification =
         reinterpret_cast<openspace::PlanetsSonification*>(ptr);
 
     for (const std::string_view& k : planets.keys()) {
         const ghoul::Dictionary& planet = planets.value<ghoul::Dictionary>(k);
-        planetary->addPlanet(planet);
+        planetsSonification->addPlanet(planet);
     }
 }
 

@@ -24,8 +24,7 @@
 
 #include <modules/telemetry/include/specific/planetsoverviewsonification.h>
 
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/memorymanager.h>
 
 namespace {
@@ -36,7 +35,7 @@ namespace {
     {
         "PlanetsOverviewSonification",
         "Planets Overview Sonification",
-        "Sonification that gives an overview of the planets in the overviewsystem with "
+        "Sonification that gives an overview of the planets in the solar system with "
         "simpler sounds"
     };
 
@@ -109,26 +108,31 @@ PlanetsOverviewSonification::PlanetsOverviewSonification(const std::string& ip, 
     , _uranusEnabled(EnableUranusInfo, false)
     , _neptuneEnabled(EnableNeptuneInfo, false)
 {
-    // Add onChange functions to the properties
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
-    _mercuryEnabled.onChange([this]() { sendData(); });
-    _venusEnabled.onChange([this]() { sendData(); });
-    _earthEnabled.onChange([this]() { sendData(); });
-    _marsEnabled.onChange([this]() { sendData(); });
-    _jupiterEnabled.onChange([this]() { sendData(); });
-    _saturnEnabled.onChange([this]() { sendData(); });
-    _uranusEnabled.onChange([this]() { sendData(); });
-    _neptuneEnabled.onChange([this]() { sendData(); });
-
-    // Add the properties
     addProperty(_toggleAll);
+
+    _mercuryEnabled.onChange([this]() { sendData(); });
     addProperty(_mercuryEnabled);
+
+    _venusEnabled.onChange([this]() { sendData(); });
     addProperty(_venusEnabled);
+
+    _earthEnabled.onChange([this]() { sendData(); });
     addProperty(_earthEnabled);
+
+    _marsEnabled.onChange([this]() { sendData(); });
     addProperty(_marsEnabled);
+
+    _jupiterEnabled.onChange([this]() { sendData(); });
     addProperty(_jupiterEnabled);
+
+    _saturnEnabled.onChange([this]() { sendData(); });
     addProperty(_saturnEnabled);
+
+    _uranusEnabled.onChange([this]() { sendData(); });
     addProperty(_uranusEnabled);
+
+    _neptuneEnabled.onChange([this]() { sendData(); });
     addProperty(_neptuneEnabled);
 }
 

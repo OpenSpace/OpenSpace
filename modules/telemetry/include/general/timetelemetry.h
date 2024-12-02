@@ -29,7 +29,6 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/util/timeconversion.h>
 
 namespace openspace {
 
@@ -39,15 +38,15 @@ public:
     virtual ~TimeTelemetry() override = default;
 
     /**
-     * Main update function for the sonification. Checks the current delta time and sends
-     * it via the osc connection in the specified time unit per second.
+     * Main update function to gather time telemetry information (current deltatime, and current
+     * simulation time in J2000 seconds) and send it via the osc connection.
      *
-     * \param camera pointer to the camera in the scene (not used in this sonification)
+     * \param camera The camera in the scene (not used in this case)
      */
     virtual void update(const Camera*) override;
 
     /**
-     * Function to stop the sonification
+     * Function to stop the gathering of time telemetry data
      */
     virtual void stop() override;
 
@@ -59,16 +58,16 @@ private:
     static constexpr int CurrentTimeIndex = 2;
 
     /**
-     * Update the sonification data
+     * Gather time telemetry information (speed, and current time)
      *
-     * \return true if the data is new compared to before, otherwise false
+     * \return True if the data is new compared to before, otherwise false
      */
     bool getData();
 
     /**
-     * Send current sonification data over the osc connection
-     * Order of data: time speed, unit of time speed, current simulation time in J2000
-     * number of seconds.
+     * Send the current time telemetry information over the osc connection
+     * Order of data: Time speed, unit of time speed, current simulation time in J2000
+     *                number of seconds.
      */
     void sendData();
 

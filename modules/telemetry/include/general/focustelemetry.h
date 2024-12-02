@@ -28,7 +28,6 @@
 #include <modules/telemetry/include/telemetrybase.h>
 
 #include <openspace/properties/optionproperty.h>
-#include <openspace/util/timeconversion.h>
 
 namespace openspace {
 
@@ -38,15 +37,15 @@ public:
     virtual ~FocusTelemetry() override = default;
 
     /**
-     * Main update function for the sonification. Checks the current focus node and sends
-     * it via the osc connection.
+     * Main update function to gather focus telemetry information (current focus node) and
+     * send it via the osc connection.
      *
-     * \param camera pointer to the camera in the scene (not used in this sonification)
+     * \param camera The camera in the scene (not used in this case)
      */
     virtual void update(const Camera*) override;
 
     /**
-     * Function to stop the sonification
+     * Function to stop the gathering of focus telemetry data
      */
     virtual void stop() override;
 
@@ -56,15 +55,17 @@ private:
     static constexpr int FocusNodeIndex = 0;
 
     /**
-     * Update focus node data
+     * Gather focus telemetry information (current focus node)
      *
-     * \return true if the data is new compared to before, otherwise false
+     * \param camera The camera in the scene
+     *
+     * \return True if the data is new compared to before, otherwise false
      */
     bool getData();
 
     /**
-     * Send current sonification data for the indicated node over the osc connection
-     * Order of data: distance, horizontal angle, vertical angle
+     * Send the current focus telemetry information over the osc connection
+     * Order of data: Current focus node
      */
     void sendData();
 

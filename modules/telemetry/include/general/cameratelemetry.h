@@ -38,15 +38,15 @@ public:
     virtual ~CameraTelemetry() override = default;
 
     /**
-     * Main update function for the sonification. Checks the current camera information
-     * (position, rotation, and speed) and sends it via the osc connection.
+     * Main update function to gather camera telemetry information (position, rotation,
+     * and speed) and send it via the osc connection.
      *
-     * \param camera pointer to the camera in the scene
+     * \param camera The camera in the scene
      */
     virtual void update(const Camera* camera) override;
 
     /**
-     * Function to stop the sonification
+     * Function to stop the gathering of camera telemetry data
      */
     virtual void stop() override;
 
@@ -64,17 +64,18 @@ private:
     static constexpr int CameraSpeedUnitIndex = 8;
 
     /**
-     * Update the sonification data
+     * Gather camera telemetry information (position, rotation, and speed)
      *
-     * \param camera pointer to the camera in the scene
+     * \param camera The camera in the scene
      *
-     * \return true if the data is new compared to before, otherwise false
+     * \return True if the data is new compared to before, otherwise false
      */
     bool getData(const Camera* camera);
 
     /**
-     * Send current sonification data over the osc connection
-     * Order of data: Camera position x, y,, and z, rotation, speed, and speed distance unit.
+     * Send the current camera telemetry information over the osc connection
+     * Order of data: Camera position (x, y, z), rotation quaternion (w, x, y z), speed,
+     *                and speed distance unit.
      */
     void sendData();
 

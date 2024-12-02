@@ -22,42 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/telemetry/include/specific/modesonification.h>
+#include <modules/telemetry/include/general/anglemodetelemetry.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "ModeSonification";
+    constexpr std::string_view _loggerCat = "AngleModeTelemetry";
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        ModeSonificationInfo =
+        AngleModeTelemetryInfo =
     {
-       "ModeSonification",
-       "Surround Mode Sonification",
-       "Sonification that alters all other sonificatoins based on the current surround "
-       "mode"
+        "AngleModeTelemetry",
+        "Angle Mode Telemetry",
+        "Telemetry that gathers data of what angle calculaiton mode is currently used for "
+        "all telemetries in the telemetry module"
     };
 
 } // namespace
 
 namespace openspace {
 
-ModeSonification::ModeSonification(const std::string& ip, int port)
-    : TelemetryBase(ModeSonificationInfo, ip, port)
-{
-    // Assume None at start
-    _currentMode = TelemetryModule::SurroundMode::None;
+AngleModeTelemetry::AngleModeTelemetry(const std::string& ip, int port)
+    : TelemetryBase(AngleModeTelemetryInfo, ip, port)
+{}
 
-    // Get access to the sonification module
-    _sonificationModule = global::moduleEngine->module<TelemetryModule>();
-    if (!_sonificationModule) {
-        LERROR("Could not find the SonificationModule");
-    }
-}
-
-void ModeSonification::update(const Camera*) {
-    if (!_enabled || !_sonificationModule) {
+void AngleModeTelemetry::update(const Camera*) {
+    if (!_enabled) {
         return;
     }
 
@@ -69,27 +60,49 @@ void ModeSonification::update(const Camera*) {
     }
 }
 
-void ModeSonification::stop() {}
+void AngleModeTelemetry::stop() {}
 
-bool ModeSonification::getData() {
+bool AngleModeTelemetry::getData() {
+    // Get the current angle settings
+    TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
+    if (!module) {
+        LERROR("Could not find the TelemetryModule");
+        return false;
+    }
+    TelemetryModule::AngleCalculationMode angleMode = module->angleCalculationMode();
+    bool includeElevation = module->includeElevationAngle();
+
     // Check if this data is new, otherwise don't update it
-    TelemetryModule::SurroundMode mode = _sonificationModule->surroundMode();
-    TelemetryModule::SurroundMode prevMode = _currentMode;
+    TelemetryModule::AngleCalculationMode prevAngleMode = _angleMode;
+    bool prevIncludeElevation = _includeElevation;
     bool shouldSendData = false;
 
-    if (mode != prevMode) {
-        _currentMode = mode;
+    if (angleMode != prevAngleMode) {
+        _angleMode = angleMode;
         shouldSendData = true;
+    }
+
+    if (includeElevation != prevIncludeElevation) {
+        _includeElevation = includeElevation;
+        shouldSendData = true;
+    }
+
+    // Make sure that the first message is sent, even if the values are defualt and no
+    // change has been detected
+    if (!_isInitialized) {
+        shouldSendData = true;
+        _isInitialized = true;
     }
 
     return shouldSendData;
 }
 
-void ModeSonification::sendData() {
+void AngleModeTelemetry::sendData() {
     std::string label = "/Mode";
 
     std::vector<OscDataType> data(NumDataItems);
-    data[ModeIndex] = static_cast<int>(_currentMode);
+    data[AngleModeIndex] = static_cast<int>(_angleMode);
+    data[IncludeElevationIndex] = static_cast<int>(_includeElevation);
 
     _connection->send(label, data);
 }

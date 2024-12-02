@@ -28,6 +28,7 @@
 #include "openspace/util/openspacemodule.h"
 
 #include <modules/telemetry/include/telemetrybase.h>
+#include <ghoul/misc/boolean.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
@@ -44,46 +45,45 @@ public:
     constexpr static const char* Name = "Telemetry";
 
     /**
-     * None: Mono. No directional information at all.
-     * Horizontal: Calculate the angle to the object in the horizontal direction of
-     *             the camera view plane. Where straight forwards in the camera view
-     *             direction is zero degrees. TODO: Where is + and -?. (Norrköping dome)
+     * This mode only affects telemetries that send angle information. For example, the
+     * NodesTelemetry and the PlanetsSonification. More documentation for the elevation
+     * part of the angles is located further below.
      *
-     * HorizontalWithElevation: Same as Horizontal with an additional angle in the
-     *                          vertical direction of the camera view plane. Where the
-     *                          angle goes from -pi/2 to pi/2 and zero is straight
-     *                          forwards in the camera view direction. Positive elevation
-     *                          angles in the up direction of the camera.
+     * Horizontal: Calculate the angle to the object in the horizontal direction within
+     *             the camera plane. This mode is suitable for flat displays or forward
+     *             facing immersive envierments (such as the Norrköping dome theater).
+     *             The camera plane is the plane of the camera view direction + camera
+     *             left direction (i.e. the negative camera right direction), with the
+     *             camera up direction as the normal. The angle goes from -pi to pi in
+     *             radians and zero degrees would be forward in the camera view direction.
+     *             When the object is located towards the left relative the camera view
+     *             direction, then the angle will be a positive value. If instead, the
+     *             object is located towards the right, the angle will become negative.
      *
      * Circular: Calculate the angle to the object in circular space around the center
-     *           point in the camera view plane. Where the angle goes from -pi to pi and
-     *           zero degrees would be straig up in the camera up direction. Negative
-     *           angles in the right direction of the camrea.
-     *
-     * CircularWithElevation: Smae as Circular with an additional angle in the vertical
-     *                        direction of the camera view plane (same as the elevation
-     *                        angle in HorizontalWithElevation). Where the angle goes
-     *                        from -pi/2 to pi/2 and zero is straight forwards in the
-     *                        camera view direction. Positive elevation angles in the up
-     *                        direction of the camera. (Hayden planetarium)
+     *           point in the camera view plane. This mode is suitable for centered
+     *           fisheye displays or omnidirectional immersive environments (such as the
+     *           Hayden planetarium). The camera view plane is the plane of the camera up
+     *           direction + camera left direction (i.e. the negative camera right
+     *           direction), with the negative camera view direction as the normal. The
+     *           angle goes from -pi to pi in radians and zero degrees would be forward in
+     *           the camera view direction. When the object is located towards the left
+     *           relative the center of the screen, then the angle will be a positive
+     *           value. If instead, the object is located towards the right, the angle
+     *           will become negative.
      */
-    enum class SurroundMode {
-        None = 0,
-        Horizontal,
-        HorizontalWithElevation,
-        Circular,
-        CircularWithElevation,
+    enum class AngleCalculationMode {
+        Horizontal = 0,
+        Circular
     };
 
     TelemetryModule();
     ~TelemetryModule();
 
     /**
-     * Returns the Lua library that contains all Lua functions available to for the
-     * sonification module.
+     * Returns the Lua libraries for all telemetries available in the telemetry module
      *
-     * \return The Lua library that contains all Lua functions available to for the
-     * sonification module
+     * \return The Lua libraries for all telemetries available in the telemetry module
      */
     std::vector<scripting::LuaLibrary> luaLibraries() const override;
 
@@ -91,52 +91,58 @@ public:
     virtual void internalDeinitialize() override;
 
     /**
-     * Get the list of sonifications that are currently registered in the sonification
-     * module
+     * Get the list of telemetries that are currently registered in the module
      *
-     * \return the list of registered sonifications
+     * \return A list of all registered telemetries
      */
-    const std::vector<TelemetryBase*>& sonifications() const;
+    const std::vector<TelemetryBase*>& telemetries() const;
 
     /**
-     * Get a specified sonification from the list of registered sonifications in the
-     * sonification module
+     * Get a specified telemetry from the list of registered telemetries in the module
      *
-     * \param id the identifier for the sonification to get
+     * \param id The identifier of the telemetry to fetch
      *
-     * \return the requested sonification
+     * \return The requested telemetry
      */
-    const TelemetryBase* sonification(std::string id) const;
-    TelemetryBase* sonification(std::string id);
+    const TelemetryBase* telemetry(std::string id) const;
+    TelemetryBase* telemetry(std::string id);
 
     /**
-     * Get the current surround mode used in the sonification module
+     * Get the current angle calculation mode used in the telemetry module
      *
-     * \return the current surround mode
+     * \return The angle calculation mode
      */
-    SurroundMode surroundMode() const;
+    AngleCalculationMode angleCalculationMode() const;
+
+    /**
+     * Return whether any elevation angles are being caclulated and sent over the osc
+     * connection or not
+     *
+     * \return True if elevation angles are being caclulated and sent over the osc
+     *         connection, false otherwise
+     */
+    bool includeElevationAngle() const;
 
 private:
     /**
-     * Main update function that keeps track of all sonificaitons and keeps the thread
-     * running
+     * Main update function that keeps track of all telemetries and keeps the update
+     * thread running and synced to the OpenSpace main thread
      *
-     * \param isRunning whether the thread should be kept running or not
+     * \param isRunning Whether the thread should be kept running or shut down and joined
      */
     void update(std::atomic<bool>& isRunning);
 
     /**
-     * Add the a specified sonification to the list of registered sonifications in the
-     * sonification module
+     * Add a given telemetry to the list of registered telemetries in the module
      *
-     * \param sonification the sonification to add
+     * \param telemetry The telemetry to register in the module
      */
-    void addSonification(TelemetryBase* sonification);
+    void addTelemetry(TelemetryBase* telemetry);
 
     /**
-     * Function that gets called when the surround mode is changed in the GUI
+     * Function that gets called when the angle calculation mode is changed in the GUI
      */
-    void guiOnChangeSurroundMode();
+    void guiOnChangeAngleCalculationMode();
 
     // To sync the sonificaiton thread with the main thread
     std::mutex mutexLock;
@@ -146,13 +152,29 @@ private:
     properties::BoolProperty _enabled;
     properties::StringProperty _ipAddress;
     properties::IntProperty _port;
-    properties::OptionProperty _mode;
+    properties::OptionProperty _modeOptions;
+
+    /**
+     * This setting only affects telemetries that send angle information. For example, the
+     * NodesTelemetry and the PlanetsSonification.
+     *
+     * True: An additional angle in the vertical direction within the camera view + up
+     *       plane is sent over the osc connection. The camera view + up plane is the
+     *       plane of the camera view direction + camera up direction, with the camera
+     *       right direction as the normal. The elevation angle goes from -pi/2 to pi/2 in
+     *       radians and zero is straight forward in the camera view direction. Positive
+     *       elevation angles is in the up direction of the camera, and negative angles
+     *       are in the down direction of the camera.
+     *
+     * False: The elevation angle sent over the osc connection is always set to 0.0
+    */
+    properties::BoolProperty _includeElevationAngle;
 
     // Variables
     std::thread _updateThread;
     std::atomic<bool> _isRunning = false;
-    std::vector<TelemetryBase*> _sonifications;
-    SurroundMode _surroundMode = SurroundMode::Horizontal;
+    std::vector<TelemetryBase*> _telemetries;
+    AngleCalculationMode _angleCalculationMode = AngleCalculationMode::Horizontal;
 };
 
 } // namespace openspace

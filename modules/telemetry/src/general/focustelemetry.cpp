@@ -31,11 +31,11 @@
 
 namespace {
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        FocusSonificationInfo =
+        FocusTelemetryInfo =
     {
-        "FocusSonification",
-        "Focus Sonification",
-        "Sonification that keeps track of the current focus node in the scene"
+        "FocusTelemetry",
+        "Focus Telemetry",
+        "Telemetry that sends out the current focus node over the OSC connection"
     };
 
 } // namespace
@@ -43,7 +43,7 @@ namespace {
 namespace openspace {
 
 FocusTelemetry::FocusTelemetry(const std::string& ip, int port)
-    : TelemetryBase(FocusSonificationInfo, ip, port)
+    : TelemetryBase(FocusTelemetryInfo, ip, port)
 {}
 
 void FocusTelemetry::update(const Camera*) {

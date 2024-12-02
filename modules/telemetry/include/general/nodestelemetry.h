@@ -27,8 +27,8 @@
 
 #include <modules/telemetry/include/telemetrybase.h>
 
+#include <modules/telemetry/telemetrymodule.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {
@@ -41,30 +41,32 @@ public:
     virtual ~NodesTelemetry() override;
 
     /**
-     * Main update function for the sonification
+     * Main update function to gather telemetry information from a list of scene graph
+     * nodes (distance, horizontal angle, vertical angle) and send it via the osc
+     * connection.
      *
-     * \param camera pointer to the camera in the scene
+     * \param camera The camera in the scene
      */
     virtual void update(const Camera* camera) override;
 
     /**
-     * Function to stop the sonification
+     * Function to stop the gathering of nodes telemetry data
      */
     virtual void stop() override;
 
     /**
-    * Add the given node to the list of nodes
-    *
-    * \param node the identifier of the node that should be added
-    */
+     * Add the given node to the list of nodes to gather telemetry data for
+     *
+     * \param node The identifier of the node that should be added
+     */
     void addNode(const std::string& node);
 
     /**
-     * Returns the Lua library that contains all Lua functions available to change the
-     * nodes sonification.
+     * Returns the Lua library that contains all Lua functions available for the
+     * nodes telemetry
      *
-     * \return The Lua library that contains all Lua functions available to change the
-     * nodes sonification
+     * \return The Lua library that contains all Lua functions available for the
+     *         nodes telemetry
      */
     static scripting::LuaLibrary luaLibrary();
 
@@ -72,37 +74,44 @@ private:
     // Indices for data items
     static constexpr int NumDataItems = 4;
     static constexpr int DistanceIndex = 0;
-    static constexpr int HAngleIndex = 1;
-    static constexpr int VAngleIndex = 2;
+    static constexpr int HorizontalAngleIndex = 1;
+    static constexpr int VerticalAngleIndex = 2;
     static constexpr int DistanceUnitIndex = 3;
 
     // Struct to hold data for all the nodes
-    struct NodesTelemetryNode {
-        NodesTelemetryNode(std::string id = "") {
+    struct TelemetryNode {
+        TelemetryNode(std::string id = "") {
             identifier = id;
         }
 
         std::string identifier;
 
-        // Distance, horizontal angle, vertical angle
-        std::vector<double> data = std::vector<double>(NumDataItems);
+        // Distance, horizontal angle, vertical angle (do not store the distance unit
+        // here, the option property stores it instead)
+        std::vector<double> data = std::vector<double>(NumDataItems - 1, 0.0);
     };
 
     /**
-     * Update distance and angle data for the given node
+     * Update telemetry data (distance, horizontal angle, vertical angle) for the given
+     * node
      *
-     * \param camera pointer to the camera in the scene. Used to calculated the data for
-     *        the node
-     * \param nodeIndex index to the internally stored node data that should be updated
+     * \param camera The camera in the scene
+     * \param nodeIndex The index to the internally stored node data that should be
+     *        updated
+     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     *        method to use when calculating the angle.
+     * \param includeElevation Whether the additional elevation angle should be calculated
      *
-     * \return true if the data is new compared to before, otherwise false
+     * \return True if the data is new compared to before, otherwise false
      */
-    bool getData(const Camera* camera, int nodeIndex);
+    bool getData(const Camera* camera, int nodeIndex,
+        TelemetryModule::AngleCalculationMode angleCalculationMode,
+        bool includeElevation);
 
     /**
-     * Send current sonification data for the indicated node over the osc connection
-     * Order of data: distance, horizontal angle, vertical angle, unit used for the
-     * distance value
+     * Send current telemetry data for the indicated node over the osc connection
+     * Order of data: distance, horizontal angle, vertical angle, and the unit used for
+     *                the distance value
      */
     void sendData(int nodeIndex);
 
@@ -110,6 +119,11 @@ private:
     struct PrecisionProperty : properties::PropertyOwner {
         PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
 
+        // The low and high precision values are used in different situations. When the
+        // node is the current focus node, then the high precision value is used. This
+        // is due to the node being in the current focus and therfore needs better
+        // precision. If the node is not the current focus node, then the low precision
+        // value is used to save performance.
         properties::DoubleProperty lowDistancePrecision;
         properties::DoubleProperty highDistancePrecision;
         properties::DoubleProperty lowAnglePrecision;
@@ -120,9 +134,11 @@ private:
     PrecisionProperty _precisionProperty;
 
     // Variables
+    std::vector<TelemetryNode> _nodes;
+
+    // The current precision values for distance and angle
     double _anglePrecision = 0.0;
     double _distancePrecision = 0.0;
-    std::vector<NodesTelemetryNode> _nodes;
 };
 
 } // namespace openspace

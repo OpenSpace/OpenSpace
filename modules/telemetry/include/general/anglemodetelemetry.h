@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TELEMETRY___MODETELEMETRY___H__
-#define __OPENSPACE_MODULE_TELEMETRY___MODETELEMETRY___H__
+#ifndef __OPENSPACE_MODULE_TELEMETRY___ANGLEMODETELEMETRY___H__
+#define __OPENSPACE_MODULE_TELEMETRY___ANGLEMODETELEMETRY___H__
 
 #include <modules/telemetry/include/telemetrybase.h>
 
@@ -31,47 +31,51 @@
 
 namespace openspace {
 
-class ModeSonification : public TelemetryBase {
+class AngleModeTelemetry : public TelemetryBase {
 public:
-    ModeSonification(const std::string& ip, int port);
-    virtual ~ModeSonification() override = default;
+    AngleModeTelemetry(const std::string& ip, int port);
+    virtual ~AngleModeTelemetry() override = default;
 
     /**
-     * Main update function for the sonification. Checks the current surround mode and
-     * sends it via the osc connection as an integer.
+     * Main update function to gather angle mode telemetry information (Angle calculation
+     * mode, and whether elevation angle is included) and send it via the osc connection.
      *
-     * \param camera pointer to the camera in the scene (not used in this sonification)
+     * \param camera The camera in the scene (not used in this case)
      */
     virtual void update(const Camera*) override;
 
     /**
-     * Function to stop the sonification
+     * Function to stop the gathering of telemetry data
      */
     virtual void stop() override;
 
 private:
     // Indices for data items
-    static constexpr int NumDataItems = 1;
-    static constexpr int ModeIndex = 0;
+    static constexpr int NumDataItems = 2;
+    static constexpr int AngleModeIndex = 0;
+    static constexpr int IncludeElevationIndex = 1;
 
     /**
-     * Update focus node data
+     * Gather angle settings telemetry information (Angle calculation mode, and whether
+     * elevation angle is included)
      *
-     * \return true if the data is new compared to before, otherwise false
+     * \return True if the data is new compared to before, otherwise false
      */
     bool getData();
 
     /**
-     * Send current sonification data for the indicated node over the osc connection
-     * Order of data: distance, horizontal angle, vertical angle
+     * Send the current angle settings telemetry information over the osc connection
+     * Order of data: Angle calculation mode,
      */
     void sendData();
 
     // Variables
-    TelemetryModule* _sonificationModule = nullptr;
-    TelemetryModule::SurroundMode _currentMode;
+    TelemetryModule::AngleCalculationMode _angleMode =
+        TelemetryModule::AngleCalculationMode::Horizontal;
+    bool _includeElevation = false;
+    bool _isInitialized = false;
 };
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_TELEMETRY___MODETELEMETRY___H__
+#endif __OPENSPACE_MODULE_TELEMETRY___ANGLEMODETELEMETRY___H__

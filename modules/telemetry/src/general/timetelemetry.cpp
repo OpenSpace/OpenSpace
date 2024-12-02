@@ -33,19 +33,21 @@ namespace {
     {
         "TimeTelemetry",
         "Time Telemetry",
-        "Sonification that sends out time information over the OSC connection"
+        "Telemetry that sends out time information over the OSC connection"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeUnitOptionInfo = {
         "TimeUnit",
         "Time Unit",
-        "Choose a time unit that the sonification should use"
+        "Choose a time unit that the telemetry should use for the time speed. For "
+        "example, if the unit is set to 'Hour' then the unit for the time speed "
+        "is simulation hours per real life second."
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
-        "Settings for the precision of the sonification"
+        "Settings for the precision of the telemetry information"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimePrecisionInfo = {
@@ -60,7 +62,7 @@ namespace {
 
 namespace openspace {
 
-    TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
+TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
     : TelemetryBase(TimeTelemetryInfo, ip, port)
     , _timeUnitOption(
         TimeUnitOptionInfo,
@@ -69,11 +71,12 @@ namespace openspace {
     , _precisionProperty(TimeTelemetry::PrecisionProperty(PrecisionInfo))
 {
     // Add all time units as options in the drop down menu
-    for (int i = 0; i < TimeUnitNamesSingular.size(); ++i) {
+    for (size_t i = 0; i < TimeUnitNamesSingular.size(); ++i) {
         _timeUnitOption.addOption(i, TimeUnitNamesSingular[i].data());
     }
 
-    // Set days as default time unit
+    // Set days as the default time unit, i.e. the unit for the time speed is
+    // simulation days per real life second
     _timeUnitOption.setValue(static_cast<int>(TimeUnit::Day));
     addProperty(_timeUnitOption);
 
@@ -99,15 +102,10 @@ void TimeTelemetry::stop() {}
 TimeTelemetry::PrecisionProperty::PrecisionProperty(
                                properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
     : properties::PropertyOwner(precisionInfo)
-    , timePrecision(
-        TimePrecisionInfo,
-        0.0001,
-        0,
-        1e8
-    )
+    , timePrecision(TimePrecisionInfo, 0.0001, 0, 1e8)
 {
-    addProperty(timePrecision);
     timePrecision.setExponent(10.f);
+    addProperty(timePrecision);
 }
 
 bool TimeTelemetry::getData() {

@@ -27,7 +27,7 @@
 
 #include <modules/telemetry/include/telemetrybase.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/optionproperty.h>
 
 namespace openspace {
@@ -38,11 +38,11 @@ public:
     virtual ~PlanetsCompareSonification() override;
 
     /**
-     * Main update function for the sonification
+     * Main update function to gather telemetry data and send it over the osc connection
      *
-     * \param camera pointer to the camera in the scene
+     * \param camera The camera in the scene (not used in this case)
      */
-    virtual void update(const Camera* camera) override;
+    virtual void update(const Camera*) override;
 
     /**
      * Function to stop the sonification
@@ -65,41 +65,60 @@ private:
     static constexpr int MoonsIndex = 4;
     static constexpr int RingsIndex = 5;
 
+    // List of planets that can be selected
+    static constexpr std::array<std::string, 9> PlanetsOptions = {
+        "Choose Planet", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn",
+        "Uranus", "Neptune"
+    };
+
     /**
-     * Create a osc::Blob object with current sonification settings.
-     * Order of settings: size/day, gravity, temperature, atmosphere, moons, rings
+     * Create an osc::Blob object with the current compare planets sonification settings.
+     * Order of settings: Size/day, gravity, temperature, atmosphere, moons, rings
      *
-     * \return a osc::Blob object with current sonificaiton settings
+     * \return An osc::Blob object with the current compare planets sonification settings
      */
     osc::Blob createSettingsBlob() const;
 
     /**
-     * Send current sonification settings over the osc connection
-     * Order of data: name of first planet, name of second planet, settings
+     * Send current compare planets sonification settings over the osc connection
+     * Order of data: Name of the first selected planet, name of the second planet,
+     *                compare planets settings
      */
     void sendSettings();
 
     /**
      * Function that gets called when either the first or second planet selection
-     * was changed
+     * was changed with the GUI
      *
-     * \param changedPlanet the planet that was recently changed
-     * \param notChangedPlanet the planet that was NOT changed
-     * \param prevChangedPlanet the previous value of the planet that was recently changed
+     * \param changedPlanet The planet selection that was recently changed
+     * \param notChangedPlanet The planet selection that was NOT changed
+     * \param prevChangedPlanet The previous value of the planet that was changed
      */
     void planetSelectionChanged(properties::OptionProperty& changedPlanet,
         properties::OptionProperty& notChangedPlanet, std::string& prevChangedPlanet);
 
+    /**
+     * Function that scales the given planet by the given amount over the given amount of
+     * seconds
+     *
+     * \param planet The identifer of the planet that should be scaled
+     * \param scale The amount that the planet should be scaled with as a multiplier of
+     *        the original size
+     * \param interpolationTime The amount of time in seconds to interpolate to the new
+     *        scale for the planet
+     */
+    void scalePlanet(const std::string& planet, double scale,
+        double interpolationTime);
+
     // Properties onChange
+    void onUpscaleChanged();
     void onFirstChanged();
     void onSecondChanged();
     void onToggleAllChanged();
 
-    float _focusScale = 2000.f;
-    std::string _oldFirst;
-    std::string _oldSecond;
-
     // Properties
+    properties::DoubleProperty _selectedUpscale;
+    properties::DoubleProperty _selectedScaleInterpolationTime;
     properties::OptionProperty _firstPlanet;
     properties::OptionProperty _secondPlanet;
 
@@ -110,6 +129,10 @@ private:
     properties::BoolProperty _atmosphereEnabled;
     properties::BoolProperty _moonsEnabled;
     properties::BoolProperty _ringsEnabled;
+
+    // Variables
+    std::string _oldFirst;
+    std::string _oldSecond;
 };
 
 } // namespace openspace

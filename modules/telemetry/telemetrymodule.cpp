@@ -24,14 +24,15 @@
 
 #include <modules/telemetry/telemetrymodule.h>
 
+#include <modules/telemetry/include/general/anglemodetelemetry.h>
 #include <modules/telemetry/include/general/cameratelemetry.h>
 #include <modules/telemetry/include/general/focustelemetry.h>
 #include <modules/telemetry/include/general/nodestelemetry.h>
 #include <modules/telemetry/include/general/timetelemetry.h>
-#include <modules/telemetry/include/specific/modesonification.h>
 #include <modules/telemetry/include/specific/planetscomparesonification.h>
 #include <modules/telemetry/include/specific/planetsoverviewsonification.h>
 #include <modules/telemetry/include/specific/planetssonification.h>
+#include <ghoul/logging/logmanager.h>
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
@@ -39,37 +40,49 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "TelemetryModule";
 
-    //Output to SuperCollider
+    // The default OSC reciver is SuperCollider with these default values.
+    // However, the user can define any reciver in the openspace.cfg file as the
+    // ModuleConfiguration for the Telemetry module.
     constexpr std::string_view DefaultSuperColliderIp = "127.0.0.1";
     constexpr int DefaultSuperColliderPort = 57120;
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Enable or disable all sonifications"
+        "Enable or disable all gathering of telemetry information"
     };
 
     constexpr openspace::properties::Property::PropertyInfo IpAddressInfo = {
         "IpAddress",
         "Ip address",
-        "The network ip address that the sonification osc messages will be sent to"
+        "The network ip address that the telemetry osc messages is sent to"
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The network port that the sonification osc messages will be sent to"
+        "The network port that the telemetry osc messages is sent to"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SurroundModeInfo = {
-        "SurroundMode",
-        "Surround Mode",
-        "The type of surround system that the sonification is played on"
+    constexpr openspace::properties::Property::PropertyInfo AngleCalculationModeInfo = {
+        "AngleCalculationMode",
+        "Angle Calculation Mode",
+        "This setting changes the method to calculate any angles in the telemetries. "
+        "The Horizontal mode, generally works well for flat displays or forward facing "
+        "immersive envierments. The Circular mode, generally works well for centered "
+        "fisheye displays or omnidirectional immersive environments"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo IncludeElevationAngleInfo = {
+        "IncludeElevationAngle",
+        "Include Elevation Angle",
+        "This setting determines if an additional elevation angle should be calculated "
+        "for the telemetries that calculate angles. The method used for this calculation "
+        "also depends on the angle calculation mode"
     };
 
     struct [[codegen::Dictionary(TelemetryModule)]] Parameters {
@@ -79,16 +92,16 @@ namespace {
         // [[codegen::verbatim(PortInfo.description)]]
         std::optional<int> port;
 
-        enum class [[codegen::map(openspace::TelemetryModule::SurroundMode)]] SurroundMode {
+        enum class [[codegen::map(openspace::TelemetryModule::AngleCalculationMode)]] AngleCalculationMode {
             Horizontal,
-            HorizontalWithElevation,
-            Circular,
-            CircularWithElevation,
-            None
+            Circular
         };
 
-        // [[codegen::verbatim(SurroundModeInfo.description)]]
-        std::optional<SurroundMode> surroundMode;
+        // [[codegen::verbatim(AngleCalculationModeInfo.description)]]
+        std::optional<AngleCalculationMode> angleCalculationMode;
+
+        // [[codegen::verbatim(IncludeElevationAngleInfo.description)]]
+        std::optional<bool> includeElevationAngle;
     };
 #include "telemetrymodule_codegen.cpp"
 } // namespace
@@ -100,10 +113,11 @@ TelemetryModule::TelemetryModule()
     , _enabled(EnabledInfo, false)
     , _ipAddress(IpAddressInfo, DefaultSuperColliderIp.data())
     , _port(PortInfo, DefaultSuperColliderPort, 1025, 65536)
-    , _mode(
-        SurroundModeInfo,
+    , _modeOptions(
+        AngleCalculationModeInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _includeElevationAngle(IncludeElevationAngleInfo, false)
 {
     addProperty(_enabled);
 
@@ -113,30 +127,29 @@ TelemetryModule::TelemetryModule()
     _port.setReadOnly(true);
     addProperty(_port);
 
-    // Add options to the drop down menues
-    _mode.addOptions({
-        { 0, "None" },
-        { 1, "Horizontal" },
-        { 2, "Horizontal With Elevation" },
-        { 3, "Circular" },
-        { 4, "Circular With Elevation" }
+    // Add options to the drop down menu
+    _modeOptions.addOptions({
+        { 0, "Horizontal" },
+        { 1, "Circular" }
     });
-    _mode.onChange([this]() { guiOnChangeSurroundMode(); });
+    _modeOptions.onChange([this]() { guiOnChangeAngleCalculationMode(); });
 
-    // Select Horizontal as the default surround mode
-    _mode.setValue(static_cast<int>(SurroundMode::Horizontal));
-    addProperty(_mode);
+    // Select Horizontal angle calculation mode as the default
+    _modeOptions.setValue(static_cast<int>(AngleCalculationMode::Horizontal));
+    addProperty(_modeOptions);
+
+    addProperty(_includeElevationAngle);
 }
 
 TelemetryModule::~TelemetryModule() {
-    // Clear the sonifications list
-    for (TelemetryBase* sonification : _sonifications) {
-        delete sonification;
+    // Clear the telemetries list
+    for (TelemetryBase* telemetry : _telemetries) {
+        delete telemetry;
     }
 }
 
-void TelemetryModule::guiOnChangeSurroundMode() {
-    _surroundMode = static_cast<SurroundMode>(_mode.value());
+void TelemetryModule::guiOnChangeAngleCalculationMode() {
+    _angleCalculationMode = static_cast<AngleCalculationMode>(_modeOptions.value());
 }
 
 void TelemetryModule::internalInitialize(const ghoul::Dictionary& dictionary) {
@@ -145,53 +158,54 @@ void TelemetryModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     _ipAddress = p.ipAddress.value_or(_ipAddress);
     _port = p.port.value_or(_port);
 
-    if (p.surroundMode.has_value()) {
-        Parameters::SurroundMode mode = Parameters::SurroundMode(*p.surroundMode);
-        _surroundMode = codegen::map<SurroundMode>(mode);
+    if (p.angleCalculationMode.has_value()) {
+        Parameters::AngleCalculationMode mode =
+            Parameters::AngleCalculationMode(*p.angleCalculationMode);
+        _angleCalculationMode = codegen::map<AngleCalculationMode>(mode);
     }
 
     // Fill telemetry list
-    TelemetryBase* sonification = new CameraTelemetry(_ipAddress, _port);
-    addSonification(sonification);
+    TelemetryBase* telemetry = new AngleModeTelemetry(_ipAddress, _port);
+    addTelemetry(telemetry);
 
-    sonification = new FocusTelemetry(_ipAddress, _port);
-    addSonification(sonification);
+    telemetry = new CameraTelemetry(_ipAddress, _port);
+    addTelemetry(telemetry);
 
-    sonification = new TimeTelemetry(_ipAddress, _port);
-    addSonification(sonification);
+    telemetry = new FocusTelemetry(_ipAddress, _port);
+    addTelemetry(telemetry);
 
-    sonification = new NodesTelemetry(_ipAddress, _port);
-    addSonification(sonification);
+    telemetry = new TimeTelemetry(_ipAddress, _port);
+    addTelemetry(telemetry);
 
-    sonification = new ModeSonification(_ipAddress, _port);
-    addSonification(sonification);
+    telemetry = new NodesTelemetry(_ipAddress, _port);
+    addTelemetry(telemetry);
 
-    sonification = new PlanetsCompareSonification(_ipAddress, _port);
-    addSonification(sonification);
+    telemetry = new PlanetsCompareSonification(_ipAddress, _port);
+    addTelemetry(telemetry);
 
-    sonification = new PlanetsOverviewSonification(_ipAddress, _port);
-    addSonification(sonification);
+    telemetry = new PlanetsOverviewSonification(_ipAddress, _port);
+    addTelemetry(telemetry);
 
-    sonification = new PlanetsSonification(_ipAddress, _port);
-    addSonification(sonification);
+    telemetry = new PlanetsSonification(_ipAddress, _port);
+    addTelemetry(telemetry);
 
-    // Only the master runs the SonificationModule
+    // Only the master runs the TelemetryModule update thread
     if (global::windowDelegate->isMaster()) {
         _isRunning = true;
         _updateThread = std::thread([this]() { update(std::ref(_isRunning)); });
 
-        // Make sure the sonification thread is synced with the main thread
+        // Make sure the telemetry thread is synced with the main thread
         global::callback::postSyncPreDraw->emplace_back([this]() {
-            // Tell the sonification thread that a new frame is starting
-            //LDEBUG("The main thread signals to the sonification thread");
+            // Tell the telemetry thread that a new frame is starting
+            //LDEBUG("The main thread signals to the telemetry thread");
             syncToMain.notify_one();
         });
     }
 }
 
-void TelemetryModule::addSonification(TelemetryBase* sonification) {
-    _sonifications.push_back(sonification);
-    addPropertySubOwner(sonification);
+void TelemetryModule::addTelemetry(TelemetryBase* telemetry) {
+    _telemetries.push_back(telemetry);
+    addPropertySubOwner(telemetry);
 }
 
 void TelemetryModule::internalDeinitialize() {
@@ -203,30 +217,34 @@ void TelemetryModule::internalDeinitialize() {
     _updateThread.join();
 }
 
-const std::vector<TelemetryBase*>& TelemetryModule::sonifications() const {
-    return _sonifications;
+const std::vector<TelemetryBase*>& TelemetryModule::telemetries() const {
+    return _telemetries;
 }
 
-const TelemetryBase* TelemetryModule::sonification(std::string id) const {
-    for (const TelemetryBase* s : _sonifications) {
-        if (s->identifier() == id) {
-            return s;
+const TelemetryBase* TelemetryModule::telemetry(std::string id) const {
+    for (const TelemetryBase* t : _telemetries) {
+        if (t->identifier() == id) {
+            return t;
         }
     }
     return nullptr;
 }
 
-TelemetryBase* TelemetryModule::sonification(std::string id) {
-    for (TelemetryBase* s : _sonifications) {
-        if (s->identifier() == id) {
-            return s;
+TelemetryBase* TelemetryModule::telemetry(std::string id) {
+    for (TelemetryBase* t : _telemetries) {
+        if (t->identifier() == id) {
+            return t;
         }
     }
     return nullptr;
 }
 
-TelemetryModule::SurroundMode TelemetryModule::surroundMode() const {
-    return _surroundMode;
+TelemetryModule::AngleCalculationMode TelemetryModule::angleCalculationMode() const {
+    return _angleCalculationMode;
+}
+
+bool TelemetryModule::includeElevationAngle() const {
+    return _includeElevationAngle;
 }
 
 void TelemetryModule::update(std::atomic<bool>& isRunning) {
@@ -236,60 +254,60 @@ void TelemetryModule::update(std::atomic<bool>& isRunning) {
 
     while (isRunning) {
         // Wait for the main thread
-        //LDEBUG("The sonification thread is waiting for a signal from the main thread");
+        //LDEBUG("The telemetry thread is waiting for a signal from the main thread");
         std::unique_lock<std::mutex> lk(mutexLock);
         syncToMain.wait(lk);
         //LDEBUG(
-        //    "The sonification thread is working after having received a signal from "
+        //    "The telemetry thread is working after having received a signal from "
         //    "the main thread"
         //);
 
-        // Check if the sonification is even enabled
-        if (_enabled) {
-            // Initialize the scena and camera information
-            if (!isInitialized) {
-                // Find the scene
-                if (!scene) {
-                    scene = global::renderEngine->scene();
-                }
+        // Check if the module is even enabled
+        if (!_enabled) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            continue;
+        }
 
-                // Find the camera in the scene
-                if (!camera) {
-                    camera = scene ? scene->camera() : nullptr;
-                }
-
-                // Check status
-                if (!scene || scene->isInitializing() || scene->root()->children().empty() ||
-                    !camera ||glm::length(camera->positionVec3()) <
-                    std::numeric_limits<glm::f64>::epsilon())
-                {
-                    isInitialized = false;
-                }
-                else {
-                    isInitialized = true;
-                }
+        // Initialize the scena and camera information if that has not already been done
+        if (!isInitialized) {
+            // Find the scene
+            if (!scene) {
+                scene = global::renderEngine->scene();
             }
 
-            if (isInitialized) {
-                // Process the sonifications
-                for (TelemetryBase* sonification : _sonifications) {
-                    if (!sonification) {
-                        continue;
-                    }
-                    sonification->update(camera);
-                }
+            // Find the camera in the scene
+            if (!camera) {
+                camera = scene ? scene->camera() : nullptr;
+            }
+
+            // Check status
+            if (!scene || scene->isInitializing() || scene->root()->children().empty() ||
+                !camera ||glm::length(camera->positionVec3()) <
+                std::numeric_limits<glm::f64>::epsilon())
+            {
+                isInitialized = false;
+            }
+            else {
+                isInitialized = true;
             }
         }
-        else {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        // Process the telemetries
+        if (isInitialized) {
+            for (TelemetryBase* telemetry : _telemetries) {
+                if (!telemetry) {
+                    continue;
+                }
+                telemetry->update(camera);
+            }
         }
     }
 }
 
 std::vector<scripting::LuaLibrary> TelemetryModule::luaLibraries() const {
     return {
-        PlanetsSonification::luaLibrary(),
-        NodesTelemetry::luaLibrary()
+        NodesTelemetry::luaLibrary(),
+        PlanetsSonification::luaLibrary()
     };
 }
 

@@ -24,7 +24,6 @@
 
 #include <modules/telemetry/include/util.h>
 
-#include <modules/telemetry/telemetrymodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -84,12 +83,16 @@ namespace openspace {
     }
 
     // Horizontal angles
-    double calculateAngleTo(const Camera* camera, std::string nodeIdentifier) {
+    double calculateAngleTo(const Camera* camera, std::string nodeIdentifier,
+                            TelemetryModule::AngleCalculationMode angleCalculationMode)
+    {
         glm::dvec3 nodePosition = getNodePosition(nodeIdentifier);
-        return calculateAngleTo(camera, nodePosition);
+        return calculateAngleTo(camera, nodePosition, angleCalculationMode);
     }
 
-    double calculateAngleTo(const Camera* camera, glm::dvec3 nodePosition) {
+    double calculateAngleTo(const Camera* camera, glm::dvec3 nodePosition,
+                            TelemetryModule::AngleCalculationMode angleCalculationMode)
+    {
         if (glm::length(nodePosition)<std::numeric_limits<glm::f64>::epsilon()) {
             return 0.0;
         }
@@ -98,21 +101,11 @@ namespace openspace {
         glm::dvec3 cameraUpVector = camera->lookUpVectorWorldSpace();
         glm::dvec3 cameraViewVector = camera->viewDirectionWorldSpace();
 
-        // Get the current surround mode
-        TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
-        if (!module) {
-            LERROR("Could not find the SonificationModule");
-            return 0.0;
-        }
-        TelemetryModule::SurroundMode mode = module->surroundMode();
-
         // Get the vector from the camera to the node
         glm::dvec3 cameraToNode = nodePosition - camera->positionVec3();
 
         // Calculate the horizontal angle depending on the surround mode
-        if (mode == TelemetryModule::SurroundMode::Horizontal ||
-            mode == TelemetryModule::SurroundMode::HorizontalWithElevation)
-        {
+        if (angleCalculationMode == TelemetryModule::AngleCalculationMode::Horizontal) {
             // Calculate the angle from the camera, to the node, within the camera plane.
             // The camera plane is the plane of the camera view direction + camera left
             // direction (i.e. the negative camera right direction), with the camera up
@@ -137,8 +130,7 @@ namespace openspace {
                 glm::normalize(cameraUpVector)
             );
         }
-        else if (mode == TelemetryModule::SurroundMode::Circular ||
-                 mode == TelemetryModule::SurroundMode::CircularWithElevation)
+        else if (angleCalculationMode == TelemetryModule::AngleCalculationMode::Circular)
         {
             // Calculate the angle from the camera, to the node, within the camera view
             // plane. The camera view plane is the plane of the camera up direction +
@@ -171,16 +163,23 @@ namespace openspace {
     }
 
     double calculateAngleFromAToB(const Camera* camera, std::string nodeIdentifierA,
-                                  std::string nodeIdentifierB)
+                                  std::string nodeIdentifierB,
+                               TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
         glm::dvec3 nodeAPosition = getNodePosition(nodeIdentifierA);
         glm::dvec3 nodeBPosition = getNodePosition(nodeIdentifierB);
 
-        return calculateAngleFromAToB(camera, nodeAPosition, nodeBPosition);
+        return calculateAngleFromAToB(
+            camera,
+            nodeAPosition,
+            nodeBPosition,
+            angleCalculationMode
+        );
     }
 
     double calculateAngleFromAToB(const Camera* camera, glm::dvec3 nodePositionA,
-                                  glm::dvec3 nodePositionB)
+                                  glm::dvec3 nodePositionB,
+                               TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
         if (glm::length(nodePositionA) < std::numeric_limits<glm::f64>::epsilon() ||
             glm::length(nodePositionB) < std::numeric_limits<glm::f64>::epsilon())
@@ -192,21 +191,11 @@ namespace openspace {
         glm::dvec3 cameraUpVector = camera->lookUpVectorWorldSpace();
         glm::dvec3 cameraViewVector = camera->viewDirectionWorldSpace();
 
-        // Get the current surround mode
-        TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
-        if (!module) {
-            LERROR("Could not find the SonificationModule");
-            return 0.0;
-        }
-        TelemetryModule::SurroundMode mode = module->surroundMode();
-
         // Get the vector from the first node (A) to the second node (B)
         glm::dvec3 AToB = nodePositionB - nodePositionA;
 
         // Calculate the horizontal angle depending on the surround mode
-        if (mode == TelemetryModule::SurroundMode::Horizontal ||
-            mode == TelemetryModule::SurroundMode::HorizontalWithElevation)
-        {
+        if (angleCalculationMode == TelemetryModule::AngleCalculationMode::Horizontal) {
             // Calculate the angle from node A, to node B, within the camera plane.
             // The camera plane is the plane of the camera view direction + camera left
             // direction (i.e. the negative camera right direction), with the camera up
@@ -232,8 +221,7 @@ namespace openspace {
                 glm::normalize(cameraUpVector)
             );
         }
-        else if (mode == TelemetryModule::SurroundMode::Circular ||
-                 mode == TelemetryModule::SurroundMode::CircularWithElevation)
+        else if (angleCalculationMode == TelemetryModule::AngleCalculationMode::Circular)
         {
             // Calculate the angle from node A to the node B within the camera view
             // plane. The camera view plane is the plane of the camera up direction +
@@ -267,13 +255,16 @@ namespace openspace {
     }
 
     // Elevation angles
-    double calculateElevationAngleTo(const Camera* camera, std::string nodeIdentifier)
+    double calculateElevationAngleTo(const Camera* camera, std::string nodeIdentifier,
+                               TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
         glm::dvec3 nodePosition = getNodePosition(nodeIdentifier);
-        return calculateElevationAngleTo(camera, nodePosition);
+        return calculateElevationAngleTo(camera, nodePosition, angleCalculationMode);
     }
 
-    double calculateElevationAngleTo(const Camera* camera, glm::dvec3 nodePosition) {
+    double calculateElevationAngleTo(const Camera* camera, glm::dvec3 nodePosition,
+                               TelemetryModule::AngleCalculationMode angleCalculationMode)
+    {
         if (glm::length(nodePosition) < std::numeric_limits<glm::f64>::epsilon()) {
             return 0.0;
         }
@@ -283,19 +274,11 @@ namespace openspace {
         glm::dvec3 cameraViewVector = camera->viewDirectionWorldSpace();
         glm::dvec3 cameraRightVector = glm::cross(cameraViewVector, cameraUpVector);
 
-        // Get the current surround mode
-        TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
-        if (!module) {
-            LERROR("Could not find the SonificationModule");
-            return 0.0;
-        }
-        TelemetryModule::SurroundMode mode = module->surroundMode();
-
         // Get the vector from the camera to the node
         glm::dvec3 cameraToNode = nodePosition - camera->positionVec3();
 
         // Calculate the elevation angle depending on the surround mode
-        if (mode == TelemetryModule::SurroundMode::HorizontalWithElevation) {
+        if (angleCalculationMode == TelemetryModule::AngleCalculationMode::Horizontal) {
             // Calculate the elevation angle from the camera, to the node, within the
             // camera view + up plane. The camera view + up plane is the plane of the
             // camera view direction + camera up direction, with the camera right
@@ -320,7 +303,8 @@ namespace openspace {
                 glm::normalize(cameraRightVector)
             );
         }
-        else if (mode == TelemetryModule::SurroundMode::CircularWithElevation) {
+        else if (angleCalculationMode == TelemetryModule::AngleCalculationMode::Circular)
+        {
             // Calculate the elevation angle from the camera, to the node, within the
             // camera view + up plane. The camera view + up plane is the plane of the
             // camera view direction + camera up direction, with the camera right
@@ -377,16 +361,23 @@ namespace openspace {
 
     double calculateElevationAngleFromAToB(const Camera* camera,
                                            std::string nodeIdentifierA,
-                                           std::string nodeIdentifierB)
+                                           std::string nodeIdentifierB,
+                               TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
         glm::dvec3 nodeAPosition = getNodePosition(nodeIdentifierA);
         glm::dvec3 nodeBPosition = getNodePosition(nodeIdentifierB);
 
-        return calculateElevationAngleFromAToB(camera, nodeAPosition, nodeBPosition);
+        return calculateElevationAngleFromAToB(
+            camera,
+            nodeAPosition,
+            nodeBPosition,
+            angleCalculationMode
+        );
     }
 
     double calculateElevationAngleFromAToB(const Camera* camera, glm::dvec3 nodePositionA,
-                                           glm::dvec3 nodePositionB)
+                                           glm::dvec3 nodePositionB,
+                               TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
         if (glm::length(nodePositionA) < std::numeric_limits<glm::f64>::epsilon() ||
             glm::length(nodePositionB) < std::numeric_limits<glm::f64>::epsilon())
@@ -399,19 +390,11 @@ namespace openspace {
         glm::dvec3 cameraViewVector = camera->viewDirectionWorldSpace();
         glm::dvec3 cameraRightVector = glm::cross(cameraViewVector, cameraUpVector);
 
-        // Get the current surround mode
-        TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
-        if (!module) {
-            LERROR("Could not find the SonificationModule");
-            return 0.0;
-        }
-        TelemetryModule::SurroundMode mode = module->surroundMode();
-
         // Get the vector from the first node (A) to the second node (B)
         glm::dvec3 AToB = nodePositionB - nodePositionA;
 
         // Calculate the elevation angle depending on the surround mode
-        if (mode == TelemetryModule::SurroundMode::HorizontalWithElevation) {
+        if (angleCalculationMode == TelemetryModule::AngleCalculationMode::Horizontal) {
             // Calculate the elevation angle from node A, to node B, within the
             // camera view + up plane. The camera view + up plane is the plane of the
             // camera view direction + camera up direction, with the camera right
@@ -445,7 +428,8 @@ namespace openspace {
                 glm::normalize(cameraRightVector)
             );
         }
-        else if (mode == TelemetryModule::SurroundMode::CircularWithElevation) {
+        else if (angleCalculationMode == TelemetryModule::AngleCalculationMode::Circular)
+        {
             // Calculate the elevation angle from node A, to node B, within the
             // camera view + up plane. The camera view + up plane is the plane of the
             // camera view direction + camera up direction, with the camera right

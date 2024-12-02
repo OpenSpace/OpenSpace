@@ -42,7 +42,7 @@ public:
     /**
      * Main update function to gather telemetry data and send it over the osc connection
      *
-     * \param camera pointer to the camera in the scene
+     * \param camera The camera in the scene
      */
     virtual void update(const Camera* camera) = 0;
 
@@ -52,14 +52,14 @@ public:
     virtual void stop() = 0;
 
     /**
-    * \return The identifier of the telemetry class, the type of data that is gathered
-    *         and sent
-    */
+     * \return The identifier of the telemetry class, the type of data that is gathered
+     *         and sent
+     */
     std::string identifier() const;
 
     /**
-    * \return Whether the telemetry monitoring is enabled or not for this type of data
-    */
+     * \return Whether the telemetry monitoring is enabled or not for this type of data
+     */
     bool enabled() const;
 
 protected:

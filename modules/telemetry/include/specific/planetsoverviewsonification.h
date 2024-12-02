@@ -27,8 +27,6 @@
 
 #include <modules/telemetry/include/telemetrybase.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-
 namespace openspace {
 
 class PlanetsOverviewSonification : public TelemetryBase {
@@ -37,11 +35,11 @@ public:
     virtual ~PlanetsOverviewSonification() override;
 
     /**
-     * Main update function for the sonification
+      * Main update function to gather telemetry data and send it over the osc connection
      *
-     * \param camera pointer to the camera in the scene
+     * \param camera The camera in the scene (not used in this case)
      */
-    virtual void update(const Camera* camera) override;
+    virtual void update(const Camera*) override;
 
     /**
      * Function to stop the sonification
@@ -65,15 +63,16 @@ private:
     static constexpr int NeptuneIndex = 7;
 
     /**
-     * Create a osc::Blob object with current sonification settings.
+     * Create an osc::Blob object with the current planets overview sonification settings.
      * Order of settings: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
      *
-     * \return a osc::Blob object with current sonificaiton settings
+     * \return An osc::Blob object with the current planets overview sonification settings
      */
     osc::Blob createSettingsBlob() const;
 
     /**
-     * Send current sonification data over the osc connection
+     * Send current planets overview sonification settings over the osc connection
+     * Order of data: Planets overview settings
      */
     void sendData();
 

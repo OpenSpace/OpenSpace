@@ -27,7 +27,7 @@
 
 #include <modules/telemetry/include/telemetrybase.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
+#include <modules/telemetry/telemetrymodule.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {
@@ -40,9 +40,11 @@ public:
     virtual ~PlanetsSonification() override;
 
     /**
-     * Main update function for the sonification
+     * Main update function to gather planets telemetry information (distance, horizontal
+     * angle, vertical angle, distance to moons, horizontal angle to moons, and vertical
+     * angle to moons) for the planets sonificaiton and send it via the osc connection.
      *
-     * \param camera pointer to the camera in the scene
+     * \param camera The camera in the scene
      */
     virtual void update(const Camera* camera) override;
 
@@ -52,10 +54,10 @@ public:
     virtual void stop() override;
 
     /**
-    * Add the given planet to the list of planets and moons
-    *
-    * \param dict the planet that should be added
-    */
+     * Add the given planet information to the list of planets and their moons
+     *
+     * \param dict The planet that should be added
+     */
     void addPlanet(ghoul::Dictionary dict);
 
     /**
@@ -63,16 +65,15 @@ public:
      * planets sonification.
      *
      * \return The Lua library that contains all Lua functions available to change the
-     * planets sonification
+     *         planets sonification
      */
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    // Indices for data items
-    static constexpr int NumDataItems = 3;
-    static constexpr int DistanceIndex = 0;
-    static constexpr int HAngleIndex = 1;
-    static constexpr int VAngleIndex = 2;
+    // Number of data items for planets and moons, which is used to calculate the total
+    // size of the data vector sent over the osc connection
+    static constexpr int NumDataItemsPlanet = 4;
+    static constexpr int NumDataItemsMoon = 3;
 
     // Indices for the planets
     static constexpr int MercuryIndex = 0;
@@ -93,47 +94,58 @@ private:
     static constexpr int MoonsIndex = 4;
     static constexpr int RingsIndex = 5;
 
-    // Struct to hold data for all the planets
-    struct Planet {
-        Planet(std::string id = "") {
-            identifier = id;
+    // To hold all the data for a planet or a moon, including a list of data for the
+    // moons of the planet. However, in the case of a moon, then the list of moons
+    // is empty
+    struct DataBody {
+        DataBody(std::string inName = "") {
+            name = inName;
         }
 
-        std::string identifier;
+        std::string name;
+        double distance = 0.0;
+        double horizontalAngle = 0.0;
+        double verticalAngle = 0.0;
 
-        // Distance, horizontal angle, vertical angle
-        std::vector<double> data = std::vector<double>(NumDataItems);
-
-        // <name of moon, <distance, horizontal angle, vertical angle>>
-        std::vector<std::pair<std::string, std::vector<double>>> moons;
+        // List of moons that orbit this planet (in the case that this is a moon, then
+        // this list is empty)
+        std::vector<DataBody> moons;
     };
 
     /**
-     * Update distance and angle data for the given planet
+     * Update the distance and angle information for the given planet
      *
-     * \param camera pointer to the camera in the scene. Used to calculated the data for
-     *               the planet
-     * \param planetIndex index to the internally stored planet data that should be
-     *                    updated
+     * \param camera The camera in the scene
+     * \param planetIndex The index to the internally stored planet data that should be
+     *        updated
+     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     *        method to use when calculating the angle.
+     * \param includeElevation Whether the additional elevation angle should be calculated
      *
-     * \return true if the data is new compared to before, otherwise false
+     * \return True if the data is new compared to before, otherwise false
      */
-    bool getData(const Camera* camera, int planetIndex);
+    bool getData(const Camera* camera, int planetIndex,
+        TelemetryModule::AngleCalculationMode angleCalculationMode,
+        bool includeElevation);
 
     /**
-     * Create a osc::Blob object with current sonification settings for the indicated
-     * planet. Order of settings: size/day, gravity, temperature, (atmosphere, moons,
-     * rings).
+     * Create an osc::Blob object with the current sonification settings for the indicated
+     * planet
+     * Order of settings: Size/day, gravity, temperature, and optionaly atmosphere, moons,
+     *                    and rings.
      *
-     * \param planetIndex indicates which planet to create the settings blob for
+     * \param planetIndex The index of the planet to create the settings blob for
      *
-     * \return a osc::Blob object with current sonificaiton settings
+     * \return An osc::Blob object with current sonificaiton settings for the indicated
+     *         planet
      */
     osc::Blob createSettingsBlob(int planetIndex) const;
 
     /**
-     * Send current sonification settings for the indicated planet over the osc connection
-     * Order of data: distance, angle, settings, moon angles
+     * Send the current sonification settings for the indicated planet over the osc
+     * connection
+     * Order of data: distance, horizontal angle, vertical angle, settings, data for each
+     *                moon (distance, horizontal angle, and vertical angle)
      */
     void sendPlanetData(int planetIndex);
 
@@ -172,21 +184,17 @@ private:
     void onNeptuneAllChanged();
     void onNeptuneSettingChanged();
 
-    double _anglePrecision;
-    double _distancePrecision;
-    std::vector<Planet> _planets;
-
     // Properties
     struct PlanetProperty : properties::PropertyOwner {
         PlanetProperty(properties::PropertyOwner::PropertyOwnerInfo planetInfo);
 
-        // All planets have these
+        // All planets have these settings
         properties::BoolProperty toggleAll;
         properties::BoolProperty sizeDayEnabled;
         properties::BoolProperty gravityEnabled;
         properties::BoolProperty temperatureEnabled;
 
-        // Some planets have these
+        // Only some planets have some of these settings
         properties::BoolProperty atmosphereEnabled;
         properties::BoolProperty moonsEnabled;
         properties::BoolProperty ringsEnabled;
@@ -195,6 +203,12 @@ private:
     struct PrecisionProperty : properties::PropertyOwner {
         PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
 
+        // The low and high precision values are used in different situations. When the
+        // planet is the current focus node, then the high precision value is used. This
+        // is due to the sonificaiton and planet being in the current focus and should
+        // therfore have better precision. If the planet is not the current focus node,
+        // then the low precision value is used to save performance, both on the
+        // OpenSpace side and the SuperCollider side.
         properties::DoubleProperty lowDistancePrecision;
         properties::DoubleProperty highDistancePrecision;
         properties::DoubleProperty lowAnglePrecision;
@@ -211,6 +225,13 @@ private:
     PlanetProperty _uranusProperty;
     PlanetProperty _neptuneProperty;
     PrecisionProperty _precisionProperty;
+
+    // Variables
+    std::vector<DataBody> _planets;
+
+    // The current precision values for distance and angle
+    double _anglePrecision;
+    double _distancePrecision;
 };
 
 } // namespace openspace

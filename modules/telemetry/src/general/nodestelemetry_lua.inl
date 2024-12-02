@@ -22,31 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/telemetry/telemetrymodule.h>
+#include <openspace/engine/moduleengine.h>
+
 namespace {
 
 /**
- * Adds the given list of planets to the PlanetsSonification internal list of Planets
- * and Moons
+ * Adds the given list of nodes to the NodesTelemetry's internal list
  */
 [[codegen::luawrap]] void addNodes(ghoul::Dictionary nodes) {
     openspace::TelemetryModule* module =
         openspace::global::moduleEngine->module<openspace::TelemetryModule>();
     if (!module) {
-        LERRORC("NodesSonification_lua", "Could not find the SonificationModule");
+        LERRORC("NodesTelemetry_lua", "Could not find the TelemetryModule");
         return;
     }
-    openspace::TelemetryBase* ptr = module->sonification("NodesSonification");
+    openspace::TelemetryBase* ptr = module->telemetry("NodesTelemetry");
     if (!ptr) {
-        LERRORC("NodesSonification_lua", "Could not find the NodesSonification");
+        LERRORC("NodesTelemetry_lua", "Could not find the NodesTelemetry");
         return;
     }
 
-    openspace::NodesTelemetry* nodesSonification =
+    openspace::NodesTelemetry* nodesTelemetry =
         reinterpret_cast<openspace::NodesTelemetry*>(ptr);
 
     for (const std::string_view& k : nodes.keys()) {
         std::string node = nodes.value<std::string>(k);
-        nodesSonification->addNode(node);
+        nodesTelemetry->addNode(node);
     }
 }
 

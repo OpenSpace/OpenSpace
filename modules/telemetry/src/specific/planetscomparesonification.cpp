@@ -24,8 +24,7 @@
 
 #include <modules/telemetry/include/specific/planetscomparesonification.h>
 
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/memorymanager.h>
@@ -39,26 +38,46 @@ namespace {
     {
         "PlanetsCompareSonification",
         "Planets Compare Sonification",
-        "Sonification that compares two different planets to each other in different "
+        "Sonification that compares two different planets to each other in a variety of "
         "aspects"
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SelectedUpscaleInfo = {
+        "SelectedUpscale",
+        "Selected Planet Upscale Multiplier",
+        "When a planet is selected to be compared in any of the drop down menus below, "
+        "it is also upscaled as a visual indicator of which planets are currently being "
+        "compared. This property determines how much the planet is scaled up as a "
+        "multiplier of the original size."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo
+        SelectedScaleInterpolationTimeInfo =
+    {
+        "SelectedScaleInterpolationTimeInfo",
+        "Selected Planet Scale Interpolation Time",
+        "When a planet is selected to be compared in any of the drop down menus below, "
+        "it is also upscaled as a visual indicator of which planets are currently being "
+        "compared. This property determines over how many seconds the scaling animation "
+        "should play."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FirstOptionInfo = {
         "FirstOption",
-        "Choose planet to compare",
-        "Choose a planet to compare"
+        "Choose a planet to compare",
+        "Choose a planet in the given list to compare"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondOptionInfo = {
         "SecondOption",
-        "Choose planet to compare",
-        "Choose another planet to compare"
+        "Choose a planet to compare",
+        "Choose another planet in the given list to compare"
     };
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "All",
-        "Toggle all comparing sonifications for both selected planets"
+        "Toggle all comparing sonification varieties for both selected planets"
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
@@ -102,6 +121,8 @@ namespace openspace {
 
 PlanetsCompareSonification::PlanetsCompareSonification(const std::string& ip, int port)
     : TelemetryBase(PlanetsCompareSonificationInfo, ip, port)
+    , _selectedUpscale(SelectedUpscaleInfo, 2000.0, 0.0, 1e+20)
+    , _selectedScaleInterpolationTime(SelectedScaleInterpolationTimeInfo, 1.0, 0.0, 60)
     , _firstPlanet(FirstOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _secondPlanet(SecondOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _toggleAll(ToggleAllInfo, false)
@@ -112,52 +133,43 @@ PlanetsCompareSonification::PlanetsCompareSonification(const std::string& ip, in
     , _moonsEnabled(MoonsInfo, false)
     , _ringsEnabled(RingsInfo, false)
 {
-    // Add options to the drop down menues
-    _firstPlanet.addOptions({
-        { 0, "Choose Planet" },
-        { 1, "Mercury" },
-        { 2, "Venus" },
-        { 3, "Earth" },
-        { 4, "Mars" },
-        { 5, "Jupiter" },
-        { 6, "Saturn" },
-        { 7, "Uranus" },
-        { 8, "Neptune" }
-    });
+    // Scaling animation properties
+    _selectedUpscale.setExponent(15.f);
+    _selectedUpscale.onChange([this]() { onUpscaleChanged(); });
+    addProperty(_selectedUpscale);
+    addProperty(_selectedScaleInterpolationTime);
 
-    _secondPlanet.addOptions({
-        { 0, "Choose Planet" },
-        { 1, "Mercury" },
-        { 2, "Venus" },
-        { 3, "Earth" },
-        { 4, "Mars" },
-        { 5, "Jupiter" },
-        { 6, "Saturn" },
-        { 7, "Uranus" },
-        { 8, "Neptune" }
-    });
-
-    // Add onChange for the properties
+    // Add all the planet selection options to the drop down menu properties
+    for (int i = 0; i < PlanetsOptions.size(); ++i) {
+        _firstPlanet.addOption(i, PlanetsOptions[i].data());
+        _secondPlanet.addOption(i, PlanetsOptions[i].data());
+    }
     _firstPlanet.onChange([this]() { onFirstChanged(); });
-    _secondPlanet.onChange([this]() { onSecondChanged(); });
-    _toggleAll.onChange([this]() { onToggleAllChanged(); });
-    _sizeDayEnabled.onChange([this]() { sendSettings(); });
-    _gravityEnabled.onChange([this]() { sendSettings(); });
-    _temperatureEnabled.onChange([this]() { sendSettings(); });
-    _atmosphereEnabled.onChange([this]() { sendSettings(); });
-    _moonsEnabled.onChange([this]() { sendSettings(); });
-    _ringsEnabled.onChange([this]() { sendSettings(); });
-
-    // Add the properties
     addProperty(_firstPlanet);
+
+    _secondPlanet.onChange([this]() { onSecondChanged(); });
     addProperty(_secondPlanet);
 
+    // Add the sonifiation aspects properties
+    _toggleAll.onChange([this]() { onToggleAllChanged(); });
     addProperty(_toggleAll);
+
+    _sizeDayEnabled.onChange([this]() { sendSettings(); });
     addProperty(_sizeDayEnabled);
+
+    _gravityEnabled.onChange([this]() { sendSettings(); });
     addProperty(_gravityEnabled);
+
+    _temperatureEnabled.onChange([this]() { sendSettings(); });
     addProperty(_temperatureEnabled);
+
+    _atmosphereEnabled.onChange([this]() { sendSettings(); });
     addProperty(_atmosphereEnabled);
+
+    _moonsEnabled.onChange([this]() { sendSettings(); });
     addProperty(_moonsEnabled);
+
+    _ringsEnabled.onChange([this]() { sendSettings(); });
     addProperty(_ringsEnabled);
 }
 
@@ -198,7 +210,7 @@ void PlanetsCompareSonification::sendSettings() {
 void PlanetsCompareSonification::planetSelectionChanged(
                                                 properties::OptionProperty& changedPlanet,
                                              properties::OptionProperty& notChangedPlanet,
-                                                 std::string& prevChangedPlanet)
+                                                        std::string& prevChangedPlanet)
 {
     if (changedPlanet != 0 && changedPlanet == notChangedPlanet) {
         LINFO("Cannot compare a planet to itself");
@@ -206,22 +218,17 @@ void PlanetsCompareSonification::planetSelectionChanged(
         return;
     }
 
-    if (prevChangedPlanet != "") {
-        // Reset scale of previously compared planet
-        std::string script = std::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
-            prevChangedPlanet, 1
-        );
-        global::scriptEngine->queueScript(script);
+    if (!prevChangedPlanet.empty()) {
+        // Reset the scale of the previously compared planet
+        scalePlanet(prevChangedPlanet, 1.0, _selectedScaleInterpolationTime);
     }
 
     if (changedPlanet != 0) {
-        // Scale up the planet to visually show which planets are being compared
-        std::string script = std::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {});",
-            changedPlanet.getDescriptionByValue(changedPlanet.value()), _focusScale
+        scalePlanet(
+            changedPlanet.getDescriptionByValue(changedPlanet.value()),
+            _selectedUpscale,
+            _selectedScaleInterpolationTime
         );
-        global::scriptEngine->queueScript(script);
 
         prevChangedPlanet = changedPlanet.getDescriptionByValue(changedPlanet.value());
     }
@@ -230,6 +237,37 @@ void PlanetsCompareSonification::planetSelectionChanged(
     }
 
     sendSettings();
+}
+
+void PlanetsCompareSonification::scalePlanet(const std::string& planet, double scale,
+                                             double interpolationTime)
+{
+    // Scale the selected planet to visually indicate which planets are currently compared
+    std::string script = std::format(
+        "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {}, {});",
+        planet, scale, interpolationTime
+    );
+    global::scriptEngine->queueScript(script);
+}
+
+void PlanetsCompareSonification::onUpscaleChanged() {
+    // Update the scale value for the first planet if something is selected
+    if (_firstPlanet != 0) {
+        scalePlanet(
+            _firstPlanet.getDescriptionByValue(_firstPlanet.value()),
+            _selectedUpscale,
+            0.0
+        );
+    }
+
+    // Update the scale value for the second planet if something is selected
+    if (_secondPlanet != 0) {
+        scalePlanet(
+            _secondPlanet.getDescriptionByValue(_secondPlanet.value()),
+            _selectedUpscale,
+            0.0
+        );
+    }
 }
 
 void PlanetsCompareSonification::onFirstChanged() {
