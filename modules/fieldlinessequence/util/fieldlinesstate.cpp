@@ -30,6 +30,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <fstream>
 #include <iomanip>
+#include <cerrno>
 
 namespace {
     constexpr std::string_view _loggerCat = "FieldlinesState";
@@ -74,8 +75,12 @@ FieldlinesState FieldlinesState::createStateFromOsfls(const std::string& path) {
 
 bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
     std::ifstream ifs(pathToOsflsFile, std::ifstream::binary);
+
     if (!ifs.is_open()) {
-        LERROR("Couldn't open file: " + pathToOsflsFile);
+        LERROR(
+            "Could not open file: " + pathToOsflsFile +
+            " Error code: " + std::strerror(errno)
+        );
         return false;
     }
 

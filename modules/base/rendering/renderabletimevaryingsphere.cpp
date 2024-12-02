@@ -201,8 +201,8 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
         p.deleteDownloadsOnShutdown.value_or(_deleteDownloadsOnShutdown);
 
     _textureFilterProperty.addOptions({
-        {static_cast<int>(TextureFilter::NearestNeighbor), "Nearest"},
-        {static_cast<int>(TextureFilter::Linear), "Linear"}
+        {static_cast<int>(TextureFilter::NearestNeighbor), "No Filter"},
+        {static_cast<int>(TextureFilter::Linear), "Linear smoothening"}
     });
     if (p.textureFilter.has_value()) {
         _textureFilter = codegen::map<TextureFilter>(*p.textureFilter);
@@ -257,7 +257,9 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
 
     // Stall main thread until thread that's loading states is done
     bool printedWarning = false;
-    while (_dynamicFileDownloader->filesCurrentlyDownloading()) {
+    while (_dynamicFileDownloader != nullptr &&
+           _dynamicFileDownloader->filesCurrentlyDownloading())
+    {
         if (!printedWarning) {
             LWARNING("Currently downloading file, exiting might take longer than usual");
             printedWarning = true;
@@ -265,7 +267,10 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
         _dynamicFileDownloader->checkForFinishedDownloads();
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
-    if (_deleteDownloadsOnShutdown && _loadingType == LoadingType::DynamicDownloading) {
+    if (_dynamicFileDownloader != nullptr &&
+        _deleteDownloadsOnShutdown &&
+        _loadingType == LoadingType::DynamicDownloading)
+    {
         std::filesystem::path syncDir = _dynamicFileDownloader->destinationDirectory();
         for (auto& file : std::filesystem::directory_iterator(syncDir)) {
             std::filesystem::remove(file);
