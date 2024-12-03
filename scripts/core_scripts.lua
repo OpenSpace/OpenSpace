@@ -317,8 +317,15 @@ openspace.fadeOut = function(identifier, fadeTime, endScript)
 
   -- If node is already disabled we don't have to do anything
   if isEnabled then
-    openspace.setPropertyValue(fadeProperty, 0.0, fadeTime, "Linear", endScript)
-    end
+    local disableScript = "openspace.setPropertyValue('" .. enabledProperty .. "', false)"
+    openspace.setPropertyValue(
+      fadeProperty,
+      0.0,
+      fadeTime,
+      "Linear",
+      disableScript .. endScript
+    )
+  end
 end
 
 openspace.toggleFade = function(renderable, fadeTime, endScript)
