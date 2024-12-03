@@ -1,5 +1,4 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
---local magnetosphereTransforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
 local GSM_SM_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_sm")
 local GSE_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_gse")
 local GSM_SM_Time_Transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_sm_timedependent")
