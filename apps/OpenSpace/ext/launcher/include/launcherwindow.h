@@ -29,8 +29,8 @@
 
 #include "sgctedit/sgctedit.h"
 #include <openspace/scene/profile.h>
+#include <sgct/config.h>
 #include <sgct/error.h>
-#include <sgct/readconfig.h>
 #include <QApplication>
 #include <filesystem>
 #include <optional>

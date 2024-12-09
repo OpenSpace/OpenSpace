@@ -227,29 +227,28 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
                 );
             }
         },
-        [&](const sgct::config::SpoutOutputProjection& p) {
-            if (p.quality) {
-                if (p.mapping ==
-                    sgct::config::SpoutOutputProjection::Mapping::Equirectangular)
-                {
-                    wCtrl->setProjectionEquirectangular(
-                        *p.quality,
-                        true
-                    );
-                }
-                else if (p.mapping ==
-                         sgct::config::SpoutOutputProjection::Mapping::Fisheye)
-                {
-                    wCtrl->setProjectionFisheye(
-                        *p.quality,
-                        true
-                    );
-                }
-            }
+        [&](const sgct::config::CubemapProjection& p) {
+            //if (p.quality) {
+            //    if (p.mapping ==
+            //        sgct::config::SpoutOutputProjection::Mapping::Equirectangular)
+            //    {
+            //        wCtrl->setProjectionEquirectangular(
+            //            *p.quality,
+            //            true
+            //        );
+            //    }
+            //    else if (p.mapping ==
+            //             sgct::config::SpoutOutputProjection::Mapping::Fisheye)
+            //    {
+            //        wCtrl->setProjectionFisheye(
+            //            *p.quality,
+            //            true
+            //        );
+            //    }
+            //}
         },
         [&](const sgct::config::NoProjection&) {},
         [&](const sgct::config::ProjectionPlane&) {},
-        [&](const sgct::config::SpoutFlatProjection&) {}
     }, vPort.projection);
 }
 

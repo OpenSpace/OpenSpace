@@ -90,7 +90,7 @@ constexpr std::string_view OpenVRTag = "OpenVR";
 // @TODO (abock, 2020-04-09): These state variables should disappear
 const Window* currentWindow = nullptr;
 const BaseViewport* currentViewport = nullptr;
-Frustum::Mode currentFrustumMode;
+FrustumMode currentFrustumMode;
 glm::mat4 currentModelMatrix;
 glm::ivec2 currentDrawResolution;
 
@@ -499,12 +499,12 @@ void mainRenderFunc(const sgct::RenderData& data) {
 
             if (w.leftOrMain.isCreated() && w.leftOrMain.updateSenderSize(width, height))
             {
-                GLuint texId = window.frameBufferTexture(Window::TextureIndex::LeftEye);
+                GLuint texId = window.frameBufferTextureEye(Eye::MonoOrLeft);
                 w.leftOrMain.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
             }
 
             if (w.right.isCreated() && w.right.updateSenderSize(width, height)) {
-                GLuint texId = window.frameBufferTexture(Window::TextureIndex::RightEye);
+                GLuint texId = window.frameBufferTextureEye(Eye::Right);
                 w.right.updateSender(texId, static_cast<int>(GL_TEXTURE_2D));
             }
 
@@ -731,7 +731,10 @@ void setSgctDelegateFunctions() {
     sgctDelegate.currentWindowSize = []() {
         ZoneScoped;
 
-        return glm::ivec2(currentWindow->resolution().x, currentWindow->resolution().y);
+        return glm::ivec2(
+            currentWindow->windowResolution().x,
+            currentWindow->windowResolution().y
+        );
     };
     sgctDelegate.currentSubwindowSize = []() {
         ZoneScoped;
@@ -740,19 +743,19 @@ void setSgctDelegateFunctions() {
             case Window::StereoMode::SideBySide:
             case Window::StereoMode::SideBySideInverted:
                 return glm::ivec2(
-                    currentWindow->resolution().x / 2,
-                    currentWindow->resolution().y
+                    currentWindow->windowResolution().x / 2,
+                    currentWindow->windowResolution().y
                 );
             case Window::StereoMode::TopBottom:
             case Window::StereoMode::TopBottomInverted:
                 return glm::ivec2(
-                    currentWindow->resolution().x,
-                    currentWindow->resolution().y / 2
+                    currentWindow->windowResolution().x,
+                    currentWindow->windowResolution().y / 2
                 );
             default:
                 return glm::ivec2(
-                    currentWindow->resolution().x * currentViewport->size().x,
-                    currentWindow->resolution().y * currentViewport->size().y
+                    currentWindow->windowResolution().x * currentViewport->size().x,
+                    currentWindow->windowResolution().y * currentViewport->size().y
                 );
         }
     };
@@ -766,7 +769,7 @@ void setSgctDelegateFunctions() {
                 return glm::ivec2(dim.x, dim.y);
             }
             else {
-                const ivec2 dim = currentWindow->finalFBODimensions();
+                const ivec2 dim = currentWindow->framebufferResolution();
                 return glm::ivec2(dim.x, dim.y);
             }
         }
@@ -787,7 +790,7 @@ void setSgctDelegateFunctions() {
         ZoneScoped;
 
         if (currentViewport) {
-            const ivec2 res = currentWindow->resolution();
+            const ivec2 res = currentWindow->windowResolution();
             const vec2 size = currentViewport->size();
             return glm::ivec2(size.x * res.x, size.y * res.y);
         }
@@ -802,23 +805,23 @@ void setSgctDelegateFunctions() {
     sgctDelegate.firstWindowResolution = []() {
         ZoneScoped;
         sgct::Window* window = Engine::instance().windows().front().get();
-        return glm::ivec2(window->resolution().x, window->resolution().y);
+        return glm::ivec2(window->windowResolution().x, window->windowResolution().y);
     };
     sgctDelegate.guiWindowResolution = []() {
         ZoneScoped;
-        const Window* guiWindow = nullptr;
+        const Window* guiWin = nullptr;
         for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
             if (window->hasTag("GUI")) {
-                guiWindow = window.get();
+                guiWin = window.get();
                 break;
             }
         }
 
-        if (!guiWindow) {
-            guiWindow = Engine::instance().windows().front().get();
+        if (!guiWin) {
+            guiWin = Engine::instance().windows().front().get();
         }
 
-        return glm::ivec2(guiWindow->resolution().x, guiWindow->resolution().y);
+        return glm::ivec2(guiWin->windowResolution().x, guiWin->windowResolution().y);
     };
     sgctDelegate.osDpiScaling = []() {
         ZoneScoped;
@@ -956,9 +959,9 @@ void setSgctDelegateFunctions() {
 
         switch (currentFrustumMode) {
             default:
-            case Frustum::Mode::MonoEye: return WindowDelegate::Frustum::Mono;
-            case Frustum::Mode::StereoLeftEye: return WindowDelegate::Frustum::LeftEye;
-            case Frustum::Mode::StereoRightEye: return WindowDelegate::Frustum::RightEye;
+            case FrustumMode::Mono: return WindowDelegate::Frustum::Mono;
+            case FrustumMode::StereoLeft: return WindowDelegate::Frustum::LeftEye;
+            case FrustumMode::StereoRight: return WindowDelegate::Frustum::RightEye;
         }
     };
     sgctDelegate.swapGroupFrameNumber = []() -> uint64_t {
@@ -983,7 +986,7 @@ void setSgctDelegateFunctions() {
                 continue;
             }
 
-            const sgct::ivec2 res = window->resolution();
+            const sgct::ivec2 res = window->windowResolution();
             for (const std::unique_ptr<Viewport>& viewport : window->viewports()) {
                 const sgct::vec2 pos = viewport->position();
                 const sgct::vec2 size = viewport->size();
@@ -1489,7 +1492,7 @@ int main(int argc, char* argv[]) {
     LDEBUG("Creating SGCT Engine");
     std::vector<std::string> arg(argv + 1, argv + argc);
     LDEBUG("Parsing commandline arguments");
-    const sgct::Configuration config = parseArguments(arg);
+    sgct::Configuration config = parseArguments(arg);
     LDEBUG("Loading cluster information");
     config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
 
@@ -1511,6 +1514,11 @@ int main(int argc, char* argv[]) {
         .drop = mainDropCallback
     };
     Log::instance().setNotifyLevel(Log::Level::Debug);
+
+    // Do not print message if clients are waiting for the master
+    config.printWaitMessage = config.printWaitMessage.value_or(false);
+    // Only timeout after 15 minutes
+    config.waitTimeout = config.waitTimeout.value_or(15.f * 60.f);
 
     try {
         Engine::create(std::move(cluster), std::move(callbacks), config);
@@ -1552,11 +1560,6 @@ int main(int argc, char* argv[]) {
         glfwPollEvents();
     }
 #endif // __APPLE__
-
-
-    // Do not print message if clients are waiting for the master
-    // Only timeout after 15 minutes
-    Engine::instance().setSyncParameters(false, 15.f * 60.f);
 
     LINFO("Starting rendering loop");
     Engine::instance().exec();

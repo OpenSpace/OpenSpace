@@ -679,20 +679,22 @@ sgct::config::Projections WindowControl::generateProjectionInformation() const {
     using namespace sgct::config;
     switch (type) {
         case ProjectionIndices::Fisheye:
-            if (isSpoutFisheye) {
-                SpoutOutputProjection projection;
-                projection.mapping = SpoutOutputProjection::Mapping::Fisheye;
-                projection.quality = QualityValues[_fisheye.quality->currentIndex()];
-                projection.mappingSpoutName = "OpenSpace";
-                return projection;
-            }
-            else {
+            //if (isSpoutFisheye) {
+            //    SpoutOutputProjection projection;
+            //    projection.mapping = SpoutOutputProjection::Mapping::Fisheye;
+            //    projection.quality = QualityValues[_fisheye.quality->currentIndex()];
+            //    projection.mappingSpoutName = "OpenSpace";
+            //    return projection;
+            //}
+            //else {
+    {
                 FisheyeProjection projection;
                 projection.quality = QualityValues[_fisheye.quality->currentIndex()];
                 projection.fov = 180.f;
                 projection.tilt = 0.f;
                 return projection;
-            }
+                }
+            //}
         case ProjectionIndices::SphericalMirror:
             {
                 SphericalMirrorProjection projection;
@@ -708,20 +710,22 @@ sgct::config::Projections WindowControl::generateProjectionInformation() const {
                 return projection;
             }
         case ProjectionIndices::Equirectangular:
-            if (isSpoutEquirectangular) {
-                SpoutOutputProjection projection;
-                projection.mapping = SpoutOutputProjection::Mapping::Equirectangular;
-                projection.quality =
-                    QualityValues[_equirectangular.quality->currentIndex()];
-                projection.mappingSpoutName = "OpenSpace";
-                return projection;
-            }
-            else {
+            //if (isSpoutEquirectangular) {
+            //    SpoutOutputProjection projection;
+            //    projection.mapping = SpoutOutputProjection::Mapping::Equirectangular;
+            //    projection.quality =
+            //        QualityValues[_equirectangular.quality->currentIndex()];
+            //    projection.mappingSpoutName = "OpenSpace";
+            //    return projection;
+            //}
+            //else {
+            {
                 EquirectangularProjection projection;
                 projection.quality =
                     QualityValues[_equirectangular.quality->currentIndex()];
                 return projection;
-            }
+                }
+            //}
         case ProjectionIndices::Planar:
             {
                 double fovH = _planar.fovH->value();
