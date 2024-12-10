@@ -58,7 +58,8 @@ void GuiActionComponent::render() {
             global::actionManager->triggerAction(
                 p.second,
                 ghoul::Dictionary(),
-                interaction::ActionManager::ShouldBeSynchronized::Yes
+                interaction::ActionManager::ShouldBeSynchronized::Yes,
+                interaction::ActionManager::ShouldBeLogged::Yes
             );
         }
         ImGui::SameLine();
@@ -85,7 +86,8 @@ void GuiActionComponent::render() {
             global::actionManager->triggerAction(
                 action.command,
                 ghoul::Dictionary(),
-                interaction::ActionManager::ShouldBeSynchronized::Yes
+                interaction::ActionManager::ShouldBeSynchronized::Yes,
+                interaction::ActionManager::ShouldBeLogged::Yes
             );
         }
         ImGui::SameLine();

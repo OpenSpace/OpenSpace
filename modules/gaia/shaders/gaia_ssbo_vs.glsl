@@ -176,7 +176,7 @@ void main() {
 
   // Remove stars without position, happens when VBO chunk is stuffed with zeros.
   // Has to be done in Geometry shader because Vertices cannot be discarded here.
-  if (length(in_position) > EPS){
+  if (length(in_position) > EPS) {
     vs_gPosition = vec4(model * objectPosition);
     gl_Position = vec4(projection * viewPosition);
   }

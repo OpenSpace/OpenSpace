@@ -422,7 +422,7 @@ NotInListVerifier<T>::NotInListVerifier(std::vector<typename T::Type> vals)
 
 template <typename T>
 TestResult NotInListVerifier<T>::operator()(const ghoul::Dictionary& dict,
-                                         const std::string& key) const
+                                            const std::string& key) const
 {
     TestResult res = T::operator()(dict, key);
     if (res.success) {
@@ -686,9 +686,7 @@ std::string NotInRangeVerifier<T>::documentation() const {
 template <typename T>
 AnnotationVerifier<T>::AnnotationVerifier(std::string a)
     : annotation(std::move(a))
-{
-
-}
+{}
 
 template <typename T>
 std::string AnnotationVerifier<T>::documentation() const {

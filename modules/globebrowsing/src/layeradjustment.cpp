@@ -138,7 +138,7 @@ layers::Adjustment::ID LayerAdjustment::type() const {
 }
 
 void LayerAdjustment::addVisibleProperties() {
-    switch (type()) {
+    switch (_typeId) {
         case layers::Adjustment::ID::None:
             break;
         case layers::Adjustment::ID::ChromaKey:

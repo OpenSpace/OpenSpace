@@ -83,7 +83,7 @@ std::string formatJsonNumber(double d) {
     if (!std::isfinite(d)) {
         return "null";
     }
-    return std::to_string(d);
+    return std::format("{}", d);
 }
 
 void sortJson(nlohmann::json& json, const std::string& key) {

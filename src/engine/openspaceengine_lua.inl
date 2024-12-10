@@ -308,4 +308,20 @@ namespace {
 #endif // WIN32
 }
 
+/**
+ * Returns the number of bytes of video memory that is currently being used. This function
+ * only works on Windows.
+ */
+[[codegen::luawrap]] double vramInUse() {
+    return static_cast<double>(openspace::global::openSpaceEngine->vramInUse());
+}
+
+/**
+ * Returns the number of bytes of system memory that is currently being used. This
+ * function only works on Windows.
+ */
+[[codegen::luawrap]] double ramInUse() {
+    return static_cast<double>(openspace::global::openSpaceEngine->ramInUse());
+}
+
 #include "openspaceengine_lua_codegen.cpp"

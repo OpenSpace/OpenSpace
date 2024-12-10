@@ -41,8 +41,6 @@ struct TileProvider;
 struct LayerGroup : public properties::PropertyOwner {
     LayerGroup(layers::Group group);
 
-    void setLayersFromDict(const ghoul::Dictionary& dict);
-
     void initialize();
     void deinitialize();
 

@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/exoplanets/datastructure.h>
+#include <modules/exoplanets/exoplanetshelper.h>
+#include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 #include <openspace/scene/scene.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/stringhelper.h>
@@ -34,18 +37,7 @@ namespace {
 
 constexpr std::string_view _loggerCat = "ExoplanetsModule";
 
-constexpr std::string_view ExoplanetsGuiPath = "/Milky Way/Exoplanets/Exoplanet Systems/";
-
-// Lua cannot handle backslashes, so replace these with forward slashes
-std::string formatPathToLua(const std::filesystem::path& path) {
-    std::string resPath = path.string();
-    std::replace(resPath.begin(), resPath.end(), '\\', '/');
-    return resPath;
-}
-
-openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
-                                                                std::string_view starName)
-{
+openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starName) {
     using namespace openspace;
     using namespace exoplanets;
 
@@ -54,15 +46,17 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
     const std::filesystem::path binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
-        LERROR(std::format("Failed to open exoplanets data file '{}'", binPath));
-        return ExoplanetSystem();
+        throw ghoul::lua::LuaError(std::format(
+            "Failed to open exoplanets data file '{}'", binPath
+        ));
     }
 
     const std::filesystem::path lutPath = module->lookUpTablePath();
     std::ifstream lut(absPath(lutPath));
     if (!lut.good()) {
-        LERROR(std::format("Failed to open exoplanets look-up table '{}'", lutPath));
-        return ExoplanetSystem();
+        throw ghoul::lua::LuaError(std::format(
+            "Failed to open exoplanets look-up table '{}'", lutPath
+        ));
     }
 
     ExoplanetSystem system;
@@ -105,477 +99,6 @@ openspace::exoplanets::ExoplanetSystem findExoplanetSystemInData(
     return system;
 }
 
-void queueAddSceneGraphNodeScript(const std::string& sgnTableAsString) {
-    using namespace openspace;
-    // No sync or send because this will already be called inside a Lua script,
-    // therefor it has already been synced and sent to the connected nodes and peers
-    global::scriptEngine->queueScript(
-        std::format("openspace.addSceneGraphNode({})", sgnTableAsString),
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
-}
-
-void createExoplanetSystem(const std::string& starName,
-                           openspace::exoplanets::ExoplanetSystem system)
-{
-    using namespace openspace;
-    using namespace exoplanets;
-
-    const std::string starIdentifier = makeIdentifier(starName);
-
-    std::string sanitizedStarName = starName;
-    sanitizeNameString(sanitizedStarName);
-
-    const std::string guiPath = std::format("{}{}", ExoplanetsGuiPath, sanitizedStarName);
-
-    SceneGraphNode* existingStarNode = sceneGraphNode(starIdentifier);
-    if (existingStarNode) {
-        LERROR(std::format(
-            "Adding of exoplanet system '{}' failed. The system has already been added",
-            starName
-        ));
-        return;
-    }
-
-    const glm::vec3 starPosInParsec = system.starData.position;
-    if (!isValidPosition(starPosInParsec)) {
-        LERROR(std::format(
-            "Insufficient data available for exoplanet system '{}'. Could not determine "
-            "star position", starName
-        ));
-        return;
-    }
-
-    const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
-
-    const glm::dvec3 starPos =
-        static_cast<glm::dvec3>(starPosInParsec) * distanceconstants::Parsec;
-    const glm::dmat3 exoplanetSystemRotation = computeSystemRotation(starPos);
-
-    // Star
-    double radiusInMeter = distanceconstants::SolarRadius;
-    if (!std::isnan(system.starData.radius)) {
-        radiusInMeter *= system.starData.radius;
-    }
-
-    std::string colorLayers;
-    std::optional<glm::vec3> starColor = std::nullopt;
-    const float bv = system.starData.bv;
-
-    if (!std::isnan(bv)) {
-        starColor = computeStarColor(bv);
-        const std::filesystem::path starTexture = module->starTexturePath();
-
-        if (!starTexture.empty() && !std::filesystem::is_regular_file(starTexture)) {
-            LWARNING(std::format(
-                "Could not find specified star texture set in {} module: '{}'",
-                module->guiName(), starTexture
-            ));
-        }
-
-        colorLayers =
-            "{"
-                "Identifier = 'StarColor',"
-                "Type = 'SolidColor',"
-                "Color = " + ghoul::to_string(*starColor) + ","
-                "BlendMode = 'Normal',"
-                "Enabled = true"
-            "},"
-            "{"
-                "Identifier = 'StarTexture',"
-                "FilePath = openspace.absPath('" + formatPathToLua(starTexture) + "'),"
-                "BlendMode = 'Color',"
-                "Enabled = true"
-            "}";
-    }
-    else {
-        const std::filesystem::path noDataTexture = module->noDataTexturePath();
-        colorLayers =
-            "{"
-                "Identifier = 'NoDataStarTexture',"
-                "FilePath = openspace.absPath('" + formatPathToLua(noDataTexture) + "'),"
-                "BlendMode = 'Color',"
-                "Enabled = true"
-            "}";
-    }
-
-    const std::string starGlobeRenderableString = "Renderable = {"
-        "Type = 'RenderableGlobe',"
-        "Radii = " + std::to_string(radiusInMeter) + ","
-        "PerformShading = false,"
-        "Layers = {"
-            "ColorLayers = { " + colorLayers + "}"
-        "}"
-    "},";
-
-    const std::string starParent = "{"
-        "Identifier = '" + starIdentifier + "',"
-        "Parent = 'SolarSystemBarycenter',"
-        "" + starGlobeRenderableString + ""
-        "Transform = {"
-            "Rotation = {"
-                "Type = 'StaticRotation',"
-                "Rotation = " + ghoul::to_string(exoplanetSystemRotation) + ""
-            "},"
-            "Translation = {"
-                "Type = 'StaticTranslation',"
-                "Position = " + ghoul::to_string(starPos) + ""
-            "}"
-        "},"
-        "Tag = {'exoplanet_system'},"
-        "GUI = {"
-            "Name = '" + sanitizedStarName + " (Star)',"
-            "Path = '" + guiPath + "'"
-        "}"
-    "}";
-
-    queueAddSceneGraphNodeScript(starParent);
-
-    // Add a label for the star.
-    // The fade values are set based on the values for the Sun label
-    const std::string starLabel = "{"
-        "Identifier = '" + starIdentifier + "_Label',"
-        "Parent = '" + starIdentifier + "',"
-        "Renderable = {"
-          "Type = 'RenderableLabel',"
-          "Enabled = false,"
-          "Text = '" + sanitizedStarName + "',"
-          "FontSize = 70.0,"
-          "Size = 14.17,"
-          "MinMaxSize = { 1, 50 },"
-          "EnableFading = true,"
-          "FadeUnit = 'pc',"
-          "FadeDistances = { 1.33, 15.0 },"
-          "FadeWidths = {1.0, 20.0}"
-        "},"
-        "Tag = {'exoplanet_system_labels'},"
-        "GUI = {"
-            "Name = '" + sanitizedStarName + " Label',"
-            "Path = '" + guiPath + "'"
-        "}"
-    "}";
-
-    queueAddSceneGraphNodeScript(starLabel);
-
-    // Planets
-
-    const std::filesystem::path planetTexture = module->planetDefaultTexturePath();
-    if (!planetTexture.empty() && !std::filesystem::is_regular_file(planetTexture)) {
-        LWARNING(std::format(
-            "Could not find specified planet default texture set in {} module: '{}'",
-            module->guiName(), planetTexture
-        ));
-    }
-
-    for (size_t i = 0; i < system.planetNames.size(); i++) {
-        // Note that we are here overriding some invalid parameters in the planet data.
-        // Use a reference, so that it is changed down the line
-        ExoplanetDataEntry& planet = system.planetsData[i];
-        const std::string planetName = system.planetNames[i];
-
-        if (std::isnan(planet.ecc)) {
-            planet.ecc = 0.f;
-        }
-
-        // KeplerTranslation requires angles in range [0, 360]
-        auto validAngle = [](float angle, float defaultValue) {
-            if (std::isnan(angle)) { return defaultValue; }
-            if (angle < 0.f) { return angle + 360.f; }
-            if (angle > 360.f) { return angle - 360.f; }
-            return angle;
-        };
-
-        planet.i = validAngle(planet.i, 90.f);
-        planet.bigOmega = validAngle(planet.bigOmega, 180.f);
-        planet.omega = validAngle(planet.omega, 90.f);
-
-        Time epoch;
-        std::string sEpoch;
-        if (!std::isnan(planet.tt)) {
-            epoch.setTime("JD " + std::to_string(planet.tt));
-            sEpoch = std::string(epoch.ISO8601());
-        }
-        else {
-            sEpoch = "2009-05-19T07:11:34.080";
-        }
-
-        double planetRadius;
-        std::string enabled;
-        if (std::isnan(planet.r)) {
-            if (std::isnan(planet.rStar)) {
-                planetRadius = planet.a * 0.001 * distanceconstants::AstronomicalUnit;
-            }
-            else {
-                planetRadius = planet.rStar * 0.1 * distanceconstants::SolarRadius;
-            }
-            enabled = "false";
-        }
-        else {
-            planetRadius = planet.r * distanceconstants::JupiterRadius;
-            enabled = "true";
-        }
-
-        float periodInSeconds = static_cast<float>(planet.per * SecondsPerDay);
-        double semiMajorAxisInMeter = planet.a * distanceconstants::AstronomicalUnit;
-        double semiMajorAxisInKm = semiMajorAxisInMeter * 0.001;
-
-        const std::string planetIdentifier = makeIdentifier(planetName);
-
-        const std::string planetKeplerTranslation = "{"
-            "Type = 'KeplerTranslation',"
-            "Eccentricity = " + std::to_string(planet.ecc) + ","
-            "SemiMajorAxis = " + std::to_string(semiMajorAxisInKm) + ","
-            "Inclination = " + std::to_string(planet.i) + ","
-            "AscendingNode = " + std::to_string(planet.bigOmega) + ","
-            "ArgumentOfPeriapsis = " + std::to_string(planet.omega) + ","
-            "MeanAnomaly = 0.0,"
-            "Epoch = '" + sEpoch + "'," //TT. JD to YYYY MM DD hh:mm:ss
-            "Period = " + std::to_string(periodInSeconds) + ""
-        "}";
-
-        std::string planetLayers = "";
-        if (!planetTexture.empty()) {
-            planetLayers = "{"
-                "Identifier = 'PlanetTexture',"
-                "FilePath = openspace.absPath('" + formatPathToLua(planetTexture) + "'),"
-                "BlendMode = 'Color',"
-                "Enabled = true"
-            "}";
-        }
-
-        const std::string planetNode = "{"
-            "Identifier = '" + planetIdentifier + "',"
-            "Parent = '" + starIdentifier + "',"
-            "Renderable = {"
-                "Type = 'RenderableGlobe',"
-                "Enabled = " + enabled + ","
-                "Radii = " + std::to_string(planetRadius) + "," // in meters
-                "PerformShading = true,"
-                "Layers = {"
-                    "ColorLayers = {" + planetLayers + "}"
-                "},"
-                "LightSourceNode = '" + starIdentifier + "'"
-            "},"
-            "Transform = { "
-                "Translation = " + planetKeplerTranslation + ""
-            "},"
-            "GUI = {"
-                "Name = '" + planetName + "',"
-                "Path = '" + guiPath + "'"
-            "}"
-        "}";
-
-        int trailResolution = 1000;
-
-        // Increase the resolution for highly eccentric orbits
-        const float eccentricityThreshold = 0.85f;
-        if (planet.ecc > eccentricityThreshold) {
-            trailResolution *= 2;
-        }
-
-        const std::string planetTrailNode = "{"
-            "Identifier = '" + planetIdentifier + "_Trail',"
-            "Parent = '" + starIdentifier + "',"
-            "Renderable = {"
-                "Type = 'RenderableTrailOrbit',"
-                "Period = " + std::to_string(planet.per) + ","
-                "Resolution = " + std::to_string(trailResolution) + ","
-                "Translation = " + planetKeplerTranslation + ","
-                "Color = { 1, 1, 1 }"
-            "},"
-            "GUI = {"
-                "Name = '" + planetName + " Trail',"
-                "Path = '" + guiPath + "'"
-            "}"
-        "}";
-
-        queueAddSceneGraphNodeScript(planetTrailNode);
-        queueAddSceneGraphNodeScript(planetNode);
-
-        bool hasUpperAUncertainty = !std::isnan(planet.aUpper);
-        bool hasLowerAUncertainty = !std::isnan(planet.aLower);
-
-        if (hasUpperAUncertainty && hasLowerAUncertainty) {
-            const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(
-                planet.i,
-                planet.bigOmega,
-                planet.omega
-            );
-            const glm::dmat3 rotationMat3 = static_cast<glm::dmat3>(rotation);
-
-            const float lowerOffset = static_cast<float>(planet.aLower / planet.a);
-            const float upperOffset = static_cast<float>(planet.aUpper / planet.a);
-
-            const std::filesystem::path discTexture = module->orbitDiscTexturePath();
-
-            bool isDiscEnabled = module->showOrbitUncertainty();
-
-            const std::string discNode = "{"
-                "Identifier = '" + planetIdentifier + "_Disc',"
-                "Parent = '" + starIdentifier + "',"
-                "Renderable = {"
-                    "Type = 'RenderableOrbitDisc',"
-                    "Enabled = " + (isDiscEnabled ? "true" : "false") +  ","
-                    "Texture = openspace.absPath('" +
-                        formatPathToLua(discTexture) +
-                    "'),"
-                    "Size = " + std::to_string(semiMajorAxisInMeter) + ","
-                    "Eccentricity = " + std::to_string(planet.ecc) + ","
-                    "Offset = { " +
-                        std::to_string(lowerOffset) + ", " +
-                        std::to_string(upperOffset) +
-                    "}," //min / max extend
-                    "Opacity = 0.25"
-                "},"
-                "Transform = {"
-                    "Rotation = {"
-                        "Type = 'StaticRotation',"
-                        "Rotation = " + ghoul::to_string(rotationMat3) + ""
-                    "}"
-                "},"
-                "Tag = {'exoplanet_uncertainty_disc'},"
-                "GUI = {"
-                    "Name = '" + planetName + " Disc',"
-                    "Path = '" + guiPath + "'"
-                "}"
-            "}";
-
-            queueAddSceneGraphNodeScript(discNode);
-        }
-    }
-
-    float meanInclination = 0.f;
-    for (const ExoplanetDataEntry& p : system.planetsData) {
-        meanInclination += p.i;
-    }
-    meanInclination /= static_cast<float>(system.planetsData.size());
-    const glm::dmat4 rotation = computeOrbitPlaneRotationMatrix(meanInclination);
-    const glm::dmat3 meanOrbitPlaneRotationMatrix = static_cast<glm::dmat3>(rotation);
-
-    bool isCircleEnabled = module->showComparisonCircle();
-    glm::vec3 circleColor = module->comparisonCircleColor();
-
-    // 1 AU Size Comparison Circle
-    const std::string circle = "{"
-        "Identifier = '" + starIdentifier + "_1AU_Circle',"
-        "Parent = '" + starIdentifier + "',"
-        "Renderable = {"
-            "Type = 'RenderableRadialGrid',"
-            "Enabled = " + (isCircleEnabled ? "true" : "false") + ","
-            "Radii = { 0.0, 1.0 },"
-            "Color = " + ghoul::to_string(circleColor) + ","
-            "CircleSegments = 64,"
-            "LineWidth = 2.0,"
-        "},"
-        "Transform = {"
-            "Rotation = {"
-                "Type = 'StaticRotation',"
-                "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
-            "},"
-            "Scale = {"
-                "Type = 'StaticScale',"
-                "Scale = " + std::to_string(distanceconstants::AstronomicalUnit) + ""
-            "}"
-        "},"
-        "Tag = {'exoplanet_1au_ring'},"
-        "GUI = {"
-            "Name = '1 AU Size Comparison Circle',"
-            "Path = '" + guiPath + "'"
-        "}"
-    "}";
-
-    queueAddSceneGraphNodeScript(circle);
-
-    // Habitable Zone
-    bool hasTeff = !std::isnan(system.starData.teff);
-    bool hasLuminosity = !std::isnan(system.starData.luminosity);
-
-    if (hasTeff && hasLuminosity) {
-        constexpr std::string_view description =
-            "The habitable zone is the region around a star in which an Earth-like "
-            "planet can potentially have liquid water on its surface."
-            "<br><br>"
-            "The inner boundary is where the greenhouse gases in the atmosphere "
-            "would trap any incoming infrared radiation, leading to the planet "
-            "surface becoming so hot that water boils away. The outer boundary is where "
-            "the greenhouse effect would not be able to maintain surface temperature "
-            "above freezing anywhere on the planet";
-
-        const std::filesystem::path hzTexture = module->habitableZoneTexturePath();
-        bool isHzEnabled = module->showHabitableZone();
-        bool useOptimistic = module->useOptimisticZone();
-        float opacity = module->habitableZoneOpacity();
-
-        const std::string zoneDiscNode = "{"
-            "Identifier = '" + starIdentifier + "_HZ_Disc',"
-            "Parent = '" + starIdentifier + "',"
-            "Renderable = {"
-                "Type = 'RenderableHabitableZone',"
-                "Enabled = " + (isHzEnabled ? "true" : "false") + ","
-                "Texture = openspace.absPath('" + formatPathToLua(hzTexture) + "'),"
-                "Luminosity = " + std::to_string(system.starData.luminosity) + ","
-                "EffectiveTemperature = " + std::to_string(system.starData.teff) + ","
-                "Optimistic = " + (useOptimistic ? "true" : "false") + ","
-                "Opacity = " + std::to_string(opacity) + ""
-            "},"
-            "Transform = {"
-                "Rotation = {"
-                    "Type = 'StaticRotation',"
-                    "Rotation = " + ghoul::to_string(meanOrbitPlaneRotationMatrix) + ""
-                "}"
-            "},"
-            "Tag = {'exoplanet_habitable_zone'},"
-            "GUI = {"
-                "Name = '" + starName + " Habitable Zone',"
-                "Path = '" + guiPath + "',"
-                "Description = '" + std::string(description) + "'"
-            "}"
-        "}";
-
-        queueAddSceneGraphNodeScript(zoneDiscNode);
-
-        // Star glare
-        if (starColor.has_value()) {
-            // This is a little magic to make the size of the glare dependent on the
-            // size and the temperature of the star. It's kind of based on the fact that
-            // the luminosity of a star is proportional to: (radius^2)*(temperature^4)
-            // Maybe a better option would be to compute the size based on the aboslute
-            // magnitude or star luminosity, but for now this looks good enough.
-            double size = 59.0 * radiusInMeter;
-            if (hasTeff) {
-                constexpr float sunTeff = 5780.f;
-                size *= std::pow(system.starData.teff / sunTeff, 2.0);
-            }
-
-            const std::filesystem::path glareTexture = module->starGlareTexturePath();
-
-            const std::string starGlare = "{"
-                "Identifier = '" + starIdentifier + "_Glare',"
-                "Parent = '" + starIdentifier + "',"
-                "Renderable = {"
-                    "Type = 'RenderablePlaneImageLocal',"
-                    "Size = " + ghoul::to_string(size) + ","
-                    "Origin = 'Center',"
-                    "Billboard = true,"
-                    "Texture = openspace.absPath('"
-                        + formatPathToLua(glareTexture) +
-                    "'),"
-                    "BlendMode = 'Additive',"
-                    "Opacity = 0.65,"
-                    "MultiplyColor = " + ghoul::to_string(*starColor) + ""
-                "},"
-                "GUI = {"
-                    "Name = '" + sanitizedStarName + " Glare',"
-                    "Path = '" + guiPath + "'"
-                "}"
-            "}";
-
-            queueAddSceneGraphNodeScript(starGlare);
-        }
-    }
-}
-
 std::vector<std::string> hostStarsWithSufficientData() {
     using namespace openspace;
     using namespace exoplanets;
@@ -583,22 +106,21 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     if (!module->hasDataFiles()) {
         // If no data file path has been configured at all, we just bail out early here
-        LINFO("No data path was configured for the exoplanets");
-        return {};
+        throw ghoul::lua::LuaError("No data path was configured for the exoplanets");
     }
 
     const std::filesystem::path lutPath = module->lookUpTablePath();
     std::ifstream lookupTableFile(absPath(lutPath));
     if (!lookupTableFile.good()) {
-        LERROR(std::format("Failed to open lookup table file '{}'", lutPath));
-        return {};
+        throw ghoul::lua::LuaError(std::format(
+            "Failed to open lookup table file '{}'", lutPath
+        ));
     }
 
     const std::filesystem::path binPath = module->exoplanetsDataPath();
     std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
-        LERROR(std::format("Failed to open data file '{}'", binPath));
-        return {};
+        throw ghoul::lua::LuaError(std::format("Failed to open data file '{}'", binPath));
     }
 
     std::vector<std::string> names;
@@ -642,37 +164,34 @@ std::vector<std::string> hostStarsWithSufficientData() {
 }
 
 /**
- * Add one or multiple exoplanet systems to the scene, as specified by the input. An input
- * string should be the name of the system host star.
+ * Return an object containing the information needed to add a specific exoplanet system.
+ * The data is retrieved from the module's prepared datafile for exoplanets. This file is
+ * in a binary format, for fast retrieval during runtime.
+ *
+ * \param starName The name of the star to get the information for.
+ *
+ * \return An object of the type [ExoplanetSystemData](#exoplanets_exoplanet_system_data)
+ *         that can be used to create the scene graph nodes for the exoplanet system
  */
-[[codegen::luawrap]] void addExoplanetSystem(
-                            std::variant<std::string, std::vector<std::string>> starNames)
-{
-    std::vector<std::string> starsToAdd;
+[[codegen::luawrap]] ghoul::Dictionary systemData(std::string starName){
+    using namespace openspace;
 
-    if (std::holds_alternative<std::string>(starNames)) {
-        // The user provided a single name
-        const std::string starName = std::get<std::string>(starNames);
-        starsToAdd.push_back(starName);
-    }
-    else {
-        starsToAdd = std::get<std::vector<std::string>>(starNames);
+    exoplanets::ExoplanetSystem systemData = findSystemInData(starName);
+
+    if (systemData.planetsData.empty()) {
+        throw ghoul::lua::LuaError(std::format(
+            "Exoplanet system '{}' could not be found", starName
+        ));
     }
 
-    for (const std::string& starName : starsToAdd) {
-        openspace::exoplanets::ExoplanetSystem systemData =
-            findExoplanetSystemInData(starName);
-
-        if (systemData.planetsData.empty()) {
-            LERROR(std::format("Exoplanet system '{}' could not be found", starName));
-            return;
-        }
-
-        createExoplanetSystem(starName, systemData);
-    }
-
+    return systemData.toDataDictionary();
 }
 
+/**
+ * Remove a loaded exoplanet system.
+ *
+ * \param starName The name of the host star for the system to remove.
+ */
 [[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
     using namespace openspace;
     using namespace exoplanets;
@@ -680,17 +199,19 @@ std::vector<std::string> hostStarsWithSufficientData() {
 
     // No sync or send because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
-    global::scriptEngine->queueScript(
-        "openspace.removeSceneGraphNode('" + starIdentifier + "');",
-        scripting::ScriptEngine::ShouldBeSynchronized::No,
-        scripting::ScriptEngine::ShouldSendToRemote::No
-    );
+    global::scriptEngine->queueScript({
+        .code = "openspace.removeSceneGraphNode('" + starIdentifier + "');",
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+    });
 }
 
 /**
  * Returns a list with names of the host star of all the exoplanet systems
  * that have sufficient data for generating a visualization, based on the
  * module's loaded data file.
+ *
+ * \return A list of exoplanet host star names.
  */
 [[codegen::luawrap]] std::vector<std::string> listOfExoplanets() {
     std::vector<std::string> names = hostStarsWithSufficientData();
@@ -711,6 +232,10 @@ listOfExoplanetsDeprecated()
     return listOfExoplanets();
 }
 
+/**
+ * Lists the names of the host stars of all exoplanet systems that have sufficient
+ * data for generating a visualization, and prints the list to the console.
+ */
 [[codegen::luawrap]] void listAvailableExoplanetSystems() {
     std::vector<std::string> names = hostStarsWithSufficientData();
 
@@ -727,26 +252,24 @@ listOfExoplanetsDeprecated()
     ));
 }
 
-/**
- * Load a set of exoplanets based on custom data, in the form of a CSV file, and add
- * them to the rendering. Can be used to load custom datasets, or more recent planets
- * than what are included in the internal data file that is released with OpenSpace.
- *
- * The format and column names in the CSV sould be the same as the ones provided by the
- * NASA Exoplanet Archive. https://exoplanetarchive.ipac.caltech.edu/
- *
- * We recommend downloading the file from the Exoplanet Archive's Composite data table,
- * where multiple sources are combined into one row per planet.
- * https://exoplanetarchive.ipac.caltech.edu
- * /cgi-bin/TblView/nph-tblView?app=ExoTbls&config=PSCompPars
- *
- * Please remember to include all columns in the file download, as missing data columns
- * may lead to an incomplete visualization.
- *
- * Also, avoid loading too large files of planets, as each added system will affect the
- * rendering performance.
- */
-[[codegen::luawrap]] void loadExoplanetsFromCsv(std::string csvFile) {
+ /**
+  * Load a set of exoplanet information based on custom data in the form of a CSV file.
+  *
+  * The format and column names in the CSV should be the same as the ones provided by the
+  * [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/).
+  *
+  * When dowloading the data from the archive we recommend including all columns, since a
+  * few required ones are not selected by default.
+  *
+  * \param csvFile A path to the CSV file to load the data from.
+  *
+  * \return A list of objects of the type
+  *         [ExoplanetSystemData](#exoplanets_exoplanet_system_data), that can be used to
+  *         create the scene graph nodes for the exoplanet systems
+  */
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> loadSystemDataFromCsv(
+                                                                      std::string csvFile)
+{
     using namespace openspace;
     using namespace exoplanets;
 
@@ -754,8 +277,7 @@ listOfExoplanetsDeprecated()
 
     std::ifstream inputDataFile(csvFile);
     if (!inputDataFile.good()) {
-        LERROR(std::format("Failed to open input file '{}'", csvFile));
-        return;
+        throw ghoul::lua::LuaError(std::format("Failed to open input file '{}'", csvFile));
     }
 
     std::vector<std::string> columnNames =
@@ -767,6 +289,8 @@ listOfExoplanetsDeprecated()
 
     std::map<std::string, ExoplanetSystem> hostNameToSystemDataMap;
 
+    LINFO(std::format("Reading exoplanet data from file '{}'", csvFile));
+
     // Parse the file line by line to compose system information
     std::string row;
     while (ghoul::getline(inputDataFile, row)) {
@@ -777,14 +301,14 @@ listOfExoplanetsDeprecated()
             module->teffToBvConversionFilePath()
         );
 
-        LINFO(std::format("Reading data for planet '{}'", planetData.name));
-
         if (!hasSufficientData(planetData.dataEntry)) {
             LWARNING(std::format(
                 "Insufficient data for exoplanet '{}'", planetData.name
             ));
             continue;
         }
+
+        LINFO(std::format("Loaded data for planet '{}'", planetData.name));
 
         auto found = hostNameToSystemDataMap.find(planetData.host);
         if (found != hostNameToSystemDataMap.end()) {
@@ -799,6 +323,7 @@ listOfExoplanetsDeprecated()
             // No host found. Add a new one
             ExoplanetSystem system;
             sanitizeNameString(planetData.name);
+            system.starName = planetData.host;
             system.planetNames.push_back(planetData.name);
             system.planetsData.push_back(planetData.dataEntry);
             updateStarDataFromNewPlanet(system.starData, planetData.dataEntry);
@@ -807,20 +332,13 @@ listOfExoplanetsDeprecated()
         }
     }
 
-    // Add all the added exoplanet systems
-    using K = const std::string;
-    using V = ExoplanetSystem;
-    for (const std::pair<K, V>& entry : hostNameToSystemDataMap) {
-        const std::string& hostName = entry.first;
-        const ExoplanetSystem& data = entry.second;
-        createExoplanetSystem(hostName, data);
-    }
+    std::vector<ghoul::Dictionary> result;
+    result.reserve(hostNameToSystemDataMap.size());
 
-    LINFO(std::format(
-        "Read data for {} exoplanet systems from CSV file: {}. Please wait until "
-        "they are all finished initializing. You may have to reload the user interface.",
-        hostNameToSystemDataMap.size(), csvFile
-    ));
+    for (auto const& [_, system]: hostNameToSystemDataMap) {
+        result.push_back(system.toDataDictionary());
+    }
+    return result;
 }
 
 #include "exoplanetsmodule_lua_codegen.cpp"

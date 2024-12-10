@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___SPICEMANAGER___H__
 #define __OPENSPACE_CORE___SPICEMANAGER___H__
 
+#include <openspace/engine/globals.h>
+#include <openspace/util/memorymanager.h>
 #include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
@@ -589,6 +591,23 @@ public:
             // The conversion failed and we need to use et2utc
             constexpr int SecondsPrecision = 3;
             et2utc_c(ephemerisTime, "C", SecondsPrecision, bufferSize, outBuf);
+            // We want to move the B.C. part to the beginning of the string so that we can
+            // identify B.C. years by inspecting the first character of `outBuf`
+            const char* bcPos = std::strstr(outBuf, "B.C.");
+            if (bcPos) {
+                const size_t bcLength = 4;
+                const size_t prefixYearLength = bcPos - outBuf;
+                // Create temporary storage
+                char* tmp = reinterpret_cast<char*>(
+                    global::memoryManager->TemporaryMemory.allocate(prefixYearLength)
+                );
+                // Copy year into tmp buffer
+                std::memcpy(tmp, outBuf, prefixYearLength);
+                // Copy B.C. to beginning of outBuf, + 1 to add a space ' ' after B.C.
+                std::memcpy(outBuf, "B.C. ", bcLength + 1);
+                // Copy year to after B.C
+                std::memcpy(outBuf + bcLength + 1 , tmp, prefixYearLength);
+            }
         }
     }
 

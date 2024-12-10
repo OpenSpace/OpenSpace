@@ -593,7 +593,7 @@ void RenderableFluxNodes::populateStartTimes() {
             break;
         }
 
-        const std::string f = filePath.string();
+        const std::string f = filePath.filename().string();
         // if no file extention but word "time" in file name
         if (f.find("time") != std::string::npos && f.find('.') == std::string::npos) {
             timeFile = filePath;

@@ -344,11 +344,7 @@ void PathNavigator::startPath() {
     // moving. However, keep track of whether the time was running before the path
     // was started, so we can reset it on finish
     if (!global::timeManager->isPaused()) {
-        openspace::global::scriptEngine->queueScript(
-            "openspace.time.setPause(true)",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        openspace::global::scriptEngine->queueScript("openspace.time.setPause(true)");
 
         _startSimulationTimeOnFinish = true;
         LINFO("Pausing time simulation during path traversal");
@@ -471,11 +467,7 @@ void PathNavigator::handlePathEnd() {
     global::openSpaceEngine->resetMode();
 
     if (_startSimulationTimeOnFinish) {
-        openspace::global::scriptEngine->queueScript(
-            "openspace.time.setPause(false)",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript("openspace.time.setPause(false)");
         _startSimulationTimeOnFinish = false;
     }
 
@@ -484,9 +476,7 @@ void PathNavigator::handlePathEnd() {
             "openspace.setPropertyValueSingle("
                 "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
                 "true"
-            ");",
-            openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
+            ");"
         );
     }
 

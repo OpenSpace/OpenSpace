@@ -89,6 +89,10 @@ std::vector<documentation::Documentation> OpenSpaceModule::documentations() cons
     return {};
 }
 
+documentation::Documentation OpenSpaceModule::Documentation() {
+    return {};
+}
+
 scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }

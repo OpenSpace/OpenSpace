@@ -109,7 +109,8 @@ protected:
     glm::vec3 raeToCartesian(const glm::vec3& rae) const;
     glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
-    void draw(const glm::mat4& modelTransform, const RenderData& renderData);
+    void draw(const glm::mat4& modelTransform, const RenderData& renderData,
+        bool useAcceleratedRendering = false);
 
     virtual void bindTexture() = 0;
     virtual void unbindTexture();
@@ -150,7 +151,8 @@ protected:
 
     glm::ivec2 _objectSize = glm::ivec2(0);
     UniformCache(color, opacity, blackoutFactor, hue, value, saturation, mvpMatrix, tex,
-        backgroundColor, gamma, borderColor, borderWidth, borderFeather) _uniformCache;
+        backgroundColor, gamma, borderColor, borderWidth, borderFeather,
+        useAcceleratedRendering) _uniformCache;
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 };
 

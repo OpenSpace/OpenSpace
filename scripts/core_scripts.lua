@@ -88,6 +88,38 @@ openspace.documentation = {
       target several nodes. If the fade time is not provided then the
       "OpenSpaceEngine.FadeDuration" property will be used instead. If the third argument
       (endScript) is provided then that script will be run after the fade is finished.]]
+  },
+  {
+    Name = "ternary",
+    Arguments = {
+      { "condition", "Boolean" },
+      { "trueValue", "any" },
+      { "falseValue", "any" }
+    },
+    Return = "any",
+    Documentation = [[
+      A utility function to return a specific value based on a True/False condition.
+
+      \\param condition The condition to check against
+      \\param trueValue The value to return if the condition is True
+      \\param falseValue The value to return if the condition is False
+      \\return Either the trueValue of falseValue, depending on if the condition is true
+               or not
+    ]]
+  },
+  {
+    Name = "isEmpty",
+    Arguments = {
+      { "object", "any" }
+    },
+    Return = "Boolean",
+    Documentation = [[
+      A utility function to check whether an object is empty or not. Identifies `nil`
+      objects, Tables without any keys, and empty strings.
+
+      \\param object The object to check
+      \\return A Boolean that specifies if the object is empty or not
+    ]]
   }
 }
 
@@ -303,5 +335,17 @@ openspace.toggleFade = function(renderable, fadeTime, endScript)
     end
   else
     openspace.fadeIn(renderable, fadeTime, endScript)
+  end
+end
+
+openspace.ternary = function(condition, trueValue, falseValue)
+  if condition then return trueValue else return falseValue end
+end
+
+openspace.isEmpty = function(v)
+  if type(v) == "table" then
+    return next(v) == nil
+  else
+    return v == nil or v == ''
   end
 end

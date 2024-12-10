@@ -184,7 +184,7 @@ void RenderableCartesianAxes::deinitializeGL() {
     _program = nullptr;
 }
 
-void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
+void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
     const glm::dmat4 modelViewTransform = calcModelViewTransform(data);
