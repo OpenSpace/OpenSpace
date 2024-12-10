@@ -1,0 +1,65 @@
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local earthcentricKernels = asset.resource({
+  Name = "Earthcenteric Frame Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "earthcentric_frame_kernels",
+  Version = 1
+})
+
+local Frame = {
+  GSE = "GSE"
+}
+
+local GeocentricSolarEcliptic = {
+  Identifier = "GeocentricSolarEcliptic",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = Frame.GSE,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Geocentric Solar Ecliptic",
+    Path = "/Solar System/Planets/Earth",
+    Description = [[The X-Y plane is defined by the Earth Mean Ecliptic plane of date:
+        the +Z axis, primary vector, is the normal vector to this plane,
+        always pointing toward the North side of the invariant plane.
+        +X axis is the component of the Earth-Sun vector that is orthogonal
+        to the +Z axis.
+        +Y axis completes the right-handed system.]],
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(earthcentricKernels .."ECLIPDATE.tf")
+  openspace.spice.loadKernel(earthcentricKernels .."GSE.tf")
+  openspace.addSceneGraphNode(GeocentricSolarEcliptic)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(GeocentricSolarEcliptic)
+  openspace.spice.unloadKernel(earthcentricKernels .."GSE.tf")
+  openspace.spice.unloadKernel(earthcentricKernels .."ECLIPDATE.tf")
+end)
+
+asset.export("Frame", Frame)
+asset.export(GeocentricSolarEcliptic)
+
+
+
+asset.meta = {
+  Name = "Geocentric Solar Ecliptic (GSE) frame Transform",
+  Version = "1.0",
+  Description = "Earth transform GSE Reference Frame",
+  Author = "CCMC",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

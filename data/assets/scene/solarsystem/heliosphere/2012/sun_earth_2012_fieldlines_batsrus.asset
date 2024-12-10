@@ -1,5 +1,5 @@
 asset.require("scene/solarsystem/heliosphere/2012/reset_loop_action")
-local transforms = asset.require("scene/solarsystem/planets/earth/magnetosphere/transforms_magnetosphere")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_sm")
 
 
 
@@ -59,7 +59,7 @@ local InteractionSphere = 6380000  -- A value slightly bigger than earth radius
 ----------------------LUTZ's JULY TRACES-------------------------
 local BatsrusJ12OpenClosed = {
   Identifier = "FL_BATSRUS_J12_OpenClosed",
-  Parent = transforms.GSMReferenceFrame.Identifier,
+  Parent = transforms.GeocentricSolarMagnetospheric.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -89,7 +89,7 @@ local BatsrusJ12OpenClosed = {
 --------------------- VELOCITY FLOWLINES ------------------------
 local BatsrusJ12FlowLines = {
   Identifier = "FL_BATSRUS_J12_FlowLines",
-  Parent = transforms.GSMReferenceFrame.Identifier,
+  Parent = transforms.GeocentricSolarMagnetospheric.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
@@ -116,7 +116,7 @@ local BatsrusJ12FlowLines = {
 --------------------- Ashers seedpoints ------------------------
 local BatsrusAsherStaticSeedsFlowLines = {
   Identifier = "FL_BATSRUS_ASHER_STATIC_SSEDS_FlowLines",
-  Parent = transforms.GSMReferenceFrame.Identifier,
+  Parent = transforms.GeocentricSolarMagnetospheric.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
