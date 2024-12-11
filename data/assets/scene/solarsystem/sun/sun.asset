@@ -18,7 +18,7 @@ local Sun = {
   },
   ApproachFactor = 15.0,
   GUI = {
-    Name = "Sun",
+    Name = "Solar Surface",
     Path = "/Solar System/Sun",
     Description = "Globe for the sun in our solar system"
   }
