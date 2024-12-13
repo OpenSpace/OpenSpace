@@ -33,7 +33,7 @@ namespace {
     {
         "TimeTelemetry",
         "Time Telemetry",
-        "Telemetry that sends out time information over the OSC connection"
+        "Telemetry that sends out time information over the OSC connection."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeUnitOptionInfo = {
@@ -47,7 +47,7 @@ namespace {
     const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
-        "Settings for the precision of the telemetry information"
+        "Settings for the precision of the telemetry information."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimePrecisionInfo = {
@@ -80,7 +80,6 @@ TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
     _timeUnitOption.setValue(static_cast<int>(TimeUnit::Day));
     addProperty(_timeUnitOption);
 
-    // Precision
     addPropertySubOwner(_precisionProperty);
 }
 

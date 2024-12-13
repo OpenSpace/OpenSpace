@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #ifndef __OPENSPACE_MODULE_OSC___OSCCONNECTION___H__
 #define __OPENSPACE_MODULE_OSC___OSCCONNECTION___H__
 
@@ -36,7 +37,6 @@ using OscDataType = std::variant<osc::Blob, double, int, std::string>;
 
 class OscConnection {
 public:
-
     OscConnection(const std::string& ip, int port);
     ~OscConnection();
 
@@ -44,8 +44,8 @@ public:
         const std::vector<OscDataType>& data);
 private:
     UdpTransmitSocket _socket;
+    char* _buffer = nullptr;
     osc::OutboundPacketStream _stream;
-    char* _buffer;
 };
 
 } // namespace openspace

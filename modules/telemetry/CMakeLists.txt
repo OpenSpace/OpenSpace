@@ -25,39 +25,39 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/general/anglemodetelemetry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/general/cameratelemetry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/general/focustelemetry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/general/nodestelemetry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/general/timetelemetry.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/specific/planetscomparesonification.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/specific/planetsoverviewsonification.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/specific/planetssonification.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/telemetrybase.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/util.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/general/anglemodetelemetry.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/general/cameratelemetry.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/general/focustelemetry.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/general/nodestelemetry.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/general/timetelemetry.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/specific/planetscomparesonification.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/specific/planetsoverviewsonification.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/specific/planetssonification.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/telemetrybase.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/util.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/general/anglemodetelemetry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/general/cameratelemetry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/general/focustelemetry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/general/nodestelemetry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/general/nodestelemetry_lua.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/general/timetelemetry.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/specific/planetscomparesonification.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/specific/planetsoverviewsonification.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/specific/planetssonification.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/specific/planetssonification_lua.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/telemetrybase.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/util.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/general/anglemodetelemetry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/general/cameratelemetry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/general/focustelemetry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/general/nodestelemetry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/general/nodestelemetry_lua.inl
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/general/timetelemetry.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/specific/planetscomparesonification.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/specific/planetsoverviewsonification.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/specific/planetssonification.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/specific/planetssonification_lua.inl
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/telemetrybase.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/util.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
-    "Telemetry"
-    telemetry
-    STATIC
-    ${HEADER_FILES}
-    ${SOURCE_FILES}
+  "Telemetry"
+  telemetry_module
+  STATIC
+  ${HEADER_FILES}
+  ${SOURCE_FILES}
 )

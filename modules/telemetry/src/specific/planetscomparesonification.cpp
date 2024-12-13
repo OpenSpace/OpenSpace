@@ -39,7 +39,7 @@ namespace {
         "PlanetsCompareSonification",
         "Planets Compare Sonification",
         "Sonification that compares two different planets to each other in a variety of "
-        "aspects"
+        "aspects."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectedUpscaleInfo = {
@@ -77,43 +77,43 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "All",
-        "Toggle all comparing sonification varieties for both selected planets"
+        "Toggle all comparing sonification varieties for both selected planets."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
         "SizeDay",
         "Size/Day",
-        "Toggle size/day sonification for both selected planets"
+        "Toggle size/day sonification for both selected planets."
     };
 
     constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
         "Gravity",
         "Gravity",
-        "Toggle gravity sonification for both selected planets"
+        "Toggle gravity sonification for both selected planets."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TemperatureInfo = {
         "Temperature",
         "Temperature",
-        "Toggle temperature sonification for both selected planets"
+        "Toggle temperature sonification for both selected planets."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
         "Atmosphere",
         "Atmosphere",
-        "Toggle atmosphere sonification for both selected planets"
+        "Toggle atmosphere sonification for both selected planets."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
         "Moons",
         "Moons",
-        "Toggle moons sonification for both selected planets"
+        "Toggle moons sonification for both selected planets."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RingsInfo = {
         "Rings",
         "Rings",
-        "Toggle rings sonification for both selected planets"
+        "Toggle rings sonification for both selected planets."
     };
 } // namespace
 
@@ -247,7 +247,7 @@ void PlanetsCompareSonification::scalePlanet(const std::string& planet, double s
         "openspace.setPropertyValueSingle('Scene.{}.Scale.Scale', {}, {});",
         planet, scale, interpolationTime
     );
-    global::scriptEngine->queueScript(script);
+    global::scriptEngine->queueScript(std::move(script));
 }
 
 void PlanetsCompareSonification::onUpscaleChanged() {

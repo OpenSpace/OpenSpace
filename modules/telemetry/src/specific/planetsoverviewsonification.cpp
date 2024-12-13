@@ -36,61 +36,61 @@ namespace {
         "PlanetsOverviewSonification",
         "Planets Overview Sonification",
         "Sonification that gives an overview of the planets in the solar system with "
-        "simpler sounds"
+        "simpler sounds."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "All",
-        "Toggle the sonification for all planets"
+        "Toggle the sonification for all planets."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableMercuryInfo = {
         "Mercury",
         "Mercury",
-        "Toggle sonification for Mercury"
+        "Toggle sonification for Mercury."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableVenusInfo = {
         "Venus",
         "Venus",
-        "Toggle sonification for Venus"
+        "Toggle sonification for Venus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableEarthInfo = {
         "Earth",
         "Earth",
-        "Toggle sonification for Earth"
+        "Toggle sonification for Earth."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableMarsInfo = {
         "Mars",
         "Mars",
-        "Toggle sonification for Mars"
+        "Toggle sonification for Mars."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableJupiterInfo = {
         "Jupiter",
         "Jupiter",
-        "Toggle sonification for Jupiter"
+        "Toggle sonification for Jupiter."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableSaturnInfo = {
         "Saturn",
         "Saturn",
-        "Toggle sonification for Saturn"
+        "Toggle sonification for Saturn."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableUranusInfo = {
         "Uranus",
         "Uranus",
-        "Toggle sonification for Uranus"
+        "Toggle sonification for Uranus."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableNeptuneInfo = {
         "Neptune",
         "Neptune",
-        "Toggle sonification for Neptune"
+        "Toggle sonification for Neptune."
     };
 } // namespace
 

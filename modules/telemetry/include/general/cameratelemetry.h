@@ -46,7 +46,7 @@ public:
     virtual void update(const Camera* camera) override;
 
     /**
-     * Function to stop the gathering of camera telemetry data
+     * Function to stop the gathering of camera telemetry data.
      */
     virtual void stop() override;
 
@@ -64,11 +64,10 @@ private:
     static constexpr int CameraSpeedUnitIndex = 8;
 
     /**
-     * Gather camera telemetry information (position, rotation, and speed)
+     * Gather camera telemetry information (position, rotation, and speed).
      *
      * \param camera The camera in the scene
-     *
-     * \return True if the data is new compared to before, otherwise false
+     * \return `true` if the data is new compared to before, otherwise `false`
      */
     bool getData(const Camera* camera);
 

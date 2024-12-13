@@ -45,7 +45,7 @@ public:
     virtual void update(const Camera*) override;
 
     /**
-     * Function to stop the gathering of telemetry data
+     * Function to stop the gathering of telemetry data.
      */
     virtual void stop() override;
 
@@ -57,7 +57,7 @@ private:
 
     /**
      * Gather angle settings telemetry information (Angle calculation mode, and whether
-     * elevation angle is included)
+     * elevation angle is included).
      *
      * \return True if the data is new compared to before, otherwise false
      */
@@ -69,7 +69,6 @@ private:
      */
     void sendData();
 
-    // Variables
     TelemetryModule::AngleCalculationMode _angleMode =
         TelemetryModule::AngleCalculationMode::Horizontal;
     bool _includeElevation = false;

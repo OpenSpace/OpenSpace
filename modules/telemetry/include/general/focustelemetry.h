@@ -45,7 +45,7 @@ public:
     virtual void update(const Camera*) override;
 
     /**
-     * Function to stop the gathering of focus telemetry data
+     * Function to stop the gathering of focus telemetry data.
      */
     virtual void stop() override;
 
@@ -58,8 +58,7 @@ private:
      * Gather focus telemetry information (current focus node)
      *
      * \param camera The camera in the scene
-     *
-     * \return True if the data is new compared to before, otherwise false
+     * \return `true` if the data is new compared to before, otherwise `false`
      */
     bool getData();
 
@@ -69,7 +68,6 @@ private:
      */
     void sendData();
 
-    // Variables
     std::string _currentFocus;
 };
 

@@ -35,7 +35,7 @@ namespace {
     {
         "FocusTelemetry",
         "Focus Telemetry",
-        "Telemetry that sends out the current focus node over the OSC connection"
+        "Telemetry that sends out the current focus node over the OSC connection."
     };
 
 } // namespace

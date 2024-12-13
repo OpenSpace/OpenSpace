@@ -40,14 +40,14 @@ public:
     virtual ~TelemetryBase();
 
     /**
-     * Main update function to gather telemetry data and send it over the osc connection
+     * Main update function to gather telemetry data and send it over the osc connection.
      *
      * \param camera The camera in the scene
      */
     virtual void update(const Camera* camera) = 0;
 
     /**
-     * Function to stop the gathering of telemetry data
+     * Function to stop the gathering of telemetry data.
      */
     virtual void stop() = 0;
 
@@ -63,7 +63,6 @@ public:
     bool enabled() const;
 
 protected:
-    // Variables
     std::string _identifier;
     properties::BoolProperty _enabled;
     OscConnection* _connection = nullptr;

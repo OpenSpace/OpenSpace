@@ -53,19 +53,19 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Enable or disable all gathering of telemetry information"
+        "Enable or disable all gathering of telemetry information."
     };
 
     constexpr openspace::properties::Property::PropertyInfo IpAddressInfo = {
         "IpAddress",
         "Ip address",
-        "The network ip address that the telemetry osc messages is sent to"
+        "The network ip address that the telemetry osc messages is sent to."
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The network port that the telemetry osc messages is sent to"
+        "The network port that the telemetry osc messages are sent to."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AngleCalculationModeInfo = {
@@ -73,8 +73,8 @@ namespace {
         "Angle Calculation Mode",
         "This setting changes the method to calculate any angles in the telemetries. "
         "The Horizontal mode, generally works well for flat displays or forward facing "
-        "immersive envierments. The Circular mode, generally works well for centered "
-        "fisheye displays or omnidirectional immersive environments"
+        "immersive environments. The Circular mode, generally works well for centered "
+        "fisheye displays or omnidirectional immersive environments."
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeElevationAngleInfo = {
@@ -82,7 +82,7 @@ namespace {
         "Include Elevation Angle",
         "This setting determines if an additional elevation angle should be calculated "
         "for the telemetries that calculate angles. The method used for this calculation "
-        "also depends on the angle calculation mode"
+        "also depends on the angle calculation mode."
     };
 
     struct [[codegen::Dictionary(TelemetryModule)]] Parameters {
@@ -221,7 +221,7 @@ const std::vector<TelemetryBase*>& TelemetryModule::telemetries() const {
     return _telemetries;
 }
 
-const TelemetryBase* TelemetryModule::telemetry(std::string id) const {
+const TelemetryBase* TelemetryModule::telemetry(std::string_view id) const {
     for (const TelemetryBase* t : _telemetries) {
         if (t->identifier() == id) {
             return t;
@@ -230,7 +230,7 @@ const TelemetryBase* TelemetryModule::telemetry(std::string id) const {
     return nullptr;
 }
 
-TelemetryBase* TelemetryModule::telemetry(std::string id) {
+TelemetryBase* TelemetryModule::telemetry(std::string_view id) {
     for (TelemetryBase* t : _telemetries) {
         if (t->identifier() == id) {
             return t;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                              *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,17 +31,16 @@ namespace {
     constexpr int BufferSize = 1024;
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    template <class... Ts> overloaded(Ts...)->overloaded<Ts...>;
+    template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 } // namespace
 
 namespace openspace {
 
 OscConnection::OscConnection(const std::string& ip, int port)
     : _socket(IpEndpointName(ip.c_str(), port))
+    , _buffer(new char[BufferSize])
+    , _stream(osc::OutboundPacketStream(_buffer, BufferSize))
 {
-    // Create buffer and stream that will be used to send messages
-    _buffer = new char[BufferSize];
-    _stream = osc::OutboundPacketStream(_buffer, BufferSize);
 }
 
 OscConnection::~OscConnection() {

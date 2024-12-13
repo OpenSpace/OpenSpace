@@ -35,10 +35,9 @@ namespace {
     {
         "AngleModeTelemetry",
         "Angle Mode Telemetry",
-        "Telemetry that gathers data of what angle calculaiton mode is currently used for "
+        "Telemetry that gathers data of what angle calculation mode is currently used for "
         "all telemetries in the telemetry module"
     };
-
 } // namespace
 
 namespace openspace {

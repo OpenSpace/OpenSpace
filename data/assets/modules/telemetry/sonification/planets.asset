@@ -1,5 +1,5 @@
 asset.onInitialize(function ()
-  -- Note that the planets needs to be in this order
+  -- Note that the planets need to be in this order
   local planets = {
     {
       Name = "Mercury"

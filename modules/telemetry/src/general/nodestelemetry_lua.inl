@@ -28,7 +28,7 @@
 namespace {
 
 /**
- * Adds the given list of nodes to the NodesTelemetry's internal list
+ * Adds the given list of nodes to the NodesTelemetry's internal list.
  */
 [[codegen::luawrap]] void addNodes(ghoul::Dictionary nodes) {
     openspace::TelemetryModule* module =
@@ -48,9 +48,10 @@ namespace {
 
     for (const std::string_view& k : nodes.keys()) {
         std::string node = nodes.value<std::string>(k);
-        nodesTelemetry->addNode(node);
+        nodesTelemetry->addNode(std::move(node));
     }
 }
 
 #include "nodestelemetry_lua_codegen.cpp"
+
 } // namespace

@@ -42,147 +42,147 @@ namespace {
     {
         "PlanetsSonification",
         "Planets Sonification",
-        "Sonification of the planets in the solar system"
+        "Sonification of the planets in the solar system."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "All",
-        "Toggle all sonifications for all planets"
+        "Toggle all sonifications for all planets."
     };
 
     // Planets
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo MercuryInfo = {
         "Mercury",
         "Mercury",
-        "Settings for the sonification of Mercury"
+        "Settings for the sonification of Mercury."
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo VenusInfo = {
         "Venus",
         "Venus",
-        "Settings for the sonification of Venus"
+        "Settings for the sonification of Venus."
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo EarthInfo = {
         "Earth",
         "Earth",
-        "Settings for the sonification of Earth"
+        "Settings for the sonification of Earth."
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo MarsInfo = {
         "Mars",
         "Mars",
-        "Settings for the sonification of Mars"
+        "Settings for the sonification of Mars."
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo JupiterInfo = {
         "Jupiter",
         "Jupiter",
-        "Settings for the sonification of Jupiter"
+        "Settings for the sonification of Jupiter."
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo SaturnInfo = {
         "Saturn",
         "Saturn",
-        "Settings for the sonification of Saturn"
+        "Settings for the sonification of Saturn."
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo UranusInfo = {
         "Uranus",
         "Uranus",
-        "Settings for the sonification of Uranus"
+        "Settings for the sonification of Uranus."
     };
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo NeptuneInfo = {
         "Neptune",
         "Neptune",
-        "Settings for the sonification of Neptune"
+        "Settings for the sonification of Neptune."
     };
 
     // Sonification settings per planet
     constexpr openspace::properties::Property::PropertyInfo PlanetToggleAllInfo = {
         "ToggleAll",
         "All",
-        "Toggle all sonifications for the planet"
+        "Toggle all sonifications for the planet."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
         "SizeDay",
         "Size/Day",
-        "Toggle the size/day sonification for the planet"
+        "Toggle the size/day sonification for the planet."
     };
 
     constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
         "Gravity",
         "Gravity",
-        "Toggle the gravity sonification for the planet"
+        "Toggle the gravity sonification for the planet."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TemperatureInfo = {
         "Temperature",
         "Temperature",
-        "Toggle the temperature sonification for the planet"
+        "Toggle the temperature sonification for the planet."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
         "Atmosphere",
         "Atmosphere",
-        "Toggle the atmosphere sonification for the planet"
+        "Toggle the atmosphere sonification for the planet."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
         "Moons",
         "Moons",
-        "Toggle the moons sonification for the planet"
+        "Toggle the moons sonification for the planet."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RingsInfo = {
         "Rings",
         "Rings",
-        "Toggle the rings sonification for the planet"
+        "Toggle the rings sonification for the planet."
     };
 
     // Precision settings
     const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
-        "Settings for the distance and angle precision of the planets sonification"
+        "Settings for the distance and angle precision of the planets sonification."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LowDistancePrecisionInfo = {
         "LowDistancePrecision",
         "Distance Precision (Low)",
-        "The precision in meters used to determin when to send updated distance data "
+        "The precision in meters used to determine when to send updated distance data "
         "over the OSC connection. This is the lower precision used, for planets that are "
-        "not the current focus",
+        "not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighDistancePrecisionInfo = {
         "HighDistancePrecision",
         "Distance Precision (High)",
-        "The precision in meters used to determin when to send updated distance data "
+        "The precision in meters used to determine when to send updated distance data "
         "over the OSC connection. This is the higher precision used, for the planet that "
-        "is the current focus",
+        "is the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LowAnglePrecisionInfo = {
         "LowAnglePrecision",
         "Angle Precision (Low)",
-        "The precision in radians used to determin when to send updated angle data "
+        "The precision in radians used to determine when to send updated angle data "
         "over the OSC connection. This is the lower precision used, for planets that are "
-        "not the current focus",
+        "not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighAnglePrecisionInfo = {
         "HighAnglePrecision",
         "Angle Precision (High)",
-        "The precision in radians used to determin when to send updated angle data "
+        "The precision in radians used to determine when to send updated angle data "
         "over the OSC connection. This is the higher precision used, for the planet that "
-        "is the current focus",
+        "is the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -465,15 +465,15 @@ void PlanetsSonification::sendPlanetData(int planetIndex) {
     data.push_back(settingsBlob);
 
     // Moons
-    for (size_t m = 0; m < _planets[planetIndex].moons.size(); ++m) {
+    for (const DataBody& moon : _planets[planetIndex].moons) {
         // Distance
-        data.push_back(_planets[planetIndex].moons[m].distance);
+        data.push_back(moon.distance);
 
         // Horizontal Angle
-        data.push_back(_planets[planetIndex].moons[m].horizontalAngle);
+        data.push_back(moon.horizontalAngle);
 
         // Vertical Angle
-        data.push_back(_planets[planetIndex].moons[m].verticalAngle);
+        data.push_back(moon.verticalAngle);
     }
 
     _connection->send(label, data);
@@ -713,7 +713,7 @@ void PlanetsSonification::update(const Camera* camera) {
     bool compareEnabled = compare->enabled();
     bool overviewEnabled = overview->enabled();
 
-    if (!_enabled && !compareEnabled && !overviewEnabled) {
+    if (!(_enabled || compareEnabled || overviewEnabled)) {
         return;
     }
 
@@ -756,7 +756,7 @@ void PlanetsSonification::stop() {
 
 void PlanetsSonification::addPlanet(ghoul::Dictionary dict) {
     const Parameters p = codegen::bake<Parameters>(dict);
-    DataBody planet(p.name);
+    DataBody planet = DataBody(p.name);
 
     if (p.moons.has_value()) {
         for (const std::string& moon : *p.moons) {

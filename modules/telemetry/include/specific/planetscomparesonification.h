@@ -38,14 +38,14 @@ public:
     virtual ~PlanetsCompareSonification() override;
 
     /**
-     * Main update function to gather telemetry data and send it over the osc connection
+     * Main update function to gather telemetry data and send it over the osc connection.
      *
      * \param camera The camera in the scene (not used in this case)
      */
     virtual void update(const Camera*) override;
 
     /**
-     * Function to stop the sonification
+     * Function to stop the sonification.
      */
     virtual void stop() override;
 
@@ -73,14 +73,14 @@ private:
 
     /**
      * Create an osc::Blob object with the current compare planets sonification settings.
-     * Order of settings: Size/day, gravity, temperature, atmosphere, moons, rings
+     * Order of settings: Size/day, gravity, temperature, atmosphere, moons, rings.
      *
      * \return An osc::Blob object with the current compare planets sonification settings
      */
     osc::Blob createSettingsBlob() const;
 
     /**
-     * Send current compare planets sonification settings over the osc connection
+     * Send current compare planets sonification settings over the osc connection.
      * Order of data: Name of the first selected planet, name of the second planet,
      *                compare planets settings
      */
@@ -88,7 +88,7 @@ private:
 
     /**
      * Function that gets called when either the first or second planet selection
-     * was changed with the GUI
+     * was changed with the GUI.
      *
      * \param changedPlanet The planet selection that was recently changed
      * \param notChangedPlanet The planet selection that was NOT changed
@@ -99,7 +99,7 @@ private:
 
     /**
      * Function that scales the given planet by the given amount over the given amount of
-     * seconds
+     * seconds.
      *
      * \param planet The identifer of the planet that should be scaled
      * \param scale The amount that the planet should be scaled with as a multiplier of
@@ -110,13 +110,11 @@ private:
     void scalePlanet(const std::string& planet, double scale,
         double interpolationTime);
 
-    // Properties onChange
     void onUpscaleChanged();
     void onFirstChanged();
     void onSecondChanged();
     void onToggleAllChanged();
 
-    // Properties
     properties::DoubleProperty _selectedUpscale;
     properties::DoubleProperty _selectedScaleInterpolationTime;
     properties::OptionProperty _firstPlanet;
@@ -130,7 +128,6 @@ private:
     properties::BoolProperty _moonsEnabled;
     properties::BoolProperty _ringsEnabled;
 
-    // Variables
     std::string _oldFirst;
     std::string _oldSecond;
 };

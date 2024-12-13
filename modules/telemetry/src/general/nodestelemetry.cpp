@@ -40,7 +40,7 @@ namespace {
     {
         "NodesTelemetry",
         "Nodes Telemetry",
-        "Telemetry of a list of nodes that has been added by the user"
+        "Telemetry of a list of nodes that has been added by the user."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
@@ -53,13 +53,13 @@ namespace {
     const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
-        "Settings for the precision of the nodes telemetry information"
+        "Settings for the precision of the nodes telemetry information."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LowDistancePrecisionInfo = {
         "LowDistancePrecision",
         "Distance Precision (Low)",
-        "The precision in meters used to determin when to send updated distance data "
+        "The precision in meters used to determine when to send updated distance data "
         "over the OSC connection. This is the lower precision used, for nodes that are "
         "not the current focus",
         openspace::properties::Property::Visibility::User
@@ -68,7 +68,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HighDistancePrecisionInfo = {
         "HighDistancePrecision",
         "Distance Precision (High)",
-        "The precision in meters used to determin when to send updated distance data "
+        "The precision in meters used to determine when to send updated distance data "
         "over the OSC connection. This is the higher precision used, for the current "
         "focus node",
         openspace::properties::Property::Visibility::User
@@ -77,7 +77,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LowAnglePrecisionInfo = {
         "LowAnglePrecision",
         "Angle Precision (Low)",
-        "The precision in radians used to determin when to send updated angle data "
+        "The precision in radians used to determine when to send updated angle data "
         "over the OSC connection. This is the lower precision used, for nodes that are "
         "not the current focus",
         openspace::properties::Property::Visibility::User
@@ -86,7 +86,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo HighAnglePrecisionInfo = {
         "HighAnglePrecision",
         "Angle Precision (High)",
-        "The precision in radians used to determin when to send updated angle data "
+        "The precision in radians used to determine when to send updated angle data "
         "over the OSC connection. This is the higher precision used, for the current "
         "focus node",
         openspace::properties::Property::Visibility::User
@@ -264,8 +264,8 @@ void NodesTelemetry::update(const Camera* camera) {
 
 void NodesTelemetry::stop() {}
 
-void NodesTelemetry::addNode(const std::string& node) {
-    _nodes.push_back(node);
+void NodesTelemetry::addNode(std::string node) {
+    _nodes.push_back(std::move(node));
 }
 
 scripting::LuaLibrary NodesTelemetry::luaLibrary() {

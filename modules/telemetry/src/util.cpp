@@ -26,8 +26,8 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <glm/gtx/projection.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
@@ -35,25 +35,20 @@ namespace {
     constexpr std::string_view _loggerCat = "TelemetryUtil";
 
     /**
-     * Get the position of the node with the given identifier
+     * Get the position of the node with the given identifier.
      *
      * \param nodeIdentifier The identifier of the node to get the position for
      *
      * \return The position of the node with the given identifier
      */
-    glm::dvec3 getNodePosition(std::string nodeIdentifier) {
+    glm::dvec3 nodePosition(std::string_view nodeIdentifier) {
         if (nodeIdentifier.empty()) {
             return glm::dvec3(0.0);
         }
 
         // Find the node
         openspace::SceneGraphNode* node = openspace::sceneGraphNode(nodeIdentifier);
-        if (!node) {
-            return glm::dvec3(0.0);
-        }
-
-        // Return the position of the node
-        return node->worldPosition();
+        return node ? node->worldPosition() : glm::dvec3(0.0);
     }
 } // namespace
 
@@ -70,7 +65,7 @@ namespace openspace {
     double calculateDistanceTo(const Camera* camera, glm::dvec3 nodePosition,
                                DistanceUnit unit)
     {
-        if (glm::length(nodePosition)<std::numeric_limits<glm::f64>::epsilon()) {
+        if (glm::length(nodePosition) < std::numeric_limits<double>::epsilon()) {
             return 0.0;
         }
 
@@ -93,7 +88,7 @@ namespace openspace {
     double calculateAngleTo(const Camera* camera, glm::dvec3 nodePosition,
                             TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
-        if (glm::length(nodePosition)<std::numeric_limits<glm::f64>::epsilon()) {
+        if (glm::length(nodePosition) < std::numeric_limits<double>::epsilon()) {
             return 0.0;
         }
 
@@ -181,8 +176,8 @@ namespace openspace {
                                   glm::dvec3 nodePositionB,
                                TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
-        if (glm::length(nodePositionA) < std::numeric_limits<glm::f64>::epsilon() ||
-            glm::length(nodePositionB) < std::numeric_limits<glm::f64>::epsilon())
+        if (glm::length(nodePositionA) < std::numeric_limits<double>::epsilon() ||
+            glm::length(nodePositionB) < std::numeric_limits<double>::epsilon())
         {
             return 0.0;
         }
@@ -379,8 +374,8 @@ namespace openspace {
                                            glm::dvec3 nodePositionB,
                                TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
-        if (glm::length(nodePositionA) < std::numeric_limits<glm::f64>::epsilon() ||
-            glm::length(nodePositionB) < std::numeric_limits<glm::f64>::epsilon())
+        if (glm::length(nodePositionA) < std::numeric_limits<double>::epsilon() ||
+            glm::length(nodePositionB) < std::numeric_limits<double>::epsilon())
         {
             return 0.0;
         }

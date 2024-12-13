@@ -49,12 +49,12 @@ public:
     virtual void update(const Camera* camera) override;
 
     /**
-     * Function to stop the sonification
+     * Function to stop the sonification.
      */
     virtual void stop() override;
 
     /**
-     * Add the given planet information to the list of planets and their moons
+     * Add the given planet information to the list of planets and their moons.
      *
      * \param dict The planet that should be added
      */
@@ -113,16 +113,16 @@ private:
     };
 
     /**
-     * Update the distance and angle information for the given planet
+     * Update the distance and angle information for the given planet.
      *
      * \param camera The camera in the scene
      * \param planetIndex The index to the internally stored planet data that should be
      *        updated
-     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     * \param angleCalculationMode The angle calculation mode to use. This determines which
      *        method to use when calculating the angle.
      * \param includeElevation Whether the additional elevation angle should be calculated
      *
-     * \return True if the data is new compared to before, otherwise false
+     * \return `true` if the data is new compared to before, otherwise `false`
      */
     bool getData(const Camera* camera, int planetIndex,
         TelemetryModule::AngleCalculationMode angleCalculationMode,
@@ -130,7 +130,7 @@ private:
 
     /**
      * Create an osc::Blob object with the current sonification settings for the indicated
-     * planet
+     * planet.
      * Order of settings: Size/day, gravity, temperature, and optionaly atmosphere, moons,
      *                    and rings.
      *
@@ -143,13 +143,12 @@ private:
 
     /**
      * Send the current sonification settings for the indicated planet over the osc
-     * connection
+     * connection.
      * Order of data: distance, horizontal angle, vertical angle, settings, data for each
      *                moon (distance, horizontal angle, and vertical angle)
      */
     void sendPlanetData(int planetIndex);
 
-    // Properties onChange
     void onToggleAllChanged();
 
     //Mercury
@@ -184,7 +183,6 @@ private:
     void onNeptuneAllChanged();
     void onNeptuneSettingChanged();
 
-    // Properties
     struct PlanetProperty : properties::PropertyOwner {
         PlanetProperty(properties::PropertyOwner::PropertyOwnerInfo planetInfo);
 
@@ -205,10 +203,10 @@ private:
 
         // The low and high precision values are used in different situations. When the
         // planet is the current focus node, then the high precision value is used. This
-        // is due to the sonificaiton and planet being in the current focus and should
-        // therfore have better precision. If the planet is not the current focus node,
+        // is due to the sonification and planet being in the current focus and should
+        // therefore have better precision. If the planet is not the current focus node,
         // then the low precision value is used to save performance, both on the
-        // OpenSpace side and the SuperCollider side.
+        // OpenSpace side and the receiving side.
         properties::DoubleProperty lowDistancePrecision;
         properties::DoubleProperty highDistancePrecision;
         properties::DoubleProperty lowAnglePrecision;
@@ -226,10 +224,8 @@ private:
     PlanetProperty _neptuneProperty;
     PrecisionProperty _precisionProperty;
 
-    // Variables
     std::vector<DataBody> _planets;
 
-    // The current precision values for distance and angle
     double _anglePrecision;
     double _distancePrecision;
 };

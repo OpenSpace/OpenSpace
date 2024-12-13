@@ -34,7 +34,7 @@ namespace {
     {
         "CameraTelemetryInfo",
         "Camera Telemetry",
-        "Telemetry that sends out camera information over the OSC connection"
+        "Telemetry that sends out camera information over the OSC connection."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraSpeedDistanceUnitInfo =
@@ -75,7 +75,6 @@ namespace {
         "speed data over the OSC connection.",
         openspace::properties::Property::Visibility::User
     };
-
 } // namespace
 
 namespace openspace {
@@ -97,7 +96,6 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
     _cameraSpeedDistanceUnitOption.setValue(static_cast<int>(DistanceUnit::Kilometer));
     addProperty(_cameraSpeedDistanceUnitOption);
 
-    // Precision
     addPropertySubOwner(_precisionProperty);
 }
 

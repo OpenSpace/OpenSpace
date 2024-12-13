@@ -26,18 +26,18 @@ namespace {
 
 /**
  * Adds the given list of planets to the PlanetsSonification internal list of Planets
- * and Moons
+ * and Moons.
  */
 [[codegen::luawrap]] void addPlanets(ghoul::Dictionary planets) {
     openspace::TelemetryModule* module =
         openspace::global::moduleEngine->module<openspace::TelemetryModule>();
     if (!module) {
-        LERRORC("PlanetsSonification_lua", "Could not find the TelemetryModule");
+        LERRORC("PlanetsSonification", "Could not find the TelemetryModule");
         return;
     }
     openspace::TelemetryBase* ptr = module->telemetry("PlanetsSonification");
     if (!ptr) {
-        LERRORC("PlanetsSonification_lua", "Could not find the PlanetsSonification");
+        LERRORC("PlanetsSonification", "Could not find the PlanetsSonification");
         return;
     }
 
@@ -52,3 +52,4 @@ namespace {
 
 #include "planetssonification_lua_codegen.cpp"
 } // namespace
+

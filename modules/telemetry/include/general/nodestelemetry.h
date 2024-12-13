@@ -50,12 +50,12 @@ public:
     virtual void update(const Camera* camera) override;
 
     /**
-     * Function to stop the gathering of nodes telemetry data
+     * Function to stop the gathering of nodes telemetry data.
      */
     virtual void stop() override;
 
     /**
-     * Add the given node to the list of nodes to gather telemetry data for
+     * Add the given node to the list of nodes to gather telemetry data for.
      *
      * \param node The identifier of the node that should be added
      */
@@ -63,7 +63,7 @@ public:
 
     /**
      * Returns the Lua library that contains all Lua functions available for the
-     * nodes telemetry
+     * nodes telemetry.
      *
      * \return The Lua library that contains all Lua functions available for the
      *         nodes telemetry
@@ -80,9 +80,9 @@ private:
 
     // Struct to hold data for all the nodes
     struct TelemetryNode {
-        TelemetryNode(std::string id = "") {
-            identifier = id;
-        }
+        TelemetryNode(std::string id = "")
+            : identifier(std::move(id))
+        {}
 
         std::string identifier;
 
@@ -93,12 +93,12 @@ private:
 
     /**
      * Update telemetry data (distance, horizontal angle, vertical angle) for the given
-     * node
+     * node.
      *
      * \param camera The camera in the scene
      * \param nodeIndex The index to the internally stored node data that should be
      *        updated
-     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     * \param angleCalculationMode The angle calculation mode to use. This determines which
      *        method to use when calculating the angle.
      * \param includeElevation Whether the additional elevation angle should be calculated
      *
@@ -115,7 +115,6 @@ private:
      */
     void sendData(int nodeIndex);
 
-    // Properties
     struct PrecisionProperty : properties::PropertyOwner {
         PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
 
@@ -133,7 +132,6 @@ private:
     properties::OptionProperty _distanceUnitOption;
     PrecisionProperty _precisionProperty;
 
-    // Variables
     std::vector<TelemetryNode> _nodes;
 
     // The current precision values for distance and angle

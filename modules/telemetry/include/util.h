@@ -30,10 +30,9 @@
 #include <openspace/util/distanceconversion.h>
 
 namespace openspace {
-
     /**
      * Calculate the distance from the camera to the node with the given identifier, in
-     * the given distance unit
+     * the given distance unit.
      *
      * \param camera Pointer to the camera in the scene that the distance should be
      *        calculated from
@@ -49,7 +48,7 @@ namespace openspace {
 
     /**
      * Calculate the distance from the camera to the node with the given position, in
-     * the given distance unit
+     * the given distance unit.
      *
      * \param camera Pointer to the camera in the scene that the distance should be
      *        calculated from
@@ -66,13 +65,13 @@ namespace openspace {
 
     /**
      * Calculate the angle in radians from the camera to the node with the given
-     * identifier
+     * identifier.
      *
      * \param camera Pointer to the camera in the scene that the angle should be
      *        calculated from
      * \param nodeIdentifier The identifier of the node, that the angle should be
      *        calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     * \param angleCalculationMode The angle calculation mode to use. This determines which
      *        method to use when calculating the angle.
      *
      * \return The angle in radians from the camera to the node with the given identifier
@@ -82,13 +81,13 @@ namespace openspace {
 
     /**
      * Calculate the angle in radians from the camera to the node with the given
-     * position
+     * position.
      *
      * \param camera Pointer to the camera in the scene that the angle should be
      *        calculated from
      * \param nodePosition The position of the node, that the angle should be
      *        calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     * \param angleCalculationMode The angle calculation mode to use. This determines which
      *        method to use when calculating the angle.
      *
      * \return The angle in radians from the camera to the node with the given position
@@ -99,14 +98,14 @@ namespace openspace {
 
     /**
      * Calculate the angle in radians from the first node (A) with the given identifier
-     * to the second node (B) with the given identifier
+     * to the second node (B) with the given identifier.
      *
      * \param camera Pointer to the camera in the scene
      * \param nodeIdentifierA The identifier of the first node (A) that the angle should
      *        be calculated from
      * \param nodeIdentifierB The identifier of the second node (B) that the angle should
      *        be calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     * \param angleCalculationMode The angle calculation mode to use. This determines which
      *        method to use when calculating the angle.
      *
      * \return The angle in radians from the first node (A) with the given identifier to
@@ -118,14 +117,14 @@ namespace openspace {
 
     /**
      * Calculate the angle in radians from the first node (A) with the given position
-     * to the second node (B) with the given position
+     * to the second node (B) with the given position.
      *
      * \param camera Pointer to the camera in the scene
      * \param nodePositionA The position of the first node (A) that the angle should
      *        be calculated from
      * \param nodePositionB The position of the second node (B) that the angle should
      *        be calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     * \param angleCalculationMode The angle calculation mode to use. This determines which
      *        method to use when calculating the angle.
      *
      * \return The angle in radians from the first node (A) with the given position to
@@ -138,13 +137,13 @@ namespace openspace {
 
     /**
      * Calculate the elevation angle in radians from the camera to the node with the given
-     * identifier
+     * identifier.
      *
      * \param camera Pointer to the camera in the scene that the elevation angle should be
      *        calculated from
      * \param nodeIdentifier The identifier of the node that the elevation angle should be
      *        calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     * \param angleCalculationMode The angle calculation mode to use. This determines which
      *        method to use when calculating the angle.
      *
      * \return The elevation angle in radians from the camera to the node with the given
@@ -155,13 +154,13 @@ namespace openspace {
 
     /**
      * Calculate the elevation angle in radians from the camera to the node with the given
-     * position
+     * position.
      *
      * \param camera Pointer to the camera in the scene that the elevation angle should be
      *        calculated from
      * \param nodePosition The position of the node that the elevation angle should be
      *        calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     * \param angleCalculationMode The angle calculation mode to use. This determines which
      *        method to use when calculating the angle.
      *
      * \return The elevation angle in radians from the camera to the node with the given
@@ -173,14 +172,14 @@ namespace openspace {
 
     /**
      * Calculate the elevation angle in radians from the first node (A) with the given
-     * identifier to the second node (B) with the given identifier
+     * identifier to the second node (B) with the given identifier.
      *
      * \param camera Pointer to the camera in the scene
      * \param nodeIdentifierA The identifier of the first node (A) that the elevation
      *        angle should be calculated from
      * \param nodeIdentifierB The identifier of the second node (B) that the elevation
      *        angle should be calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     * \param angleCalculationMode The angle calculation mode to use. This determines which
      *        method to use when calculating the angle.
      *
      * \return The elevation angle in radians from the first node (A) with the given
@@ -192,14 +191,14 @@ namespace openspace {
 
     /**
      * Calculate the elevation angle in radians from the first node (A) with the given
-     * position to the second node (B) with the given position
+     * position to the second node (B) with the given position.
      *
      * \param camera Pointer to the camera in the scene
      * \param nodePositionA The position of the first node (A) that the elevation angle
      *        should be calculated from
      * \param nodePositionB The position of the second node (B) that the elevation angle
      *        should be calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determins which
+     * \param angleCalculationMode The angle calculation mode to use. This determines which
      *        method to use when calculating the angle.
      *
      * \return The elevation angle in radians from the first node (A) with the given

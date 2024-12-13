@@ -36,18 +36,6 @@
     630720000.0
   ],
   "keybindings": [
-    {
-      "action": "os.solarsystem.ToggleSatelliteTrails",
-      "key": "S"
-    },
-    {
-      "action": "os.solarsystem.FocusIss",
-      "key": "I"
-    },
-    {
-      "action": "os.solarsystem.FocusEarth",
-      "key": "HOME"
-    }
   ],
   "mark_nodes": [
     "Earth",
@@ -59,7 +47,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Profile that adds sonification for the planets in different ways. The sonificaiton needs to be run in a separate software that can receive OSC messages, such as SuperCollider.",
+    "description": "Profile that adds sonification for the planets in different ways. The sonification needs to be run in a separate software that can receive OSC messages, such as SuperCollider.",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",

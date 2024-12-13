@@ -35,14 +35,14 @@ public:
     virtual ~PlanetsOverviewSonification() override;
 
     /**
-      * Main update function to gather telemetry data and send it over the osc connection
+      * Main update function to gather telemetry data and send it over the osc connection.
      *
      * \param camera The camera in the scene (not used in this case)
      */
     virtual void update(const Camera*) override;
 
     /**
-     * Function to stop the sonification
+     * Function to stop the sonification.
      */
     virtual void stop() override;
 
@@ -64,22 +64,20 @@ private:
 
     /**
      * Create an osc::Blob object with the current planets overview sonification settings.
-     * Order of settings: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune
+     * Order of settings: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune.
      *
      * \return An osc::Blob object with the current planets overview sonification settings
      */
     osc::Blob createSettingsBlob() const;
 
     /**
-     * Send current planets overview sonification settings over the osc connection
+     * Send current planets overview sonification settings over the osc connection.
      * Order of data: Planets overview settings
      */
     void sendData();
 
-    // Properties onChange
     void onToggleAllChanged();
 
-    // Properties
     properties::BoolProperty _toggleAll;
     properties::BoolProperty _mercuryEnabled;
     properties::BoolProperty _venusEnabled;

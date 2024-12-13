@@ -46,7 +46,7 @@ public:
     virtual void update(const Camera*) override;
 
     /**
-     * Function to stop the gathering of time telemetry data
+     * Function to stop the gathering of time telemetry data.
      */
     virtual void stop() override;
 
@@ -65,13 +65,12 @@ private:
     bool getData();
 
     /**
-     * Send the current time telemetry information over the osc connection
+     * Send the current time telemetry information over the osc connection.
      * Order of data: Time speed, unit of time speed, current simulation time in J2000
      *                number of seconds.
      */
     void sendData();
 
-    // Properties
     struct PrecisionProperty : properties::PropertyOwner {
         PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
 
@@ -81,7 +80,6 @@ private:
     properties::OptionProperty _timeUnitOption;
     PrecisionProperty _precisionProperty;
 
-    // Variables
     double _timeSpeed = 0.0;
     double _currentTime = 0.0;
 };

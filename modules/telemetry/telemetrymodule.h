@@ -81,7 +81,7 @@ public:
     ~TelemetryModule();
 
     /**
-     * Returns the Lua libraries for all telemetries available in the telemetry module
+     * Returns the Lua libraries for all telemetries available in the telemetry module.
      *
      * \return The Lua libraries for all telemetries available in the telemetry module
      */
@@ -91,14 +91,14 @@ public:
     virtual void internalDeinitialize() override;
 
     /**
-     * Get the list of telemetries that are currently registered in the module
+     * Get the list of telemetries that are currently registered in the module.
      *
      * \return A list of all registered telemetries
      */
     const std::vector<TelemetryBase*>& telemetries() const;
 
     /**
-     * Get a specified telemetry from the list of registered telemetries in the module
+     * Get a specified telemetry from the list of registered telemetries in the module.
      *
      * \param id The identifier of the telemetry to fetch
      *
@@ -108,7 +108,7 @@ public:
     TelemetryBase* telemetry(std::string id);
 
     /**
-     * Get the current angle calculation mode used in the telemetry module
+     * Get the current angle calculation mode used in the telemetry module.
      *
      * \return The angle calculation mode
      */
@@ -116,39 +116,38 @@ public:
 
     /**
      * Return whether any elevation angles are being caclulated and sent over the osc
-     * connection or not
+     * connection or not.
      *
-     * \return True if elevation angles are being caclulated and sent over the osc
-     *         connection, false otherwise
+     * \return `true` if elevation angles are being calculated and sent over the osc
+     *         connection, `false` otherwise
      */
     bool includeElevationAngle() const;
 
 private:
     /**
      * Main update function that keeps track of all telemetries and keeps the update
-     * thread running and synced to the OpenSpace main thread
+     * thread running and synced to the OpenSpace main thread.
      *
      * \param isRunning Whether the thread should be kept running or shut down and joined
      */
     void update(std::atomic<bool>& isRunning);
 
     /**
-     * Add a given telemetry to the list of registered telemetries in the module
+     * Add a given telemetry to the list of registered telemetries in the module.
      *
      * \param telemetry The telemetry to register in the module
      */
     void addTelemetry(TelemetryBase* telemetry);
 
     /**
-     * Function that gets called when the angle calculation mode is changed in the GUI
+     * Function that gets called when the angle calculation mode is changed in the GUI.
      */
     void guiOnChangeAngleCalculationMode();
 
-    // To sync the sonificaiton thread with the main thread
+    // To sync the sonification thread with the main thread
     std::mutex mutexLock;
     std::condition_variable syncToMain;
 
-    // Properties
     properties::BoolProperty _enabled;
     properties::StringProperty _ipAddress;
     properties::IntProperty _port;
@@ -170,7 +169,6 @@ private:
     */
     properties::BoolProperty _includeElevationAngle;
 
-    // Variables
     std::thread _updateThread;
     std::atomic<bool> _isRunning = false;
     std::vector<TelemetryBase*> _telemetries;
