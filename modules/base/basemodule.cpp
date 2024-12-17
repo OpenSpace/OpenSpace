@@ -63,9 +63,9 @@
 #include <modules/base/rendering/renderableprism.h>
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 #include <modules/base/rendering/screenspacedashboard.h>
+#include <modules/base/rendering/screenspaceframebuffer.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
-#include <modules/base/rendering/screenspaceframebuffer.h>
 #include <modules/base/rendering/screenspaceinsetblackout.h>
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
@@ -104,9 +104,9 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
+    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
     fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
-    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
     fSsRenderable->registerClass<ScreenSpaceInsetBlackout>("ScreenSpaceInsetBlackout");
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =

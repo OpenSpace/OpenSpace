@@ -1,4 +1,3 @@
-#pragma once
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -28,6 +27,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/properties/vector/vec2property.h>
+
 #include <openspace/properties/optionproperty.h>
 #include <shared_mutex>
 #include <deque>
@@ -40,13 +40,12 @@ class ScreenSpaceInsetBlackout : public ScreenSpaceRenderable {
 public:
     ScreenSpaceInsetBlackout(const ghoul::Dictionary& dictionary);
 
-    bool deinitializeGL() override; // NOT COMPLETE
+    bool deinitializeGL() override;
     void update() override;
 
     static documentation::Documentation Documentation();
 
 private:
-    // Forward declare BlackoutShape for pointer use
     struct BlackoutShape;
 
     // Struct that defines a spline segment
@@ -71,6 +70,7 @@ private:
         // Struct that holds information about each point on the spline
         struct Point {
             explicit Point(glm::vec2& dataRef, const std::string& id, const std::string& name);
+            ~Point();
             char16 guiName;
             char16 propIdentifier;
             properties::Property::PropertyInfo* propInfo = nullptr;
@@ -78,20 +78,18 @@ private:
             glm::vec2* rawDataPointer;
 
             void updateRawDataPointerValue();
-
-            ~Point();
         };
 
         const std::string baseIdentifier;
         const std::string baseGuiName;
 
         BlackoutShape& parentShape;
-        std::deque<glm::vec2> rawData;
+        std::vector<glm::vec2> rawData;
         std::vector<std::unique_ptr<Point>> points;
 
-        bool dirtyTexture = false;
-        bool pointFlagNew = false;
-        bool pointFlagDelete = false;
+        bool isTextureDirty = false;
+        bool addPointFlag = false;
+        bool removePointFlag = false;
 
         Spline::Side shapeSide;
         properties::TriggerProperty addControlPoint;
@@ -130,7 +128,7 @@ private:
         properties::BoolProperty enableCalibrationColor;
         properties::StringProperty calibrationTexturePath;
 
-        bool dirtyTexture = false;
+        bool isTextureDirty = false;
 
         // Holds corner points as they need to be shared between adjacent splines
         glm::vec2 topLeftCorner;
@@ -140,9 +138,9 @@ private:
         std::shared_mutex cornerMutex;
 
         void copyToClipboard();
-        std::string formatLine(std::string id, std::vector<glm::vec2>& data,
+        std::string formatLine(std::string id, const std::vector<glm::vec2>& data,
 			const bool isCorner = false);
-        bool isTextureDirty();
+        bool checkTextureStatus();
         void updateSplineAndGui();
         void resetDirtyTextureFlag();
         void setCornerData(const Spline::Side& side, const glm::vec2 corner0,
@@ -151,33 +149,21 @@ private:
     };
     BlackoutShape _shape;
 
-    // Quad used for displaying calibration grid texture
-    static constexpr glm::vec2 calibrationQuad[4] = {
-        glm::vec2(-1.f, 1.f),
-        glm::vec2(1.f, 1.f),
-        glm::vec2(1.f, -1.f),
-        glm::vec2(-1.f, -1.f)
-    };
-
-    // Number of samples we do per spline segment when creating our vertex buffer
-    static const int SUBDIVIDES = 250;
-
-    std::vector<glm::vec2> _vertexBufferData;
-    GLuint _vertexArray;
-    GLuint _vertexBuffer;
-    GLuint _fbo;
+    std::vector<glm::vec2> _vboData;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    GLuint _fbo = 0;
     std::unique_ptr<ghoul::opengl::Texture> _blackoutTexture;
     std::unique_ptr<ghoul::opengl::Texture> _calibrationTexture;
 
     void bindTexture() override;
 
     void checkCornerSpecification(std::vector<glm::vec2> corners);
-    void setupShadersAndFBO();
+    void initializeShadersAndFBO();
     void generateTexture();
     void generateVertexArray();
     void copyToPointsVector(const std::vector<std::unique_ptr<Spline::Point>>& points,
         std::vector<glm::vec2>& vertexData);
-    void copyToVertexBuffer(const std::vector<glm::vec2>& v);
     glm::vec2 calculateCatmullRom(const glm::vec2 &p0, const glm::vec2 &p1,
         const glm::vec2 &p2, const glm::vec2 &p3, const float t);
     std::vector<glm::vec2> sampleSpline(const std::vector<glm::vec2> &controlPoints);

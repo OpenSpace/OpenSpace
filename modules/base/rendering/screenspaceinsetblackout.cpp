@@ -24,24 +24,23 @@
 
 #include <modules/base/rendering/screenspaceinsetblackout.h>
 #include <modules/base/basemodule.h>
-
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/helper.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-
-#include <ghoul/io/texture/texturereader.h>
+#include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/clipboard.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo CopyToClipboardInfo = {
         "CopyToClipboard",
         "Copy to clipboard",
-        "Copies the current configuration to the clipboard.",
+        "Copies the current configuration to the clipboard so that it can be pasted"
+        "into the asset file.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -98,11 +97,10 @@ namespace {
         "CalibrationTexture",
         "Calibration Texture",
         "Texture used as calibration pattern.",
-        openspace::properties::Property::Visibility::Hidden
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(ScreenSpaceInsetBlackout)]] Parameters {
-        std::optional<std::string> identifier;
         struct BlackoutShape {
             std::vector<glm::vec2> corners;
             std::optional<std::vector<glm::vec2>> top;
@@ -112,6 +110,7 @@ namespace {
             std::optional<std::string> calibrationTexturePath;
         };
         BlackoutShape blackoutshape;
+        std::optional<std::string> identifier;
     };
 #include "screenspaceinsetblackout_codegen.cpp"
 } // namespace
@@ -121,7 +120,6 @@ namespace openspace {
 documentation::Documentation ScreenSpaceInsetBlackout::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_inset_blackout");
 }
-
 
 ScreenSpaceInsetBlackout::Spline::Point::Point(glm::vec2& dataRef, const std::string& id,
                                                const std::string& name)
@@ -148,16 +146,23 @@ ScreenSpaceInsetBlackout::Spline::Spline(const ghoul::Dictionary& dictionary,
                                         const std::string baseName,
                                         const Spline::Side side)
     : parentShape(shape)
-    , properties::PropertyOwner({ identifier, guiName,"" })
+    , properties::PropertyOwner({ identifier, guiName, "" })
     , baseIdentifier(baseId)
     , baseGuiName(baseName)
     , addControlPoint(AddControlPointInfo)
     , addSelector(AddSelectorInfo, properties::OptionProperty::DisplayType::Dropdown)
-    , newPointPosition(NewPointPositionInfo, glm::vec2(0.f), glm::vec2(0.f),
-        glm::vec2(1.f), glm::vec2(0.001f))
+    , newPointPosition(
+        NewPointPositionInfo,
+        glm::vec2(0.f),
+        glm::vec2(0.f),
+        glm::vec2(1.f),
+        glm::vec2(0.001f)
+    )
     , removeControlPoint(RemoveControlPointInfo)
-    , removeSelector(RemoveSelectorInfo,
-        properties::OptionProperty::DisplayType::Dropdown)
+    , removeSelector(
+        RemoveSelectorInfo,
+        properties::OptionProperty::DisplayType::Dropdown
+    )
     , shapeSide(side)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -166,18 +171,18 @@ ScreenSpaceInsetBlackout::Spline::Spline(const ghoul::Dictionary& dictionary,
     std::vector<glm::vec2> vec;
     rawData.emplace_back();
     switch (side) {
-    case Spline::Side::Top:
-        vec = p.blackoutshape.top.value_or(std::vector<glm::vec2>());
-        break;
-    case Spline::Side::Right:
-        vec = p.blackoutshape.right.value_or(std::vector<glm::vec2>());
-        break;
-    case Spline::Side::Bottom:
-        vec = p.blackoutshape.bottom.value_or(std::vector<glm::vec2>());
-        break;
-    case Spline::Side::Left:
-        vec = p.blackoutshape.left.value_or(std::vector<glm::vec2>());
-        break;
+        case Spline::Side::Top:
+            vec = p.blackoutshape.top.value_or(std::vector<glm::vec2>());
+            break;
+        case Spline::Side::Right:
+            vec = p.blackoutshape.right.value_or(std::vector<glm::vec2>());
+            break;
+        case Spline::Side::Bottom:
+            vec = p.blackoutshape.bottom.value_or(std::vector<glm::vec2>());
+            break;
+        case Spline::Side::Left:
+            vec = p.blackoutshape.left.value_or(std::vector<glm::vec2>());
+            break;
     }
     std::for_each(vec.begin(), vec.end(), [this](glm::vec2& v) {
         rawData.push_back(v);
@@ -186,15 +191,13 @@ ScreenSpaceInsetBlackout::Spline::Spline(const ghoul::Dictionary& dictionary,
 }
 
 void ScreenSpaceInsetBlackout::Spline::addSelectionOptions() {
-    const int numberOfPoints = static_cast<int>(points.size());
-
     // Add selector used when inserting a new point
-    for (int i = 1; i < numberOfPoints; ++i) {
+    for (int i = 1; i < points.size(); ++i) {
         addSelector.addOption(i, std::format("Between {} and {}", i, i + 1));
     }
 
     // Add selector used when removing a point
-    for (int i = 1; i < numberOfPoints - 1; ++i) {
+    for (int i = 1; i < points.size() - 1; ++i) {
         removeSelector.addOption(i, std::format("Point {}", i + 1));
     }
 }
@@ -239,30 +242,29 @@ void ScreenSpaceInsetBlackout::Spline::createPropertyTree() {
 
     // Adds controls to property tree
     addProperty(addSelector);
-    addControlPoint.onChange([this]() {
-        pointFlagNew = true;
-        dirtyTexture = true;
-        });
     addProperty(newPointPosition);
+    addControlPoint.onChange([this]() {
+        addPointFlag = true;
+        isTextureDirty = true;
+    });
     addProperty(addControlPoint);
     addProperty(removeSelector);
     removeControlPoint.onChange([this]() {
-        pointFlagDelete = true;
-        dirtyTexture = true;
-        });
+        removePointFlag = true;
+        isTextureDirty = true;
+    });
     addProperty(removeControlPoint);
 }
 
 void ScreenSpaceInsetBlackout::Spline::generateProperties() {
     // Remove any existing points
-    points.erase(points.begin(), points.end());
+    points.clear();
 
     std::pair<glm::vec2, glm::vec2> corners = parentShape.readCornerData(shapeSide);
     rawData.front() = corners.first;
     rawData.back() = corners.second;
 
-    const int numberOfPoints = static_cast<int>(rawData.size());
-    for (int i = 0; i < numberOfPoints; ++i) {
+    for (int i = 0; i < rawData.size(); ++i) {
         // Create the point
         std::string id = baseIdentifier + std::to_string(i);
         std::string name = std::format("{} #{}", baseGuiName, i);
@@ -285,17 +287,17 @@ void ScreenSpaceInsetBlackout::Spline::generateProperties() {
         );
 
         // Special onChange for corners
-        if (i == 0 || i == numberOfPoints-1) {
+        if (i == 0 || i == rawData.size() - 1) {
             point->prop->onChange([this, point]() {
                 updateCornerData();
                 point->updateRawDataPointerValue();
-                dirtyTexture = true;
+                isTextureDirty = true;
             });
         }
         else {
             point->prop->onChange([this, point]() {
                 point->updateRawDataPointerValue();
-                dirtyTexture = true;
+                isTextureDirty = true;
             });
         }
 
@@ -400,12 +402,12 @@ ScreenSpaceInsetBlackout::BlackoutShape::BlackoutShape(const ghoul::Dictionary& 
     left.createPropertyTree();
 
     enableCalibrationPattern.onChange([this]() {
-        dirtyTexture = true;
+        isTextureDirty = true;
     });
     addProperty(enableCalibrationPattern);
 
     enableCalibrationColor.onChange([this]() {
-        dirtyTexture = true;
+        isTextureDirty = true;
     });
     addProperty(enableCalibrationColor);
 
@@ -420,38 +422,21 @@ void ScreenSpaceInsetBlackout::BlackoutShape::copyToClipboard() {
     std::pair<glm::vec2, glm::vec2> cb = readCornerData(Spline::Side::Bottom);
     std::vector<glm::vec2> allCorners = { ct.first, ct.second, cb.first, cb.second };
 
-    auto dataTop = std::vector<glm::vec2>(
-        top.rawData.begin(),
-        top.rawData.end()
-    );
-    auto dataRight = std::vector<glm::vec2>(
-        right.rawData.begin(),
-        right.rawData.end()
-    );
-    auto dataBottom = std::vector<glm::vec2>(
-        bottom.rawData.begin(),
-        bottom.rawData.end()
-    );
-    auto dataLeft = std::vector<glm::vec2>(
-        left.rawData.begin(),
-        left.rawData.end()
-    );
-
     std::string strCorners = formatLine("Corners", allCorners, true);
-    std::string strTop = formatLine("Top", dataTop);
-    std::string strRight = formatLine("Right", dataRight);
-    std::string strBottom = formatLine("Bottom", dataBottom);
-    std::string strLeft = formatLine("Left", dataLeft);
+    std::string strTop = formatLine("Top", top.rawData);
+    std::string strRight = formatLine("Right", right.rawData);
+    std::string strBottom = formatLine("Bottom", bottom.rawData);
+    std::string strLeft = formatLine("Left", left.rawData);
 
     ghoul::setClipboardText(strCorners + strTop + strRight + strBottom + strLeft);
 }
 
 std::string ScreenSpaceInsetBlackout::BlackoutShape::formatLine(std::string id,
-                                        std::vector<glm::vec2>& data, const bool isCorner)
+                                                    const std::vector<glm::vec2>& data,
+                                                    const bool isCorner)
 {
-    const int dataSize = static_cast<int>(data.size());
     const int start = (isCorner) ? 0 : 1;
-    const int end = (isCorner) ? dataSize : (dataSize - 1);
+    const int end = static_cast<int>((isCorner) ? data.size() : (data.size() - 1));
     std::string str = std::format("{} = {{ ", id);
     for (int i = start; i < end; ++i) {
         std::string xVal = std::format("{}", data[i].x);
@@ -473,104 +458,84 @@ std::pair<glm::vec2, glm::vec2> ScreenSpaceInsetBlackout::BlackoutShape::readCor
     std::shared_lock lock(cornerMutex);
     std::pair<glm::vec2, glm::vec2> result;
     switch (side) {
-    case Spline::Side::Top:
-        result = std::make_pair(topLeftCorner, topRightCorner);
-        break;
-    case Spline::Side::Right:
-        result = std::make_pair(topRightCorner, bottomRightCorner);
-        break;
-    case Spline::Side::Bottom:
-        result = std::make_pair(bottomRightCorner, bottomLeftCorner);
-        break;
-    case Spline::Side::Left:
-        result = std::make_pair(bottomLeftCorner, topLeftCorner);
-        break;
+        case Spline::Side::Top:
+            result = std::pair(topLeftCorner, topRightCorner);
+            break;
+        case Spline::Side::Right:
+            result = std::pair(topRightCorner, bottomRightCorner);
+            break;
+        case Spline::Side::Bottom:
+            result = std::pair(bottomRightCorner, bottomLeftCorner);
+            break;
+        case Spline::Side::Left:
+            result = std::pair(bottomLeftCorner, topLeftCorner);
+            break;
     }
     return result;
 }
 
 void ScreenSpaceInsetBlackout::BlackoutShape::setCornerData(const Spline::Side& side,
-                                            const glm::vec2 corner0,
-                                            const glm::vec2 corner1)
+                                                            const glm::vec2 corner0,
+                                                            const glm::vec2 corner1)
 {
     std::unique_lock lock(cornerMutex);
     switch (side) {
-    case Spline::Side::Top:
-        topLeftCorner = corner0;
-        topRightCorner = corner1;
-        break;
-    case Spline::Side::Right:
-        topRightCorner = corner0;
-        bottomRightCorner = corner1;
-        break;
-    case Spline::Side::Bottom:
-        bottomRightCorner = corner0;
-        bottomLeftCorner = corner1;
-        break;
-    case Spline::Side::Left:
-        bottomLeftCorner = corner0;
-        topLeftCorner = corner1;
-        break;
+        case Spline::Side::Top:
+            topLeftCorner = corner0;
+            topRightCorner = corner1;
+            break;
+        case Spline::Side::Right:
+            topRightCorner = corner0;
+            bottomRightCorner = corner1;
+            break;
+        case Spline::Side::Bottom:
+            bottomRightCorner = corner0;
+            bottomLeftCorner = corner1;
+            break;
+        case Spline::Side::Left:
+            bottomLeftCorner = corner0;
+            topLeftCorner = corner1;
+            break;
     }
 }
 
-bool ScreenSpaceInsetBlackout::BlackoutShape::isTextureDirty() {
-    return ( dirtyTexture
-        || top.dirtyTexture
-        || right.dirtyTexture
-        || bottom.dirtyTexture
-        || left.dirtyTexture
-    );
+bool ScreenSpaceInsetBlackout::BlackoutShape::checkTextureStatus() {
+    return isTextureDirty ||
+        top.isTextureDirty ||
+        right.isTextureDirty ||
+        bottom.isTextureDirty ||
+        left.isTextureDirty;
 }
 
 void ScreenSpaceInsetBlackout::BlackoutShape::updateSplineAndGui() {
-    Spline* refs[4];
-    bool addedPoint[4];
-    bool removedPoint[4];
-
-    refs[0] = &top;
-    refs[1] = &right;
-    refs[2] = &bottom;
-    refs[3] = &left;
-
-    addedPoint[0] = top.pointFlagNew;
-    addedPoint[1] = right.pointFlagNew;
-    addedPoint[2] = bottom.pointFlagNew;
-    addedPoint[3] = left.pointFlagNew;
-
-    removedPoint[0] = top.pointFlagDelete;
-    removedPoint[1] = right.pointFlagDelete;
-    removedPoint[2] = bottom.pointFlagDelete;
-    removedPoint[3] = left.pointFlagDelete;
-
-    for (int i = 0; i < 4; ++i) {
+    std::array<Spline*, 4> refs = { &top, &right, &bottom, &left };
+    for (Spline* spline : refs) {
         bool updatePropertyTree = false;
-        if (addedPoint[i]) {
-            refs[i]->addPoint();
-            refs[i]->pointFlagNew = false;
+        if (spline->addPointFlag) {
+            spline->addPoint();
+            spline->addPointFlag = false;
             updatePropertyTree = true;
         }
-        if (removedPoint[i]) {
-            refs[i]->removePoint();
-            refs[i]->pointFlagDelete = false;
+        if (spline->removePointFlag) {
+            spline->removePoint();
+            spline->removePointFlag = false;
             updatePropertyTree = true;
         }
-
         // Need to remove and add the PropertySubOwner as the GUI does not reflect
         // changes otherwise
         if (updatePropertyTree) {
-            removePropertySubOwner(refs[i]);
-            addPropertySubOwner(refs[i]);
+            removePropertySubOwner(spline);
+            addPropertySubOwner(spline);
         }
     }
 }
 
 void ScreenSpaceInsetBlackout::BlackoutShape::resetDirtyTextureFlag() {
-    top.dirtyTexture = false;
-    right.dirtyTexture = false;
-    bottom.dirtyTexture = false;
-    left.dirtyTexture = false;
-    dirtyTexture = false;
+    top.isTextureDirty = false;
+    right.isTextureDirty = false;
+    bottom.isTextureDirty = false;
+    left.isTextureDirty = false;
+    isTextureDirty = false;
 }
 
 ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dictionary)
@@ -589,7 +554,7 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
     addPropertySubOwner(_shape);
 
     // Setup and render to texture
-    setupShadersAndFBO();
+    initializeShadersAndFBO();
     generateTexture();
 
     // Handling calibration texture
@@ -630,26 +595,26 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
 
 void ScreenSpaceInsetBlackout::checkCornerSpecification(std::vector<glm::vec2> corners) {
     if (corners.size() != 4) {
-        auto res = openspace::documentation::TestResult();
-        res.offenses.push_back(openspace::documentation::TestResult::Offense());
+        documentation::TestResult res;
+        res.offenses.push_back(documentation::TestResult::Offense());
 
         res.success = false;
         res.offenses[0].offender = "ScreenSpaceInsetBlackout.Blackoutshape.Corners";
         res.offenses[0].explanation = "Asset must contain exactly 4 corners";
         res.offenses[0].reason =
-            openspace::documentation::TestResult::Offense::Reason::Verification;
+            documentation::TestResult::Offense::Reason::Verification;
 
-        throw openspace::documentation::SpecificationError(
+        throw documentation::SpecificationError(
             res,
             "ScreenSpaceInsetBlackout"
         );
     }
 }
 
-void ScreenSpaceInsetBlackout::setupShadersAndFBO() {
+void ScreenSpaceInsetBlackout::initializeShadersAndFBO() {
     // Setup vertex buffer
-    glGenVertexArrays(1, &_vertexArray);
-    glGenBuffers(1, &_vertexBuffer);
+    glGenVertexArrays(1, &_vao);
+    glGenBuffers(1, &_vbo);
 
     // Setup program object and shaders
     _fboProgram = BaseModule::ProgramObjectManager.request(
@@ -685,9 +650,10 @@ void ScreenSpaceInsetBlackout::setupShadersAndFBO() {
         GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *_blackoutTexture, 0
     );
 
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        ghoul_assert(false, "Failed to complete frame buffer creation");
-    }
+    ghoul_assert(
+        glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE,
+        "Failed to complete frame buffer creation"
+    );
 
     _blackoutTexture->purgeFromRAM();
 
@@ -700,8 +666,7 @@ void ScreenSpaceInsetBlackout::setupShadersAndFBO() {
 
 void ScreenSpaceInsetBlackout::generateVertexArray() {
     // Clear old data
-    _vertexBufferData.clear();
-    _vertexBufferData.resize(0);
+    _vboData.clear();
 
     // Update all corners
     _shape.top.syncCornerData();
@@ -709,9 +674,18 @@ void ScreenSpaceInsetBlackout::generateVertexArray() {
     _shape.bottom.syncCornerData();
     _shape.left.syncCornerData();
 
+
+    // Quad used for displaying calibration grid texture
+    const glm::vec2 calibrationQuad[4] = {
+        glm::vec2(-1.f, 1.f),
+        glm::vec2(1.f, 1.f),
+        glm::vec2(1.f, -1.f),
+        glm::vec2(-1.f, -1.f)
+    };
+
     if (_shape.enableCalibrationPattern) {
         for (int i = 0; i < 4; ++i) {
-            _vertexBufferData.push_back(calibrationQuad[i]);
+            _vboData.push_back(calibrationQuad[i]);
         }
     }
     else {
@@ -760,12 +734,12 @@ void ScreenSpaceInsetBlackout::generateVertexArray() {
         // Incoming vertex data should be top -> right -> bottom -> left (clockwise)
         // Data to render needs to be counter-clockwise for correct winding
         // Also adds an extra point at the end for Triangle Fan
-        _vertexBufferData.push_back(glm::vec2(0.0, 0.0));
-        copyToVertexBuffer(splineTop);
-        copyToVertexBuffer(splineLeft);
-        copyToVertexBuffer(splineBottom);
-        copyToVertexBuffer(splineRight);
-        _vertexBufferData.push_back(splineTop.back());
+        _vboData.push_back(glm::vec2(0.0, 0.0));
+        _vboData.insert(_vboData.end(), splineTop.rbegin(), splineTop.rend());
+        _vboData.insert(_vboData.end(), splineLeft.rbegin(), splineLeft.rend());
+        _vboData.insert(_vboData.end(), splineBottom.rbegin(), splineBottom.rend());
+        _vboData.insert(_vboData.end(), splineRight.rbegin(), splineRight.rend());
+        _vboData.push_back(splineTop.back());
     }
 }
 
@@ -778,22 +752,16 @@ void ScreenSpaceInsetBlackout::copyToPointsVector(
     }
 }
 
-void ScreenSpaceInsetBlackout::copyToVertexBuffer(const std::vector<glm::vec2>& v) {
-    _vertexBufferData.insert(
-        _vertexBufferData.end(),
-        v.rbegin(),
-        v.rend()
-    );
-}
-
 std::vector<glm::vec2> ScreenSpaceInsetBlackout::sampleSpline(
                                             const std::vector<glm::vec2>& controlPoints)
 {
+    // Number of samples we do per spline segmentr
+    const int subdivisions = 250;
     std::vector<glm::vec2> outSplineData;
     const int numberOfSegments = static_cast<int>(controlPoints.size() - 3);
-    const float stepSize = 1.f / SUBDIVIDES;
+    const float stepSize = 1.f / subdivisions;
     for (int i = 0; i < numberOfSegments; ++i) {
-        for (int s = 0; s < SUBDIVIDES; ++s) {
+        for (int s = 0; s < subdivisions; ++s) {
             float tValue = stepSize * s;
             glm::vec2 splinePosition = calculateCatmullRom(
                 *(controlPoints.begin() + i + 0),
@@ -835,20 +803,20 @@ glm::vec2 ScreenSpaceInsetBlackout::calculateCatmullRom(const glm::vec2& p0,
 }
 
 void ScreenSpaceInsetBlackout::generateTexture() {
-    //Generate new vertex array data
+    // Generate new vertex array data
     generateVertexArray();
 
     // OpenGL stuff
-    glBindVertexArray(_vertexArray);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glBufferData(
         GL_ARRAY_BUFFER,
-        _vertexBufferData.size() * sizeof(glm::vec2),
-        _vertexBufferData.data(),
+        _vboData.size() * sizeof(glm::vec2),
+        _vboData.data(),
         GL_STATIC_DRAW
     );
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), nullptr);
     glBindVertexArray(0);
 
     _fboProgram->activate();
@@ -869,12 +837,12 @@ void ScreenSpaceInsetBlackout::generateTexture() {
 
     // Clear current buffer
     glViewport(0, 0, 3840, 2160);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Draw
-    glBindVertexArray(_vertexArray);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<gl::GLsizei>(_vertexBufferData.size()));
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<gl::GLsizei>(_vboData.size()));
     glBindVertexArray(0);
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -888,7 +856,7 @@ void ScreenSpaceInsetBlackout::generateTexture() {
 
 void ScreenSpaceInsetBlackout::update() {
     _shape.updateSplineAndGui();
-    bool dirtyTexture = _shape.isTextureDirty();
+    bool dirtyTexture = _shape.checkTextureStatus();
     if (dirtyTexture) {
         generateTexture();
     }
@@ -911,8 +879,8 @@ bool ScreenSpaceInsetBlackout::deinitializeGL() {
     _blackoutTexture = nullptr;
     _calibrationTexture = nullptr;
 
-    glDeleteVertexArrays(1, &_vertexArray);
-    glDeleteBuffers(1, &_vertexBuffer);
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
     glDeleteFramebuffers(1, &_fbo);
 
     if (_fboProgram) {
@@ -945,7 +913,7 @@ std::pair<glm::vec2, glm::vec2> ScreenSpaceInsetBlackout::calculatePadding(
 
     const glm::vec2 startPoint = pf0 + ((pf0 - pf1) * -1.f);
     const glm::vec2 endPoint = pb0 + ((pb0 - pb1) * -1.f);
-    return std::make_pair(startPoint, endPoint);
+    return std::pair(startPoint, endPoint);
 }
 
 } // namespace openspace

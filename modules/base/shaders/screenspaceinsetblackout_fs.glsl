@@ -28,8 +28,6 @@ uniform vec3 color;
 
 Fragment getFragment() {
   Fragment frag;
-
   frag.color = vec4(color, 1.0);
-  
   return frag;
 }
