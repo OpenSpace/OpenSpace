@@ -17,7 +17,6 @@ local Node = {
   Renderable = {
     Type = "RenderableDisc",
     Size = 100.0,
-    Width = 0.5,
     Texture = purpleTexture
   },
   GUI = {
