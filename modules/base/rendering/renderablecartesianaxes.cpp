@@ -65,9 +65,9 @@ namespace {
     //
     // To add the axes, create a scene graph node with the RenderableCartesianAxes
     // renderable and add it as a child to the other scene graph node, i.e. specify the
-    // other node as the Parent of the node with this renderable. Also, the axes have to
+    // other node as the `Parent` of the node with this renderable. Also, the axes have to
     // be scaled to match the parent object for the axes to be visible in the scene, for
-    // example using a StaticScale.
+    // example using a [StaticScale](#base_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];
