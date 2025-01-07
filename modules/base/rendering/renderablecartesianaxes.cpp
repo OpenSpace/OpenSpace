@@ -95,6 +95,9 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     , _zColor(ZColorInfo, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_opacity);
+
     _xColor = p.xColor.value_or(_xColor);
     _xColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_xColor);
@@ -195,6 +198,7 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     _program->setUniform("xColor", _xColor);
     _program->setUniform("yColor", _yColor);
     _program->setUniform("zColor", _zColor);
+    _program->setUniform("opacity", opacity());
 
     // Changes GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
