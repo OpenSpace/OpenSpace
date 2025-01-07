@@ -78,6 +78,29 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    // @TODO (2025-01-07, emmbr) I did not add any description of the file format below,
+    // since we intend for this to be changed in a relatively near future. When that is
+    // done, update the description.
+    // @TODO (2025-01-07, emmbr) Also need to update description of names file and labels
+    // as part of the labels rewrite
+
+    // This renderable can be used to draw constellations using lines. Each constellation
+    // corresponds to a group of lines between 3D positions that represent the star
+    // positions.
+    //
+    // Which groups (constellations) to show can be controlled through the `Selection`
+    // parameter.
+    //
+    // Each constellation is given an abbreviation that acts as the identifier of the
+    // constellation. These abbreviations and can be mapped to full names in the
+    // optional `NamesFile`. The names in this file are then the ones that will show
+    // in the user interface. A line in the `NamesFile` should first include the
+    // abbreviation and then the full name. For example: `AND Andromeda`.
+    //
+    // If labels were added, the full names may also be used for the text of the label.
+    // This happens if a row in the label file includes an `id` that matches the
+    // abbreviation of the constellation, in which case the text specified in the label
+    // file is overwritten.
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;

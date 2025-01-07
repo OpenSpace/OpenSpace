@@ -79,6 +79,11 @@ namespace {
     // file should first include the abbreviation and then the full name. For example,
     // for the `AND` abbreviation in the example above, the line would look like this:
     // `AND Andromeda`.
+    //
+    // If labels were added, the full names may also be used for the text of the label.
+    // This happens if a row in the label file includes an `id` that matches the
+    // abbreviation of the constellation, in which case the text specified in the label
+    // file is overwritten.
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
         // [[codegen::verbatim(VertexInfo.description)]]
         std::filesystem::path file;
