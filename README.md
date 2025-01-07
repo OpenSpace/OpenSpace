@@ -11,13 +11,13 @@
 ![Contributors](https://img.shields.io/github/contributors/OpenSpace/OpenSpace?style=flat-square)
 ![Commits](https://img.shields.io/github/commit-activity/m/OpenSpace/OpenSpace?color=green&style=flat-square)
 
-![Image](https://docs.openspaceproject.com/en/latest/_static/images/collection.jpg)
+![Image](https://docs.openspaceproject.com/latest/_static/images/collection.jpg)
 
 
 # Background
 OpenSpace started as a collaboration between Sweden's [Linköping University](https://immvis.github.io) (LiU) and the [American Museum of Natural History](https://www.amnh.org) (AMNH). Development of the software began several years ago through a close collaboration with NASA Goddard's [Community Coordinated Modeling Center](https://ccmc.gsfc.nasa.gov) (CCMC) to model space weather forecasting and continued with visualizations of NASA's New Horizons mission to Pluto and ESA's Rosetta mission to 67P/Churyumov-Gerasimenko. This promising set of preliminary work provided a foundation for continued funding from NASA, the Swedish eScience Research Centre, and the Knut and Alice Wallenberg foundation, which has extended the collaboration to include the University of Utah's [Scientific Computing and Imaging](https://www.sci.utah.edu) (SCI) Institute, [New York University](https://www.nyu.edu)'s Tandon School of Engineering, multiple informal science institutions across the world, and multiple, international vendors.
 
-![Image](https://docs.openspaceproject.com/en/latest/_static/images/presentation.jpg)
+![Image](https://docs.openspaceproject.com/latest/_static/images/presentation.jpg)
 
 
 # Features
@@ -33,7 +33,7 @@ Some of the high-level features supported in OpenSpace are:
 
 OpenSpace requires at least support for [OpenGL](https://www.opengl.org/) version 3.3, some custom components require at least version 4.2.
 
-![Image](https://docs.openspaceproject.com/en/latest/_static/images/display-systems.jpg)
+![Image](https://docs.openspaceproject.com/latest/_static/images/display-systems.jpg)
 
 
 # Getting Started
@@ -51,7 +51,7 @@ Feel free to create issues for missing features, bug reports, or compile problem
 ## :heart: Contributing
 Any contributions to the software are very welcome and can take a multitude of forms, from reporting a bug, fixing bugs, creating new content, writing new features, and even creating and sharing images and videos you have made with the software. Please feel free to share anything you want in the #sharespace channel on the Slack.
 
-![Image](https://docs.openspaceproject.com/en/latest/_static/images/himalaya-nkpg-dome.jpg)
+![Image](https://docs.openspaceproject.com/latest/_static/images/himalaya-nkpg-dome.jpg)
 
 
 # License
@@ -61,4 +61,4 @@ The contents of this repository provided under an [MIT license](https://github.c
 # Support
 OpenSpace is supported by the following institutions:
 
-![Image](https://docs.openspaceproject.com/en/latest/_static/logos/sponsors.png)
+![Image](https://docs.openspaceproject.com/latest/_static/logos/sponsors.png)
