@@ -88,9 +88,6 @@ namespace {
     // corresponds to a group of lines between 3D positions that represent the star
     // positions.
     //
-    // Which groups (constellations) to show can be controlled through the `Selection`
-    // parameter.
-    //
     // Each constellation is given an abbreviation that acts as the identifier of the
     // constellation. These abbreviations and can be mapped to full names in the
     // optional `NamesFile`. The names in this file are then the ones that will show
