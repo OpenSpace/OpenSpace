@@ -26,7 +26,6 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   debuggingmodule.h
-  rendering/renderabledebugplane.h
   rendering/debugrenderer.h
   rendering/screenspacedebugplane.h
 )
@@ -35,7 +34,6 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
   debuggingmodule.cpp
   debuggingmodule_lua.inl
-  rendering/renderabledebugplane.cpp
   rendering/debugrenderer.cpp
   rendering/screenspacedebugplane.cpp
 )

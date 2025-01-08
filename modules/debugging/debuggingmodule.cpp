@@ -24,7 +24,6 @@
 
 #include <modules/debugging/debuggingmodule.h>
 
-#include <modules/debugging/rendering/renderabledebugplane.h>
 #include <modules/debugging/rendering/screenspacedebugplane.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
@@ -137,12 +136,6 @@ DebuggingModule::DebuggingModule()
 }
 
 void DebuggingModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* fRenderable =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-
-    fRenderable->registerClass<RenderableDebugPlane>("RenderableDebugPlane");
-
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
@@ -157,7 +150,6 @@ void DebuggingModule::internalInitializeGL() {
 
 std::vector<documentation::Documentation> DebuggingModule::documentations() const {
     return {
-        RenderableDebugPlane::Documentation(),
         ScreenSpaceDebugPlane::Documentation()
     };
 }
