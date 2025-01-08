@@ -66,13 +66,13 @@ namespace {
     };
 
     // This `Renderable` creates a label that shows the distance between two nodes, based
-    // on an existing [RenderableNodeLine](#base_renderable_renderablenodeline). The label
+    // on an existing [RenderableNodeLine](#base_renderable_nodeline). The label
     // will be placed halfway between the two scene graph nodes that the line connects.
     //
     // The unit in which the distance is displayed can be customized.
     struct [[codegen::Dictionary(RenderableDistanceLabel)]] Parameters {
         // The identifier of a scene graph node with a
-        // [RenderableNodeLine](#base_renderable_renderablenodeline) that this label
+        // [RenderableNodeLine](#base_renderable_nodeline) that this label
         // should track. The label text will be updating based on the distance from the
         // node line's start and end.
         std::string nodeLine;
