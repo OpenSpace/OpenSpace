@@ -22,26 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
-#define __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEDISTANCELABEL___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEDISTANCELABEL___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <modules/base/rendering/renderablelabel.h>
 
 namespace openspace {
 
-class VisLabModule : public OpenSpaceModule {
+namespace documentation { struct Documentation; }
+
+class RenderableDistanceLabel : public RenderableLabel {
 public:
-    constexpr static const char* Name = "VisLab";
+     RenderableDistanceLabel(const ghoul::Dictionary& dictionary);
 
-    VisLabModule();
-
-    std::vector<documentation::Documentation> documentations() const override;
-
+     void update(const UpdateData& data) override;
+     static documentation::Documentation Documentation();
 
 private:
-    void internalInitialize(const ghoul::Dictionary&) override;
+     properties::StringProperty _nodelineId;
+     properties::IntProperty _distanceUnit;
+     properties::StringProperty _customUnitDescriptor;
+     bool _errorThrown = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEDISTANCELABEL___H__

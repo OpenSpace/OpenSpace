@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/vislab/rendering/renderabledistancelabel.h>
+#include <modules/base/rendering/renderabledistancelabel.h>
 
 #include <modules/base/rendering/renderablenodeline.h>
 #include <openspace/documentation/documentation.h>
@@ -89,7 +89,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableDistanceLabel::Documentation() {
-    return codegen::doc<Parameters>("vislab_renderable_distance_label");
+    return codegen::doc<Parameters>("base_renderable_distancelabel");
 }
 
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
