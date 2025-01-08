@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/distanceconversion.h>
 #include <ghoul/logging/logmanager.h>
 #include <optional>
 #include <string>
@@ -45,9 +46,6 @@ namespace {
         "node line's start and end.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
-
-    // @TODO (2024-04-26, emmbr) The unit and custom unit descriptor are confusing and
-    // should be reimplemented. Why are we using an int value for the unit??
 
     constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
         "DistanceUnit",
@@ -78,7 +76,8 @@ namespace {
         std::string nodeLine;
 
         // [[codegen::verbatim(DistanceUnitInfo.description)]]
-        std::optional<int> distanceUnit;
+        std::optional<std::string> distanceUnit
+            [[codegen::inlist(openspace::distanceUnitList())]];
 
         // [[codegen::verbatim(CustomUnitDescriptorInfo.description)]]
         std::optional<std::string> customUnitDescriptor;
@@ -95,7 +94,7 @@ documentation::Documentation RenderableDistanceLabel::Documentation() {
 RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictionary)
     : RenderableLabel(dictionary)
     , _nodelineId(NodeLineInfo)
-    , _distanceUnit(DistanceUnitInfo, 1, 0, 11)
+    , _distanceUnit(DistanceUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _customUnitDescriptor(CustomUnitDescriptorInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -103,7 +102,17 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
     _nodelineId = p.nodeLine;
     addProperty(_nodelineId);
 
-    _distanceUnit = p.distanceUnit.value_or(_distanceUnit);
+    for (const DistanceUnit u : DistanceUnits) {
+        _distanceUnit.addOption(
+            static_cast<int>(u),
+            std::string(nameForDistanceUnit(u))
+        );
+    }
+    _distanceUnit = static_cast<int>(DistanceUnit::Meter);
+    if (p.distanceUnit.has_value()) {
+        const DistanceUnit unit = distanceUnitFromString(*p.distanceUnit);
+        _distanceUnit = static_cast<int>(unit);
+    }
     addProperty(_distanceUnit);
 
     _customUnitDescriptor = p.customUnitDescriptor.value_or(_customUnitDescriptor);
@@ -128,18 +137,18 @@ void RenderableDistanceLabel::update(const UpdateData&) {
             return;
         }
 
-        // Get used unit scale
-        const float scale = unit(_distanceUnit);
+        const DistanceUnit unit = static_cast<DistanceUnit>(_distanceUnit.value());
 
         // Get unit descriptor text
-        std::string_view unitDescriptor = toString(_distanceUnit);
+        std::string_view unitDescriptor = abbreviationForDistanceUnit(unit);
         if (!_customUnitDescriptor.value().empty()) {
             unitDescriptor = _customUnitDescriptor;
         }
 
         // Get distance as string and remove fractional part
+        const double convertedDistance = convertMeters(nodeline->distance(), unit);
         std::string distanceText = std::to_string(
-            std::round(nodeline->distance() / scale)
+            std::round(convertedDistance)
         );
         const int pos = static_cast<int>(distanceText.find('.'));
         const std::string subStr = distanceText.substr(pos);

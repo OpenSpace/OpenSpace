@@ -27,6 +27,9 @@
 
 #include <modules/base/rendering/renderablelabel.h>
 
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }
@@ -40,7 +43,7 @@ public:
 
 private:
      properties::StringProperty _nodelineId;
-     properties::IntProperty _distanceUnit;
+     properties::OptionProperty _distanceUnit;
      properties::StringProperty _customUnitDescriptor;
      bool _errorThrown = false;
 };
