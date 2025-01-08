@@ -49,7 +49,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
         "DistanceUnit",
-        "Distance Unit",
+        "Display Distance Unit",
         "The unit in which the distance value should be displayed. Defaults to 'km' if "
         "not specified.",
         openspace::properties::Property::Visibility::User
@@ -117,6 +117,9 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
 
     _customUnitDescriptor = p.customUnitDescriptor.value_or(_customUnitDescriptor);
     addProperty(_customUnitDescriptor);
+
+    // The text will be updated automatically, so set the property to readonly
+    _text.setReadOnly(true);
 }
 
 void RenderableDistanceLabel::update(const UpdateData&) {
