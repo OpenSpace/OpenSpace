@@ -108,7 +108,7 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
             std::string(nameForDistanceUnit(u))
         );
     }
-    _distanceUnit = static_cast<int>(DistanceUnit::Meter);
+    _distanceUnit = static_cast<int>(DistanceUnit::Kilometer);
     if (p.distanceUnit.has_value()) {
         const DistanceUnit unit = distanceUnitFromString(*p.distanceUnit);
         _distanceUnit = static_cast<int>(unit);
