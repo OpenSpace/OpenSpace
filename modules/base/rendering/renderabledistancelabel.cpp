@@ -63,11 +63,20 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PrecisionInfo = {
+        "Precision",
+        "Precision",
+        "The precision in which to to show the distance number, i.e. the number of "
+        "digits after the decimal point.",
+        openspace::properties::Property::Visibility::User
+    };
+
     // This `Renderable` creates a label that shows the distance between two nodes, based
     // on an existing [RenderableNodeLine](#base_renderable_nodeline). The label
     // will be placed halfway between the two scene graph nodes that the line connects.
     //
-    // The unit in which the distance is displayed can be customized.
+    // The unit in which the distance is displayed can be customized, as well as the
+    // precision of the number.
     struct [[codegen::Dictionary(RenderableDistanceLabel)]] Parameters {
         // The identifier of a scene graph node with a
         // [RenderableNodeLine](#base_renderable_nodeline) that this label
@@ -81,6 +90,9 @@ namespace {
 
         // [[codegen::verbatim(CustomUnitDescriptorInfo.description)]]
         std::optional<std::string> customUnitDescriptor;
+
+        // [[codegen::verbatim(PrecisionInfo.description)]]
+        std::optional<int> precision [[codegen::greaterequal(0)]];
     };
 #include "renderabledistancelabel_codegen.cpp"
 } // namespace
@@ -96,6 +108,7 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
     , _nodelineId(NodeLineInfo)
     , _distanceUnit(DistanceUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _customUnitDescriptor(CustomUnitDescriptorInfo)
+    , _precision(PrecisionInfo, 0, 0, 10)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -117,6 +130,9 @@ RenderableDistanceLabel::RenderableDistanceLabel(const ghoul::Dictionary& dictio
 
     _customUnitDescriptor = p.customUnitDescriptor.value_or(_customUnitDescriptor);
     addProperty(_customUnitDescriptor);
+
+    _precision = p.precision.value_or(_precision);
+    addProperty(_precision);
 
     // The text will be updated automatically, so set the property to readonly
     _text.setReadOnly(true);
@@ -148,14 +164,10 @@ void RenderableDistanceLabel::update(const UpdateData&) {
             unitDescriptor = _customUnitDescriptor;
         }
 
-        // Get distance as string and remove fractional part
+        // Get distance as string
         const double convertedDistance = convertMeters(nodeline->distance(), unit);
-        std::string distanceText = std::to_string(
-            std::round(convertedDistance)
-        );
-        const int pos = static_cast<int>(distanceText.find('.'));
-        const std::string subStr = distanceText.substr(pos);
-        distanceText.erase(pos, subStr.size());
+
+        std::string distanceText = std::format("{:.{}f}", convertedDistance, _precision.value());
 
         // Create final label text and set it
         const std::string finalText = std::format("{} {}", distanceText, unitDescriptor);

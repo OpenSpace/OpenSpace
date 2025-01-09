@@ -28,6 +28,7 @@
 #include <modules/base/rendering/renderablelabel.h>
 
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
@@ -45,6 +46,7 @@ private:
      properties::StringProperty _nodelineId;
      properties::OptionProperty _distanceUnit;
      properties::StringProperty _customUnitDescriptor;
+     properties::IntProperty _precision;
      bool _errorThrown = false;
 };
 
