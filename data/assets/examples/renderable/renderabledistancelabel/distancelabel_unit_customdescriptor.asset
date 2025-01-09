@@ -15,7 +15,7 @@ local Node = {
     CustomUnitDescriptor = "Astronomical Units"
   },
   GUI = {
-    Name = "RenderableDistanceLabel - Unit",
+    Name = "RenderableDistanceLabel - Custom Unit Descriptor",
     Path = "/Examples"
   }
 }
