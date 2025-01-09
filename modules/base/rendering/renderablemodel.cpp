@@ -319,19 +319,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             const std::string stringUnit = std::get<std::string>(*p.modelScale);
 
             // Find matching unit name in list of supported unit names
-            DistanceUnit distanceUnit;
-            bool wasFound = false;
-            for (int i = 0; i < DistanceUnitNamesSingular.size(); ++i) {
-                if (stringUnit == DistanceUnitNamesSingular[i]) {
-                    wasFound = true;
-                    distanceUnit = DistanceUnits[i];
-                }
-            }
-
-            if (wasFound) {
+            try {
+                DistanceUnit distanceUnit = distanceUnitFromString(stringUnit);
                 _modelScale = toMeter(distanceUnit);
             }
-            else {
+            catch (const ghoul::MissingCaseException& e) {
                 std::string message = std::format("The given unit name '{}' does not "
                     "match any currently supported unit names", stringUnit);
                 LERROR(message);

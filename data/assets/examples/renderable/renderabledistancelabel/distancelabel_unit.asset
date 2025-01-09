@@ -1,0 +1,27 @@
+-- Set Unit
+-- Per default, the distance is displayed in meters. This example shows how to specify a
+-- specific unit, and how to set the precision of dislayed number.
+
+local nodelineAsset = asset.require("examples/renderable/renderablenodeline/nodeline")
+
+local Node = {
+  Identifier = "RenderableDistanceLabel_Example_Unit",
+  Renderable = {
+    Type = "RenderableDistanceLabel",
+    NodeLine = nodelineAsset.NodeLine.Identifier,
+    DistanceUnit = "AU",
+    Precision = 2
+  },
+  GUI = {
+    Name = "RenderableDistanceLabel - Unit",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

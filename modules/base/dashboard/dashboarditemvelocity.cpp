@@ -57,25 +57,13 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    std::vector<std::string> unitList() {
-        std::vector<std::string> res(openspace::DistanceUnits.size());
-        std::transform(
-            openspace::DistanceUnits.begin(),
-            openspace::DistanceUnits.end(),
-            res.begin(),
-            [](openspace::DistanceUnit unit) {
-                return std::string(nameForDistanceUnit(unit));
-            }
-        );
-        return res;
-    }
-
     struct [[codegen::Dictionary(DashboardItemVelocity)]] Parameters {
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;
 
         // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+        std::optional<std::string> requestedUnit
+            [[codegen::inlist(openspace::distanceUnitList())]];
     };
 #include "dashboarditemvelocity_codegen.cpp"
 

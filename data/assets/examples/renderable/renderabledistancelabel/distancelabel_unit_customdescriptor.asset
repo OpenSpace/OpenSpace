@@ -1,0 +1,29 @@
+-- Custom Unit Descriptor
+-- In addition to setting the unit, it is also possible to specify a custom unit
+-- descriptor, i.e. a text that will de displayed for the unit instead of the default one.
+-- Here, we write out "Astronomical Units" instead of using the default descriptor for AU.
+
+local nodelineAsset = asset.require("examples/renderable/renderablenodeline/nodeline")
+
+local Node = {
+  Identifier = "RenderableDistanceLabel_Example_CustomDescriptor",
+  Renderable = {
+    Type = "RenderableDistanceLabel",
+    NodeLine = nodelineAsset.NodeLine.Identifier,
+    DistanceUnit = "AU",
+    Precision = 2,
+    CustomUnitDescriptor = "Astronomical Units"
+  },
+  GUI = {
+    Name = "RenderableDistanceLabel - Custom Unit Descriptor",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -106,19 +106,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    std::vector<std::string> unitList() {
-        std::vector<std::string> res(openspace::DistanceUnits.size());
-        std::transform(
-            openspace::DistanceUnits.begin(),
-            openspace::DistanceUnits.end(),
-            res.begin(),
-            [](openspace::DistanceUnit unit) {
-                return std::string(nameForDistanceUnit(unit));
-            }
-        );
-        return res;
-    }
-
     struct [[codegen::Dictionary(DashboardItemDistance)]] Parameters {
         enum class [[codegen::map(Type)]] TypeInfo {
             Node,
@@ -143,7 +130,8 @@ namespace {
         std::optional<bool> simplification;
 
         // [[codegen::verbatim(RequestedUnitInfo.description)]]
-        std::optional<std::string> requestedUnit [[codegen::inlist(unitList())]];
+        std::optional<std::string> requestedUnit
+            [[codegen::inlist(openspace::distanceUnitList())]];
 
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;

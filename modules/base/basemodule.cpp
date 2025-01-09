@@ -49,6 +49,7 @@
 #include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
 #include <modules/base/rendering/renderablecartesianaxes.h>
 #include <modules/base/rendering/renderabledisc.h>
+#include <modules/base/rendering/renderabledistancelabel.h>
 #include <modules/base/rendering/renderablelabel.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/renderablenodearrow.h>
@@ -138,6 +139,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");
     fRenderable->registerClass<RenderableDisc>("RenderableDisc");
+    fRenderable->registerClass<RenderableDistanceLabel>("RenderableDistanceLabel");
     fRenderable->registerClass<RenderableGrid>("RenderableGrid");
     fRenderable->registerClass<RenderableLabel>("RenderableLabel");
     fRenderable->registerClass<RenderableModel>("RenderableModel");
@@ -230,6 +232,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         RenderableBoxGrid::Documentation(),
         RenderableCartesianAxes::Documentation(),
         RenderableDisc::Documentation(),
+        RenderableDistanceLabel::Documentation(),
         RenderableGrid::Documentation(),
         RenderableInterpolatedPoints::Documentation(),
         RenderableLabel::Documentation(),
