@@ -51,14 +51,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The line width of the constellation.",
+        "The line width to use for the constellation shape.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation Selection",
-        "The constellations that are selected are displayed on the celestial sphere.",
+        "The selected constellations are displayed on the celestial sphere.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -75,7 +75,8 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
-        // [[codegen::verbatim(SelectionInfo.description)]]
+        // A list of constellations (given as abbreviations) to show. If empty or
+        // excluded, all constellations will be shown.
         std::optional<std::vector<std::string>> selection;
 
         // [[codegen::verbatim(LabelsInfo.description)]]
