@@ -31,7 +31,7 @@ in vec3 vs_positionModelSpace;
 uniform vec3 xColor;
 uniform vec3 yColor;
 uniform vec3 zColor;
-
+uniform float opacity;
 
 Fragment getFragment() {
   Fragment frag;
@@ -44,7 +44,7 @@ Fragment getFragment() {
   frag.color.rgb = colorComponents.x * xColor +
     colorComponents.y * yColor +
     colorComponents.z * zColor;
-  frag.color.a = 1.0;
+  frag.color.a = opacity;
 
   frag.depth = vs_screenSpaceDepth;
   frag.gPosition = vs_positionViewSpace;
