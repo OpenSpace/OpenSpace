@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-local transforms = asset.require("./transforms_magnetosphere")
-=======
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms_gsm_static")
 
 
 
->>>>>>> master
 local transferFunction = asset.resource("CMR-illuminance2.txt")
 
 local fieldlinesDirectory = asset.resource({
@@ -15,11 +11,6 @@ local fieldlinesDirectory = asset.resource({
   Version = 1
 })
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> master
 local EarthMagnetosphere = {
   Identifier = "EarthMagnetosphere",
   Parent = transforms.GeocentricSolarMagnetosphericStatic.Identifier,
@@ -36,14 +27,9 @@ local EarthMagnetosphere = {
     MaskingRanges = {{-0, 0}},  --closed only
     ColorMethod = "ByQuantity",
     ColorQuantity = 4, -- speed
-<<<<<<< HEAD
-    ColorTableRanges = {{50, 300}},
-    ColorTablePaths = {transferFunction},
-=======
     ColorTableRanges = { { 50, 300 } },
     LoadAtRuntime = true,
     ColorTablePaths = { transferFunction },
->>>>>>> master
     ScaleToMeters = 1.0,
     Color = { 1.0, 0.725, 0.75, 0.8 }
   },
