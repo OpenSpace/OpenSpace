@@ -78,7 +78,7 @@ const std::string& Property::identifier() const {
 
 std::string Property::uri() const {
     const std::string& ownerUri = owner()->uri();
-    return !ownerUri.empty() ? std::format("{}.{}", ownerUri, _identifier) : _identifier;
+    return !ownerUri.empty() ? std::format("{}.{}", ownerUri, _identifier) : "";
 }
 
 std::any Property::get() const {

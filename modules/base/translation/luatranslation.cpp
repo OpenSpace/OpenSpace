@@ -26,6 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -76,6 +78,7 @@ LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary)
         });
     });
     addProperty(_luaScriptFile);
+    global::scriptEngine->initializeLuaState(_state);
 
     _luaScriptFile = p.script.string();
 }

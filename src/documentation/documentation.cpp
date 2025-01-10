@@ -178,10 +178,11 @@ void logError(const SpecificationError& error, std::string component) {
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,
-                                       Optional opt, std::string doc)
+                                       Optional opt, Private priv, std::string doc)
     : key(std::move(k))
     , verifier(std::move(v))
     , optional(opt)
+    , isPrivate(priv)
     , documentation(std::move(doc))
 {
     ghoul_assert(!key.empty(), "Key must not be empty");
@@ -189,8 +190,8 @@ DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> 
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, Verifier* v, Optional opt,
-                                       std::string doc)
-    : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt,
+                                       Private priv, std::string doc)
+    : DocumentationEntry(std::move(k), std::shared_ptr<Verifier>(v), opt, priv,
                          std::move(doc))
 {}
 

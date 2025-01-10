@@ -75,7 +75,7 @@ struct TileProvider : public properties::PropertyOwner {
     static unsigned int NumTileProviders;
 
     static std::unique_ptr<TileProvider> createFromDictionary(
-        layers::Layer::ID layerTypeID, const ghoul::Dictionary& dictionary);
+        const ghoul::Dictionary& dictionary);
 
     static void initializeDefaultTile();
     static void deinitializeDefaultTile();

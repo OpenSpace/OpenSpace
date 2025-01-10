@@ -22,51 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::interaction {
+#ifndef __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
+#define __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
 
-template <class T>
-T nextKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer,
-                  std::function<void()> finishedCallback)
-{
-    if (index >= (keyframeContainer.size() - 1)) {
-        if (index == (keyframeContainer.size() - 1)) {
-            finishedCallback();
-        }
-        return keyframeContainer.back();
-    }
-    else if (index < keyframeContainer.size()) {
-        return keyframeContainer[index];
-    }
-    else {
-        return keyframeContainer.back();
-    }
-}
+#include <modules/server/include/topics/topic.h>
+#include <ghoul/logging/log.h>
 
-template <class T>
-T prevKeyframeObj(unsigned int index, const std::vector<T>& keyframeContainer) {
-    if (index >= keyframeContainer.size()) {
-        return keyframeContainer.back();
-    }
-    else if (index > 0) {
-        return keyframeContainer[index - 1];
-    }
-    else {
-        return keyframeContainer.front();
-    }
-}
+namespace openspace {
 
-template <typename T>
-T readFromPlayback(std::ifstream& stream) {
-    T res;
-    stream.read(reinterpret_cast<char*>(&res), sizeof(T));
-    return res;
-}
+class ErrorLogTopic : public Topic {
+public:
+    ErrorLogTopic() = default;
+    ~ErrorLogTopic() override;
 
-template <typename T>
-T readFromPlayback(std::stringstream& stream) {
-    T res;
-    stream.read(reinterpret_cast<char*>(&res), sizeof(T));
-    return res;
-}
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
 
-} // namespace openspace::interaction
+private:
+    bool _isSubscribedTo = false;
+    // Non owning but we remove the log from LogManager on destruction
+    ghoul::logging::Log* _log = nullptr;
+};
+
+} // namespace openspace
+
+#endif // !__OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__

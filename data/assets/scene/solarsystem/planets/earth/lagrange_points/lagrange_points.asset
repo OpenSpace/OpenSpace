@@ -1,7 +1,7 @@
-asset.require("./l1")
-asset.require("./l2")
-asset.require("./l4")
-asset.require("./l5")
+asset.require("./l1/l1")
+asset.require("./l2/l2")
+asset.require("./l4/l4")
+asset.require("./l5/l5")
 
 
 

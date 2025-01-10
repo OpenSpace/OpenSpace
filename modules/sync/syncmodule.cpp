@@ -59,6 +59,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation SyncModule::Documentation() {
+    return codegen::doc<Parameters>("module_sync");
+}
+
 SyncModule::SyncModule() : OpenSpaceModule(Name) {}
 
 void SyncModule::internalInitialize(const ghoul::Dictionary& configuration) {

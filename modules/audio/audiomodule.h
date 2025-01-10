@@ -287,6 +287,8 @@ public:
      */
     glm::vec3 speakerPosition(int channel) const;
 
+    static documentation::Documentation Documentation();
+
 private:
     struct Info {
         std::unique_ptr<SoLoud::Wav> sound;

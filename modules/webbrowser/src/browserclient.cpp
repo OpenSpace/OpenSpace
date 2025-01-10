@@ -82,10 +82,9 @@ bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
     return true;
 }
 
-bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
-                                                  CefCursorHandle,
-                                                  cef_cursor_type_t type,
-                                                  const CefCursorInfo&)
+bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle,
+                                                   cef_cursor_type_t type,
+                                                   const CefCursorInfo&)
 {
     WindowDelegate::Cursor newCursor;
     switch (type) {
@@ -128,6 +127,13 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser
             break;
         case cef_cursor_type_t::CT_NOTALLOWED:
             newCursor = WindowDelegate::Cursor::NotAllowed;
+            break;
+        case cef_cursor_type_t::CT_GRAB:
+        case cef_cursor_type_t::CT_GRABBING:
+            // There is no "grabbing" cursors in GLFW, so for now the pointing hand to
+            // make web objects that use drag-n-drop look more interactive.
+            // @TODO (emmbr, 2024-12-09) Add custom cursors for these cases
+            newCursor = WindowDelegate::Cursor::PointingHand;
             break;
         default:
             newCursor = WindowDelegate::Cursor::Arrow;

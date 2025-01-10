@@ -22,63 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYFRAMERECORDING___H__
-#define __OPENSPACE_CORE___KEYFRAMERECORDING___H__
+#ifndef __OPENSPACE_CORE___KEYFRAMERECORDINGHANDLER___H__
+#define __OPENSPACE_CORE___KEYFRAMERECORDINGHANDLER___H__
 
-#include <openspace/navigation/keyframenavigator.h>
 #include <openspace/properties/propertyowner.h>
+
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/scripting/lualibrary.h>
-#include <json/json.hpp>
+#include <filesystem>
 #include <string>
 #include <vector>
 
 namespace openspace::interaction {
 
-class KeyframeRecording : public properties::PropertyOwner {
+class KeyframeRecordingHandler : public properties::PropertyOwner {
 public:
-    struct Keyframe {
-        struct TimeStamp {
-            double application;
-            double sequenceTime;
-            double simulation;
-        };
-
-        KeyframeNavigator::CameraPose camera;
-        TimeStamp timestamp;
-    };
-
-    KeyframeRecording();
+    KeyframeRecordingHandler();
 
     void newSequence();
-    void addKeyframe(double sequenceTime);
+    void addCameraKeyframe(double sequenceTime);
+    void addScriptKeyframe(double sequenceTime, std::string script);
     void removeKeyframe(int index);
     void updateKeyframe(int index);
     void moveKeyframe(int index, double sequenceTime);
-    bool saveSequence(std::optional<std::string> filename);
-    void loadSequence(std::string filename);
-    void preSynchronization(double dt);
+    void saveSequence(std::filesystem::path filename);
+    void loadSequence(std::filesystem::path filename);
     void play();
-    void pause();
-    void setSequenceTime(double sequenceTime);
-    void jumpToKeyframe(int index);
     bool hasKeyframeRecording() const;
     std::vector<ghoul::Dictionary> keyframes() const;
 
     static openspace::scripting::LuaLibrary luaLibrary();
 
 private:
-    void sortKeyframes();
-
-    Keyframe newKeyframe(double sequenceTime);
-    bool isInRange(int index) const;
-
-    std::vector<Keyframe> _keyframes;
-    std::string _filename;
-    bool _isPlaying = false;
-    bool _hasStateChanged = false;
-    double _sequenceTime = 0.0;
+    SessionRecording _timeline;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___KEYFRAMERECORDING___H__
+#endif // __OPENSPACE_CORE___KEYFRAMERECORDINGHANDLER___H__

@@ -1,6 +1,7 @@
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local l2 = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2")
+local l2kernels = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/kernels")
+local l2transforms = asset.require("scene/solarsystem/planets/earth/lagrange_points/l2/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -33,7 +34,7 @@ local JWSTPosition = {
         [L2orbitInsertionTime] = {
           Type = "SpiceTranslation",
           Target = kernels.ID.JWST,
-          Observer = l2.ID.L2,
+          Observer = l2kernels.ID.L2,
           Frame = coreKernels.Frame.Galactic
         }
       }
@@ -75,15 +76,15 @@ asset.onInitialize(function()
   -- Set correct parent during run-time
   openspace.scriptScheduler.loadScheduledScript(
     DetachTime,
-    [[openspace.setParent("JWSTPosition", "EarthCenter")]],
-    [[openspace.setParent("JWSTPosition", "EarthIAU")]],
+    [[openspace.setParent("JWSTPosition", "]] .. earthTransforms.EarthCenter.Identifier .. [[")]],
+    [[openspace.setParent("JWSTPosition", "]] .. earthTransforms.EarthIAU.Identifier .. [[")]],
     "",
     1 -- Not default group, never clear this script
   )
   openspace.scriptScheduler.loadScheduledScript(
     L2orbitInsertionTime,
-    [[openspace.setParent("JWSTPosition", "L2")]],
-    [[openspace.setParent("JWSTPosition", "EarthCenter")]],
+    [[openspace.setParent("JWSTPosition", "]] .. l2transforms.L2Position.Identifier .. [[")]],
+    [[openspace.setParent("JWSTPosition", "]] .. earthTransforms.EarthCenter.Identifier .. [[")]],
     "",
     1 -- Not default group, never clear this script
   )
@@ -91,11 +92,11 @@ asset.onInitialize(function()
   -- Set correct parent at the start
   local now = openspace.time.currentTime()
   if now < openspace.time.convertTime(DetachTime) then
-    openspace.setParent("JWSTPosition", "EarthIAU")
+    openspace.setParent("JWSTPosition", earthTransforms.EarthIAU.Identifier)
   elseif now > openspace.time.convertTime(L2orbitInsertionTime) then
-    openspace.setParent("JWSTPosition", "L2")
+    openspace.setParent("JWSTPosition", l2transforms.L2Position.Identifier)
   else
-    openspace.setParent("JWSTPosition", "EarthCenter")
+    openspace.setParent("JWSTPosition", earthTransforms.EarthCenter.Identifier)
   end
 end)
 
@@ -105,6 +106,9 @@ asset.onDeinitialize(function()
   openspace.scriptScheduler.clear(1)
 end)
 
+asset.export("LaunchTime", LaunchTime)
+asset.export("DetachTime", DetachTime)
+asset.export("L2orbitInsertionTime", L2orbitInsertionTime)
 asset.export(JWSTPosition)
 asset.export(JWSTRotation)
 

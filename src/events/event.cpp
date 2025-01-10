@@ -62,6 +62,11 @@ void log(int i, [[maybe_unused]] const EventProfileLoadingFinished& e) {
     LINFO(std::format("[{}] ProfileLoadingFinished", i));
 }
 
+void log(int i, const EventAssetLoadingFinished& e) {
+    ghoul_assert(e.type == EventAssetLoadingFinished::Type, "Wrong type");
+    LINFO(std::format("[{}] AssetLoadingFinished", i));
+}
+
 void log(int i, const EventApplicationShutdown& e) {
     ghoul_assert(e.type == EventApplicationShutdown::Type, "Wrong type");
     const std::string t = [](EventApplicationShutdown::State state) {
@@ -220,6 +225,7 @@ std::string_view toString(Event::Type type) {
     switch (type) {
         case Event::Type::ParallelConnection: return "ParallelConnection";
         case Event::Type::ProfileLoadingFinished: return "ProfileLoadingFinished";
+        case Event::Type::AssetLoadingFinished: return "AssetLoadingFinished";
         case Event::Type::ApplicationShutdown: return "ApplicationShutdown";
         case Event::Type::CameraFocusTransition: return "CameraFocusTransition";
         case Event::Type::TimeOfInterestReached: return "TimeOfInterestReached";
@@ -252,6 +258,9 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "ProfileLoadingFinished") {
         return Event::Type::ProfileLoadingFinished;
+    }
+    else if (str == "AssetLoadingFinished") {
+        return Event::Type::AssetLoadingFinished;
     }
     else if (str == "ApplicationShutdown") {
         return Event::Type::ApplicationShutdown;
@@ -505,6 +514,9 @@ void logAllEvents(const Event* e) {
             case Event::Type::ProfileLoadingFinished:
                 log(i, *static_cast<const EventProfileLoadingFinished*>(e));
                 break;
+            case Event::Type::AssetLoadingFinished:
+                log(i, *static_cast<const EventAssetLoadingFinished*>(e));
+                break;
             case Event::Type::ApplicationShutdown:
                 log(i, *static_cast<const EventApplicationShutdown*>(e));
                 break;
@@ -583,6 +595,10 @@ EventParallelConnection::EventParallelConnection(State state_)
 {}
 
 EventProfileLoadingFinished::EventProfileLoadingFinished()
+    : Event(Type)
+{}
+
+EventAssetLoadingFinished::EventAssetLoadingFinished()
     : Event(Type)
 {}
 

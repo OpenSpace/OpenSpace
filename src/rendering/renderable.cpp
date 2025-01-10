@@ -93,8 +93,9 @@ namespace {
             Background,
             Opaque,
             PreDeferredTransparent,
+            Overlay,
             PostDeferredTransparent,
-            Overlay
+            Sticker
         };
 
         // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
