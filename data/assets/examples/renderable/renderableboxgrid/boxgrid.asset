@@ -1,0 +1,31 @@
+-- Basic
+-- This example adds a box grid, which is a 3D box rendered using grid lines, to the
+-- scene.
+--
+-- Per default, the box will be given a size of 1x1x1 meters, and here it is scaled up by a
+-- factor of 100. It will hence have a size of 100x100x100 meters.
+
+local Node = {
+  Identifier = "RenderableBoxGrid_Example",
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 100
+    }
+  },
+  Renderable = {
+    Type = "RenderableBoxGrid"
+  },
+  GUI = {
+    Name = "RenderableBoxGrid - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -1,0 +1,24 @@
+-- Styled
+-- This example creates a box grid where the grid lines are styled to have a specific
+-- color and line width.
+
+local Node = {
+  Identifier = "RenderableBoxGrid_Example_Styled",
+  Renderable = {
+    Type = "RenderableBoxGrid",
+    LineWidth = 4.0,
+    Color = { 1.0, 1.0, 0.0 }
+  },
+  GUI = {
+    Name = "RenderableBoxGrid - Styled",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
