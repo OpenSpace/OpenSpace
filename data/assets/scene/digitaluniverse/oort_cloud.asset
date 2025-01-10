@@ -1,0 +1,72 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local speck = asset.resource({
+  Name = "Grids Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_grids_speck",
+  Version = 3
+})
+
+
+local EclipticRotationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,
+  -0.9938214 , -0.1109906, -0.0003515167,
+  -0.09647644,  0.8622859,  0.4971472
+}
+
+local Object = {
+  Identifier = "OortSphere",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 7.47989845E15
+    },
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphericalGrid",
+    Enabled = false,
+    Opacity = 0.8,
+    Color = { 0.4, 0.3, 0.2 },
+    LineWidth = 2.0,
+    Segments = 24
+  },
+  GUI = {
+    Name = "Oort Sphere",
+    Path = "/Solar System/Comets",
+    Description = [[The Oort cloud is a region of space surrounding the Sun where comets
+      are believed to originate. It is believed to extend from 20,000-100,000 Astronomical
+      Units (AU), with its greatest concentration around 50,000 AU (1 AU is the average
+      Earth-Sun distance, which equals 149 million kilometers, or 93 million miles). We
+      represent the Oort cloud with a 50,000-AU-radius, wire-frame sphere representing
+      the location of the central concentration. Fifty thousand astronomical units is
+      equal to about 10 light months, which is 0.8 light years, or 4.8 trillion miles.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Object)
+end)
+
+asset.export(Object)
+
+
+
+asset.meta = {
+  Name = "Oort Cloud Sphere",
+  Description = Object.GUI.Description,
+  Author = "Brian Abbott (AMNH)",
+  URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
+  License = "AMNH Digital Universe"
+}

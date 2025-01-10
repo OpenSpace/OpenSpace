@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,18 +34,22 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
         "RotationAxis",
         "Rotation Axis",
-        "This value is the rotation axis around which the object will rotate"
+        "This value is the rotation axis around which the object will rotate.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationRateInfo = {
         "RotationRate",
         "Rotation Rate",
-        "This value determines the number of revolutions per in-game second"
+        "This value determines the number of revolutions per in-game second.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ConstantRotation)]] Parameters {
         // [[codegen::verbatim(RotationInfo.description)]]
-        std::optional<glm::dvec3> rotationAxis;
+        std::optional<glm::dvec3> rotationAxis
+            [[codegen::inrange(glm::dvec3(-1.0), glm::dvec3(1.0))]];
+
         // [[codegen::verbatim(RotationRateInfo.description)]]
         std::optional<float> rotationRate;
     };
@@ -98,7 +102,10 @@ glm::dmat3 ConstantRotation::matrix(const UpdateData& data) const {
         _accumulatedRotation += glm::tau<double>();
     }
 
-    glm::dquat q = glm::angleAxis(_accumulatedRotation, _rotationAxis.value());
+    const glm::dquat q = glm::angleAxis(
+        _accumulatedRotation,
+        glm::normalize(_rotationAxis.value())
+    );
     return glm::toMat3(q);
 }
 

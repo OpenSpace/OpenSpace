@@ -1,12 +1,14 @@
 local transforms = asset.require("./transforms")
 
 
-local texturesPath = asset.syncedResource({
+
+local texturesPath = asset.resource({
   Name = "Earth Textures",
   Type = "HttpSynchronization",
   Identifier = "earth_textures",
   Version = 2
 })
+
 
 local EarthMarker = {
   Identifier = "EarthMarker",
@@ -26,6 +28,7 @@ local EarthMarker = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthMarker)
 end)
@@ -40,7 +43,6 @@ asset.export(EarthMarker)
 
 asset.meta = {
   Name = "Earth marker",
-  Version = "1.1",
   Description = "Earth marker with name, sized for Solar System view",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

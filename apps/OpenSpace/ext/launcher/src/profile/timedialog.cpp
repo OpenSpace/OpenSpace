@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include "profile/timedialog.h"
 
 #include "profile/line.h"
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
@@ -32,7 +33,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QVBoxLayout>
-#include <fmt/format.h>
+#include <format>
 #include <algorithm>
 
 using namespace openspace;
@@ -44,7 +45,7 @@ TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>*
     setWindowTitle("Time");
     createWidgets();
 
-    QStringList types = { "Absolute", "Relative" };
+    const QStringList types = { "Absolute", "Relative" };
     _typeCombo->addItems(types);
     if (_time->has_value()) {
         _timeData = **_time;
@@ -52,7 +53,8 @@ TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>*
             if (_timeData.value.empty()) {
                 _timeData.value = "0d";
             }
-            _relativeEdit->setSelection(0, _relativeEdit->text().length());
+            const int len = static_cast<int>(_relativeEdit->text().length());
+            _relativeEdit->setSelection(0, len);
         }
         else {
             _absoluteEdit->setSelectedSection(QDateTimeEdit::YearSection);
@@ -62,6 +64,8 @@ TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>*
         _timeData.type = Profile::Time::Type::Relative;
         _timeData.value = "0d";
     }
+    _startPaused->setChecked(_timeData.startPaused);
+
     _initializedAsAbsolute = (_timeData.type == Profile::Time::Type::Absolute);
     enableAccordingToType(static_cast<int>(_timeData.type));
 }
@@ -71,6 +75,7 @@ void TimeDialog::createWidgets() {
     {
         layout->addWidget(new QLabel("Time Type"));
         _typeCombo = new QComboBox;
+        _typeCombo->setAccessibleName("Time type");
         _typeCombo->setToolTip("Types: Absolute defined time or Relative to actual time");
         connect(
             _typeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
@@ -81,21 +86,31 @@ void TimeDialog::createWidgets() {
     {
         _absoluteLabel = new QLabel("Absolute UTC:");
         layout->addWidget(_absoluteLabel);
-        
+
         _absoluteEdit = new QDateTimeEdit;
         _absoluteEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
         _absoluteEdit->setDateTime(QDateTime::currentDateTime());
+        _absoluteEdit->setAccessibleName("Set absolute time");
         layout->addWidget(_absoluteEdit);
     }
     {
         _relativeLabel = new QLabel("Relative Time:");
         layout->addWidget(_relativeLabel);
-        
+
         _relativeEdit = new QLineEdit;
+        _relativeEdit->setAccessibleName("Set relative time");
         _relativeEdit->setToolTip(
             "String for relative time to actual (e.g. \"-1d\" for back 1 day)"
         );
         layout->addWidget(_relativeEdit);
+    }
+    {
+        _startPaused = new QCheckBox("Start with time paused");
+        _startPaused->setChecked(false);
+        _startPaused->setToolTip(
+            "If this is checked, the profile will start with the delta time paused"
+        );
+        layout->addWidget(_startPaused);
     }
     layout->addWidget(new Line);
     {
@@ -109,8 +124,8 @@ void TimeDialog::createWidgets() {
 }
 
 void TimeDialog::enableAccordingToType(int idx) {
-    Profile::Time::Type comboIdx = static_cast<Profile::Time::Type>(idx);
-    bool setFormatForAbsolute = (comboIdx == Profile::Time::Type::Absolute);
+    const Profile::Time::Type comboIdx = static_cast<Profile::Time::Type>(idx);
+    const bool setFormatForAbsolute = (comboIdx == Profile::Time::Type::Absolute);
     enableFormatForAbsolute(setFormatForAbsolute);
     _typeCombo->setCurrentIndex(idx);
     if (comboIdx == Profile::Time::Type::Relative) {
@@ -125,9 +140,13 @@ void TimeDialog::enableAccordingToType(int idx) {
     }
     else {
         _relativeEdit->setText("<font color='gray'>Relative Time:</font>");
-        size_t tIdx = _timeData.value.find_first_of('T', 0);
-        QString importDate = QString::fromStdString(_timeData.value.substr(0, tIdx));
-        QString importTime = QString::fromStdString(_timeData.value.substr(tIdx + 1));
+        const size_t tIdx = _timeData.value.find_first_of('T', 0);
+        const QString importDate = QString::fromStdString(
+            _timeData.value.substr(0, tIdx)
+        );
+        const QString importTime = QString::fromStdString(
+            _timeData.value.substr(tIdx + 1)
+        );
         _absoluteEdit->setDate(QDate::fromString(importDate, Qt::DateFormat::ISODate));
         _absoluteEdit->setTime(QTime::fromString(importTime));
         _relativeEdit->clear();
@@ -152,17 +171,19 @@ void TimeDialog::approved() {
             Profile::Time t;
             t.type = Profile::Time::Type::Relative;
             t.value = _relativeEdit->text().toStdString();
+            t.startPaused = _startPaused->isChecked();
             *_time = t;
         }
     }
     else {
         Profile::Time t;
         t.type = Profile::Time::Type::Absolute;
-        t.value = fmt::format(
+        t.value = std::format(
             "{}T{}",
             _absoluteEdit->date().toString("yyyy-MM-dd").toStdString(),
             _absoluteEdit->time().toString().toStdString()
         );
+        t.startPaused = _startPaused->isChecked();
         *_time = t;
     }
     accept();

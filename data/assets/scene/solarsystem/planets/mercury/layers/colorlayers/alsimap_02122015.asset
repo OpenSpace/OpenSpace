@@ -1,35 +1,40 @@
-local globeIdentifier = asset.require("../../mercury").Mercury.Identifier
+local globe = asset.require("../../mercury")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Name = "Mercury Textures",
   Type = "HttpSynchronization",
   Identifier = "mercury_abundance_textures",
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Name = "Aluminium Abundance",
   Identifier = "alsimap_02122015",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = texturesPath .. "alsimap_02122015.png",
   BlendMode = "Multiply",
+  CacheSettings = { Enabled = false }
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Mercury.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "Mercury Aluminium Abundance",
-  Version = "1.0",
   Description = "Aluminium Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

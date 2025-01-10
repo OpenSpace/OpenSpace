@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2024                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,10 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
-
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 include(cmake/webbrowser_helpers.cmake)
 
 set(WEBBROWSER_MODULE_NAME WebBrowser)
@@ -51,13 +48,12 @@ set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 cmake_policy(SET CMP0074 NEW)
 
 # Specify the CEF distribution version.
-set(CEF_VERSION "102.0.10+gf249b2e+chromium-102.0.5005.115")
+set(CEF_VERSION "127.3.5+g114ea2a+chromium-127.0.6533.120")
 
 # CEF Sandbox is not working with the latest Visual Studio, so we disable it for now.
 if (WIN32 OR UNIX)
   option(USE_SANDBOX OFF)
 endif ()
-
 # Add this project's cmake/ directory to the module path.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(cef_support)
@@ -90,12 +86,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
 find_package(CEF REQUIRED)
 
 # Include the libcef_dll_wrapper target (executes libcef_dll/CMakeLists.txt).
-add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
+add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper SYSTEM)
 
 mark_as_advanced(CEF_DEBUG_INFO_FLAG USE_ATL USE_OFFICIAL_BUILD_SANDBOX USE_SANDBOX)
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-  # The CEF DLL wrapper is raising a lot of warnings on GCC
+if (UNIX)
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
 endif ()
 
@@ -169,7 +164,11 @@ set(WEBBROWSER_RESOURCES_SRCS
 
 # Place Helper in separate executable
 # The naming style "<ApplicationName> Helper" is required by Chromium.
-set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+if (OS_MACOSX)
+  set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+else ()
+  set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+endif ()
 set(CEF_HELPER_TARGET_GPU "OpenSpace Helper (GPU)" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
 set(CEF_HELPER_TARGET_RENDERER "OpenSpace Helper (Renderer)" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
 
@@ -220,6 +219,7 @@ else()
 endif ()
 
 set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "Helper")
+set_openspace_compile_settings(${CEF_HELPER_TARGET})
 
 ##########################################################################################
 # Create OpenSpace module.
@@ -266,8 +266,8 @@ target_precompile_headers(${webbrowser_module} PRIVATE
   <include/wrapper/cef_helpers.h>
 )
 
-set_folder_location(libcef_dll_wrapper "Helper")
-set_folder_location(openspace_web_helper "Helper")
+set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "Helper")
+set_openspace_compile_settings(libcef_dll_wrapper)
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()

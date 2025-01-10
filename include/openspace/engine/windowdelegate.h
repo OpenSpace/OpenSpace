@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,9 @@ namespace openspace {
 struct WindowDelegate {
     enum class Frustum { Mono, LeftEye, RightEye };
 
+    enum class Cursor { Arrow, IBeam, CrossHair, PointingHand, ResizeEW, ResizeNS,
+        ResizeNWSE, ResizeNESW, ResizeAll, NotAllowed };
+
     void (*terminate)() = [](){};
 
     void (*setBarrier)(bool enabled) = [](bool) {};
@@ -62,7 +65,13 @@ struct WindowDelegate {
 
     glm::ivec2 (*currentViewportSize)() = []() { return glm::ivec2(0); };
 
+    glm::ivec2(*currentViewportResolution)() = []() { return glm::ivec2(0); };
+
     glm::vec2 (*dpiScaling)() = []() { return glm::vec2(1.f); };
+
+    glm::ivec2(*firstWindowResolution)() = []() { return glm::ivec2(0); };
+
+    glm::ivec2(*guiWindowResolution)() = []() { return glm::ivec2(0); };
 
     float (*osDpiScaling)() = []() { return 1.f; };
 
@@ -81,11 +90,15 @@ struct WindowDelegate {
     unsigned int (*takeScreenshot)(bool applyWarping, std::vector<int> windowIds) =
         [](bool, std::vector<int>) { return 0u; };
 
+    void (*resetScreenshotNumber)() = []() {};
+
     void (*swapBuffer)() = []() {};
 
     int (*nWindows)() = []() { return 0; };
 
     int (*currentWindowId)() = []() { return 0; };
+
+    int (*firstWindowId)() = []() { return 0; };
 
     double (*getHorizFieldOfView)() = []() { return 0.0; };
 
@@ -104,13 +117,20 @@ struct WindowDelegate {
 
     uint64_t (*swapGroupFrameNumber)() = []() { return uint64_t(0); };
 
-    void (*setScreenshotFolder)(std::string) = [](std::string) {};
+    void (*setScreenshotFolder)(std::filesystem::path) = [](std::filesystem::path) {};
 
     void (*showStatistics)(bool) = [](bool) {};
 
     int (*numberOfNodes)() = []() { return 0; };
 
     int (*currentNode)() = []() { return 0; };
+
+    glm::vec2 (*mousePositionViewportRelative)(const glm::vec2& mousePosition) =
+        [](const glm::vec2&) { return glm::vec2(0); };
+
+    void (*setStatisticsGraphScale)(float scale) = [](float) {};
+
+    void (*setMouseCursor)(Cursor cursor) = [](Cursor) {};
 };
 
 } // namespace openspace

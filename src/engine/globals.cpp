@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,9 +35,10 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/keyframerecordinghandler.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
@@ -89,13 +90,15 @@ namespace {
         sizeof(TimeManager) +
         sizeof(VersionChecker) +
         sizeof(WindowDelegate) +
-        sizeof(configuration::Configuration) +
+        sizeof(Configuration) +
         sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionMonitor) +
+        sizeof(interaction::JoystickInputStates) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
+        sizeof(interaction::KeyframeRecordingHandler) +
         sizeof(interaction::NavigationHandler) +
-        sizeof(interaction::SessionRecording) +
+        sizeof(interaction::SessionRecordingHandler) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
@@ -111,7 +114,7 @@ namespace {
 namespace openspace::global {
 
 void create() {
-    ZoneScoped
+    ZoneScoped;
 
     callback::create();
 
@@ -266,11 +269,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    configuration = new (currentPos) configuration::Configuration;
+    configuration = new (currentPos) Configuration;
     ghoul_assert(configuration, "No configuration");
-    currentPos += sizeof(configuration::Configuration);
+    currentPos += sizeof(Configuration);
 #else // ^^^ WIN32 / !WIN32 vvv
-    configuration = new configuration::Configuration;
+    configuration = new Configuration;
 #endif // WIN32
 
 #ifdef WIN32
@@ -314,6 +317,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    keyframeRecording = new (currentPos) interaction::KeyframeRecordingHandler;
+    ghoul_assert(keyframeRecording, "No keyframeRecording");
+    currentPos += sizeof(interaction::KeyframeRecordingHandler);
+#else // ^^^ WIN32 / !WIN32 vvv
+    keyframeRecording = new interaction::KeyframeRecordingHandler;
+#endif // WIN32
+
+#ifdef WIN32
     navigationHandler = new (currentPos) interaction::NavigationHandler;
     ghoul_assert(navigationHandler, "No navigationHandler");
     currentPos += sizeof(interaction::NavigationHandler);
@@ -322,11 +333,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    sessionRecording = new (currentPos) interaction::SessionRecording(true);
-    ghoul_assert(sessionRecording, "No sessionRecording");
-    currentPos += sizeof(interaction::SessionRecording);
+    sessionRecordingHandler = new (currentPos) interaction::SessionRecordingHandler;
+    ghoul_assert(sessionRecordingHandler, "No sessionRecording");
+    currentPos += sizeof(interaction::SessionRecordingHandler);
 #else // ^^^ WIN32 / !WIN32 vvv
-    sessionRecording = new interaction::SessionRecording(true);
+    sessionRecordingHandler = new interaction::SessionRecordingHandler;
 #endif // WIN32
 
 #ifdef WIN32
@@ -380,14 +391,15 @@ void create() {
 }
 
 void initialize() {
-    ZoneScoped
+    ZoneScoped;
 
     rootPropertyOwner->addPropertySubOwner(global::moduleEngine);
 
     // New property subowners also have to be added to the ImGuiModule callback!
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
+    rootPropertyOwner->addPropertySubOwner(global::keyframeRecording);
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
-    rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
+    rootPropertyOwner->addPropertySubOwner(global::sessionRecordingHandler);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
     rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
 
@@ -405,8 +417,7 @@ void initialize() {
 }
 
 void initializeGL() {
-    ZoneScoped
-
+    ZoneScoped;
 }
 
 void destroy() {
@@ -445,11 +456,11 @@ void destroy() {
     delete rootPropertyOwner;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'SessionRecording'");
+    LDEBUGC("Globals", "Destroying 'SessionRecordingHandler'");
 #ifdef WIN32
-    sessionRecording->~SessionRecording();
+    sessionRecordingHandler->~SessionRecordingHandler();
 #else // ^^^ WIN32 / !WIN32 vvv
-    delete sessionRecording;
+    delete sessionRecordingHandler;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'NavigationHandler'");
@@ -457,6 +468,13 @@ void destroy() {
     navigationHandler->~NavigationHandler();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete navigationHandler;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'KeyframeRecordingHandler'");
+#ifdef WIN32
+    keyframeRecording->~KeyframeRecordingHandler();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete keyframeRecording;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'KeybindingManager'");
@@ -631,7 +649,7 @@ void destroy() {
 }
 
 void deinitialize() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *screenSpaceRenderables) {
         ssr->deinitialize();
@@ -646,7 +664,7 @@ void deinitialize() {
 }
 
 void deinitializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<ScreenSpaceRenderable>& ssr : *screenSpaceRenderables) {
         ssr->deinitializeGL();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@ namespace {
     T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
         T x2 = x0;
 
-        for (int i = 0; i < maxIter; ++i) {
+        for (int i = 0; i < maxIter; i++) {
             T x = x2;
             x2 = function(x);
             if (std::abs(x2 - x) < err) {
@@ -51,7 +51,8 @@ namespace {
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
         "sphere, for this orbit. Currently, hyperbolic orbits using Keplerian elements "
-        "are not supported"
+        "are not supported.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SemiMajorAxisInfo = {
@@ -59,7 +60,8 @@ namespace {
         "Semi-major axis",
         "This value determines the semi-major axis, that is the distance of the object "
         "from the central body in kilometers (semi-major axis = average of periapsis and "
-        "apoapsis)"
+        "apoapsis).",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InclinationInfo = {
@@ -67,7 +69,8 @@ namespace {
         "Inclination",
         "This value determines the degrees of inclination, or the angle of the orbital "
         "plane, relative to the reference plane, on which the object orbits around the "
-        "central body"
+        "central body.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
@@ -75,34 +78,39 @@ namespace {
         "Right ascension of ascending Node",
         "This value determines the right ascension of the ascending node in degrees, "
         "that is the location of position along the orbit where the inclined plane and "
-        "the horizonal reference plane intersect"
+        "the horizonal reference plane intersect.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
         "ArgumentOfPeriapsis",
         "Argument of Periapsis",
         "This value determines the argument of periapsis in degrees, that is the "
-        "position on the orbit that is closest to the orbiting body"
+        "position on the orbit that is closest to the orbiting body.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochInfo = {
         "MeanAnomaly",
         "Mean anomaly at epoch",
         "This value determines the mean anomaly at the epoch in degrees, which "
-        "determines the initial location of the object along the orbit at epoch"
+        "determines the initial location of the object along the orbit at epoch.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EpochInfo = {
         "Epoch",
         "Epoch",
         "This value determines the epoch for which the initial location is defined in "
-        "the form of YYYY MM DD HH:mm:ss"
+        "the form of YYYY MM DD HH:mm:ss.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PeriodInfo = {
         "Period",
         "Orbit period",
-        "Specifies the orbital period (in seconds)"
+        "Specifies the orbital period (in seconds).",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(KeplerTranslation)]] Parameters {
@@ -113,16 +121,16 @@ namespace {
         double semiMajorAxis;
 
         // [[codegen::verbatim(InclinationInfo.description)]]
-        double inclination [[codegen::inrange(0.0, 360.0)]];
+        double inclination [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(AscendingNodeInfo.description)]]
-        double ascendingNode [[codegen::inrange(0.0, 360.0)]];
+        double ascendingNode [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(ArgumentOfPeriapsisInfo.description)]]
-        double argumentOfPeriapsis [[codegen::inrange(0.0, 360.0)]];
+        double argumentOfPeriapsis [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(MeanAnomalyAtEpochInfo.description)]]
-        double meanAnomaly [[codegen::inrange(0.0, 360.0)]];
+        double meanAnomaly [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(EpochInfo.description)]]
         std::string epoch;
@@ -190,10 +198,12 @@ KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
     setKeplerElements(
         p.eccentricity,
         p.semiMajorAxis,
-        p.inclination,
-        p.ascendingNode,
-        p.argumentOfPeriapsis,
-        p.meanAnomaly,
+        p.inclination < 0.0 ? p.inclination + 360.0 : p.inclination,
+        p.ascendingNode < 0.0 ? p.ascendingNode + 360.0 : p.ascendingNode,
+        p.argumentOfPeriapsis < 0.0 ?
+            p.argumentOfPeriapsis + 360.0 :
+            p.argumentOfPeriapsis,
+        p.meanAnomaly < 0.0 ? p.meanAnomaly + 360.0 : p.meanAnomaly,
         p.period,
         p.epoch
     );
@@ -226,7 +236,7 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
         auto sign = [](double val) -> double {
             return val > 0.0 ? 1.0 : ((val < 0.0) ? -1.0 : 0.0);
         };
-        double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
+        const double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
 
         auto solver = [this, &meanAnomaly, &sign](double x) -> double {
             const double s = _eccentricity * sin(x);
@@ -258,11 +268,11 @@ glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
     const double e = eccentricAnomaly(meanAnomaly);
 
     // Use the eccentric anomaly to compute the actual location
-    const glm::dvec3 p = {
+    const glm::dvec3 p = glm::dvec3(
         _semiMajorAxis * 1000.0 * (cos(e) - _eccentricity),
         _semiMajorAxis * 1000.0 * sin(e) * sqrt(1.0 - _eccentricity * _eccentricity),
         0.0
-    };
+    );
     return _orbitPlaneRotation * p;
 }
 
@@ -278,9 +288,9 @@ void KeplerTranslation::computeOrbitPlane() const {
     // inclination
     // 3. Around the new z axis to place the closest approach to the correct location
 
-    const glm::vec3 ascendingNodeAxisRot = { 0.f, 0.f, 1.f };
-    const glm::vec3 inclinationAxisRot = { 1.f, 0.f, 0.f };
-    const glm::vec3 argPeriapsisAxisRot = { 0.f, 0.f, 1.f };
+    const glm::vec3 ascendingNodeAxisRot = glm::vec3(0.f, 0.f, 1.f);
+    const glm::vec3 inclinationAxisRot = glm::vec3(1.f, 0.f, 0.f);
+    const glm::vec3 argPeriapsisAxisRot = glm::vec3(0.f, 0.f, 1.f);
 
     const double asc = glm::radians(_ascendingNode.value());
     const double inc = glm::radians(_inclination.value());
@@ -321,7 +331,6 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     auto isInRange = [](double val, double min, double max) -> bool {
         return val >= min && val <= max;
     };
-
     if (isInRange(eccentricity, 0.0, 1.0)) {
         _eccentricity = eccentricity;
     }

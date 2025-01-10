@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,8 +45,8 @@ namespace openspace::scripting {
 struct LuaLibrary;
 
 /**
- * Maintains an ordered list of <code>ScheduledScript</code>s and provides a simple
- * interface for retrieveing scheduled scripts
+ * Maintains an ordered list of `ScheduledScript`s and provides a simple interface for
+ * retrieveing scheduled scripts.
  */
 class ScriptScheduler : public properties::PropertyOwner {
 public:
@@ -65,11 +65,13 @@ public:
     };
 
     /**
-     * Load a schedule from a ghoul::Dictionary \p dictionary and adds the
+     * Load a schedule from a ghoul::Dictionary \p scheduledScripts and adds the
      * ScheduledScript%s to the list of stored scripts.
-     * \param dictionary Dictionary to read
+     *
+     * \param scheduledScripts The scripts that should be loaded
+     *
      * \throw SpecificationError If the dictionary does not adhere to the Documentation as
-     * specified in the openspace::Documentation function
+     *        specified in the openspace::Documentation function
      */
     void loadScripts(std::vector<ScheduledScript> scheduledScripts);
 
@@ -82,78 +84,43 @@ public:
     /**
      * Removes all scripts for the schedule.
      *
-     * \param An int that specifies which group to clear.
-     *        If none given then all scripts is cleared from the schedule.
+     * \param group An int that specifies which group to clear. If none given then all
+     *              scripts are cleared from the schedule
      */
     void clearSchedule(std::optional<int> group = std::nullopt);
 
     /**
-    * Progresses the script schedulers time and returns all scripts that has been
-    * scheduled to run between \param newTime and the time provided in the last invocation
-    * of this method.
-    *
-    * \param newTime_simulation A j2000 time value specifying the new time stamp that
-    * the script scheduler should progress to.
-    * \param newTime_application The seconds elapsed since the application started
-    *
-    * \returns the ordered queue of scripts .
-    */
-//    std::queue<std::string> progressTo(double newTime);
-
-    /**
-     * See <code>progressTo(double newTime)</code>.
+     * Progresses the script schedulers time and returns all scripts that has been
+     * scheduled to run between \p newTime and the time provided in the last invocation
+     * of this method.
      *
-     * \param timeStr A string specifying the a new time stamp that the
-     * scripts scheduler should progress to.
+     * \param newTime A j2000 time value specifying the new time stamp that the script
+     *        scheduler should progress to.
+     * \return vector with the scheduled scripts that should be run from begining to end
      */
-//    std::queue<std::string> progressTo(const std::string& timeStr);
-
-    /**
-    * Progresses the script schedulers time and returns all scripts that has been
-    * scheduled to run between \param newTime and the time provided in the last invocation
-    * of this method.
-    *
-    * \param newTime A j2000 time value specifying the new time stamp that
-    * the script scheduler should progress to.
-    *
-    * \returns vector with the scheduled scripts that should be run from begining to end.
-    */
     std::vector<std::string> progressTo(double newTime);
 
     /**
-     * Returns the the j2000 time value that the script scheduler is currently at
+     * Returns the the j2000 time value that the script scheduler is currently at.
      */
     double currentTime() const;
 
     /**
-     * Updates the current time to the given j2000 time value
+     * Updates the current time to the given J2000 time value.
      */
     void setCurrentTime(double time);
 
     /**
-    * Function that returns all scripts currently loaded in the script scheduler
-    *
-    * \param group An int specifying which group to return, if empty all scripts
-    *              will be returned
-    *
-    * \returns a vector of all scripts that has been loaded
-    */
+     * Function that returns all scripts currently loaded in the script scheduler.
+     *
+     * \param group An int specifying which group to return, if empty all scripts
+     *              will be returned
+     * \return a vector of all scripts that has been loaded
+     */
     std::vector<ScheduledScript> allScripts(
         std::optional<int> group = std::nullopt) const;
 
-    /**
-    * Sets the mode for how each scheduled script's timestamp will be interpreted.
-    * \param refType reference mode (for exact syntax, see definition of
-    * openspace::interaction::KeyframeTimeRef) which is either relative to the
-    * application start time, relative to the recorded session playback start time,
-    * or according to the absolute simulation time in seconds from J2000 epoch.
-    */
-    void setTimeReferenceMode(openspace::interaction::KeyframeTimeRef refType);
-
     static LuaLibrary luaLibrary();
-    void setModeApplicationTime();
-    void setModeRecordedTime();
-    void setModeSimulationTime();
 
     static documentation::Documentation Documentation();
 
@@ -164,9 +131,6 @@ private:
 
     int _currentIndex = 0;
     double _currentTime = 0;
-
-    openspace::interaction::KeyframeTimeRef _timeframeMode
-        = openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000;
 };
 
 } // namespace openspace::scripting

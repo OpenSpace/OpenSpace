@@ -6,12 +6,16 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_apollo11_26cm_mosaic_byte_geo_1_2_highContrast = {
   Identifier = "apollo11_26cm_mosaic_byte_geo_1_2_highContrast",
   Name = [[LRO LROC Image Mosaic 26cm, Apollo 11]],
-  FilePath = asset.localResource("LRO_LROC_Image_Mosaic_26cm/Apollo_11.vrt"),
+  ZIndex = 50,
+  FilePath = asset.resource("LRO_LROC_Image_Mosaic_26cm/Apollo_11.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_apollo11_26cm_mosaic_byte_geo_1_2_highContrast)
@@ -24,9 +28,9 @@ end)
 asset.export("apollo11_26cm_mosaic_byte_geo_1_2_highContrast", treks_apollo11_26cm_mosaic_byte_geo_1_2_highContrast)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_LROC_Image_Mosaic_26cm],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_LROC_Image_Mosaic_26cm]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

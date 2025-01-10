@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <optional>
@@ -46,18 +47,13 @@ namespace openspace {
 
 InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _type = p.detectorType;
-    std::for_each(
-        _type.begin(),
-        _type.end(),
-        [](char& in) { in = static_cast<char>(toupper(in)); }
-    );
+    _type = ghoul::toUpperCase(p.detectorType);
 
     if (p.stopCommand.has_value() && _type == "SCANNER") {
         _stopCommand = *p.stopCommand;
     }
     else {
-        LWARNING("Scanner must provide stop command, please check asset file");
+        LDEBUG("Scanner must provide stop command, please check asset file");
     }
 
     _spiceIDs = p.spice;

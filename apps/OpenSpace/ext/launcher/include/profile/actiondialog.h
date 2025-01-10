@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,9 @@
 class QCheckBox;
 class QComboBox;
 class QDialogButtonBox;
+class QErrorMessage;
 class QGridLayout;
+class QLabel;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
@@ -55,18 +57,18 @@ private:
     void actionRemove();
     void actionSelected();
     void actionSaved();
-    void clearActionFields();
+    void clearActionFields() const;
     void actionRejected();
     void chooseScripts();
-    void appendScriptsToTextfield(std::string scripts);
+    void appendScriptsToTextfield(const std::vector<std::string>& scripts) const;
 
     openspace::Profile::Keybinding* selectedKeybinding();
     void keybindingAdd();
     void keybindingRemove();
     void keybindingSelected();
-    void keybindingActionSelected(int);
+    void keybindingActionSelected(int) const;
     void keybindingSaved();
-    void clearKeybindingFields();
+    void clearKeybindingFields() const;
     void keybindingRejected();
 
     std::vector<openspace::Profile::Action>* _actions = nullptr;
@@ -77,6 +79,7 @@ private:
     struct {
         QListWidget* list = nullptr;
         QLineEdit* identifier = nullptr;
+        QErrorMessage* infoText = nullptr;
         QLineEdit* name = nullptr;
         QLineEdit* guiPath = nullptr;
         QLineEdit* documentation = nullptr;
@@ -100,6 +103,8 @@ private:
         QPushButton* removeButton = nullptr;
         QDialogButtonBox* saveButtons = nullptr;
     } _keybindingWidgets;
+
+    QDialogButtonBox* _mainButton = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___ACTIONDIALOG___H__

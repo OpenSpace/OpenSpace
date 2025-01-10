@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2024                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -160,7 +160,9 @@ function(run_cef_linux_config CEF_TARGET CEF_ROOT)
 endfunction ()
 
 function(set_modules_dependency_on_cef_libraries LIB_DEPENDENT)
-  target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_lib) 
+  if (WIN32 OR OS_LINUX)
+    target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_lib)
+  endif ()
   target_link_libraries(${LIB_DEPENDENT} INTERFACE libcef_dll_wrapper)
 endfunction ()
 

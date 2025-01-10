@@ -1,15 +1,16 @@
 local propertyHelper = asset.require("./property_helper")
 
+
+
 -- Function that returns the string that enables/disables the renderable 'renderable'
-local toggle = function(renderable)
+function toggle(renderable)
   return propertyHelper.invert(renderable .. ".Renderable.Enabled")
 end
 
 -- Function that returns the string that sets the enabled property of <renderable> to <enabled>
-local setEnabled = function(renderable, enabled)
-  return 'openspace.setPropertyValue("' .. renderable .. '.Renderable.Enabled", ' .. (enabled and "true" or "false") .. ");";
+function setEnabled(renderable, enabled)
+  return [[openspace.setPropertyValue("]] .. renderable .. [[.Renderable.Enabled", ]] .. (enabled and "true" or "false") .. ")"
 end
-
 
 asset.export("toggle", toggle)
 asset.export("setEnabled", setEnabled)

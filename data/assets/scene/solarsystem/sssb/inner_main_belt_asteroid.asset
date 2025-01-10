@@ -1,15 +1,18 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local sssb = asset.syncedResource({
+
+
+local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Inner Main Belt Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_inner_main_belt_asteroid",
-  Version = 1
+  Version = 4
 })
 
-local object = {
+
+local Object = {
   Identifier = "sssb_inner_main_belt_asteroid",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_inner_main_belt_asteroid.csv",
@@ -17,7 +20,8 @@ local object = {
     Segments = 200,
     SegmentQuality = 1,
     Color = { 1.0, 1.0, 0.0 },
-    TrailFade = 0.5
+    TrailFade = 0.5,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Inner Main Asteroid Belt",
@@ -27,21 +31,21 @@ local object = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "Inner Main Asteroid Belt",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Inner Main Asteroid Belt group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2024                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,7 +28,6 @@ add_executable(
   test_assetloader.cpp
   test_concurrentqueue.cpp
   test_distanceconversion.cpp
-  test_configuration.cpp
   test_documentation.cpp
   test_horizons.cpp
   test_iswamanager.cpp
@@ -39,6 +38,9 @@ add_executable(
   test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
+  test_sessionrecording.cpp
+  test_settings.cpp
+  test_sgctedit.cpp
   test_spicemanager.cpp
   test_timeconversion.cpp
   test_timeline.cpp
@@ -55,11 +57,16 @@ set_openspace_compile_settings(OpenSpaceTest)
 
 target_include_directories(OpenSpaceTest
   PUBLIC
-    "${GHOUL_BASE_DIR}/ext/catch2/single_include"
-    "${OPENSPACE_BASE_DIR}"
+    "../apps/OpenSpace/ext/sgct/ext/json/include"
+    "../apps/OpenSpace/ext/sgct/ext/json-schema-validator/src"
 )
+
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
-target_link_libraries(OpenSpaceTest PUBLIC openspace-core)
+target_link_libraries(OpenSpaceTest PUBLIC Catch2 openspace-core sgct)
+
+target_precompile_headers(OpenSpaceTest PRIVATE
+  <catch2/catch_test_macros.hpp>
+)
 
 foreach (library_name ${all_enabled_modules})
   get_target_property(library_type ${library_name} TYPE)
@@ -78,4 +85,4 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
 endif ()
 
-set_folder_location(OpenSpaceTest "Unit Tests")
+set_target_properties(OpenSpaceTest PROPERTIES FOLDER "Unit Tests")

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -66,59 +66,59 @@ enum class DistanceUnit {
 };
 
 // Assumption:  Unit names are sequential in memory
-constexpr std::string_view DistanceUnitNanometer = "nanometer";
-constexpr std::string_view DistanceUnitMicrometer = "micrometer";
-constexpr std::string_view DistanceUnitMillimeter = "millimeter";
-constexpr std::string_view DistanceUnitCentimeter = "centimeter";
-constexpr std::string_view DistanceUnitDecimeter = "decimeter";
-constexpr std::string_view DistanceUnitMeter = "meter";
-constexpr std::string_view DistanceUnitKilometer = "km";
+constexpr std::string_view DistanceUnitNanometer = "Nanometer";
+constexpr std::string_view DistanceUnitMicrometer = "Micrometer";
+constexpr std::string_view DistanceUnitMillimeter = "Millimeter";
+constexpr std::string_view DistanceUnitCentimeter = "Centimeter";
+constexpr std::string_view DistanceUnitDecimeter = "Decimeter";
+constexpr std::string_view DistanceUnitMeter = "Meter";
+constexpr std::string_view DistanceUnitKilometer = "Kilometer";
 constexpr std::string_view DistanceUnitAU = "AU";
-constexpr std::string_view DistanceUnitLighthour = "lighthour";
-constexpr std::string_view DistanceUnitLightday = "lightday";
-constexpr std::string_view DistanceUnitLightmonth = "lightmonth";
-constexpr std::string_view DistanceUnitLightyear = "lightyear";
-constexpr std::string_view DistanceUnitParsec = "parsec";
-constexpr std::string_view DistanceUnitKiloparsec = "kiloparsec";
-constexpr std::string_view DistanceUnitMegaparsec = "megaparsec";
-constexpr std::string_view DistanceUnitGigaparsec = "gigaparsec";
-constexpr std::string_view DistanceUnitGigalightyear = "gigalightyear";
-constexpr std::string_view DistanceUnitThou = "thou";
-constexpr std::string_view DistanceUnitInch = "inch";
-constexpr std::string_view DistanceUnitFoot = "foot";
-constexpr std::string_view DistanceUnitYard = "yard";
-constexpr std::string_view DistanceUnitChain = "chain";
-constexpr std::string_view DistanceUnitFurlong = "furlong";
-constexpr std::string_view DistanceUnitMile = "mile";
-constexpr std::string_view DistanceUnitLeague = "league";
+constexpr std::string_view DistanceUnitLighthour = "Lighthour";
+constexpr std::string_view DistanceUnitLightday = "Lightday";
+constexpr std::string_view DistanceUnitLightmonth = "Lightmonth";
+constexpr std::string_view DistanceUnitLightyear = "Lightyear";
+constexpr std::string_view DistanceUnitParsec = "Parsec";
+constexpr std::string_view DistanceUnitKiloparsec = "Kiloparsec";
+constexpr std::string_view DistanceUnitMegaparsec = "Megaparsec";
+constexpr std::string_view DistanceUnitGigaparsec = "Gigaparsec";
+constexpr std::string_view DistanceUnitGigalightyear = "Gigalightyear";
+constexpr std::string_view DistanceUnitThou = "Thou";
+constexpr std::string_view DistanceUnitInch = "Inch";
+constexpr std::string_view DistanceUnitFoot = "Foot";
+constexpr std::string_view DistanceUnitYard = "Yard";
+constexpr std::string_view DistanceUnitChain = "Chain";
+constexpr std::string_view DistanceUnitFurlong = "Furlong";
+constexpr std::string_view DistanceUnitMile = "Mile";
+constexpr std::string_view DistanceUnitLeague = "League";
 
 
 // Assumption:  Unit names are sequential in memory
-constexpr std::string_view DistanceUnitNanometers = "nanometers";
-constexpr std::string_view DistanceUnitMicrometers = "micrometers";
-constexpr std::string_view DistanceUnitMillimeters = "millimeters";
-constexpr std::string_view DistanceUnitCentimeters = "centimeters";
-constexpr std::string_view DistanceUnitDecimeters = "decimeters";
-constexpr std::string_view DistanceUnitMeters = "meters";
-constexpr std::string_view DistanceUnitKilometers = "km";
+constexpr std::string_view DistanceUnitNanometers = "Nanometers";
+constexpr std::string_view DistanceUnitMicrometers = "Micrometers";
+constexpr std::string_view DistanceUnitMillimeters = "Millimeters";
+constexpr std::string_view DistanceUnitCentimeters = "Centimeters";
+constexpr std::string_view DistanceUnitDecimeters = "Decimeters";
+constexpr std::string_view DistanceUnitMeters = "Meters";
+constexpr std::string_view DistanceUnitKilometers = "Kilometers";
 constexpr std::string_view DistanceUnitAUs = "AU";
-constexpr std::string_view DistanceUnitLighthours = "lighthours";
-constexpr std::string_view DistanceUnitLightdays = "lightdays";
-constexpr std::string_view DistanceUnitLightmonths = "lightmonths";
-constexpr std::string_view DistanceUnitLightyears = "lightyears";
-constexpr std::string_view DistanceUnitParsecs = "parsecs";
-constexpr std::string_view DistanceUnitKiloparsecs = "kiloparsecs";
-constexpr std::string_view DistanceUnitMegaparsecs = "megaparsecs";
-constexpr std::string_view DistanceUnitGigaparsecs = "gigaparsecs";
-constexpr std::string_view DistanceUnitGigalightyears = "gigalightyears";
-constexpr std::string_view DistanceUnitThous = "thou";
-constexpr std::string_view DistanceUnitInches = "inches";
-constexpr std::string_view DistanceUnitFeet = "feet";
-constexpr std::string_view DistanceUnitYards = "yards";
-constexpr std::string_view DistanceUnitChains = "chains";
-constexpr std::string_view DistanceUnitFurlongs = "furlongs";
-constexpr std::string_view DistanceUnitMiles = "miles";
-constexpr std::string_view DistanceUnitLeagues = "leagues";
+constexpr std::string_view DistanceUnitLighthours = "Lighthours";
+constexpr std::string_view DistanceUnitLightdays = "Lightdays";
+constexpr std::string_view DistanceUnitLightmonths = "Lightmonths";
+constexpr std::string_view DistanceUnitLightyears = "Lightyears";
+constexpr std::string_view DistanceUnitParsecs = "Parsecs";
+constexpr std::string_view DistanceUnitKiloparsecs = "Kiloparsecs";
+constexpr std::string_view DistanceUnitMegaparsecs = "Megaparsecs";
+constexpr std::string_view DistanceUnitGigaparsecs = "Gigaparsecs";
+constexpr std::string_view DistanceUnitGigalightyears = "Gigalightyears";
+constexpr std::string_view DistanceUnitThous = "Thou";
+constexpr std::string_view DistanceUnitInches = "Inches";
+constexpr std::string_view DistanceUnitFeet = "Feet";
+constexpr std::string_view DistanceUnitYards = "Yards";
+constexpr std::string_view DistanceUnitChains = "Chains";
+constexpr std::string_view DistanceUnitFurlongs = "Furlongs";
+constexpr std::string_view DistanceUnitMiles = "Miles";
+constexpr std::string_view DistanceUnitLeagues = "Leagues";
 
 constexpr std::array<DistanceUnit, static_cast<int>(DistanceUnit::League) + 1>
 DistanceUnits = {
@@ -157,20 +157,16 @@ DistanceUnitNamesPlural = {
 };
 
 constexpr bool isValidDistanceUnitName(std::string_view name) {
-    int i = 0;
     for (std::string_view val : DistanceUnitNamesSingular) {
         if (val == name) {
             return true;
         }
-        ++i;
     }
 
-    i = 0;
     for (std::string_view val : DistanceUnitNamesPlural) {
         if (val == name) {
             return true;
         }
-        ++i;
     }
     return false;
 }
@@ -222,7 +218,7 @@ constexpr DistanceUnit distanceUnitFromString(std::string_view unitName) {
             found = i;
             break;
         }
-        ++i;
+        i++;
     }
 
     i = 0;
@@ -231,7 +227,7 @@ constexpr DistanceUnit distanceUnitFromString(std::string_view unitName) {
             found = i;
             break;
         }
-        ++i;
+        i++;
     }
 
 

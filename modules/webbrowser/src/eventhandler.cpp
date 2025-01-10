@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,8 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "WebBrowser:EventHandler";
@@ -201,7 +201,7 @@ void EventHandler::initialize() {
 
     global::callback::touchDetected->emplace(
         global::callback::touchDetected->begin(),
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             if (!_browserInstance) {
                 return false;
             }
@@ -230,18 +230,18 @@ void EventHandler::initialize() {
                     BrowserInstance::SingleClick
                 );
 #endif
-                _validTouchStates.emplace_back(input);
             }
-            else {
-                _validTouchStates.emplace_back(input);
-            }
+
+            _validTouchStates.emplace_back(input);
+
+            global::interactionMonitor->markInteraction();
             return true;
         }
     );
 
     global::callback::touchUpdated->emplace(
         global::callback::touchUpdated->begin(),
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             if (!_browserInstance || _validTouchStates.empty()) {
                 return false;
             }
@@ -249,7 +249,7 @@ void EventHandler::initialize() {
             auto it = std::find_if(
                 _validTouchStates.cbegin(),
                 _validTouchStates.cend(),
-                [&](const TouchInput& state){
+                [&input](const TouchInput& state) {
                     return state.fingerId == input.fingerId &&
                            state.touchDeviceId == input.touchDeviceId;
                 }
@@ -263,12 +263,13 @@ void EventHandler::initialize() {
                 );
                 _browserInstance->sendTouchEvent(event);
 #else // ^^^^ WIN32 // !WIN32 vvvv
-                glm::vec2 windowPos = input.currentWindowCoordinates();
+                const glm::vec2 windowPos = input.currentWindowCoordinates();
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = true;
                 _browserInstance->sendMouseMoveEvent(mouseEvent());
 #endif // WIN32
+                global::interactionMonitor->markInteraction();
                 return true;
             }
             else if (it != _validTouchStates.cend()) {
@@ -280,7 +281,7 @@ void EventHandler::initialize() {
 
     global::callback::touchExit->emplace(
         global::callback::touchExit->begin(),
-        [&](TouchInput input) {
+        [this](TouchInput input) {
             if (!_browserInstance) {
                 return;
             }
@@ -291,7 +292,7 @@ void EventHandler::initialize() {
             const auto found = std::find_if(
                 _validTouchStates.cbegin(),
                 _validTouchStates.cend(),
-                [&](const TouchInput& state){
+                [&input](const TouchInput& state) {
                     return state.fingerId == input.fingerId &&
                     state.touchDeviceId == input.touchDeviceId;
                 }
@@ -310,7 +311,7 @@ void EventHandler::initialize() {
             _validTouchStates.erase(found);
 #ifndef WIN32
             if (_validTouchStates.empty()) {
-                glm::vec2 windowPos = input.currentWindowCoordinates();
+                const glm::vec2 windowPos = input.currentWindowCoordinates();
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = false;
@@ -364,7 +365,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
 
 bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
     auto now = std::chrono::high_resolution_clock::now();
-    std::chrono::milliseconds maxTimeDifference(doubleClickTime());
+    const std::chrono::milliseconds maxTimeDifference(doubleClickTime());
     auto requiredTime = button.lastClickTime + maxTimeDifference;
     if (requiredTime < now) {
         return false;
@@ -372,16 +373,18 @@ bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
 
     // check position
     const float maxDist = maxDoubleClickDistance() / 2.f;
-    const bool x = abs(_mousePosition.x - button.lastClickPosition.x) < maxDist;
-    const bool y = abs(_mousePosition.y - button.lastClickPosition.y) < maxDist;
+    const bool x = std::abs(_mousePosition.x - button.lastClickPosition.x) < maxDist;
+    const bool y = std::abs(_mousePosition.y - button.lastClickPosition.y) < maxDist;
 
     return x && y;
 }
 
 bool EventHandler::mousePositionCallback(double x, double y) {
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
-    _mousePosition.x = floor(static_cast<float>(x) * dpiScaling.x);
-    _mousePosition.y = floor(static_cast<float>(y) * dpiScaling.y);
+    _mousePosition.x = std::floor(static_cast<float>(x) * dpiScaling.x);
+    _mousePosition.y = std::floor(static_cast<float>(y) * dpiScaling.y);
+    _mousePosition =
+        global::windowDelegate->mousePositionViewportRelative(_mousePosition);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
     global::interactionMonitor->markInteraction();
 
@@ -403,7 +406,7 @@ bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     keyEvent.windows_key_code = mapFromGlfwToWindows(Key(charCode));
     keyEvent.character = mapFromGlfwToCharacter(Key(charCode));
     keyEvent.native_key_code = mapFromGlfwToNative(Key(charCode));
-    keyEvent.modifiers = static_cast<uint32>(modifier);
+    keyEvent.modifiers = static_cast<uint32_t>(modifier);
     keyEvent.type = KEYEVENT_CHAR;
 
     return _browserInstance->sendKeyEvent(keyEvent);
@@ -426,17 +429,36 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     return _browserInstance->sendKeyEvent(keyEvent);
 }
 
-bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction) {
+bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
     switch (key) {
-        case Key::F5:
-            _browserInstance->reloadBrowser();
-            return true;
         case Key::A:
             if (hasKeyModifier(mod, KeyModifier::Super)) {
                 _browserInstance->selectAll();
                 return true;
             }
             return false;
+        case Key::Minus:
+            if (hasKeyModifier(mod, KeyModifier::Shift)) {
+                CefKeyEvent keyEvent;
+                keyEvent.windows_key_code = mapFromGlfwToWindows(Key(45));
+                keyEvent.character = mapFromGlfwToCharacter(Key(45));
+                keyEvent.native_key_code = mapFromGlfwToNative(Key(45));
+                keyEvent.modifiers = static_cast<uint32_t>(mod);
+                keyEvent.type = keyEventType(action);
+                _browserInstance->sendKeyEvent(keyEvent);
+                return true;
+            }
+            return false;
+        case Key::Period: {
+            CefKeyEvent keyEvent;
+            keyEvent.windows_key_code = mapFromGlfwToWindows(Key::KeypadDecimal);
+            keyEvent.character = mapFromGlfwToCharacter(Key::KeypadDecimal);
+            keyEvent.native_key_code = mapFromGlfwToNative(Key::KeypadDecimal);
+            keyEvent.modifiers = static_cast<uint32_t>(mod);
+            keyEvent.type = keyEventType(action);
+            _browserInstance->sendKeyEvent(keyEvent);
+            return true;
+        }
         default:
             return false;
     }
@@ -446,7 +468,7 @@ cef_key_event_type_t EventHandler::keyEventType(KeyAction action) {
     return action == KeyAction::Release ? KEYEVENT_KEYUP : KEYEVENT_KEYDOWN;
 }
 
-CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) {
+CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) const {
     CefMouseEvent event;
     event.x = static_cast<int>(_mousePosition.x);
     event.y = static_cast<int>(_mousePosition.y);

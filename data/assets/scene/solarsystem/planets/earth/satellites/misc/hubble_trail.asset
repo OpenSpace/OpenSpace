@@ -1,12 +1,15 @@
-local transforms = asset.require('scene/solarsystem/planets/earth/transforms')
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Hubble)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_hst",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=20580&FORMAT=kvn",
   Filename = "hst.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -22,8 +25,8 @@ local HubblePosition = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "GALACTIC",
-      DestinationFrame = "J2000",
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
     }
   },
   Tag = { "earth_satellite", "hubble" },
@@ -46,7 +49,7 @@ local HubbleTrail = {
       Format = "OMM"
     },
     RenderBinMode = "PostDeferredTransparent",
-    Color = { 0.0, 0.902, 0.6},
+    Color = { 0.0, 0.902, 0.6 },
     Fade = 1.5,
     Resolution = 320
   },
@@ -57,15 +60,16 @@ local HubbleTrail = {
   }
 }
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   local hubble = openspace.space.readKeplerFile(omm .. "hst.txt", "OMM")
-  HubbleTrail.Renderable.Period = hubble[0].Period / (60 * 60 * 24)
+  HubbleTrail.Renderable.Period = hubble[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(HubblePosition)
   openspace.addSceneGraphNode(HubbleTrail)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HubbleTrail)
   openspace.removeSceneGraphNode(HubblePosition)
 end)
@@ -73,9 +77,10 @@ end)
 asset.export(HubblePosition)
 asset.export(HubbleTrail)
 
+
+
 asset.meta = {
   Name = "Hubble Space Telescope Trail",
-  Version = "1.0",
   Description = "Position and Trail for Hubble Space Telescope, trail from Celestrak",
   Author = "Dan Tell",
   URL = "www.calacademy.org",

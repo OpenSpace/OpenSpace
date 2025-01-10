@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2022                                                                #
+# Copyright (c) 2014-2024                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -22,8 +22,8 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
-include(${GHOUL_BASE_DIR}/support/cmake/message_macros.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/global_variables.cmake)
+include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
 
 
 # This function takes a list of module paths and returns the list of include paths that
@@ -91,7 +91,7 @@ function (get_module_attribute_supported path result)
 endfunction()
 
 
-# Returns the path for the 'module_name'. If the module has not been seen before by 
+# Returns the path for the 'module_name'. If the module has not been seen before by
 # get_individual_modules, an empty string is returned
 function (find_path_for_module module_name module_names module_paths result)
   list(FIND module_names ${module_name} i)
@@ -121,7 +121,7 @@ function (get_recursive_dependencies module_name module_path module_names module
           "${module_names}" "${module_paths}"
           res
         )
-        # 1. We add "base" to the list of dependencies as we always want it 
+        # 1. We add "base" to the list of dependencies as we always want it
         # 2. We add dependencies in this order such that when we later traverse
         #    this list, we automatically get them in the correct order (meaning
         #    that we include a dependency first)
@@ -162,9 +162,8 @@ endfunction ()
 
 
 
-
-set(OPENSPACE_EXTERNAL_MODULES_PATHS "" CACHE STRING "List of external modules")
-set(internal_module_path "${OPENSPACE_BASE_DIR}/modules")
+option(OPENSPACE_ENABLE_ALL_MODULES "If this is ON, all modules will be enabled by default")
+set(internal_module_path "${PROJECT_SOURCE_DIR}/modules")
 set(all_enabled_modules "")
 
 
@@ -173,21 +172,6 @@ set(all_enabled_modules "")
 #
 # First get all the internal module
 get_individual_modules(${internal_module_path} all_module_names all_module_paths)
-
-# Then get all external modules
-foreach (path ${OPENSPACE_EXTERNAL_MODULES_PATHS})
-  get_individual_modules(${path} names paths)
-
-  foreach (n ${names})
-    if (${n} IN_LIST all_module_names)
-      message(FATAL_ERROR "Module name ${n} is not unique among the external directories")
-    endif ()
-  endforeach ()
-
-  set(all_module_names ${all_module_names} ${names})
-  set(all_module_paths ${all_module_paths} ${paths})
-endforeach ()
-
 list(LENGTH all_module_names all_module_names_count)
 math(EXPR all_module_names_count "${all_module_names_count} - 1")
 
@@ -209,7 +193,11 @@ foreach(val RANGE ${all_module_names_count})
 
   get_module_attribute_default(${path} is_default_module)
   create_option_name(${name} optionName)
-  option(${optionName} "Build ${path} Module" ${is_default_module})
+  if (${OPENSPACE_ENABLE_ALL_MODULES})
+    option(${optionName} "Build ${path} Module" ON)
+  else ()
+    option(${optionName} "Build ${path} Module" ${is_default_module})
+  endif ()
 
   if (${optionName})
     list(APPEND enabled_module_names ${name})
@@ -241,7 +229,7 @@ foreach (val RANGE ${enabled_module_count})
   set(dependencies ${dependencies} ${deps})
 endforeach()
 
-# We can remove the duplicates here.  We constructed the list such that nested 
+# We can remove the duplicates here.  We constructed the list such that nested
 # dependencies are order left to right.  REMOVE_DUPLICATES will keep the left most
 # value in the case of duplicates, so that will still work
 list(REMOVE_DUPLICATES dependencies)
@@ -332,7 +320,7 @@ list(REMOVE_DUPLICATES topologically_sorted)
 
 set(MODULE_HEADERS "")
 set(MODULE_CLASSES "")
-set(MODULE_PATHS "")
+set(MODULE_DOCUMENTATION "")
 
 foreach (key RANGE ${enabled_module_count})
   list(GET topologically_sorted ${key} name)
@@ -348,6 +336,7 @@ foreach (key RANGE ${enabled_module_count})
 
   list(APPEND MODULE_HEADERS "#include <${header_filepath}>\n")
   list(APPEND MODULE_CLASSES "        new ${class_name},\n")
+  list(APPEND MODULE_DOCUMENTATION "        ${class_name}::Documentation(),\n")
 endforeach ()
 
 get_unique_include_paths(
@@ -372,19 +361,13 @@ if (NOT "${MODULE_CLASSES}" STREQUAL "")
   string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
 endif ()
 
-if (NOT "${MODULE_PATHS}" STREQUAL "")
-  string(REPLACE ";" "" MODULE_PATHS ${MODULE_PATHS})
-  string(REPLACE "\\" "/" MODULE_PATHS ${MODULE_PATHS})
+if (NOT "${MODULE_DOCUMENTATION}" STREQUAL "")
+  string(REPLACE ";" "" MODULE_DOCUMENTATION ${MODULE_DOCUMENTATION})
 endif ()
 
 configure_file(
-  ${OPENSPACE_CMAKE_EXT_DIR}/module_registration.template
+  ${PROJECT_SOURCE_DIR}/support/cmake/module_registration.template
   ${CMAKE_BINARY_DIR}/_generated/include/openspace/moduleregistration.h
-)
-
-configure_file(
-  ${OPENSPACE_CMAKE_EXT_DIR}/module_path.template
-  ${CMAKE_BINARY_DIR}/_generated/include/openspace/modulepath.h
 )
 
 # Return the list of enabled modules to the caller

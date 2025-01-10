@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -69,10 +69,7 @@ void Transition::performAction() const {
     if (_action.empty()) {
         return;
     }
-    global::scriptEngine->queueScript(
-        _action,
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    global::scriptEngine->queueScript(_action);
 }
 
 } // namespace openspace

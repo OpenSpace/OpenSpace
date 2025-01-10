@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,19 +35,21 @@ namespace openspace::globebrowsing {
 struct LayerRenderSettings : public properties::PropertyOwner {
     LayerRenderSettings();
 
-    properties::FloatProperty opacity;
     properties::FloatProperty gamma;
     properties::FloatProperty multiplier;
     properties::FloatProperty offset;
     properties::TriggerProperty setDefault;
 
-    void onChange(std::function<void()> callback);
+    void onChange(const std::function<void()>& callback);
 
-    /// This function matches the function with the same name in the
-    /// shader code
+    /**
+     * This function matches the function with the same name in the shader code.
+     */
     float performLayerSettings(float value) const;
-    /// This function matches the function with the same name in the
-    /// shader code
+
+    /**
+     * This function matches the function with the same name in the shader code.
+     */
     glm::vec4 performLayerSettings(const glm::vec4& currentValue) const;
 };
 

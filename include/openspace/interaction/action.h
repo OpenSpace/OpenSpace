@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@
 namespace openspace::interaction {
 
 struct Action {
-    BooleanType(IsSynchronized);
+    BooleanType(IsLocal);
 
     /// Unique identifier that identifies this action. There is no special naming scheme
     /// that we enforce, we are trying to stick to the same . separated structure that
@@ -57,12 +57,13 @@ struct Action {
     /// This variable defines a subdivision of where this action is placed in a user
     /// interface. The individual path components are separated by '/' with a leading '/'
     /// for the root path
-    std::string guiPath;
+    std::string guiPath = "/";
 
-    /// If this value is set to `Yes`, the execution of this action is synchronized to
-    /// other OpenSpace instances, for example other nodes in a cluster environment, or
-    /// to other OpenSpace instances using a parallel connection
-    IsSynchronized synchronization = IsSynchronized::Yes;
+    /// If this value is set to `Yes`, the execution of this action is restricted to the
+    /// current OpenSpace instance. If it is `No`, it is synchronized to other OpenSpace
+    /// instances, for example other nodes in a cluster environment, or to other OpenSpace
+    /// instances using a parallel connection
+    IsLocal isLocal = IsLocal::No;
 };
 
 } // namespace openspace::interaction

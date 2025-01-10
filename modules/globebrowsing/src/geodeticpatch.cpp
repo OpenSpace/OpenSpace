@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -106,10 +106,10 @@ Geodetic2 GeodeticPatch::size() const {
 
 Geodetic2 GeodeticPatch::corner(Quad q) const {
     switch (q) {
-        case NORTH_WEST:  return Geodetic2{ maxLat(), minLon() };// northWestCorner();
-        case NORTH_EAST:  return Geodetic2{ maxLat(), maxLon() };// northEastCorner();
-        case SOUTH_WEST:  return Geodetic2{ minLat(), minLon() };// southWestCorner();
-        case SOUTH_EAST:  return Geodetic2{ minLat(), maxLon() };// southEastCorner();
+        case NORTH_WEST:  return Geodetic2{ maxLat(), minLon() }; // northWestCorner();
+        case NORTH_EAST:  return Geodetic2{ maxLat(), maxLon() }; // northEastCorner();
+        case SOUTH_WEST:  return Geodetic2{ minLat(), minLon() }; // southWestCorner();
+        case SOUTH_EAST:  return Geodetic2{ minLat(), maxLon() }; // southEastCorner();
         default:          throw ghoul::MissingCaseException();
     }
 }
@@ -132,8 +132,8 @@ double GeodeticPatch::maxLon() const {
 
 bool GeodeticPatch::contains(const Geodetic2& p) const {
     const Geodetic2 diff = {
-        _center.lat - p.lat,
-        _center.lon - p.lon
+        .lat = _center.lat - p.lat,
+        .lon = _center.lon - p.lon
     };
     return glm::abs(diff.lat) <= _halfSize.lat && glm::abs(diff.lon) <= _halfSize.lon;
 }
@@ -154,8 +154,8 @@ Geodetic2 GeodeticPatch::clamp(const Geodetic2& p) const {
     //        --> Just clamping pointLat would be clamp(330, -10, 10) = 10 // WRONG!
     //    Instead, if we first normalize 330 deg around 0, we get -30 deg
     //        --> clamp(-30, -10, 10) = -10 // CORRECT!
-    double pointLat = normalizedAngleAround(p.lat, _center.lat);
-    double pointLon = normalizedAngleAround(p.lon, _center.lon);
+    const double pointLat = normalizedAngleAround(p.lat, _center.lat);
+    const double pointLon = normalizedAngleAround(p.lon, _center.lon);
 
     return {
         glm::clamp(pointLat, minLat(), maxLat()),
@@ -166,8 +166,8 @@ Geodetic2 GeodeticPatch::clamp(const Geodetic2& p) const {
 Geodetic2 GeodeticPatch::closestCorner(const Geodetic2& p) const {
     // LatLon vector from patch center to the point
     const Geodetic2 centerToPoint = {
-        p.lat - _center.lat,
-        p.lon - _center.lon
+        .lat = p.lat - _center.lat,
+        .lon = p.lon - _center.lon
     };
 
     // Normalize the difference angles to be centered around 0.
@@ -219,8 +219,8 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
 
     // Normalize point with respect to center. This is done because the point
     // will later be clamped. See LatLonPatch::clamp(const LatLon&) for explanation
-    double pointLat = normalizedAngleAround(p.lat, _center.lat);
-    double pointLon = normalizedAngleAround(p.lon, _center.lon);
+    const double pointLat = normalizedAngleAround(p.lat, _center.lat);
+    const double pointLon = normalizedAngleAround(p.lon, _center.lon);
 
     // Calculate the longitud difference between center and point. We normalize around
     // zero because we want the "shortest distance" difference, i.e the difference

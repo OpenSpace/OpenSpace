@@ -1,0 +1,75 @@
+local transforms = asset.require("./transforms")
+
+
+
+local circle = asset.resource({
+  Name = "Circle",
+  Type = "HttpSynchronization",
+  Identifier = "circle_image",
+  Version = 1
+})
+
+
+local L4 = {
+  Identifier = "L4",
+  Parent = transforms.L4Position.Identifier,
+  Renderable = {
+    Type = "RenderablePlaneImageLocal",
+    Enabled = asset.enabled,
+    Billboard = true,
+    Size = 800000000,
+    Texture = circle .. "circle.png",
+    BlendMode = "Additive"
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l4" },
+  GUI = {
+    Name = "L4",
+    Path = "/Solar System/Planets/Earth/Lagrange Points"
+  }
+}
+
+local L4Label = {
+  Identifier = "L4Label",
+  Parent = transforms.L4Position.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = asset.enabled,
+    Text = "L4",
+    FontSize = 50,
+    Size = 8.5,
+    MinMaxSize = { 1.0, 100.0 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = false
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l4" },
+  GUI = {
+    Name = "L4 Label",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Description = "Main label for L4"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(L4)
+  openspace.addSceneGraphNode(L4Label)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(L4Label)
+  openspace.removeSceneGraphNode(L4)
+end)
+
+asset.export(L4)
+asset.export(L4Label)
+
+
+
+asset.meta = {
+  Name = "Lagrange point L4",
+  Description = "Lagrange point L4 node and label",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

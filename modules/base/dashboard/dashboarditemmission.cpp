@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,12 +67,12 @@ DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
 {}
 
 void DashboardItemMission::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
     if (!global::missionManager->hasCurrentMission()) {
         return;
     }
-    double currentTime = global::timeManager->time().j2000Seconds();
+    const double currentTime = global::timeManager->time().j2000Seconds();
     const Mission& mission = global::missionManager->currentMission();
 
     if (mission.phases().empty()) {
@@ -84,13 +84,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
     static constexpr glm::vec4 nonCurrentMissionColor = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
 
     // Add spacing
-    RenderFont(
-        *_font,
-        penPosition,
-        " ",
-        nonCurrentMissionColor,
-        ghoul::fontrendering::CrDirection::Down
-    );
+    penPosition.y -= _font->height();
 
     MissionPhase::Trace phaseTrace = mission.phaseTrace(currentTime);
     if (!phaseTrace.empty()) {
@@ -99,7 +93,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         penPosition.y -= _font->height();
         RenderFont(*_font, penPosition, title, missionProgressColor);
         double remaining = phase.timeRange().end - currentTime;
-        float t = static_cast<float>(
+        const float t = static_cast<float>(
             1.0 - remaining / phase.timeRange().duration()
         );
         std::string progress = progressToStr(25, t);
@@ -107,7 +101,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100),
+            std::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100),
             missionProgressColor
         );
     }
@@ -119,18 +113,18 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format("{:.0f} s", remaining),
+            std::format("{:.0f} s", remaining),
             nextMissionColor
         );
     }
 
-    bool showAllPhases = false;
+    constexpr bool ShowAllPhases = false;
 
     using PhaseWithDepth = std::pair<const MissionPhase*, int>;
     std::stack<PhaseWithDepth> S;
 
     constexpr int PixelIndentation = 20;
-    S.push({ &mission, 0 });
+    S.emplace(&mission, 0);
     while (!S.empty()) {
         const MissionPhase* phase = S.top().first;
         const int depth = S.top().second;
@@ -148,7 +142,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(
+                std::format(
                     "{:s}  {:s} {:.1f} %",
                     phase->name(),progress,t * 100
                 ),
@@ -169,22 +163,22 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         }
         penPosition.x -= depth * PixelIndentation;
 
-        if (isCurrentPhase || showAllPhases) {
+        if (isCurrentPhase || ShowAllPhases) {
             // phases are sorted increasingly by start time, and will be
             // popped last-in-first-out from the stack, so add them in
             // reversed order.
-            int indexLastPhase = static_cast<int>(
-                phase->phases().size()
-            ) - 1;
+            const int indexLastPhase = static_cast<int>(phase->phases().size()) - 1;
             for (int i = indexLastPhase; 0 <= i; --i) {
-                S.push({ &phase->phases()[i], depth + 1 });
+                S.emplace(&phase->phases()[i], depth + 1);
             }
         }
     }
+
+    penPosition.y += _font->height();
 }
 
 glm::vec2 DashboardItemMission::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     // @TODO fix this up ---abock
     return { 0.f, 0.f };

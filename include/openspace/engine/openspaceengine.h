@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,9 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/scene/profile.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -50,28 +51,35 @@ class Scene;
 
 namespace scripting { struct LuaLibrary; }
 
-  // Structure that is responsible for the delayed shutdown of the application
+/**
+ * Structure that is responsible for the delayed shutdown of the application.
+ */
 struct ShutdownInformation {
-    // Whether the application is currently in shutdown mode (i.e. counting down the
-    // timer and closing it at '0'
+    /// Whether the application is currently in shutdown mode (i.e. counting down the
+    /// timer and closing it at '0'
     bool inShutdown = false;
-    // Total amount of time the application will wait before actually shutting down
+    /// Total amount of time the application will wait before actually shutting down
     float waitTime = 0.f;
-    // Current state of the countdown; if it reaches '0', the application will
-    // close
+    /// Current state of the countdown; if it reaches '0', the application will
+    /// close
     float timer = 0.f;
 };
 
 struct CommandlineArguments {
-    std::string configurationName;
-    std::string configurationOverride;
+    std::optional<std::string> configuration;
+    std::optional<std::string> windowConfig;
+    std::optional<std::string> profile;
+    std::optional<std::string> propertyVisibility;
+    std::optional<bool> bypassLauncher;
 };
 
 class OpenSpaceEngine : public properties::PropertyOwner {
 public:
-    // A mode that specifies which part of the system is currently in control.
-    // The mode can be used to limit certain features, like setting time, navigation
-    // or triggering scripts
+    /**
+     * A mode that specifies which part of the system is currently in control. The mode
+     * can be used to limit certain features, like setting time, navigation or triggering
+     * scripts.
+     */
     enum class Mode {
         UserControl = 0,
         SessionRecordingPlayback,
@@ -92,7 +100,6 @@ public:
         const glm::mat4& projectionMatrix);
     void drawOverlays();
     void postDraw();
-    void resetPropertyChangeFlags();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action,
         IsGuiWindow isGuiWindow);
     void charCallback(unsigned int codepoint, KeyModifier modifier,
@@ -109,7 +116,6 @@ public:
     void decode(std::vector<std::byte> data);
 
     properties::Property::Visibility visibility() const;
-    bool showHiddenSceneGraphNodes() const;
     void toggleShutdownMode();
 
     Mode currentMode() const;
@@ -126,8 +132,10 @@ public:
     AssetManager& assetManager();
     LoadingScreen* loadingScreen();
 
-    void writeDocumentation();
     void createUserDirectoriesIfNecessary();
+
+    uint64_t ramInUse() const;
+    uint64_t vramInUse() const;
 
     /**
      * Returns the Lua library that contains all Lua functions available to affect the
@@ -140,15 +148,14 @@ private:
     void loadFonts();
 
     void runGlobalCustomizationScripts();
-    void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po);
 
     properties::BoolProperty _printEvents;
     properties::OptionProperty _visibility;
-    properties::BoolProperty _showHiddenSceneGraphNodes;
+    properties::FloatProperty _fadeOnEnableDuration;
+    properties::BoolProperty _disableAllMouseInputs;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
-    bool _shouldAbortLoading = false;
     std::unique_ptr<LoadingScreen> _loadingScreen;
     std::unique_ptr<VersionChecker> _versionChecker;
 
@@ -173,7 +180,8 @@ private:
  * Sets the camera position using the time contents of a profile. The function will
  * set an absolute position or a go-to-geolocation command using the globebrowsing
  * module.
- * \param p The Profile to be read.
+ *
+ * \param p The Profile to be read
  */
 void setCameraFromProfile(const Profile& p);
 
@@ -181,21 +189,21 @@ void setCameraFromProfile(const Profile& p);
  * Reads a list of modules from a profile, and executes scripts based on whether or
  * not the corresponding module is loaded.
  *
- * \param p The Profile to be read.
+ * \param p The Profile to be read
  */
 void setModulesFromProfile(const Profile& p);
 
 /**
  * Registers actions from the contents of a profile.
  *
- * \param p The Profile to be read.
+ * \param p The Profile to be read
  */
 void setActionsFromProfile(const Profile& p);
 
 /**
  * Registers keybindings from the contents of a profile.
  *
- * \param p The Profile to be read.
+ * \param p The Profile to be read
  */
 void setKeybindingsFromProfile(const Profile& p);
 
@@ -204,7 +212,7 @@ void setKeybindingsFromProfile(const Profile& p);
  * If any nodes are listed, a script to mark these will be queued with the
  * script engine.
  *
- * \param p The Profile to be read.
+ * \param p The Profile to be read
  */
 void setMarkInterestingNodesFromProfile(const Profile& p);
 
@@ -213,7 +221,7 @@ void setMarkInterestingNodesFromProfile(const Profile& p);
  * at the end of the initialization. Any openspace lua commands are allowed,
  * and will be added to the script queue.
  *
- * \param p The Profile to be read.
+ * \param p The Profile to be read
  */
 void setAdditionalScriptsFromProfile(const Profile& p);
 

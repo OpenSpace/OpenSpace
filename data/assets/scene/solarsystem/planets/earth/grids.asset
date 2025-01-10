@@ -1,0 +1,92 @@
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local EclipticRotationMatrix = {
+  -0.05487554,  0.4941095, -0.8676661,
+  -0.9938214 , -0.1109906, -0.0003515167,
+  -0.09647644,  0.8622859,  0.4971472
+}
+
+local LightSecond = 299792458
+local LightMinute = 17987547480
+
+local plane1lsec = {
+  Identifier = "1lsecGrid",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    },
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.EarthBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2 * LightSecond, 2 * LightSecond }
+  },
+  GUI = {
+    Name = "1lsec Grid",
+    Path = "/Solar System/Planets/Earth"
+  }
+}
+
+local plane1lmin = {
+  Identifier = "1lminGrid",
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = EclipticRotationMatrix
+    },
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = coreKernels.ID.EarthBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGrid",
+    Enabled = false,
+    Opacity = 0.4,
+    Color = { 0.1, 0.5, 0.6 },
+    LineWidth = 2.0,
+    Segments = { 20, 20 },
+    Size = { 2 * LightMinute, 2 * LightMinute }
+  },
+  GUI = {
+    Name = "1lmin Grid",
+    Path = "/Solar System/Planets/Earth"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(plane1lsec)
+  openspace.addSceneGraphNode(plane1lmin)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(plane1lmin)
+  openspace.removeSceneGraphNode(plane1lsec)
+end)
+
+asset.export(plane1lsec)
+asset.export(plane1lmin)
+
+
+
+asset.meta = {
+  Name = "Earth Grid",
+  Description = [[Grids that are useful to show distances around Earth]],
+  Author = "OpenSpace Team",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,15 @@
 #ifndef __OPENSPACE_CORE___ULONGPROPERTY___H__
 #define __OPENSPACE_CORE___ULONGPROPERTY___H__
 
- /**
- * \file ulongproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class ULongProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned long</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
 #include <limits>
 
 namespace openspace::properties {
 
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `unsigned long`.
+ */
 class ULongProperty : public NumericalProperty<unsigned long> {
 public:
     ULongProperty(Property::PropertyInfo info, unsigned long value = 0ul,
@@ -56,9 +45,6 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<unsigned long>::operator=;
-
-protected:
-    unsigned long fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

@@ -1,15 +1,18 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local orbit = asset.syncedResource({
+
+
+local orbit = asset.resource({
   Name = "Tesla Roadster Orbit",
   Type = "HttpSynchronization",
   Identifier = "tesla_horizons",
   Version = 2
 })
 
+
 local TeslaRoadsterTrail = {
   Identifier = "TeslaRoadsterTrail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
@@ -27,13 +30,13 @@ local TeslaRoadsterTrail = {
   },
   GUI = {
     Name = "Tesla Roadster Trail",
-    Path = "/Solar System/SSSB"
+    Path = "/Solar System/Small Bodies"
   }
 }
 
 local TeslaPosition = {
   Identifier = "TeslaPosition",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
@@ -42,11 +45,12 @@ local TeslaPosition = {
   },
   GUI = {
     Name = "Tesla Roadster",
-    Path = "/Solar System/SSSB",
+    Path = "/Solar System/Small Bodies",
     Description = [[Position and Trail of Tesla Roadster from 2018 FEB 7 03:00:00
       to 2089 DEC 31 03:00:00. Data from JPL Horizons]]
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(TeslaPosition)
@@ -65,7 +69,6 @@ asset.export(TeslaRoadsterTrail)
 
 asset.meta = {
   Name = "Tesla Roadster",
-  Version = "1.2",
   Description = [[Position and Trail of Tesla Roadster from 2018 FEB 7 03:00:00 to
     2089 DEC 31 03:00:00. Data from JPL Horizons]],
   Author = "OpenSpace Team",

@@ -1,0 +1,45 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local Trail = {
+  Identifier = "SednaTrail",
+  Parent = sunTransforms.SunEclipJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Enabled = asset.enabled,
+    Translation = transforms.Translation,
+    Color = { 0.2, 0.8, 0.3 },
+    Period = 4485811.755507208,
+    Resolution = 10000,
+    Fade = 1.24
+  },
+  Tag = { "planetTrail_dwarf" },
+  GUI = {
+    Name = "Sedna Trail",
+    Path = "/Solar System/Dwarf Planets/Sedna",
+    Description = "Trail of Sedna"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Trail)
+end)
+
+asset.export("Trail", Trail)
+
+
+
+asset.meta = {
+  Name = "Sedna Trail",
+  Description = [[Trail of Sedna]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/distanceconversion.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/model/modelgeometry.h>
@@ -38,34 +39,45 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    constexpr std::array<const char*, 7> MainUniformNames = {
-        "performShading", "directionToSunViewSpace", "modelViewTransform",
-        "projectionTransform", "projectionFading", "baseTexture", "projectionTexture"
-    };
-
-    constexpr std::array<const char*, 6> FboUniformNames = {
-        "projectionTexture", "depthTexture", "needShadowMap", "ProjectorMatrix",
-        "ModelTransform", "boresight"
-    };
-
-    constexpr std::array<const char*, 2> DepthFboUniformNames = {
-        "ProjectorMatrix", "ModelTransform"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform Shading",
-        "If this value is enabled, the model will be shaded based on the relative "
-        "location to the Sun. If this value is disabled, shading is disabled and the "
-        "entire model is rendered brightly"
+        "If true, the model will be shaded based on the location of the Sun. If false, "
+        "shading is disabled and the model is fully illuminated.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableModelProjection)]] Parameters {
-        // The file or files that should be loaded in this RenderableModel. The file can
-        // contain filesystem tokens or can be specified relatively to the
-        // location of the .asset file.
-        // This specifies the model that is rendered by the Renderable.
+        // The file or files that should be loaded, that specifies the model to load. The
+        // file can contain filesystem tokens or can be specified relative to the
+        // location of the asset file.
         std::filesystem::path geometryFile;
+
+        enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
+            Nanometer,
+            Micrometer,
+            Millimeter,
+            Centimeter,
+            Decimeter,
+            Meter,
+            Kilometer,
+            Thou,
+            Inch,
+            Foot,
+            Yard,
+            Chain,
+            Furlong,
+            Mile
+        };
+
+        // The scale of the model. For example if the model is in centimeters
+        // then `ModelScale = \"Centimeter\"` or `ModelScale = 0.01`.
+        std::optional<std::variant<ScaleUnit, double>> modelScale;
+
+        // By default the given `ModelScale` is used to scale down the model. By setting
+        // this setting to true the scaling is inverted to that the model is instead
+        // scaled up with the given `ModelScale`.
+        std::optional<bool> invertModelScale;
 
         // Contains information about projecting onto this planet.
         ghoul::Dictionary projection
@@ -73,12 +85,6 @@ namespace {
 
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
-
-        // The radius of the bounding sphere of this object. This has to be a
-        // radius that is larger than anything that is rendered by it. It has to
-        // be at least as big as the convex hull of the object. The default value
-        // is 10e9 meters.
-        std::optional<double> boundingSphereRadius;
     };
 #include "renderablemodelprojection_codegen.cpp"
 } // namespace
@@ -95,18 +101,36 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::filesystem::path file = absPath(p.geometryFile.string());
+    const std::filesystem::path file = absPath(p.geometryFile);
     _geometry = ghoul::io::ModelReader::ref().loadModel(
-        file.string(),
+        file,
         ghoul::io::ModelReader::ForceRenderInvisible::No,
         ghoul::io::ModelReader::NotifyInvisibleDropped::Yes
     );
 
+    _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
+
+    if (p.modelScale.has_value()) {
+        if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
+            const Parameters::ScaleUnit scaleUnit =
+                std::get<Parameters::ScaleUnit>(*p.modelScale);
+            const DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
+            _modelScale = toMeter(distanceUnit);
+        }
+        else if (std::holds_alternative<double>(*p.modelScale)) {
+            _modelScale = std::get<double>(*p.modelScale);
+        }
+        else {
+            throw ghoul::MissingCaseException();
+        }
+
+        if (_invertModelScale) {
+            _modelScale = 1.0 / _modelScale;
+        }
+    }
+
     addPropertySubOwner(_projectionComponent);
     _projectionComponent.initialize(identifier(), p.projection);
-
-    double boundingSphereRadius = p.boundingSphereRadius.value_or(1.0e9);
-    setBoundingSphere(boundingSphereRadius);
 
     _performShading = p.performShading.value_or(_performShading);
     addProperty(_performShading);
@@ -125,11 +149,7 @@ void RenderableModelProjection::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(
-        *_programObject,
-        _mainUniformCache,
-        MainUniformNames
-    );
+    ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
 
     _fboProgramObject = ghoul::opengl::ProgramObject::Build(
         "ProjectionPass",
@@ -141,11 +161,7 @@ void RenderableModelProjection::initializeGL() {
         )
     );
 
-    ghoul::opengl::updateUniformLocations(
-        *_fboProgramObject,
-        _fboUniformCache,
-        FboUniformNames
-    );
+    ghoul::opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
 
     _depthFboProgramObject = ghoul::opengl::ProgramObject::Build(
         "DepthPass",
@@ -153,17 +169,16 @@ void RenderableModelProjection::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(
-        *_depthFboProgramObject,
-        _depthFboUniformCache,
-        DepthFboUniformNames
-    );
+    ghoul::opengl::updateUniformLocations(*_depthFboProgramObject, _depthFboUniformCache);
 
     _projectionComponent.initializeGL();
 
-    double bs = boundingSphere();
     _geometry->initialize();
-    setBoundingSphere(bs); // ignore bounding sphere set by geometry.
+    _geometry->calculateBoundingRadius();
+    setBoundingSphere(_geometry->boundingRadius() * _modelScale);
+
+    // Set Interaction sphere size to be 10% of the bounding sphere
+    setInteractionSphere(boundingSphere() * 0.1);
 }
 
 void RenderableModelProjection::deinitializeGL() {
@@ -188,15 +203,15 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
         _projectionComponent.clearAllProjections();
     }
 
-    glm::vec3 up = data.camera.lookUpVectorCameraSpace();
+    const glm::vec3 up = data.camera.lookUpVectorCameraSpace();
 
     if (_shouldCapture && _projectionComponent.doesPerformProjection()) {
         for (const Image& i : _imageTimes) {
             try {
-                glm::mat4 projectorMatrix = attitudeParameters(i.timeRange.start, up);
-                std::shared_ptr<ghoul::opengl::Texture> t =
+                const glm::mat4 projectorMat = attitudeParameters(i.timeRange.start, up);
+                const std::shared_ptr<ghoul::opengl::Texture> t =
                     _projectionComponent.loadProjectionTexture(i.path, i.isPlaceholder);
-                imageProjectGPU(*t, projectorMatrix);
+                imageProjectGPU(*t, projectorMat);
             }
             catch (const SpiceManager::SpiceException& e) {
                 LERRORC(e.component, e.what());
@@ -219,11 +234,12 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     const glm::vec3 bodyPos = data.modelTransform.translation;
 
     // Model transform and view transform needs to be in double precision
-    const glm::dmat4 transform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * transform;
+    const glm::dmat4 modelTransform = glm::scale(
+        calcModelTransform(data), glm::dvec3(_modelScale)
+    );
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
+
+    // malej 2023-FEB-23: The light sources should probably not be hard coded
     const glm::vec3 directionToSun = glm::normalize(_sunPosition - bodyPos);
     const glm::vec3 directionToSunViewSpace = glm::normalize(
         glm::mat3(data.camera.combinedViewMatrix()) * directionToSun
@@ -265,21 +281,13 @@ void RenderableModelProjection::update(const UpdateData& data) {
     if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(
-            *_programObject,
-            _mainUniformCache,
-            MainUniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
     }
 
     if (_fboProgramObject->isDirty()) {
         _fboProgramObject->rebuildFromFile();
 
-        ghoul::opengl::updateUniformLocations(
-            *_fboProgramObject,
-            _fboUniformCache,
-            FboUniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_fboProgramObject, _fboUniformCache);
     }
 
     _projectionComponent.update();
@@ -289,8 +297,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
 
         ghoul::opengl::updateUniformLocations(
             *_depthFboProgramObject,
-            _depthFboUniformCache,
-            DepthFboUniformNames
+            _depthFboUniformCache
         );
     }
 
@@ -392,7 +399,7 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
     );
     _boresight = std::move(res.boresightVector);
 
-    double lightTime;
+    double lightTime = 0.0;
     const glm::dvec3 p = SpiceManager::ref().targetPosition(
         _projectionComponent.projectorId(),
         _projectionComponent.projecteeId(),

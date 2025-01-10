@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,13 +32,12 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scenelicensewriter.h>
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
@@ -49,8 +48,8 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/easing.h>
-#include <ghoul/misc/misc.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <string>
 #include <stack>
@@ -61,6 +60,7 @@ namespace {
     constexpr std::string_view _loggerCat = "Scene";
     constexpr std::string_view KeyIdentifier = "Identifier";
     constexpr std::string_view KeyParent = "Parent";
+    constexpr const char* RootNodeIdentifier = "Root";
 
 #ifdef TRACY_ENABLE
     constexpr const char* renderBinToString(int renderBin) {
@@ -75,16 +75,29 @@ namespace {
             return "PreDeferredTransparent";
         }
         else if (renderBin == 8) {
-            return "PostDeferredTransparent";
+            return "Overlay";
         }
         else if (renderBin == 16) {
-            return "Overlay";
+            return "PostDeferredTransparent";
+        }
+        else if (renderBin == 32) {
+            return "Sticker";
         }
         else {
             throw ghoul::MissingCaseException();
         }
     }
 #endif // TRACY_ENABLE
+
+    std::chrono::steady_clock::time_point currentTimeForInterpolation() {
+        using namespace openspace::global;
+        if (sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+            return sessionRecordingHandler->currentPlaybackInterpolationTime();
+        }
+        else {
+            return std::chrono::steady_clock::now();
+        }
+    }
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
@@ -101,23 +114,41 @@ Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
     , _camera(std::make_unique<Camera>())
     , _initializer(std::move(initializer))
 {
-    _rootDummy.setIdentifier(SceneGraphNode::RootNodeIdentifier);
-    _rootDummy.setScene(this);
+    _rootNode.setIdentifier(RootNodeIdentifier);
+    _rootNode.setScene(this);
+    _rootNode.setGuiHintHidden(true);
 
-    _camera->setParent(&_rootDummy);
+    _camera->setParent(&_rootNode);
 }
 
 Scene::~Scene() {
-    clear();
-    _rootDummy.setScene(nullptr);
+    LINFO("Clearing current scene graph");
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        if (node->identifier() == "Root") {
+            continue;
+        }
+
+        LWARNING(std::format(
+            "SceneGraphNode '{}' was not removed before shutdown",
+            node->identifier()
+        ));
+
+        // There might still be scene graph nodes around that weren't removed by the asset
+        // manager as they would have been added manually by the user. This also serves as
+        // a backstop for assets that forgot to implement the onDeinitialize functions
+        node->deinitializeGL();
+        node->deinitialize();
+    }
+    _rootNode.clearChildren();
+    _rootNode.setScene(nullptr);
 }
 
 void Scene::attachNode(ghoul::mm_unique_ptr<SceneGraphNode> node) {
-    _rootDummy.attachChild(std::move(node));
+    _rootNode.attachChild(std::move(node));
 }
 
 ghoul::mm_unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
-    return _rootDummy.detachChild(node);
+    return _rootNode.detachChild(node);
 }
 
 Camera* Scene::camera() const {
@@ -125,17 +156,16 @@ Camera* Scene::camera() const {
 }
 
 void Scene::registerNode(SceneGraphNode* node) {
-    if (_nodesByIdentifier.count(node->identifier())) {
-        throw Scene::InvalidSceneError(
-            "Node with identifier " + node->identifier() + " already exists"
-        );
+    if (_nodesByIdentifier.contains(node->identifier())) {
+        throw Scene::InvalidSceneError(std::format(
+            "Node with identifier '{}' already exists", node->identifier()
+        ));
     }
 
     _topologicallySortedNodes.push_back(node);
     _nodesByIdentifier[node->identifier()] = node;
     addPropertySubOwner(node);
     _dirtyNodeRegistry = true;
-    global::eventEngine->publishEvent<events::EventSceneGraphNodeAdded>(node);
 }
 
 void Scene::unregisterNode(SceneGraphNode* node) {
@@ -155,7 +185,6 @@ void Scene::unregisterNode(SceneGraphNode* node) {
     }
     removePropertySubOwner(node);
     _dirtyNodeRegistry = true;
-    global::eventEngine->publishEvent<events::EventSceneGraphNodeRemoved>(node);
 }
 
 void Scene::markNodeRegistryDirty() {
@@ -163,13 +192,15 @@ void Scene::markNodeRegistryDirty() {
 }
 
 void Scene::updateNodeRegistry() {
-    ZoneScoped
+    ZoneScoped;
 
     sortTopologically();
     _dirtyNodeRegistry = false;
 }
 
 void Scene::sortTopologically() {
+    ZoneScoped;
+
     _topologicallySortedNodes.insert(
         _topologicallySortedNodes.end(),
         std::make_move_iterator(_circularNodes.begin()),
@@ -187,7 +218,7 @@ void Scene::sortTopologically() {
     }
 
     // Only the Root node can have an in-degree of 0
-    SceneGraphNode* root = _nodesByIdentifier[SceneGraphNode::RootNodeIdentifier];
+    SceneGraphNode* root = _nodesByIdentifier[RootNodeIdentifier];
     if (!root) {
         throw Scene::InvalidSceneError("No root node found");
     }
@@ -229,7 +260,7 @@ void Scene::sortTopologically() {
         }
     }
     if (!inDegrees.empty()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "The scene contains circular dependencies. {} nodes will be disabled",
             inDegrees.size()
         ));
@@ -243,6 +274,8 @@ void Scene::sortTopologically() {
 }
 
 void Scene::initializeNode(SceneGraphNode* node) {
+    ghoul_assert(node, "Node must not be nullptr");
+
     _initializer->initializeNode(node);
 }
 
@@ -251,10 +284,10 @@ bool Scene::isInitializing() const {
 }
 
 void Scene::update(const UpdateData& data) {
-    ZoneScoped
+    ZoneScoped;
 
-    std::vector<SceneGraphNode*> initializedNodes = _initializer->takeInitializedNodes();
-    for (SceneGraphNode* node : initializedNodes) {
+    const std::vector<SceneGraphNode*> initialized = _initializer->takeInitializedNodes();
+    for (SceneGraphNode* node : initialized) {
         try {
             node->initializeGL();
         }
@@ -277,11 +310,11 @@ void Scene::update(const UpdateData& data) {
 }
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
-    ZoneScoped
-    ZoneName(
+    ZoneScoped;
+    ZoneText(
         renderBinToString(data.renderBinMask),
         strlen(renderBinToString(data.renderBinMask))
-    )
+    );
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
@@ -296,7 +329,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
     }
 
     {
-        ZoneScopedN("Get Error Hack")
+        ZoneScopedN("Get Error Hack");
 
         // @TODO(abock 2019-08-19) This glGetError call is a hack to prevent the GPU
         // thread and the CPU thread from diverging too much, particularly the uploading
@@ -309,21 +342,16 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
     }
 }
 
-void Scene::clear() {
-    LINFO("Clearing current scene graph");
-    _rootDummy.clearChildren();
-}
-
 const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByIdentifier() const {
     return _nodesByIdentifier;
 }
 
 SceneGraphNode* Scene::root() {
-    return &_rootDummy;
+    return &_rootNode;
 }
 
 const SceneGraphNode* Scene::root() const {
-    return &_rootDummy;
+    return &_rootNode;
 }
 
 SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
@@ -339,6 +367,8 @@ const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
 }
 
 SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
+    ZoneScoped;
+
     // First interpret the dictionary
     std::vector<std::string> dependencyNames;
 
@@ -346,7 +376,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     const bool hasParent = nodeDictionary.hasKey(KeyParent);
 
     if (_nodesByIdentifier.find(nodeIdentifier) != _nodesByIdentifier.end()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Cannot add scene graph node '{}'. A node with that name already exists",
             nodeIdentifier
         ));
@@ -359,7 +389,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
         parent = sceneGraphNode(parentIdentifier);
         if (!parent) {
             // TODO: Throw exception
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Could not find parent '{}' for '{}'", parentIdentifier, nodeIdentifier
             ));
             return nullptr;
@@ -369,10 +399,6 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     ghoul::mm_unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(
         nodeDictionary
     );
-    if (!node) {
-        // TODO: Throw exception
-        LERROR("Could not create node from dictionary: " + nodeIdentifier);
-    }
 
     if (nodeDictionary.hasKey(SceneGraphNode::KeyDependencies)) {
         if (!nodeDictionary.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies))
@@ -380,12 +406,12 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
             // TODO: Throw exception
             LERROR("Dependencies did not have the corrent type");
         }
-        ghoul::Dictionary nodeDependencies =
+        const ghoul::Dictionary nodeDependencies =
             nodeDictionary.value<ghoul::Dictionary>(SceneGraphNode::KeyDependencies);
 
-        for (std::string_view key : nodeDependencies.keys()) {
+        for (const std::string_view key : nodeDependencies.keys()) {
             std::string value = nodeDependencies.value<std::string>(key);
-            dependencyNames.push_back(value);
+            dependencyNames.push_back(std::move(value));
         }
     }
 
@@ -396,7 +422,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
         SceneGraphNode* dep = sceneGraphNode(depName);
         if (!dep) {
             // TODO: Throw exception
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Could not find dependency '{}' for '{}'", depName, nodeIdentifier
             ));
             foundAllDeps = false;
@@ -423,16 +449,8 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     return rawNodePointer;
 }
 
-std::chrono::steady_clock::time_point Scene::currentTimeForInterpolation() {
-    if (global::sessionRecording->isSavingFramesDuringPlayback()) {
-        return global::sessionRecording->currentPlaybackInterpolationTime();
-    }
-    else {
-        return std::chrono::steady_clock::now();
-    }
-}
-
 void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
+                                     std::string postScript,
                                      ghoul::EasingFunction easingFunction)
 {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
@@ -454,11 +472,12 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
         ghoul::easingFunction<float>(easingFunction);
 
     // First check if the current property already has an interpolation information
-    std::chrono::steady_clock::time_point now = currentTimeForInterpolation();
+    const std::chrono::steady_clock::time_point now = currentTimeForInterpolation();
     for (PropertyInterpolationInfo& info : _propertyInterpolationInfos) {
         if (info.prop == prop) {
             info.beginTime = now;
             info.durationSeconds = durationSeconds;
+            info.postScript = std::move(postScript);
             info.easingFunction = func;
             // If we found it, we can break since we make sure that each property is only
             // represented once in this
@@ -467,12 +486,12 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
     }
 
     PropertyInterpolationInfo i = {
-        prop,
-        now,
-        durationSeconds,
-        func
+        .prop = prop,
+        .beginTime = now,
+        .durationSeconds = durationSeconds,
+        .postScript = std::move(postScript),
+        .easingFunction = func
     };
-
     _propertyInterpolationInfos.push_back(std::move(i));
 }
 
@@ -500,20 +519,19 @@ void Scene::removePropertyInterpolation(properties::Property* prop) {
 }
 
 void Scene::updateInterpolations() {
-    ZoneScoped
+    ZoneScoped;
 
     using namespace std::chrono;
 
-    steady_clock::time_point now = currentTimeForInterpolation();
+    const steady_clock::time_point now = currentTimeForInterpolation();
     // First, let's update the properties
     for (PropertyInterpolationInfo& i : _propertyInterpolationInfos) {
-        long long usPassed = duration_cast<std::chrono::microseconds>(
-            now - i.beginTime
-        ).count();
+        const long long us =
+            duration_cast<std::chrono::microseconds>(now - i.beginTime).count();
 
         const float t = glm::clamp(
             static_cast<float>(
-                static_cast<double>(usPassed) /
+                static_cast<double>(us) /
                 static_cast<double>(i.durationSeconds * 1000000)
             ),
             0.f,
@@ -531,6 +549,19 @@ void Scene::updateInterpolations() {
         i.isExpired = (t == 1.f);
 
         if (i.isExpired) {
+            if (!i.postScript.empty()) {
+                // No sync or send because this is already inside a Lua script that was
+                // triggered when the interpolation of the property was triggered,
+                // therefore it has already been synced and sent to the connected nodes
+                // and peers
+                using Script = scripting::ScriptEngine::Script;
+                global::scriptEngine->queueScript({
+                    .code = std::move(i.postScript),
+                    .synchronized = Script::ShouldBeSynchronized::No,
+                    .sendToRemote = Script::ShouldSendToRemote::No
+                });
+            }
+
             global::eventEngine->publishEvent<events::EventInterpolationFinished>(i.prop);
         }
     }
@@ -545,18 +576,14 @@ void Scene::updateInterpolations() {
     );
 }
 
-void Scene::addInterestingTime(InterestingTime time) {
-    _interestingTimes.push_back(std::move(time));
-}
-
-const std::vector<Scene::InterestingTime>& Scene::interestingTimes() const {
-    return _interestingTimes;
-}
-
 void Scene::setPropertiesFromProfile(const Profile& p) {
-    ghoul::lua::LuaState L(ghoul::lua::LuaState::IncludeStandardLibrary::Yes);
+    ghoul::lua::LuaState L;
 
     for (const Profile::Property& prop : p.properties) {
+        if (prop.name.empty()) {
+            LWARNING("Property name in profile was empty");
+            continue;
+        }
         std::string uriOrRegex = prop.name;
         std::string groupName;
         if (doesUriContainGroupTag(uriOrRegex, groupName)) {
@@ -578,7 +605,8 @@ void Scene::setPropertiesFromProfile(const Profile& p) {
             allProperties(),
             0.0,
             groupName,
-            ghoul::EasingFunction::Linear
+            ghoul::EasingFunction::Linear,
+            ""
         );
         // Clear lua state stack
         lua_settop(L, 0);
@@ -591,7 +619,7 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
     _valueIsTable = false;
     ProfilePropertyLua elem = propertyProcessValue(L, value);
     if (!_valueIsTable) {
-        std::visit(overloaded{
+        std::visit(overloaded {
             [&L](bool v) {
                 ghoul::lua::push(L, v);
             },
@@ -612,7 +640,7 @@ ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
                                                                  const std::string& value)
 {
     ProfilePropertyLua result;
-    PropertyValueType pType = propertyValueType(value);
+    const PropertyValueType pType = propertyValueType(value);
 
     switch (pType) {
         case PropertyValueType::Boolean:
@@ -624,27 +652,31 @@ ProfilePropertyLua Scene::propertyProcessValue(ghoul::lua::LuaState& L,
         case PropertyValueType::Nil:
             result = ghoul::lua::nil_t();
             break;
-        case PropertyValueType::Table:
-            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '{');
-            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '}');
-            handlePropertyLuaTableEntry(L, value);
+        case PropertyValueType::Table: {
+            std::string val = value;
+            ghoul::trimSurroundingCharacters(val, '{');
+            ghoul::trimSurroundingCharacters(val, '}');
+            handlePropertyLuaTableEntry(L, val);
             _valueIsTable = true;
             break;
+        }
         case PropertyValueType::String:
-        default:
-            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '\"');
-            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), '[');
-            ghoul::trimSurroundingCharacters(const_cast<std::string&>(value), ']');
-            result = value;
+        default: {
+            std::string val = value;
+            ghoul::trimSurroundingCharacters(val, '\"');
+            ghoul::trimSurroundingCharacters(val, '[');
+            ghoul::trimSurroundingCharacters(val, ']');
+            result = val;
             break;
+        }
     }
     return result;
 }
 
 void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value)
 {
-    PropertyValueType enclosedType;
-    size_t commaPos = value.find(',', 0);
+    PropertyValueType enclosedType = PropertyValueType::Nil;
+    const size_t commaPos = value.find(',', 0);
     if (commaPos != std::string::npos) {
         enclosedType = propertyValueType(value.substr(0, commaPos));
     }
@@ -654,30 +686,30 @@ void Scene::handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::stri
 
     switch (enclosedType) {
         case PropertyValueType::Boolean:
-            LERROR(fmt::format(
-                "A lua table of bool values is not supported. (processing property {})",
-                _profilePropertyName)
-            );
+            LERROR(std::format(
+                "A Lua table of bool values is not supported. (processing property '{}')",
+                _profilePropertyName
+            ));
             break;
         case PropertyValueType::Float:
             {
-                std::vector<float> valsF;
-                processPropertyValueTableEntries(L, value, valsF);
-                ghoul::lua::push(L, valsF);
+                std::vector<float> vals;
+                processPropertyValueTableEntries(L, value, vals);
+                ghoul::lua::push(L, vals);
             }
             break;
         case PropertyValueType::String:
             {
-                std::vector<std::string> valsS;
-                processPropertyValueTableEntries(L, value, valsS);
-                ghoul::lua::push(L, valsS);
+                std::vector<std::string> vals;
+                processPropertyValueTableEntries(L, value, vals);
+                ghoul::lua::push(L, vals);
             }
             break;
         case PropertyValueType::Table:
         default:
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Table-within-a-table values are not supported for profile a "
-                "property (processing property {})", _profilePropertyName
+                "property (processing property '{}')", _profilePropertyName
             ));
             break;
     }
@@ -705,9 +737,9 @@ void Scene::processPropertyValueTableEntries(ghoul::lua::LuaState& L,
             table.push_back(std::get<T>(tableElement));
         }
         catch (std::bad_variant_access&) {
-            LERROR(fmt::format(
-                "Error attempting to parse profile property setting for "
-                "{} using value = {}", _profilePropertyName, value
+            LERROR(std::format(
+                "Error attempting to parse profile property setting for '{}' using "
+                "value = {}", _profilePropertyName, value
             ));
         }
     }
@@ -743,9 +775,34 @@ PropertyValueType Scene::propertyValueType(const std::string& value) {
 }
 
 std::vector<properties::Property*> Scene::propertiesMatchingRegex(
-                                                              std::string propertyString)
+                                                          std::string_view propertyString)
 {
     return findMatchesInAllProperties(propertyString, allProperties(), "");
+}
+
+std::vector<std::string> Scene::allTags() const {
+    std::set<std::string> result;
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        const std::vector<std::string>& tags = node->tags();
+        result.insert(tags.begin(), tags.end());
+    }
+
+    return std::vector<std::string>(result.begin(), result.end());
+}
+
+void Scene::setGuiTreeOrder(const std::string& guiPath,
+                            const std::vector<std::string>& list)
+{
+    _guiTreeOrderMap[guiPath] = list;
+    global::eventEngine->publishEvent<events::EventGuiTreeUpdated>();
+}
+
+ghoul::Dictionary Scene::guiTreeOrder() const {
+    ghoul::Dictionary dict;
+    for (const auto& [key, list] : _guiTreeOrderMap) {
+        dict.setValue(key, list);
+    }
+    return dict;
 }
 
 scripting::LuaLibrary Scene::luaLibrary() {
@@ -754,7 +811,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
         {
             {
                 "setPropertyValue",
-                &luascriptfunctions::propertySetValue,
+                &luascriptfunctions::propertySetValue<false>,
                 {},
                 "",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
@@ -766,20 +823,17 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "function if a 'duration' has been specified. If 'duration' is 0, this "
                 "parameter value is ignored. Otherwise, it can be one of many supported "
                 "easing functions. See easing.h for available functions. The fifth "
-                "argument must be either empty, 'regex', or 'single'. If the fifth"
-                "argument is empty (the default), the URI is interpreted using a "
-                "wildcard in which '*' is expanded to '(.*)' and bracketed components "
-                "'{ }' are interpreted as group tag names. Then, the passed value will "
-                "be set on all properties that fit the regex + group name combination. "
-                "If the fifth argument is 'regex' neither the '*' expansion, nor the "
-                "group tag expansion is performed and the first argument is used as an "
-                "ECMAScript style regular expression that matches against the fully "
-                "qualified IDs of properties. If the fifth argument is 'single' no "
-                "substitutions are performed and exactly 0 or 1 properties are changed"
+                "argument is another Lua script that will be executed when the "
+                "interpolation provided in parameter 3 finishes.\n"
+                "The URI is interpreted using a wildcard in which '*' is expanded to "
+                "'(.*)' and bracketed components '{ }' are interpreted as group tag "
+                "names. Then, the passed value will be set on all properties that fit "
+                "the regex + group name combination.",
+                {}
             },
             {
                 "setPropertyValueSingle",
-                &luascriptfunctions::propertySetValueSingle,
+                &luascriptfunctions::propertySetValue<true>,
                 {},
                 "",
                 "Sets the property identified by the URI in the first argument. The "
@@ -789,33 +843,76 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the value is interpolated at each step in between. The fourth "
                 "parameter is an optional easing function if a 'duration' has been "
                 "specified. If 'duration' is 0, this parameter value is ignored. "
-                "Otherwise, it has to be 'linear', 'easein', 'easeout', or 'easeinout'. "
-                "This is the same as calling the setValue method and passing 'single' as "
-                "the fourth argument to setPropertyValue"
+                "Otherwise, it has to be one of the easing functions defined in the list "
+                "below. This is the same as calling the setValue method and passing "
+                "'single' as the fourth argument to setPropertyValue. The fifth argument "
+                "is another Lua script that will be executed when the interpolation "
+                "provided in parameter 3 finishes.\n Avaiable easing functions: "
+                "Linear, QuadraticEaseIn, QuadraticEaseOut, QuadraticEaseInOut, "
+                "CubicEaseIn, CubicEaseOut, CubicEaseInOut, QuarticEaseIn, "
+                "QuarticEaseOut, QuarticEaseInOut, QuinticEaseIn, QuinticEaseOut, "
+                "QuinticEaseInOut, SineEaseIn, SineEaseOut, SineEaseInOut, "
+                "CircularEaseIn, CircularEaseOut, CircularEaseInOut, ExponentialEaseIn, "
+                "ExponentialEaseOut, ExponentialEaseInOut, ElasticEaseIn, "
+                "ElasticEaseOut, ElasticEaseInOut, BounceEaseIn, BounceEaseOut, "
+                "BounceEaseInOut",
+                {}
             },
             {
                 "getPropertyValue",
+                &luascriptfunctions::propertyGetValueDeprecated,
+                {},
+                "",
+                "Returns the value the property, identified by the provided URI. "
+                "Deprecated in favor of the 'propertyValue' function",
+                {}
+            },
+            {
+                "propertyValue",
                 &luascriptfunctions::propertyGetValue,
                 {},
                 "",
-                "Returns the value the property, identified by the provided URI"
+                "Returns the value the property, identified by the provided URI. "
+                "Deprecated in favor of the 'propertyValue' function",
+                {}
             },
             codegen::lua::HasProperty,
-            codegen::lua::GetProperty,
+            codegen::lua::PropertyDeprecated,
+            codegen::lua::Property,
             codegen::lua::AddCustomProperty,
             codegen::lua::RemoveCustomProperty,
             codegen::lua::AddSceneGraphNode,
             codegen::lua::RemoveSceneGraphNode,
             codegen::lua::RemoveSceneGraphNodesFromRegex,
             codegen::lua::HasSceneGraphNode,
-            codegen::lua::AddInterestingTime,
+            codegen::lua::SceneGraphNodes,
+            codegen::lua::NodeByRenderableType,
+            codegen::lua::ScreenSpaceRenderables,
             codegen::lua::WorldPosition,
             codegen::lua::WorldRotation,
             codegen::lua::SetParent,
             codegen::lua::BoundingSphere,
-            codegen::lua::InteractionSphere
+            codegen::lua::InteractionSphere,
+            codegen::lua::MakeIdentifier,
+            codegen::lua::SetGuiOrder,
+            codegen::lua::GuiOrder
         }
     };
+}
+
+std::string makeIdentifier(std::string str) {
+    // Note that we want to preserve '-' and '_', but replace any other punctuation
+    // marks. Hence, we first convert '_' to whitespaces to avoid them being replaced
+    // in the puncutation check
+    std::replace(str.begin(), str.end(), '_', ' ');
+    std::replace_if(
+        str.begin(),
+        str.end(),
+        [](unsigned char c) { return std::ispunct(c) != 0; },
+        '-'
+    );
+    std::replace(str.begin(), str.end(), ' ', '_');
+    return str;
 }
 
 }  // namespace openspace

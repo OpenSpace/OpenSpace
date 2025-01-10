@@ -1,8 +1,8 @@
 local earth_transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local kernels = asset.require("./kernels").kernels
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-local apolloSpiceId = -908
 
 
 local LaunchTrail = {
@@ -12,10 +12,9 @@ local LaunchTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
-      Observer = "EARTH",
-      Frame = "IAU_EARTH",
-      Kernels = kernels
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Earth
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 21 12:51:00",
@@ -25,7 +24,7 @@ local LaunchTrail = {
   },
   GUI = {
     Name = "Apollo 8 Launch Trail",
-    Path = "/Solar System/Missions/Apollo"
+    Path = "/Solar System/Missions/Apollo/8"
   }
 }
 
@@ -34,22 +33,21 @@ local MoonTrail = {
   Parent = moon_transforms.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
-      Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1968 DEC 23",
     EndTime = "1968 DEC 26",
-    SampleInterval = 30,
-    Enabled = false,
+    SampleInterval = 30
   },
   GUI = {
     Name = "Apollo 8 Moon Trail",
-    Path = "/Solar System/Missions/Apollo"
+    Path = "/Solar System/Missions/Apollo/8"
   }
 }
 
@@ -58,24 +56,24 @@ local EarthBarycenterTrail = {
   Parent = earth_transforms.EarthCenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
+    Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = apolloSpiceId,
-      Observer = "EARTH",
-      Frame = "GALACTIC",
-      Kernels = kernels
+      Target = kernels.ID.Apollo8,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.Galactic
     },
     Color = { 0.8, 0.2, 0.2 },
     StartTime = "1968 DEC 21",
     EndTime = "1968 DEC 28",
-    SampleInterval = 30,
-    Enabled = false,
+    SampleInterval = 30
   },
   GUI = {
     Name = "Apollo 8 Earth Barycenter Trail",
-    Path = "/Solar System/Missions/Apollo"
+    Path = "/Solar System/Missions/Apollo/8"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(LaunchTrail)

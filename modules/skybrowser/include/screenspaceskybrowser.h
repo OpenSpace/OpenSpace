@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,18 +43,19 @@ public:
     bool initializeGL() override;
     bool deinitializeGL() override;
     glm::mat4 scaleMatrix() override;
-    void render() override;
+    void render(const RenderData& renderData) override;
     void update() override;
 
-    float opacity() const;
+    float opacity() const noexcept override;
     glm::dvec2 fineTuneVector(const glm::dvec2& drag);
     bool isInitialized() const;
+    bool isPointingSpacecraft() const;
+    bool shouldUpdateWhileTargetAnimates() const;
 
     double setVerticalFovWithScroll(float scroll);
-    void setOpacity(float opacity);
-    void setRatio(float ratio);
     void setIdInBrowser() const;
     void setIsInitialized(bool isInitialized);
+    void setPointSpaceCraft(bool shouldPoint);
 
     void updateTextureResolution();
 
@@ -70,20 +71,19 @@ private:
     static constexpr int RadiusTimeOut = 25;
     properties::FloatProperty _textureQuality;
     properties::BoolProperty _isHidden;
+    properties::BoolProperty _isPointingSpacecraft;
+    properties::BoolProperty _updateDuringTargetAnimation;
     std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
     std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
 
     void bindTexture() override;
 
     // Flags
-    bool _isSyncedWithWwt = false;
-    bool _textureDimensionsIsDirty = false;
-    bool _ratioIsDirty = false;
-    bool _radiusIsDirty = false;
     bool _isInitialized = false;
+    bool _radiusIsDirty = false;
     int _borderRadiusTimer = -1;
 
-    float _ratio = 1.f;
+    float _lastTextureQuality = 1.f;
 };
 
 } // namespace openspace

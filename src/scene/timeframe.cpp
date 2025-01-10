@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,14 +53,18 @@ documentation::Documentation TimeFrame::Documentation() {
 ghoul::mm_unique_ptr<TimeFrame> TimeFrame::createFromDictionary(
                                                             const ghoul::Dictionary& dict)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dict);
 
     TimeFrame* result = FactoryManager::ref().factory<TimeFrame>()->create(p.type, dict);
     result->setIdentifier("TimeFrame");
+    result->_type = p.type;
+
     return ghoul::mm_unique_ptr<TimeFrame>(result);
 }
 
-TimeFrame::TimeFrame() : properties::PropertyOwner({ "TimeFrame" }) {}
+TimeFrame::TimeFrame() : properties::PropertyOwner({ "TimeFrame", "Time Frame" }) {}
 
 bool TimeFrame::initialize() {
     return true;

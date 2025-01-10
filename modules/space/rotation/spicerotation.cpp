@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,27 +36,31 @@ namespace {
         "SourceFrame",
         "Source",
         "This value specifies the source frame that is used as the basis for the "
-        "coordinate transformation. This has to be a valid SPICE name"
+        "coordinate transformation. This has to be a valid SPICE name.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DestinationInfo = {
         "DestinationFrame",
         "Destination",
         "This value specifies the destination frame that is used for the coordinate "
-        "transformation. This has to be a valid SPICE name"
+        "transformation. This has to be a valid SPICE name.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeFrameInfo = {
         "TimeFrame",
         "Time Frame",
-        "The time frame in which the spice kernels are valid"
+        "The time frame in which the spice kernels are valid.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
         "Fixed Date",
         "A time to lock the rotation to. Setting this to an empty string will "
-        "unlock the time and return to rotation based on current simulation time"
+        "unlock the time and return to rotation based on current simulation time.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SpiceRotation)]] Parameters {
@@ -64,11 +68,10 @@ namespace {
         std::string sourceFrame
             [[codegen::annotation("A valid SPICE NAIF name or integer")]];
 
-        // [[codegen::verbatim(DestinationInfo.description)]]
-        std::string destinationFrame;
-
-        // [[codegen::verbatim(DestinationInfo.description)]]
-        std::optional<std::variant<std::vector<std::string>, std::string>> kernels;
+        // This value specifies the destination frame that is used for the coordinate
+        // transformation. This has to be a valid SPICE name. If this value is not
+        // specified, a reference frame of 'GALACTIC' is used instead
+        std::optional<std::string> destinationFrame;
 
         // [[codegen::verbatim(TimeFrameInfo.description)]]
         std::optional<ghoul::Dictionary> timeFrame
@@ -95,18 +98,7 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _sourceFrame = p.sourceFrame;
-    _destinationFrame = p.destinationFrame;
-
-    if (p.kernels.has_value()) {
-        if (std::holds_alternative<std::string>(*p.kernels)) {
-            SpiceManager::ref().loadKernel(std::get<std::string>(*p.kernels));
-        }
-        else {
-            for (const std::string& s : std::get<std::vector<std::string>>(*p.kernels)) {
-                SpiceManager::ref().loadKernel(s);
-            }
-        }
-    }
+    _destinationFrame = p.destinationFrame.value_or("GALACTIC");
 
     _fixedDate.onChange([this]() {
         if (_fixedDate.value().empty()) {
@@ -119,13 +111,8 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
     _fixedDate = p.fixedDate.value_or(_fixedDate);
     addProperty(_fixedDate);
 
-    if (dictionary.hasKey(TimeFrameInfo.identifier)) {
-        ghoul::Dictionary timeFrameDictionary =
-            dictionary.value<ghoul::Dictionary>(TimeFrameInfo.identifier);
-        _timeFrame = TimeFrame::createFromDictionary(timeFrameDictionary);
-        if (_timeFrame == nullptr) {
-            throw ghoul::RuntimeError("Invalid dictionary for TimeFrame");
-        }
+    if (p.timeFrame.has_value()) {
+        _timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
         addPropertySubOwner(_timeFrame.get());
     }
 
@@ -134,7 +121,6 @@ SpiceRotation::SpiceRotation(const ghoul::Dictionary& dictionary)
 
     _sourceFrame.onChange([this]() { requireUpdate(); });
     _destinationFrame.onChange([this]() { requireUpdate(); });
-
 }
 
 glm::dmat3 SpiceRotation::matrix(const UpdateData& data) const {

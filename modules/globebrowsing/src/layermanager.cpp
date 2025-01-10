@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,52 +35,32 @@
 
 namespace openspace::globebrowsing {
 
-documentation::Documentation LayerManager::Documentation() {
-    using namespace documentation;
-    return {
-        "LayerManager",
-        "globebrowsing_layermanager",
-        {
-            {
-                "*",
-                new ReferencingVerifier("globebrowsing_layer"),
-                Optional::Yes,
-                "Specifies an individual layer"
-            }
-        }
-    };
-}
-
 LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
 
-void LayerManager::initialize(const ghoul::Dictionary& layerGroupsDict) {
-    ZoneScoped
+void LayerManager::initialize(
+                  const std::map<layers::Group::ID, std::vector<ghoul::Dictionary>>& dict)
+{
+    ZoneScoped;
 
     // First create empty layer groups in case not all are specified
-    for (size_t i = 0; i < _layerGroups.size(); ++i) {
+    for (size_t i = 0; i < _layerGroups.size(); i++) {
         _layerGroups[i] = std::make_unique<LayerGroup>(layers::Groups[i]);
-    }
-
-    // Create all the layer groups
-    for (std::string_view groupName : layerGroupsDict.keys()) {
-        using namespace layers;
-        Group::ID id = ghoul::from_string<Group::ID>(groupName);
-
-        if (id != Group::ID::Unknown) {
-            ghoul::Dictionary d = layerGroupsDict.value<ghoul::Dictionary>(groupName);
-            _layerGroups[static_cast<int>(id)]->setLayersFromDict(d);
+        addPropertySubOwner(_layerGroups[i].get());
+        _layerGroups[i]->initialize();
+        auto it = dict.find(layers::Groups[i].id);
+        if (it == dict.end()) {
+            continue;
         }
-        else {
-            LWARNINGC("LayerManager", fmt::format("Unknown layer group: {}", groupName));
+
+        for (const ghoul::Dictionary& layer : it->second) {
+            try {
+                Layer* l = _layerGroups[i]->addLayer(layer);
+                l->initialize();
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+            }
         }
-    }
-
-    for (const std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
-        addPropertySubOwner(layerGroup.get());
-    }
-
-    for (const std::unique_ptr<LayerGroup>& lg : _layerGroups) {
-        lg->initialize();
     }
 }
 
@@ -91,7 +71,7 @@ void LayerManager::deinitialize() {
 }
 
 Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(id != layers::Group::ID::Unknown, "Layer group ID must be known");
 
@@ -99,13 +79,7 @@ Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& lay
         return _layerGroups[static_cast<size_t>(id)]->addLayer(layerDict);
     }
     catch (const documentation::SpecificationError& e) {
-        LERRORC(e.component, e.message);
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
-            LERRORC(o.offender, ghoul::to_string(o.reason));
-        }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
-            LWARNINGC(w.offender, ghoul::to_string(w.reason));
-        }
+        logError(e);
         return nullptr;
     }
     catch (const ghoul::RuntimeError& e) {
@@ -115,7 +89,7 @@ Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& lay
 }
 
 void LayerManager::deleteLayer(layers::Group::ID id, const std::string& layerName) {
-    ZoneScoped
+    ZoneScoped;
 
     ghoul_assert(id != layers::Group::ID::Unknown, "Layer group ID must be known");
     _layerGroups[static_cast<size_t>(id)]->deleteLayer(layerName);
@@ -130,7 +104,7 @@ const LayerGroup& LayerManager::layerGroup(layers::Group::ID groupId) const {
 }
 
 bool LayerManager::hasAnyBlendingLayersEnabled() const {
-    ZoneScoped
+    ZoneScoped;
 
     return std::any_of(
         _layerGroups.begin(),
@@ -142,17 +116,17 @@ bool LayerManager::hasAnyBlendingLayersEnabled() const {
 }
 
 std::array<LayerGroup*, LayerManager::NumLayerGroups> LayerManager::layerGroups() const {
-    ZoneScoped
+    ZoneScoped;
 
     std::array<LayerGroup*, NumLayerGroups> res = {};
-    for (int i = 0; i < NumLayerGroups; ++i) {
+    for (size_t i = 0; i < NumLayerGroups; i++) {
         res[i] = _layerGroups[i].get();
     }
     return res;
 }
 
 void LayerManager::update() {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->update();
@@ -160,7 +134,7 @@ void LayerManager::update() {
 }
 
 void LayerManager::reset(bool includeDisabled) {
-    ZoneScoped
+    ZoneScoped;
 
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         for (Layer* layer : layerGroup->layers()) {
@@ -171,8 +145,8 @@ void LayerManager::reset(bool includeDisabled) {
     }
 }
 
-void LayerManager::onChange(std::function<void(Layer*)> callback) {
-    ZoneScoped
+void LayerManager::onChange(const std::function<void(Layer*)>& callback) {
+    ZoneScoped;
 
     for (std::unique_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->onChange(callback);

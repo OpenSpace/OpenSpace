@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,7 @@ namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
+struct Configuration;
 class Dashboard;
 class DeferredcasterManager;
 class DownloadManager;
@@ -50,16 +51,15 @@ class SyncEngine;
 class TimeManager;
 class VersionChecker;
 struct WindowDelegate;
-namespace configuration { struct Configuration; }
 namespace interaction {
     struct JoystickInputStates;
     struct WebsocketInputStates;
     class ActionManager;
     class InteractionMonitor;
     class KeybindingManager;
+    class KeyframeRecordingHandler;
     class NavigationHandler;
-    class SessionRecording;
-    class ShortcutManager;
+    class SessionRecordingHandler;
 } // namespace interaction
 namespace properties { class PropertyOwner; }
 namespace scripting {
@@ -88,15 +88,15 @@ inline SyncEngine* syncEngine;
 inline TimeManager* timeManager;
 inline VersionChecker* versionChecker;
 inline WindowDelegate* windowDelegate;
-inline configuration::Configuration* configuration;
+inline Configuration* configuration;
 inline interaction::ActionManager* actionManager;
 inline interaction::InteractionMonitor* interactionMonitor;
 inline interaction::JoystickInputStates* joystickInputStates;
 inline interaction::WebsocketInputStates* websocketInputStates;
 inline interaction::KeybindingManager* keybindingManager;
+inline interaction::KeyframeRecordingHandler* keyframeRecording;
 inline interaction::NavigationHandler* navigationHandler;
-inline interaction::SessionRecording* sessionRecording;
-inline interaction::ShortcutManager* shortcutManager;
+inline interaction::SessionRecordingHandler* sessionRecordingHandler;
 inline properties::PropertyOwner* rootPropertyOwner;
 inline properties::PropertyOwner* screenSpaceRootPropertyOwner;
 inline properties::PropertyOwner* userPropertyOwner;

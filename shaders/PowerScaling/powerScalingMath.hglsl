@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,8 @@
 const float k = 10.0;
 const float FLT_MAX = 1e38; // Not max but large enough for the purpose
 
-float log10(float x) {  
-  return log(x) / log(10.0);   
+float log10(float x) {
+  return log(x) / log(10.0);
 }
 
 vec4 psc_normalization(vec4 v) {

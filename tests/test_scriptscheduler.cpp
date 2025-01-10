@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/spicemanager.h>
@@ -34,12 +34,8 @@
 TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
     using namespace openspace;
     using namespace openspace::scripting;
-    
-    SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
+    SpiceManager::initialize();
 
     ScriptScheduler scheduler;
 
@@ -70,9 +66,6 @@ TEST_CASE("ScriptScheduler: Multiple Forward Single Jump", "[scriptscheduler]") 
     using namespace openspace::scripting;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -113,10 +106,6 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
-
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -154,9 +143,6 @@ TEST_CASE("ScriptScheduler: Simple Backward", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -187,10 +173,6 @@ TEST_CASE("ScriptScheduler: Multiple Backward Single Jump", "[scriptscheduler]")
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
-
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -231,9 +213,6 @@ TEST_CASE("ScriptScheduler: Multiple Backward Ordering", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -270,9 +249,6 @@ TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
     using namespace openspace::scripting;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     static const std::vector<double> TestTimes = {
         0.0, 1.0, -1.0, std::numeric_limits<double>::min(),
@@ -280,16 +256,16 @@ TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
     };
 
     // First test if a new ScriptScheduler will return an empty list
-    for (double t : TestTimes) {
+    for (const double t : TestTimes) {
         ScriptScheduler scheduler;
-        std::vector<std::string> res = scheduler.progressTo(t);
+        const std::vector<std::string> res = scheduler.progressTo(t);
         CHECK(res.empty());
     }
 
     // Then test the same thing but keeping the same ScriptScheduler
     ScriptScheduler scheduler;
-    for (double t : TestTimes) {
-        std::vector<std::string> res = scheduler.progressTo(t);
+    for (const double t : TestTimes) {
+        const std::vector<std::string> res = scheduler.progressTo(t);
         CHECK(res.empty());
     }
 
@@ -302,9 +278,6 @@ TEST_CASE("ScriptScheduler: Forward Backwards", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -349,9 +322,6 @@ TEST_CASE("ScriptScheduler: Rewind", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -389,16 +359,13 @@ TEST_CASE("ScriptScheduler: CurrentTime", "[scriptscheduler]") {
     using namespace openspace::scripting;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     static const std::vector<double> TestValues = {
         0.0, 1.0, 42.0, std::numeric_limits<double>::min(),
         -std::numeric_limits<double>::max(), std::numeric_limits<double>::max()
     };
 
-    for (double t : TestValues) {
+    for (const double t : TestValues) {
         ScriptScheduler scheduler;
         scheduler.progressTo(t);
         CHECK(t == scheduler.currentTime());
@@ -413,9 +380,6 @@ TEST_CASE("ScriptScheduler: All Scripts", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -456,9 +420,6 @@ TEST_CASE("ScriptScheduler: Jump Equal", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -496,9 +457,6 @@ TEST_CASE("ScriptScheduler: Same Time", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -529,9 +487,6 @@ TEST_CASE("ScriptScheduler: Multi Inner Jump", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
     {
@@ -571,9 +526,6 @@ TEST_CASE(
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     ScriptScheduler::ScheduledScript script1;
     script1.time = Time::convertTime("2000 JAN 03");
@@ -612,9 +564,6 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering Multiple Load" "[scriptsch
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     ScriptScheduler::ScheduledScript script1;
     script1.time = Time::convertTime("2000 JAN 03");
@@ -651,9 +600,6 @@ TEST_CASE(
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     ScriptScheduler::ScheduledScript script1;
     script1.time = Time::convertTime("2000 JAN 03");
@@ -693,9 +639,6 @@ TEST_CASE(
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     ScriptScheduler scheduler;
 
@@ -730,9 +673,6 @@ TEST_CASE("ScriptScheduler: Forward Backwards Multiple Load", "[scriptscheduler]
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     ScriptScheduler::ScheduledScript script1;
     script1.time = Time::convertTime("2000 JAN 03");
@@ -773,9 +713,6 @@ TEST_CASE("ScriptScheduler: Rewind Multiple Load", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     ScriptScheduler::ScheduledScript script1;
     script1.time = Time::convertTime("2000 JAN 03");
@@ -810,9 +747,6 @@ TEST_CASE("ScriptScheduler: All Scripts Multiple Load", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     ScriptScheduler::ScheduledScript script1;
     script1.time = Time::convertTime("2000 JAN 03");
@@ -849,9 +783,6 @@ TEST_CASE("ScriptScheduler: All Scripts Mixed Load", "[scriptscheduler]") {
     using namespace std::string_literals;
 
     SpiceManager::initialize();
-    SpiceManager::ref().loadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
 
     ScriptScheduler::ScheduledScript script1;
     script1.time = Time::convertTime("2000 JAN 03");

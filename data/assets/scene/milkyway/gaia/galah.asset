@@ -1,39 +1,41 @@
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Galah Speck Files",
   Type = "HttpSynchronization",
   Identifier = "gaia_galah",
   Version = 1
 })
 
-local colormaps = asset.syncedResource({
+local colormaps = asset.resource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",
   Version = 3
 })
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Stars Textures",
   Type = "HttpSynchronization",
   Identifier = "stars_textures",
   Version = 1
 })
 
-local gaia_abundance_galah = {
+
+local GaiaAbundanceGalah = {
   Identifier = "GaiaAbundanceGalah",
   Renderable = {
     Type = "RenderableStars",
     Enabled = false,
     File = speck .. "GaiaAbundGalah.speck",
-    Texture = textures .. "halo.png",
+    Glare = {
+      Texture = textures .. "halo.png"
+    },
     -- ShapeTexture = textures .. "disc.png",
     MagnitudeExponent = 7.25,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based",
     ColorOption = "Other Data",
     OtherData = "FeH",
     ColorMap = colormaps .. "colorbv.cmap",
-    OtherDataColorMap = colormaps .. "RainbowGradient.cmap",
+    OtherDataColorMap = colormaps .. "rainbowgradient.cmap",
     ColorRange = { { -0.8, 0.6 } },
     StaticFilter = -9999,
     StaticFilterReplacement = 0.0,
@@ -55,21 +57,21 @@ local gaia_abundance_galah = {
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(gaia_abundance_galah)
+  openspace.addSceneGraphNode(GaiaAbundanceGalah)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(gaia_abundance_galah)
+  openspace.removeSceneGraphNode(GaiaAbundanceGalah)
 end)
 
-asset.export(gaia_abundance_galah)
+asset.export(GaiaAbundanceGalah)
 
 
 
 asset.meta = {
   Name = "Gaia Abundance Galah",
-  Version = "1.0",
   Description = "This asset contains a RenderableStars dataset with metallicity data",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

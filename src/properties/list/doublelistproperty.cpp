@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/stringhelper.h>
 
 namespace openspace::properties {
 
@@ -45,49 +45,8 @@ int DoubleListProperty::typeLua() const {
     return LUA_TTABLE;
 }
 
-std::vector<double> DoubleListProperty::fromLuaConversion(lua_State* state,
-                                                          bool& success) const
-{
-    if (!lua_istable(state, -1)) {
-        success = false;
-        LERRORC(className(), "Conversion from Lua failed. The input was not a table");
-        return {};
-    }
-
-    std::vector<double> result;
-    lua_pushnil(state);
-    while (lua_next(state, -2) != 0) {
-        if (lua_isnumber(state, -1)) {
-            result.emplace_back(lua_tonumber(state, -1));
-        }
-        else {
-            success = false;
-            LERRORC(
-                className(),
-                "Conversion from Lua failed. The input table contains non-number values"
-            );
-            return {};
-        }
-        lua_pop(state, 1);
-    }
-    success = true;
-    return result;
-}
-
-void DoubleListProperty::toLuaConversion(lua_State* state) const {
-    lua_createtable(state, static_cast<int>(_value.size()), 0);
-
-    int i = 1;
-    for (double v : _value) {
-        ghoul::lua::push(state, i);
-        ghoul::lua::push(state, v);
-        lua_settable(state, -3);
-        ++i;
-    }
-}
-
 std::string DoubleListProperty::toStringConversion() const {
-    nlohmann::json json(_value);
+    const nlohmann::json json(_value);
     return json.dump();
 }
 

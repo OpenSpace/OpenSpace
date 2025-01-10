@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -110,10 +110,10 @@ void NumericalProperty<T>::setExponent(float exponent) {
         if (!isValidRange(_minimumValue, _maximumValue)) {
             LWARNINGC(
                 "NumericalProperty: setExponent",
-                fmt::format(
+                std::format(
                     "Setting exponent for properties with negative values in "
                     "[min, max] range is not yet supported. Property: {}",
-                    this->fullyQualifiedIdentifier()
+                    this->uri()
                 )
             );
             _exponent = 1.f;
@@ -166,12 +166,9 @@ void NumericalProperty<T>::setInterpolationTarget(std::any value) {
 
 template <typename T>
 void NumericalProperty<T>::setLuaInterpolationTarget(lua_State* state) {
-    bool success = false;
-    T targetValue = fromLuaConversion(state, success);
-    if (success) {
-        _interpolationStart = TemplateProperty<T>::_value;
-        _interpolationEnd = std::move(targetValue);
-    }
+    T targetValue = fromLuaConversion(state);
+    _interpolationStart = TemplateProperty<T>::_value;
+    _interpolationEnd = std::move(targetValue);
 }
 
 template <typename T>
@@ -189,6 +186,11 @@ void NumericalProperty<T>::interpolateValue(float t,
 template <typename T>
 void NumericalProperty<T>::toLuaConversion(lua_State* state) const {
     ghoul::lua::push(state, TemplateProperty<T>::_value);
+}
+
+template <typename T>
+T NumericalProperty<T>::fromLuaConversion(lua_State* state) const {
+    return ghoul::lua::value<T>(state);
 }
 
 template <typename T>

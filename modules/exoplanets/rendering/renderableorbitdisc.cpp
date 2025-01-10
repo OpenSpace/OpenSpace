@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,45 +40,45 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 7> UniformNames = {
-        "modelViewProjectionTransform", "offset", "opacity",
-        "discTexture", "eccentricity", "semiMajorAxis", "multiplyColor"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for the color"
+        "The path to a file with a one-dimensional texture to be used for the disc "
+        "color. The leftmost color will be innermost color when rendering the disc, "
+        "and the rightmost color will be the outermost color.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the semi-major axis of the orbit, in meter"
+        "The size of the semi-major axis of the orbit in meters.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EccentricityInfo = {
         "Eccentricity",
         "Eccentricity",
-        "This value determines the eccentricity, that is the deviation from a perfect "
-        "sphere, for this orbit"
+        "The eccentricity of the orbit, which is the deviation from a perfect circle.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
-        "This property determines the width of the disc. The values specify the lower "
-        "and upper deviation from the semi major axis, respectively. The values are "
-        "relative to the size of the semi-major axis. That is, 0 means no deviation "
-        "from the semi-major axis and 1 is a whole semi-major axis's worth of deviation"
+        "The width of the disc, given as two values that specify the lower and upper "
+        "deviation from the semi major axis, respectively. The values are relative "
+        "to the size of the semi-major axis. That is, 0 means no deviation from the "
+        "semi-major axis and 1 is a whole semi-major axis's worth of deviation.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply Color",
-        "If set, the disc's texture is multiplied with this color. "
-        "Useful for applying a color grayscale images"
+        "If set, the disc's texture is multiplied with this color. Useful for applying a "
+        "color grayscale images.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     struct [[codegen::Dictionary(RenderableOrbitDisc)]] Parameters {
@@ -117,17 +117,17 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _offset = p.offset.value_or(_offset);
-    _offset.onChange([&]() { _planeIsDirty = true; });
+    _offset.onChange([this]() { _planeIsDirty = true; });
     addProperty(_offset);
 
     _size = p.size;
-    _size.onChange([&]() { _planeIsDirty = true; });
+    _size.onChange([this]() { _planeIsDirty = true; });
     addProperty(_size);
 
     setBoundingSphere(_size + _offset.value().y * _size);
 
     _texturePath = p.texture.string();
-    _texturePath.onChange([&]() { _texture->loadFromFile(_texturePath.value()); });
+    _texturePath.onChange([this]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
@@ -135,10 +135,10 @@ RenderableOrbitDisc::RenderableOrbitDisc(const ghoul::Dictionary& dictionary)
     addProperty(_multiplyColor);
 
     _eccentricity = p.eccentricity;
-    _eccentricity.onChange([&]() { _planeIsDirty = true; });
+    _eccentricity.onChange([this]() { _planeIsDirty = true; });
     addProperty(_eccentricity);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 }
 
 bool RenderableOrbitDisc::isReady() const {
@@ -159,7 +159,7 @@ void RenderableOrbitDisc::initializeGL() {
         absPath("${BASE}/modules/exoplanets/shaders/orbitdisc_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     _texture->loadFromFile(_texturePath.value());
     _texture->uploadToGpu();
@@ -179,16 +179,9 @@ void RenderableOrbitDisc::deinitializeGL() {
 void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     _shader->activate();
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-
     _shader->setUniform(
-        _uniformCache.modelViewProjection,
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+        _uniformCache.modelViewProjectionTransform,
+        glm::mat4(calcModelViewProjectionTransform(data))
     );
     _shader->setUniform(_uniformCache.offset, _offset);
     _shader->setUniform(_uniformCache.opacity, opacity());
@@ -199,7 +192,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
-    _shader->setUniform(_uniformCache.texture, unit);
+    _shader->setUniform(_uniformCache.discTexture, unit);
 
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -219,7 +212,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
 void RenderableOrbitDisc::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
     if (_planeIsDirty) {

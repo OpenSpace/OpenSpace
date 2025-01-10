@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,17 +39,6 @@ std::string_view FloatProperty::className() const {
 
 int FloatProperty::typeLua() const {
     return LUA_TNUMBER;
-}
-
-float FloatProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        float val = static_cast<float>(lua_tonumber(state, -1));
-        return val;
-    }
-    else {
-        return 0.f;
-    }
 }
 
 } // namespace openspace::properties

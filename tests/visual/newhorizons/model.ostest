@@ -1,0 +1,17 @@
+{
+  "profile": "newhorizons",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "NewHorizons",
+        "pitch": 0.0444246,
+        "position": [ 33.19494, -1.500620, -8.950034 ],
+        "up": [ 0.0469986, 0.998872, 0.00683673 ],
+        "yaw": 0.146484
+      }
+    },
+    { "type": "wait", "value": 5 },
+    { "type": "screenshot" }
+  ]
+}

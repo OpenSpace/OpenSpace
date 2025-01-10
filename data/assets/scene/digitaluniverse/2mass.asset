@@ -1,66 +1,74 @@
-local textures = asset.syncedResource({
-  Name = "2MASS Textures",
+local textures = asset.resource({
+  Name = "Point Textures",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_2mass_textures",
-  Version = 2
-})
-
-local speck = asset.syncedResource({
-  Name = "2MASS Speck Files",
-  Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_2mass_speck",
+  Identifier = "digitaluniverse_point_textures",
   Version = 1
 })
 
-local object = {
+local speck = asset.resource({
+  Name = "2MASS Speck Files",
+  Type = "HttpSynchronization",
+  Identifier = "digitaluniverse_2mass_speck",
+  Version = 2
+})
+
+
+local Object = {
   Identifier = "2MASS",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
-    Color = { 1.0, 0.4, 0.2 },
     Opacity = 1.0,
     File = speck .. "2MASS.speck",
     Unit = "Mpc",
-    Texture = textures .. "point3A.png",
-    ColorMap = speck .. "lss.cmap",
-    ColorOption = { "redshift", "prox5Mpc" },
-    ColorRange = { { 0.0, 0.075 }, { 1.0, 50.0 } },
-    CorrectionSizeEndDistance = 20.6,
-    CorrectionSizeFactor = 15.0,
-    ScaleFactor = 510.78,
-    BillboardMinMaxSize = { 0.0, 11.15 },
-    EnablePixelSizeControl = true
+    Texture = {
+      File = textures .. "point3A.png",
+    },
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 },
+      ColorMapping = {
+        File = speck .. "lss.cmap",
+        ParameterOptions = {
+          { Key = "prox5Mpc", Range = { 1.0, 50.0 } },
+          { Key = "redshift", Range = { 0.0, 0.075 } }
+        }
+      }
+    },
+    SizeSettings = {
+      ScaleExponent = 22.2,
+      MaxSize = 0.44,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "2MASS Galaxies",
-    Path = "/Universe/Galaxies",
+    Path = "/Universe/Nearby Surveys",
     Description = [[The Two Micron All-Sky Survey (2MASS) is an infrared survey of the
-    sky published in 2003. Because it is looking in the infrared, and this is a composite
-    of the 2MASS point-source catalog, most of the light from this survey is starlight. In
-    visible light, clouds of gas and dust obscure our view. However, in infrared, the
-    longer wavelengths of light can penetrate these clouds without being scattered,
-    thereby revealing stars that would normally be hidden to our eye.
-    (Description from URL)]]
+      sky published in 2003. Taken from two telescopes in Arizona and Chile, it offers an
+      all-sky view of galaxies beyond the Milky Way. Because it is infrared, the light
+      detected is mostly from cool stars within the galaxies, which comprises the majority
+      of mass in a galaxy. Colors: Orange galaxies show dense regions of galaxies, aqua
+      galaxies are areas of intermediate density, and green galaxies are areas of lower
+      density. Census: 43,533 galaxies.]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "2MASS Galaxies",
-  Version = "1.1",
-  Description = "Digital Universe asset for the Two Micron All-Sky Survey (2MASS) survey",
+  Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

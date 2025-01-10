@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,6 +52,8 @@ documentation::Documentation Translation::Documentation() {
 ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     Translation* result = FactoryManager::ref().factory<Translation>()->create(
@@ -59,6 +61,7 @@ ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
         dictionary,
         &global::memoryManager->PersistentMemory
     );
+    result->_type = p.type;
     return ghoul::mm_unique_ptr<Translation>(result);
 }
 
@@ -69,6 +72,8 @@ bool Translation::initialize() {
 }
 
 void Translation::update(const UpdateData& data) {
+    ZoneScoped;
+
     if (!_needsUpdate && data.time.j2000Seconds() == _cachedTime) {
         return;
     }

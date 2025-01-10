@@ -22,9 +22,9 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-include(${GHOUL_BASE_DIR}/support/cmake/copy_shared_libraries.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/application_definition.cmake)
-include(${OPENSPACE_CMAKE_EXT_DIR}/global_variables.cmake)
+include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/copy_shared_libraries.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/application_definition.cmake)
+include(${PROJECT_SOURCE_DIR}/support/cmake/global_variables.cmake)
 
 set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
 
@@ -57,7 +57,7 @@ target_link_libraries(OpenSpace-MinVR PUBLIC openspace-core MinVR)
 # target as of July 2017, which is needed.
 if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   if (WIN32)
-    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace-MinVR/openspace.rc)
+    set(RESOURCE_FILE openspace.rc)
   endif ()
 
   # Add the CEF binary distribution's cmake/ directory to the module path and

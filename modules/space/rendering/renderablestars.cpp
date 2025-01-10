@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,32 +50,21 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableStars";
 
-    constexpr std::array<const char*, 17> UniformNames = {
-        "modelMatrix", "cameraUp", "cameraViewProjectionMatrix", "colorOption",
-        "magnitudeExponent", "eyePosition", "psfParamConf", "lumCent", "radiusCent",
-        "brightnessCent", "colorTexture", "alphaValue", "psfTexture", "otherDataTexture",
-        "otherDataRange", "filterOutOfRange", "fixedColor"
-    };
-
-    enum RenderMethod {
-        PointSpreadFunction = 0,
-        TextureBased
+    constexpr std::array<const char*, 24> UniformNames = {
+        "modelMatrix", "cameraViewProjectionMatrix", "cameraUp", "eyePosition",
+        "colorOption", "magnitudeExponent", "sizeComposition", "lumCent", "radiusCent",
+        "colorTexture", "opacity", "otherDataTexture", "otherDataRange",
+        "filterOutOfRange", "fixedColor", "glareTexture", "glareMultiplier", "glareGamma",
+        "glareScale", "hasCore", "coreTexture", "coreMultiplier", "coreGamma", "coreScale"
     };
 
     enum SizeComposition {
-        AppBrightness = 0,
+        DistanceModulus = 0,
+        AppBrightness,
         LumSize,
-        LumSizeAppBrightness,
         AbsMagnitude,
-        AppMagnitude,
-        DistanceModulus
+        AppMagnitude
     };
-
-    constexpr int PsfMethodSpencer = 0;
-    constexpr int PsfMethodMoffat = 1;
-
-    constexpr int PsfTextureSize = 64;
-    constexpr int ConvolvedfTextureSize = 257;
 
     constexpr double PARSEC = 0.308567756E17;
 
@@ -84,7 +73,6 @@ namespace {
         float value;
         float luminance;
         float absoluteMagnitude;
-        float apparentMagnitude;
     };
 
     struct VelocityVBOLayout {
@@ -92,7 +80,6 @@ namespace {
         float value;
         float luminance;
         float absoluteMagnitude;
-        float apparentMagnitude;
 
         float vx; // v_x
         float vy; // v_y
@@ -104,7 +91,6 @@ namespace {
         float value;
         float luminance;
         float absoluteMagnitude;
-        float apparentMagnitude;
 
         float speed;
     };
@@ -114,248 +100,203 @@ namespace {
         float value;
         float luminance;
         float absoluteMagnitude;
-        float apparentMagnitude;
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
         "SpeckFile",
-        "Speck File",
-        "The speck file that is loaded to get the data for rendering these stars"
+        "SPECK File",
+        "The path to the SPECK file containing the data for rendering these stars.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "ColorBV Texture",
         "The path to the texture that is used to convert from the B-V value of the star "
-        "to its color. The texture is used as a one dimensional lookup function"
+        "to its color. The texture is used as a one dimensional lookup function.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingBvInfo = {
         "MappingBV",
         "Mapping (bv-color)",
-        "The name of the variable in the speck file that is used as the b-v color "
-        "variable"
+        "The name of the variable in the SPECK file that is used as the b-v color "
+        "variable.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingLuminanceInfo = {
         "MappingLuminance",
         "Mapping (luminance)",
-        "The name of the variable in the speck file that is used as the luminance "
-        "variable"
+        "The name of the variable in the SPECK file that is used as the luminance "
+        "variable.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingAbsMagnitudeInfo = {
         "MappingAbsMagnitude",
         "Mapping (absolute magnitude)",
-        "The name of the variable in the speck file that is used as the absolute "
-        "magnitude variable"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MappingAppMagnitudeInfo = {
-        "MappingAppMagnitude",
-        "Mapping (apparent magnitude)",
-        "The name of the variable in the speck file that is used as the apparent "
-        "magnitude variable"
+        "The name of the variable in the SPECK file that is used as the absolute "
+        "magnitude variable.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingVxInfo = {
         "MappingVx",
         "Mapping (vx)",
-        "The name of the variable in the speck file that is used as the star velocity "
-        "along the x-axis"
+        "The name of the variable in the SPECK file that is used as the star velocity "
+        "along the x-axis.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingVyInfo = {
         "MappingVy",
         "Mapping (vy)",
-        "The name of the variable in the speck file that is used as the star velocity "
-        "along the y-axis"
+        "The name of the variable in the SPECK file that is used as the star velocity "
+        "along the y-axis.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingVzInfo = {
         "MappingVz",
         "Mapping (vz)",
-        "The name of the variable in the speck file that is used as the star velocity "
-        "along the z-axis"
+        "The name of the variable in the SPECK file that is used as the star velocity "
+        "along the z-axis.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MappingSpeedInfo = {
         "MappingSpeed",
         "Mapping (speed)",
-        "The name of the variable in the speck file that is used as the speed"
+        "The name of the variable in the SPECK file that is used as the speed.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
         "Color Option",
         "This value determines which quantity is used for determining the color of the "
-        "stars"
+        "stars.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataOptionInfo = {
         "OtherData",
         "Other Data Column",
-        "The index of the speck file data column that is used as the color input"
+        "The index of the SPECK file data column that is used as the color input.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataValueRangeInfo = {
         "OtherDataValueRange",
         "Range of the other data values",
         "This value is the min/max value range that is used to normalize the other data "
-        "values so they can be used by the specified color map"
+        "values so they can be used by the specified color map.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FixedColorInfo = {
         "FixedColorValue",
         "Color used for fixed star colors",
-        "The color that should be used if the 'Fixed Color' value is used"
+        "The color that should be used if the 'Fixed Color' value is used.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataColorMapInfo = {
         "OtherDataColorMap",
         "Other Data Color Map",
-        "The color map that is used if the 'Other Data' rendering method is selected"
+        "The color map that is used if the 'Other Data' rendering method is selected.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterOutOfRangeInfo = {
         "FilterOutOfRange",
         "Filter Out of Range",
         "Determines whether other data values outside the value range should be visible "
-        "or filtered away"
+        "or filtered away.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    // Old Method
-    constexpr openspace::properties::Property::PropertyInfo PsfTextureInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo CoreOwnerInfo = {
+        "Core",
+        "Core",
+        "Settings for the central core portion of the star."
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo GlareOwnerInfo = {
+        "Glare",
+        "Glare",
+        "Settings for the glare portion of the star."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
-        "Point Spread Function Texture",
-        "The path to the texture that should be used as a point spread function for the "
-        "stars"
+        "Texture Path",
+        "The path to the texture that should be used.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    //constexpr openspace::properties::Property::PropertyInfo ShapeTextureInfo = {
-    //    "ShapeTexture",
-    //    "Shape Texture to be convolved",
-    //    "The path to the texture that should be used as the base shape for the stars"
-    //};
+    constexpr openspace::properties::Property::PropertyInfo MultiplierInfo = {
+        "Multiplier",
+        "Multiplier",
+        "An individual multiplication factor for this texture component. Using the "
+        "multiplier and gamma values for both components, it is possible to fine tune "
+        "the look of the stars or disable the contributions altogether by setting it to "
+        "0.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 
-    // PSF
+    constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
+        "Gamma",
+        "Gamma",
+        "An individual gamma exponent for this texture component. Using the multiplier "
+        "and gamma values for both components, it is possible to finetune the look of "
+        "the stars."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
         "MagnitudeExponent",
         "Magnitude Exponent",
-        "Adjust star magnitude by 10^MagnitudeExponent. "
-        "Stars closer than this distance are given full opacity. "
-        "Farther away, stars dim proportionally to the logarithm of their distance"
+        "Adjust star magnitude by 10^MagnitudeExponent. Stars closer than this distance "
+        "are given full opacity. Farther away, stars dim proportionally to the "
+        "logarithm of their distance.",
+        openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderMethodOptionInfo = {
-        "RenderMethod",
-        "Render Method",
-        "Render method for the stars"
+    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+        "Scale",
+        "Scale",
+        "A uniform scale factor that determines how much of the total size of the star "
+        "this component is using. If it is 0, it will be hidden. If it is 1, it will "
+        "take the entire size.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        UserProvidedTextureOptionInfo =
-    {
-        "UserProvidedTexture",
-        "User Provided Texture",
-        ""
-    };
-
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        ParametersOwnerOptionInfo =
-    {
-        "ParametersOwner",
-        "Parameters Options",
-        ""
-    };
-
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo MoffatMethodOptionInfo =
-    {
-        "MoffatMethodOption",
-        "Moffat Method",
-        ""
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo PSFMethodOptionInfo = {
-        "PSFMethodOptionInfo",
-        "PSF Method Option",
-        "Debug option for PSF main function: Spencer or Moffat"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SizeCompositionOptionInfo = {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo SizeCompositionInfo = {
         "SizeComposition",
-        "Size Composition Option",
-        "Base multiplyer for the final stars' sizes"
+        "Size Composition",
+        ""
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SizeCompositionMethodInfo = {
+        "Method",
+        "Method",
+        "Method to determine the size for the stars.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LumPercentInfo = {
         "LumPercent",
         "Luminosity Contribution",
-        "Luminosity Contribution"
+        "Luminosity Contribution.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusPercentInfo = {
         "RadiusPercent",
         "Radius Contribution",
-        "Radius Contribution"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo BrightnessPercentInfo = {
-        "BrightnessPercen",
-        "App Brightness Contribution",
-        "App Brightness Contribution"
-    };
-
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        SpencerPSFParamOwnerInfo =
-    {
-        "SpencerPSFParamOwner",
-        "Spencer PSF Paramameters",
-        "PSF parameters for Spencer"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo P0ParamInfo = {
-        "P0Param",
-        "P0",
-        "P0 parameter contribution"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo P1ParamInfo = {
-        "P1Param",
-        "P1",
-        "P1 parameter contribution"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo P2ParamInfo = {
-        "P2Param",
-        "P2",
-        "P2 parameter contribution"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo AlphaConstInfo = {
-        "AlphaConst",
-        "Alpha",
-        "Empirical Alpha Constant"
-    };
-
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        MoffatPSFParamOwnerInfo =
-    {
-        "MoffatPSFParam",
-        "Moffat PSF Parameters",
-        "PSF parameters for Moffat"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FWHMInfo = {
-        "FWHM",
-        "FWHM",
-        "Moffat's FWHM"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo BetaInfo = {
-        "Beta",
-        "Beta",
-        "Moffat's Beta Constant"
+        "Radius Contribution.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
@@ -363,18 +304,19 @@ namespace {
         "Fade-In Start and End Distances",
         "These values determine the initial and final distances from the center of "
         "our galaxy from which the astronomical object will start and end "
-        "fading-in"
+        "fading-in.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFadeInInfo = {
-        "DisableFadeIn",
-        "Disable Fade-in effect",
-        "Enables/Disables the Fade-in effect"
+    constexpr openspace::properties::Property::PropertyInfo EnableFadeInInfo = {
+        "EnableFadeIn",
+        "Enable Fade-in effect",
+        "Enables/Disables the Fade-in effect.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableStars)]] Parameters {
-        // The path to the SPECK file containing information about the stars being
-        // rendered
+        // [[codegen::verbatim(SpeckFileInfo.description)]]
         std::filesystem::path speckFile [[codegen::key("File")]];
 
         // [[codegen::verbatim(ColorTextureInfo.description)]]
@@ -394,43 +336,51 @@ namespace {
         std::optional<std::string> otherData;
 
         // [[codegen::verbatim(OtherDataColorMapInfo.description)]]
-        std::optional<std::string> otherDataColorMap;
+        std::optional<std::filesystem::path> otherDataColorMap;
 
         // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
 
-        // This value specifies a value that is always filtered out of the value ranges on
-        // loading. This can be used to trim the dataset's automatic value range
+        // Specifies a value that is always filtered out of the value ranges on load.
+        // This can be used to trim the dataset's automatic value range.
         std::optional<float> staticFilter;
 
-        // This is the value that is used to replace statically filtered values. Setting
-        // this value only makes sense if 'StaticFilter' is 'true', as well
+        // A value that is used to replace statically filtered values. Setting this value
+        // only makes sense if `StaticFilter` is set as well.
         std::optional<float> staticFilterReplacement;
+
+        struct Texture {
+            // [[codegen::verbatim(TextureInfo.description)]]
+            std::filesystem::path texture;
+
+            // [[codegen::verbatim(MultiplierInfo.description)]]
+            std::optional<float> multiplier;
+
+            // [[codegen::verbatim(GammaInfo.description)]]
+            std::optional<float> gamma;
+
+            // [[codegen::verbatim(ScaleInfo.description)]]
+            std::optional<float> scale;
+        };
+
+        // [[codegen::verbatim(GlareOwnerInfo.description)]]
+        Texture glare;
+
+        // [[codegen::verbatim(CoreOwnerInfo.description)]]
+        std::optional<Texture> core;
 
         // [[codegen::verbatim(MagnitudeExponentInfo.description)]]
         std::optional<float> magnitudeExponent;
 
-        enum class [[codegen::map(RenderMethod)]] RenderMethod {
-            PointSpreadFunction [[codegen::key("PSF")]],
-            TextureBased [[codegen::key("Texture Based")]]
-        };
-
-        // [[codegen::verbatim(RenderMethodOptionInfo.description)]]
-        RenderMethod renderMethod;
-
-        // [[codegen::verbatim(PsfTextureInfo.description)]]
-        std::filesystem::path texture;
-
         enum class [[codegen::map(SizeComposition)]] SizeComposition {
+            DistanceModulus [[codegen::key("Distance Modulus")]],
             AppBrightness [[codegen::key("App Brightness")]],
             LumSize [[codegen::key("Lum and Size")]],
-            LumSizeAppBrightness [[codegen::key("Lum, Size and App Brightness")]],
             AbsMagnitude [[codegen::key("Abs Magnitude")]],
-            AppMagnitude [[codegen::key("App Magnitude")]],
-            DistanceModulus [[codegen::key("Distance Modulus")]]
+            AppMagnitude [[codegen::key("App Magnitude")]]
         };
 
-        // [[codegen::verbatim(SizeCompositionOptionInfo.description)]]
+        // [[codegen::verbatim(SizeCompositionMethodInfo.description)]]
         std::optional<SizeComposition> sizeComposition;
 
         struct DataMapping {
@@ -440,8 +390,6 @@ namespace {
             std::optional<std::string> luminance;
             // [[codegen::verbatim(MappingAbsMagnitudeInfo.description)]]
             std::optional<std::string> absoluteMagnitude;
-            // [[codegen::verbatim(MappingAppMagnitudeInfo.description)]]
-            std::optional<std::string> apparentMagnitude;
             // [[codegen::verbatim(MappingVxInfo.description)]]
             std::optional<std::string> vx;
             // [[codegen::verbatim(MappingVyInfo.description)]]
@@ -451,15 +399,15 @@ namespace {
             // [[codegen::verbatim(MappingSpeedInfo.description)]]
             std::optional<std::string> speed;
         };
-        // The mappings between data values and the variable names specified in the speck
-        // file
+        // The mappings between data values and the variable names specified in the SPECK
+        // file.
         DataMapping dataMapping;
 
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
 
-        // [[codegen::verbatim(DisableFadeInInfo.description)]]
-        std::optional<bool> disableFadeIn;
+        // [[codegen::verbatim(EnableFadeInInfo.description)]]
+        std::optional<bool> enableFadeIn;
     };
 #include "renderablestars_codegen.cpp"
 }  // namespace
@@ -474,13 +422,11 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _speckFile(SpeckFileInfo)
     , _colorTexturePath(ColorTextureInfo)
-    //, _shapeTexturePath(ShapeTextureInfo)
-    , _dataMappingContainer({ "DataMapping", "Data Mapping" })
     , _dataMapping{
+        properties::PropertyOwner({ "DataMapping", "Data Mapping" }),
         properties::StringProperty(MappingBvInfo),
         properties::StringProperty(MappingLuminanceInfo),
         properties::StringProperty(MappingAbsMagnitudeInfo),
-        properties::StringProperty(MappingAppMagnitudeInfo),
         properties::StringProperty(MappingVxInfo),
         properties::StringProperty(MappingVyInfo),
         properties::StringProperty(MappingVzInfo),
@@ -500,101 +446,96 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     )
     , _fixedColor(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
-    , _pointSpreadFunctionTexturePath(PsfTextureInfo)
-    , _psfMethodOption(
-        PSFMethodOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _psfMultiplyOption(
-        SizeCompositionOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _lumCent(LumPercentInfo, 0.5f, 0.f, 3.f)
-    , _radiusCent(RadiusPercentInfo, 0.5f, 0.f, 3.f)
-    , _brightnessCent(BrightnessPercentInfo, 0.5f, 0.f, 3.f)
-    , _magnitudeExponent(MagnitudeExponentInfo, 4.f, 0.f, 8.f)
-    , _spencerPSFParamOwner(SpencerPSFParamOwnerInfo)
-    , _p0Param(P0ParamInfo, 0.384f, 0.f, 1.f)
-    , _p1Param(P1ParamInfo, 0.478f, 0.f, 1.f)
-    , _p2Param(P2ParamInfo, 0.138f, 0.f, 1.f)
-    , _spencerAlphaConst(AlphaConstInfo, 0.02f, 0.000001f, 5.f)
-    , _moffatPSFParamOwner(MoffatPSFParamOwnerInfo)
-    , _FWHMConst(FWHMInfo, 10.4f, 0.f, 100.f)
-    , _moffatBetaConst(BetaInfo, 4.765f, 0.f, 100.f)
-    , _renderingMethodOption(
-        RenderMethodOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
-    , _userProvidedTextureOwner(UserProvidedTextureOptionInfo)
-    , _parametersOwner(ParametersOwnerOptionInfo)
-    , _moffatMethodOwner(MoffatMethodOptionInfo)
+    , _core {
+        properties::PropertyOwner(CoreOwnerInfo),
+        properties::StringProperty(TextureInfo),
+        properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
+        properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
+        properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f),
+        nullptr,
+        nullptr
+    }
+    , _glare {
+        properties::PropertyOwner(GlareOwnerInfo),
+        properties::StringProperty(TextureInfo),
+        properties::FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
+        properties::FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
+        properties::FloatProperty(ScaleInfo, 1.f, 0.f, 1.f),
+        nullptr,
+        nullptr
+    }
+    , _parameters {
+        properties::PropertyOwner(SizeCompositionInfo),
+        properties::OptionProperty(
+            SizeCompositionMethodInfo,
+            properties::OptionProperty::DisplayType::Dropdown
+        ),
+        properties::FloatProperty(LumPercentInfo, 0.5f, 0.f, 3.f),
+        properties::FloatProperty(RadiusPercentInfo, 0.5f, 0.f, 3.f)
+    }
+    , _magnitudeExponent(MagnitudeExponentInfo, 6.2f, 5.f, 8.f)
     , _fadeInDistances(
         FadeInDistancesInfo,
         glm::vec2(0.f),
         glm::vec2(0.f),
         glm::vec2(100.f)
     )
-    , _disableFadeInDistance(DisableFadeInInfo, true)
+    , _enableFadeInDistance(EnableFadeInInfo, false)
 {
-    using File = ghoul::filesystem::File;
-
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
-    _dataMapping.bvColor = p.dataMapping.bv.value_or("");
-    _dataMapping.bvColor.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.bvColor);
-
-    _dataMapping.luminance = p.dataMapping.luminance.value_or("");
-    _dataMapping.luminance.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.luminance);
-
-    _dataMapping.absoluteMagnitude = p.dataMapping.absoluteMagnitude.value_or("");
-    _dataMapping.absoluteMagnitude.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.absoluteMagnitude);
-
-    _dataMapping.apparentMagnitude = p.dataMapping.apparentMagnitude.value_or("");
-    _dataMapping.apparentMagnitude.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.apparentMagnitude);
-
-    _dataMapping.vx = p.dataMapping.vx.value_or("");
-    _dataMapping.vx.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.vx);
-
-    _dataMapping.vy = p.dataMapping.vy.value_or("");
-    _dataMapping.vy.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.vy);
-
-    _dataMapping.vz = p.dataMapping.vz.value_or("");
-    _dataMapping.vz.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.vz);
-
-    _dataMapping.speed = p.dataMapping.speed.value_or("");
-    _dataMapping.speed.onChange([this]() { _dataIsDirty = true; });
-    _dataMappingContainer.addProperty(_dataMapping.speed);
-
-    addPropertySubOwner(_dataMappingContainer);
 
     _speckFile = p.speckFile.string();
-    _speckFile.onChange([&]() { _speckFileIsDirty = true; });
+    _speckFile.onChange([this]() { _speckFileIsDirty = true; });
     addProperty(_speckFile);
 
+
+    _colorTextureFile = std::make_unique<ghoul::filesystem::File>(p.colorMap);
+    _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
     _colorTexturePath = p.colorMap.string();
-    _colorTextureFile = std::make_unique<File>(_colorTexturePath.value());
+    _colorTexturePath.onChange([&] {
+        if (std::filesystem::exists(_colorTexturePath.value())) {
+            _colorTextureIsDirty = true;
+        }
+        else {
+            LWARNING(std::format("File not found: {}", _colorTexturePath.value()));
+        }
+    });
+    addProperty(_colorTexturePath);
 
-    //_shapeTexturePath = absPath(dictionary.value<std::string>(
-    //    ShapeTextureInfo.identifier
-    //    ));
-    //_shapeTextureFile = std::make_unique<File>(_shapeTexturePath);
 
-    if (p.otherDataColorMap.has_value()) {
-        _otherDataColorMapPath = absPath(*p.otherDataColorMap).string();
-    }
+    _dataMapping.bvColor = p.dataMapping.bv.value_or(_dataMapping.bvColor);
+    _dataMapping.bvColor.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.bvColor);
 
-    _fixedColor.setViewOption(properties::Property::ViewOptions::Color, true);
-    addProperty(_fixedColor);
+    _dataMapping.luminance = p.dataMapping.luminance.value_or(_dataMapping.luminance);
+    _dataMapping.luminance.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.luminance);
+
+    _dataMapping.absoluteMagnitude =
+        p.dataMapping.absoluteMagnitude.value_or(_dataMapping.absoluteMagnitude);
+    _dataMapping.absoluteMagnitude.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.absoluteMagnitude);
+
+    _dataMapping.vx = p.dataMapping.vx.value_or(_dataMapping.vx);
+    _dataMapping.vx.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.vx);
+
+    _dataMapping.vy = p.dataMapping.vy.value_or(_dataMapping.vy);
+    _dataMapping.vy.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.vy);
+
+    _dataMapping.vz = p.dataMapping.vz.value_or(_dataMapping.vz);
+    _dataMapping.vz.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.vz);
+
+    _dataMapping.speed = p.dataMapping.speed.value_or(_dataMapping.speed);
+    _dataMapping.speed.onChange([this]() { _dataIsDirty = true; });
+    _dataMapping.container.addProperty(_dataMapping.speed);
+    addPropertySubOwner(_dataMapping.container);
+
 
     _colorOption.addOptions({
         { ColorOption::Color, "Color" },
@@ -622,135 +563,100 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
                 break;
         }
     }
-    _colorOption.onChange([&] { _dataIsDirty = true; });
+    _colorOption.onChange([this]() { _dataIsDirty = true; });
     addProperty(_colorOption);
 
-    _colorTexturePath.onChange([&] {
-        if (std::filesystem::exists(_colorTexturePath.value())) {
-            _colorTextureIsDirty = true;
-        }
-        else {
-            LWARNING(fmt::format("File not found: {}", _colorTexturePath));
-        }
-    });
-    _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
-    addProperty(_colorTexturePath);
 
-    _queuedOtherData = p.otherData.value_or(_queuedOtherData);
 
-    _otherDataOption.onChange([&]() { _dataIsDirty = true; });
+    _otherDataOption.onChange([this]() { _dataIsDirty = true; });
     addProperty(_otherDataOption);
+
+
+    _otherDataColorMapPath.onChange([this]() { _otherDataColorMapIsDirty = true; });
+    if (p.otherDataColorMap.has_value()) {
+        _otherDataColorMapPath = p.otherDataColorMap->string();
+    }
+    addProperty(_otherDataColorMapPath);
+
 
     _otherDataRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
     addProperty(_otherDataRange);
 
-    addProperty(_otherDataColorMapPath);
-    _otherDataColorMapPath.onChange([&]() {
-        if (std::filesystem::exists(_otherDataColorMapPath.value())) {
-            _otherDataColorMapIsDirty = true;
-        }
-        else {
-            LWARNING(fmt::format("File not found: {}", _otherDataColorMapPath));
-        }
-    });
 
-    _staticFilterValue = p.staticFilter;
-    _staticFilterReplacementValue =
-        p.staticFilterReplacement.value_or(_staticFilterReplacementValue);
+    _fixedColor.setViewOption(properties::Property::ViewOptions::Color, true);
+    addProperty(_fixedColor);
+
 
     addProperty(_filterOutOfRange);
 
-    _renderingMethodOption.addOption(
-        RenderMethod::PointSpreadFunction,
-        "Point Spread Function Based"
-    );
-    _renderingMethodOption.addOption(RenderMethod::TextureBased, "Textured Based");
-    addProperty(_renderingMethodOption);
 
-    _renderingMethodOption = codegen::map<RenderMethod>(p.renderMethod);
+    auto markTextureAsDirty = [this]() {_pointSpreadFunctionTextureIsDirty = true; };
 
-    _pointSpreadFunctionTexturePath = absPath(p.texture.string()).string();
-    _pointSpreadFunctionFile = std::make_unique<File>(
-        _pointSpreadFunctionTexturePath.value()
-    );
-    _pointSpreadFunctionTexturePath.onChange([this]() {
-        _pointSpreadFunctionTextureIsDirty = true;
-    });
-    _pointSpreadFunctionFile->setCallback([this]() {
-        _pointSpreadFunctionTextureIsDirty = true;
-    });
-    _userProvidedTextureOwner.addProperty(_pointSpreadFunctionTexturePath);
-
-    _psfMethodOption.addOption(PsfMethodSpencer, "Spencer's Function");
-    _psfMethodOption.addOption(PsfMethodMoffat, "Moffat's Function");
-    _psfMethodOption = PsfMethodSpencer;
-    _psfMethodOption.onChange([&]() { renderPSFToTexture(); });
-    _parametersOwner.addProperty(_psfMethodOption);
-
-    _psfMultiplyOption.addOption(AppBrightness, "Use Star's Apparent Brightness");
-    _psfMultiplyOption.addOption(LumSize, "Use Star's Luminosity and Size");
-    _psfMultiplyOption.addOption(
-        LumSizeAppBrightness,
-        "Luminosity, Size, App Brightness"
-    );
-    _psfMultiplyOption.addOption(AbsMagnitude, "Absolute Magnitude");
-    _psfMultiplyOption.addOption(AppMagnitude, "Apparent Magnitude");
-    _psfMultiplyOption.addOption(DistanceModulus, "Distance Modulus");
-
-
-    if (p.sizeComposition.has_value()) {
-        _psfMultiplyOption =
-            static_cast<int>(codegen::map<SizeComposition>(*p.sizeComposition));
+    if (p.core.has_value()) {
+        _core.texturePath = absPath(p.core->texture).string();
+        _core.file = std::make_unique<ghoul::filesystem::File>(_core.texturePath.value());
+        _core.file->setCallback(markTextureAsDirty);
+        _core.multiplier = p.core->multiplier.value_or(_core.multiplier);
+        _core.gamma = p.core->gamma.value_or(_core.gamma);
+        _core.scale = p.core->scale.value_or(_core.scale);
     }
-    else {
-        _psfMultiplyOption = 5;
-    }
+    _core.texturePath.onChange(markTextureAsDirty);
+    _core.container.addProperty(_core.texturePath);
+    _core.container.addProperty(_core.multiplier);
+    _core.container.addProperty(_core.gamma);
+    _core.container.addProperty(_core.scale);
+    addPropertySubOwner(_core.container);
 
-    _parametersOwner.addProperty(_psfMultiplyOption);
-    _parametersOwner.addProperty(_lumCent);
-    _parametersOwner.addProperty(_radiusCent);
-    _parametersOwner.addProperty(_brightnessCent);
+    _glare.texturePath = absPath(p.glare.texture).string();
+    _glare.texturePath.onChange(markTextureAsDirty);
+    _glare.file = std::make_unique<ghoul::filesystem::File>(_glare.texturePath.value());
+    _glare.file->setCallback(markTextureAsDirty);
+    _glare.container.addProperty(_glare.texturePath);
+    _glare.multiplier = p.glare.multiplier.value_or(_glare.multiplier);
+    _glare.container.addProperty(_glare.multiplier);
+    _glare.gamma = p.glare.gamma.value_or(_glare.gamma);
+    _glare.container.addProperty(_glare.gamma);
+    _glare.scale = p.glare.scale.value_or(_glare.scale);
+    _glare.container.addProperty(_glare.scale);
+    addPropertySubOwner(_glare.container);
 
     _magnitudeExponent = p.magnitudeExponent.value_or(_magnitudeExponent);
-    _parametersOwner.addProperty(_magnitudeExponent);
+    addProperty(_magnitudeExponent);
 
-    auto renderPsf = [&]() { renderPSFToTexture(); };
 
-    _spencerPSFParamOwner.addProperty(_p0Param);
-    _p0Param.onChange(renderPsf);
-    _spencerPSFParamOwner.addProperty(_p1Param);
-    _p1Param.onChange(renderPsf);
-    _spencerPSFParamOwner.addProperty(_p2Param);
-    _p2Param.onChange(renderPsf);
-    _spencerPSFParamOwner.addProperty(_spencerAlphaConst);
-    _spencerAlphaConst.onChange(renderPsf);
+    _parameters.method.addOptions({
+        { DistanceModulus, "Distance Modulus" },
+        { AppBrightness, "Apparent Brightness" },
+        { LumSize, "Luminosity and Size" },
+        { AbsMagnitude, "Absolute Magnitude" },
+        { AppMagnitude, "Apparent Magnitude" }
+    });
+    _parameters.method =
+        p.sizeComposition.has_value() ?
+        static_cast<int>(codegen::map<SizeComposition>(*p.sizeComposition)) :
+        SizeComposition::DistanceModulus;
+    _parameters.container.addProperty(_parameters.method);
+    _parameters.container.addProperty(_parameters.lumCent);
+    _parameters.container.addProperty(_parameters.radiusCent);
+    addPropertySubOwner(_parameters.container);
 
-    _moffatPSFParamOwner.addProperty(_FWHMConst);
-    _FWHMConst.onChange(renderPsf);
-    _moffatPSFParamOwner.addProperty(_moffatBetaConst);
-    _moffatBetaConst.onChange(renderPsf);
-
-    _parametersOwner.addPropertySubOwner(_spencerPSFParamOwner);
-    _parametersOwner.addPropertySubOwner(_moffatPSFParamOwner);
-
-    addPropertySubOwner(_userProvidedTextureOwner);
-    addPropertySubOwner(_parametersOwner);
-    addPropertySubOwner(_moffatMethodOwner);
 
     if (p.fadeInDistances.has_value()) {
-        glm::vec2 v = *p.fadeInDistances;
-        _fadeInDistances = v;
-        _disableFadeInDistance = false;
+        _fadeInDistances = *p.fadeInDistances;
+        _enableFadeInDistance = true;
         _fadeInDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
         addProperty(_fadeInDistances);
-        addProperty(_disableFadeInDistance);
+        addProperty(_enableFadeInDistance);
     }
+
+    _queuedOtherData = p.otherData.value_or(_queuedOtherData);
+    _staticFilterValue = p.staticFilter;
+    _staticFilterReplacementValue =
+        p.staticFilterReplacement.value_or(_staticFilterReplacementValue);
 }
 
-RenderableStars::~RenderableStars() {}
-
 bool RenderableStars::isReady() const {
-    return _program && _pointSpreadFunctionTexture;
+    return _program && _glare.texture;
 }
 
 void RenderableStars::initializeGL() {
@@ -761,6 +667,13 @@ void RenderableStars::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
     );
 
+    glGenVertexArrays(1, &_vao);
+    glGenBuffers(1, &_vbo);
+
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBindVertexArray(0);
+
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
 
     loadData();
@@ -769,9 +682,9 @@ void RenderableStars::initializeGL() {
     // data value actually exists or not.  Once we determine the index, we no longer
     // need the value and can clear it
     if (!_queuedOtherData.empty()) {
-        int idx = _dataset.index(_queuedOtherData);
+        const int idx = _dataset.index(_queuedOtherData);
         if (idx == -1) {
-            LERROR(fmt::format("Could not find other data column {}", _queuedOtherData));
+            LERROR(std::format("Could not find other data column {}", _queuedOtherData));
         }
         else {
             _otherDataOption = idx;
@@ -780,84 +693,17 @@ void RenderableStars::initializeGL() {
     }
     _speckFileIsDirty = false;
 
-    LDEBUG("Creating Polygon Texture");
-
-    glGenVertexArrays(1, &_psfVao);
-    glGenBuffers(1, &_psfVbo);
-    glBindVertexArray(_psfVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _psfVbo);
-
-    constexpr std::array<GLfloat, 24> VertexData = {
-        //x      y     s     t
-        -1.f, -1.f, 0.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-        -1.f,  1.f, 0.f, 1.f,
-        -1.f, -1.f, 0.f, 0.f,
-         1.f, -1.f, 1.f, 0.f,
-         1.f,  1.f, 1.f, 1.f
-    };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-
-    glGenTextures(1, &_psfTexture);
-    glBindTexture(GL_TEXTURE_2D, _psfTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA8,
-        PsfTextureSize,
-        PsfTextureSize,
-        0,
-        GL_RGBA,
-        GL_BYTE,
-        nullptr
-    );
-
-
-    LDEBUG("Creating Convolution Texture");
-
-    glGenTextures(1, &_convolvedTexture);
-    glBindTexture(GL_TEXTURE_2D, _convolvedTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA8,
-        ConvolvedfTextureSize,
-        ConvolvedfTextureSize,
-        0,
-        GL_RGBA,
-        GL_BYTE,
-        nullptr
-    );
-
-    //loadShapeTexture();
     loadPSFTexture();
-    renderPSFToTexture();
 }
 
 void RenderableStars::deinitializeGL() {
-    glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
 
+    glDeleteBuffers(1, &_vbo);
+    _vbo = 0;
+
     _colorTexture = nullptr;
-    //_shapeTexture = nullptr;
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());
@@ -866,135 +712,38 @@ void RenderableStars::deinitializeGL() {
 }
 
 void RenderableStars::loadPSFTexture() {
-    _pointSpreadFunctionTexture = nullptr;
-    if (!_pointSpreadFunctionTexturePath.value().empty() &&
-        std::filesystem::exists(_pointSpreadFunctionTexturePath.value()))
-    {
-        _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
-            absPath(_pointSpreadFunctionTexturePath).string(),
-            2
-        );
+    auto markPsfTextureAsDirty = [this]() { _pointSpreadFunctionTextureIsDirty = true; };
+    auto loadTexture = [markPsfTextureAsDirty](TextureComponent& component) {
+        using Texture = ghoul::opengl::Texture;
 
-        if (_pointSpreadFunctionTexture) {
-            LDEBUG(fmt::format(
-                "Loaded texture from {}", absPath(_pointSpreadFunctionTexturePath)
-            ));
-            _pointSpreadFunctionTexture->uploadTexture();
+        component.texture = nullptr;
+        const std::string path = component.texturePath;
+        if (path.empty() || !std::filesystem::exists(path)) {
+            return;
         }
-        _pointSpreadFunctionTexture->setFilter(
-            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-        );
 
-        _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
-            _pointSpreadFunctionTexturePath.value()
-        );
-        _pointSpreadFunctionFile->setCallback(
-            [&]() { _pointSpreadFunctionTextureIsDirty = true; }
-        );
-    }
+        component.texture = ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
+
+        if (!component.texture) {
+            return;
+        }
+
+        LDEBUG(std::format("Loaded texture from '{}'", absPath(component.texturePath)));
+        component.texture->uploadTexture();
+        component.texture->setWrapping(Texture::WrappingMode::ClampToBorder);
+
+        constexpr std::array<float, 4> border = { 0.f, 0.f, 0.f, 0.f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border.data());
+        component.texture->setFilter(Texture::FilterMode::AnisotropicMipMap);
+
+        component.file = std::make_unique<ghoul::filesystem::File>(path);
+        component.file->setCallback(markPsfTextureAsDirty);
+    };
+
+    loadTexture(_core);
+    loadTexture(_glare);
+
     _pointSpreadFunctionTextureIsDirty = false;
-}
-
-void RenderableStars::renderPSFToTexture() {
-    // Creates the FBO for the calculations
-    GLuint psfFBO;
-    glGenFramebuffers(1, &psfFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, psfFBO);
-    GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-    glDrawBuffers(1, drawBuffers);
-
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _psfTexture, 0);
-    glViewport(0, 0, PsfTextureSize, PsfTextureSize);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> program =
-        ghoul::opengl::ProgramObject::Build(
-            "RenderStarPSFToTexture",
-            absPath("${MODULE_SPACE}/shaders/psfToTexture_vs.glsl"),
-            absPath("${MODULE_SPACE}/shaders/psfToTexture_fs.glsl")
-        );
-
-    program->activate();
-    constexpr std::array<float, 4> Black = { 0.f, 0.f, 0.f, 0.f };
-    glClearBufferfv(GL_COLOR, 0, Black.data());
-
-    program->setUniform("psfMethod", _psfMethodOption.value());
-    program->setUniform("p0Param", _p0Param);
-    program->setUniform("p1Param", _p1Param);
-    program->setUniform("p2Param", _p2Param);
-    program->setUniform("alphaConst", _spencerAlphaConst);
-    program->setUniform("FWHM", _FWHMConst);
-    program->setUniform("betaConstant", _moffatBetaConst);
-
-    // Draws psf to texture
-    glBindVertexArray(_psfVao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-
-    program->deactivate();
-
-    // JCC: Convolution is disabled while FFT is not enabled
-    //// Now convolves with a disc shape for final shape
-
-    //GLuint convolveFBO;
-    //glGenFramebuffers(1, &convolveFBO);
-    //glBindFramebuffer(GL_FRAMEBUFFER, convolveFBO);
-    //glDrawBuffers(1, drawBuffers);
-
-    //glFramebufferTexture(
-    //    GL_FRAMEBUFFER,
-    //    GL_COLOR_ATTACHMENT0,
-    //    _convolvedTexture,
-    //    0
-    //);
-
-    //glViewport(0, 0, _convolvedfTextureSize, _convolvedfTextureSize);
-
-    //std::unique_ptr<ghoul::opengl::ProgramObject> programConvolve =
-    //    ghoul::opengl::ProgramObject::Build("ConvolvePSFandStarShape",
-    //        absPath("${MODULE_SPACE}/shaders/convolution_vs.glsl"),
-    //        absPath("${MODULE_SPACE}/shaders/convolution_fs.glsl")
-    //    );
-
-    //programConvolve->activate();
-    //glClearBufferfv(GL_COLOR, 0, black);
-
-    //ghoul::opengl::TextureUnit psfTextureUnit;
-    //psfTextureUnit.activate();
-    //glBindTexture(GL_TEXTURE_2D, _psfTexture);
-    //programConvolve->setUniform("psfTexture", psfTextureUnit);
-    //
-    //ghoul::opengl::TextureUnit shapeTextureUnit;
-    //shapeTextureUnit.activate();
-    //_shapeTexture->bind();
-    //programConvolve->setUniform("shapeTexture", shapeTextureUnit);
-
-    //programConvolve->setUniform("psfTextureSize", _psfTextureSize);
-    //programConvolve->setUniform(
-    //    "convolvedfTextureSize",
-    //    _convolvedfTextureSize
-    //);
-
-    //// Convolves to texture
-    //glBindVertexArray(_psfVao);
-    //glDrawArrays(GL_TRIANGLES, 0, 6);
-    //glBindVertexArray(0);
-
-    //programConvolve->deactivate();
-
-    //// Restores system state
-    //glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    //glViewport(
-    //    m_viewport[0],
-    //    m_viewport[1],
-    //    m_viewport[2],
-    //    m_viewport[3]
-    //);
-    glDeleteFramebuffers(1, &psfFBO);
-    //glDeleteFramebuffers(1, &convolveFBO);
-
-    // Restores OpenGL blending state
-    global::renderEngine->openglStateCache().resetBlendState();
 }
 
 void RenderableStars::render(const RenderData& data, RendererTasks&) {
@@ -1007,36 +756,27 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     _program->activate();
 
-    glm::dvec3 eyePosition = glm::dvec3(
+    const glm::dvec3 eyePosition = glm::dvec3(
         glm::inverse(data.camera.combinedViewMatrix()) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
     _program->setUniform(_uniformCache.eyePosition, eyePosition);
 
-    glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
+    const glm::dvec3 cameraUp = data.camera.lookUpVectorWorldSpace();
     _program->setUniform(_uniformCache.cameraUp, cameraUp);
 
-    glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), data.modelTransform.scale);
-
-    glm::dmat4 projectionMatrix = glm::dmat4(data.camera.projectionMatrix());
-
-    glm::dmat4 cameraViewProjectionMatrix = projectionMatrix *
-                                            data.camera.combinedViewMatrix();
-
+    const glm::dmat4 modelMatrix = calcModelTransform(data);
     _program->setUniform(_uniformCache.modelMatrix, modelMatrix);
-    _program->setUniform(
-        _uniformCache.cameraViewProjectionMatrix,
-        cameraViewProjectionMatrix
-    );
+
+    const glm::dmat4 viewProjectionMatrix =
+        glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
+    _program->setUniform(_uniformCache.cameraViewProjectionMatrix, viewProjectionMatrix);
+
     _program->setUniform(_uniformCache.colorOption, _colorOption);
     _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
 
-    _program->setUniform(_uniformCache.psfParamConf, _psfMultiplyOption.value());
-    _program->setUniform(_uniformCache.lumCent, _lumCent);
-    _program->setUniform(_uniformCache.radiusCent, _radiusCent);
-    _program->setUniform(_uniformCache.brightnessCent, _brightnessCent);
+    _program->setUniform(_uniformCache.sizeComposition, _parameters.method.value());
+    _program->setUniform(_uniformCache.lumCent, _parameters.lumCent);
+    _program->setUniform(_uniformCache.radiusCent, _parameters.radiusCent);
 
     if (_colorOption == ColorOption::FixedColor) {
         if (_uniformCache.fixedColor == -1) {
@@ -1045,34 +785,38 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.fixedColor, _fixedColor);
     }
 
-    float fadeInVariable = 1.f;
-    if (!_disableFadeInDistance) {
-        float distCamera = static_cast<float>(glm::length(data.camera.positionVec3()));
+    if (_enableFadeInDistance) {
+        const double distCam = glm::length(data.camera.positionVec3());
         const glm::vec2 fadeRange = _fadeInDistances;
         const double a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
         const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
-        const double funcValue = a * distCamera + b;
-        fadeInVariable *= static_cast<float>(funcValue > 1.f ? 1.f : funcValue);
+        const float funcValue = static_cast<float>(a * distCam + b);
+        const float fadeInValue = std::min(funcValue, 1.f);
 
-        _program->setUniform(_uniformCache.alphaValue, opacity() * fadeInVariable);
+        _program->setUniform(_uniformCache.opacity, opacity() * fadeInValue);
     }
     else {
-        _program->setUniform(_uniformCache.alphaValue, opacity());
+        _program->setUniform(_uniformCache.opacity, opacity());
     }
 
-    ghoul::opengl::TextureUnit psfUnit;
-    psfUnit.activate();
+    ghoul::opengl::TextureUnit glareUnit;
+    glareUnit.activate();
+    _glare.texture->bind();
+    _program->setUniform(_uniformCache.glareTexture, glareUnit);
+    _program->setUniform(_uniformCache.glareMultiplier, _glare.multiplier);
+    _program->setUniform(_uniformCache.glareGamma, _glare.gamma);
+    _program->setUniform(_uniformCache.glareScale, _glare.scale);
 
-    if (_renderingMethodOption.value() == RenderMethod::PointSpreadFunction) {
-        glBindTexture(GL_TEXTURE_2D, _psfTexture);\
-        // Convolutioned texture
-        //glBindTexture(GL_TEXTURE_2D, _convolvedTexture);
+    ghoul::opengl::TextureUnit coreUnit;
+    if (_core.texture) {
+        coreUnit.activate();
+        _core.texture->bind();
+        _program->setUniform(_uniformCache.coreTexture, coreUnit);
+        _program->setUniform(_uniformCache.coreMultiplier, _core.multiplier);
+        _program->setUniform(_uniformCache.coreGamma, _core.gamma);
+        _program->setUniform(_uniformCache.coreScale, _core.scale);
     }
-    else if (_renderingMethodOption.value() == RenderMethod::TextureBased) {
-        _pointSpreadFunctionTexture->bind();
-    }
-
-    _program->setUniform(_uniformCache.psfTexture, psfUnit);
+    _program->setUniform(_uniformCache.hasCore, _core.texture != nullptr);
 
     ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {
@@ -1098,9 +842,7 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
 
     glBindVertexArray(_vao);
-    const GLsizei nStars = static_cast<GLsizei>(_dataset.entries.size());
-    glDrawArrays(GL_POINTS, 0, nStars);
-
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_dataset.entries.size()));
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -1126,12 +868,6 @@ void RenderableStars::update(const UpdateData&) {
 
         std::vector<float> slice = createDataSlice(ColorOption(value));
 
-        if (_vao == 0) {
-            glGenVertexArrays(1, &_vao);
-        }
-        if (_vbo == 0) {
-            glGenBuffers(1, &_vbo);
-        }
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(
@@ -1141,34 +877,33 @@ void RenderableStars::update(const UpdateData&) {
             GL_STATIC_DRAW
         );
 
-        GLint positionAttrib = _program->attributeLocation("in_position");
-        // bvLumAbsMagAppMag = bv color, luminosity, abs magnitude and app magnitude
-        GLint bvLumAbsMagAppMagAttrib = _program->attributeLocation(
-            "in_bvLumAbsMagAppMag"
-        );
+        const GLint positionAttrib = _program->attributeLocation("in_position");
+        // in_bvLumAbsMag = bv color, luminosity, abs magnitude
+        const GLint bvLumAbsMagAttrib = _program->attributeLocation("in_bvLumAbsMag");
 
         const size_t nStars = _dataset.entries.size();
         const size_t nValues = slice.size() / nStars;
 
-        GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
+        const GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
 
         glEnableVertexAttribArray(positionAttrib);
-        glEnableVertexAttribArray(bvLumAbsMagAppMagAttrib);
+        glVertexAttribPointer(
+            positionAttrib,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            stride,
+            nullptr
+        );
+
+        glEnableVertexAttribArray(bvLumAbsMagAttrib);
         const int colorOption = _colorOption;
         switch (colorOption) {
             case ColorOption::Color:
             case ColorOption::FixedColor:
                 glVertexAttribPointer(
-                    positionAttrib,
+                    bvLumAbsMagAttrib,
                     3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    nullptr // = offsetof(ColorVBOLayout, position)
-                );
-                glVertexAttribPointer(
-                    bvLumAbsMagAppMagAttrib,
-                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
@@ -1179,23 +914,15 @@ void RenderableStars::update(const UpdateData&) {
             case ColorOption::Velocity:
             {
                 glVertexAttribPointer(
-                    positionAttrib,
+                    bvLumAbsMagAttrib,
                     3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    nullptr // = offsetof(VelocityVBOLayout, position)
-                );
-                glVertexAttribPointer(
-                    bvLumAbsMagAppMagAttrib,
-                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
                     reinterpret_cast<void*>(offsetof(VelocityVBOLayout, value))
                 );
 
-                GLint velocityAttrib = _program->attributeLocation("in_velocity");
+                const GLint velocityAttrib = _program->attributeLocation("in_velocity");
                 glEnableVertexAttribArray(velocityAttrib);
                 glVertexAttribPointer(
                     velocityAttrib,
@@ -1211,23 +938,15 @@ void RenderableStars::update(const UpdateData&) {
             case ColorOption::Speed:
             {
                 glVertexAttribPointer(
-                    positionAttrib,
+                    bvLumAbsMagAttrib,
                     3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    nullptr // = offsetof(SpeedVBOLayout, position)
-                );
-                glVertexAttribPointer(
-                    bvLumAbsMagAppMagAttrib,
-                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
                     reinterpret_cast<void*>(offsetof(SpeedVBOLayout, value))
                 );
 
-                GLint speedAttrib = _program->attributeLocation("in_speed");
+                const GLint speedAttrib = _program->attributeLocation("in_speed");
                 glEnableVertexAttribArray(speedAttrib);
                 glVertexAttribPointer(
                     speedAttrib,
@@ -1240,27 +959,17 @@ void RenderableStars::update(const UpdateData&) {
                 break;
             }
             case ColorOption::OtherData:
-            {
                 glVertexAttribPointer(
-                    positionAttrib,
+                    bvLumAbsMagAttrib,
                     3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    nullptr // = offsetof(OtherDataLayout, position)
-                );
-                glVertexAttribPointer(
-                    bvLumAbsMagAppMagAttrib,
-                    4,
                     GL_FLOAT,
                     GL_FALSE,
                     stride,
                     reinterpret_cast<void*>(offsetof(OtherDataLayout, value))
                 );
-            }
+                break;
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
         _dataIsDirty = false;
@@ -1274,13 +983,13 @@ void RenderableStars::update(const UpdateData&) {
     if (_colorTextureIsDirty) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
-        if (_colorTexturePath.value() != "") {
+        if (!_colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath).string(),
+                absPath(_colorTexturePath),
                 1
             );
             if (_colorTexture) {
-                LDEBUG(fmt::format("Loaded texture from {}", absPath(_colorTexturePath)));
+                LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
                 _colorTexture->uploadTexture();
             }
 
@@ -1292,20 +1001,17 @@ void RenderableStars::update(const UpdateData&) {
         _colorTextureIsDirty = false;
     }
 
-    //loadShapeTexture();
-
     if (_otherDataColorMapIsDirty) {
         LDEBUG("Reloading Color Texture");
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
             _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_otherDataColorMapPath).string(),
+                absPath(_otherDataColorMapPath),
                 1
             );
             if (_otherDataColorMapTexture) {
-                LDEBUG(fmt::format(
-                    "Loaded texture from {}",
-                    absPath(_otherDataColorMapPath)
+                LDEBUG(std::format(
+                    "Loaded texture '{}'", _otherDataColorMapPath.value()
                 ));
                 _otherDataColorMapTexture->uploadTexture();
             }
@@ -1321,44 +1027,37 @@ void RenderableStars::update(const UpdateData&) {
 }
 
 void RenderableStars::loadData() {
-    std::filesystem::path file = absPath(_speckFile);
+    const std::filesystem::path file = absPath(_speckFile);
     if (!std::filesystem::is_regular_file(file)) {
         return;
     }
 
-    _dataset = speck::data::loadFileWithCache(file);
+    _dataset = dataloader::data::loadFileWithCache(file);
     if (_dataset.entries.empty()) {
         return;
     }
 
     std::vector<std::string> variableNames;
     variableNames.reserve(_dataset.variables.size());
-    for (const speck::Dataset::Variable& v : _dataset.variables) {
+    for (const dataloader::Dataset::Variable& v : _dataset.variables) {
         variableNames.push_back(v.name);
     }
     _otherDataOption.addOptions(variableNames);
 
-    bool success = _dataset.normalizeVariable("lum");
+    const bool success = _dataset.normalizeVariable("lum");
     if (!success) {
         throw ghoul::RuntimeError("Could not find required variable 'luminosity'");
     }
 }
 
 std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
-    const int bvIdx = std::max(_dataset.index(_dataMapping.bvColor.value()), 0);
-    const int lumIdx = std::max(_dataset.index(_dataMapping.luminance.value()), 0);
-    const int absMagIdx = std::max(
-        _dataset.index(_dataMapping.absoluteMagnitude.value()),
-        0
-    );
-    const int appMagIdx = std::max(
-        _dataset.index(_dataMapping.apparentMagnitude.value()),
-        0
-    );
-    const int vxIdx = std::max(_dataset.index(_dataMapping.vx.value()), 0);
-    const int vyIdx = std::max(_dataset.index(_dataMapping.vy.value()), 0);
-    const int vzIdx = std::max(_dataset.index(_dataMapping.vz.value()), 0);
-    const int speedIdx = std::max(_dataset.index(_dataMapping.speed.value()), 0);
+    const int bvIdx = std::max(_dataset.index(_dataMapping.bvColor), 0);
+    const int lumIdx = std::max(_dataset.index(_dataMapping.luminance), 0);
+    const int absMagIdx = std::max(_dataset.index(_dataMapping.absoluteMagnitude), 0);
+    const int vxIdx = std::max(_dataset.index(_dataMapping.vx), 0);
+    const int vyIdx = std::max(_dataset.index(_dataMapping.vy), 0);
+    const int vzIdx = std::max(_dataset.index(_dataMapping.vz), 0);
+    const int speedIdx = std::max(_dataset.index(_dataMapping.speed), 0);
 
     _otherDataRange = glm::vec2(
         std::numeric_limits<float>::max(),
@@ -1368,10 +1067,11 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
     double maxRadius = 0.0;
 
     std::vector<float> result;
-    // 7 for the default Color option of 3 positions + bv + lum + abs + app magnitude
-    result.reserve(_dataset.entries.size() * 7);
-    for (const speck::Dataset::Entry& e : _dataset.entries) {
+    // 6 for the default Color option of 3 positions + bv + lum + abs
+    result.reserve(_dataset.entries.size() * 6);
+    for (const dataloader::Dataset::Entry& e : _dataset.entries) {
         glm::dvec3 position = glm::dvec3(e.position) * distanceconstants::Parsec;
+        glm::vec3 pos = position;
         maxRadius = std::max(maxRadius, glm::length(position));
 
         switch (option) {
@@ -1383,16 +1083,10 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
                 } layout;
 
-                layout.value.position = { {
-                    static_cast<float>(position[0]),
-                    static_cast<float>(position[1]),
-                    static_cast<float>(position[2])
-                }};
-
+                layout.value.position = { pos.x, pos.y, pos.z };
                 layout.value.value = e.data[bvIdx];
                 layout.value.luminance = e.data[lumIdx];
                 layout.value.absoluteMagnitude = e.data[absMagIdx];
-                layout.value.apparentMagnitude = e.data[appMagIdx];
 
                 result.insert(result.end(), layout.data.begin(), layout.data.end());
                 break;
@@ -1404,16 +1098,10 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(VelocityVBOLayout) / sizeof(float)> data;
                 } layout;
 
-                layout.value.position = {{
-                    static_cast<float>(position[0]),
-                    static_cast<float>(position[1]),
-                    static_cast<float>(position[2])
-                }};
-
+                layout.value.position = { pos.x, pos.y, pos.z };
                 layout.value.value = e.data[bvIdx];
                 layout.value.luminance = e.data[lumIdx];
                 layout.value.absoluteMagnitude = e.data[absMagIdx];
-                layout.value.apparentMagnitude = e.data[appMagIdx];
 
                 layout.value.vx = e.data[vxIdx];
                 layout.value.vy = e.data[vyIdx];
@@ -1429,16 +1117,10 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(SpeedVBOLayout) / sizeof(float)> data;
                 } layout;
 
-                layout.value.position = {{
-                    static_cast<float>(position[0]),
-                    static_cast<float>(position[1]),
-                    static_cast<float>(position[2])
-                }};
-
+                layout.value.position = { pos.x, pos.y, pos.z };
                 layout.value.value = e.data[bvIdx];
                 layout.value.luminance = e.data[lumIdx];
                 layout.value.absoluteMagnitude = e.data[absMagIdx];
-                layout.value.apparentMagnitude = e.data[appMagIdx];
                 layout.value.speed = e.data[speedIdx];
 
                 result.insert(result.end(), layout.data.begin(), layout.data.end());
@@ -1451,13 +1133,9 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
                     std::array<float, sizeof(OtherDataLayout)> data;
                 } layout = {};
 
-                layout.value.position = {{
-                    static_cast<float>(position[0]),
-                    static_cast<float>(position[1]),
-                    static_cast<float>(position[2])
-                }};
+                layout.value.position = { pos.x, pos.y, pos.z };
 
-                int index = _otherDataOption.value();
+                const int index = _otherDataOption.value();
                 // plus 3 because of the position
                 layout.value.value = e.data[index];
 
@@ -1475,7 +1153,6 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
 
                 layout.value.luminance = e.data[lumIdx];
                 layout.value.absoluteMagnitude = e.data[absMagIdx];
-                layout.value.apparentMagnitude = e.data[appMagIdx];
 
                 result.insert(result.end(), layout.data.begin(), layout.data.end());
                 break;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,6 @@ namespace openspace {
 
 namespace openspace::volume {
 
-//class TransferFunction;
 class BasicVolumeRaycaster;
 template <typename T> class RawVolume;
 class VolumeClipPlanes;
@@ -62,7 +61,7 @@ public:
 
 private:
     struct Timestep {
-        std::string baseName;
+        std::filesystem::path baseName;
         bool inRam;
         bool onGpu;
         RawVolumeMetadata metadata;
@@ -73,10 +72,10 @@ private:
 
     Timestep* currentTimestep();
     int timestepIndex(const Timestep* t) const;
-    Timestep* timestepFromIndex(int index);
-    void jumpToTimestep(int i);
+    Timestep* timestepFromIndex(int target);
+    void jumpToTimestep(int target);
 
-    void loadTimestepMetadata(const std::string& path);
+    void loadTimestepMetadata(const std::filesystem::path& path);
 
     properties::OptionProperty _gridType;
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;

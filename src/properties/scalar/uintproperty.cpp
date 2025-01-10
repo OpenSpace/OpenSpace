@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,14 +48,15 @@ int UIntProperty::typeLua() const {
     return LUA_TNUMBER;
 }
 
-unsigned int UIntProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = (lua_isnumber(state, -1) == 1);
-    if (success) {
-        unsigned int val = static_cast<unsigned int>(lua_tonumber(state, -1));
-        return val;
+unsigned int UIntProperty::fromLuaConversion(lua_State* state) const {
+    if (ghoul::lua::hasValue<double>(state)) {
+        return static_cast<int>(ghoul::lua::value<double>(state));
+    }
+    else if (ghoul::lua::hasValue<unsigned int>(state)) {
+        return ghoul::lua::value<unsigned int>(state);
     }
     else {
-        return 0;
+        throw ghoul::RuntimeError("Error extracting value in UIntProperty");
     }
 }
 

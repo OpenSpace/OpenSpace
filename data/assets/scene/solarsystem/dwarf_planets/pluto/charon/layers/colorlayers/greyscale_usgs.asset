@@ -1,26 +1,30 @@
-local globeIdentifier = asset.require("../../charon").Charon.Identifier
+local charon = asset.require("../../charon")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "Greyscale_USGS",
   Name = "Black & White [USGS]",
   Enabled = asset.enabled,
-  FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/charon_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_CHARON_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90.0003,359.972,90",
+  ZIndex = 10,
+  FilePath = "WMS:https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/pluto/charon_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=NEWHORIZONS_CHARON_MOSAIC&SRS=EPSG:4326&BBOX=-180,-90.0003,359.972,90"
 }
 
-asset.onInitialize(function ()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(charon.Charon.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(charon.Charon.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
+
 
 
 asset.meta = {
   Name = "Charon Black & White [USGS]",
-  Version = "1.0",
   Description = [[Charon New Horizons LORRI MVIC Global Mosaic 300m v1. This detailed,
     high-quality global mosaic of Pluto's largest moon, Charon, was assembled from nearly
     all of the highest-resolution images obtained by the Long-Range Reconnaissance Imager

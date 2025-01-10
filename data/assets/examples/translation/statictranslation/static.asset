@@ -1,0 +1,29 @@
+-- Basic
+-- This asset creates a set of coordinate axes that are offset from their original
+-- position by a fixed and static amount. In this specific example, the axes are offset
+-- by 50 meters along the y-axis and 10 meters along the negative z-axis.
+
+local Node = {
+  Identifier = "StaticTranslation_Example",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, 50.0, -10.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "StaticTranslation - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

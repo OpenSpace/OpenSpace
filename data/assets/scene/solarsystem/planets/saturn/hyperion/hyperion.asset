@@ -1,13 +1,17 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Saturn Labels",
   Type = "HttpSynchronization",
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Hyperion = {
   Identifier = "Hyperion",
@@ -15,21 +19,15 @@ local Hyperion = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "HYPERION",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Hyperion,
+      Observer = coreKernels.ID.SaturnBarycenter
     }
-    --[[
-      The IAU report does not give an orientation model for Hyperion.
-      Hyperion's rotation is in chaotic and is not predictable for
-      long periods.
-    ]]--
+    -- The IAU report does not give an orientation model for Hyperion.
+    -- Hyperion's rotation is chaotic and not predictable for long periods.
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 360200, 266000, 205400},
-    SegmentsPerPatch = 64,
-    Layers = {},
+    Radii = { 360200, 266000, 205400 },
     Labels = {
       -- @TODO (2021-05-21, emmbr26) These labels do not seem to be visible
       Enabled = false,
@@ -43,28 +41,56 @@ local Hyperion = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
   GUI = {
     Name = "Hyperion",
-    Path = "/Solar System/Planets/Saturn/Moons"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Hyperion"
   }
 }
 
+local HyperionLabel = {
+  Identifier = "HyperionLabel",
+  Parent = Hyperion.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Hyperion",
+    FontSize = 70.0,
+    Size = 6.2,
+    MinMaxSize = { 1, 35 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Hyperion Label",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Hyperion",
+    Description = "Label for Saturn's moon Hyperion"
+  }
+}
+
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Hyperion)
+  openspace.addSceneGraphNode(HyperionLabel)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(HyperionLabel)
   openspace.removeSceneGraphNode(Hyperion)
 end)
 
 asset.export(Hyperion)
+asset.export(HyperionLabel)
 
 
 
 asset.meta = {
   Name = "Hyperion",
-  Version = "1.1",
   Description = "Hyperion globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

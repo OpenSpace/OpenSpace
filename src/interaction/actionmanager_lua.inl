@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
+
 namespace {
 
 // Checks if the passed identifier corresponds to an action.
@@ -34,7 +36,7 @@ namespace {
 }
 
 /**
- * Removes an existing action from the list of possible actions.The action is identifies
+ * Removes an existing action from the list of possible actions. The action is identifies
  * either by the passed name, or if it is a table, the value behind the 'Identifier' key
  * is extract and used instead.
  */
@@ -62,13 +64,34 @@ namespace {
     }
     if (!global::actionManager->hasAction(identifier)) {
         throw ghoul::lua::LuaError(
-            fmt::format("Identifier '{}' for action not found", identifier)
+            std::format("Identifier '{}' for action not found", identifier)
         );
     }
 
     global::actionManager->removeAction(identifier);
 }
 
+struct [[codegen::Dictionary(Action)]] Action {
+    // The identifier under which the action is registered
+    std::string identifier;
+
+    // The Lua script that is to be executed when the action is triggered
+    std::string command;
+
+    // The user-facing name of the action
+    std::optional<std::string> name;
+
+    // A documentation that explains what the action does
+    std::optional<std::string> documentation;
+
+    // The path in the GUI under which the action is shown to the user. If the value is
+    // not provided, the default value is /
+    std::optional<std::string> guiPath;
+
+    // Determines whether the provided command will be executed locally or will be sent to
+    // connected computers in a cluster or parallel connection environment
+    std::optional<bool> isLocal;
+};
 /**
  * Registers a new action. The first argument is the identifier which cannot have been
  * used to register a previous action before, the second argument is the Lua command that
@@ -78,47 +101,30 @@ namespace {
  * whether the action should be executed locally (= false) or remotely (= true, the
  * default).
  */
-[[codegen::luawrap]] void registerAction(ghoul::Dictionary action) {
+[[codegen::luawrap]] void registerAction(Action action) {
     using namespace openspace;
 
-    if (!action.hasValue<std::string>("Identifier")) {
-        throw ghoul::lua::LuaError("Identifier must to provided to register action");
-    }
-    std::string identifier = action.value<std::string>("Identifier");
-    if (global::actionManager->hasAction(identifier)) {
-        throw ghoul::lua::LuaError(
-            fmt::format("Action for identifier '{}' already existed", identifier)
-        );
-    }
-    if (global::actionManager->hasAction(identifier)) {
-        throw ghoul::lua::LuaError(
-            fmt::format("Identifier '{}' for action already registered", identifier)
-        );
-    }
-
-    if (!action.hasValue<std::string>("Command")) {
-        throw ghoul::lua::LuaError(
-            fmt::format(
-                "Identifier '{}' does not provide a Lua command to execute", identifier
-            )
-        );
+    if (global::actionManager->hasAction(action.identifier)) {
+        throw ghoul::lua::LuaError(std::format(
+            "Identifier '{}' for action already registered", action.identifier
+        ));
     }
 
     interaction::Action a;
-    a.identifier = std::move(identifier);
-    a.command = action.value<std::string>("Command");
-    if (action.hasValue<std::string>("Name")) {
-        a.name = action.value<std::string>("Name");
+    a.identifier = std::move(action.identifier);
+    a.command = std::move(action.command);
+    a.name = action.name.value_or(a.name);
+    a.documentation = action.documentation.value_or(a.documentation);
+    a.guiPath = action.guiPath.value_or(a.guiPath);
+    if (!a.guiPath.starts_with('/')) {
+        throw ghoul::RuntimeError(
+            std::format(
+                "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but "
+                "should be '/{}' ", a.name, a.guiPath, a.guiPath)
+        );
     }
-    if (action.hasValue<std::string>("Documentation")) {
-        a.documentation = action.value<std::string>("Documentation");
-    }
-    if (action.hasValue<std::string>("GuiPath")) {
-        a.guiPath = action.value<std::string>("GuiPath");
-    }
-    if (action.hasValue<bool>("IsLocal")) {
-        bool value = action.value<bool>("IsLocal");
-        a.synchronization = interaction::Action::IsSynchronized(value);
+    if (action.isLocal.has_value()) {
+        a.isLocal = interaction::Action::IsLocal(*action.isLocal);
     }
     global::actionManager->registerAction(std::move(a));
 }
@@ -135,7 +141,7 @@ namespace {
     }
     if (!global::actionManager->hasAction(identifier)) {
         throw ghoul::lua::LuaError(
-            fmt::format("Identifier '{}' for action not found", identifier)
+            std::format("Identifier '{}' for action not found", identifier)
         );
     }
 
@@ -146,10 +152,7 @@ namespace {
     res.setValue("Name", action.name);
     res.setValue("Documentation", action.documentation);
     res.setValue("GuiPath", action.guiPath);
-    res.setValue(
-        "Synchronization",
-        action.synchronization == interaction::Action::IsSynchronized::Yes
-    );
+    res.setValue("IsLocal", action.isLocal == interaction::Action::IsLocal::Yes);
     return res;
 }
 
@@ -170,11 +173,7 @@ namespace {
         d.setValue("Name", a.name);
         d.setValue("Documentation", a.documentation);
         d.setValue("GuiPath", a.guiPath);
-        d.setValue(
-            "Synchronization",
-            a.synchronization == interaction::Action::IsSynchronized::Yes
-        );
-
+        d.setValue("IsLocal", a.isLocal == interaction::Action::IsLocal::Yes);
         res.push_back(d);
     }
     return res;
@@ -190,10 +189,16 @@ namespace {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
     if (!global::actionManager->hasAction(id)) {
-        throw ghoul::lua::LuaError(fmt::format("Action '{}' not found", id));
+        throw ghoul::lua::LuaError(std::format("Action '{}' not found", id));
     }
 
-    global::actionManager->triggerAction(id, arg);
+    // No sync because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
+    global::actionManager->triggerAction(
+        id,
+        arg,
+        interaction::ActionManager::ShouldBeSynchronized::No
+    );
 }
 
 #include "actionmanager_lua_codegen.cpp"

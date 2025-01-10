@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,14 +41,16 @@ namespace {
         "Format String",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the value "
-        "of the elapsed time."
+        "of the elapsed time.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReferenceTimeInfo = {
         "ReferenceTime",
         "Reference Time",
         "The reference time relative to which the elapsed time is specified. The format "
-        "must be an ISO 8601-compliant date string"
+        "must be an ISO 8601-compliant date string.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SimplifyTimeInfo = {
@@ -56,14 +58,16 @@ namespace {
         "Simplify Time",
         "If this value is enabled, the elapsed time will be simplified into seconds, "
         "minutes, hours, etc. If the value is disabled, the elapsed time is always "
-        "presented in seconds. The default value for this is 'true'."
+        "presented in seconds. The default value for this is 'true'.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LowestTimeUnitInfo = {
         "LowestTimeUnit",
         "Lowest Time Unit when Simplifying",
         "If 'SimplifyTime' is enabled, this is the lowest time unit that will be shown. "
-        "All finer grained timesteps will be ignored."
+        "All finer grained timesteps will be ignored.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemElapsedTime)]] Parameters {
@@ -120,11 +124,11 @@ DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dict
     _simplifyTime = p.simplifyTime.value_or(_simplifyTime);
     addProperty(_simplifyTime);
 
-    for (TimeUnit u : TimeUnits) {
+    for (const TimeUnit u : TimeUnits) {
         _lowestTimeUnit.addOption(static_cast<int>(u), std::string(nameForTimeUnit(u)));
     }
     _lowestTimeUnit = static_cast<int>(TimeUnit::Second);
-    TimeUnit u = codegen::map<TimeUnit>(
+    const TimeUnit u = codegen::map<TimeUnit>(
         p.lowestTimeUnit.value_or(Parameters::TimeUnit::Second)
     );
     _lowestTimeUnit = static_cast<int>(u);
@@ -132,21 +136,23 @@ DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dict
 }
 
 void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
-    ZoneScoped
+    ZoneScoped;
 
-    double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
+    const double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
+
+    penPosition.y -= _font->height();
 
     if (_simplifyTime) {
         using namespace std::chrono;
 
-        TimeUnit lowestTime = TimeUnit(_lowestTimeUnit.value());
-        std::string_view lowestUnitS = nameForTimeUnit(lowestTime, false);
-        std::string_view lowestUnitP = nameForTimeUnit(lowestTime, true);
+        const TimeUnit lowestTime = TimeUnit(_lowestTimeUnit.value());
+        const std::string_view lowestUnitS = nameForTimeUnit(lowestTime, false);
+        const std::string_view lowestUnitP = nameForTimeUnit(lowestTime, true);
 
-        std::vector<std::pair<double, std::string_view>> ts = splitTime(delta);
+        const std::vector<std::pair<double, std::string_view>> ts = splitTime(delta);
         std::string time;
         for (const std::pair<double, std::string_view>& t : ts) {
-            time += fmt::format("{} {} ", t.first, t.second);
+            time += std::format("{} {} ", t.first, t.second);
             if (t.second == lowestUnitS || t.second == lowestUnitP) {
                 // We have reached the lowest unit the user was interested in
                 break;
@@ -159,26 +165,29 @@ void DashboardItemElapsedTime::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format(fmt::runtime(_formatString.value()), time)
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_formatString.value(), std::make_format_args(time))
         );
     }
     else {
-        std::string time = fmt::format("{} s", delta);
+        std::string time = std::format("{} s", delta);
         RenderFont(
             *_font,
             penPosition,
-            fmt::format(fmt::runtime(_formatString.value()), time)
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            std::vformat(_formatString.value(), std::make_format_args(time))
         );
     }
-
-    penPosition.y -= _font->height();
 }
 
 glm::vec2 DashboardItemElapsedTime::size() const {
-    ZoneScoped
+    ZoneScoped;
 
     const double delta = global::timeManager->time().j2000Seconds() - _referenceJ2000;
-    return _font->boundingBox(fmt::format(fmt::runtime(_formatString.value()), delta));
+    // @CPP26(abock): This can be replaced with std::runtime_format
+    return _font->boundingBox(
+        std::vformat(_formatString.value(), std::make_format_args(delta))
+    );
 }
 
 } // namespace openspace

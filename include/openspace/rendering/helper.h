@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,11 @@ namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
 } // namespace ghoul::opengl
+
+namespace openspace {
+    class LightSource;
+    struct RenderData;
+} // namespace openspace
 
 namespace openspace::rendering::helper {
 
@@ -86,6 +91,22 @@ struct VertexObjects {
 
     struct {
         GLuint vao = 0;
+        GLuint vbo = 0;
+        GLuint ibo = 0;
+
+        int nElements = 64;
+    } cylinder;
+
+    struct {
+        GLuint vao = 0;
+        GLuint vbo = 0;
+        GLuint ibo = 0;
+
+        int nElements = 64;
+    } cone;
+
+    struct {
+        GLuint vao = 0;
     } empty;
 };
 
@@ -109,15 +130,48 @@ struct VertexXYZ {
     GLfloat xyz[3];
 };
 
+struct VertexXYZNormal {
+    GLfloat xyz[3];
+    GLfloat normal[3];
+};
+
+template <typename V>
+struct VertexIndexListCombo {
+    std::vector<V> vertices;
+    std::vector<GLushort> indices;
+};
+
 VertexXYZ convertToXYZ(const Vertex& v);
 
 std::vector<VertexXYZ> convert(std::vector<Vertex> v);
 
 std::vector<Vertex> createRing(int nSegments, float radius,
-    glm::vec4 colors = glm::vec4(1.f));
+    const glm::vec4& colors = glm::vec4(1.f));
 
-std::pair<std::vector<Vertex>, std::vector<GLushort>>
-createSphere(int nSegments, glm::vec3 radii, glm::vec4 colors = glm::vec4(1.f));
+std::vector<VertexXYZ> createRingXYZ(int nSegments, float radius);
+
+VertexIndexListCombo<Vertex>
+createSphere(int nSegments, glm::vec3 radii, const glm::vec4& colors = glm::vec4(1.f));
+
+VertexIndexListCombo<VertexXYZNormal> createCylinder(unsigned int nSegments,
+    float radius, float height);
+
+VertexIndexListCombo<VertexXYZNormal> createCone(unsigned int nSegments, float radius,
+    float height);
+
+/**
+ * Data structure that can be used for rendering using multiple light directions.
+ */
+struct LightSourceRenderData {
+    unsigned int nLightSources = 0;
+
+    // Buffers for uniform uploading
+    std::vector<float> intensitiesBuffer;
+    std::vector<glm::vec3> directionsViewSpaceBuffer;
+
+    void updateBasedOnLightSources(const RenderData& renderData,
+        const std::vector<std::unique_ptr<LightSource>>& sources);
+};
 
 } // namespace openspace::rendering::helper
 

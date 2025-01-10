@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,9 +45,6 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<glm::mat2x2>::operator=;
-
-protected:
-    glm::mat2x2 fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

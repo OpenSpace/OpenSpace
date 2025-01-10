@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,11 +52,12 @@ public:
     void removeDashboardItem(int index);
     void clearDashboardItems();
     glm::vec2 getStartPositionOffset();
+    std::vector<DashboardItem*> dashboardItems() const;
 
     /**
-    * Returns the Lua library that contains all Lua functions available to affect the
-    * rendering.
-    */
+     * Returns the Lua library that contains all Lua functions available to affect the
+     * rendering.
+     */
     static scripting::LuaLibrary luaLibrary();
 
 private:

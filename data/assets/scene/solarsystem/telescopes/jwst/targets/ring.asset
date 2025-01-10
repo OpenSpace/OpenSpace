@@ -1,0 +1,41 @@
+local ring = asset.require("./ring_image")
+
+
+
+local RingImage = {
+  Identifier = "RingImage",
+  Type = "ScreenSpaceImageLocal",
+  Name = "Ring Nebula",
+  UseRadiusAzimuthElevation = true,
+  FaceCamera = false,
+  RadiusAzimuthElevation = { 1.0, 0.5, 0.1 },
+  UsePerspectiveProjection = false,
+  Opacity = 1.0,
+  TexturePath = ring.image .. "ring-nebula.png",
+  Tag = { "mission_jwst_target" },
+  Description = [[
+    Image of the Ring Nebula by NASA, ESA, C.R. O'Dell (Vanderbilt University), and
+    D. Thompson (Large Binocular Telescope Observatory).
+  ]]
+}
+
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(RingImage)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(RingImage)
+end)
+
+asset.export(RingImage)
+
+
+
+asset.meta = {
+  Name = "Ring Nebula Image",
+  Description = "Screenspace image of the Ring Nebula",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

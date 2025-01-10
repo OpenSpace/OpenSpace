@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,26 +25,15 @@
 #ifndef __OPENSPACE_CORE___DOUBLEPROPERTY___H__
 #define __OPENSPACE_CORE___DOUBLEPROPERTY___H__
 
- /**
- * \file doubleproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class DoubleProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>double</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
 #include <limits>
 
 namespace openspace::properties {
 
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `double`.
+ */
 class DoubleProperty : public NumericalProperty<double> {
 public:
     DoubleProperty(Property::PropertyInfo info, double value = 0.0,
@@ -55,9 +44,6 @@ public:
     int typeLua() const override;
 
     using TemplateProperty<double>::operator=;
-
-protected:
-    double fromLuaConversion(lua_State* state, bool& success) const override;
 };
 
 } // namespace openspace::properties

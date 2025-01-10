@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,58 +44,41 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
-        "This setting determines whether this object will be visible or not"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
-        "Opacity",
-        "Opacity",
-        "This value determines the opacity of this renderable. A value of 0 means "
-        "completely transparent"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
-        "Fade",
-        "Fade",
-        "This value is used by the system to be able to fade out renderables "
-        "independently from the Opacity value selected by the user. This value should "
-        "not be directly manipulated through a user interface, but instead used by other "
-        "components of the system programmatically",
-        // The Developer mode should be used once the properties in the UI listen to this
-        // openspace::properties::Property::Visibility::Developer
-        openspace::properties::Property::Visibility::Hidden
+        "Enabled",
+        "Determines whether this object will be visible or not.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable Type",
-        "This tells the type of the renderable",
-        openspace::properties::Property::Visibility::Hidden
+        "The type of the renderable.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo =
     {
         "RenderBinMode",
         "Render Bin Mode",
-        "This value specifies if the renderable should be rendered in the Background,"
-        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step",
-        openspace::properties::Property::Visibility::Developer
+        "A value that specifies if the renderable should be rendered in the Background, "
+        "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
         "DimInAtmosphere",
         "Dim In Atmosphere",
-        "Enables/Disables if the object should be dimmed when the camera is in the "
-        "sunny part of an atmosphere",
-        openspace::properties::Property::Visibility::Developer
+        "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
+        "the sunny part of an atmosphere.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(Renderable)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
-        // [[codegen::verbatim(OpacityInfo.description)]]
+        // This value determines the opacity of this renderable. A value of 0 means
+        // completely transparent
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         // A single tag or a list of tags that this renderable will respond to when
@@ -110,8 +93,9 @@ namespace {
             Background,
             Opaque,
             PreDeferredTransparent,
+            Overlay,
             PostDeferredTransparent,
-            Overlay
+            Sticker
         };
 
         // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
@@ -130,8 +114,10 @@ documentation::Documentation Renderable::Documentation() {
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
-                                                             ghoul::Dictionary dictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     if (!dictionary.hasKey(KeyType)) {
         throw ghoul::RuntimeError("Tried to create Renderable but no 'Type' was found");
     }
@@ -139,7 +125,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     // This should be done in the constructor instead with noexhaustive
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
-    std::string renderableType = dictionary.value<std::string>(KeyType);
+    const std::string renderableType = dictionary.value<std::string>(KeyType);
     ghoul::TemplateFactory<Renderable>* factory =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
@@ -148,25 +134,34 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
         dictionary,
         &global::memoryManager->PersistentMemory
     );
+    result->_type = renderableType;
     return ghoul::mm_unique_ptr<Renderable>(result);
 }
 
 
 
-Renderable::Renderable(const ghoul::Dictionary& dictionary)
+Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings settings)
     : properties::PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
-    , _opacity(OpacityInfo, 1.f, 0.f, 1.f)
-    , _fade(FadeInfo, 1.f, 0.f, 1.f)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
+    , _shouldUpdateIfDisabled(settings.shouldUpdateIfDisabled)
+    , _automaticallyUpdateRenderBin(settings.automaticallyUpdateRenderBin)
 {
-    ZoneScoped
-
-    // I can't come up with a good reason not to do this for all renderables
-    registerUpdateRenderBinFromOpacity();
+    ZoneScoped;
 
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.renderBinMode.has_value()) {
+        _automaticallyUpdateRenderBin = false;
+        _hasOverrideRenderBin = true;
+        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
+    }
+
+    if (_automaticallyUpdateRenderBin) {
+        ghoul_assert(!p.renderBinMode.has_value(), "Something misfired in constructor");
+        registerUpdateRenderBinFromOpacity();
+    }
 
     if (p.tag.has_value()) {
         if (std::holds_alternative<std::string>(*p.tag)) {
@@ -197,16 +192,12 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     // We don't add the property here as subclasses should decide on their own whether
     // they to expose the opacity or not
 
-    addProperty(_fade);
+    addProperty(Fadeable::_fade);
 
     // set type for UI
     _renderableType = p.type.value_or(_renderableType);
+    _renderableType.setReadOnly(true);
     addProperty(_renderableType);
-
-    // only used by a few classes such as RenderableTrail and RenderableSphere
-    if (p.renderBinMode.has_value()) {
-        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderBinMode));
-    }
 
     _dimInAtmosphere = p.dimInAtmosphere.value_or(_dimInAtmosphere);
     addProperty(_dimInAtmosphere);
@@ -224,11 +215,13 @@ void Renderable::update(const UpdateData&) {}
 
 void Renderable::render(const RenderData&, RendererTasks&) {}
 
+void Renderable::renderSecondary(const RenderData&, RendererTasks&) {}
+
 void Renderable::setBoundingSphere(double boundingSphere) {
     _boundingSphere = boundingSphere;
 }
 
-double Renderable::boundingSphere() const {
+double Renderable::boundingSphere() const noexcept {
     return _boundingSphere;
 }
 
@@ -236,8 +229,12 @@ void Renderable::setInteractionSphere(double interactionSphere) {
     _interactionSphere = interactionSphere;
 }
 
-double Renderable::interactionSphere() const {
+double Renderable::interactionSphere() const noexcept {
     return _interactionSphere;
+}
+
+std::string_view Renderable::typeAsString() const noexcept {
+    return _renderableType;
 }
 
 SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
@@ -263,16 +260,19 @@ void Renderable::setRenderBin(RenderBin bin) {
     _renderBin = bin;
 }
 
-bool Renderable::matchesRenderBinMask(int binMask) {
-    return binMask & static_cast<int>(renderBin());
+bool Renderable::matchesRenderBinMask(int binMask) const noexcept {
+    return binMask & static_cast<int>(_renderBin);
 }
 
-void Renderable::setFade(float fade) {
-    _fade = fade;
+bool Renderable::matchesSecondaryRenderBin(int binMask) const noexcept {
+    if (!_secondaryRenderBin.has_value()) {
+        return false;
+    }
+    return binMask & static_cast<int>(*_secondaryRenderBin);
 }
 
 bool Renderable::isVisible() const {
-    return _enabled && _opacity > 0.f && _fade > 0.f;
+    return _enabled && Fadeable::isVisible();
 }
 
 bool Renderable::isReady() const {
@@ -283,7 +283,7 @@ bool Renderable::isEnabled() const {
     return _enabled;
 }
 
-bool Renderable::shouldUpdateIfDisabled() const {
+bool Renderable::shouldUpdateIfDisabled() const noexcept {
     return _shouldUpdateIfDisabled;
 }
 
@@ -310,15 +310,77 @@ void Renderable::setRenderBinFromOpacity() {
 void Renderable::registerUpdateRenderBinFromOpacity() {
     _opacity.onChange([this]() { setRenderBinFromOpacity(); });
     _fade.onChange([this]() { setRenderBinFromOpacity(); });
+
+    _automaticallyUpdateRenderBin = true;
 }
 
-float Renderable::opacity() const {
+float Renderable::opacity() const noexcept {
     // Rendering should depend on if camera is in the atmosphere and if camera is at the
     // dark part of the globe
     const float dimming = _dimInAtmosphere ?
         global::navigationHandler->camera()->atmosphereDimmingFactor() :
         1.f;
-    return _opacity * _fade * dimming;
+    return dimming * Fadeable::opacity();
+}
+
+SceneGraphNode* Renderable::parent() const noexcept {
+    ghoul_assert(dynamic_cast<SceneGraphNode*>(owner()), "Owner is not a SceneGraphNode");
+    return static_cast<SceneGraphNode*>(owner());
+}
+
+bool Renderable::automaticallyUpdatesRenderBin() const noexcept {
+    return _automaticallyUpdateRenderBin;
+}
+
+bool Renderable::hasOverrideRenderBin() const noexcept {
+    return _hasOverrideRenderBin;
+}
+
+glm::dmat4 Renderable::calcModelTransform(const RenderData& data,
+                                          const AlternativeTransform& altTransform) const
+{
+    const glm::dvec3 translation =
+        altTransform.translation.value_or(data.modelTransform.translation);
+    const glm::dmat3 rot = altTransform.rotation.value_or(data.modelTransform.rotation);
+    const glm::dvec3 scale = altTransform.scale.value_or(data.modelTransform.scale);
+
+    return glm::translate(glm::dmat4(1.0), translation) *
+        glm::dmat4(rot) *
+        glm::scale(glm::dmat4(1.0), scale);
+}
+
+glm::dmat4 Renderable::calcModelViewTransform(const RenderData& data,
+                                    const std::optional<glm::dmat4>& modelTransform) const
+{
+    const glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    return data.camera.combinedViewMatrix() * modelMatrix;
+}
+
+glm::dmat4 Renderable::calcModelViewProjectionTransform(const RenderData& data,
+                                    const std::optional<glm::dmat4>& modelTransform) const
+{
+    const glm::dmat4& modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    const glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
+    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+    return glm::dmat4(projectionMatrix * viewMatrix * modelMatrix);
+}
+
+std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
+                                                                   const RenderData& data,
+                                      const AlternativeTransform& altModelTransform) const
+{
+    const glm::dmat4 modelTransform = calcModelTransform(data, altModelTransform);
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
+    const glm::dmat4 modelViewProjectionTransform = calcModelViewProjectionTransform(
+        data,
+        modelTransform
+    );
+
+    return {
+        modelTransform,
+        modelViewTransform,
+        modelViewProjectionTransform
+    };
 }
 
 }  // namespace openspace

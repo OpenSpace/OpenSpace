@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,7 +38,6 @@
 MarkNodesDialog::MarkNodesDialog(QWidget* parent, std::vector<std::string>* markedNodes)
     : QDialog(parent)
     , _markedNodes(markedNodes)
-    , _markedNodesData(*_markedNodes)
 {
     setWindowTitle("Mark Interesting Nodes");
     createWidgets();
@@ -55,18 +54,18 @@ void MarkNodesDialog::createWidgets() {
     );
     _list->setAlternatingRowColors(true);
     _list->setMovement(QListView::Free);
+    _list->setDragDropMode(QListView::InternalMove);
     _list->setResizeMode(QListView::Adjust);
 
-    for (size_t i = 0; i < _markedNodesData.size(); ++i) {
-        _markedNodesListItems.push_back(
-            new QListWidgetItem(QString::fromStdString(_markedNodesData[i]))
-        );
-        _list->addItem(_markedNodesListItems[i]);
+    for (const std::string& nodes : *_markedNodes) {
+        QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(nodes));
+        _list->addItem(item);
     }
     layout->addWidget(_list);
 
     _removeButton = new QPushButton("Remove");
     connect(_removeButton, &QPushButton::clicked, this, &MarkNodesDialog::listItemRemove);
+    _removeButton->setAccessibleName("Remove node");
     layout->addWidget(_removeButton);
 
     {
@@ -80,6 +79,7 @@ void MarkNodesDialog::createWidgets() {
 
         QPushButton* addButton = new QPushButton("Add new");
         connect(addButton, &QPushButton::clicked, this, &MarkNodesDialog::listItemAdded);
+        addButton->setAccessibleName("Add new node");
         box->addWidget(addButton);
         layout->addLayout(box);
     }
@@ -101,24 +101,11 @@ void MarkNodesDialog::listItemAdded() {
         return;
     }
 
-    std::string itemToAdd = _newNode->text().toStdString();
-    const auto it = std::find(
-        _markedNodesData.cbegin(), _markedNodesData.cend(),
-        itemToAdd
-    );
-    if (it != _markedNodesData.end()) {
-        _list->setCurrentRow(
-            static_cast<int>(std::distance(_markedNodesData.cbegin(), it))
-        );
-    }
-    else {
-        _markedNodesData.push_back(itemToAdd);
-        _markedNodesListItems.push_back(new QListWidgetItem(_newNode->text()));
-        _list->addItem(_markedNodesListItems.back());
+    QListWidgetItem* item = new QListWidgetItem(_newNode->text());
+    _list->addItem(item);
 
-        // Scroll down to that blank line highlighted
-        _list->setCurrentItem(_markedNodesListItems.back());
-    }
+    // Scroll down to that blank line highlighted
+    _list->setCurrentItem(item);
 
     // Blank-out entry again
     _newNode->clear();
@@ -126,19 +113,17 @@ void MarkNodesDialog::listItemAdded() {
 
 void MarkNodesDialog::listItemRemove() {
     QListWidgetItem* item = _list->currentItem();
-    int index = _list->row(item);
-
-    if (index < 0 || index >= static_cast<int>(_markedNodesListItems.size())) {
-        return;
-    }
-
+    const int index = _list->row(item);
     _list->takeItem(index);
-    _markedNodesData.erase(_markedNodesData.begin() + index);
-    _markedNodesListItems.erase(_markedNodesListItems.begin() + index);
 }
 
 void MarkNodesDialog::parseSelections() {
-    *_markedNodes = std::move(_markedNodesData);
+    std::vector<std::string> nodes;
+    for (int i = 0; i < _list->count(); i++) {
+        const QString node = _list->item(i)->text();
+        nodes.push_back(node.toStdString());
+    }
+    *_markedNodes = std::move(nodes);
     accept();
 }
 

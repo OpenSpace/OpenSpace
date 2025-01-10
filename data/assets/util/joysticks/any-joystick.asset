@@ -1,5 +1,8 @@
 local propertyHelper = asset.require("../property_helper")
 local joystickHelper = asset.require("./joystick_helper")
+
+
+
 local initializeAll = false
 
 -- Add the asset cooresponding to the joystick name
@@ -10,6 +13,8 @@ local function addJoystickAsset(joystick)
     openspace.asset.add("./util/joysticks/xbox")
   elseif joystick == "Wireless Xbox Controller" then
     openspace.asset.add("./util/joysticks/xbox-wireless")
+  elseif joystick == "Microsoft X-Box 360 pad" then
+    openspace.asset.add("./util/joysticks/microsoft-xbox-360-pad")
   elseif joystick == "SpaceNavigator" then
     openspace.asset.add("./util/joysticks/space-mouse-compact")
   elseif joystick == "SpaceMouse Enterprise" then
@@ -20,6 +25,7 @@ local function addJoystickAsset(joystick)
     openspace.printWarning("Could not find a matching asset for joystick: " .. joystick)
   end
 end
+
 
 asset.onInitialize(function()
   local rawJoysticks = openspace.navigation.listAllJoysticks()
@@ -70,3 +76,15 @@ asset.onDeinitialize(function()
     openspace.asset.remove("./util/joysticks/space-mouse-enterprise")
   end
 end)
+
+
+
+asset.meta = {
+  Name = "Joystick controller: Any",
+  Description = [[
+    Checks the name on the connected controllers and adds the cooresponding joystick asset
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

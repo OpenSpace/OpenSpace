@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,10 +29,13 @@
 
 #include "sgctedit/sgctedit.h"
 #include <openspace/scene/profile.h>
+#include <sgct/error.h>
+#include <sgct/readconfig.h>
 #include <QApplication>
+#include <filesystem>
 #include <optional>
 
-namespace openspace::configuration { struct Configuration; }
+namespace openspace { struct Configuration; }
 
 class QComboBox;
 class QLabel;
@@ -41,68 +44,89 @@ class LauncherWindow final : public QMainWindow {
 Q_OBJECT
 public:
     /**
-     * Constructor for LauncherWindow class
+     * Constructor for LauncherWindow class.
      *
-     * \param profileEnabled true if profile selection combo box will be enabled
-     * \param globalConfig reference to global configuration for OpenSpace settings
-     * \param sgctConfigEnabled true if window selection combo box will be enabled
-     * \param sgctConfigName the name of the sgct configuration function used to
-     *                       generate window config (blank if file is used)
-     * \param parentItem The parent that contains this (and possibly other) children
-     *                   in the tree structure.
+     * \param profileEnabled `true` if profile selection combo box will be enabled
+     * \param globalConfig Reference to global configuration for OpenSpace settings
+     * \param sgctConfigEnabled `true` if window selection combo box will be enabled
+     * \param sgctConfigName The name of the sgct configuration function used to generate
+     *        window config (blank if file is used)
+     * \param parent The parent that contains this (and possibly other) children in the
+     *        tree structure.
      */
-    LauncherWindow(bool profileEnabled,
-        const openspace::configuration::Configuration& globalConfig,
-        bool sgctConfigEnabled,  std::string sgctConfigName, QWidget* parent);
+    LauncherWindow(bool profileEnabled, const openspace::Configuration& globalConfig,
+        bool sgctConfigEnabled, std::string sgctConfigName, QWidget* parent);
 
     /**
-      * Returns bool for whether "start OpenSpace" was chosen when this window closed.
-      * OpenSpace will not start if false
+      * Returns whether "Start OpenSpace" was chosen when this window closed.
       *
-      * \return true if the "start OpenSpace" button was clicked
+      * \return `true` if the "Start OpenSpace" button was clicked
       */
     bool wasLaunchSelected() const;
 
     /**
-      * Returns the selected profile name when launcher window closed
+      * Returns the selected profile name when launcher window closed.
       *
-      * \return name of selected profile (this is only the name without file extension
+      * \return The name of selected profile (this is only the name without file extension
       *         and without path)
       */
     std::string selectedProfile() const;
 
     /**
-      * Returns the selected sgct window configuration when launcher window closed
+      * Returns the selected sgct window configuration when launcher window closed.
       *
-      * \return name of selected profile (this is only the name without file extension
+      * \return The name of selected profile (this is only the name without file extension
       *         and without path)
       */
     std::string selectedWindowConfig() const;
 
+    /**
+      * Returns `true` if the window configuration filename selected in the combo box
+      * is a file in the user configurations section.
+      *
+      * \return `true` if window configuration is a user configuration file
+      */
+    bool isUserConfigSelected() const;
+
+    /**
+     * Handles keypresses while the Qt launcher window is open.
+     *
+     * \param evt QKeyEevent object of the key press event
+     */
+    void keyPressEvent(QKeyEvent* evt) override;
+
 private:
     QWidget* createCentralWidget();
-    void setBackgroundImage(const std::string& syncPath);
+    void setBackgroundImage(const std::filesystem::path& syncPath);
 
     void openProfileEditor(const std::string& profile, bool isUserProfile);
-    void openWindowEditor();
+    void openWindowEditor(const std::string& winCfg, bool isUserWinCfg);
+    void editRefusalDialog(const std::string& title, const std::string& msg,
+        const std::string& detailedText);
 
-    void populateProfilesList(std::string preset);
-    void populateWindowConfigsList(std::string preset);
+    void populateProfilesList(const std::string& preset);
+    void populateWindowConfigsList(const std::string& preset);
+    void handleReturnFromWindowEditor(const sgct::config::Cluster& cluster,
+        std::filesystem::path savePath, const std::filesystem::path& saveWindowCfgPath);
+    void onNewWindowConfigSelection(int newIndex);
 
-    const std::string _assetPath;
-    const std::string _userAssetPath;
-    const std::string _configPath;
-    const std::string _userConfigPath;
-    const std::string _profilePath;
-    const std::string _userProfilePath;
-    const std::vector<std::string>& _readOnlyProfiles;
+    const std::filesystem::path _assetPath;
+    const std::filesystem::path _userAssetPath;
+    const std::filesystem::path _configPath;
+    const std::filesystem::path _userConfigPath;
+    const std::filesystem::path _profilePath;
+    const std::filesystem::path _userProfilePath;
     bool _shouldLaunch = false;
     int _userAssetCount = 0;
+    int _userConfigStartingIdx = 0;
     int _userConfigCount = 0;
+    int _preDefinedConfigStartingIdx = 0;
     const std::string _sgctConfigName;
+    int _windowConfigBoxIndexSgctCfgDefault = 0;
 
     QComboBox* _profileBox = nullptr;
     QComboBox* _windowConfigBox = nullptr;
     QLabel* _backgroundImage = nullptr;
+    QPushButton* _editWindowButton = nullptr;
 };
 #endif // __OPENSPACE_UI_LAUNCHER___LAUNCHERWINDOW___H__

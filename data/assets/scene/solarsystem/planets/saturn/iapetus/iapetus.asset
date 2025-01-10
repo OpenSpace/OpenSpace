@@ -1,13 +1,17 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Saturn Labels",
   Type = "HttpSynchronization",
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Iapetus = {
   Identifier = "Iapetus",
@@ -15,21 +19,18 @@ local Iapetus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "IAPETUS",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Iapetus,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_IAPETUS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Iapetus,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 734000,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "iapetus.labels",
@@ -43,31 +44,57 @@ local Iapetus = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
   GUI = {
     Name = "Iapetus",
-    Path = "/Solar System/Planets/Saturn/Moons",
-    Description = "Third largest moon of Saturn"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus"
   }
 }
 
+local IapetusLabel = {
+  Identifier = "IapetusLabel",
+  Parent = Iapetus.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Iapetus",
+    FontSize = 70.0,
+    Size = 6.2,
+    MinMaxSize = { 1, 35 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.5, 20.0 },
+    FadeWidths = { 0.3, 20.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Iapetus Label",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Iapetus"
+  }
+}
+
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Iapetus)
+  openspace.addSceneGraphNode(IapetusLabel)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(IapetusLabel)
   openspace.removeSceneGraphNode(Iapetus)
 end)
 
 asset.export(Iapetus)
+asset.export(IapetusLabel)
 
 
 
 asset.meta = {
-    Name = "Iapetus",
-    Version = "1.0",
-    Description = "Iapetus globe with labels",
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Iapetus",
+  Description = "Iapetus globe with labels",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

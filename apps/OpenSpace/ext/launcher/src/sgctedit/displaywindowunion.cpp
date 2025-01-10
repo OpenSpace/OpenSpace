@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #include "sgctedit/displaywindowunion.h"
 
 #include "sgctedit/windowcontrol.h"
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QColor>
 #include <QFrame>
 #include <QPushButton>
@@ -36,26 +36,34 @@
 DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
                                        int nMaxWindows,
                                        const std::array<QColor, 4>& windowColors,
-                                       QWidget* parent)
+                                       bool resetToDefault, QWidget* parent)
     : QWidget(parent)
 {
-    createWidgets(nMaxWindows, monitorSizeList, windowColors);
+    createWidgets(
+        nMaxWindows,
+        monitorSizeList,
+        windowColors,
+        resetToDefault
+    );
     showWindows();
 }
 
 void DisplayWindowUnion::createWidgets(int nMaxWindows,
-                                       std::vector<QRect> monitorResolutions,
-                                       std::array<QColor, 4> windowColors)
+                                       const std::vector<QRect>& monitorResolutions,
+                                       std::array<QColor, 4> windowColors,
+                                       bool resetToDefault)
 {
     // Add all window controls (some will be hidden from GUI initially)
-    for (int i = 0; i < nMaxWindows; ++i) {
-        const int monitorNumForThisWindow = (nMaxWindows > 3 && i >= 2) ? 1 : 0;
+    for (int i = 0; i < nMaxWindows; i++) {
+        const int monitorNumForThisWindow =
+            (monitorResolutions.size() > 1 && i >= 2) ? 1 : 0;
 
         WindowControl* ctrl = new WindowControl(
             monitorNumForThisWindow,
             i,
             monitorResolutions,
             windowColors[i],
+            resetToDefault,
             this
         );
         _windowControl.push_back(ctrl);
@@ -86,7 +94,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
         layoutMonButton->addStretch(1);
 
         _addWindowButton = new QPushButton("Add Window");
-        _addWindowButton->setToolTip(QString::fromStdString(fmt::format(
+        _addWindowButton->setToolTip(QString::fromStdString(std::format(
             "Add a window to the configuration (up to {} windows allowed)", nMaxWindows
         )));
         _addWindowButton->setFocusPolicy(Qt::NoFocus);
@@ -106,7 +114,7 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
     QBoxLayout* layoutWindows = new QHBoxLayout;
     layoutWindows->setContentsMargins(0, 0, 0, 0);
     layoutWindows->setSpacing(0);
-    for (int i = 0; i < nMaxWindows; ++i) {
+    for (int i = 0; i < nMaxWindows; i++) {
         layoutWindows->addWidget(_windowControl[i]);
         if (i < (nMaxWindows - 1)) {
             QFrame* frameForNextWindow = new QFrame;
@@ -119,13 +127,17 @@ void DisplayWindowUnion::createWidgets(int nMaxWindows,
     layout->addStretch();
 }
 
-std::vector<WindowControl*> DisplayWindowUnion::windowControls() const {
+std::vector<WindowControl*> DisplayWindowUnion::activeWindowControls() const {
     std::vector<WindowControl*> res;
     res.reserve(_nWindowsDisplayed);
-    for (unsigned int i = 0; i < _nWindowsDisplayed; ++i) {
+    for (unsigned int i = 0; i < _nWindowsDisplayed; i++) {
         res.push_back(_windowControl[i]);
     }
     return res;
+}
+
+std::vector<WindowControl*>& DisplayWindowUnion::windowControls() {
+    return _windowControl;
 }
 
 void DisplayWindowUnion::addWindow() {
@@ -143,11 +155,15 @@ void DisplayWindowUnion::removeWindow() {
     }
 }
 
+unsigned int DisplayWindowUnion::numWindowsDisplayed() const {
+    return _nWindowsDisplayed;
+}
+
 void DisplayWindowUnion::showWindows() {
-    for (size_t i = 0; i < _windowControl.size(); ++i) {
+    for (size_t i = 0; i < _windowControl.size(); i++) {
         _windowControl[i]->setVisible(i < _nWindowsDisplayed);
     }
-    for (size_t i = 0; i < _frameBorderLines.size(); ++i) {
+    for (size_t i = 0; i < _frameBorderLines.size(); i++) {
         _frameBorderLines[i]->setVisible(i < (_nWindowsDisplayed - 1));
     }
     _removeWindowButton->setEnabled(_nWindowsDisplayed > 1);

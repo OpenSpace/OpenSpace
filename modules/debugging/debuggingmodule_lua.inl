@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,25 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/scene/scene.h>
+
 namespace {
 
 constexpr const char RenderedPathIdentifier[] = "CurrentCameraPath";
 constexpr const char RenderedPointsIdentifier[] = "CurrentPathControlPoints";
 constexpr const char DebuggingGuiPath[] = "/Debugging";
 
-constexpr glm::vec3 PathColor = { 1.0, 1.0, 0.0 };
-constexpr glm::vec3 OrientationLineColor = { 0.0, 1.0, 1.0 };
-
-// Conver the input string to a format that is valid as an identifier
-std::string makeIdentifier(std::string s) {
-    std::replace(s.begin(), s.end(), ' ', '_');
-    std::replace(s.begin(), s.end(), '.', '-');
-    // Remove quotes and apostrophe, since they cause problems
-    // when a string is translated to a script call
-    s.erase(remove(s.begin(), s.end(), '\"'), s.end());
-    s.erase(remove(s.begin(), s.end(), '\''), s.end());
-    return s;
-}
+constexpr glm::vec3 PathColor = glm::vec3(1.0, 1.0, 0.0);
+constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
 /**
  * Render the current camera path from the path navigation system. The first optional
@@ -65,7 +56,7 @@ std::string makeIdentifier(std::string s) {
 
     // Parent node. Note that we only render one path at a time, so remove the previously
     // rendered one, if any
-    std::string addParentScript = fmt::format(
+    std::string addParentScript = std::format(
         "if openspace.hasSceneGraphNode('{0}') then "
             "openspace.removeSceneGraphNode('{0}') "
         "end "
@@ -73,10 +64,7 @@ std::string makeIdentifier(std::string s) {
         RenderedPathIdentifier
     );
 
-    global::scriptEngine->queueScript(
-        addParentScript,
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    global::scriptEngine->queueScript(addParentScript);
 
     // Get the poses along the path
     std::vector<CameraPose> poses;
@@ -90,7 +78,7 @@ std::string makeIdentifier(std::string s) {
 
     // Create node lines between the positions
     auto pointIdentifier = [](int i) {
-        return fmt::format("Point_{}", i);
+        return std::format("Point_{}", i);
     };
 
     auto addPoint = [](const std::string& id, glm::dvec3 p) {
@@ -106,8 +94,7 @@ std::string makeIdentifier(std::string s) {
         "}";
 
         global::scriptEngine->queueScript(
-            fmt::format("openspace.addSceneGraphNode({})", pointNode),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            std::format("openspace.addSceneGraphNode({})", pointNode)
         );
     };
 
@@ -115,7 +102,7 @@ std::string makeIdentifier(std::string s) {
                                    const glm::vec3& color, float lineWidth)
     {
         const std::string lineNode = "{"
-            "Identifier = '" + fmt::format("Line{}", id1) + "',"
+            "Identifier = '" + std::format("Line{}", id1) + "',"
             "Parent = '" + RenderedPathIdentifier + "',"
             "Renderable = {"
                 "Enabled = true,"
@@ -128,8 +115,7 @@ std::string makeIdentifier(std::string s) {
         "}";
 
         global::scriptEngine->queueScript(
-            fmt::format("openspace.addSceneGraphNode({})", lineNode),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            std::format("openspace.addSceneGraphNode({})", lineNode)
         );
     };
 
@@ -139,7 +125,7 @@ std::string makeIdentifier(std::string s) {
     {
         const glm::dvec3 dir = glm::normalize(p.rotation * glm::dvec3(0.0, 0.0, -1.0));
         const glm::dvec3 pointPosition = p.position + lineLength * dir;
-        const std::string id = fmt::format("{}_orientation", pointId);
+        const std::string id = std::format("{}_orientation", pointId);
 
         addPoint(id, pointPosition);
         addLineBetweenPoints(id, pointId, OrientationLineColor, 2.f);
@@ -164,10 +150,10 @@ std::string makeIdentifier(std::string s) {
 // Removes the currently rendered camera path if there is one.
 [[codegen::luawrap]] void removeRenderedCameraPath() {
     using namespace openspace;
-    global::scriptEngine->queueScript(
-        fmt::format("openspace.removeSceneGraphNode('{}');", RenderedPathIdentifier),
-        scripting::ScriptEngine::RemoteScripting::Yes
+    const std::string script = std::format(
+        "openspace.removeSceneGraphNode('{}');", RenderedPathIdentifier
     );
+    global::scriptEngine->queueScript(script);
 }
 
 /**
@@ -188,23 +174,20 @@ std::string makeIdentifier(std::string s) {
 
     // Parent node. Note that we only render one set of points at a time, so remove any
     // previously rendered ones
-    std::string addParentScript = fmt::format(
+    std::string addParentScript = std::format(
         "if openspace.hasSceneGraphNode('{0}') then "
-        "openspace.removeSceneGraphNode('{0}') "
+            "openspace.removeSceneGraphNode('{0}') "
         "end "
         "openspace.addSceneGraphNode({{ Identifier = '{0}' }})",
         RenderedPointsIdentifier
     );
 
-    global::scriptEngine->queueScript(
-        addParentScript,
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    global::scriptEngine->queueScript(addParentScript);
 
     const std::vector<glm::dvec3> points = currentPath->controlPoints();
 
     const std::string guiPath =
-        fmt::format("{}/Camera Path Control Points", DebuggingGuiPath);
+        std::format("{}/Camera Path Control Points", DebuggingGuiPath);
 
     const char* colorTexturePath = "openspace.absPath("
         "openspace.createSingleColorImage('point_color', { 0.0, 1.0, 0.0 })"
@@ -215,27 +198,26 @@ std::string makeIdentifier(std::string s) {
             "Identifier = 'ControlPoint_" + std::to_string(i) + "',"
             "Parent = '" + RenderedPointsIdentifier + "',"
             "Transform = { "
-            "Translation = {"
-            "Type = 'StaticTranslation',"
-            "Position = " + ghoul::to_string(points[i]) + ""
-            "},"
+                "Translation = {"
+                    "Type = 'StaticTranslation',"
+                    "Position = " + ghoul::to_string(points[i]) + ""
+                "},"
             "},"
             "Renderable = {"
-            "Type = 'RenderableSphere',"
-            "Enabled = true,"
-            "Segments = 30,"
-            "Size = " + std::to_string(radius) + ","
-            "Texture = " + colorTexturePath + ""
+                "Type = 'RenderableSphere',"
+                "Enabled = true,"
+                "Segments = 30,"
+                "Size = " + std::to_string(radius) + ","
+                "Texture = " + colorTexturePath + ""
             "},"
             "GUI = {"
-            "Name = 'Control Point " + std::to_string(i) + "',"
-            "Path = '" + guiPath + "'"
+                "Name = 'Control Point " + std::to_string(i) + "',"
+                "Path = '" + guiPath + "'"
             "}"
-            "}";
+        "}";
 
         global::scriptEngine->queueScript(
-            fmt::format("openspace.addSceneGraphNode({})", node),
-            scripting::ScriptEngine::RemoteScripting::Yes
+            std::format("openspace.addSceneGraphNode({})", node)
         );
     }
 }
@@ -243,65 +225,10 @@ std::string makeIdentifier(std::string s) {
 // Removes the rendered control points.
 [[codegen::luawrap]] void removePathControlPoints() {
     using namespace openspace;
-    global::scriptEngine->queueScript(
-        fmt::format("openspace.removeSceneGraphNode('{}');", RenderedPointsIdentifier),
-        scripting::ScriptEngine::RemoteScripting::Yes
+    const std::string script = std::format(
+        "openspace.removeSceneGraphNode('{}');", RenderedPointsIdentifier
     );
-}
-
-/**
- * Adds a set of Cartesian axes to the scene graph node identified by the first string, to
- * illustrate its local coordinate system. The second (optional) argument is a scale
- * value, in meters.
- */
-[[codegen::luawrap]] void addCartesianAxes(std::string nodeIdentifier,
-                                           std::optional<double> scale)
-{
-    using namespace openspace;
-    SceneGraphNode* n = global::renderEngine->scene()->sceneGraphNode(nodeIdentifier);
-    if (!n) {
-        throw ghoul::lua::LuaError("Unknown scene graph node: " + nodeIdentifier);
-    }
-
-    if (!scale.has_value()) {
-        scale = 2.0 * n->boundingSphere();
-        if (n->boundingSphere() <= 0.0) {
-            LWARNINGC(
-                "Debugging: Cartesian Axes",
-                "Using zero bounding sphere for scale of created axes. You need to set "
-                "the scale manually for them to be visible"
-            );
-            scale = 1.0;
-        }
-    }
-
-    const std::string identifier = makeIdentifier(nodeIdentifier + "_AxesXYZ");
-    const std::string& axes = "{"
-        "Identifier = '" + identifier + "',"
-        "Parent = '" + nodeIdentifier + "',"
-        "Transform = { "
-        "Scale = {"
-        "Type = 'StaticScale',"
-        "Scale = " + std::to_string(*scale) + ""
-        "}"
-        "},"
-        "Renderable = {"
-        "Type = 'RenderableCartesianAxes',"
-        "Enabled = true,"
-        "XColor = { 1.0, 0.0, 0.0 },"
-        "YColor = { 0.0, 1.0, 0.0 },"
-        "ZColor = { 0.0, 0.0, 1.0 }"
-        "},"
-        "GUI = {"
-        "Name = '" + identifier + "',"
-        "Path = '" + DebuggingGuiPath + "/Coordiante Systems'"
-        "}"
-    "}";
-
-    global::scriptEngine->queueScript(
-        fmt::format("openspace.addSceneGraphNode({});", axes),
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    global::scriptEngine->queueScript(script);
 }
 
 #include "debuggingmodule_lua_codegen.cpp"

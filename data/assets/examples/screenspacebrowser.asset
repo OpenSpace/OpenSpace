@@ -1,16 +1,28 @@
-local spec = {
+local Browser = {
   Type = "ScreenSpaceBrowser",
   Identifier = "ScreenSpaceBrowserExample",
   Name = "Screen Space Browser Example",
   Url = "https://www.openspaceproject.com/"
-};
+}
+
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(spec)
+  openspace.addScreenSpaceRenderable(Browser)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(spec)
+  openspace.removeScreenSpaceRenderable(Browser)
 end)
 
-asset.export(spec)
+asset.export(Browser)
+
+
+
+asset.meta = {
+  Name = "ScreenSpaceBrowser Example",
+  Description = [[Example of how to load and show a webpage in the rendering. The loaded
+    webpage is shown in screen space.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 #define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/util/keys.h>
 
 namespace openspace {
@@ -38,10 +36,8 @@ namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
-class KeybindingManager : public DocumentationGenerator {
+class KeybindingManager {
 public:
-    KeybindingManager();
-
     void resetKeyBindings();
 
     void bindKey(Key key, KeyModifier modifier, std::string action);
@@ -54,8 +50,6 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-
-    std::string generateJson() const override;
 
     const std::multimap<KeyWithModifier, std::string>& keyBindings() const;
 

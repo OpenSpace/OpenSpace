@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,22 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/server/include/topics/cameratopic.h"
+#include <modules/server/include/topics/cameratopic.h>
 
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
+#include <modules/globebrowsing/globebrowsingmodule.h>
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
-#include <openspace/query/query.h>
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
-    constexpr std::string_view UnsubscribeEvent = "stop_subscription";
 } // namespace
 
 using nlohmann::json;
@@ -62,7 +61,7 @@ bool CameraTopic::isDone() const {
 }
 
 void CameraTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at("event").get<std::string>();
+    const std::string event = json.at("event").get<std::string>();
 
     if (event != SubscribeEvent) {
         _isDone = true;
@@ -72,7 +71,7 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
     ServerModule* module = global::moduleEngine->module<ServerModule>();
     _dataCallbackHandle = module->addPreSyncCallback(
         [this]() {
-            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+            const auto now = std::chrono::system_clock::now();
             if (now - _lastUpdateTime > _cameraPositionUpdateTime) {
                 sendCameraData();
                 _lastUpdateTime = std::chrono::system_clock::now();
@@ -82,13 +81,12 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
 }
 
 void CameraTopic::sendCameraData() {
-    using namespace openspace;
-
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
     glm::dvec3 position = module->geoPosition();
     std::pair<double, std::string_view> altSimplified = simplifyDistance(position.z);
 
-    nlohmann::json jsonData = {
+    const nlohmann::json jsonData = {
         { "latitude", position.x },
         { "longitude", position.y },
         { "altitude", altSimplified.first },
@@ -96,6 +94,12 @@ void CameraTopic::sendCameraData() {
     };
 
     _connection->sendJson(wrappedPayload(jsonData));
+#else // ^^^ OPENSPACE_MODULE_SPACE_ENABLED ||| !OPENSPACE_MODULE_SPACE_ENABLED vvv
+    LWARNINGC(
+        "CameraTopic",
+        "Cannot send camera data, compiled without globebrowsing support"
+    );
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 } // namespace openspace

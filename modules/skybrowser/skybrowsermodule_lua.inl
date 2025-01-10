@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,10 +35,34 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <scn/scan.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "SkyBrowserModule";
+constexpr std::string_view _loggerCat = "SkyBrowserModule";
 
+bool browserBelongsToCurrentNode(std::string identifier) {
+    size_t found = identifier.find('_');
+    std::string errorMessage = "The Sky Browser encountered a problem when it tried to "
+        "initialize the browser";
+    if (found == std::string::npos) {
+        throw ghoul::RuntimeError(errorMessage);
+    }
+    else {
+        std::string res = identifier.substr(found + 1, identifier.size());
+        if (res.empty()) {
+            throw ghoul::RuntimeError(errorMessage);
+        }
+        // Convert the last char to an int
+        int nodeId = std::stoi(res);
+        return nodeId == openspace::global::windowDelegate->currentNode();
+    }
+}
+
+std::string prunedIdentifier(std::string identifier) {
+    // Removes the node number at the end of the identifier
+    std::string res = identifier.substr(0, identifier.find('_'));
+    return res;
+}
 
 /**
 * Reloads the sky browser display copy for the node index that is sent in.
@@ -74,7 +98,7 @@ namespace {
  * Takes an index to an image and selects that image in the currently
  * selected sky browser.
  */
-[[codegen::luawrap]] void selectImage(int imageIndex) {
+[[codegen::luawrap]] void selectImage(std::string imageUrl) {
     using namespace openspace;
 
     // Load image
@@ -83,8 +107,17 @@ namespace {
     if (module->isCameraInSolarSystem()) {
         TargetBrowserPair* selected = module->pair(module->selectedBrowserId());
         if (selected) {
-            const ImageData& image = module->wwtDataHandler().image(imageIndex);
+            std::optional<const ImageData> found = module->wwtDataHandler().image(
+                imageUrl
+            );
+            if (!found.has_value()) {
+                LINFO(std::format(
+                    "No image with identifier '{}' was found in the collection.", imageUrl
+                ));
+                return;
+            }
             // Load image into browser
+            const ImageData& image = found.value();
             std::string str = image.name;
             // Check if character is ASCII - if it isn't, remove
             str.erase(
@@ -97,7 +130,7 @@ namespace {
                 str.end()
             );
             LINFO("Loading image " + str);
-            selected->selectImage(image, imageIndex);
+            selected->selectImage(image);
 
             bool isInView = skybrowser::isCoordinateInView(image.equatorialCartesian);
             // If the coordinate is not in view, rotate camera
@@ -106,6 +139,14 @@ namespace {
                     image.equatorialCartesian * skybrowser::CelestialSphereRadius
                 );
                 module->startRotatingCamera(dir);
+            }
+
+            if (selected->pointSpaceCraft()) {
+                global::eventEngine->publishEvent<events::EventPointSpacecraft>(
+                    image.equatorialSpherical.x,
+                    image.equatorialSpherical.y,
+                    module->spaceCraftAnimationTime()
+                );
             }
         }
     }
@@ -119,8 +160,8 @@ namespace {
 
     SceneGraphNode* circle = global::renderEngine->scene()->sceneGraphNode(identifier);
     if (!circle) {
-        throw ghoul::lua::LuaError(fmt::format(
-            "Could not find node to set as hover circle: '{}'", identifier
+        throw ghoul::lua::LuaError(std::format(
+            "Could not find node to set as hover circle: {}", identifier
         ));
     }
 
@@ -130,10 +171,10 @@ namespace {
 /**
  * Moves the hover circle to the coordinate specified by the image index.
  */
-[[codegen::luawrap]] void moveCircleToHoverImage(int imageIndex) {
+[[codegen::luawrap]] void moveCircleToHoverImage(std::string imageUrl) {
     using namespace openspace;
 
-    global::moduleEngine->module<SkyBrowserModule>()->moveHoverCircle(imageIndex, false);
+    global::moduleEngine->module<SkyBrowserModule>()->moveHoverCircle(imageUrl, false);
 }
 
 /**
@@ -150,7 +191,7 @@ namespace {
  * which it should have in the selected image list. The image is then changed to have this
  * order.
  */
-[[codegen::luawrap]] void setImageLayerOrder(std::string identifier, int imageIndex,
+[[codegen::luawrap]] void setImageLayerOrder(std::string identifier, std::string imageUrl,
                                              int imageOrder)
 {
     using namespace openspace;
@@ -158,7 +199,7 @@ namespace {
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->setImageOrder(imageIndex, imageOrder);
+        pair->setImageOrder(imageUrl, imageOrder);
     }
 }
 
@@ -169,13 +210,17 @@ namespace {
 [[codegen::luawrap]] void loadImagesToWWT(std::string identifier) {
     using namespace openspace;
 
+    if (!browserBelongsToCurrentNode(identifier)) {
+        return;
+    }
+    std::string prunedId = prunedIdentifier(identifier);
     // Load images from url
-    LINFO("Connection established to WorldWide Telescope application in " + identifier);
-    LINFO("Loading image collections to " + identifier);
+    LINFO("Connection established to WorldWide Telescope application in " + prunedId);
+    LINFO("Loading image collections to " + prunedId);
 
     // Load the collections here because we know that the browser can execute javascript
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
+    TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
         pair->hideChromeInterface();
         pair->browser()->loadImageCollection(module->wwtImageCollectionUrl());
@@ -183,7 +228,7 @@ namespace {
 }
 
 /**
- * Starts the setup process of the sky browers. This function calls the lua function
+ * Starts the setup process of the sky browers. This function calls the Lua function
  * 'sendOutIdsToBrowsers' in all nodes in the cluster.
  */
 [[codegen::luawrap]] void startSetup() {
@@ -197,23 +242,28 @@ namespace {
         for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
             std::string id = pair->browserId();
             glm::ivec3 color = pair->borderColor();
-            std::string script = fmt::format(
+            std::string script = std::format(
                 "openspace.skybrowser.setBorderColor('{}', {}, {}, {})",
                 id, color.r, color.g, color.b
             );
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::RemoteScripting::Yes
-            );
+
+            // No sync or send because this is already inside a Lua script, therefor it
+            // has already been synced and sent to the connected nodes and peers
+            global::scriptEngine->queueScript({
+                .code = script,
+                .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+                .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+            });
         }
     }
-
     // To ensure each node in a cluster calls its own instance of the wwt application
-    // Do not send this script to the other nodes
-    global::scriptEngine->queueScript(
-        "openspace.skybrowser.sendOutIdsToBrowsers()",
-        scripting::ScriptEngine::RemoteScripting::No
-    );
+    // Do not send this script to the other nodes. (Note malej 2023-AUG-23: Due to this
+    // already being inside a Lua function that have already been synced out)
+    global::scriptEngine->queueScript({
+        .code = "openspace.skybrowser.sendOutIdsToBrowsers()",
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+    });
 }
 
 /**
@@ -241,9 +291,14 @@ namespace {
     using namespace openspace;
 
     // Initialize browser with ID and its corresponding target
-    LINFO("Initializing sky browser " + identifier);
+    if (!browserBelongsToCurrentNode(identifier)) {
+        return;
+    }
+
+    std::string prunedId = prunedIdentifier(identifier);
+    LINFO("Initializing sky browser " + prunedId);
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
+    TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
         pair->initialize();
     }
@@ -268,7 +323,7 @@ namespace {
 /**
  * Returns the AAS WorldWide Telescope image collection url.
  */
-[[codegen::luawrap]] ghoul::Dictionary getWwtImageCollectionUrl() {
+[[codegen::luawrap]] ghoul::Dictionary wwtImageCollectionUrl() {
     using namespace openspace;
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     ghoul::Dictionary url;
@@ -277,12 +332,26 @@ namespace {
 }
 
 /**
+ * Deprecated in favor of 'wwtImageCollectionUrl'
+ */
+[[codegen::luawrap("getWwtImageCollectionUrl")]]
+ghoul::Dictionary wwtImageCollectionUrlDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getWwtImageCollectionUrl' function is deprecated and should be replaced with "
+        "'wwtImageCollectionUrl'"
+    );
+    return wwtImageCollectionUrl();
+}
+
+/**
  * Returns a list of all the loaded AAS WorldWide Telescope images that have been loaded.
  * Each image has a name, thumbnail url, equatorial spherical coordinates RA and Dec,
  * equatorial Cartesian coordinates, if the image has celestial coordinates, credits text,
  * credits url and the identifier of the image which is a unique number.
  */
-[[codegen::luawrap]] ghoul::Dictionary getListOfImages() {
+[[codegen::luawrap]] ghoul::Dictionary listOfImages() {
     using namespace openspace;
 
     // Send image list to GUI
@@ -296,10 +365,7 @@ namespace {
 
     // Create Lua table to send to the GUI
     ghoul::Dictionary list;
-
-    for (int i = 0; i < module->nLoadedImages(); i++) {
-        const ImageData& img = module->wwtDataHandler().image(i);
-
+    for (auto const& [id, img] : module->wwtDataHandler().images()) {
         // Push ("Key", value)
         ghoul::Dictionary image;
         image.setValue("name", img.name);
@@ -311,22 +377,34 @@ namespace {
         image.setValue("cartesianDirection", img.equatorialCartesian);
         image.setValue("hasCelestialCoords", img.hasCelestialCoords);
         image.setValue("credits", img.credits);
+        image.setValue("collection", img.collection);
         image.setValue("creditsUrl", img.creditsUrl);
-        image.setValue("identifier", std::to_string(i));
+        image.setValue("identifier", img.identifier);
 
-        // Index for current ImageData
-        // Set table for the current ImageData
-        list.setValue(std::to_string(i + 1), image);
+        list.setValue(img.identifier, image);
     }
 
     return list;
 }
 
 /**
+ * Deprecated in favor of 'listOfExoplanets'
+ */
+[[codegen::luawrap("getListOfImages")]] ghoul::Dictionary listOfImagesDeprecated()
+{
+    LWARNINGC(
+        "Deprecation",
+        "'getListOfImages' function is deprecated and should be replaced with "
+        "'listOfImages'"
+    );
+    return listOfImages();
+}
+
+/**
  * Returns a table of data regarding the current view and the sky browsers and targets.
  * returns a table of data regarding the current targets.
  */
-[[codegen::luawrap]] ghoul::Dictionary getTargetData() {
+[[codegen::luawrap]] ghoul::Dictionary targetData() {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
@@ -393,6 +471,17 @@ namespace {
 }
 
 /**
+ * Deprecated in favor of 'targetData'
+ */
+[[codegen::luawrap("getTargetData")]] ghoul::Dictionary targetDataDeprecated() {
+    LWARNINGC(
+        "Deprecation",
+        "'getTargetData' function is deprecated and should be replaced with 'targetData'"
+    );
+    return targetData();
+}
+
+/**
  * Takes an identifier to a sky browser or sky target. Rotates the camera so that the
  * target is placed in the center of the view.
  */
@@ -409,15 +498,15 @@ namespace {
  * Takes an identifier to a sky browser or sky target, an index to an image and a value
  * for the opacity.
  */
-[[codegen::luawrap]] void setOpacityOfImageLayer(std::string identifier, int imageIndex,
-                                                 float opacity)
+[[codegen::luawrap]] void setOpacityOfImageLayer(std::string identifier,
+                                                 std::string imageUrl, float opacity)
 {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->setImageOpacity(imageIndex, opacity);
+        pair->setImageOpacity(imageUrl, opacity);
     }
 }
 
@@ -466,6 +555,9 @@ namespace {
     glm::vec3 positionBrowser = glm::vec3(0.f, 0.f, -2.1f);
     glm::vec3 positionTarget = glm::vec3(0.9f, 0.4f, -2.1f);
     glm::dvec3 galacticTarget = skybrowser::localCameraToGalactic(positionTarget);
+    if (glm::any(glm::isnan(galacticTarget))) {
+        galacticTarget = glm::dvec3(0.0, 0.0, skybrowser::CelestialSphereRadius);
+    }
     std::string guiPath = "/Sky Browser";
     std::string url = "http://wwt.openspaceproject.com/1/openspace/";
     double fov = 70.0;
@@ -477,7 +569,6 @@ namespace {
         "Name = '" + nameBrowser + "',"
         "Url = '" + url + "',"
         "FaceCamera = false,"
-        "Gamma = 2.2,"
         "CartesianPosition = " + ghoul::to_string(positionBrowser) +
      "}";
 
@@ -514,26 +605,20 @@ namespace {
         "}"
     "}";
 
-    global::scriptEngine->queueScript(
-        "openspace.addScreenSpaceRenderable(" + browser + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
+    // No sync or send because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
+    const std::string script = std::format(
+        "openspace.addScreenSpaceRenderable({0});"
+        "openspace.addSceneGraphNode({1});"
+        "openspace.skybrowser.addPairToSkyBrowserModule('{2}','{3}');"
+        "openspace.skybrowser.setSelectedBrowser('{3}')",
+        browser, target, idTarget, idBrowser
     );
-
-    global::scriptEngine->queueScript(
-        "openspace.addSceneGraphNode(" + target + ");",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-
-    global::scriptEngine->queueScript(
-        "openspace.skybrowser.addPairToSkyBrowserModule('" + idTarget + "','"
-        + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
-
-    global::scriptEngine->queueScript(
-        "openspace.skybrowser.setSelectedBrowser('" + idBrowser + "');",
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    global::scriptEngine->queueScript({
+        .code = script,
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+    });
 }
 
 /**
@@ -550,16 +635,20 @@ namespace {
 
         module->removeTargetBrowserPair(identifier);
 
-        // Remove from engine
-        global::scriptEngine->queueScript(
-            "openspace.removeScreenSpaceRenderable('" + browser + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
+        // Remove from engine.
+        // No sync or send because this is already inside a Lua script, therefor it has
+        // already been synced and sent to the connected nodes and peers
+        global::scriptEngine->queueScript({
+            .code = "openspace.removeScreenSpaceRenderable('" + browser + "');",
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        });
 
-        global::scriptEngine->queueScript(
-            "openspace.removeSceneGraphNode('" + target + "');",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
+        global::scriptEngine->queueScript({
+            .code = "openspace.removeSceneGraphNode('" + target + "');",
+            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        });
     }
 }
 
@@ -590,14 +679,14 @@ namespace {
  * image from that sky browser.
  */
 [[codegen::luawrap]] void removeSelectedImageInBrowser(std::string identifier,
-                                                       int imageIndex)
+                                                       std::string imageUrl)
 {
     using namespace openspace;
 
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     TargetBrowserPair* pair = module->pair(identifier);
     if (pair) {
-        pair->browser()->removeSelectedImage(imageIndex);
+        pair->browser()->removeSelectedImage(imageUrl);
     }
 }
 
@@ -762,19 +851,25 @@ namespace {
 [[codegen::luawrap]] void loadingImageCollectionComplete(std::string identifier) {
     using namespace openspace;
 
+    if (!browserBelongsToCurrentNode(identifier)) {
+        return;
+    }
+    std::string prunedId = prunedIdentifier(identifier);
+
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
+    TargetBrowserPair* pair = module->pair(prunedId);
     if (pair) {
-        LINFO("Image collection is loaded in Screen Space Sky Browser " + identifier);
+        LINFO("Image collection is loaded in Screen Space Sky Browser " + prunedId);
         pair->setImageCollectionIsLoaded(true);
         // Add all selected images to WorldWide Telescope
-        const std::vector<int>& images = pair->selectedImages();
+        const std::vector<std::string>& images = pair->selectedImages();
         std::for_each(
             images.rbegin(), images.rend(),
-            [&](int index) {
-                const ImageData& image = module->wwtDataHandler().image(index);
+            [module, pair](std::string imageUrl) {
+                std::optional<ImageData> img = module->wwtDataHandler().image(imageUrl);
+                ghoul_assert(img.has_value(), "No image found");
                 // Index of image is used as layer ID as it's unique in the image data set
-                pair->browser()->addImageLayerToWwt(image.imageUrl, index);
+                pair->browser()->addImageLayerToWwt(img->imageUrl);
             }
         );
     }
@@ -791,22 +886,6 @@ namespace {
     for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
         pair->setEnabled(show);
     }
-}
-
-/**
- * Point spacecraft to the equatorial coordinates the target points to. Takes an
- * identifier to a sky browser.
- */
-[[codegen::luawrap]] void pointSpaceCraft(std::string identifier) {
-    using namespace openspace;
-    SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
-    TargetBrowserPair* pair = module->pair(identifier);
-    glm::dvec2 equatorial = pair->targetDirectionEquatorial();
-    global::eventEngine->publishEvent<events::EventPointSpacecraft>(
-        equatorial.x,
-        equatorial.y,
-        module->spaceCraftAnimationTime()
-        );
 }
 
 /**

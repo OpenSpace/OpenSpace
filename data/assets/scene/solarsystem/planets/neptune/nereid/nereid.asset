@@ -1,0 +1,116 @@
+local transforms = asset.require("../transforms")
+local coreKernels = asset.require("spice/core")
+
+
+
+local kernels = asset.resource({
+  Name = "Neptune Spice Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "neptune_kernels",
+  Version = 2
+})
+
+
+local Nereid = {
+  Identifier = "Nereid",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NEREID",
+      Observer = coreKernels.ID.NeptuneBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 357000, 340000, 340000 }
+  },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_major_neptune" },
+  GUI = {
+    Name = "Nereid",
+    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid"
+  }
+}
+
+local NereidTrail = {
+  Identifier = "NereidTrail",
+  Parent = transforms.NeptuneBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = "NEREID",
+      Observer = coreKernels.ID.NeptuneBarycenter
+    },
+    Color = { 0.2, 0.5, 0.75 },
+    Period = 360.13,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_major_neptune"
+  },
+  GUI = {
+    Name = "Nereid Trail",
+    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid"
+  }
+}
+
+local NereidLabel = {
+  Identifier = "NereidLabel",
+  Parent = Nereid.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Nereid",
+    FontSize = 50.0,
+    Size = 7.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1, 15.0 },
+    FadeWidths = { 1, 15.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Nereid Label",
+    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid",
+    Description = "Label for Neptune's moon Nereid"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels .. "nep101xl-802.bsp")
+
+  openspace.addSceneGraphNode(Nereid)
+  openspace.addSceneGraphNode(NereidTrail)
+  openspace.addSceneGraphNode(NereidLabel)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(NereidLabel)
+  openspace.removeSceneGraphNode(NereidTrail)
+  openspace.removeSceneGraphNode(Nereid)
+
+  openspace.spice.unloadKernel(kernels .. "nep101xl-802.bsp")
+end)
+
+asset.export(Nereid)
+asset.export(NereidTrail)
+asset.export(NereidLabel)
+
+
+
+asset.meta = {
+  Name = "Nereid",
+  Description = [[Procedural Globe asset containing Neptune's moon: Nereid. A blank globe
+    and SPICE trail are generated for the moon]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,13 +1,17 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Saturn Labels",
   Type = "HttpSynchronization",
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Dione = {
   Identifier = "Dione",
@@ -15,21 +19,18 @@ local Dione = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DIONE",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Dione,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_ENCELADUS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Dione,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 561400,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "dione.labels",
@@ -43,27 +44,55 @@ local Dione = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_saturn", "moon_major_saturn" },
   GUI = {
-    Path = "/Solar System/Planets/Saturn/Moons"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Dione"
   }
 }
 
+local DioneLabel = {
+  Identifier = "DioneLabel",
+  Parent = Dione.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "Dione",
+    FontSize = 70.0,
+    Size = 6.0,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Normal",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 0.3, 10.0 },
+    FadeWidths = { 0.15, 10.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  GUI = {
+    Name = "Dione Label",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Dione",
+    Description = "Label for Saturn's moon Dione"
+  }
+}
+
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Dione)
+  openspace.addSceneGraphNode(DioneLabel)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(DioneLabel)
   openspace.removeSceneGraphNode(Dione)
 end)
 
 asset.export(Dione)
+asset.export(DioneLabel)
 
 
 
 asset.meta = {
   Name = "Dione",
-  Version = "1.0",
   Description = "Dione globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

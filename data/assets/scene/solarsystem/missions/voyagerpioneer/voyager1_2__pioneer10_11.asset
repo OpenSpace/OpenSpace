@@ -1,20 +1,19 @@
-local sampleInterval = 24*60*60
-
-local voyager_horizons = asset.syncedResource({
+local voyager_horizons = asset.resource({
   Name = "Voyager horizons",
   Type = "HttpSynchronization",
   Identifier = "voyager_horizons",
   Version = 1
 })
 
-local pioneer_horizons = asset.syncedResource({
+local pioneer_horizons = asset.resource({
   Name = "Pioneer horizons",
   Type = "HttpSynchronization",
   Identifier = "pioneer_horizons",
   Version = 1
 })
 
-local voyager1 = {
+
+local Voyager1 = {
   Identifier = "Voyager1",
   Parent = "SolarSystemBarycenter",
   Renderable = {
@@ -33,8 +32,7 @@ local voyager1 = {
     Fade = 5.0,
     StartTime = "1977 SEP 06 00:00:00",
     EndTime = "2030 JAN 01 00:00:00",
-    SampleInterval = sampleInterval,
-    TimeStampSubsampleFactor = 1
+    SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
     Name = "Voyager 1 Trail",
@@ -44,7 +42,7 @@ local voyager1 = {
   }
 }
 
-local voyager2 = {
+local Voyager2 = {
   Identifier = "Voyager2",
   Parent = "SolarSystemBarycenter",
   Renderable = {
@@ -63,8 +61,7 @@ local voyager2 = {
     Fade = 5.0,
     StartTime = "1977 AUG 21 00:00:00",
     EndTime = "2030 JAN 01 00:00:00",
-    SampleInterval = sampleInterval,
-    TimeStampSubsampleFactor = 1
+    SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
     Name = "Voyager 2 Trail",
@@ -74,7 +71,7 @@ local voyager2 = {
   }
 }
 
-local pioneer10 = {
+local Pioneer10 = {
   Identifier = "Pioneer10",
   Parent = "SolarSystemBarycenter",
   Renderable = {
@@ -93,8 +90,7 @@ local pioneer10 = {
     Fade = 5.0,
     StartTime = "1972 MAR 04 00:00:00",
     EndTime = "2030 JAN 01 00:00:00",
-    SampleInterval = sampleInterval,
-    TimeStampSubsampleFactor = 1
+    SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
     Name = "Pioneer 10 Trail",
@@ -104,7 +100,7 @@ local pioneer10 = {
   }
 }
 
-local pioneer11 ={
+local Pioneer11 ={
   Identifier = "Pioneer11",
   Parent = "SolarSystemBarycenter",
   Renderable = {
@@ -123,8 +119,7 @@ local pioneer11 ={
     Fade = 5.0,
     StartTime = "1973 APR 07 00:00:00",
     EndTime = "2030 JAN 01 00:00:00",
-    SampleInterval = sampleInterval,
-    TimeStampSubsampleFactor = 1
+    SampleInterval = openspace.time.secondsPerDay()
   },
   GUI = {
     Name = "Pioneer 11 Trail",
@@ -134,32 +129,32 @@ local pioneer11 ={
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(voyager1)
-  openspace.addSceneGraphNode(voyager2)
-  openspace.addSceneGraphNode(pioneer10)
-  openspace.addSceneGraphNode(pioneer11)
+  openspace.addSceneGraphNode(Voyager1)
+  openspace.addSceneGraphNode(Voyager2)
+  openspace.addSceneGraphNode(Pioneer10)
+  openspace.addSceneGraphNode(Pioneer11)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(pioneer11)
-  openspace.removeSceneGraphNode(pioneer10)
-  openspace.removeSceneGraphNode(voyager2)
-  openspace.removeSceneGraphNode(voyager1)
+  openspace.removeSceneGraphNode(Pioneer11)
+  openspace.removeSceneGraphNode(Pioneer10)
+  openspace.removeSceneGraphNode(Voyager2)
+  openspace.removeSceneGraphNode(Voyager1)
 end)
 
-asset.export(voyager1)
-asset.export(voyager2)
-asset.export(pioneer10)
-asset.export(pioneer11)
+asset.export(Voyager1)
+asset.export(Voyager2)
+asset.export(Pioneer10)
+asset.export(Pioneer11)
 
 
 
 asset.meta = {
   Name = "Pioneer and Voyager Trails",
-  Version = "1.1",
   Description = [[Pioneer 10, Pioneer 11, Voyager 1 and Voyager 2 trails. Driven by JPL
-    Horizons data for better performance then spice but lower resolution. Data is from 
+    Horizons data for better performance then spice but lower resolution. Data is from
     shortly after mission launches until January 1st, 2030]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

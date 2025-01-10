@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -67,7 +67,7 @@ private:
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _lineColor;
     properties::FloatProperty _length;
-    UniformCache(modelViewProjection, color) _uniformCache;
+    UniformCache(modelViewProjectionTransform, color) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     GLuint _vaoId = 0;

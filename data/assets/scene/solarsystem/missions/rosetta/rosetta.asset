@@ -1,357 +1,119 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./67p")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
 
-local models = asset.syncedResource({
+
+local models = asset.resource({
   Name = "Rosetta Models",
   Type = "HttpSynchronization",
   Identifier = "rosetta_model",
-  Version = 4
+  Version = 5
 })
-
-local kernels = asset.syncedResource({
-  Name = "Rosetta Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "rosetta_kernels",
-  Version = 1
-})
-
-local RosettaKernels = {
-  kernels .. "ROS_160718_STEP.TSC",
-  kernels .. "ros_triv.tsc",
-
-  kernels .. "CORB_DV_243_01___T19_00325.BSP",
-  kernels .. "CORB_DV_223_01___T19_00302.BSP",
-  kernels .. "CORB_DV_145_01___T19_00216.BSP",
-
-  kernels .. "LORB_DV_236_01___T19_00318.BSP",
-  kernels .. "LORB_DV_223_01___T19_00302.BSP",
-  kernels .. "LORB_DV_145_01___T19_00216.BSP",
-
-  kernels .. "RORB_DV_243_01___T19_00325.BSP",
-  kernels .. "RORB_DV_223_01___T19_00302.BSP",
-  kernels .. "RORB_DV_145_01___T19_00216.BSP",
-
-  kernels .. "ATNR_P040302093352_00127.BC",
-
-  kernels .. "ROS_STRUCT_V5.BSP",
-
-  kernels .. "ROS_NAVCAM_V01.TI",
-
-  kernels .. "ROS_CHURYUMOV_V01.TF",
-  kernels .. "ROS_V26.TF",
-
-  -- CK
-  -- Rosetta attitude
-  kernels .. "RATT_DV_243_01_01____00325.BC",
-  kernels .. "RATT_DV_223_01_01____00302.BC",
-  kernels .. "RATT_DV_145_01_01____00216.BC",
-
-  -- Comet attitude
-  kernels .. "CATT_DV_243_01_______00325.BC",
-  kernels .. "CATT_DV_223_01_______00302.BC",
-  kernels .. "CATT_DV_145_01_______00216.BC",
-
-  -- High gain antenna
-  kernels .. "ROS_HGA_2016_V0035.BC",
-  kernels .. "ROS_HGA_2015_V0053.BC",
-  kernels .. "ROS_HGA_2014_V0044.BC",
-
-  -- Solar arrays
-  kernels .. "ROS_SA_2016_V0034.BC",
-  kernels .. "ROS_SA_2015_V0042.BC",
-  kernels .. "ROS_SA_2014_V0047.BC",
-
-  kernels .. "ROS_CGS_RSOC_V03.TPC"
-}
 
 local RotationMatrix = {
-  0, 1, 0,
-  0, 0, 1,
-  1, 0, 0
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  1, 0, 0, 0,
+  0, 0, 0, 1
+}
+
+local RosettaPosition = {
+  Identifier = "RosettaPosition",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2014 JAN 01 00:00:00.000",
+    End = "2016 OCT 01 00:00:00.000"
+  },
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.Rosetta,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Rosetta,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "Rosetta Position",
+    Path = "/Solar System/Missions/Rosetta",
+    Hidden = true
+  }
 }
 
 local Rosetta = {
   Identifier = "Rosetta",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = RosettaPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { 0.0, math.pi / 2.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "rosetta.glb",
+    ModelTransform = RotationMatrix,
+    LightSources = {
+      sun.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.5
+      }
+    }
+  },
+  GUI = {
+    Name = "Rosetta",
+    Path = "/Solar System/Missions/Rosetta"
+  }
+}
+
+local PhilaePosition = {
+  Identifier = "PhilaePosition",
+  Parent = transforms.Barycenter.Identifier,
+  -- This should need a transform, but currently the model contains it instead
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ROSETTA",
-      Observer = "SSB",
-      Kernels = RosettaKernels
+      Target = kernels.ID.Philae,
+      Observer = kernels.ID.ChurymovGerasimenko
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "ROS_SPACECRAFT",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Rosetta,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local RosettaModel = {
-  Identifier = "RosettaModel",
-  Parent = Rosetta.Identifier,
-  Transform = {
-    Scale = {
-      Type = "StaticScale",
-      -- The scale of the model is in cm; OpenSpace is in m
-      Scale = 0.01
-    }
-  },
-  GUI = {
-    Name = "Rosetta Model",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local RosettaBlackFoil = {
-  Identifier = "Rosetta_black_foil",
-  Parent = RosettaModel.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "black_foil.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Rosetta Model Part Black Foil",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local RosettaBlackParts = {
-  Identifier = "Rosetta_black_parts",
-  Parent = RosettaModel.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "black_parts.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Rosetta Model Part Black Parts",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local RosettaDish = {
-  Identifier = "Rosetta_dish",
-  Parent = RosettaModel.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "dish.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Rosetta Model Part Dish",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local RosettaParts = {
-  Identifier = "Rosetta_parts",
-  Parent = RosettaModel.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "parts.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Rosetta Model Part Parts",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local RosettaSilverFoil = {
-  Identifier = "Rosetta_silver_foil",
-  Parent = RosettaModel.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "silver_foil.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Rosetta Model Part Silver Foil",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local RosettaVents = {
-  Identifier = "Rosetta_vents",
-  Parent = RosettaModel.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "vents.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Rosetta Model Part Vents",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local RosettaWingA = {
-  Identifier = "Rosetta_wing_a",
-  Parent = RosettaModel.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .."wingA.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Rosetta Model Part Wing A",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local RosettaWingB = {
-  Identifier = "Rosetta_wing_b",
-  Parent = RosettaModel.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "wingB.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Rosetta Model Part Wing B",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local RosettaYellowFoil = {
-  Identifier = "Rosetta_yellow_foil",
-  Parent = RosettaModel.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "yellow_foil.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Rosetta Model Part Yellow Foil",
-    Path = "/Solar System/Missions/Rosetta"
+    Name = "Philae Position",
+    Path = "/Solar System/Missions/Rosetta",
+    Hidden = true
   }
 }
 
 local Philae = {
   Identifier = "Philae",
-  Parent = transforms.Barycenter.Identifier,
-  -- This should need a transform, but currently the model is intrinsically
-  -- translated
+  Parent = PhilaePosition.Identifier,
   Transform = {
     Translation = {
-      Type = "SpiceTranslation",
-      Target = "PHILAE",
-      Observer = "CHURYUMOV-GERASIMENKO",
-      Kernels = RosettaKernels
+      Type = "StaticTranslation",
+      Position = { 1.0, 0.0, -1.25 }
     },
     Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "ROS_SPACECRAFT",
-      DestinationFrame = "GALACTIC",
-    },
-    Scale = {
-      Type = "StaticScale",
-      -- The scale of the model is in cm; OpenSpace is in m
-      Scale = 0.01
+      Type = "StaticRotation",
+      Rotation = { 0.0, math.pi / 2.0, 0.0 }
     }
   },
-  GUI = {
-    Name = "Philae Model",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local PhilaeFoil = {
-  Identifier = "Philae_foil",
-  Parent = Philae.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "lander_foil.obj",
+    GeometryFile = models .. "lander.glb",
     ModelTransform = RotationMatrix,
     LightSources = {
       sun.LightSource,
@@ -363,83 +125,14 @@ local PhilaeFoil = {
     }
   },
   GUI = {
-    Name = "Philae Model Part Foil",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local PhilaeLids = {
-  Identifier = "Philae_lids",
-  Parent = Philae.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "lander_lids.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Philae Model Part Lids",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local PhilaeParts = {
-  Identifier = "Philae_parts",
-  Parent = Philae.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "lander_parts.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Philae Model Part Parts",
-    Path = "/Solar System/Missions/Rosetta"
-  }
-}
-
-local PhilaeSolarPanels = {
-  Identifier = "Philae_solarp",
-  Parent = Philae.Identifier,
-  Renderable = {
-    Type = "RenderableModel",
-    Body = "ROSETTA",
-    GeometryFile = models .. "lander_solarp.obj",
-    ModelTransform = RotationMatrix,
-    LightSources = {
-      sun.LightSource,
-      {
-        Identifier = "Camera",
-        Type = "CameraLightSource",
-        Intensity = 0.5
-      }
-    }
-  },
-  GUI = {
-    Name = "Philae Model Parts Solar Panels",
+    Name = "Philae",
     Path = "/Solar System/Missions/Rosetta"
   }
 }
 
 local NavCam = {
   Identifier = "NAVCAM",
-  Parent = Rosetta.Identifier,
+  Parent = RosettaPosition.Identifier,
   GUI = {
     Path = "/Solar System/Missions/Rosetta/Instruments"
   }
@@ -449,13 +142,13 @@ local NavCamFov = {
   Identifier = "NAVCAM_FOV",
   Parent = NavCam.Identifier,
   Renderable = {
-    Type  = "RenderableFov",
-    Body  = "ROSETTA",
-    Frame = "ROS_NAVCAM-A",
-    RGB   = { 0.8, 0.7, 0.7 },
+    Type = "RenderableFov",
+    Body = kernels.ID.Rosetta,
+    Frame = kernels.Frame.NavCam,
+    RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
-      Name       = "ROS_NAVCAM-A",
-      Method     = "ELLIPSOID",
+      Name = kernels.Frame.NavCam,
+      Method = "ELLIPSOID",
       Aberration = "NONE"
     },
     PotentialTargets = { "CHURYUMOV-GERASIMENKO" },
@@ -474,10 +167,10 @@ local ImagePlane = {
   Parent = transforms.Comet67P.Identifier,
   Renderable = {
     Type = "RenderablePlaneProjection",
-    Frame = "67P/C-G_CK",
+    Frame = kernels.Frame.ChurymovGerasimenko,
     DefaultTarget = "CHURYUMOV-GERASIMENKO",
-    Spacecraft = "ROSETTA",
-    Instrument = "ROS_NAVCAM-A",
+    Spacecraft = kernels.ID.Rosetta,
+    Instrument = kernels.Frame.NavCam,
     Moving = false,
     Texture = models .. "defaultProj.png"
   },
@@ -494,8 +187,8 @@ local RosettaCometTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "ROSETTA",
-      Observer = "CHURYUMOV-GERASIMENKO"
+      Target = kernels.ID.Rosetta,
+      Observer = kernels.ID.ChurymovGerasimenko
     },
     Color = { 0.288, 0.375, 0.934 },
     StartTime = "2014 AUG 01 12:00:00",
@@ -515,8 +208,8 @@ local PhilaeTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "PHILAE",
-      Observer = "CHURYUMOV-GERASIMENKO"
+      Target = kernels.ID.Philae,
+      Observer = kernels.ID.ChurymovGerasimenko
     },
     Color = { 0.8, 0.5, 1.0 },
     StartTime = "2014 NOV 12 08:35:00",
@@ -529,45 +222,102 @@ local PhilaeTrail = {
   }
 }
 
-local nodes = {
-  Rosetta,
-  RosettaModel,
-  RosettaBlackFoil,
-  RosettaBlackParts,
-  RosettaDish,
-  RosettaParts,
-  RosettaSilverFoil,
-  RosettaVents,
-  RosettaWingA,
-  RosettaWingB,
-  RosettaYellowFoil,
-
-  NavCam,
-  NavCamFov,
-  ImagePlane,
-
-  Philae,
-  PhilaeFoil,
-  PhilaeLids,
-  PhilaeParts,
-  PhilaeSolarPanels,
-
-  RosettaCometTrail,
-  PhilaeTrail
+local FocusRosetta = {
+  Identifier = "os.rosetta.FocusRosetta",
+  Name = "Focus on Rosetta",
+  Command = [[
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Anchor", "Rosetta")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.Aim", "")
+    openspace.setPropertyValue("NavigationHandler.OrbitalNavigator.RetargetAnchor", nil)
+  ]],
+  Documentation = "Sets the focus of the camera on Rosetta",
+  GuiPath = "/Missions/Rosetta",
+  IsLocal = false
 }
 
-asset.onInitialize(function ()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+local SetupLanderRelease = {
+  Identifier = "os.rosetta.SetupLanderRelease",
+  Name = "Set lander release time",
+  Command = [[
+    openspace.time.setTime("2014-11-12T08:20:00.00")
+  ]],
+  Documentation = "Jumps to the time when the Philae lander is released",
+  GuiPath = "/Missions/Rosetta",
+  IsLocal = false
+}
+
+local ToggleImagePlane = {
+  Identifier = "os.rosetta.ToggleImagePlane",
+  Name = "Toggle image plane",
+  Command = [[
+    openspace.setPropertyValueSingle(
+      "Scene.ImagePlaneRosetta.Renderable.Enabled",
+      not openspace.propertyValue("Scene.ImagePlaneRosetta.Renderable.Enabled")
+    )
+  ]],
+  Documentation = "Toggles the visibility of the free floating image plane",
+  GuiPath = "/Missions/Rosetta",
+  IsLocal = false
+}
+
+local TogglePhilaeTrail = {
+  Identifier = "os.rosetta.TogglePhilaeTrail",
+  Name = "Toggle Philae trail",
+  Command = [[
+    openspace.setPropertyValueSingle(
+      "Scene.PhilaeTrail.Renderable.Enabled",
+      not openspace.propertyValue("Scene.PhilaeTrail.Renderable.Enabled")
+    )
+  ]],
+  Documentation = "Toggles the visibility of Philae's trail",
+  GuiPath = "/Missions/Rosetta",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(RosettaPosition)
+  openspace.addSceneGraphNode(Rosetta)
+  openspace.addSceneGraphNode(PhilaePosition)
+  openspace.addSceneGraphNode(Philae)
+  openspace.addSceneGraphNode(NavCam)
+  openspace.addSceneGraphNode(NavCamFov)
+  openspace.addSceneGraphNode(ImagePlane)
+  openspace.addSceneGraphNode(RosettaCometTrail)
+  openspace.addSceneGraphNode(PhilaeTrail)
+
+  openspace.action.registerAction(FocusRosetta)
+  openspace.action.registerAction(SetupLanderRelease)
+  openspace.action.registerAction(ToggleImagePlane)
+  openspace.action.registerAction(TogglePhilaeTrail)
 end)
 
-asset.onDeinitialize(function ()
-  for i = #nodes, 1, -1 do
-    openspace.removeSceneGraphNode(nodes[i])
-  end
+asset.onDeinitialize(function()
+  openspace.action.removeAction(TogglePhilaeTrail)
+  openspace.action.removeAction(ToggleImagePlane)
+  openspace.action.removeAction(SetupLanderRelease)
+  openspace.action.removeAction(FocusRosetta)
+
+  openspace.removeSceneGraphNode(PhilaeTrail)
+  openspace.removeSceneGraphNode(RosettaCometTrail)
+  openspace.removeSceneGraphNode(ImagePlane)
+  openspace.removeSceneGraphNode(NavCamFov)
+  openspace.removeSceneGraphNode(NavCam)
+  openspace.removeSceneGraphNode(Philae)
+  openspace.removeSceneGraphNode(PhilaePosition)
+  openspace.removeSceneGraphNode(Rosetta)
+  openspace.removeSceneGraphNode(RosettaPosition)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node);
-end
+asset.export(RosettaPosition)
+asset.export(Rosetta)
+asset.export(PhilaePosition)
+asset.export(Philae)
+asset.export(NavCam)
+asset.export(NavCamFov)
+asset.export(ImagePlane)
+asset.export(RosettaCometTrail)
+asset.export("FocusRosetta", FocusRosetta.Identifier)
+asset.export("SetupLanderRelease", SetupLanderRelease.Identifier)
+asset.export("ToggleImagePlane", ToggleImagePlane.Identifier)
+asset.export("TogglePhilaeTrail", TogglePhilaeTrail.Identifier)

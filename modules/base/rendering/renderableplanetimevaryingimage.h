@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEPLANETIMEVARYINGIMAGE___H__
 
 #include <modules/base/rendering/renderableplane.h>
+
+#include <filesystem>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class Texture; }
@@ -57,12 +59,12 @@ private:
     ghoul::opengl::Texture* loadTexture() const;
     void extractTriggerTimesFromFileNames();
     bool extractMandatoryInfoFromDictionary();
-    int updateActiveTriggerTimeIndex(double currenttime) const;
+    int updateActiveTriggerTimeIndex(double currentTime) const;
     void computeSequenceEndTime();
 
     // If there's just one state it should never disappear
     double _sequenceEndTime = std::numeric_limits<double>::max();
-    std::vector<std::string> _sourceFiles;
+    std::vector<std::filesystem::path> _sourceFiles;
     std::vector<double> _startTimes;
     int _activeTriggerTimeIndex = 0;
     properties::StringProperty _sourceFolder;

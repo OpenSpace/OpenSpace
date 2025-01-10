@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
+
 #version __CONTEXT__
 
 #include "atmosphere_common.glsl"
@@ -60,9 +60,9 @@ void main() {
   // In order to solve the integral from equation (15) we use the trapezoidal rule:
   // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
   vec3 irradianceE = vec3(0.0);
-  for (int iphi = 0; iphi < IRRADIANCE_INTEGRAL_SAMPLES; ++iphi) {
+  for (int iphi = 0; iphi < IRRADIANCE_INTEGRAL_SAMPLES; iphi++) {
     float phi = (float(iphi) + 0.5) * stepPhi;
-    for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES; ++itheta) {
+    for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES; itheta++) {
       float theta = (float(itheta) + 0.5) * stepTheta;
       // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
       // rho = 1, we are integrating over a unit sphere
@@ -98,5 +98,5 @@ void main() {
   }
 
   // Write the higher order irradiance to texture deltaE
-  renderTableColor = vec4(irradianceE, 0.0);    
+  renderTableColor = vec4(irradianceE, 0.0);
 }

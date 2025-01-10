@@ -1,4 +1,5 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
+
 
 
 local Name = "Earthquakes: Cumulative - 1980 - 1995"
@@ -20,25 +21,26 @@ some shaking of indoor items and significant damage unlikely]]
 local URL = "https://sos.noaa.gov/catalog/datasets/earthquakes-cumulative-1980-1995/"
 
 
-local syncedDirectory = asset.syncedResource({
+local syncedDirectory = asset.resource({
   Name = Name,
   Type = "HttpSynchronization",
   Identifier = Identifier,
-  Version = 1
+  Version = 1,
+  UnzipFiles = true
 })
 
-local imagesDestination = syncedDirectory .. "images"
 
-local layer = {
+local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
-  Type = "ImageSequenceTileLayer",
-  FolderPath = imagesDestination,
+  ZIndex = 100,
+  Type = "ImageSequenceTileProvider",
+  FolderPath = syncedDirectory .. "1024",
   Description = Description
 }
 
-local legend = {
+local Legend = {
   Identifier = Identifier .. "-legend",
   Name = Name .. " (Legend)",
   Enabled = asset.enabled,
@@ -49,7 +51,7 @@ local legend = {
   CartesianPosition = { 0.0, -0.6, -2.0 }
 }
 
-local quakebar = {
+local Quakebar = {
   Identifier = Identifier .. "-quake",
   Name = Name .. " (Quake)",
   Enabled = asset.enabled,
@@ -59,46 +61,41 @@ local quakebar = {
   CartesianPosition = { 0.0, -0.3, -2.0 }
 }
 
-local quakebar_combined = {
+local QuakebarCombined = {
   Identifier = Identifier .. "-combined",
   Name = Name .. " (Combined)",
   Enabled = asset.enabled,
   Type = "ScreenSpaceImageLocal",
-  Enabled = false,
   TexturePath = syncedDirectory .. "quakebar_combined.png",
   FaceCamera = false,
   Scale = 0.6,
   CartesianPosition = { 0.5, -0.5, -2.0 }
 }
 
-asset.onInitialize(function()
-  if not openspace.directoryExists(imagesDestination) then
-    openspace.printInfo("Extracting " .. Name)
-    openspace.unzipFile(syncedDirectory .. "1024.zip", imagesDestination, true)
-  end
 
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.addScreenSpaceRenderable(legend)
-  openspace.addScreenSpaceRenderable(quakebar)
-  openspace.addScreenSpaceRenderable(quakebar_combined)
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.addScreenSpaceRenderable(Legend)
+  openspace.addScreenSpaceRenderable(Quakebar)
+  openspace.addScreenSpaceRenderable(QuakebarCombined)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.removeScreenSpaceRenderable(legend)
-  openspace.removeScreenSpaceRenderable(quakebar)
-  openspace.removeScreenSpaceRenderable(quakebar_combined)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+  openspace.removeScreenSpaceRenderable(Legend)
+  openspace.removeScreenSpaceRenderable(Quakebar)
+  openspace.removeScreenSpaceRenderable(QuakebarCombined)
 end)
 
-asset.export(layer)
-asset.export(legend)
-asset.export(quakebar)
-asset.export(quakebar_combined)
+asset.export(Layer)
+asset.export(Legend)
+asset.export(Quakebar)
+asset.export(QuakebarCombined)
+
 
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

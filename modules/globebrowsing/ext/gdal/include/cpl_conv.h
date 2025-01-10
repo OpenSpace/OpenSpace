@@ -369,9 +369,9 @@ namespace cpl
     /** Use cpl::down_cast<Derived*>(pointer_to_base) as equivalent of
      * static_cast<Derived*>(pointer_to_base) with safe checking in debug
      * mode.
-     * 
+     *
      * Only works if no virtual inheritance is involved.
-     * 
+     *
      * @param f pointer to a base class
      * @return pointer to a derived class
      */

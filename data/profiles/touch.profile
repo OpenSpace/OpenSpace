@@ -3,7 +3,8 @@
     "openspace.setPropertyValueSingle(\"Modules.CefWebGui.GuiUrl\", 'http://127.0.0.1:4680/frontend/#/ontouch');"
   ],
   "assets": [
-    "base"
+    "base",
+    "base_keybindings"
   ],
   "camera": {
     "altitude": 20000000.0,

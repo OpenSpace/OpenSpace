@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@
 namespace openspace::properties {
 
 StringProperty::StringProperty(Property::PropertyInfo info, std::string value)
-    : TemplateProperty<std::string>(info, value)
+    : TemplateProperty<std::string>(std::move(info), std::move(value))
 {}
 
 std::string_view StringProperty::className() const {
@@ -42,9 +42,8 @@ int StringProperty::typeLua() const {
     return LUA_TSTRING;
 }
 
-std::string StringProperty::fromLuaConversion(lua_State* state, bool& success) const {
-    success = lua_isstring(state, -1) == 1;
-    return success ? lua_tostring(state, -1) : "";
+std::string StringProperty::fromLuaConversion(lua_State* state) const {
+    return ghoul::lua::value<std::string>(state);
 }
 
 void StringProperty::toLuaConversion(lua_State* state) const {

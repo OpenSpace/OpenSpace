@@ -1,5 +1,6 @@
-local transforms = asset.require('../transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+
 
 
 -- Circle shapes are not support
@@ -13,8 +14,8 @@ local RimeBase = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_RIME_BASE",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.RimeBase,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_RIME_BASE",
@@ -22,8 +23,7 @@ local RimeBase = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Rime Base FOV",
@@ -43,8 +43,8 @@ local Rime = {
   },
   Renderable = {
     Type = "RenderableFov",
-    Body = "JUICE",
-    Frame = "JUICE_RIME",
+    Body = kernels.ID.Juice,
+    Frame = kernels.Frame.Rime,
     RGB = { 0.8, 0.7, 0.7 },
     Instrument = {
       Name = "JUICE_RIME",
@@ -52,8 +52,7 @@ local Rime = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Rime FOV",
@@ -77,9 +76,9 @@ asset.export(Rime)
 asset.export(RimeBase)
 
 
+
 asset.meta = {
   Name = "RIME",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Radar for Icy Moons Exploration (RIME) onboard Juice,
     which is a ground-penetrating radar meant to measure the subsurface structure of the

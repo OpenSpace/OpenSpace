@@ -1,0 +1,16 @@
+{
+  "profile": "gaia",
+  "commands": [
+    { "type": "time", "value": "2000-01-01T12:00:00.00" },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Earth",
+        "position": [ 8.104243E18, 8.839172E18, -5.076751E18 ],
+        "up": [ -0.201743, 0.620307, 0.757970 ]
+      }
+    },
+    { "type": "wait", "value": 2 },
+    { "type": "screenshot" }
+  ]
+}

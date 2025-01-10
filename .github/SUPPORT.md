@@ -1,0 +1,1 @@
+In order to get in touch with the developers and to get support about using and contribution to OpenSpace either send an email to support@openspaceproject.com or join our Slack [here](https://join.slack.com/t/openspacesupport/shared_invite/zt-37niq6y9-T0JaCIk4UoFLI4VF5U9Vsw).

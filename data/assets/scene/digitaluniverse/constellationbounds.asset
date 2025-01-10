@@ -1,16 +1,20 @@
-local data = asset.syncedResource({
+local coreKernels = asset.require("spice/core")
+
+
+
+local data = asset.resource({
   Name = "Constellation Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_constellations_data",
   Version = 1
 })
 
+
 local zodiacs = {
-  "Cancer", "Taurus", "Pisces", "Aries", "Libra", "Aquarius", "Capricornus", "Scorpius",
-  "Virgo", "Sagittarius", "Gemini", "Leo"
+  "CNC", "TAU", "PSC", "ARI", "LIB", "AQR", "CAP", "SCO", "VIR", "SGR", "GEM", "LEO"
 }
 
-local object = {
+local Object = {
   Identifier = "ConstellationBounds",
   Renderable = {
     Type = "RenderableConstellationBounds",
@@ -22,8 +26,8 @@ local object = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "J2000",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.J2000,
+      DestinationFrame = coreKernels.Frame.Galactic
     },
     Scale = {
       Type = "StaticScale",
@@ -31,30 +35,31 @@ local object = {
     }
   },
   GUI = {
-    Name = "Constellation Bounds",
+    Name = "Constellation Boundaries",
     Path = "/Milky Way/Constellations",
-    Description = [[A Spherical mesh dividing the sky into regions that fit the
-      constellations]],
+    Description = [[As a continent is divided into countries, astronomers divide the sky
+      into 88 regions called constellations. Every object falls into one of these 88
+      regions. The boundaries of these regions are shown in this asset. Use these in
+      concert with the constellation labels. Census: 88 constellations.]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "Constellation Bounds",
-  Version = "1.2",
-  Description = [[DU asset providing a Spherical mesh dividing the sky into regions that
-    fit the constellations]],
+  Description = Object.GUI.Description,
   Author = "Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

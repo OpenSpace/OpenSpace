@@ -1,0 +1,48 @@
+-- To learn how you can include your own video, see the wiki
+-- http://wiki.openspaceproject.com/docs/builders/assets/resources.html
+
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local Plane = {
+  Identifier = "VideoPlaneExample",
+  Parent = transforms.EarthCenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, -11E7, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableVideoPlane",
+    MirrorBackside = true,
+    Size = 3E7,
+    Video = asset.resource("examplevideo.mp4"),
+  },
+  GUI = {
+    Name = "Video Plane Example",
+    Path = "/Other/Planes"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Plane)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Plane)
+end)
+
+asset.export(Plane)
+
+
+
+asset.meta = {
+  Name = "Video Plane Example",
+  Description = "An example asset that shows how to include a video on a plane.",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT"
+}

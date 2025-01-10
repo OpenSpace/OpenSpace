@@ -1,0 +1,39 @@
+-- To learn how you can include your own video, see the wiki
+-- http://wiki.openspaceproject.com/docs/builders/assets/resources.html
+
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local Layer = {
+  Name = "Stretched Video Example",
+  Identifier = "StretchedVideoExample",
+  Type = "VideoTileProvider",
+  Video = asset.resource("examplevideo.mp4"),
+  StartTime = "2023 01 29 20:00:00",
+  EndTime = "2023 01 29 21:00:00",
+  PlaybackMode = "MapToSimulationTime",
+  Enabled = asset.enabled,
+  Description = [[Video mapped to the simulation time in OpenSpace]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(earth.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(earth.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export(Layer)
+
+
+
+asset.meta = {
+  Name = "Stretched Video Example",
+  Description = "This is a video mapped to the simulation time in OpenSpace.",
+  Author = "OpenSpace Team",
+  URL = "https://openspaceproject.com",
+  License = "MIT"
+}

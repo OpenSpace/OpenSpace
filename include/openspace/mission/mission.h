@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,8 @@
 #define __OPENSPACE_CORE___MISSION___H__
 
 #include <openspace/util/timerange.h>
-
+#include <openspace/util/time.h>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -36,13 +37,22 @@ namespace openspace {
 
 namespace documentation {  struct Documentation; }
 
+struct Milestone {
+    std::string name;
+    Time date;
+    std::optional<std::string> description;
+    std::optional<std::string> image;
+    std::optional<std::string> link;
+    std::optional<std::vector<std::string>> actions;
+};
+
 /**
  * Used to represent a named period of time within a mission. Allows nested phases, i.e.
  * phases within phases. Designed for WORM usage (Write Once, Read Multiple), and,
  * therefore, has only accessors.
  *
- * Each MissionPhase is characterized by its MissionPhase::name, a TimeRange, an
- * optional MissionPhase::description, and optional subphases.
+ * Each MissionPhase is characterized by its MissionPhase::name, a TimeRange, an optional
+ * MissionPhase::description, and optional subphases.
  */
 class MissionPhase {
 public:
@@ -82,11 +92,43 @@ public:
     const std::string& description() const;
 
     /**
+     * Returns the associated image of this MissionPhase. If no image is associated, this
+     * string will be empty.
+     *
+     * \return The associated image of the MissionPhase or the empty string
+     */
+    const std::string& image() const;
+
+    /**
+     * Returns the associated link of this MissionPhase. If no link is associated, this
+     * string will be empty.
+     *
+     * \return The associated link of the MissionPhase or the empty string
+     */
+    const std::string& link() const;
+
+    /**
      * Returns all subphases sorted by start time.
      *
      * \return All subphases sorted by start time
      */
     const std::vector<MissionPhase>& phases() const;
+
+
+    /**
+     * Returns all important dates.
+     *
+     * \return All important dates
+     */
+    const std::vector<Milestone>& milestones() const;
+
+
+    /**
+     * Returns all actions.
+     *
+     * \return All actions
+     */
+    const std::vector<std::string>& actions() const;
 
     using Trace = std::vector<std::reference_wrapper<const MissionPhase>>;
 
@@ -97,7 +139,7 @@ public:
      * \param time The time in which the subphases have to be active in order to be
      *        included
      * \param maxDepth The maximum levels of subphases that will be considered. If this
-     *        value is equal to <code>-1</code>, an infinite depth will be considered.
+     *        value is equal to `-1`, an infinite depth will be considered.
      * \return A list of MissionPhases that cover the provided \p time
      */
     Trace phaseTrace(double time, int maxDepth = -1) const;
@@ -105,6 +147,7 @@ public:
     /**
      * Returns the Documentation that describes the ghoul::Dictionarty that this
      * MissionPhase can be constructed from.
+     *
      * \return The Documentation that describes the required structure for a Dictionary
      */
     static documentation::Documentation Documentation();
@@ -119,7 +162,7 @@ protected:
      * \param trace The list of MissionPhase%s that are active during the time \p time
      * \param maxDepth The maximum depth of levels that will be considered
      *
-     * \pre maxDepth must not be negative
+     * \pre \p maxDepth must not be negative
      */
     void phaseTrace(double time, Trace& trace, int maxDepth) const;
 
@@ -131,6 +174,14 @@ protected:
     TimeRange _timeRange;
     /// A list of subphases into which this MissionPhase is separated
     std::vector<MissionPhase> _subphases;
+    /// Image that is associated with this phase
+    std::string _image;
+    /// Link that is associated with this phase
+    std::string _link;
+    /// Actions associated with the phase
+    std::vector<std::string> _actions;
+    /// Important dates
+    std::vector<Milestone> _milestones;
 };
 
 /**

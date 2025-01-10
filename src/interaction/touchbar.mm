@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 
 using namespace openspace;
 
@@ -74,7 +74,7 @@ NSArray* focusIdentifiers;
 
         // Set the default ordering of items.
         touchBar.defaultItemIdentifiers = objs;
-            
+
         touchBar.customizationAllowedItemIdentifiers = objs;
         if ([focusIdentifiers count] > 0) {
             touchBar.principalItemIdentifier = [focusIdentifiers firstObject];
@@ -90,7 +90,7 @@ NSArray* focusIdentifiers;
         (void)touchBar;
 
         if ([identifier isEqualToString:pauseResultId]) {
-            NSButton* button = [NSButton 
+            NSButton* button = [NSButton
                 buttonWithTitle:NSLocalizedString(
                     (global::timeManager->isPaused() ? @"Resume" : @"Pause"),
                     @""
@@ -112,7 +112,7 @@ NSArray* focusIdentifiers;
         }
 
         if ([identifier isEqualToString:hideOnScreenTextId]) {
-            NSButton* button = [NSButton 
+            NSButton* button = [NSButton
                 buttonWithTitle:@"Toggle Text"
                 target:self action:@selector(hideTextAction:)
             ];
@@ -172,9 +172,12 @@ NSArray* focusIdentifiers;
     }
 
     - (void)pauseResumeButtonAction:(id)sender {
+        // No sync or send because time settings are always synced and sent
+        // to the connected nodes and peers
         global::scriptEngine->queueScript(
             "openspace.time.togglePause();",
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
 
         NSButton* button = static_cast<NSButton*>(sender);
@@ -187,7 +190,7 @@ NSArray* focusIdentifiers;
 
         NSString* title = [button title];
 
-        std::string str = fmt::format(
+        std::string str = std::format(
             "openspace.setPropertyValueSingle('{}', '{}');\
              openspace.setPropertyValueSingle('{}', '');\
              openspace.setPropertyValueSingle('{}', '');",
@@ -197,7 +200,8 @@ NSArray* focusIdentifiers;
         );
         global::scriptEngine->queueScript(
             str,
-            scripting::ScriptEngine::RemoteScripting::Yes
+            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            scripting::ScriptEngine::ShouldSendToRemote::Yes
         );
     }
 
@@ -206,12 +210,13 @@ NSArray* focusIdentifiers;
         (void)sender;
 
         global::scriptEngine->queueScript(
-            "local isEnabled = openspace.getPropertyValue('Dashboard.IsEnabled');\
+            "local isEnabled = openspace.propertyValue('Dashboard.IsEnabled');\
              openspace.setPropertyValueSingle('Dashboard.IsEnabled', not isEnabled);\
              openspace.setPropertyValueSingle('RenderEngine.ShowLog', not isEnabled);\
              openspace.setPropertyValueSingle('RenderEngine.ShowVersion', not isEnabled);\
              openspace.setPropertyValueSingle('RenderEngine.ShowCamera', not isEnabled)",
-            scripting::ScriptEngine::RemoteScripting::No
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
 
@@ -219,9 +224,10 @@ NSArray* focusIdentifiers;
         // Remove unused variable warning
         (void)sender;
         global::scriptEngine->queueScript(
-            "local isEnabled = openspace.getPropertyValue('Modules.CefWebGui.Visible');\
-            openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', not isEnabled);",
-            scripting::ScriptEngine::RemoteScripting::No
+            "local isEnabled = openspace.propertyValue('Modules.CefWebGui.Visible');\
+             openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', not isEnabled);",
+            scripting::ScriptEngine::ShouldBeSynchronized::No,
+            scripting::ScriptEngine::ShouldSendToRemote::No
         );
     }
 @end
@@ -241,7 +247,7 @@ void showTouchbar() {
         g_TouchBarDelegate = [[TouchBarDelegate alloc] init];
         [NSApplication sharedApplication].automaticCustomizeTouchBarMenuItemEnabled = YES;
     }
-    
+
     std::vector<SceneGraphNode*> ns = global::renderEngine->scene()->allSceneGraphNodes();
 
     std::sort(

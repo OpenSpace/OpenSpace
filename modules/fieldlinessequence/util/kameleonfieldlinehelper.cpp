@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 #include <modules/fieldlinessequence/util/commons.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <memory>
 #include <fstream>
@@ -36,7 +36,7 @@
 
 #ifdef _MSC_VER
 #pragma warning (push)
- // Boost throws #pragma warning: there is no warning number '4675'
+// Boost throws #pragma warning: there is no warning number '4675'
 #pragma warning (disable : 4619)
 #endif // _MSC_VER
 
@@ -353,7 +353,7 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
             state.appendToExtra(i, val);
         }
         // Calculate and store the magnitudes!
-        for (size_t i = 0; i < nXtraMagnitudes; ++i) {
+        for (size_t i = 0; i < nXtraMagnitudes; i++) {
             const size_t idx = i*3;
 
             const float x = interpolator->interpolate(extraMagVars[idx]  , p.x, p.y, p.z);
@@ -402,7 +402,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
 
     // Load the existing SCALAR variables into kameleon.
     // Remove non-existing variables from vector
-    for (int i = 0; i < static_cast<int>(extraScalarVars.size()); ++i) {
+    for (int i = 0; i < static_cast<int>(extraScalarVars.size()); i++) {
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&
@@ -421,7 +421,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
             str = TAsPOverRho;
         }
         if (!success) {
-            LWARNING(fmt::format("Failed to load extra variable: '{}'. Ignoring", str));
+            LWARNING(std::format("Failed to load extra variable '{}'. Ignoring", str));
             extraScalarVars.erase(extraScalarVars.begin() + i);
             --i;
         }
@@ -459,9 +459,9 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
                 name = JParallelB;
             }
             if (!success) {
-                LWARNING(fmt::format(
-                    "Failed to load at least one of the magnitude variables: {}, {}, {}. "
-                    "Removing ability to store corresponding magnitude",
+                LWARNING(std::format(
+                    "Failed to load at least one of the magnitude variables: '{}', '{}', "
+                    "'{}'. Removing ability to store corresponding magnitude",
                     s1, s2, s3
                 ));
                 extraMagVars.erase(
@@ -478,7 +478,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
     else {
         // WRONG NUMBER OF MAGNITUDE VARIABLES.. REMOVE ALL!
         extraMagVars.clear();
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Wrong number of variables provided for storing magnitudes. Expects multiple "
             "of 3 but {} are provided",
             extraMagVars.size()

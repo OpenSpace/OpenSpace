@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,7 +58,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    // Computes the size of the plane quad using the relevant properties
+    /**
+     * Computes the size of the plane quad using the relevant properties.
+     */
     float planeSize() const;
 
     properties::StringProperty _texturePath;
@@ -68,7 +70,7 @@ private:
     properties::Vec3Property _multiplyColor;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
-    UniformCache(modelViewProjection, offset, opacity, texture,
+    UniformCache(modelViewProjectionTransform, offset, opacity, discTexture,
         eccentricity, semiMajorAxis, multiplyColor) _uniformCache;
 
     std::unique_ptr<PlaneGeometry> _plane;

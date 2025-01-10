@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,17 +57,23 @@ class WebKeyboardHandler;
 class BrowserInstance {
 public:
     static constexpr int SingleClick = 1;
-
-    BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
+    // @TODO (ylvse 2024-08-20): remove third argument when the sky browser rewrite is
+    // done.
+    // The browser instance should always accelerate the rendering if possible but for
+    // now the skybrowser is not accelerated. Will be when the rewrite is done.
+    BrowserInstance(WebRenderHandler* renderer,
+        WebKeyboardHandler* keyboardHandler,
+        bool accelerateRendering = true
+    );
     ~BrowserInstance();
 
-    void loadUrl(std::string url);
+    void loadUrl(const std::string& url);
 
     /**
      * Load a local file.
      *
      * \param path The path to load
-     * \return \c true if the path exists, \c false otherwise
+     * \return `true` if the path exists, `false` otherwise
      */
     bool loadLocalPath(std::string path);
     void initialize();
@@ -75,12 +81,12 @@ public:
     /**
      * Call when the window has been reshaped.
      *
-     * \param wrapper the windowWrapper capable of
+     * \param windowSize The size of the window in pixels
      */
     void reshape(const glm::ivec2& windowSize);
 
     /**
-     * Encapsulate renderHandler's draw method
+     * Encapsulate renderHandler's draw method.
      */
     void draw();
     void close(bool force = false);
@@ -97,15 +103,17 @@ public:
     bool sendMouseMoveEvent(const CefMouseEvent& event);
 
     /**
-     * Send scroll wheel event to browser
+     * Send scroll wheel event to browser.
      *
      * \param event Key event with position
      * \param delta The scroll amount in pixels
-     * \return if this scroll should be blocked or not
+     * \return `true` if this scroll should be blocked or not
      */
     bool sendMouseWheelEvent(const CefMouseEvent& event, const glm::ivec2& delta);
 
-    /// Set the browser zoom level. 1.0 = default, 2.0 = double, etc.
+    /**
+     * Set the browser zoom level. 1.0 = default, 2.0 = double, etc.
+     */
     void setZoom(float ratio);
 
     void reloadBrowser();

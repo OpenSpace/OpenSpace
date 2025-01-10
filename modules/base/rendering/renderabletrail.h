@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,9 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -61,7 +63,7 @@ class Translation;
  *
  * Trails can be rendered either as lines, as points, or a combination of both with
  * varying colors, line thicknesses, or fading settings. If trails are rendered as points,
- * the RenderInformation's \c stride parameter determines the number of points between
+ * the RenderInformation's `stride` parameter determines the number of points between
  * larger points. A potential use case for this is showing the passage of time along a
  * trail by using a point separation of one hour and a subsampling of 4, you would get a
  * point every 15 minutes with every hourly point being bigger.
@@ -72,23 +74,24 @@ class Translation;
  */
 class RenderableTrail : public Renderable {
 public:
+    const double DISTANCE_CULLING_RADII = 800.0;
 
-const double DISTANCE_CULLING_RADII = 800.0;
-
-struct Appearance : properties::PropertyOwner {
+    struct Appearance : properties::PropertyOwner {
         Appearance();
         /// Specifies the base color of the line before fading
         properties::Vec3Property lineColor;
         /// Settings that enables or disables the line fading
         properties::BoolProperty useLineFade;
-        /// Specifies a multiplicative factor that fades out the line
-        properties::FloatProperty lineFade;
         /// Line width for the line rendering part
         properties::FloatProperty lineWidth;
         /// Point size for the point rendering part
         properties::IntProperty pointSize;
         /// The option determining which rendering method to use
         properties::OptionProperty renderingModes;
+        /// Specifies how much of the orbit should have a trail
+        properties::FloatProperty lineLength;
+        /// Specifies how much of the trail should be faded
+        properties::FloatProperty lineFadeAmount;
     };
 
     virtual ~RenderableTrail() override = default;
@@ -100,26 +103,28 @@ struct Appearance : properties::PropertyOwner {
 
     /**
      * The render method will set up the shader information and then render first the
-     * information contained in the the \c _primaryRenderInformation, then the optional
-     * \c _floatingRenderInformation using the provided \p data
+     * information contained in the the `_primaryRenderInformation`, then the optional
+     * `_floatingRenderInformation` using the provided \p data.
+     *
      * \param data The data that is necessary to render this Renderable
+     * \param rendererTask A place to store render tasks from this Renderable
      */
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
 protected:
     explicit RenderableTrail(const ghoul::Dictionary& dictionary);
 
-    /// Returns the documentation entries that the con
     static documentation::Documentation Documentation();
 
-    /// The layout of the VBOs
+    /// The layout of the VBOs (use float if sending as positions to shader)
+    template <typename T>
     struct TrailVBOLayout {
-        float x, y, z;
+        T x, y, z;
     };
 
     /// The backend storage for the vertex buffer object containing all points for this
     /// trail.
-    std::vector<TrailVBOLayout> _vertexArray;
+    std::vector<TrailVBOLayout<float>> _vertexArray;
 
     /// The index array that is potentially used in the draw call. If this is empty, no
     /// element draw call is used.
@@ -128,13 +133,18 @@ protected:
     /// The Translation object that provides the position of the individual trail points
     ghoul::mm_unique_ptr<Translation> _translation;
 
-    /// The RenderInformation contains information filled in by the concrete subclasses to
-    /// be used by this class.
+    /**
+     * The RenderInformation contains information filled in by the concrete subclasses to
+     * be used by this class.
+     */
     struct RenderInformation {
         enum class VertexSorting {
-            NewestFirst = 0,    ///< Newer vertices have a lower index than older ones
-            OldestFirst,        ///< Older vertices have a lower index than newer ones
-            NoSorting           ///< No ordering in the vertices; no fading applied
+            /// Newer vertices have a lower index than older ones
+            NewestFirst = 0,
+            /// Older vertices have a lower index than newer ones
+            OldestFirst,
+            /// No ordering in the vertices; no fading applied
+            NoSorting
         };
         /// The first element in the vertex buffer to be rendered
         GLint first = 0;
@@ -161,25 +171,38 @@ protected:
     /// Optional render information that contains information about the last, floating
     /// part of the trail
     RenderInformation _floatingRenderInformation;
+    /// Render information that contains information about trail segments after the
+    /// object point (renderableTrailTrajectory)
+    RenderInformation _secondaryRenderInformation;
+
+    /// Flag used to determine if we use a split trail or not during rendering
+    bool _useSplitRenderMode = false;
+    /// Number of unique vertices used when rendering segmented trails
+    int _numberOfUniqueVertices = 0;
 
 private:
     void internalRender(bool renderLines, bool renderPoints,
         const RenderData& data,
         const glm::dmat4& modelTransform,
-        RenderInformation& info, int nVertices, int offset);
+        RenderInformation& info, int nVertices, int ringOffset,
+        bool useSplitRenderMode = false, int numberOfUniqueVertices = 0,
+        int floatingOffset = 0);
 
    Appearance _appearance;
 
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject = nullptr;
 #ifdef __APPLE__
-    UniformCache(opacity, modelView, projection, color, useLineFade,
-                 lineFade, vertexSorting, idOffset, nVertices, stride,
-                 pointSize, renderPhase) _uniformCache;
+    UniformCache(opacity, modelViewTransform, projectionTransform, color, useLineFade,
+        lineLength, lineFadeAmount, vertexSortingMethod, idOffset, nVertices, stride,
+        pointSize, renderPhase, useSplitRenderMode, floatingOffset, numberOfUniqueVertices
+    ) _uniformCache;
 #else
-    UniformCache(opacity, modelView, projection, color, useLineFade, lineFade,
-        vertexSorting, idOffset, nVertices, stride, pointSize, renderPhase, viewport,
-        lineWidth) _uniformCache;
+    UniformCache(opacity, modelViewTransform, projectionTransform, color, useLineFade,
+        lineLength, lineFadeAmount, vertexSortingMethod, idOffset, nVertices, stride,
+        pointSize, renderPhase, viewport, lineWidth, floatingOffset, useSplitRenderMode,
+        numberOfUniqueVertices
+    ) _uniformCache;
 #endif
 };
 

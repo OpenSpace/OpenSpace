@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,24 +41,39 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser Dimensions",
-        "Set the dimensions of the web browser windows"
+        "The dimensions of the web browser window in pixels.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
-        "The URL to load"
+        "The URL to load.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
-        "Reload the web browser"
+        "Reload the web browser.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
+    // This `ScreenSpaceRenderable` can be used to render a webpage in front of the
+    // camera. This can be used to show various dynamic content, for example using the
+    // scripting API.
+    //
+    // Note that mouse input will not be passed to the rendered view, so it will not be
+    // possible to interact with the web page.
     struct [[codegen::Dictionary(ScreenSpaceBrowser)]] Parameters {
-        std::optional<std::string> identifier;
+        // A unique identifier for this screen space browser.
+        std::optional<std::string> identifier [[codegen::identifier()]];
+
+        // [[codegen::verbatim(UrlInfo.description)]]
         std::optional<std::string> url;
+
+        // [[codegen::verbatim(DimensionsInfo.description)]]
+        std::optional<glm::vec2> dimensions [[codegen::greater({ 0, 0 })]];
     };
 #include "screenspacebrowser_codegen.cpp"
 
@@ -74,11 +89,17 @@ void ScreenSpaceBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
     _texture = t;
 }
 
+documentation::Documentation ScreenSpaceBrowser::Documentation() {
+    return codegen::doc<Parameters>("core_screenspace_browser");
+}
+
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _dimensions(DimensionsInfo, glm::vec2(0.f), glm::vec2(0.f), glm::vec2(3000.f))
+    , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
+    , _renderHandler(new ScreenSpaceRenderHandler)
     , _url(UrlInfo)
     , _reload(ReloadInfo)
+    , _keyboardHandler(new WebKeyboardHandler)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -88,11 +109,8 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 
     _url = p.url.value_or(_url);
 
-    glm::vec2 windowDimensions = global::windowDelegate->currentSubwindowSize();
-    _dimensions = windowDimensions;
+    _dimensions = p.dimensions.value_or(global::windowDelegate->currentSubwindowSize());
 
-    _renderHandler = new ScreenSpaceRenderHandler;
-    _keyboardHandler = new WebKeyboardHandler();
     _browserInstance = std::make_unique<BrowserInstance>(
         _renderHandler.get(),
         _keyboardHandler.get()
@@ -105,6 +123,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     addProperty(_url);
     addProperty(_dimensions);
     addProperty(_reload);
+    _useAcceleratedRendering = WebBrowserModule::canUseAcceleratedRendering();
 
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
@@ -113,13 +132,6 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 }
 
 bool ScreenSpaceBrowser::initializeGL() {
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(_dimensions.value(), 1),
-        GL_TEXTURE_2D
-    );
-
-    _renderHandler->setTexture(*_texture);
-
     createShaders();
 
     _browserInstance->initialize();
@@ -128,10 +140,7 @@ bool ScreenSpaceBrowser::initializeGL() {
 }
 
 bool ScreenSpaceBrowser::deinitializeGL() {
-    _renderHandler->setTexture(0);
-    _texture = nullptr;
-
-    LDEBUG(fmt::format("Deinitializing ScreenSpaceBrowser: {}", _url.value()));
+    LDEBUG(std::format("Deinitializing ScreenSpaceBrowser: {}", _url.value()));
 
     _browserInstance->close(true);
 
@@ -147,22 +156,23 @@ bool ScreenSpaceBrowser::deinitializeGL() {
     return ScreenSpaceRenderable::deinitializeGL();
 }
 
-void ScreenSpaceBrowser::render() {
+void ScreenSpaceBrowser::render(const RenderData& renderData) {
     if (!_renderHandler->isTextureReady()) {
         return;
     }
 
     _renderHandler->updateTexture();
-    draw(
+
+    const glm::mat4 mat =
         globalRotationMatrix() *
         translationMatrix() *
         localRotationMatrix() *
-        scaleMatrix()
-    );
+        scaleMatrix();
+    draw(mat, renderData, _useAcceleratedRendering);
 }
 
 void ScreenSpaceBrowser::update() {
-    _objectSize = _texture->dimensions();
+    _objectSize = _dimensions.value();
 
     if (_isUrlDirty) {
         _browserInstance->loadUrl(_url);
@@ -176,11 +186,11 @@ void ScreenSpaceBrowser::update() {
 }
 
 bool ScreenSpaceBrowser::isReady() const {
-    return _shader && _texture;
+    return _shader != nullptr;
 }
 
 void ScreenSpaceBrowser::bindTexture() {
-    _texture->bind();
+    _renderHandler->bindTexture();
 }
 
 } // namespace openspace

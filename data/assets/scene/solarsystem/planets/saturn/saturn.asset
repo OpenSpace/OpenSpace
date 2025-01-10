@@ -1,13 +1,16 @@
-local transforms = asset.require("./transforms")
-asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Type = "HttpSynchronization",
   Name = "Saturn textures",
   Identifier = "saturn_textures",
   Version = 4
 })
+
 
 local Saturn = {
   Identifier = "Saturn",
@@ -15,20 +18,18 @@ local Saturn = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SATURN",
-      Observer = "SATURN BARYCENTER"
+      Target = coreKernels.ID.Saturn,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_SATURN",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Saturn,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 60268000, 60268000, 54364000 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Rings = {
       -- Single Texture Values:
       --Texture = texturesPath .. "/saturn_rings.png",
@@ -63,22 +64,27 @@ local SaturnLabel = {
   Identifier = "SaturnLabel",
   Parent = Saturn.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Saturn",
     FontSize = 70.0,
-    Size = 8.85,
-    MinMaxSize = { 1, 100 },
+    Size = 8.9,
+    MinMaxSize = { 1, 60 },
     BlendMode = "Additive",
-    OrientationOption = "Camera View Direction"
+    OrientationOption = "Camera View Direction",
+    EnableFading = true,
+    FadeUnit = "au",
+    FadeDistances = { 2.5, 80.0 },
+    FadeWidths = { 1.0, 100.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Saturn Label",
     Path = "/Solar System/Planets/Saturn",
-    Description = "Main planet label for Saturn",
+    Description = "Main planet label for Saturn"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Saturn)
@@ -97,7 +103,6 @@ asset.export(SaturnLabel)
 
 asset.meta = {
   Name = "Saturn",
-  Version = "1.1",
   Description = "Saturn globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

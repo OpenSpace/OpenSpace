@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,26 +87,31 @@ void TextureComponent::uploadToGpu() {
 }
 
 void TextureComponent::loadFromFile(const std::filesystem::path& path) {
-    if (!path.empty()) {
-        using namespace ghoul::io;
-        using namespace ghoul::opengl;
-        std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(path.string()).string(),
-            _nDimensions
-        );
+    if (path.empty()) {
+        return;
+    }
 
-        if (texture) {
-            LDEBUG(fmt::format("Loaded texture from {}", absPath(path.string())));
-            _texture = std::move(texture);
+    using namespace ghoul::io;
+    using namespace ghoul::opengl;
 
-            _textureFile = std::make_unique<ghoul::filesystem::File>(path);
-            if (_shouldWatchFile) {
-                _textureFile->setCallback([this]() { _fileIsDirty = true; });
-            }
+    std::filesystem::path absolutePath = absPath(path);
 
-            _fileIsDirty = false;
-            _textureIsDirty = true;
+    std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+        absolutePath,
+        _nDimensions
+    );
+
+    if (texture) {
+        LDEBUG(std::format("Loaded texture from '{}'", absolutePath));
+        _texture = std::move(texture);
+
+        _textureFile = std::make_unique<ghoul::filesystem::File>(absolutePath);
+        if (_shouldWatchFile) {
+            _textureFile->setCallback([this]() { _fileIsDirty = true; });
         }
+
+        _fileIsDirty = false;
+        _textureIsDirty = true;
     }
 }
 

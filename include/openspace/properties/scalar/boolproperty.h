@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,25 +25,14 @@
 #ifndef __OPENSPACE_CORE___BOOLPROPERTY___H__
 #define __OPENSPACE_CORE___BOOLPROPERTY___H__
 
- /**
- * \file boolproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class BoolProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>bool</code>.
-
- * @} @}
- */
-
 #include <openspace/properties/templateproperty.h>
 
 namespace openspace::properties {
 
+/**
+ * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * the type `bool`.
+ */
 class BoolProperty : public TemplateProperty<bool> {
 public:
     BoolProperty(Property::PropertyInfo info, bool value = false);
@@ -54,7 +43,7 @@ public:
     using TemplateProperty<bool>::operator=;
 
 protected:
-    bool fromLuaConversion(lua_State* state, bool& success) const override;
+    bool fromLuaConversion(lua_State* state) const override;
     void toLuaConversion(lua_State* state) const override;
     std::string toStringConversion() const override;
 };

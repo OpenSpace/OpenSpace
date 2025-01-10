@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,20 +32,37 @@
 SettingsWidget::SettingsWidget(sgct::quat orientation, QWidget* parent)
     : QWidget(parent)
     , _orientationValue(std::move(orientation))
+    , _showUiOnFirstWindow(new QCheckBox(
+        "Show user interface only on first window using graphics:"
+    ))
+    , _firstWindowGraphicsSelection(new QComboBox)
+    , _firstWindowSelectionLayout(new QHBoxLayout)
 {
     QBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     
-    _showUiOnFirstWindow = new QCheckBox("Show only user interface on the first window");
     _showUiOnFirstWindow->setChecked(false);
+    _showUiOnFirstWindow->setEnabled(false);
     _showUiOnFirstWindow->setToolTip(
         "If enabled the first window is marked as a GUI window resulting in the user "
-        "interface only being shown on that window and the rendering is suppressed on "
-        "this first window. The remaining windows will render normally but they will not "
-        "show the user interface"
+        "interface only being shown\non that window and the rendering is suppressed on "
+        "this first window. The remaining windows will render\nnormally but they will "
+        "not show the user interface"
     );
-    layout->addWidget(_showUiOnFirstWindow);
 
+    _firstWindowGraphicsSelection->setToolTip(
+        "Select the contents of the first window to match one of the other windows"
+    );
+    _firstWindowGraphicsSelection->setFixedWidth(150);
+    connect(
+        _showUiOnFirstWindow, &QCheckBox::clicked,
+        this, &SettingsWidget::showUiOnFirstWindowClicked
+    );
+
+    _firstWindowSelectionLayout->addWidget(_showUiOnFirstWindow);
+    _firstWindowSelectionLayout->addWidget(_firstWindowGraphicsSelection);
+    _firstWindowSelectionLayout->addStretch();
+    layout->addLayout(_firstWindowSelectionLayout);
 
     _checkBoxVsync = new QCheckBox("Enable VSync");
     _checkBoxVsync->setToolTip(
@@ -78,5 +95,75 @@ bool SettingsWidget::vsync() const {
 }
 
 bool SettingsWidget::showUiOnFirstWindow() const {
-    return _showUiOnFirstWindow->isChecked();
+    return (_showUiOnFirstWindow->isChecked() && _showUiOnFirstWindow->isEnabled());
+}
+
+void SettingsWidget::setShowUiOnFirstWindow(bool setUiOnFirstWindow) {
+    _showUiOnFirstWindow->setChecked(setUiOnFirstWindow);
+}
+
+void SettingsWidget::setEnableShowUiOnFirstWindowCheckbox(bool enable) {
+    _showUiOnFirstWindow->setEnabled(enable);
+    _firstWindowGraphicsSelection->setEnabled(enable);
+}
+
+int SettingsWidget::graphicsSelectionForShowUiOnFirstWindow() const {
+    return _firstWindowGraphicsSelection->currentIndex();
+}
+
+void SettingsWidget::setGraphicsSelectionForShowUiOnFirstWindow(int selection) {
+    _firstWindowGraphicsSelection->setCurrentIndex(selection);
+}
+
+void SettingsWidget::setVsync(bool enableVsync) {
+    _checkBoxVsync->setChecked(enableVsync);
+}
+
+void SettingsWidget::nWindowsDisplayedChanged(int newCount) {
+    constexpr int CountOneWindow = 1;
+    constexpr int CountTwoWindows = 2;
+    int graphicsSelect = _firstWindowGraphicsSelection->currentIndex();
+    graphicsSelect = std::max(0, graphicsSelect);
+
+    QList<QString> graphicsOptions = {"None (GUI only)"};
+    for (int i = CountOneWindow; i <= newCount; i++) {
+        graphicsOptions.append("Window " + QString::number(i));
+    }
+    _firstWindowGraphicsSelection->clear();
+    _firstWindowGraphicsSelection->addItems(graphicsOptions);
+    setEnableShowUiOnFirstWindowCheckbox(newCount > CountOneWindow);
+    if (graphicsSelect > newCount) {
+        graphicsSelect = newCount;
+    }
+    _firstWindowGraphicsSelection->setCurrentIndex(graphicsSelect);
+
+    if (newCount == CountOneWindow) {
+        _stateOfUiOnFirstWindowWhenDisabled = _showUiOnFirstWindow->isChecked();
+        _showUiOnFirstWindow->setChecked(false);
+        _firstWindowGraphicsSelection->setEnabled(false);
+    }
+    else if (newCount == CountTwoWindows &&
+             _stateOfUiOnFirstWindowPreviousCount == CountOneWindow)
+    {
+        if (_stateOfUiOnFirstWindowWhenDisabled) {
+            _showUiOnFirstWindow->setChecked(true);
+        }
+        _firstWindowGraphicsSelection->setEnabled(_showUiOnFirstWindow->isChecked());
+    }
+    else {
+        _firstWindowGraphicsSelection->setEnabled(_showUiOnFirstWindow->isChecked());
+    }
+    _stateOfUiOnFirstWindowPreviousCount = newCount;
+}
+
+void SettingsWidget::showUiOnFirstWindowClicked(bool checked) {
+    _firstWindowGraphicsSelection->setEnabled(checked);
+}
+
+QComboBox* SettingsWidget::firstWindowGraphicsSelection() {
+    return _firstWindowGraphicsSelection;
+}
+
+QCheckBox* SettingsWidget::showUiOnFirstWindowCheckbox() {
+    return _showUiOnFirstWindow;
 }

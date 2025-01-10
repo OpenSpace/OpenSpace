@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-Ellipsoid::Ellipsoid(glm::dvec3 radii) : _radii(radii) {
+Ellipsoid::Ellipsoid(glm::dvec3 radii) : _radii(std::move(radii)) {
     updateInternalCache();
 }
 
@@ -66,7 +66,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
     double s = 0.0;
     double dSdA = 1.0;
 
-    double epsilon = 1e-10;
+    constexpr double Epsilon = 1e-10;
 
     size_t nIterations = 0;
     do {
@@ -81,7 +81,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
         dSdA = -2.0 * glm::dot(p2 / (_cached.radiiToTheFourth * d3), glm::dvec3(1.0));
         ++nIterations;
     }
-    while (std::abs(s) > epsilon && nIterations < MaxIterations);
+    while (std::abs(s) > Epsilon && nIterations < MaxIterations);
 
     return p / d;
 }
@@ -133,8 +133,8 @@ double Ellipsoid::greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) 
     );
 
     const Geodetic2 pMid = {
-        (p1.lat + p2.lat) / 2.0,
-        (p1.lon + p2.lon) / 2.0
+        .lat = (p1.lat + p2.lat) / 2.0,
+        .lon = (p1.lon + p2.lon) / 2.0
     };
     const glm::dvec3 centralNormal = cartesianSurfacePosition(pMid);
 

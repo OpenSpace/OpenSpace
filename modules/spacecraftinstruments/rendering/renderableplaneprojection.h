@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
 #include <memory>
 
 namespace ghoul::filesystem { class File; }
@@ -46,7 +47,7 @@ struct UpdateData;
 class RenderablePlaneProjection : public Renderable {
 public:
     RenderablePlaneProjection(const ghoul::Dictionary& dictionary);
-    ~RenderablePlaneProjection() override;
+    ~RenderablePlaneProjection() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -63,7 +64,7 @@ private:
     void updatePlane(const Image& img, double currentTime);
     void setTarget(std::string body);
 
-    std::string _texturePath;
+    std::filesystem::path _texturePath;
 
     bool _planeIsDirty = false;
 

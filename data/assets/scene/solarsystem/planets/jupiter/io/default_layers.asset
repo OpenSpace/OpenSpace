@@ -1,11 +1,9 @@
-local colorLayersPath = "./layers/colorlayers"
+asset.require("./layers/colorlayers/io_texture", true)
 
-asset.require(colorLayersPath .. "/io_texture", true)
 
 
 asset.meta = {
   Name = "Default Io Layers",
-  Version = "1.0",
   Description = "Default Io layers are: Io Texture",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

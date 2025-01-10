@@ -1,81 +1,82 @@
-local textures = asset.syncedResource({
-  Name = "Abell Textures",
+local transforms = asset.require("./transforms")
+
+
+
+local textures = asset.resource({
+  Name = "Point Textures",
   Type = "HttpSynchronization",
-  Identifier = "digitaluniverse_abell_textures",
-  Version = 2
+  Identifier = "digitaluniverse_point_textures",
+  Version = 1
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Abell Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_abell_speck",
-  Version = 2
+  Version = 3
 })
 
-local object = {
+
+local Object = {
   Identifier = "Abell",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = false,
+    File = speck .. "abell.speck",
     Labels = {
       File = speck .. "abell.label",
       Opacity = 1.0,
       Color = { 0.0, 0.8, 0.0 },
-      Size = 22,
+      Size = 21.2,
       MinMaxSize = { 10, 12 },
-      Unit = "Mpc"
+      Unit = "Mpc",
+      TransformationMatrix = transforms.Supergalactic
     },
-    Color = { 1.0, 0.4, 0.2 },
     Opacity = 1.0,
-    --ColorMap = speck .. "abell.cmap",
-    File = speck .. "abell.speck",
-    Texture = textures .. "point3A.png",
-    Unit = "Mpc",
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 },
+      --ColorMap = speck .. "abell.cmap", -- TODO: Decide whether to add
     },
-    ScaleFactor = 520.0,
-    BillboardMinMaxSize = { 0.0, 7.0 },
-    EnablePixelSizeControl = true
+    Texture = {
+      File = textures .. "point3A.png",
+    },
+    Unit = "Mpc",
+    TransformationMatrix = transforms.Supergalactic,
+    SizeSettings = {
+      ScaleExponent = 23.2,
+      MaxSize = 0.27,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Abell Galaxy Clusters",
-    Path = "/Universe/Galaxies",
-    Description = [[Census 2,246 galaxies. DU Version 1.4. <br> The Abell catalog
-        includes all the nearby, and not so nearby, galaxy clusters. The northern
-        hemisphere survey, published in 1958, was compiled by George Abell (1927-1983)
-        from the Palomar Sky Survey plates. A subsequent southern hemisphere catalog
-        was published posthumously in 1989. Further analysis by Brent Tully determined
-        their distance and three-dimensional distribution. Each point in this data set
-        represents a cluster of tens to hundreds (possibly even thousands) of
-        galaxies, similar to the Virgo or Fornax Clusters. You will notice some points
-        are assigned colors while most are gray. The data set also has an arbitrary
-        cut-off for completeness, resulting in the rectangular shape of the data set.
-        (Description from URL) <br><br> Data Reference: Abell Clusters of Rich
-        Galaxies, Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]],
+    Path = "/Universe/Deep Sky Surveys",
+    Description = [[The Abell catalog includes all the nearby, and not so nearby, galaxy
+      clusters. The northern hemisphere survey, published in 1958, was compiled by George
+      Abell from the Palomar Sky Survey plates. A subsequent southern hemisphere catalog
+      was published posthumously in 1989. Each point in this data set represents a
+      cluster of tens to hundreds (possibly even thousands) of galaxies, similar to the
+      Virgo or Fornax Clusters. The data have an arbitrary cut-off for completeness,
+      resulting in the rectangular shape of the data set. Census: 2,246 galaxy clusters.]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "Abell Galaxy Clusters",
-  Version = "2.1",
-  Description = "Digital Universe asset for The Abell catalog",
+  Description = Object.GUI.Description,
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"
