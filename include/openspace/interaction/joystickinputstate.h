@@ -28,7 +28,6 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringconversion.h>
-#include <ghoul/fmt.h>
 #include <array>
 #include <memory>
 #include <string>

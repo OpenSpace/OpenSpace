@@ -26,6 +26,7 @@
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 #include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
+#include <modules/fieldlinessequence/tasks/findlastclosedfieldlinestask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -66,13 +67,15 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "No renderable factory existed");
     fTask->registerClass<KameleonVolumeToFieldlinesTask>("KameleonVolumeToFieldlinesTask");
+    fTask->registerClass<FindLastClosedFieldLinesTask>("FindLastClosedFieldLinesTask");
     factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
 }
 
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
-        KameleonVolumeToFieldlinesTask::documentation(),
+        FindLastClosedFieldLinesTask::Documentation(),
+        KameleonVolumeToFieldlinesTask::Documentation(),
         RenderableFieldlinesSequence::Documentation()
     };
 }

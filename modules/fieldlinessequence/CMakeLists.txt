@@ -30,6 +30,7 @@ set(HEADER_FILES
   util/commons.h
   util/kameleonfieldlinehelper.h
   tasks/kameleonvolumetofieldlinestask.h
+  tasks/findlastclosedfieldlinestask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -39,6 +40,7 @@ set(SOURCE_FILES
   util/commons.cpp
   util/kameleonfieldlinehelper.cpp
   tasks/kameleonvolumetofieldlinestask.cpp
+  tasks/findlastclosedfieldlinestask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
