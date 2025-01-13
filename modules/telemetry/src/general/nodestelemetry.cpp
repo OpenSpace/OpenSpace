@@ -264,7 +264,7 @@ void NodesTelemetry::update(const Camera* camera) {
 
 void NodesTelemetry::stop() {}
 
-void NodesTelemetry::addNode(std::string node) {
+void NodesTelemetry::addNode(const std::string& node) {
     _nodes.push_back(std::move(node));
 }
 

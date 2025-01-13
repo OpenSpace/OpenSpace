@@ -43,7 +43,7 @@ namespace openspace {
      * \return The distance from the camera to the node with the given identifier in the
      *         given distance unit
      */
-    double calculateDistanceTo(const Camera* camera, std::string nodeIdentifier,
+    double calculateDistanceTo(const Camera* camera, const std::string& nodeIdentifier,
         DistanceUnit unit = DistanceUnit::Meter);
 
     /**
@@ -71,12 +71,12 @@ namespace openspace {
      *        calculated from
      * \param nodeIdentifier The identifier of the node, that the angle should be
      *        calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determines which
-     *        method to use when calculating the angle.
+     * \param angleCalculationMode The angle calculation mode to use. This determines
+     *        which method to use when calculating the angle.
      *
      * \return The angle in radians from the camera to the node with the given identifier
      */
-    double calculateAngleTo(const Camera* camera, std::string nodeIdentifier,
+    double calculateAngleTo(const Camera* camera, const std::string& nodeIdentifier,
         TelemetryModule::AngleCalculationMode angleCalculationMode);
 
     /**
@@ -87,8 +87,8 @@ namespace openspace {
      *        calculated from
      * \param nodePosition The position of the node, that the angle should be
      *        calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determines which
-     *        method to use when calculating the angle.
+     * \param angleCalculationMode The angle calculation mode to use. This determines
+     *        which method to use when calculating the angle.
      *
      * \return The angle in radians from the camera to the node with the given position
      */
@@ -105,14 +105,14 @@ namespace openspace {
      *        be calculated from
      * \param nodeIdentifierB The identifier of the second node (B) that the angle should
      *        be calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determines which
-     *        method to use when calculating the angle.
+     * \param angleCalculationMode The angle calculation mode to use. This determines
+     *        which method to use when calculating the angle.
      *
      * \return The angle in radians from the first node (A) with the given identifier to
      *         the second node (B) with the given identifier
      */
-    double calculateAngleFromAToB(const Camera* camera, std::string nodeIdentifierA,
-        std::string nodeIdentifierB,
+    double calculateAngleFromAToB(const Camera* camera,
+        const std::string& nodeIdentifierA, const std::string& nodeIdentifierB,
         TelemetryModule::AngleCalculationMode angleCalculationMode);
 
     /**
@@ -124,8 +124,8 @@ namespace openspace {
      *        be calculated from
      * \param nodePositionB The position of the second node (B) that the angle should
      *        be calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determines which
-     *        method to use when calculating the angle.
+     * \param angleCalculationMode The angle calculation mode to use. This determines
+     *        which method to use when calculating the angle.
      *
      * \return The angle in radians from the first node (A) with the given position to
      *         the second node (B) with the given position
@@ -143,13 +143,14 @@ namespace openspace {
      *        calculated from
      * \param nodeIdentifier The identifier of the node that the elevation angle should be
      *        calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determines which
-     *        method to use when calculating the angle.
+     * \param angleCalculationMode The angle calculation mode to use. This determines
+     *        which method to use when calculating the angle.
      *
      * \return The elevation angle in radians from the camera to the node with the given
      *         identifier
      */
-    double calculateElevationAngleTo(const Camera* camera, std::string nodeIdentifier,
+    double calculateElevationAngleTo(const Camera* camera,
+        const std::string& nodeIdentifier,
         TelemetryModule::AngleCalculationMode angleCalculationMode);
 
     /**
@@ -160,8 +161,8 @@ namespace openspace {
      *        calculated from
      * \param nodePosition The position of the node that the elevation angle should be
      *        calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determines which
-     *        method to use when calculating the angle.
+     * \param angleCalculationMode The angle calculation mode to use. This determines
+     *        which method to use when calculating the angle.
      *
      * \return The elevation angle in radians from the camera to the node with the given
      *         position
@@ -179,14 +180,14 @@ namespace openspace {
      *        angle should be calculated from
      * \param nodeIdentifierB The identifier of the second node (B) that the elevation
      *        angle should be calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determines which
-     *        method to use when calculating the angle.
+     * \param angleCalculationMode The angle calculation mode to use. This determines
+     *        which method to use when calculating the angle.
      *
      * \return The elevation angle in radians from the first node (A) with the given
      *         identifier to the second node (B) with the given identifier
      */
     double calculateElevationAngleFromAToB(const Camera* camera,
-        std::string nodeIdentifierA, std::string nodeIdentifierB,
+        const std::string& nodeIdentifierA, const std::string& nodeIdentifierB,
         TelemetryModule::AngleCalculationMode angleCalculationMode);
 
     /**
@@ -198,8 +199,8 @@ namespace openspace {
      *        should be calculated from
      * \param nodePositionB The position of the second node (B) that the elevation angle
      *        should be calculated to
-     * \param angleCalculationMode The angle calculation mode to use. This determines which
-     *        method to use when calculating the angle.
+     * \param angleCalculationMode The angle calculation mode to use. This determines
+     *        which method to use when calculating the angle.
      *
      * \return The elevation angle in radians from the first node (A) with the given
      *         position to the second node (B) with the given position

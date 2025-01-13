@@ -41,7 +41,7 @@ namespace {
      *
      * \return The position of the node with the given identifier
      */
-    glm::dvec3 nodePosition(std::string_view nodeIdentifier) {
+    glm::dvec3 nodePosition(const std::string& nodeIdentifier) {
         if (nodeIdentifier.empty()) {
             return glm::dvec3(0.0);
         }
@@ -55,11 +55,11 @@ namespace {
 namespace openspace {
 
     // Distances
-    double calculateDistanceTo(const Camera* camera, std::string nodeIdentifier,
+    double calculateDistanceTo(const Camera* camera, const std::string& nodeIdentifier,
                                DistanceUnit unit)
     {
-        glm::dvec3 nodePosition = getNodePosition(nodeIdentifier);
-        return calculateDistanceTo(camera, nodePosition, unit);
+        glm::dvec3 nodePos = nodePosition(nodeIdentifier);
+        return calculateDistanceTo(camera, nodePos, unit);
     }
 
     double calculateDistanceTo(const Camera* camera, glm::dvec3 nodePosition,
@@ -78,11 +78,11 @@ namespace openspace {
     }
 
     // Horizontal angles
-    double calculateAngleTo(const Camera* camera, std::string nodeIdentifier,
+    double calculateAngleTo(const Camera* camera, const std::string& nodeIdentifier,
                             TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
-        glm::dvec3 nodePosition = getNodePosition(nodeIdentifier);
-        return calculateAngleTo(camera, nodePosition, angleCalculationMode);
+        glm::dvec3 nodePos = nodePosition(nodeIdentifier);
+        return calculateAngleTo(camera, nodePos, angleCalculationMode);
     }
 
     double calculateAngleTo(const Camera* camera, glm::dvec3 nodePosition,
@@ -157,12 +157,13 @@ namespace openspace {
         return 0.0;
     }
 
-    double calculateAngleFromAToB(const Camera* camera, std::string nodeIdentifierA,
-                                  std::string nodeIdentifierB,
+    double calculateAngleFromAToB(const Camera* camera,
+                                  const std::string& nodeIdentifierA,
+                                  const std::string& nodeIdentifierB,
                                TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
-        glm::dvec3 nodeAPosition = getNodePosition(nodeIdentifierA);
-        glm::dvec3 nodeBPosition = getNodePosition(nodeIdentifierB);
+        glm::dvec3 nodeAPosition = nodePosition(nodeIdentifierA);
+        glm::dvec3 nodeBPosition = nodePosition(nodeIdentifierB);
 
         return calculateAngleFromAToB(
             camera,
@@ -250,11 +251,12 @@ namespace openspace {
     }
 
     // Elevation angles
-    double calculateElevationAngleTo(const Camera* camera, std::string nodeIdentifier,
+    double calculateElevationAngleTo(const Camera* camera,
+                                     const std::string& nodeIdentifier,
                                TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
-        glm::dvec3 nodePosition = getNodePosition(nodeIdentifier);
-        return calculateElevationAngleTo(camera, nodePosition, angleCalculationMode);
+        glm::dvec3 nodePos = nodePosition(nodeIdentifier);
+        return calculateElevationAngleTo(camera, nodePos, angleCalculationMode);
     }
 
     double calculateElevationAngleTo(const Camera* camera, glm::dvec3 nodePosition,
@@ -340,8 +342,8 @@ namespace openspace {
                 glm::normalize(cameraViewVector)
             );
 
-            // Lastly, we calculate the elavation angle in the same way as in the horizontal
-            // with elevation surround mode above.
+            // Lastly, we calculate the elavation angle in the same way as in the
+            // horizontal with elevation surround mode above.
             return std::abs(glm::orientedAngle(
                 glm::normalize(cameraViewVector),
                 glm::normalize(rotatedVector),
@@ -355,12 +357,12 @@ namespace openspace {
     }
 
     double calculateElevationAngleFromAToB(const Camera* camera,
-                                           std::string nodeIdentifierA,
-                                           std::string nodeIdentifierB,
+                                           const std::string& nodeIdentifierA,
+                                           const std::string& nodeIdentifierB,
                                TelemetryModule::AngleCalculationMode angleCalculationMode)
     {
-        glm::dvec3 nodeAPosition = getNodePosition(nodeIdentifierA);
-        glm::dvec3 nodeBPosition = getNodePosition(nodeIdentifierB);
+        glm::dvec3 nodeAPosition = nodePosition(nodeIdentifierA);
+        glm::dvec3 nodeBPosition = nodePosition(nodeIdentifierB);
 
         return calculateElevationAngleFromAToB(
             camera,
@@ -451,13 +453,13 @@ namespace openspace {
                 glm::normalize(-cameraViewVector)
             );
 
-            // First we counter-rotate the circular angle to make the cameraToNode vector be
-            // inside the view-up plane
+            // First we counter-rotate the circular angle to make the cameraToNode vector
+            // be inside the view-up plane
             glm::dvec3 rotatedVector =
                 glm::rotate(AToB, rotationAngle, glm::normalize(cameraViewVector));
 
-            // Lastly, we calculate the elavation angle in the same way as in the horizontal
-            // with elevation surround mode above.
+            // Lastly, we calculate the elavation angle in the same way as in the
+            // horizontal with elevation surround mode above.
             return std::abs(glm::orientedAngle(
                 glm::normalize(cameraViewVector),
                 glm::normalize(rotatedVector),

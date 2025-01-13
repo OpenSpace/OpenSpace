@@ -38,8 +38,8 @@ public:
     virtual ~TimeTelemetry() override = default;
 
     /**
-     * Main update function to gather time telemetry information (current deltatime, and current
-     * simulation time in J2000 seconds) and send it via the osc connection.
+     * Main update function to gather time telemetry information (current deltatime, and
+     * current simulation time in J2000 seconds) and send it via the osc connection.
      *
      * \param camera The camera in the scene (not used in this case)
      */

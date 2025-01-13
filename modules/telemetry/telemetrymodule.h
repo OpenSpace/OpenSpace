@@ -104,8 +104,8 @@ public:
      *
      * \return The requested telemetry
      */
-    const TelemetryBase* telemetry(std::string id) const;
-    TelemetryBase* telemetry(std::string id);
+    const TelemetryBase* telemetry(std::string_view id) const;
+    TelemetryBase* telemetry(std::string_view id);
 
     /**
      * Get the current angle calculation mode used in the telemetry module.
