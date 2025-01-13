@@ -1,0 +1,57 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
+
+local L2Position = {
+  Identifier = "L2Position",
+  Parent = transforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.L2,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    }
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
+  GUI = {
+    Name = "L2 Position",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Hidden = true
+  }
+}
+
+-- This reference frame co-revolves with L2 and can be useful for trails for certain
+-- spacecraft that orbit in relation to L2. It is for exmaple used for JWST
+local L2CoRevFrame = {
+  Identifier = "L2CoRevFrame",
+  Parent = L2Position.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.L2Corevolving,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  Tag = { "lagrange_points_earth", "lagrange_points_earth_l2" },
+  GUI = {
+    Name = "L2 Co-revolving Reference Frame",
+    Path = "/Solar System/Planets/Earth/Lagrange Points",
+    Hidden = true
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(L2Position)
+  openspace.addSceneGraphNode(L2CoRevFrame)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(L2CoRevFrame)
+  openspace.removeSceneGraphNode(L2Position)
+end)
+
+asset.export(L2Position)
+asset.export(L2CoRevFrame)

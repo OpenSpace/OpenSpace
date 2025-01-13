@@ -50,7 +50,6 @@
 #include <sgct/log.h>
 #include <sgct/projection/fisheye.h>
 #include <sgct/projection/nonlinearprojection.h>
-#include <sgct/settings.h>
 #include <sgct/user.h>
 #include <sgct/window.h>
 #include <stb_image.h>
@@ -298,7 +297,7 @@ void mainInitFunc(GLFWwindow*) {
     // We save the startup value of the screenshots just in case we want to add a date
     // to them later in the RenderEngine
     std::filesystem::path screenshotPath = absPath("${SCREENSHOTS}");
-    sgct::Settings::instance().setCapturePath(screenshotPath);
+    sgct::Engine::instance().setCapturePath(screenshotPath);
     FileSys.registerPathToken("${STARTUP_SCREENSHOT}", std::move(screenshotPath));
 
     LDEBUG("Initializing OpenSpace Engine started");
@@ -891,7 +890,7 @@ void setSgctDelegateFunctions() {
     sgctDelegate.takeScreenshot = [](bool applyWarping, std::vector<int> windowIds) {
         ZoneScoped;
 
-        sgct::Settings::instance().setCaptureFromBackBuffer(applyWarping);
+        sgct::Engine::instance().setCaptureFromBackBuffer(applyWarping);
         Engine::instance().takeScreenshot(std::move(windowIds));
         return Engine::instance().screenShotNumber();
     };
@@ -967,7 +966,7 @@ void setSgctDelegateFunctions() {
         return sgct::Window::swapGroupFrameNumber();
     };
     sgctDelegate.setScreenshotFolder = [](std::filesystem::path path) {
-        sgct::Settings::instance().setCapturePath(std::move(path));
+        sgct::Engine::instance().setCapturePath(std::move(path));
     };
     sgctDelegate.showStatistics = [](bool enabled) {
         Engine::instance().setStatsGraphVisibility(enabled);
