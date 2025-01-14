@@ -50,6 +50,7 @@ set(HEADER_FILES
   rendering/pointcloud/sizemappingcomponent.h
   rendering/renderablecartesianaxes.h
   rendering/renderabledisc.h
+  rendering/renderabledistancelabel.h
   rendering/renderablelabel.h
   rendering/renderablemodel.h
   rendering/renderablenodearrow.h
@@ -113,6 +114,7 @@ set(SOURCE_FILES
   rendering/pointcloud/sizemappingcomponent.cpp
   rendering/renderablecartesianaxes.cpp
   rendering/renderabledisc.cpp
+  rendering/renderabledistancelabel.cpp
   rendering/renderablelabel.cpp
   rendering/renderablemodel.cpp
   rendering/renderablenodearrow.cpp

@@ -1,0 +1,27 @@
+-- Basic
+-- This example adds a distance label between two nodes in the scene, based on an existing
+-- [RenderableNodeLine](#base_renderable_nodeline). Note that the identifier of the
+-- `RenderableNodeLine` is accessed by importing another example asset, which also adds
+-- the node line to the scene.
+
+local nodelineAsset = asset.require("examples/renderable/renderablenodeline/nodeline")
+
+local Node = {
+  Identifier = "RenderableDistanceLabel_Example",
+  Renderable = {
+    Type = "RenderableDistanceLabel",
+    NodeLine = nodelineAsset.NodeLine.Identifier
+  },
+  GUI = {
+    Name = "RenderableDistanceLabel - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
