@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/osc/include/oscconnection.h>
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "OscConnection";
+    constexpr std::string_view _loggerCat = "OpenSoundControlConnection";
     constexpr int BufferSize = 1024;
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -36,30 +36,28 @@ namespace {
 
 namespace openspace {
 
-OscConnection::OscConnection(const std::string& ip, int port)
+OpenSoundControlConnection::OpenSoundControlConnection(const std::string& ip, int port)
     : _socket(IpEndpointName(ip.c_str(), port))
     , _buffer(new char[BufferSize])
     , _stream(osc::OutboundPacketStream(_buffer, BufferSize))
 {
 }
 
-OscConnection::~OscConnection() {
+OpenSoundControlConnection::~OpenSoundControlConnection() {
     delete[] _buffer;
 }
 
-void OscConnection::send(const std::string& label, const std::vector<OscDataType>& data)
+void OpenSoundControlConnection::send(const std::string& label, const std::vector<OpenSoundControlDataType>& data)
 {
     if (label.empty()) {
-        LERROR("Cannot send osc message without label");
+        LERROR("Cannot send Open Sound Control message without label");
         return;
     }
 
     _stream.Clear();
     _stream << osc::BeginMessage(label.c_str());
 
-    //LDEBUG(std::format("Sending: {}", label));
-
-    for (const OscDataType& item : data) {
+    for (const OpenSoundControlDataType& item : data) {
         std::visit(overloaded {
             [this](const osc::Blob& value) {
                 _stream << value;
@@ -72,11 +70,7 @@ void OscConnection::send(const std::string& label, const std::vector<OscDataType
             },
             [this](const std::string& value) {
                 _stream << value.c_str();
-            },
-            [this](auto v) {
-                _stream << osc::EndMessage;
-                throw ghoul::MissingCaseException();
-            },
+            }
         }, item);
     }
 

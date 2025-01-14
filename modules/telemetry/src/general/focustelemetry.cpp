@@ -85,7 +85,7 @@ bool FocusTelemetry::getData() {
 void FocusTelemetry::sendData() {
     std::string label = "/Focus";
 
-    std::vector<OscDataType> data(NumDataItems);
+    std::vector<OpenSoundControlDataType> data(NumDataItems);
     data[FocusNodeIndex] = _currentFocus;
 
     _connection->send(label, data);

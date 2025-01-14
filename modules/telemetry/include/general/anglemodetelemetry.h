@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -59,13 +59,13 @@ private:
      * Gather angle settings telemetry information (Angle calculation mode, and whether
      * elevation angle is included).
      *
-     * \return True if the data is new compared to before, otherwise false
+     * \return `true` if the data is new compared to before, otherwise `false`
      */
     bool getData();
 
     /**
      * Send the current angle settings telemetry information over the osc connection
-     * Order of data: Angle calculation mode,
+     * Order of data: Angle calculation mode, whether the elevation angle is included.
      */
     void sendData();
 

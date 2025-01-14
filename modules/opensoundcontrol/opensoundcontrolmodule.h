@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,17 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/osc/oscmodule.h>
+#ifndef __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLMODULE___H__
+#define __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLMODULE___H__
 
+#include "openspace/util/openspacemodule.h"
 
 namespace openspace {
 
-OscModule::OscModule()
-    : OpenSpaceModule("Osc")
-{
+class OpenSoundControlModule : public OpenSpaceModule {
+public:
+    constexpr static const char* Name = "OpenSoundControlModule";
 
-}
-
-OscModule::~OscModule() {}
+    OpenSoundControlModule();
+    ~OpenSoundControlModule();
+};
 
 } // namespace openspace
+
+#endif __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLMODULE___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,21 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_OSC___OSCMODULE___H__
-#define __OPENSPACE_MODULE_OSC___OSCMODULE___H__
+#ifndef __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLCONNECTION___H__
+#define __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLCONNECTION___H__
 
-#include "openspace/util/openspacemodule.h"
+#include <modules/opensoundcontrol/ext/osc/ip/UdpSocket.h>
+#include <modules/opensoundcontrol/ext/osc/osc/OscOutboundPacketStream.h>
+#include <string>
+#include <variant>
+#include <vector>
 
 namespace openspace {
 
-class OscModule : public OpenSpaceModule {
-public:
-    constexpr static const char* Name = "OscModule";
+using OpenSoundControlDataType = std::variant<osc::Blob, double, int, std::string>;
 
-    OscModule();
-    ~OscModule();
+class OpenSoundControlConnection {
+public:
+    OpenSoundControlConnection(const std::string& ip, int port);
+    ~OpenSoundControlConnection();
+
+    void send(const std::string& label,
+        const std::vector<OpenSoundControlDataType>& data);
+private:
+    UdpTransmitSocket _socket;
+    char* _buffer = nullptr;
+    osc::OutboundPacketStream _stream;
 };
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_OSC___OSCMODULE___H__
+#endif __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLCONNECTION___H__

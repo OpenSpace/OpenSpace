@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,32 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_OSC___OSCCONNECTION___H__
-#define __OPENSPACE_MODULE_OSC___OSCCONNECTION___H__
+#include <modules/opensoundcontrol/opensoundcontrolmodule.h>
 
-#include <modules/osc/ext/osc/ip/UdpSocket.h>
-#include <modules/osc/ext/osc/osc/OscOutboundPacketStream.h>
-#include <string>
-#include <variant>
-#include <vector>
 
 namespace openspace {
 
-using OscDataType = std::variant<osc::Blob, double, int, std::string>;
+OpenSoundControlModule::OpenSoundControlModule() : OpenSpaceModule("OpenSoundControl") {}
 
-class OscConnection {
-public:
-    OscConnection(const std::string& ip, int port);
-    ~OscConnection();
-
-    void send(const std::string& label,
-        const std::vector<OscDataType>& data);
-private:
-    UdpTransmitSocket _socket;
-    char* _buffer = nullptr;
-    osc::OutboundPacketStream _stream;
-};
+OpenSoundControlModule::~OpenSoundControlModule() {}
 
 } // namespace openspace
-
-#endif __OPENSPACE_MODULE_OSC___OSCCONNECTION___H__

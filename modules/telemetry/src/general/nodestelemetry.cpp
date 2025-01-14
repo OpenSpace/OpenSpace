@@ -150,7 +150,7 @@ void NodesTelemetry::sendData(int nodeIndex) {
     }
 
     std::string label = "/" + _nodes[nodeIndex].identifier;
-    std::vector<OscDataType> data(NumDataItems);
+    std::vector<OpenSoundControlDataType> data(NumDataItems);
 
     // Distance
     data[DistanceIndex] = _nodes[nodeIndex].data[DistanceIndex];

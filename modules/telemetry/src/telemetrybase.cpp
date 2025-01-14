@@ -46,7 +46,7 @@ TelemetryBase::TelemetryBase(properties::PropertyOwner::PropertyOwnerInfo info,
     : properties::PropertyOwner(info)
     , _enabled(EnabledInfo, false)
     , _identifier(info.identifier)
-    , _connection(new OscConnection(ip, port))
+    , _connection(new OpenSoundControlConnection(ip, port))
 {
 
     addProperty(_enabled);

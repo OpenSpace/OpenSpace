@@ -443,7 +443,7 @@ void PlanetsSonification::sendPlanetData(int planetIndex) {
     }
 
     std::string label = "/" + _planets[planetIndex].name;
-    std::vector<OscDataType> data;
+    std::vector<OpenSoundControlDataType> data;
 
     // The total size of the data vector is NumDataItemsPlanet for the
     // planet, and then NumDataItemsMoon per moon

@@ -198,7 +198,7 @@ void PlanetsCompareSonification::sendSettings() {
     }
 
     std::string label = "/Compare";
-    std::vector<OscDataType> data(NumDataItems);
+    std::vector<OpenSoundControlDataType> data(NumDataItems);
 
     data[FirstPlanetIndex] = _firstPlanet;
     data[SecondPlanetIndex] = _secondPlanet;

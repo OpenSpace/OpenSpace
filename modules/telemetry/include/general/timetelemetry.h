@@ -58,7 +58,7 @@ private:
     static constexpr int CurrentTimeIndex = 2;
 
     /**
-     * Gather time telemetry information (speed, and current time)
+     * Gather time telemetry information (speed, and current time).
      *
      * \return True if the data is new compared to before, otherwise false
      */

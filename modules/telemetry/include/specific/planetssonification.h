@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -98,9 +98,9 @@ private:
     // moons of the planet. However, in the case of a moon, then the list of moons
     // is empty
     struct DataBody {
-        DataBody(std::string inName = "") {
-            name = inName;
-        }
+        DataBody(std::string inName = "")
+            : name (std::move(inName))
+        {}
 
         std::string name;
         double distance = 0.0;
@@ -145,41 +145,25 @@ private:
      * Send the current sonification settings for the indicated planet over the osc
      * connection.
      * Order of data: distance, horizontal angle, vertical angle, settings, data for each
-     *                moon (distance, horizontal angle, and vertical angle)
+     *                moon (distance, horizontal angle, and vertical angle).
      */
     void sendPlanetData(int planetIndex);
 
     void onToggleAllChanged();
-
-    //Mercury
     void onMercuryAllChanged();
     void onMercurySettingChanged();
-
-    //Venus
     void onVenusAllChanged();
     void onVenusSettingChanged();
-
-    //Earth
     void onEarthAllChanged();
     void onEarthSettingChanged();
-
-    //Mars
     void onMarsAllChanged();
     void onMarsSettingChanged();
-
-    //Jupiter
     void onJupiterAllChanged();
     void onJupiterSettingChanged();
-
-    //Saturn
     void onSaturnAllChanged();
     void onSaturnSettingChanged();
-
-    //Uranus
     void onUranusAllChanged();
     void onUranusSettingChanged();
-
-    //Neptune
     void onNeptuneAllChanged();
     void onNeptuneSettingChanged();
 

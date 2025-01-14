@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2024                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,21 +25,21 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/include/oscconnection.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/opensoundcontrolconnection.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/src/oscconnection.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/opensoundcontrolconnection.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module(
-	"Osc"
-	osc_module
-	STATIC
-	${HEADER_FILES}
-	${SOURCE_FILES}
+  "OpenSoundControl"
+  opensoundcontrol_module
+  STATIC
+  ${HEADER_FILES}
+  ${SOURCE_FILES}
 )
 
 add_subdirectory(ext/osc SYSTEM)
@@ -52,5 +52,5 @@ else ()
   target_compile_options(oscpack PRIVATE "-w")
 endif ()
 
-target_include_directories(openspace-module-osc SYSTEM PRIVATE ext ext/osc)
-target_link_libraries(openspace-module-osc PRIVATE oscpack)
+target_include_directories(openspace-module-opensoundcontrol SYSTEM PRIVATE ext ext/osc)
+target_link_libraries(openspace-module-opensoundcontrol PRIVATE oscpack)

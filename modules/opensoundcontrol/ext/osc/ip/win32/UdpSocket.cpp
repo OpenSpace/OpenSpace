@@ -49,13 +49,13 @@
 #include <stdexcept>
 #include <vector>
 
-#include "modules/osc/ext/osc/ip/UdpSocket.h" // usually I'd include the module header first
+#include "modules/opensoundcontrol/ext/osc/ip/UdpSocket.h" // usually I'd include the module header first
                           // but this is causing conflicts with BCB4 due to
                           // std::size_t usage.
 
-#include "modules/osc/ext/osc/ip/NetworkingUtils.h"
-#include "modules/osc/ext/osc/ip/PacketListener.h"
-#include "modules/osc/ext/osc/ip/TimerListener.h"
+#include "modules/opensoundcontrol/ext/osc/ip/NetworkingUtils.h"
+#include "modules/opensoundcontrol/ext/osc/ip/PacketListener.h"
+#include "modules/opensoundcontrol/ext/osc/ip/TimerListener.h"
 
 
 typedef int socklen_t;

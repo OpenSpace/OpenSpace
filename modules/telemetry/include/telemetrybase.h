@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/osc/include/oscconnection.h>
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/camera/camera.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
@@ -65,7 +65,7 @@ public:
 protected:
     std::string _identifier;
     properties::BoolProperty _enabled;
-    OscConnection* _connection = nullptr;
+    OpenSoundControlConnection* _connection = nullptr;
 };
 
 } // namespace openspace

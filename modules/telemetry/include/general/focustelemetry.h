@@ -55,7 +55,7 @@ private:
     static constexpr int FocusNodeIndex = 0;
 
     /**
-     * Gather focus telemetry information (current focus node)
+     * Gather focus telemetry information (current focus node).
      *
      * \param camera The camera in the scene
      * \return `true` if the data is new compared to before, otherwise `false`
@@ -64,7 +64,7 @@ private:
 
     /**
      * Send the current focus telemetry information over the osc connection
-     * Order of data: Current focus node
+     * Order of data: Current focus node.
      */
     void sendData();
 

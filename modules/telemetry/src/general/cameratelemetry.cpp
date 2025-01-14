@@ -186,7 +186,7 @@ bool CameraTelemetry::getData(const Camera* camera) {
 
 void CameraTelemetry::sendData() {
     std::string label = "/Camera";
-    std::vector<OscDataType> data(NumDataItems);
+    std::vector<OpenSoundControlDataType> data(NumDataItems);
 
     // Position
     data[CameraPosXIndex] = _cameraPosition.x;

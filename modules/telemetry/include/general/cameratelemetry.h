@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,7 +78,6 @@ private:
      */
     void sendData();
 
-    // Properties
     struct PrecisionProperty : properties::PropertyOwner {
         PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
 
@@ -90,7 +89,6 @@ private:
     properties::OptionProperty _cameraSpeedDistanceUnitOption;
     PrecisionProperty _precisionProperty;
 
-    // Variables
     glm::dvec3 _cameraPosition = glm::dvec3(0.0);
     glm::dquat _cameraRotation = glm::dquat(0.0, 0.0, 0.0, 0.0);
     double _cameraSpeed = 0.0;

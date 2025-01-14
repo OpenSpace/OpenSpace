@@ -1,10 +1,11 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "events/toggle_sun",
-    "modules/telemetry/sonification/planets",
     "scene/solarsystem/planets/earth/earth",
-    "scene/solarsystem/planets/earth/satellites/satellites"
+    "scene/solarsystem/planets/earth/satellites/satellites",
+    "modules/telemetry/sonification/planets"
   ],
   "camera": {
     "altitude": 17000000.0,
@@ -35,21 +36,23 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-  ],
   "mark_nodes": [
-    "Earth",
-    "Mars",
-    "Moon",
     "Sun",
+    "Mercury",
     "Venus",
-    "ISS"
+    "Earth",
+    "Moon",
+    "Mars",
+    "Jupiter",
+    "Saturn",
+    "Uranus",
+    "Neptune"
   ],
   "meta": {
     "author": "OpenSpace Team",
     "description": "Profile that adds sonification for the planets in different ways. The sonification needs to be run in a separate software that can receive OSC messages, such as SuperCollider.",
     "license": "MIT License",
-    "name": "Default",
+    "name": "Sonification",
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
@@ -67,6 +70,6 @@
   },
   "version": {
     "major": 1,
-    "minor": 2
+    "minor": 0
   }
 }

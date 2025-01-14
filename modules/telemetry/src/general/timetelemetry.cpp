@@ -136,7 +136,7 @@ bool TimeTelemetry::getData() {
 
 void TimeTelemetry::sendData() {
     std::string label = "/Time";
-    std::vector<OscDataType> data(NumDataItems);
+    std::vector<OpenSoundControlDataType> data(NumDataItems);
 
     data[TimeSpeedIndex] = _timeSpeed;
     data[TimeSpeedUnitIndex] =
