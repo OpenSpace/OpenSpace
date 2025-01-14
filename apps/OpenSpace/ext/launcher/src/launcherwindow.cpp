@@ -620,8 +620,8 @@ bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_en
     std::string tooltipDescription = "(no description available)";
     try {
         sgct::config::Cluster cluster = sgct::readConfig(p.path());
-        if (cluster.meta && !cluster.meta->description.empty()) {
-            tooltipDescription = cluster.meta->description;
+        if (cluster.meta && cluster.meta->description.has_value()) {
+            tooltipDescription = *cluster.meta->description;
         }
     }
     catch (const sgct::Error&) {}
@@ -896,24 +896,6 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
                     std::format(
                         "{}\n\nThis configuration file is unable to generate a proper "
                         "display",
-                        err
-                    )
-                );
-                return;
-            }
-
-            err = validateConfigAgainstSchema(
-                winCfg,
-                _configPath / "schema/sgcteditor.schema.json"
-            );
-            if (!err.empty()) {
-                editRefusalDialog(
-                    "Format Validation Error",
-                    std::format("Parsing error found in file '{}'", winCfg),
-                    std::format(
-                        "{}\n\nThis configuration file is valid for generating a "
-                        "display, but its format does not match the window editor "
-                        "requirements and cannot be opened in the editor",
                         err
                     )
                 );

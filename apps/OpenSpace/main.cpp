@@ -459,7 +459,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
     glm::mat4 viewMatrix;
     std::memcpy(
         glm::value_ptr(viewMatrix),
-        data.viewMatrix.values,
+        data.viewMatrix.values.data(),
         sizeof(mat4)
     );
     viewMatrix = viewMatrix * glm::translate(glm::mat4(1.f), pos);
@@ -467,7 +467,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
     glm::mat4 projectionMatrix;
     std::memcpy(
         glm::value_ptr(projectionMatrix),
-        data.projectionMatrix.values,
+        data.projectionMatrix.values.data(),
         sizeof(mat4)
     );
 #ifdef OPENVR_SUPPORT
@@ -483,7 +483,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
         glm::mat4 modelMatrix;
         std::memcpy(
             glm::value_ptr(modelMatrix),
-            data.modelMatrix.values,
+            data.modelMatrix.values.data(),
             sizeof(mat4)
         );
         currentModelMatrix = modelMatrix;

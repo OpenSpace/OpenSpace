@@ -290,6 +290,16 @@ void WindowControl::createWidgets(const QColor& windowColor) {
         layout->addWidget(_windowDecoration, 5, 0, 1, 8);
     }
     {
+        _spoutOutput = new QCheckBox("Spout Output");
+        _spoutOutput->setToolTip(
+            "Share this window using the Spout library.\nThis library only supports the "
+            "Windows operating system. Spout makes it possible to make the rendered\n"
+            "images available to other real-time applications on the same machine for "
+            "further processing"
+        );
+        layout->addWidget(_spoutOutput);
+    }
+    {
         QFrame* projectionGroup = new QFrame;
         projectionGroup->setVisible(true);
         projectionGroup->setFrameStyle(QFrame::StyledPanel | QFrame::Plain);
@@ -458,15 +468,6 @@ QWidget* WindowControl::createFisheyeWidget() {
     _fisheye.quality->setCurrentIndex(2);
     layout->addWidget(_fisheye.quality, 1, 1);
 
-    _fisheye.spoutOutput = new QCheckBox("Spout Output");
-    _fisheye.spoutOutput->setToolTip(
-        "This projection method provides the ability to share the reprojected image "
-        "using the Spout library.\nThis library only supports the Windows operating "
-        "system. Spout makes it possible to make the rendered\nimages available to other "
-        "real-time applications on the same machine for further processing"
-    );
-    layout->addWidget(_fisheye.spoutOutput, 2, 0, 1, 2);
-
     return widget;
 }
 
@@ -593,15 +594,6 @@ QWidget* WindowControl::createEquirectangularWidget() {
     _equirectangular.quality->setCurrentIndex(2);
     layout->addWidget(_equirectangular.quality, 1, 1);
 
-    _equirectangular.spoutOutput = new QCheckBox("Spout Output");
-    _equirectangular.spoutOutput->setToolTip(
-        "This projection method provides the ability to share the reprojected image "
-        "using the Spout library.\nThis library only supports the Windows operating "
-        "system. Spout makes it possible to make the rendered\nimages available to other "
-        "real-time applications on the same machine for further processing"
-    );
-    layout->addWidget(_equirectangular.spoutOutput, 2, 0, 1, 2);
-
     return widget;
 }
 
@@ -629,8 +621,7 @@ void WindowControl::resetToDefaults() {
         _monitor->setCurrentIndex(_monitorIndexDefault);
     }
     _windowDecoration->setChecked(true);
-    _fisheye.spoutOutput->setChecked(false);
-    _equirectangular.spoutOutput->setChecked(false);
+    _spoutOutput->setChecked(false);
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Planar));
     _planar.fovV->setValue(DefaultFovLongEdge);
     _planar.fovV->setValue(DefaultFovShortEdge);
@@ -666,66 +657,44 @@ void WindowControl::setDecorationState(bool hasWindowDecoration) {
     _windowDecoration->setChecked(hasWindowDecoration);
 }
 
+void WindowControl::setSpoutOutputState(bool shouldSpoutOutput) {
+    _spoutOutput->setChecked(shouldSpoutOutput);
+}
+
 sgct::config::Projections WindowControl::generateProjectionInformation() const {
     const ProjectionIndices type =
         static_cast<WindowControl::ProjectionIndices>(_projectionType->currentIndex());
 
-    const bool isSpoutFisheye =
-        type == ProjectionIndices::Fisheye && _fisheye.spoutOutput->isChecked();
-    const bool isSpoutEquirectangular =
-        type == ProjectionIndices::Equirectangular &&
-        _equirectangular.spoutOutput->isChecked();
-
-    using namespace sgct::config;
     switch (type) {
         case ProjectionIndices::Fisheye:
-            //if (isSpoutFisheye) {
-            //    SpoutOutputProjection projection;
-            //    projection.mapping = SpoutOutputProjection::Mapping::Fisheye;
-            //    projection.quality = QualityValues[_fisheye.quality->currentIndex()];
-            //    projection.mappingSpoutName = "OpenSpace";
-            //    return projection;
-            //}
-            //else {
-    {
-                FisheyeProjection projection;
+            {
+                sgct::config::FisheyeProjection projection;
                 projection.quality = QualityValues[_fisheye.quality->currentIndex()];
                 projection.fov = 180.f;
                 projection.tilt = 0.f;
                 return projection;
-                }
-            //}
+            }
         case ProjectionIndices::SphericalMirror:
             {
-                SphericalMirrorProjection projection;
+                sgct::config::SphericalMirrorProjection projection;
                 projection.quality =
                     QualityValues[_sphericalMirror.quality->currentIndex()];
                 return projection;
             }
         case ProjectionIndices::Cylindrical:
             {
-                CylindricalProjection projection;
+                sgct::config::CylindricalProjection projection;
                 projection.quality = QualityValues[_cylindrical.quality->currentIndex()];
                 projection.heightOffset = _cylindrical.heightOffset->text().toFloat();
                 return projection;
             }
         case ProjectionIndices::Equirectangular:
-            //if (isSpoutEquirectangular) {
-            //    SpoutOutputProjection projection;
-            //    projection.mapping = SpoutOutputProjection::Mapping::Equirectangular;
-            //    projection.quality =
-            //        QualityValues[_equirectangular.quality->currentIndex()];
-            //    projection.mappingSpoutName = "OpenSpace";
-            //    return projection;
-            //}
-            //else {
             {
-                EquirectangularProjection projection;
+                sgct::config::EquirectangularProjection projection;
                 projection.quality =
                     QualityValues[_equirectangular.quality->currentIndex()];
                 return projection;
-                }
-            //}
+            }
         case ProjectionIndices::Planar:
             {
                 double fovH = _planar.fovH->value();
@@ -735,7 +704,7 @@ sgct::config::Projections WindowControl::generateProjectionInformation() const {
                 fovV = std::clamp(fovV, FovEpsilon, 180.0 - FovEpsilon);
 
                 // The negative values for left & down are due to SGCT's convention
-                PlanarProjection projection;
+                sgct::config::PlanarProjection projection;
                 projection.fov.right = fovH / 2.0;
                 projection.fov.left = -projection.fov.right;
                 projection.fov.up = fovV / 2.0;
@@ -765,6 +734,10 @@ void WindowControl::generateWindowInformation(sgct::config::Window& window) cons
     window.viewports.push_back(vp);
     
     window.isDecorated = _windowDecoration->isChecked();
+    if (_spoutOutput->isChecked()) {
+        window.spout = sgct::config::Window::Spout();
+        window.spout->enabled = true;
+    }
     if (!_windowName->text().isEmpty()) {
         window.name = _windowName->text().toStdString();
     }
@@ -776,9 +749,8 @@ void WindowControl::setProjectionPlanar(float hfov, float vfov) {
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Planar));
 }
 
-void WindowControl::setProjectionFisheye(int quality, bool spoutOutput) {
+void WindowControl::setProjectionFisheye(int quality) {
     setQualityComboBoxFromLinesResolution(quality, _fisheye.quality);
-    _fisheye.spoutOutput->setChecked(spoutOutput);
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Fisheye));
 }
 
@@ -795,9 +767,8 @@ void WindowControl::setProjectionCylindrical(int quality, float heightOffset) {
     _projectionType->setCurrentIndex(static_cast<int>(ProjectionIndices::Cylindrical));
 }
 
-void WindowControl::setProjectionEquirectangular(int quality, bool spoutOutput) {
+void WindowControl::setProjectionEquirectangular(int quality) {
     setQualityComboBoxFromLinesResolution(quality, _equirectangular.quality);
-    _equirectangular.spoutOutput->setChecked(spoutOutput);
     _projectionType->setCurrentIndex(
         static_cast<int>(ProjectionIndices::Equirectangular)
     );
@@ -814,7 +785,6 @@ void WindowControl::setVisibilityOfProjectionGui(bool enable) {
     _fisheye.labelInfo->setVisible(enable);
     _fisheye.quality->setVisible(enable);
     _fisheye.labelQuality->setVisible(enable);
-    _fisheye.spoutOutput->setVisible(enable);
     _sphericalMirror.labelInfo->setVisible(enable);
     _sphericalMirror.quality->setVisible(enable);
     _sphericalMirror.labelQuality->setVisible(enable);
@@ -826,7 +796,6 @@ void WindowControl::setVisibilityOfProjectionGui(bool enable) {
     _equirectangular.labelInfo->setVisible(enable);
     _equirectangular.quality->setVisible(enable);
     _equirectangular.labelQuality->setVisible(enable);
-    _equirectangular.spoutOutput->setVisible(enable);
 
     _projectionLabel->setVisible(!enable);
 }
