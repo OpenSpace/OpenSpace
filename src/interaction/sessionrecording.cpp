@@ -146,7 +146,7 @@ namespace {
         return result;
     }
 
-    void writeHeader(std::ostream& stream, const Header& header) { 
+    void writeHeader(std::ostream& stream, const Header& header) {
         stream.write(Header::MagicBytes.data(), Header::MagicBytes.size());
 
         std::string_view version = [&header]() {

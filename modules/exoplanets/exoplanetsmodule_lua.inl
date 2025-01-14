@@ -277,7 +277,9 @@ listOfExoplanetsDeprecated()
 
     std::ifstream inputDataFile(csvFile);
     if (!inputDataFile.good()) {
-        throw ghoul::lua::LuaError(std::format("Failed to open input file '{}'", csvFile));
+        throw ghoul::lua::LuaError(std::format(
+            "Failed to open input file '{}'", csvFile
+        ));
     }
 
     std::vector<std::string> columnNames =

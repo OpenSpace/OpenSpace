@@ -138,8 +138,8 @@ namespace {
             bool hasUsedDefaultValues;
         };
 
-        // A list of data tables for the planets in the system (that have enough data to be
-        // visualized), with data about the planet and its orbit.
+        // A list of data tables for the planets in the system (that have enough data to
+        // be visualized), with data about the planet and its orbit.
         std::vector<Planet> planets;
 
         // A rotation matrix to use for the entire system's rotation. Broadly speaking, it

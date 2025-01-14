@@ -496,7 +496,8 @@ void VideoPlayer::update() {
     }
 
     if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
-        const double dt = global::sessionRecordingHandler->fixedDeltaTimeDuringFrameOutput();
+        const double dt =
+            global::sessionRecordingHandler->fixedDeltaTimeDuringFrameOutput();
         if (_playbackMode == PlaybackMode::MapToSimulationTime) {
             _currentVideoTime = correctVideoPlaybackTime();
         }

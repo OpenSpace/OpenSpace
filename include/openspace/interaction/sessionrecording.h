@@ -83,4 +83,4 @@ std::vector<ghoul::Dictionary> sessionRecordingToDictionary(
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___SESSIONRECORDINGHANDLER___H__
+#endif // __OPENSPACE_CORE___SESSIONRECORDING___H__

@@ -57,7 +57,7 @@ namespace openspace::volume {
 VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "" }) // @TODO Missing name
     , _normal(
-        NormalInfo, 
+        NormalInfo,
         glm::vec3(1.f, 0.f, 0.f),
         glm::vec3(-1.f),
         glm::vec3(1.f)
