@@ -312,6 +312,15 @@ std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
     openspace::global::scriptEngine->removeRepeatedScript(identifier);
 }
 
+/**
+ * Schedules a `script` to be run in `delay` seconds. The delay is measured in wallclock
+ * time, which is seconds that occur in the real world, not in relation to the in-game
+ * time.
+ */
+[[codegen::luawrap]] void scheduleScript(std::string script, double delay) {
+    openspace::global::scriptEngine->scheduleScript(std::move(script), delay);
+}
+
 #include "scriptengine_lua_codegen.cpp"
 
 } // namespace
