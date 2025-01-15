@@ -105,6 +105,12 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This Renderable displays the shadow cylinder behind a planetary body. Given the
+    // SPICE name of a planetary body and an observer, it will show a cylinder extending
+    // behind the body away from the observer to highlight the areas of space from which
+    // the observer is occluded by the body. A concrete example is using the Sun as the
+    // observer, in which case the shadow cylinder indicates the areas in which there is
+    // darkness.
     struct [[codegen::Dictionary(RenderableShadowCylinder)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
         std::optional<int> numberOfPoints;

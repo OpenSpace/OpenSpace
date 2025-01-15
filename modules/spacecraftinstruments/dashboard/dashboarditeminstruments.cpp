@@ -74,6 +74,12 @@ namespace {
         return glm::vec2(std::max(lhs.x, rhs.x), lhs.y + rhs.y);
     }
 
+    // This dashboard item shows information about the status of individual instruments
+    // onboard a spacecraft with regards to upcoming image capture. An image sequence has
+    // to be registered in order to be able to show the necessary information. The
+    // dashboard item shows a visual representation on how much time has passed since the
+    // previous image capture and how much time remains until the instrument captures the
+    // next image.
     struct [[codegen::Dictionary(DashboardItemInstruments)]] Parameters {
         // [[codegen::verbatim(ActiveColorInfo.description)]]
         std::optional<glm::vec3> activeColor [[codegen::color()]];
