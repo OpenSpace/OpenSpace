@@ -1137,6 +1137,8 @@ int main(int argc, char* argv[]) {
     _controlfp(_controlfp(0, 0) & ~(_EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 
+    std::setlocale(LC_ALL, "C");
+
 #ifdef WIN32
     SetUnhandledExceptionFilter(generateMiniDump);
 #endif // WIN32
