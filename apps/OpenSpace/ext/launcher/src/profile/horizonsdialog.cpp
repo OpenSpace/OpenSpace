@@ -795,7 +795,7 @@ std::string HorizonsDialog::constructUrl() {
         const std::string id = observer.toString().toStdString();
         center = "@" + id;
         _observerName = _chooseObserverCombo->currentText().toStdString();
-        _centerEdit->setText(QString::fromStdString(id));
+        _centerEdit->setText(QString::fromStdString(center));
     }
     else {
         center = _centerEdit->text().toStdString();
