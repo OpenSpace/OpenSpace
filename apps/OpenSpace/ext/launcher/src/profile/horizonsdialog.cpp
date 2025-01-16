@@ -727,7 +727,7 @@ bool HorizonsDialog::handleRequest() {
 
     nlohmann::json answer = sendRequest(url);
     if (answer.empty()) {
-        QMessageBox::critical(this, "Errpr", "Connection error");
+        QMessageBox::critical(this, "Error", "Connection error");
         return false;
     }
 
