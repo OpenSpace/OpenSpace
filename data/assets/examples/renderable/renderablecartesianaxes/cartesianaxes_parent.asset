@@ -2,9 +2,11 @@
 -- This example creates a SceneGraphNode that displays coordinate axes of the given parent
 -- node, in this case Earth.
 
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
 local Node = {
   Identifier = "RenderableCartesianAxes_Example_Parent",
-  Parent = "Earth",
+  Parent = earth.Earth.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
