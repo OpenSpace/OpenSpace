@@ -72,7 +72,7 @@ namespace {
     // one-dimensional texture.
     //
     // The disc will be filled i.e. a full circle, per default, but may also be made
-    // hollow using the `Width` parameter.
+    // with a hole in the center using the `Width` parameter.
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
