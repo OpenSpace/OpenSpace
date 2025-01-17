@@ -78,9 +78,9 @@ namespace {
     // `Renderable` types create various kinds of visuals, sometimes based on external
     // data files or resources (such as images, 3D models, color maps, or datasets).
     //
-    // A `Renderable` is created by adding it as a component to a scene graph node in an
-    // asset. In general, this places the rendered object at the position of that scene
-    // graph node, unless otherwise specified by the specific `Renderable` type.
+    // A `Renderable` is created by adding it to a scene graph node in an asset. In
+    // general, this places the rendered object at the position of that scene graph node,
+    // unless otherwise specified by the specific `Renderable` type.
     //
     // Each `Renderable` type typically also includes a number of settings to alter its
     // appearance. See the documentation for the individual types for more details.
