@@ -68,6 +68,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This renderable can be used to create a circular disc that is colored based on a
+    // one-dimensional texture.
+    //
+    // The disc will be filled i.e. a full circle, per default, but may also be made
+    // with a hole in the center using the `Width` parameter.
     struct [[codegen::Dictionary(RenderableDisc)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
@@ -90,16 +95,18 @@ documentation::Documentation RenderableDisc::Documentation() {
 RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath(TextureInfo)
-    , _size(SizeInfo, 1.f, 0.f, 1e13f)
-    , _width(WidthInfo, 0.5f, 0.f, 1.f)
+    , _size(SizeInfo, 1.f, 0.001f, 1e13f)
+    , _width(WidthInfo, 1.f, 0.001f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_opacity);
 
     _texturePath = p.texture.string();
     _texturePath.onChange([this]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 
-    _size.setExponent(13.f);
+    _size.setExponent(7.f);
     _size = p.size.value_or(_size);
     setBoundingSphere(_size);
     _size.onChange([this]() { _planeIsDirty = true; });
@@ -107,8 +114,6 @@ RenderableDisc::RenderableDisc(const ghoul::Dictionary& dictionary)
 
     _width = p.width.value_or(_width);
     addProperty(_width);
-
-    addProperty(Fadeable::_opacity);
 
     setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
 }
