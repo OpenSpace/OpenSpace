@@ -89,7 +89,7 @@ namespace {
     // positions.
     //
     // Each constellation is given an abbreviation that acts as the identifier of the
-    // constellation. These abbreviations and can be mapped to full names in the
+    // constellation. These abbreviations can be mapped to full names in the
     // optional `NamesFile`. The names in this file are then the ones that will show
     // in the user interface. A line in the `NamesFile` should first include the
     // abbreviation and then the full name. For example: `AND Andromeda`.

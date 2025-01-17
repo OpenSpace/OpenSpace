@@ -48,7 +48,7 @@ namespace {
         "File",
         "Vertex File Path",
         "A file that contains the vertex locations of the constellations bounds, as RA "
-        "DEC coordinates on the celestial sphere.",
+        "Dec coordinates on the celestial sphere.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -64,10 +64,10 @@ namespace {
     // constellation.
     //
     // The shapes are defined in a file where each line specifies a vertex location in RA
-    // DEC coordinates on the celestial sphere. Each coordinate must also be marked with
+    // Dec coordinates on the celestial sphere. Each coordinate must also be marked with
     // an abbreviation for the corresponding constellation that the shapes encapsulates.
-    // This gives each line the format: `RA DEC ABBR`. Right ascension should be specified
-    // in hours and declination in degrees.
+    // This gives each line the following order: `RA Dec Abbreviation`. Right ascension should be specified
+    // in hours, minutes, and seconds, and declination in degrees.
     //
     // An example of a line corresponding to a vertex location may look like this:
     // `23.5357132 +35.1897736 AND`, where `AND` is the identifier of the constellation.

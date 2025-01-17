@@ -51,7 +51,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line Width",
-        "The line width to use for the constellation shape.",
+        "The line width used for the constellation shape.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
