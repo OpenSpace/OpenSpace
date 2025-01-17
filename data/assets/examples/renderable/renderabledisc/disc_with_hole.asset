@@ -1,14 +1,17 @@
--- Hollow
--- This example creates a disc that is made hollow by specifying a `Width` of 0.5, which
--- will result in the disc stopping halfway from the edge to the center point.
--- The disc is rendered with a single color and an outer radius of 100 meters.
+-- With Hole
+-- This example creates a disc that has a hole in it. By specifying a `Width` of 0.5, the
+-- disc will stop halfway from the edge to the center point. The disc is rendered with a
+-- single color and an outer radius of 100 meters.
 --
 -- This renderable requires a texture to be loaded, even for just a single color. Use the
 -- utility function that exists for creating single color textures for this purpose.
-local cyanTexture = openspace.createSingleColorImage("example_disc_color1", { 0.0, 1.0, 1.0 })
+local cyanTexture = openspace.createSingleColorImage(
+  "example_disc_color_cyan",
+  { 0.0, 1.0, 1.0 }
+)
 
 local Node = {
-  Identifier = "RenderableDisc_Example_Hollow",
+  Identifier = "RenderableDisc_Example_WithHole",
   Renderable = {
     Type = "RenderableDisc",
     Size = 100.0,
@@ -16,7 +19,7 @@ local Node = {
     Texture = cyanTexture
   },
   GUI = {
-    Name = "RenderableDisc - Hollow",
+    Name = "RenderableDisc - With Hole",
     Path = "/Examples"
   }
 }

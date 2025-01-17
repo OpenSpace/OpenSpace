@@ -3,7 +3,10 @@
 --
 -- This renderable requires a texture to be loaded, even for just a single color. Use the
 -- utility function that exists for creating single color textures for this purpose.
-local purpleTexture = openspace.createSingleColorImage("example_disc_color2", { 0.5, 0.0, 0.5 })
+local purpleTexture = openspace.createSingleColorImage(
+  "example_disc_color_purple",
+  { 0.5, 0.0, 0.5 }
+)
 
 local Node = {
   Identifier = "RenderableDisc_Example_Ellipse",

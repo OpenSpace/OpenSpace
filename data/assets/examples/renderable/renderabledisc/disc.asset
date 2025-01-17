@@ -3,7 +3,10 @@
 --
 -- This renderable requires a texture to be loaded, even for just a single color. Use the
 -- utility function that exists for creating single color textures for this purpose.
-local cyanTexture = openspace.createSingleColorImage("example_disc_color1", { 0.0, 1.0, 1.0 })
+local cyanTexture = openspace.createSingleColorImage(
+  "example_disc_color_cyan",
+  { 0.0, 1.0, 1.0 }
+)
 
 local Node = {
   Identifier = "RenderableDisc_Example",
