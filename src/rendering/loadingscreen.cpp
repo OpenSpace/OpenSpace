@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -406,11 +406,11 @@ void LoadingScreen::render() {
                 for (; i < MaxNumberLocationSamples; i++) {
                     std::uniform_int_distribution<int> distX(
                         15,
-                        static_cast<int>(res.x - b.x - 15)
+                        std::max(static_cast<int>(res.x - b.x - 15), 15)
                     );
                     std::uniform_int_distribution<int> distY(
                         15,
-                        static_cast<int>(res.y - b.y - 15)
+                        std::max(static_cast<int>(res.y - b.y - 15), 15)
                     );
 
                     ll = glm::vec2(distX(_randomEngine), distY(_randomEngine));
@@ -436,11 +436,6 @@ void LoadingScreen::render() {
                         false;
 
                     if (logoOverlap || loadingOverlap || messageOverlap || logOverlap) {
-                        // We never want to have an overlap with these, so this try didn't
-                        // count against the maximum, thus ensuring that (if there has to
-                        // be an overlap, it's over other text that might disappear before
-                        // this one)
-                        --i;
                         continue;
                     }
 

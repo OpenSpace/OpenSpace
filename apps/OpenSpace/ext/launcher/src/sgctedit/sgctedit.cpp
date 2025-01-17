@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -122,6 +122,7 @@ SgctEdit::SgctEdit(sgct::config::Cluster& cluster, std::string configName,
                 wCtrl->setWindowName(w.name.value());
             }
             wCtrl->setDecorationState(w.isDecorated.value());
+            wCtrl->setSpoutOutputState(w.spout.has_value() && w.spout->enabled);
         }
         setupProjectionTypeInGui(w.viewports.back(), wCtrl);
     }
@@ -200,18 +201,12 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
         },
         [&](const sgct::config::EquirectangularProjection& p) {
             if (p.quality) {
-                wCtrl->setProjectionEquirectangular(
-                    *p.quality,
-                    false
-                );
+                wCtrl->setProjectionEquirectangular(*p.quality);
             }
         },
         [&](const sgct::config::FisheyeProjection& p) {
             if (p.quality) {
-                wCtrl->setProjectionFisheye(
-                    *p.quality,
-                    false
-                );
+                wCtrl->setProjectionFisheye(*p.quality);
             }
         },
         [&](const sgct::config::PlanarProjection& p) {
@@ -227,29 +222,9 @@ void SgctEdit::setupProjectionTypeInGui(sgct::config::Viewport& vPort,
                 );
             }
         },
-        [&](const sgct::config::SpoutOutputProjection& p) {
-            if (p.quality) {
-                if (p.mapping ==
-                    sgct::config::SpoutOutputProjection::Mapping::Equirectangular)
-                {
-                    wCtrl->setProjectionEquirectangular(
-                        *p.quality,
-                        true
-                    );
-                }
-                else if (p.mapping ==
-                         sgct::config::SpoutOutputProjection::Mapping::Fisheye)
-                {
-                    wCtrl->setProjectionFisheye(
-                        *p.quality,
-                        true
-                    );
-                }
-            }
-        },
         [&](const sgct::config::NoProjection&) {},
         [&](const sgct::config::ProjectionPlane&) {},
-        [&](const sgct::config::SpoutFlatProjection&) {}
+        [&](const sgct::config::CubemapProjection&) {},
     }, vPort.projection);
 }
 

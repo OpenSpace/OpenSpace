@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@ layout(location = 1) out vec4 gPosition;
 layout(location = 2) out vec4 gNormal;
 
 void main() {
-  Fragment f  = getFragment();
+  Fragment f = getFragment();
 
   // Color is already in HDR space
   if (f.disableLDR2HDR || (disableHDRPipeline == 1)) {
