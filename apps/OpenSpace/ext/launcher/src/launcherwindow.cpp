@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <sgct/readconfig.h>
+#include <sgct/config.h>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QFile>
@@ -617,22 +617,18 @@ bool handleConfigurationFile(QComboBox& box, const std::filesystem::directory_en
     box.addItem(QString::fromStdString(p.path().filename().string()));
 
     // Add tooltip
-    if (isJson) {
-        std::string tooltipDescription;
-        try {
-            const sgct::config::Meta meta = sgct::readMeta(p.path());
-            tooltipDescription = meta.description;
-        }
-        catch (const sgct::Error&) {
-            tooltipDescription = "(no description available)";
-        }
-        if (!tooltipDescription.empty()) {
-            const QString toolTip = QString::fromStdString(
-                std::format("<p>{}</p>", tooltipDescription)
-            );
-            box.setItemData(box.count() - 1, toolTip, Qt::ToolTipRole);
+    std::string tooltipDescription = "(no description available)";
+    try {
+        sgct::config::Cluster cluster = sgct::readConfig(p.path());
+        if (cluster.meta && cluster.meta->description.has_value()) {
+            tooltipDescription = *cluster.meta->description;
         }
     }
+    catch (const sgct::Error&) {}
+    const QString toolTip = QString::fromStdString(
+        std::format("<p>{}</p>", tooltipDescription)
+    );
+    box.setItemData(box.count() - 1, toolTip, Qt::ToolTipRole);
 
     return true;
 }
@@ -762,9 +758,8 @@ void LauncherWindow::onNewWindowConfigSelection(int newIndex) {
     }
     else {
         try {
-            sgct::config::GeneratorVersion previewGenVersion =
-                sgct::readConfigGenerator(pathSelected);
-            if (!versionCheck(previewGenVersion)) {
+            sgct::config::Cluster c = sgct::readConfig(pathSelected);
+            if (!c.generator || !versionCheck(*c.generator)) {
                 _editWindowButton->setEnabled(false);
                 _editWindowButton->setToolTip(QString::fromStdString(std::format(
                     "This file does not meet the minimum required version of {}.",
@@ -877,36 +872,39 @@ void LauncherWindow::openWindowEditor(const std::string& winCfg, bool isUserWinC
     }
     else {
         try {
-            config::GeneratorVersion previewGenVersion = readConfigGenerator(winCfg);
-            loadFileAndSchemaThenValidate(
+            sgct::config::Cluster cluster;
+            try {
+                cluster = readConfig(winCfg);
+            }
+            catch (const std::runtime_error& e) {
+                // Re-throw an SGCT error exception with the runtime exception message
+                throw std::runtime_error(std::format(
+                    "Importing of this configuration file failed because of a "
+                    "problem detected in the readConfig function:\n\n{}", e.what()
+                ));
+            }
+
+            assert(cluster.generator);
+            std::string err = validateConfigAgainstSchema(
                 winCfg,
-                _configPath / "schema/sgct.schema.json",
-                "This configuration file is unable to generate a proper display"
+                _configPath / "schema/sgct.schema.json"
             );
-            loadFileAndSchemaThenValidate(
-                winCfg,
-                _configPath / "schema/sgcteditor.schema.json",
-                "This configuration file is valid for generating a display, but "
-                "its format does not match the window editor requirements and "
-                "cannot be opened in the editor"
-            );
-            if (versionCheck(previewGenVersion)) {
-                try {
-                    preview = readConfig(
-                        winCfg,
-                        "This configuration file is unable to generate a proper display "
-                        "due to a problem detected in the readConfig function"
-                    );
-                }
-                catch (const std::runtime_error& e) {
-                    //Re-throw an SGCT error exception with the runtime exception message
-                    throw std::runtime_error(std::format(
-                        "Importing of this configuration file failed because of a "
-                        "problem detected in the readConfig function:\n\n{}", e.what()
-                    ));
-                }
+            if (!err.empty()) {
+                editRefusalDialog(
+                    "Format Validation Error",
+                    std::format("Parsing error found in file '{}'", winCfg),
+                    std::format(
+                        "{}\n\nThis configuration file is unable to generate a proper "
+                        "display",
+                        err
+                    )
+                );
+                return;
+            }
+
+            if (versionCheck(*cluster.generator)) {
                 SgctEdit editor = SgctEdit(
-                    preview,
+                    cluster,
                     winCfg,
                     saveWindowPath,
                     this

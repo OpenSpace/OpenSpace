@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json-schema.hpp>
-#include <sgct/readconfig.h>
+#include <sgct/config.h>
 #include <openspace/engine/configuration.h>
 #include <filesystem>
 #include <fstream>
@@ -44,15 +44,18 @@ namespace {
         return buffer.str();
     }
 
-    void attemptValidation(const std::string& cfgString) {
+    void validate(std::string_view cfgString) {
         const std::filesystem::path schemaDir = absPath("${TESTDIR}/../config/schema");
-        const std::string schemaString = stringify(schemaDir / "sgcteditor.schema.json");
-        sgct::validateConfigAgainstSchema(cfgString, schemaString, schemaDir);
+        const std::filesystem::path schema = schemaDir / "sgcteditor.schema.json";
+        std::string err = sgct::validateConfigAgainstSchema(cfgString, schema);
+        if (!err.empty()) {
+            throw std::runtime_error(err);
+        }
     }
 } // namespace
 
 TEST_CASE("SgctEdit: pass", "[sgctedit]") {
-    const std::string config =
+    constexpr std::string_view Source =
 R"({
   "generator": {
     "major": 1,
@@ -120,11 +123,11 @@ R"({
   ],
   "version": 1
 })";
-    CHECK_NOTHROW(attemptValidation(config));
+    CHECK_NOTHROW(validate(Source));
 }
 
 TEST_CASE("SgctEdit: addedTrailingBracket", "[sgctedit]") {
-    const std::string config =
+    constexpr std::string_view Source =
 R"({
   "generator": {
     "major": 0,
@@ -193,7 +196,7 @@ R"({
   "version": 1
 }})";
     CHECK_THROWS_MATCHES(
-        attemptValidation(config),
+        validate(Source),
         nlohmann::json::parse_error,
         Catch::Matchers::Message(
             "[json.exception.parse_error.101] parse error at line 67, column 2: "
@@ -204,7 +207,7 @@ R"({
 }
 
 TEST_CASE("SgctEdit: missingMasterAddress", "[sgctedit]") {
-    const std::string config =
+    constexpr std::string_view Source =
 R"({
   "generator": {
     "major": 1,
@@ -272,7 +275,7 @@ R"({
   "version": 1
 })";
     CHECK_THROWS_MATCHES(
-        attemptValidation(config),
+        validate(Source),
         std::exception,
         Catch::Matchers::Message(
             "At  of {\"generator\":{\"major\":1,\"minor\":1,\"name\":"
@@ -291,7 +294,7 @@ R"({
 }
 
 TEST_CASE("SgctEdit: missingPos", "[sgctedit]") {
-    const std::string config =
+    constexpr std::string_view Source =
 R"({
   "generator": {
     "major": 1,
@@ -355,7 +358,7 @@ R"({
   "version": 1
 })";
     CHECK_THROWS_MATCHES(
-        attemptValidation(config),
+        validate(Source),
         std::exception,
         Catch::Matchers::Message(
             "At /users/0 of {\"eyeseparation\":0.06499999761581421} - required "
@@ -365,7 +368,7 @@ R"({
 }
 
 TEST_CASE("SgctEdit: missingGenerator", "[sgctedit]") {
-    const std::string config =
+    constexpr std::string_view Source =
 R"({
   "masteraddress": "localhost",
   "nodes": [
@@ -429,7 +432,7 @@ R"({
   "version": 1
 })";
     CHECK_THROWS_MATCHES(
-        attemptValidation(config),
+        validate(Source),
         std::exception,
         Catch::Matchers::Message(
             "At  of {\"masteraddress\":\"localhost\",\"nodes\":[{\"address\":"
@@ -450,12 +453,13 @@ TEST_CASE("SgctEdit: minimumVersion", "[sgctedit]") {
     const sgct::config::GeneratorVersion minVersion { "SgctWindowConfig", 1, 1 };
     const std::filesystem::path cfg =
         absPath("${TESTDIR}/sgctedit/fails_minimum_version.json");
-    const sgct::config::GeneratorVersion ver = sgct::readConfigGenerator(cfg);
-    CHECK_FALSE(ver.versionCheck(minVersion));
+    const sgct::config::Cluster cluster = sgct::readConfig(cfg);
+    REQUIRE(cluster.generator);
+    CHECK_FALSE(cluster.generator->versionCheck(minVersion));
 }
 
 TEST_CASE("SgctEdit: invalidZvalue", "[sgctedit]") {
-    const std::string config =
+    constexpr std::string_view Source =
 R"({
   "generator": {
     "major": 1,
@@ -525,7 +529,7 @@ R"({
   "version": 1
 })";
     CHECK_THROWS_MATCHES(
-        attemptValidation(config),
+        validate(Source),
         std::exception,
         Catch::Matchers::Message(
             "[json.exception.parse_error.101] parse error at line 25, column 11: "
@@ -535,7 +539,7 @@ R"({
 }
 
 TEST_CASE("SgctEdit: unwelcomeValue", "[sgctedit]") {
-    const std::string config =
+    constexpr std::string_view Source =
 R"({
   "generator": {
     "major": 1,
@@ -605,7 +609,7 @@ R"({
   "version": 1
 })";
     CHECK_THROWS_MATCHES(
-        attemptValidation(config),
+        validate(Source),
         std::exception,
         Catch::Matchers::Message(
             "At /users/0 of {\"extra\":\"???\",\"eyeseparation\":0.6,\"pos\":"

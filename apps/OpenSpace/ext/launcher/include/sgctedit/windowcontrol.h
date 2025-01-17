@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -108,6 +108,11 @@ public:
     void setDecorationState(bool hasWindowDecoration);
 
     /**
+     * Sets whether the window is shared using spout.
+     */
+    void setSpoutOutputState(bool shouldSpoutOutput);
+
+    /**
      * Generates window configuration (sgct::config::Window struct) based on the
      * GUI settings.
      *
@@ -127,14 +132,13 @@ public:
 
     /**
      * Sets the window's projection type to fisheye, with the accompanying quality
-     * setting and spout option.
+     * setting.
      *
      * \param quality The value for number of vertical lines of resolution. This will be
      *        compared against the QualityValues array in order to set the correct
      *       combobox index
-     * \param spoutOutput Enabling the spout output option
      */
-    void setProjectionFisheye(int quality, bool spoutOutput);
+    void setProjectionFisheye(int quality);
 
     /**
      * Sets the window's projection type to spherical mirror, with the accompanying
@@ -159,14 +163,13 @@ public:
 
     /**
      * Sets the window's projection type to equirectangular, with the accompanying
-     * quality setting and spout option.
+     * quality setting.
      *
      * \param quality The value for number of vertical lines of resolution. This will be
      *        compared against the QualityValues array in order to set the correct
      *        combobox index
-     * \param spoutOutput Enabling the spout output option
      */
-    void setProjectionEquirectangular(int quality, bool spoutOutput);
+    void setProjectionEquirectangular(int quality);
 
     /**
      * Controls the visibility of all projection controls, including those that are only
@@ -227,6 +230,7 @@ private:
     QCheckBox* _windowDecoration = nullptr;
     QComboBox* _projectionType = nullptr;
     QLabel* _projectionLabel = nullptr;
+    QCheckBox* _spoutOutput = nullptr;
 
     struct {
         QWidget* widget = nullptr;
@@ -243,7 +247,6 @@ private:
         QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
         QLabel* labelQuality = nullptr;
-        QCheckBox* spoutOutput = nullptr;
     } _fisheye;
 
     struct {
@@ -267,7 +270,6 @@ private:
         QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
         QLabel* labelQuality = nullptr;
-        QCheckBox* spoutOutput = nullptr;
     } _equirectangular;
 
     const QIcon _lockIcon;
