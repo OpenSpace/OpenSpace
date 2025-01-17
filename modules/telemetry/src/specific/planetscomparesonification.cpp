@@ -32,6 +32,27 @@
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsCompareSonification";
 
+    // Indices for data items
+    constexpr int NumDataItems = 3;
+    constexpr int FirstPlanetIndex = 0;
+    constexpr int SecondPlanetIndex = 1;
+    constexpr int SettingsIndex = 2;
+
+    // Indicies for the gui settings
+    constexpr int NumSettings = 6;
+    constexpr int SizeDayIndex = 0;
+    constexpr int GravityIndex = 1;
+    constexpr int TemperatureIndex = 2;
+    constexpr int AtmosphereIndex = 3;
+    constexpr int MoonsIndex = 4;
+    constexpr int RingsIndex = 5;
+
+    // List of planets that can be selected
+    constexpr std::array<std::string_view, 9> PlanetsOptions = {
+        "Choose Planet", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn",
+        "Uranus", "Neptune"
+    };
+
     // Property info
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         PlanetsCompareSonificationInfo =
@@ -65,13 +86,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo FirstOptionInfo = {
         "FirstOption",
         "Choose a planet to compare",
-        "Choose a planet in the given list to compare"
+        "Choose a planet in the given list to compare."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondOptionInfo = {
         "SecondOption",
         "Choose a planet to compare",
-        "Choose another planet in the given list to compare"
+        "Choose another planet in the given list to compare."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {

@@ -61,7 +61,7 @@ namespace {
         "Distance Precision (Low)",
         "The precision in meters used to determine when to send updated distance data "
         "over the OSC connection. This is the lower precision used, for nodes that are "
-        "not the current focus",
+        "not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -70,7 +70,7 @@ namespace {
         "Distance Precision (High)",
         "The precision in meters used to determine when to send updated distance data "
         "over the OSC connection. This is the higher precision used, for the current "
-        "focus node",
+        "focus node.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -79,7 +79,7 @@ namespace {
         "Angle Precision (Low)",
         "The precision in radians used to determine when to send updated angle data "
         "over the OSC connection. This is the lower precision used, for nodes that are "
-        "not the current focus",
+        "not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -88,7 +88,7 @@ namespace {
         "Angle Precision (High)",
         "The precision in radians used to determine when to send updated angle data "
         "over the OSC connection. This is the higher precision used, for the current "
-        "focus node",
+        "focus node.",
         openspace::properties::Property::Visibility::User
     };
 

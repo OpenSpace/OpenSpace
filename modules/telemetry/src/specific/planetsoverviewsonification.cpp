@@ -41,7 +41,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
-        "All",
+        "Toggle All",
         "Toggle the sonification for all planets."
     };
 

@@ -49,7 +49,7 @@ namespace {
     const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
-        "Settings for the precision of the camera telemetry information"
+        "Settings for the precision of the camera telemetry information."
     };
 
     constexpr openspace::properties::Property::PropertyInfo PositionPrecisionInfo = {

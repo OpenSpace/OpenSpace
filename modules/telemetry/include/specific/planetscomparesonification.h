@@ -50,27 +50,6 @@ public:
     virtual void stop() override;
 
 private:
-    // Indices for data items
-    static constexpr int NumDataItems = 3;
-    static constexpr int FirstPlanetIndex = 0;
-    static constexpr int SecondPlanetIndex = 1;
-    static constexpr int SettingsIndex = 2;
-
-    // Indicies for the gui settings
-    static constexpr int NumSettings = 6;
-    static constexpr int SizeDayIndex = 0;
-    static constexpr int GravityIndex = 1;
-    static constexpr int TemperatureIndex = 2;
-    static constexpr int AtmosphereIndex = 3;
-    static constexpr int MoonsIndex = 4;
-    static constexpr int RingsIndex = 5;
-
-    // List of planets that can be selected
-    static constexpr std::array<std::string, 9> PlanetsOptions = {
-        "Choose Planet", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn",
-        "Uranus", "Neptune"
-    };
-
     /**
      * Create an osc::Blob object with the current compare planets sonification settings.
      * Order of settings: Size/day, gravity, temperature, atmosphere, moons, rings.
