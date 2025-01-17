@@ -59,17 +59,16 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    // This renderable can be used to draw bounding shapes on the night sky, where each
-    // shape encapsulates a group of night sky objects, such as the stars of a
+    // This `Renderable` type can be used to draw bounding shapes on the night sky, where
+    // each shape encapsulates a group of night sky objects, such as the stars of a
     // constellation.
     //
     // The shapes are defined in a file where each line specifies a vertex location in RA
     // Dec coordinates on the celestial sphere. Each coordinate must also be marked with
     // an abbreviation for the corresponding constellation that the shapes encapsulates.
-    // This gives each line the following order: `RA Dec Abbreviation`. Right ascension should be specified
-    // in hours, minutes, and seconds, and declination in degrees.
-    //
-    // An example of a line corresponding to a vertex location may look like this:
+    // This gives each line the following order: `RA Dec Abbreviation`. The units for the
+    // coordinate values are hours for RA, and degrees for Dec. An example of a line
+    // corresponding to a vertex location may look like this:
     // `23.5357132 +35.1897736 AND`, where `AND` is the identifier of the constellation.
     // In this case it is short for Andromeda.
     //
@@ -80,10 +79,12 @@ namespace {
     // for the `AND` abbreviation in the example above, the line would look like this:
     // `AND Andromeda`.
     //
-    // If labels were added, the full names may also be used for the text of the label.
-    // This happens if a row in the label file includes an `id` that matches the
-    // abbreviation of the constellation, in which case the text specified in the label
-    // file is overwritten.
+    // If labels were added, the full names in the `NamesFile` may also be used for the
+    // text of the labels. Note that labels are added using a different file, where each
+    // line may or may not include an identifier for that specific label, marked by `id`
+    // in the file. If a row in the label file has an `id` that matches the abbreviation
+    // of the constellation, the text of that label is replaced with the full name from
+    // the `NamesFile`.
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
         // [[codegen::verbatim(VertexInfo.description)]]
         std::filesystem::path file;
