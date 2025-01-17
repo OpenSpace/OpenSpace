@@ -94,10 +94,12 @@ namespace {
     // in the user interface. A line in the `NamesFile` should first include the
     // abbreviation and then the full name. For example: `AND Andromeda`.
     //
-    // If labels were added, the full names may also be used for the text of the label.
-    // This happens if a row in the label file includes an `id` that matches the
-    // abbreviation of the constellation, in which case the text specified in the label
-    // file is overwritten.
+    // If labels were added, the full names in the `NamesFile` may also be used for the
+    // text of the labels. Note that labels are added using a different file, where each
+    // line may or may not include an identifier for that specific label, marked by `id`
+    // in the file. If a row in the label file has an `id` that matches the abbreviation
+    // of the constellation, the text of that label is replaced with the full name from
+    // the `NamesFile`.
     struct [[codegen::Dictionary(RenderableConstellationLines)]] Parameters {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path file;
