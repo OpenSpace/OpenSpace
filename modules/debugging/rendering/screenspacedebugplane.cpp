@@ -51,7 +51,7 @@ documentation::Documentation ScreenSpaceDebugPlane::Documentation() {
 
 ScreenSpaceDebugPlane::ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _texture(TextureInfo, -1, -1, 512)
+    , _texture(TextureInfo, -1, -1, 4096)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
