@@ -125,76 +125,14 @@ constexpr bool isValidDistanceUnitName(std::string_view name) {
     return false;
 }
 
-constexpr std::string_view nameForDistanceUnit(DistanceUnit unit, bool pluralForm = false)
+constexpr std::string_view nameForDistanceUnit(DistanceUnit unit, bool usePluralForm = false)
 {
-    switch (unit) {
-        case DistanceUnit::Nanometer:
-        case DistanceUnit::Micrometer:
-        case DistanceUnit::Millimeter:
-        case DistanceUnit::Centimeter:
-        case DistanceUnit::Decimeter:
-        case DistanceUnit::Meter:
-        case DistanceUnit::Kilometer:
-        case DistanceUnit::AU:
-        case DistanceUnit::Lighthour:
-        case DistanceUnit::Lightday:
-        case DistanceUnit::Lightmonth:
-        case DistanceUnit::Lightyear:
-        case DistanceUnit::Parsec:
-        case DistanceUnit::Kiloparsec:
-        case DistanceUnit::Megaparsec:
-        case DistanceUnit::Gigaparsec:
-        case DistanceUnit::Gigalightyear:
-        case DistanceUnit::Thou:
-        case DistanceUnit::Inch:
-        case DistanceUnit::Foot:
-        case DistanceUnit::Yard:
-        case DistanceUnit::Chain:
-        case DistanceUnit::Furlong:
-        case DistanceUnit::Mile:
-        case DistanceUnit::League:
-            if (pluralForm) {
-                return DistanceUnitNames[static_cast<int>(unit)].plural;
-            }
-            else {
-                return DistanceUnitNames[static_cast<int>(unit)].singular;
-            }
-        default:
-            throw ghoul::MissingCaseException();
-    }
+    const DistanceUnitName unitName = DistanceUnitNames[static_cast<int>(unit)];
+    return usePluralForm ? unitName.plural : unitName.singular;
 }
 
 constexpr std::string_view abbreviationForDistanceUnit(DistanceUnit unit) {
-    switch (unit) {
-        case DistanceUnit::Nanometer:
-        case DistanceUnit::Micrometer:
-        case DistanceUnit::Millimeter:
-        case DistanceUnit::Centimeter:
-        case DistanceUnit::Decimeter:
-        case DistanceUnit::Meter:
-        case DistanceUnit::Kilometer:
-        case DistanceUnit::AU:
-        case DistanceUnit::Lighthour:
-        case DistanceUnit::Lightday:
-        case DistanceUnit::Lightmonth:
-        case DistanceUnit::Lightyear:
-        case DistanceUnit::Parsec:
-        case DistanceUnit::Kiloparsec:
-        case DistanceUnit::Megaparsec:
-        case DistanceUnit::Gigaparsec:
-        case DistanceUnit::Gigalightyear:
-        case DistanceUnit::Thou:
-        case DistanceUnit::Inch:
-        case DistanceUnit::Foot:
-        case DistanceUnit::Yard:
-        case DistanceUnit::Chain:
-        case DistanceUnit::Furlong:
-        case DistanceUnit::Mile:
-        case DistanceUnit::League:
-            return DistanceUnitNames[static_cast<int>(unit)].abbreviation;
-        default:
-            throw ghoul::MissingCaseException();
-    }
+    return DistanceUnitNames[static_cast<int>(unit)].abbreviation;
 }
 
 constexpr DistanceUnit distanceUnitFromString(std::string_view unitName) {
