@@ -27,6 +27,8 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <openspace/rendering/texturecomponent.h>
+
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
@@ -40,6 +42,7 @@ class RenderableSphereImageLocal : public RenderableSphere {
 public:
     RenderableSphereImageLocal(const ghoul::Dictionary& dictionary);
 
+    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -53,14 +56,10 @@ protected:
     void bindTexture() override;
 
 private:
-    void loadTexture();
 
     properties::StringProperty _texturePath;
 
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    bool _isLoadingLazily = false;
-    bool _textureIsDirty = false;
+    std::unique_ptr<TextureComponent> _texture;
 };
 
 } // namespace openspace
