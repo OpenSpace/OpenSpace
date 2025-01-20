@@ -44,11 +44,6 @@ namespace {
     struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
-
-        // If true, the image for this sphere will not be loaded at startup but rather
-        // when the image is shown for the first time. Additionally, if the sphere is
-        // disabled, the image will automatically be unloaded.
-        std::optional<bool> lazyLoading;
     };
 #include "renderablesphereimagelocal_codegen.cpp"
 } // namespace
@@ -70,24 +65,24 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texturePath = p.texture.string();
-    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
-    _texturePath.onChange([this]() {
-        loadTexture();
-    });
+    _texturePath.onChange([this]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
-    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 
 bool RenderableSphereImageLocal::isReady() const {
     return RenderableSphere::isReady() && _texture;
 }
 
+void RenderableSphereImageLocal::initialize() {
+    _texture = std::make_unique<TextureComponent>(2);
+    _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+}
+
 void RenderableSphereImageLocal::initializeGL() {
     RenderableSphere::initializeGL();
-
-    if (!_isLoadingLazily) {
-        loadTexture();
-    }
+    _texture->loadFromFile(_texturePath.value());
+    _texture->uploadToGpu();
 }
 
 void RenderableSphereImageLocal::deinitializeGL() {
@@ -98,41 +93,11 @@ void RenderableSphereImageLocal::deinitializeGL() {
 
 void RenderableSphereImageLocal::update(const UpdateData& data) {
     RenderableSphere::update(data);
-
-    if (_textureIsDirty) {
-        loadTexture();
-        _textureIsDirty = false;
-    }
+    _texture->update();
 }
 
 void RenderableSphereImageLocal::bindTexture() {
     _texture->bind();
-}
-
-void RenderableSphereImageLocal::loadTexture() {
-    if (_texturePath.value().empty()) {
-        return;
-    }
-
-    std::unique_ptr<ghoul::opengl::Texture> texture =
-        ghoul::io::TextureReader::ref().loadTexture(_texturePath.value(), 2);
-
-    if (!texture) {
-        LWARNINGC(
-            "RenderableSphereImageLocal",
-            std::format("Could not load texture from '{}'", absPath(_texturePath))
-        );
-        return;
-    }
-
-    LDEBUGC(
-        "RenderableSphereImageLocal",
-        std::format("Loaded texture from '{}'", absPath(_texturePath))
-    );
-    texture->uploadTexture();
-    texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-    texture->purgeFromRAM();
-    _texture = std::move(texture);
 }
 
 } // namespace openspace
