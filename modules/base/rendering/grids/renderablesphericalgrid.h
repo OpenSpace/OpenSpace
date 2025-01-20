@@ -35,9 +35,9 @@
 
 namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace::documentation { struct Documentation; }
-
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class RenderableSphericalGrid : public Renderable {
 public:
@@ -63,20 +63,15 @@ protected:
     ghoul::opengl::ProgramObject* _gridProgram;
 
     properties::Vec3Property _color;
-    properties::IntProperty _segments;
+    properties::IntProperty _longSegments;
+    properties::IntProperty _latSegments;
     properties::FloatProperty _lineWidth;
-
-    bool _gridIsDirty = true;
 
     GLuint _vaoID = 0;
     GLuint _vBufferID = 0;
     GLuint _iBufferID = 0;
 
-    GLenum _mode = GL_LINES;
-    unsigned int _isize = 0;
-    unsigned int _vsize = 0;
-    std::vector<Vertex> _varray;
-    std::vector<int> _iarray;
+    bool _gridIsDirty = true;
 
     // Labels
     bool _hasLabels = false;
