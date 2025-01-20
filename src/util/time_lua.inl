@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/util/timeconversion.h>
+#include <openspace/navigation/navigationhandler.h>
 
 namespace {
 
@@ -324,6 +325,66 @@ namespace {
         global::timeManager->setTimeNextFrame(
             Time(global::timeManager->time().j2000Seconds() + delta)
         );
+    }
+}
+
+/**
+ * Set the current simulation time to the specified value, using either a fade transition
+ * or interpolation, based on the time difference and specified thresholds. The time
+ * can be provided either as a number of seconds past the J2000 epoch, or as an ISO 8601
+ * string.
+ *
+ * If the time difference between the current time and the target time exceeds the
+ * specified threshold, a fade transition will be triggered. Otherwise, interpolation is
+ * used.
+ *
+ * \param time The target time to jump to. If the parameter is a number, it represents the
+ *             number of seconds past the J2000 epoch. If it is a string, it must be a
+ *             valid ISO 8601-like date string of the format YYYY-MM-DDTHH:MN:SS.
+ * \param fadeJumpThreshold The time difference threshold (in seconds) to determine
+ *                          whether to perform a fade transition. If excluded, the default
+ *                          value specified in the NavigationHandler is used.
+ * \param fadeDuration The duration (in seconds) of the fade transition, if triggered.
+ *                     If excluded, the default fade duration specified in the
+ *                     NavigationHandler is used.
+ * \param interpolationDuration The duration (in seconds) over which interpolation should
+ *                               occur if a fade transition is not triggered. If excluded,
+ *                               the default value for time interpolation specified in the
+ *                               TimeManager is used.
+ */
+[[codegen::luawrap]] void jumpToTime(std::variant<double, std::string> time,
+    std::optional<double> fadeJumpThreshold,
+    std::optional<double> fadeDuration,
+    std::optional<double> interpolationDuration)
+{
+    using namespace openspace;
+    double t;
+    if (std::holds_alternative<std::string>(time)) {
+        t = Time::convertTime(std::get<std::string>(time));
+    }
+    else {
+        t = std::get<double>(time);
+    }
+
+    const double threshold = fadeJumpThreshold.value_or(
+        global::navigationHandler->fadeJumpThreshold()
+    );
+    const double fadeTime = fadeDuration.value_or(
+        global::navigationHandler->jumpToFadeDuration()
+    );
+
+    const double currentTime = global::timeManager->time().j2000Seconds();
+
+    const double timeDiffInSeconds = std::abs(currentTime - t);
+
+    if (timeDiffInSeconds > threshold) {
+        global::navigationHandler->triggerFadeToTransition(
+            std::format("openspace.time.setTime({})", t),
+            static_cast<float>(fadeTime)
+        );
+    }
+    else {
+        interpolateTime(t, interpolationDuration);
     }
 }
 

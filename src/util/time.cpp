@@ -216,6 +216,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             codegen::lua::SetTime,
             codegen::lua::InterpolateTime,
             codegen::lua::InterpolateTimeRelative,
+            codegen::lua::JumpToTime,
             codegen::lua::CurrentTime,
             codegen::lua::CurrentTimeUTC,
             codegen::lua::CurrentTimeSpice,
