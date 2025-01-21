@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,17 +32,21 @@ namespace {
     openspace::TelemetryModule* module =
         openspace::global::moduleEngine->module<openspace::TelemetryModule>();
     if (!module) {
-        LERRORC("PlanetsSonification", "Could not find the TelemetryModule");
+        throw ghoul::lua::LuaError("Could not find the Telemetry Module");
         return;
     }
     openspace::TelemetryBase* ptr = module->telemetry("PlanetsSonification");
     if (!ptr) {
-        LERRORC("PlanetsSonification", "Could not find the PlanetsSonification");
+        throw ghoul::lua::LuaError("Could not find the Planets Sonification");
         return;
     }
 
     openspace::PlanetsSonification* planetsSonification =
-        reinterpret_cast<openspace::PlanetsSonification*>(ptr);
+        dynamic_cast<openspace::PlanetsSonification*>(ptr);
+
+    if (!planetsSonification) {
+        throw ghoul::lua::LuaError("Could not cast to PlanetsSonification");
+    }
 
     for (const std::string_view& k : planets.keys()) {
         const ghoul::Dictionary& planet = planets.value<ghoul::Dictionary>(k);
@@ -52,4 +56,3 @@ namespace {
 
 #include "planetssonification_lua_codegen.cpp"
 } // namespace
-

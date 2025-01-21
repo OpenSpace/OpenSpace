@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -104,8 +104,8 @@ public:
      *
      * \return The requested telemetry
      */
-    const TelemetryBase* telemetry(std::string_view id) const;
-    TelemetryBase* telemetry(std::string_view id);
+    const TelemetryBase* telemetry(const std::string_view& id) const;
+    TelemetryBase* telemetry(const std::string_view& id);
 
     /**
      * Get the current angle calculation mode used in the telemetry module.
@@ -157,15 +157,15 @@ private:
      * This setting only affects telemetries that send angle information. For example, the
      * NodesTelemetry and the PlanetsSonification.
      *
-     * True: An additional angle in the vertical direction within the camera view + up
-     *       plane is sent over the osc connection. The camera view + up plane is the
-     *       plane of the camera view direction + camera up direction, with the camera
-     *       right direction as the normal. The elevation angle goes from -pi/2 to pi/2 in
-     *       radians and zero is straight forward in the camera view direction. Positive
-     *       elevation angles is in the up direction of the camera, and negative angles
-     *       are in the down direction of the camera.
+     * `true`: An additional angle in the vertical direction within the camera view + up
+     *         plane is sent over the osc connection. The camera view + up plane is the
+     *         plane of the camera view direction + camera up direction, with the camera
+     *         right direction as the normal. The elevation angle goes from -pi/2 to pi/2
+     *         in radians and zero is straight forward in the camera view direction.
+     *         Positive elevation angles is in the up direction of the camera, and
+     *         negative angles are in the down direction of the camera.
      *
-     * False: The elevation angle sent over the osc connection is always set to 0.0
+     * `false`: The elevation angle sent over the osc connection is always set to 0.0
     */
     properties::BoolProperty _includeElevationAngle;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,18 @@
 #include <openspace/util/distanceconversion.h>
 
 namespace {
+    // Indices for data items
+    static constexpr int NumDataItems = 9;
+    static constexpr int CameraPosXIndex = 0;
+    static constexpr int CameraPosYIndex = 1;
+    static constexpr int CameraPosZIndex = 2;
+    static constexpr int CameraQuatRotWIndex = 3;
+    static constexpr int CameraQuatRotXIndex = 4;
+    static constexpr int CameraQuatRotYIndex = 5;
+    static constexpr int CameraQuatRotZIndex = 6;
+    static constexpr int CameraSpeedIndex = 7;
+    static constexpr int CameraSpeedUnitIndex = 8;
+
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         CameraTelemetryInfo =
     {

@@ -50,11 +50,6 @@ public:
     virtual void stop() override;
 
 private:
-    // Indices for data items
-    static constexpr int NumDataItems = 2;
-    static constexpr int AngleModeIndex = 0;
-    static constexpr int IncludeElevationIndex = 1;
-
     /**
      * Gather angle settings telemetry information (Angle calculation mode, and whether
      * elevation angle is included).

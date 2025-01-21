@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,30 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsSonification";
+
+    // Number of data items for planets and moons, which is used to calculate the total
+    // size of the data vector sent over the osc connection
+    static constexpr int NumDataItemsPlanet = 4;
+    static constexpr int NumDataItemsMoon = 3;
+
+    // Indices for the planets
+    static constexpr int MercuryIndex = 0;
+    static constexpr int VenusIndex = 1;
+    static constexpr int EarthIndex = 2;
+    static constexpr int MarsIndex = 3;
+    static constexpr int JupiterIndex = 4;
+    static constexpr int SaturnIndex = 5;
+    static constexpr int UranusIndex = 6;
+    static constexpr int NeptuneIndex = 7;
+
+    // Indices for the settings for the planets
+    static constexpr int NumSettings = 6;
+    static constexpr int SizeDayIndex = 0;
+    static constexpr int GravityIndex = 1;
+    static constexpr int TemperatureIndex = 2;
+    static constexpr int AtmosphereIndex = 3;
+    static constexpr int MoonsIndex = 4;
+    static constexpr int RingsIndex = 5;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         PlanetsSonificationInfo =
@@ -607,39 +631,31 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex,
 
     // Also calculate angle to moons
     bool shouldSendData = false;
-    for (int m = 0; m < _planets[planetIndex].moons.size(); ++m) {
+    for (DataBody& moon : _planets[planetIndex].moons) {
         // Distance
-        double dist = calculateDistanceTo(
-            camera,
-            _planets[planetIndex].moons[m].name,
-            DistanceUnit::Kilometer
-        );
+        double dist = calculateDistanceTo(camera, moon.name, DistanceUnit::Kilometer);
 
         if (std::abs(dist) < std::numeric_limits<double>::epsilon()) {
             // The scene is likely not yet initialized
             return false;
         }
 
-        if (std::abs(_planets[planetIndex].moons[m].distance - dist) >
-            _distancePrecision)
-        {
+        if (std::abs(moon.distance - dist) > _distancePrecision) {
             shouldSendData = true;
-            _planets[planetIndex].moons[m].distance = dist;
+            moon.distance = dist;
         }
 
         // Horizontal angle
         double moonHAngle = calculateAngleFromAToB(
             camera,
             _planets[planetIndex].name,
-            _planets[planetIndex].moons[m].name,
+            moon.name,
             angleCalculationMode
         );
 
-        if (std::abs(_planets[planetIndex].moons[m].horizontalAngle - moonHAngle) >
-            _anglePrecision)
-        {
+        if (std::abs(moon.horizontalAngle - moonHAngle) > _anglePrecision) {
             shouldSendData = true;
-            _planets[planetIndex].moons[m].horizontalAngle = moonHAngle;
+            moon.horizontalAngle = moonHAngle;
         }
 
         // Vertical angle
@@ -648,16 +664,14 @@ bool PlanetsSonification::getData(const Camera* camera, int planetIndex,
             moonVAngle = calculateElevationAngleFromAToB(
                 camera,
                 _planets[planetIndex].name,
-                _planets[planetIndex].moons[m].name,
+                moon.name,
                 angleCalculationMode
             );
         }
 
-        if (std::abs(_planets[planetIndex].moons[m].verticalAngle - moonVAngle) >
-            _anglePrecision)
-        {
+        if (std::abs(moon.verticalAngle - moonVAngle) > _anglePrecision) {
             shouldSendData = true;
-            _planets[planetIndex].moons[m].verticalAngle = moonVAngle;
+            moon.verticalAngle = moonVAngle;
         }
     }
 
@@ -707,7 +721,7 @@ void PlanetsSonification::update(const Camera* camera) {
     bool compareEnabled = compare->enabled();
     bool overviewEnabled = overview->enabled();
 
-    if (!(_enabled || compareEnabled || overviewEnabled)) {
+    if (!_enabled && !compareEnabled && !overviewEnabled) {
         return;
     }
 

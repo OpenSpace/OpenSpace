@@ -47,21 +47,6 @@ public:
     virtual void stop() override;
 
 private:
-    // Indices for data items
-    static constexpr int NumDataItems = 1;
-    static constexpr int GuiSettingsIndex = 0;
-
-    // Indices for the planets
-    static constexpr int NumPlanets = 8;
-    static constexpr int MercuryIndex = 0;
-    static constexpr int VenusIndex = 1;
-    static constexpr int EarthIndex = 2;
-    static constexpr int MarsIndex = 3;
-    static constexpr int JupiterIndex = 4;
-    static constexpr int SaturnIndex = 5;
-    static constexpr int UranusIndex = 6;
-    static constexpr int NeptuneIndex = 7;
-
     /**
      * Create an osc::Blob object with the current planets overview sonification settings.
      * Order of settings: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune.

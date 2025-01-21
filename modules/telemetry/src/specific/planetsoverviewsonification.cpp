@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,21 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsOverviewSonification";
+
+    // Indices for data items
+    static constexpr int NumDataItems = 1;
+    static constexpr int GuiSettingsIndex = 0;
+
+    // Indices for the planets
+    static constexpr int NumPlanets = 8;
+    static constexpr int MercuryIndex = 0;
+    static constexpr int VenusIndex = 1;
+    static constexpr int EarthIndex = 2;
+    static constexpr int MarsIndex = 3;
+    static constexpr int JupiterIndex = 4;
+    static constexpr int SaturnIndex = 5;
+    static constexpr int UranusIndex = 6;
+    static constexpr int NeptuneIndex = 7;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         PlanetsOverviewSonificationInfo =

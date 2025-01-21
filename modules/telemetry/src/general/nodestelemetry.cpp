@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,12 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "NodesTelemetry";
+
+    // Indices for data items
+    static constexpr int DistanceIndex = 0;
+    static constexpr int HorizontalAngleIndex = 1;
+    static constexpr int VerticalAngleIndex = 2;
+    static constexpr int DistanceUnitIndex = 3;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         NodesTelemetryInfo =

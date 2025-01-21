@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -92,7 +92,9 @@ namespace {
         // [[codegen::verbatim(PortInfo.description)]]
         std::optional<int> port;
 
-        enum class [[codegen::map(openspace::TelemetryModule::AngleCalculationMode)]] AngleCalculationMode {
+        enum class
+        [[codegen::map(openspace::TelemetryModule::AngleCalculationMode)]]
+        AngleCalculationMode {
             Horizontal,
             Circular
         };
@@ -197,7 +199,6 @@ void TelemetryModule::internalInitialize(const ghoul::Dictionary& dictionary) {
         // Make sure the telemetry thread is synced with the main thread
         global::callback::postSyncPreDraw->emplace_back([this]() {
             // Tell the telemetry thread that a new frame is starting
-            //LDEBUG("The main thread signals to the telemetry thread");
             syncToMain.notify_one();
         });
     }
@@ -221,7 +222,7 @@ const std::vector<TelemetryBase*>& TelemetryModule::telemetries() const {
     return _telemetries;
 }
 
-const TelemetryBase* TelemetryModule::telemetry(std::string_view id) const {
+const TelemetryBase* TelemetryModule::telemetry(const std::string_view& id) const {
     for (const TelemetryBase* t : _telemetries) {
         if (t->identifier() == id) {
             return t;
@@ -230,7 +231,7 @@ const TelemetryBase* TelemetryModule::telemetry(std::string_view id) const {
     return nullptr;
 }
 
-TelemetryBase* TelemetryModule::telemetry(std::string_view id) {
+TelemetryBase* TelemetryModule::telemetry(const std::string_view& id) {
     for (TelemetryBase* t : _telemetries) {
         if (t->identifier() == id) {
             return t;
@@ -254,13 +255,8 @@ void TelemetryModule::update(std::atomic<bool>& isRunning) {
 
     while (isRunning) {
         // Wait for the main thread
-        //LDEBUG("The telemetry thread is waiting for a signal from the main thread");
         std::unique_lock<std::mutex> lk(mutexLock);
         syncToMain.wait(lk);
-        //LDEBUG(
-        //    "The telemetry thread is working after having received a signal from "
-        //    "the main thread"
-        //);
 
         // Check if the module is even enabled
         if (!_enabled) {
@@ -281,24 +277,18 @@ void TelemetryModule::update(std::atomic<bool>& isRunning) {
             }
 
             // Check status
-            if (!scene || scene->isInitializing() || scene->root()->children().empty() ||
-                !camera ||glm::length(camera->positionVec3()) <
-                std::numeric_limits<glm::f64>::epsilon())
-            {
-                isInitialized = false;
-            }
-            else {
-                isInitialized = true;
-            }
+            isInitialized = scene && !scene->isInitializing() &&
+                !scene->root()->children().empty() && camera &&
+                glm::length(camera->positionVec3()) >
+                std::numeric_limits<double>::epsilon();
         }
 
         // Process the telemetries
         if (isInitialized) {
             for (TelemetryBase* telemetry : _telemetries) {
-                if (!telemetry) {
-                    continue;
+                if (telemetry) {
+                    telemetry->update(camera);
                 }
-                telemetry->update(camera);
             }
         }
     }

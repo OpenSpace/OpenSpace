@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,12 @@
 #include <openspace/util/timemanager.h>
 
 namespace {
+    // Indices for data items
+    static constexpr int NumDataItems = 3;
+    static constexpr int TimeSpeedIndex = 0;
+    static constexpr int TimeSpeedUnitIndex = 1;
+    static constexpr int CurrentTimeIndex = 2;
+
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         TimeTelemetryInfo =
     {

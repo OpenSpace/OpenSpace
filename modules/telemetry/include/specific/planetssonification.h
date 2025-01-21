@@ -70,30 +70,6 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    // Number of data items for planets and moons, which is used to calculate the total
-    // size of the data vector sent over the osc connection
-    static constexpr int NumDataItemsPlanet = 4;
-    static constexpr int NumDataItemsMoon = 3;
-
-    // Indices for the planets
-    static constexpr int MercuryIndex = 0;
-    static constexpr int VenusIndex = 1;
-    static constexpr int EarthIndex = 2;
-    static constexpr int MarsIndex = 3;
-    static constexpr int JupiterIndex = 4;
-    static constexpr int SaturnIndex = 5;
-    static constexpr int UranusIndex = 6;
-    static constexpr int NeptuneIndex = 7;
-
-    // Indices for the settings for the planets
-    static constexpr int NumSettings = 6;
-    static constexpr int SizeDayIndex = 0;
-    static constexpr int GravityIndex = 1;
-    static constexpr int TemperatureIndex = 2;
-    static constexpr int AtmosphereIndex = 3;
-    static constexpr int MoonsIndex = 4;
-    static constexpr int RingsIndex = 5;
-
     // To hold all the data for a planet or a moon, including a list of data for the
     // moons of the planet. However, in the case of a moon, then the list of moons
     // is empty

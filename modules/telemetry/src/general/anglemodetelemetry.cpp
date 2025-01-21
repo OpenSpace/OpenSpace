@@ -30,6 +30,11 @@
 namespace {
     constexpr std::string_view _loggerCat = "AngleModeTelemetry";
 
+    // Indices for data items
+    static constexpr int NumDataItems = 2;
+    static constexpr int AngleModeIndex = 0;
+    static constexpr int IncludeElevationIndex = 1;
+
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         AngleModeTelemetryInfo =
     {
