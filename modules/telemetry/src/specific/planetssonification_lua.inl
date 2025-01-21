@@ -55,4 +55,5 @@ namespace {
 }
 
 #include "planetssonification_lua_codegen.cpp"
+
 } // namespace

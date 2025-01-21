@@ -54,7 +54,7 @@ private:
     /**
      * Gather time telemetry information (speed, and current time).
      *
-     * \return True if the data is new compared to before, otherwise false
+     * \return `true` if the data is new compared to before, otherwise `false`
      */
     bool getData();
 
@@ -65,14 +65,14 @@ private:
      */
     void sendData();
 
-    struct PrecisionProperty : properties::PropertyOwner {
-        PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+    struct PrecisionProperties : properties::PropertyOwner {
+        PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
 
         properties::DoubleProperty timePrecision;
     };
 
     properties::OptionProperty _timeUnitOption;
-    PrecisionProperty _precisionProperty;
+    PrecisionProperties _precisionProperties;
 
     double _timeSpeed = 0.0;
     double _currentTime = 0.0;

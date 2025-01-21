@@ -50,7 +50,7 @@ OpenSoundControlConnection::~OpenSoundControlConnection() {
 void OpenSoundControlConnection::send(const std::string& label, const std::vector<OpenSoundControlDataType>& data)
 {
     if (label.empty()) {
-        LERROR("Cannot send Open Sound Control message without label");
+        LERROR("Cannot send Open Sound Control message without a label");
         return;
     }
 

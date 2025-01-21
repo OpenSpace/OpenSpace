@@ -34,12 +34,12 @@ namespace {
     openspace::TelemetryModule* module =
         openspace::global::moduleEngine->module<openspace::TelemetryModule>();
     if (!module) {
-        LERRORC("NodesTelemetry_lua", "Could not find the TelemetryModule");
+        throw ghoul::lua::LuaError("Could not find the TelemetryModule");
         return;
     }
     openspace::TelemetryBase* ptr = module->telemetry("NodesTelemetry");
     if (!ptr) {
-        LERRORC("NodesTelemetry_lua", "Could not find the NodesTelemetry");
+        throw ghoul::lua::LuaError("Could not find the NodesTelemetry");
         return;
     }
 

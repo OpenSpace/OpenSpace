@@ -31,19 +31,19 @@ namespace {
     constexpr std::string_view _loggerCat = "PlanetsOverviewSonification";
 
     // Indices for data items
-    static constexpr int NumDataItems = 1;
-    static constexpr int GuiSettingsIndex = 0;
+    constexpr int NumDataItems = 1;
+    constexpr int GuiSettingsIndex = 0;
 
     // Indices for the planets
-    static constexpr int NumPlanets = 8;
-    static constexpr int MercuryIndex = 0;
-    static constexpr int VenusIndex = 1;
-    static constexpr int EarthIndex = 2;
-    static constexpr int MarsIndex = 3;
-    static constexpr int JupiterIndex = 4;
-    static constexpr int SaturnIndex = 5;
-    static constexpr int UranusIndex = 6;
-    static constexpr int NeptuneIndex = 7;
+    constexpr int NumPlanets = 8;
+    constexpr int MercuryIndex = 0;
+    constexpr int VenusIndex = 1;
+    constexpr int EarthIndex = 2;
+    constexpr int MarsIndex = 3;
+    constexpr int JupiterIndex = 4;
+    constexpr int SaturnIndex = 5;
+    constexpr int UranusIndex = 6;
+    constexpr int NeptuneIndex = 7;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         PlanetsOverviewSonificationInfo =
@@ -51,7 +51,8 @@ namespace {
         "PlanetsOverviewSonification",
         "Planets Overview Sonification",
         "Sonification that gives an overview of the planets in the solar system with "
-        "simpler sounds."
+        "fewer audible features for each planet compared to the regular planets "
+        "sonification."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {

@@ -31,9 +31,9 @@ namespace {
     constexpr std::string_view _loggerCat = "AngleModeTelemetry";
 
     // Indices for data items
-    static constexpr int NumDataItems = 2;
-    static constexpr int AngleModeIndex = 0;
-    static constexpr int IncludeElevationIndex = 1;
+    constexpr int NumDataItems = 2;
+    constexpr int AngleModeIndex = 0;
+    constexpr int IncludeElevationIndex = 1;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         AngleModeTelemetryInfo =
@@ -58,7 +58,6 @@ void AngleModeTelemetry::update(const Camera*) {
 
     bool hasNewData = getData();
 
-    // Only send data if something new has happened
     if (hasNewData) {
         sendData();
     }

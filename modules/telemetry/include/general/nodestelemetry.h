@@ -59,7 +59,7 @@ public:
      *
      * \param node The identifier of the node that should be added
      */
-    void addNode(const std::string& node);
+    void addNode(std::string node);
 
     /**
      * Returns the Lua library that contains all Lua functions available for the
@@ -75,9 +75,7 @@ private:
 
     // Struct to hold data for all the nodes
     struct TelemetryNode {
-        TelemetryNode(std::string id = "")
-            : identifier(std::move(id))
-        {}
+        TelemetryNode(std::string id);
 
         std::string identifier;
 
@@ -97,7 +95,7 @@ private:
      *        which method to use when calculating the angle.
      * \param includeElevation Whether the additional elevation angle should be calculated
      *
-     * \return True if the data is new compared to before, otherwise false
+     * \return `true` if the data is new compared to before, otherwise `false`
      */
     bool getData(const Camera* camera, int nodeIndex,
         TelemetryModule::AngleCalculationMode angleCalculationMode,
@@ -110,8 +108,8 @@ private:
      */
     void sendData(int nodeIndex);
 
-    struct PrecisionProperty : properties::PropertyOwner {
-        PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+    struct PrecisionProperties : properties::PropertyOwner {
+        PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
 
         // The low and high precision values are used in different situations. When the
         // node is the current focus node, then the high precision value is used. This
@@ -125,7 +123,7 @@ private:
     };
 
     properties::OptionProperty _distanceUnitOption;
-    PrecisionProperty _precisionProperty;
+    PrecisionProperties _precisionProperties;
 
     std::vector<TelemetryNode> _nodes;
 

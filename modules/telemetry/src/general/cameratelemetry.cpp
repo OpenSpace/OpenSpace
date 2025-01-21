@@ -30,16 +30,16 @@
 
 namespace {
     // Indices for data items
-    static constexpr int NumDataItems = 9;
-    static constexpr int CameraPosXIndex = 0;
-    static constexpr int CameraPosYIndex = 1;
-    static constexpr int CameraPosZIndex = 2;
-    static constexpr int CameraQuatRotWIndex = 3;
-    static constexpr int CameraQuatRotXIndex = 4;
-    static constexpr int CameraQuatRotYIndex = 5;
-    static constexpr int CameraQuatRotZIndex = 6;
-    static constexpr int CameraSpeedIndex = 7;
-    static constexpr int CameraSpeedUnitIndex = 8;
+    constexpr int NumDataItems = 9;
+    constexpr int CameraPosXIndex = 0;
+    constexpr int CameraPosYIndex = 1;
+    constexpr int CameraPosZIndex = 2;
+    constexpr int CameraQuatRotWIndex = 3;
+    constexpr int CameraQuatRotXIndex = 4;
+    constexpr int CameraQuatRotYIndex = 5;
+    constexpr int CameraQuatRotZIndex = 6;
+    constexpr int CameraSpeedIndex = 7;
+    constexpr int CameraSpeedUnitIndex = 8;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         CameraTelemetryInfo =
@@ -97,18 +97,16 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
         CameraSpeedDistanceUnitInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _precisionProperty(CameraTelemetry::PrecisionProperty(PrecisionInfo))
+    , _precisionProperties(CameraTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    // Add all distance units as options in the camera speed unit option drop down menu
     for (int i = 0; i < DistanceUnitNamesSingular.size(); ++i) {
         _cameraSpeedDistanceUnitOption.addOption(i, DistanceUnitNamesSingular[i].data());
     }
 
-    // Set kilometers as default camera speed distance unit
     _cameraSpeedDistanceUnitOption.setValue(static_cast<int>(DistanceUnit::Kilometer));
     addProperty(_cameraSpeedDistanceUnitOption);
 
-    addPropertySubOwner(_precisionProperty);
+    addPropertySubOwner(_precisionProperties);
 }
 
 void CameraTelemetry::update(const Camera* camera) {
@@ -118,7 +116,6 @@ void CameraTelemetry::update(const Camera* camera) {
 
     bool hasNewData = getData(camera);
 
-    // Only send data if something new has happened
     if (hasNewData) {
         sendData();
     }
@@ -126,12 +123,12 @@ void CameraTelemetry::update(const Camera* camera) {
 
 void CameraTelemetry::stop() {}
 
-CameraTelemetry::PrecisionProperty::PrecisionProperty(
+CameraTelemetry::PrecisionProperties::PrecisionProperties(
                                properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
     : properties::PropertyOwner(precisionInfo)
-    , positionPrecision(PositionPrecisionInfo, 1000.0, 0, 1e+25)
-    , rotationPrecision(RotationPrecisionInfo, 0.05, 0, 10)
-    , speedPrecision(SpeedPrecisionInfo, 1000.0, 0, std::numeric_limits<double>::max())
+    , positionPrecision(PositionPrecisionInfo, 1000.0, 0.0, 1.0e+25)
+    , rotationPrecision(RotationPrecisionInfo, 0.05, 0.0, 10.0)
+    , speedPrecision(SpeedPrecisionInfo, 1000.0, 0.0, std::numeric_limits<double>::max())
 {
     positionPrecision.setExponent(20.f);
     addProperty(positionPrecision);
@@ -161,8 +158,8 @@ bool CameraTelemetry::getData(const Camera* camera) {
     double frameTime = global::windowDelegate->deltaTime();
     bool hasFps = false;
     double cameraSpeed = 0.0;
+    // Avoid division by 0 by first checking the current frame time
     if (std::abs(frameTime) > std::numeric_limits<double>::epsilon()) {
-        // Avoid division by 0 by first checking the current frame time
         hasFps = true;
         double distanceMovedInUnit = convertMeters(
             distanceMoved,
@@ -175,19 +172,19 @@ bool CameraTelemetry::getData(const Camera* camera) {
     double prevCameraSpeed = _cameraSpeed;
     bool shouldSendData = false;
 
-    if (distanceMoved > _precisionProperty.positionPrecision) {
+    if (distanceMoved > _precisionProperties.positionPrecision) {
         _cameraPosition = cameraPosition;
         shouldSendData = true;
     }
 
-    if (rotationAngleDifference > _precisionProperty.rotationPrecision ||
-        rotationAxisDifference > _precisionProperty.rotationPrecision)
+    if (rotationAngleDifference > _precisionProperties.rotationPrecision ||
+        rotationAxisDifference > _precisionProperties.rotationPrecision)
     {
         _cameraRotation = cameraRotation;
         shouldSendData = true;
     }
 
-    if (hasFps && abs(prevCameraSpeed - cameraSpeed) > _precisionProperty.speedPrecision)
+    if (hasFps && abs(prevCameraSpeed - cameraSpeed) > _precisionProperties.speedPrecision)
     {
         _cameraSpeed = cameraSpeed;
         shouldSendData = true;

@@ -36,10 +36,10 @@ namespace {
     constexpr std::string_view _loggerCat = "NodesTelemetry";
 
     // Indices for data items
-    static constexpr int DistanceIndex = 0;
-    static constexpr int HorizontalAngleIndex = 1;
-    static constexpr int VerticalAngleIndex = 2;
-    static constexpr int DistanceUnitIndex = 3;
+    constexpr int DistanceIndex = 0;
+    constexpr int HorizontalAngleIndex = 1;
+    constexpr int VerticalAngleIndex = 2;
+    constexpr int DistanceUnitIndex = 3;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         NodesTelemetryInfo =
@@ -109,43 +109,41 @@ NodesTelemetry::NodesTelemetry(const std::string& ip, int port)
         DistanceUnitInfo,
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _precisionProperty(NodesTelemetry::PrecisionProperty(PrecisionInfo))
+    , _precisionProperties(NodesTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    // Add all distance units as options in the drop down menu
     for (int i = 0; i < DistanceUnitNamesSingular.size(); ++i) {
         _distanceUnitOption.addOption(i, DistanceUnitNamesSingular[i].data());
     }
 
-    // Select Meters as the default distance unit
     _distanceUnitOption.setValue(static_cast<int>(DistanceUnit::Meter));
     addProperty(_distanceUnitOption);
 
-    // Precision
-    _anglePrecision = _precisionProperty.lowAnglePrecision;
-    _distancePrecision = _precisionProperty.lowDistancePrecision;
-    addPropertySubOwner(_precisionProperty);
+    _anglePrecision = _precisionProperties.lowAnglePrecision;
+    _distancePrecision = _precisionProperties.lowDistancePrecision;
+    addPropertySubOwner(_precisionProperties);
 }
 
 NodesTelemetry::~NodesTelemetry() {
     stop();
 }
 
-NodesTelemetry::PrecisionProperty::PrecisionProperty(
+NodesTelemetry::TelemetryNode::TelemetryNode(std::string id)
+    : identifier(std::move(id))
+{}
+
+NodesTelemetry::PrecisionProperties::PrecisionProperties(
                                properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
     : properties::PropertyOwner(precisionInfo)
-    , lowDistancePrecision(LowDistancePrecisionInfo, 10000.0, 0, 1e+25)
-    , highDistancePrecision(HighDistancePrecisionInfo, 1000.0, 0, 1e+25)
-    , lowAnglePrecision(LowAnglePrecisionInfo, 0.1, 0, 10)
-    , highAnglePrecision(HighAnglePrecisionInfo, 0.05, 0, 10)
+    , lowDistancePrecision(LowDistancePrecisionInfo, 10000.0, 0.0, 1.0e+25)
+    , highDistancePrecision(HighDistancePrecisionInfo, 1000.0, 0.0, 1.0e+25)
+    , lowAnglePrecision(LowAnglePrecisionInfo, 0.1, 0.0, 10.0)
+    , highAnglePrecision(HighAnglePrecisionInfo, 0.05, 0.0, 10.0)
 {
     lowDistancePrecision.setExponent(20.f);
     addProperty(lowDistancePrecision);
-
     highDistancePrecision.setExponent(20.f);
     addProperty(highDistancePrecision);
-
     addProperty(lowAnglePrecision);
-
     addProperty(highAnglePrecision);
 }
 
@@ -251,17 +249,16 @@ void NodesTelemetry::update(const Camera* camera) {
     for (int i = 0; i < _nodes.size(); ++i) {
         // Increase precision if the node is in focus
         if (focusNode->identifier() == _nodes[i].identifier) {
-            _anglePrecision = _precisionProperty.highAnglePrecision;
-            _distancePrecision = _precisionProperty.highDistancePrecision;
+            _anglePrecision = _precisionProperties.highAnglePrecision;
+            _distancePrecision = _precisionProperties.highDistancePrecision;
         }
         else {
-            _anglePrecision = _precisionProperty.lowAnglePrecision;
-            _distancePrecision = _precisionProperty.lowDistancePrecision;
+            _anglePrecision = _precisionProperties.lowAnglePrecision;
+            _distancePrecision = _precisionProperties.lowDistancePrecision;
         }
 
         bool hasNewData = getData(camera, i, angleMode, includeElevation);
 
-        // Only send data if something new has happened
         if (hasNewData) {
             sendData(i);
         }
@@ -270,7 +267,7 @@ void NodesTelemetry::update(const Camera* camera) {
 
 void NodesTelemetry::stop() {}
 
-void NodesTelemetry::addNode(const std::string& node) {
+void NodesTelemetry::addNode(std::string node) {
     _nodes.push_back(std::move(node));
 }
 

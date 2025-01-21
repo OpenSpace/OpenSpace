@@ -53,7 +53,6 @@ namespace {
         "Uranus", "Neptune"
     };
 
-    // Property info
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         PlanetsCompareSonificationInfo =
     {
@@ -66,10 +65,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo SelectedUpscaleInfo = {
         "SelectedUpscale",
         "Selected Planet Upscale Multiplier",
-        "When a planet is selected to be compared in any of the drop down menus below, "
-        "it is also upscaled as a visual indicator of which planets are currently being "
-        "compared. This property determines how much the planet is scaled up as a "
-        "multiplier of the original size."
+        "When a planet is selected to be compared, it is also upscaled as a visual "
+        "indicator of which planets are currently being compared. This property "
+        "determines how much the planet is scaled up as a multiplier of the original "
+        "size."
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -77,22 +76,21 @@ namespace {
     {
         "SelectedScaleInterpolationTimeInfo",
         "Selected Planet Scale Interpolation Time",
-        "When a planet is selected to be compared in any of the drop down menus below, "
-        "it is also upscaled as a visual indicator of which planets are currently being "
-        "compared. This property determines over how many seconds the scaling animation "
-        "should play."
+        "When a planet is selected to be compared, it is also upscaled as a visual "
+        "indicator of which planets are currently being compared. This property "
+        "determines over how many seconds the scaling animation should play."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FirstOptionInfo = {
         "FirstOption",
         "Choose a planet to compare",
-        "Choose a planet in the given list to compare."
+        "Choose a planet in the list to compare to the 'SecondOption'."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondOptionInfo = {
         "SecondOption",
         "Choose a planet to compare",
-        "Choose another planet in the given list to compare."
+        "Choose another planet in the list to compare."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
@@ -142,8 +140,8 @@ namespace openspace {
 
 PlanetsCompareSonification::PlanetsCompareSonification(const std::string& ip, int port)
     : TelemetryBase(PlanetsCompareSonificationInfo, ip, port)
-    , _selectedUpscale(SelectedUpscaleInfo, 2000.0, 0.0, 1e+20)
-    , _selectedScaleInterpolationTime(SelectedScaleInterpolationTimeInfo, 1.0, 0.0, 60)
+    , _selectedUpscale(SelectedUpscaleInfo, 2000.0, 0.0, 1.0e+20)
+    , _selectedScaleInterpolationTime(SelectedScaleInterpolationTimeInfo, 1.0, 0.0, 60.0)
     , _firstPlanet(FirstOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _secondPlanet(SecondOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
     , _toggleAll(ToggleAllInfo, false)
@@ -160,7 +158,6 @@ PlanetsCompareSonification::PlanetsCompareSonification(const std::string& ip, in
     addProperty(_selectedUpscale);
     addProperty(_selectedScaleInterpolationTime);
 
-    // Add all the planet selection options to the drop down menu properties
     for (int i = 0; i < PlanetsOptions.size(); ++i) {
         _firstPlanet.addOption(i, PlanetsOptions[i].data());
         _secondPlanet.addOption(i, PlanetsOptions[i].data());

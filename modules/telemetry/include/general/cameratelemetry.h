@@ -66,8 +66,8 @@ private:
      */
     void sendData();
 
-    struct PrecisionProperty : properties::PropertyOwner {
-        PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+    struct PrecisionProperties : properties::PropertyOwner {
+        PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
 
         properties::DoubleProperty positionPrecision;
         properties::DoubleProperty rotationPrecision;
@@ -75,7 +75,7 @@ private:
     };
 
     properties::OptionProperty _cameraSpeedDistanceUnitOption;
-    PrecisionProperty _precisionProperty;
+    PrecisionProperties _precisionProperties;
 
     glm::dvec3 _cameraPosition = glm::dvec3(0.0);
     glm::dquat _cameraRotation = glm::dquat(0.0, 0.0, 0.0, 0.0);

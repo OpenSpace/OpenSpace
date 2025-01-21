@@ -210,11 +210,10 @@ void TelemetryModule::addTelemetry(TelemetryBase* telemetry) {
 }
 
 void TelemetryModule::internalDeinitialize() {
-    // Stop the loop before joining and tell the thread it is ok to run last itteration
+    // Stop the loop and tell the thread it is ok to run the last itteration
     _isRunning = false;
     syncToMain.notify_one();
 
-    // Join the thread
     _updateThread.join();
 }
 

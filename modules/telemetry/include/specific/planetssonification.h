@@ -42,7 +42,7 @@ public:
     /**
      * Main update function to gather planets telemetry information (distance, horizontal
      * angle, vertical angle, distance to moons, horizontal angle to moons, and vertical
-     * angle to moons) for the planets sonificaiton and send it via the osc connection.
+     * angle to moons) for the planets sonification and send it via the osc connection.
      *
      * \param camera The camera in the scene
      */
@@ -74,9 +74,7 @@ private:
     // moons of the planet. However, in the case of a moon, then the list of moons
     // is empty
     struct DataBody {
-        DataBody(std::string inName = "")
-            : name (std::move(inName))
-        {}
+        DataBody(std::string inName);
 
         std::string name;
         double distance = 0.0;
@@ -107,12 +105,12 @@ private:
     /**
      * Create an osc::Blob object with the current sonification settings for the indicated
      * planet.
-     * Order of settings: Size/day, gravity, temperature, and optionaly atmosphere, moons,
+     * Order of settings: Size/day, gravity, temperature, and optionally atmosphere, moons,
      *                    and rings.
      *
      * \param planetIndex The index of the planet to create the settings blob for
      *
-     * \return An osc::Blob object with current sonificaiton settings for the indicated
+     * \return An osc::Blob object with current sonification settings for the indicated
      *         planet
      */
     osc::Blob createSettingsBlob(int planetIndex) const;
@@ -143,8 +141,8 @@ private:
     void onNeptuneAllChanged();
     void onNeptuneSettingChanged();
 
-    struct PlanetProperty : properties::PropertyOwner {
-        PlanetProperty(properties::PropertyOwner::PropertyOwnerInfo planetInfo);
+    struct PlanetProperties : properties::PropertyOwner {
+        PlanetProperties(properties::PropertyOwner::PropertyOwnerInfo planetInfo);
 
         // All planets have these settings
         properties::BoolProperty toggleAll;
@@ -158,8 +156,8 @@ private:
         properties::BoolProperty ringsEnabled;
     };
 
-    struct PrecisionProperty : properties::PropertyOwner {
-        PrecisionProperty(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+    struct PrecisionProperties : properties::PropertyOwner {
+        PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
 
         // The low and high precision values are used in different situations. When the
         // planet is the current focus node, then the high precision value is used. This
@@ -174,15 +172,15 @@ private:
     };
 
     properties::BoolProperty _toggleAll;
-    PlanetProperty _mercuryProperty;
-    PlanetProperty _venusProperty;
-    PlanetProperty _earthProperty;
-    PlanetProperty _marsProperty;
-    PlanetProperty _jupiterProperty;
-    PlanetProperty _saturnProperty;
-    PlanetProperty _uranusProperty;
-    PlanetProperty _neptuneProperty;
-    PrecisionProperty _precisionProperty;
+    PlanetProperties _mercuryProperty;
+    PlanetProperties _venusProperty;
+    PlanetProperties _earthProperty;
+    PlanetProperties _marsProperty;
+    PlanetProperties _jupiterProperty;
+    PlanetProperties _saturnProperty;
+    PlanetProperties _uranusProperty;
+    PlanetProperties _neptuneProperty;
+    PrecisionProperties _precisionProperties;
 
     std::vector<DataBody> _planets;
 

@@ -31,8 +31,8 @@
 
 namespace {
     // Indices for data items
-    static constexpr int NumDataItems = 1;
-    static constexpr int FocusNodeIndex = 0;
+    constexpr int NumDataItems = 1;
+    constexpr int FocusNodeIndex = 0;
 
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo
         FocusTelemetryInfo =
@@ -57,7 +57,6 @@ void FocusTelemetry::update(const Camera*) {
 
     bool hasNewData = getData();
 
-    // Only send data if something new has happened
     if (hasNewData) {
         sendData();
     }

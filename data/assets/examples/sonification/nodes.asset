@@ -1,10 +1,5 @@
 asset.onInitialize(function ()
-  local nodes = {
-    "ISS",
-    "Tiangong"
-  }
-
-  openspace.telemetry.addNodes(nodes)
+  openspace.telemetry.addNodes({ "ISS", "Tiangong" })
 end)
 
 
