@@ -80,7 +80,7 @@ extractSeedPointsFromFiles(std::filesystem::path filePath) {
     std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
 
     if (!std::filesystem::is_directory(filePath)) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "The specified seed point directory: '{}' does not exist", filePath
         ));
         return outMap;
@@ -97,12 +97,12 @@ extractSeedPointsFromFiles(std::filesystem::path filePath) {
 
         std::ifstream seedFile(seedFilePath);
         if (!seedFile.good()) {
-            LERROR(fmt::format("Could not open seed points file '{}'", seedFilePath));
+            LERROR(std::format("Could not open seed points file '{}'", seedFilePath));
             outMap.clear();
             return {};
         }
 
-        LDEBUG(fmt::format("Reading seed points from file '{}'", seedFilePath));
+        LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
         std::string line;
         std::vector<glm::vec3> outVec;
         while (std::getline(seedFile, line)) {
@@ -115,7 +115,7 @@ extractSeedPointsFromFiles(std::filesystem::path filePath) {
         }
 
         if (outVec.empty()) {
-            LERROR(fmt::format("Found no seed points in: {}", seedFilePath));
+            LERROR(std::format("Found no seed points in: {}", seedFilePath));
             outMap.clear();
             return {};
         }
@@ -227,6 +227,57 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
                 break;
             default:
                 break;
+        }
+
+        return true;
+    }
+
+    return false;
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
+}
+
+bool traceFromListOfPoints(
+                            FieldlinesState& state, const std::string& cdfPath,
+                            std::vector<glm::vec3>&seedPoints,
+                            double manualTimeOffset,
+                            const std::string& tracingVar,
+                            std::vector<std::string>& extraVars,
+                            std::vector<std::string>& extraMagVars)
+{
+#ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
+    LERROR("CDF inputs provided but Kameleon module is deactivated");
+    return false;
+#else // OPENSPACE_MODULE_KAMELEON_ENABLED
+    // Create Kameleon object and open CDF file!
+    std::unique_ptr<ccmc::Kameleon> kameleon = kameleonHelper::createKameleonObject(
+        cdfPath
+    );
+
+    state.setModel(fls::stringToModel(kameleon->getModelName()));
+    double cdfDoubleTime = kameleonHelper::getTime(kameleon.get(), manualTimeOffset);
+    state.setTriggerTime(cdfDoubleTime);
+
+    // get time as string.
+    std::string cdfStringTime = SpiceManager::ref().dateFromEphemerisTime(
+        cdfDoubleTime, "YYYYMMDDHRMNSC::RND"
+    );
+
+    // use time as string for picking seedpoints from seedm
+    bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);
+    if (success) {
+        // The line points are in their RAW format (unscaled & maybe spherical)
+        // Before we scale to meters (and maybe cartesian) we must extract
+        // the extraQuantites, as the iterpolator needs the unaltered positions
+        addExtraQuantities(kameleon.get(), extraVars, extraMagVars, state);
+        switch (state.model()) {
+        case fls::Model::Batsrus:
+            state.scalePositions(fls::ReToMeter);
+            break;
+        case fls::Model::Enlil:
+            state.convertLatLonToCartesian(fls::AuToMeter);
+            break;
+        default:
+            break;
         }
 
         return true;

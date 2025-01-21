@@ -22,5 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/fieldlinessequence/tasks/findlastclosedfieldlines.h>
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FINDLASTCLOSEDFIELDLINESTASK___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FINDLASTCLOSEDFIELDLINESTASK___H__
 
+#include <openspace/util/task.h>
+
+#include <filesystem>
+
+namespace openspace {
+    class FindLastClosedFieldlinesTask : public Task {
+    public:
+        FindLastClosedFieldlinesTask(const ghoul::Dictionary& dictionary);
+        ~FindLastClosedFieldlinesTask();
+
+        std::string description() override;
+        void perform(const Task::ProgressCallback& progressCallback) override;
+        static documentation::Documentation Documentation();
+
+        std::vector<glm::vec3> initialCircleOfPoints();
+
+    private:
+        std::string _tracingVar = "b";
+        std::filesystem::path _inputPath;
+        std::vector<std::string> _sourceFiles;
+        int _numberOfPointsOnBoundary = 3;
+        float _threshold = 0.5; //RE
+        std::filesystem::path _outputFolder;
+        bool _saveLastIterationOfFieldLines = true;
+    };
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FINDLASTCLOSEDFIELDLINESTASK___H__

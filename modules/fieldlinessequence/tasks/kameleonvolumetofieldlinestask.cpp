@@ -28,11 +28,10 @@
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <openspace/documentation/documentation.h>
+//#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
@@ -72,7 +71,7 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation KameleonVolumeToFieldlinesTask::documentation() {
+documentation::Documentation KameleonVolumeToFieldlinesTask::Documentation() {
     return codegen::doc<Parameters>("kameleon_volume_to_fieldlines_task");
 }
 
@@ -113,7 +112,7 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
     }
 
     if (!std::filesystem::is_directory(_inputPath)) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "KameleonVolumeToFieldlineTask: {} is not a valid directory",
             _inputPath
         ));
@@ -135,7 +134,7 @@ KameleonVolumeToFieldlinesTask::~KameleonVolumeToFieldlinesTask() {
 }
 
 std::string KameleonVolumeToFieldlinesTask::description() {
-    return fmt::format(
+    return std::format(
         "Extract fieldline data from cdf file {} and seedpoint file {}. "
         "Write either osfls files or json files into the folder {}.",
         _inputPath, _seedpointsPath, _outputFolder
