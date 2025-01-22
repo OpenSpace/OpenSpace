@@ -337,17 +337,30 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             seed.y,
             seed.z
         );
-        const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
+        ccmcFieldline.getDs();
+        ccmcFieldline.measure();
+        ccmc::Fieldline mappedFieldline =
+            ccmcFieldline.interpolate(1, ccmcFieldline.getPositions().size());
+        const std::vector<ccmc::Point3f>& fieldlinePositions =
+            mappedFieldline.getPositions();
 
-        const size_t nLinePoints = positions.size();
 
         std::vector<glm::vec3> vertices;
-        vertices.reserve(nLinePoints);
-        for (const ccmc::Point3f& p : positions) {
-            vertices.emplace_back(p.component1, p.component2, p.component3);
+        for (const ccmc::Point3f& pt : fieldlinePositions) {
+            vertices.emplace_back(pt.component1, pt.component2, pt.component3);
         }
+
+
+        //const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
+
+        //const size_t nLinePoints = positions.size();
+
+        //vertices.reserve(nLinePoints);
+        //for (const ccmc::Point3f& p : positions) {
+        //    vertices.emplace_back(p.component1, p.component2, p.component3);
+        //}
         state.addLine(vertices);
-        success |= (nLinePoints > 0);
+        success |= (vertices.size() > 0);
     }
 
     return success;

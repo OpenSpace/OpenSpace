@@ -141,7 +141,7 @@ void FindLastClosedFieldlinesTask::perform(
             LINFO(std::format("First Pos: {}", firstPos));
             LINFO(std::format("Last Pos: {}", lastPos));
 
-
+            
         }
 
 
