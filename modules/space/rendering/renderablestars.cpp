@@ -50,6 +50,14 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableStars";
 
+    constexpr std::array<const char*, 24> UniformNames = {
+        "modelMatrix", "cameraViewProjectionMatrix", "cameraUp", "eyePosition",
+        "colorOption", "magnitudeExponent", "sizeComposition", "lumCent", "radiusCent",
+        "colorTexture", "opacity", "otherDataTexture", "otherDataRange",
+        "filterOutOfRange", "fixedColor", "glareTexture", "glareMultiplier", "glareGamma",
+        "glareScale", "hasCore", "coreTexture", "coreMultiplier", "coreGamma", "coreScale"
+    };
+
     enum SizeComposition {
         DistanceModulus = 0,
         AppBrightness,
@@ -300,6 +308,26 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo ProperMotionInfo = {
+        "ProperMotion",
+        "Enable proper motion of stars",
+        "If this value is enabled and the loaded data file contains velocity information "
+        "for the stars, the velocity information is used to move the stars' position "
+        "to show their proper motion."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ProperMotionEpochInfo = {
+        "ProperMotionEpoch",
+        "Proper motion epoch",
+        "This value is the number of J2000 seconds that is the epoch for the positions "
+        "provided in the SPECK file. This value is only needed if the `ProperMotion` is "
+        "enabled as well, in which case it determines the epoch at which the position of "
+        "the star starts, so if the time in the application is at the epoch, the stars "
+        "will be exactly at their determined position without any velocity-based offset. "
+        "If thi value is not specified, the current time will be used as the epoch "
+        "instead."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnableFadeInInfo = {
         "EnableFadeIn",
         "Enable Fade-in effect",
@@ -398,6 +426,12 @@ namespace {
         // [[codegen::verbatim(FadeInDistancesInfo.description)]]
         std::optional<glm::dvec2> fadeInDistances;
 
+        // [[codegen::verbatim(ProperMotionInfo.description)]]
+        std::optional<bool> properMotion;
+
+        // [[codegen::verbatim(ProperMotionEpochInfo.description)]]
+        std::optional<double> properMotionEpoch;
+
         // [[codegen::verbatim(EnableFadeInInfo.description)]]
         std::optional<bool> enableFadeIn;
     };
@@ -472,6 +506,8 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         glm::vec2(0.f),
         glm::vec2(100.f)
     )
+    , _properMotion(ProperMotionInfo, true)
+    , _properMotionEpoch(ProperMotionEpochInfo, Time::now().j2000Seconds())
     , _enableFadeInDistance(EnableFadeInInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -580,6 +616,15 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
 
     addProperty(_filterOutOfRange);
+
+
+    _properMotion.onChange([this]() { _dataIsDirty = true; });
+    _properMotion = p.properMotion.value_or(_properMotion);
+    addProperty(_properMotion);
+
+    
+    _properMotionEpoch = p.properMotion.value_or(_properMotionEpoch);
+    addProperty(_properMotionEpoch);
 
 
     auto markTextureAsDirty = [this]() {_pointSpreadFunctionTextureIsDirty = true; };
@@ -763,6 +808,14 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         glm::dmat4(data.camera.projectionMatrix()) * data.camera.combinedViewMatrix();
     _program->setUniform(_uniformCache.cameraViewProjectionMatrix, viewProjectionMatrix);
 
+    _program->setUniform(_uniformCache.properMotion, _properMotion);
+    if (_properMotion) {
+        const float epoch = _properMotionEpoch;
+        const float curr = static_cast<float>(data.time.j2000Seconds());
+        const float diffTime = curr - epoch;
+        _program->setUniform(_uniformCache.diffTime, diffTime);
+    }
+
     _program->setUniform(_uniformCache.colorOption, _colorOption);
     _program->setUniform(_uniformCache.magnitudeExponent, _magnitudeExponent);
 
@@ -893,16 +946,38 @@ void RenderableStars::update(const UpdateData&) {
         switch (colorOption) {
             case ColorOption::Color:
             case ColorOption::FixedColor:
-                glVertexAttribPointer(
-                    bvLumAbsMagAttrib,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(ColorVBOLayout, value))
-                );
+                if (_properMotion) {
+                    glVertexAttribPointer(
+                        bvLumAbsMagAttrib,
+                        3,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        stride,
+                        reinterpret_cast<void*>(offsetof(VelocityVBOLayout, value))
+                    );
 
-                break;
+                    const GLint velocity = _program->attributeLocation("in_velocity");
+                    glEnableVertexAttribArray(velocity);
+                    glVertexAttribPointer(
+                        velocity,
+                        3,
+                        GL_FLOAT,
+                        GL_TRUE,
+                        stride,
+                        reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx))
+                    );
+                }
+                else {
+                    glVertexAttribPointer(
+                        bvLumAbsMagAttrib,
+                        3,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        stride,
+                        reinterpret_cast<void*>(offsetof(ColorVBOLayout, value))
+                    );
+                    break;
+                }
             case ColorOption::Velocity:
             {
                 glVertexAttribPointer(
@@ -1070,18 +1145,38 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
             case ColorOption::Color:
             case ColorOption::FixedColor:
             {
-                union {
-                    ColorVBOLayout value;
-                    std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
-                } layout;
+                if (_properMotion) {
+                    union {
+                        VelocityVBOLayout value;
+                        std::array<float, sizeof(VelocityVBOLayout) / sizeof(float)> data;
+                    } layout;
 
-                layout.value.position = { pos.x, pos.y, pos.z };
-                layout.value.value = e.data[bvIdx];
-                layout.value.luminance = e.data[lumIdx];
-                layout.value.absoluteMagnitude = e.data[absMagIdx];
+                    layout.value.position = { pos.x, pos.y, pos.z };
+                    layout.value.value = e.data[bvIdx];
+                    layout.value.luminance = e.data[lumIdx];
+                    layout.value.absoluteMagnitude = e.data[absMagIdx];
 
-                result.insert(result.end(), layout.data.begin(), layout.data.end());
-                break;
+                    layout.value.vx = e.data[vxIdx];
+                    layout.value.vy = e.data[vyIdx];
+                    layout.value.vz = e.data[vzIdx];
+
+                    result.insert(result.end(), layout.data.begin(), layout.data.end());
+                    break;
+                }
+                else {
+                    union {
+                        ColorVBOLayout value;
+                        std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
+                    } layout;
+
+                    layout.value.position = { pos.x, pos.y, pos.z };
+                    layout.value.value = e.data[bvIdx];
+                    layout.value.luminance = e.data[lumIdx];
+                    layout.value.absoluteMagnitude = e.data[absMagIdx];
+
+                    result.insert(result.end(), layout.data.begin(), layout.data.end());
+                    break;
+                }
             }
             case ColorOption::Velocity:
             {
