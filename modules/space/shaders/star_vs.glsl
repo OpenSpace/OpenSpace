@@ -33,11 +33,20 @@ out vec3 vs_bvLumAbsMag;
 out vec3 vs_velocity;
 out float vs_speed;
 
+uniform int properMotion;
+uniform float diffTime;
 
 void main() {
   vs_bvLumAbsMag = in_bvLumAbsMag;
   vs_velocity = in_velocity;
   vs_speed = in_speed;
 
-  gl_Position = vec4(in_position, 1.0);
+  if (properMotion == 1) {
+    vec3 pos = in_position + in_velocity * diffTime;
+    gl_Position = vec4(pos, 1.0);
+  }
+  else {
+    gl_Position = vec4(in_position, 1.0);
+  }
+
 }
