@@ -75,10 +75,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AngleCalculationModeInfo = {
         "AngleCalculationMode",
         "Angle Calculation Mode",
-        "This setting changes the method to calculate any angles in the telemetries. "
-        "The Horizontal mode, generally works well for flat displays or forward facing "
-        "immersive environments. The Circular mode, generally works well for centered "
-        "fisheye displays or omnidirectional immersive environments.",
+        "This setting changes the method used to calculate any angles in the "
+        "telemetries. The Horizontal mode, generally works well for flat displays or "
+        "forward facing immersive environments. The Circular mode, generally works well "
+        "for centered fisheye displays or omnidirectional immersive environments.",
         openspace::properties::Property::Visibility::User
     };
 

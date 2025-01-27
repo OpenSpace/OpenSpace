@@ -237,12 +237,12 @@ void PlanetsCompareSonification::sendData() {
     _connection->send(label, data);
 }
 
-void PlanetsCompareSonification::planetSelectionChanged(
+void PlanetsCompareSonification::onPlanetSelectionChanged(
                                                 properties::OptionProperty& changedPlanet,
-                                             properties::OptionProperty& notChangedPlanet,
+                                                  properties::OptionProperty& otherPlanet,
                                                            std::string& prevChangedPlanet)
 {
-    if (changedPlanet != 0 && changedPlanet == notChangedPlanet) {
+    if (changedPlanet != 0 && changedPlanet == otherPlanet) {
         LINFO("Cannot compare a planet to itself");
         changedPlanet.setValue(0);
         return;

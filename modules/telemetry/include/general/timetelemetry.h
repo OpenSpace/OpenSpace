@@ -49,7 +49,7 @@ private:
     /**
      * Send the current time telemetry information to the Open Sound Control receiver. The
      * order of sent data is as follows: Time speed, unit of time speed, and current
-     ' simulation time in J2000 number of seconds.
+     * simulation time in J2000 number of seconds.
      */
     virtual void sendData() override;
 

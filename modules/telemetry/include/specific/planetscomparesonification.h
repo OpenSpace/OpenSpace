@@ -72,11 +72,11 @@ private:
      * was changed with the GUI.
      *
      * \param changedPlanet The planet selection that was recently changed
-     * \param notChangedPlanet The planet selection that was NOT changed
+     * \param otherPlanet The other planet selection that was NOT changed
      * \param prevChangedPlanet The previous value of the planet that was changed
      */
-    void planetSelectionChanged(properties::OptionProperty& changedPlanet,
-        properties::OptionProperty& notChangedPlanet, std::string& prevChangedPlanet);
+    void onPlanetSelectionChanged(properties::OptionProperty& changedPlanet,
+        properties::OptionProperty& otherPlanet, std::string& prevChangedPlanet);
 
     /**
      * Function that scales the given planet by the given amount over the given amount of

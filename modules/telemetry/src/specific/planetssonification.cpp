@@ -34,6 +34,8 @@
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/memorymanager.h>
 
+#include "planetssonification_lua.inl"
+
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsSonification";
 
@@ -224,7 +226,6 @@ namespace {
     };
 #include "planetssonification_codegen.cpp"
 } // namespace
-#include "planetssonification_lua.inl"
 
 namespace openspace {
 
@@ -553,6 +554,11 @@ bool PlanetsSonification::updateData(const Camera* camera, int planetIndex,
         DistanceUnit::Kilometer
     );
 
+    if (std::abs(distance) < std::numeric_limits<double>::epsilon()) {
+        // The scene is likely not yet initialized
+        return false;
+    }
+
     double horizontalAngle =
         calculateAngleTo(camera, _planets[planetIndex].name, angleCalculationMode);
 
@@ -565,15 +571,9 @@ bool PlanetsSonification::updateData(const Camera* camera, int planetIndex,
         );
     }
 
-    if (std::abs(distance) < std::numeric_limits<double>::epsilon()) {
-        // The scene is likely not yet initialized
-        return false;
-    }
-
     // Also calculate angle to moons
     bool dataWasUpdated = false;
     for (DataBody& moon : _planets[planetIndex].moons) {
-        // Distance
         double dist = calculateDistanceTo(camera, moon.name, DistanceUnit::Kilometer);
 
         if (std::abs(dist) < std::numeric_limits<double>::epsilon()) {
@@ -586,7 +586,6 @@ bool PlanetsSonification::updateData(const Camera* camera, int planetIndex,
             moon.distance = dist;
         }
 
-        // Horizontal angle
         double moonHAngle = calculateAngleFromAToB(
             camera,
             _planets[planetIndex].name,
@@ -599,7 +598,6 @@ bool PlanetsSonification::updateData(const Camera* camera, int planetIndex,
             moon.horizontalAngle = moonHAngle;
         }
 
-        // Vertical angle
         double moonVAngle = 0.0;
         if (includeElevation) {
             moonVAngle = calculateElevationAngleFromAToB(
@@ -651,28 +649,16 @@ void PlanetsSonification::sendData(int planetIndex) {
         NumDataItemsPlanet + NumDataItemsMoon * _planets[planetIndex].moons.size()
     );
 
-    // Distance
     data.push_back(_planets[planetIndex].distance);
-
-    // Horizontal Angle
     data.push_back(_planets[planetIndex].horizontalAngle);
-
-    // Vertical Angle
     data.push_back(_planets[planetIndex].verticalAngle);
-
-    // Settings
     osc::Blob settingsBlob = createSettingsBlob(planetIndex);
     data.push_back(settingsBlob);
 
     // Moons
     for (const DataBody& moon : _planets[planetIndex].moons) {
-        // Distance
         data.push_back(moon.distance);
-
-        // Horizontal Angle
         data.push_back(moon.horizontalAngle);
-
-        // Vertical Angle
         data.push_back(moon.verticalAngle);
     }
 

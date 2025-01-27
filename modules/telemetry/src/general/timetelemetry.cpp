@@ -81,8 +81,6 @@ TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
         _timeUnitOption.addOption(i, TimeUnitNamesSingular[i].data());
     }
 
-    // Set days as the default time unit, i.e. the unit for the time speed is
-    // simulation days per real life second
     _timeUnitOption.setValue(static_cast<int>(TimeUnit::Day));
     addProperty(_timeUnitOption);
 

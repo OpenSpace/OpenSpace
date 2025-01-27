@@ -32,6 +32,8 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
 
+#include "nodestelemetry_lua.inl"
+
 namespace {
     constexpr std::string_view _loggerCat = "NodesTelemetry";
 
@@ -99,7 +101,6 @@ namespace {
     };
 
 } // namespace
-#include "nodestelemetry_lua.inl"
 
 namespace openspace {
 
@@ -204,6 +205,12 @@ bool NodesTelemetry::updateData(const Camera* camera, int nodeIndex,
         _nodes[nodeIndex].identifier,
         DistanceUnits[_distanceUnitOption]
     );
+
+    if (std::abs(distance) < std::numeric_limits<double>::epsilon()) {
+        // Scene is likely not yet initialized
+        return false;
+    }
+
     double horizontalAngle =
         calculateAngleTo(camera, _nodes[nodeIndex].identifier, angleCalculationMode);
 
@@ -214,11 +221,6 @@ bool NodesTelemetry::updateData(const Camera* camera, int nodeIndex,
             _nodes[nodeIndex].identifier,
             angleCalculationMode
         );
-    }
-
-    if (std::abs(distance) < std::numeric_limits<double>::epsilon()) {
-        // Scene is likely not yet initialized
-        return false;
     }
 
     // Check if this data is new, otherwise don't update it
@@ -254,16 +256,9 @@ void NodesTelemetry::sendData(int nodeIndex) {
     std::string label = "/" + _nodes[nodeIndex].identifier;
     std::vector<OpenSoundControlDataType> data(NumDataItems);
 
-    // Distance
     data[DistanceIndex] = _nodes[nodeIndex].data[DistanceIndex];
-
-    // Horizontal Angle
     data[HorizontalAngleIndex] = _nodes[nodeIndex].data[HorizontalAngleIndex];
-
-    // Vertical Angle
     data[VerticalAngleIndex] = _nodes[nodeIndex].data[VerticalAngleIndex];
-
-    // Distance Unit
     data[DistanceUnitIndex] = _distanceUnitOption.getDescriptionByValue(
         _distanceUnitOption.value()
     );

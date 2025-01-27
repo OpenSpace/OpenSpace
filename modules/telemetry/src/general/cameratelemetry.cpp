@@ -127,11 +127,9 @@ CameraTelemetry::PrecisionProperties::PrecisionProperties(
 }
 
 bool CameraTelemetry::updateData(const Camera* camera) {
-    // Position
     const glm::dvec3 cameraPosition = camera->positionVec3();
     const double distanceMoved = glm::length(_cameraPosition - cameraPosition);
 
-    // Rotation
     const glm::dquat cameraRotation = camera->rotationQuaternion();
     // To check if the rotation has changed above the precision threshold, check the
     // angle and axis of the quaternion seperatly
@@ -141,7 +139,6 @@ bool CameraTelemetry::updateData(const Camera* camera) {
         glm::dvec3(cameraRotation.x, cameraRotation.y, cameraRotation.z)
     );
 
-    // Speed
     double frameTime = global::windowDelegate->deltaTime();
     bool hasFps = false;
     double cameraSpeed = 0.0;
@@ -185,21 +182,16 @@ void CameraTelemetry::sendData() {
     std::string label = "/Camera";
     std::vector<OpenSoundControlDataType> data(NumDataItems);
 
-    // Position
     data[CameraPosXIndex] = _cameraPosition.x;
     data[CameraPosYIndex] = _cameraPosition.y;
     data[CameraPosZIndex] = _cameraPosition.z;
 
-    // Rotation
     data[CameraQuatRotWIndex] = _cameraRotation.w;
     data[CameraQuatRotXIndex] = _cameraRotation.x;
     data[CameraQuatRotYIndex] = _cameraRotation.y;
     data[CameraQuatRotZIndex] = _cameraRotation.z;
 
-    // Speed
     data[CameraSpeedIndex] = _cameraSpeed;
-
-    // Speed distance unit
     data[CameraSpeedUnitIndex] =_cameraSpeedDistanceUnitOption.getDescriptionByValue(
         _cameraSpeedDistanceUnitOption.value()
     );
