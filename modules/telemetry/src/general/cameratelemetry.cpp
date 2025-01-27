@@ -46,7 +46,7 @@ namespace {
     {
         "CameraTelemetryInfo",
         "Camera Telemetry",
-        "Telemetry that sends out camera information over the OSC connection."
+        "Telemetry that sends out camera information to the Open Sound Control receiver."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraSpeedDistanceUnitInfo =
@@ -55,7 +55,8 @@ namespace {
         "Camera Speed Unit (Distance)",
         "Choose a distance unit that is used for the camera speed. "
         "For example, if the distacne unit 'Kilometer' is chosen, then the unit used for "
-        "the camera speed will be kilometers per second."
+        "the camera speed will be kilometers per second.",
+        openspace::properties::Property::Visibility::User
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
@@ -68,7 +69,7 @@ namespace {
         "PositionPrecision",
         "Position Precision",
         "The precision in meters used to determin when to send updated camera positional "
-        "data over the OSC connection.",
+        "data to the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -76,7 +77,7 @@ namespace {
         "RotationPrecision",
         "Rotation Precision",
         "The precision used to determin when to send updated camera rotational "
-        "data over the OSC connection.",
+        "data to the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -84,7 +85,7 @@ namespace {
         "SpeedPrecision",
         "Speed Precision",
         "The precision in meters per second used to determin when to send updated camera "
-        "speed data over the OSC connection.",
+        "speed data to the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
     };
 } // namespace
@@ -109,20 +110,6 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
     addPropertySubOwner(_precisionProperties);
 }
 
-void CameraTelemetry::update(const Camera* camera) {
-    if (!_enabled) {
-        return;
-    }
-
-    bool hasNewData = getData(camera);
-
-    if (hasNewData) {
-        sendData();
-    }
-}
-
-void CameraTelemetry::stop() {}
-
 CameraTelemetry::PrecisionProperties::PrecisionProperties(
                                properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
     : properties::PropertyOwner(precisionInfo)
@@ -139,7 +126,7 @@ CameraTelemetry::PrecisionProperties::PrecisionProperties(
     addProperty(speedPrecision);
 }
 
-bool CameraTelemetry::getData(const Camera* camera) {
+bool CameraTelemetry::updateData(const Camera* camera) {
     // Position
     const glm::dvec3 cameraPosition = camera->positionVec3();
     const double distanceMoved = glm::length(_cameraPosition - cameraPosition);
@@ -170,27 +157,28 @@ bool CameraTelemetry::getData(const Camera* camera) {
 
     // Check if this data is new, otherwise don't send it
     double prevCameraSpeed = _cameraSpeed;
-    bool shouldSendData = false;
+    bool dataWasUpdated = false;
 
     if (distanceMoved > _precisionProperties.positionPrecision) {
         _cameraPosition = cameraPosition;
-        shouldSendData = true;
+        dataWasUpdated = true;
     }
 
     if (rotationAngleDifference > _precisionProperties.rotationPrecision ||
         rotationAxisDifference > _precisionProperties.rotationPrecision)
     {
         _cameraRotation = cameraRotation;
-        shouldSendData = true;
+        dataWasUpdated = true;
     }
 
-    if (hasFps && abs(prevCameraSpeed - cameraSpeed) > _precisionProperties.speedPrecision)
+    if (hasFps &&
+        abs(prevCameraSpeed - cameraSpeed) > _precisionProperties.speedPrecision)
     {
         _cameraSpeed = cameraSpeed;
-        shouldSendData = true;
+        dataWasUpdated = true;
     }
 
-    return shouldSendData;
+    return dataWasUpdated;
 }
 
 void CameraTelemetry::sendData() {

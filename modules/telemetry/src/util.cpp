@@ -68,8 +68,7 @@ double calculateDistanceTo(const Camera* camera, glm::dvec3 nodePosition,
     }
 
     // Calculate distance to the node from the camera
-    glm::dvec3 cameraToNode = nodePosition - camera->positionVec3();
-    double distance = glm::length(cameraToNode);
+    double distance = glm::distance(nodePosition, camera->positionVec3());
 
     // Convert from meters to desired unit
     return convertMeters(distance, unit);

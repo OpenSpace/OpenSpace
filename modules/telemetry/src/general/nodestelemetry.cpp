@@ -66,8 +66,8 @@ namespace {
         "LowDistancePrecision",
         "Distance Precision (Low)",
         "The precision in meters used to determine when to send updated distance data "
-        "over the OSC connection. This is the lower precision used, for nodes that are "
-        "not the current focus.",
+        "to the Open Sound Control receiver. This is the lower precision used, for nodes "
+        "that are not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -75,8 +75,8 @@ namespace {
         "HighDistancePrecision",
         "Distance Precision (High)",
         "The precision in meters used to determine when to send updated distance data "
-        "over the OSC connection. This is the higher precision used, for the current "
-        "focus node.",
+        "to the Open Sound Control receiver. This is the higher precision used, for the "
+        "current focus node.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -84,8 +84,8 @@ namespace {
         "LowAnglePrecision",
         "Angle Precision (Low)",
         "The precision in radians used to determine when to send updated angle data "
-        "over the OSC connection. This is the lower precision used, for nodes that are "
-        "not the current focus.",
+        "to the Open Sound Control receiver. This is the lower precision used, for nodes "
+        "that are not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -93,8 +93,8 @@ namespace {
         "HighAnglePrecision",
         "Angle Precision (High)",
         "The precision in radians used to determine when to send updated angle data "
-        "over the OSC connection. This is the higher precision used, for the current "
-        "focus node.",
+        "to the Open Sound Control receiver. This is the higher precision used, for the "
+        "current focus node.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -123,10 +123,6 @@ NodesTelemetry::NodesTelemetry(const std::string& ip, int port)
     addPropertySubOwner(_precisionProperties);
 }
 
-NodesTelemetry::~NodesTelemetry() {
-    stop();
-}
-
 NodesTelemetry::TelemetryNode::TelemetryNode(std::string id)
     : identifier(std::move(id))
 {}
@@ -145,82 +141,6 @@ NodesTelemetry::PrecisionProperties::PrecisionProperties(
     addProperty(highDistancePrecision);
     addProperty(lowAnglePrecision);
     addProperty(highAnglePrecision);
-}
-
-void NodesTelemetry::sendData(int nodeIndex) {
-    if (nodeIndex < 0 || _nodes.size() <= nodeIndex) {
-        LWARNING(std::format("Node list does not include index {}", nodeIndex));
-        return;
-    }
-
-    std::string label = "/" + _nodes[nodeIndex].identifier;
-    std::vector<OpenSoundControlDataType> data(NumDataItems);
-
-    // Distance
-    data[DistanceIndex] = _nodes[nodeIndex].data[DistanceIndex];
-
-    // Horizontal Angle
-    data[HorizontalAngleIndex] = _nodes[nodeIndex].data[HorizontalAngleIndex];
-
-    // Vertical Angle
-    data[VerticalAngleIndex] = _nodes[nodeIndex].data[VerticalAngleIndex];
-
-    // Distance Unit
-    data[DistanceUnitIndex] = _distanceUnitOption.getDescriptionByValue(
-        _distanceUnitOption.value()
-    );
-
-    _connection->send(label, data);
-}
-
-bool NodesTelemetry::getData(const Camera* camera, int nodeIndex,
-                             TelemetryModule::AngleCalculationMode angleCalculationMode,
-                             bool includeElevation)
-{
-    double distance = calculateDistanceTo(
-        camera,
-        _nodes[nodeIndex].identifier,
-        DistanceUnits[_distanceUnitOption]
-    );
-    double horizontalAngle =
-        calculateAngleTo(camera, _nodes[nodeIndex].identifier, angleCalculationMode);
-
-    double verticalAngle = 0.0;
-    if (includeElevation) {
-        verticalAngle = calculateElevationAngleTo(
-            camera,
-            _nodes[nodeIndex].identifier,
-            angleCalculationMode
-        );
-    }
-
-    if (std::abs(distance) < std::numeric_limits<double>::epsilon()) {
-        // Scene is likely not yet initialized
-        return false;
-    }
-
-    // Check if this data is new, otherwise don't update it
-    double prevDistance = _nodes[nodeIndex].data[DistanceIndex];
-    double prevHorizontalAngle = _nodes[nodeIndex].data[HorizontalAngleIndex];
-    double prevVerticalAngle = _nodes[nodeIndex].data[VerticalAngleIndex];
-    bool shouldSendData = false;
-
-    if (std::abs(prevDistance - distance) > _distancePrecision) {
-        _nodes[nodeIndex].data[DistanceIndex] = distance;
-        shouldSendData = true;
-    }
-
-    if (std::abs(prevHorizontalAngle - horizontalAngle) > _anglePrecision) {
-        _nodes[nodeIndex].data[HorizontalAngleIndex] = horizontalAngle;
-        shouldSendData = true;
-    }
-
-    if (std::abs(prevVerticalAngle - verticalAngle) > _anglePrecision) {
-        _nodes[nodeIndex].data[VerticalAngleIndex] = verticalAngle;
-        shouldSendData = true;
-    }
-
-    return shouldSendData;
 }
 
 void NodesTelemetry::update(const Camera* camera) {
@@ -257,18 +177,98 @@ void NodesTelemetry::update(const Camera* camera) {
             _distancePrecision = _precisionProperties.lowDistancePrecision;
         }
 
-        bool hasNewData = getData(camera, i, angleMode, includeElevation);
+        bool dataWasUpdated = updateData(camera, i, angleMode, includeElevation);
 
-        if (hasNewData) {
+        if (dataWasUpdated) {
             sendData(i);
         }
     }
 }
 
-void NodesTelemetry::stop() {}
-
 void NodesTelemetry::addNode(std::string node) {
     _nodes.push_back(std::move(node));
+}
+
+// Empty overidded functions
+bool NodesTelemetry::updateData(const Camera*) {
+    return false;
+}
+void NodesTelemetry::sendData() {}
+
+bool NodesTelemetry::updateData(const Camera* camera, int nodeIndex,
+                               TelemetryModule::AngleCalculationMode angleCalculationMode,
+                                                                    bool includeElevation)
+{
+    double distance = calculateDistanceTo(
+        camera,
+        _nodes[nodeIndex].identifier,
+        DistanceUnits[_distanceUnitOption]
+    );
+    double horizontalAngle =
+        calculateAngleTo(camera, _nodes[nodeIndex].identifier, angleCalculationMode);
+
+    double verticalAngle = 0.0;
+    if (includeElevation) {
+        verticalAngle = calculateElevationAngleTo(
+            camera,
+            _nodes[nodeIndex].identifier,
+            angleCalculationMode
+        );
+    }
+
+    if (std::abs(distance) < std::numeric_limits<double>::epsilon()) {
+        // Scene is likely not yet initialized
+        return false;
+    }
+
+    // Check if this data is new, otherwise don't update it
+    double prevDistance = _nodes[nodeIndex].data[DistanceIndex];
+    double prevHorizontalAngle = _nodes[nodeIndex].data[HorizontalAngleIndex];
+    double prevVerticalAngle = _nodes[nodeIndex].data[VerticalAngleIndex];
+    bool dataWasUpdated = false;
+
+    if (std::abs(prevDistance - distance) > _distancePrecision) {
+        _nodes[nodeIndex].data[DistanceIndex] = distance;
+        dataWasUpdated = true;
+    }
+
+    if (std::abs(prevHorizontalAngle - horizontalAngle) > _anglePrecision) {
+        _nodes[nodeIndex].data[HorizontalAngleIndex] = horizontalAngle;
+        dataWasUpdated = true;
+    }
+
+    if (std::abs(prevVerticalAngle - verticalAngle) > _anglePrecision) {
+        _nodes[nodeIndex].data[VerticalAngleIndex] = verticalAngle;
+        dataWasUpdated = true;
+    }
+
+    return dataWasUpdated;
+}
+
+void NodesTelemetry::sendData(int nodeIndex) {
+    if (nodeIndex < 0 || _nodes.size() <= nodeIndex) {
+        LWARNING(std::format("Node list does not include index {}", nodeIndex));
+        return;
+    }
+
+    std::string label = "/" + _nodes[nodeIndex].identifier;
+    std::vector<OpenSoundControlDataType> data(NumDataItems);
+
+    // Distance
+    data[DistanceIndex] = _nodes[nodeIndex].data[DistanceIndex];
+
+    // Horizontal Angle
+    data[HorizontalAngleIndex] = _nodes[nodeIndex].data[HorizontalAngleIndex];
+
+    // Vertical Angle
+    data[VerticalAngleIndex] = _nodes[nodeIndex].data[VerticalAngleIndex];
+
+    // Distance Unit
+    data[DistanceUnitIndex] = _distanceUnitOption.getDescriptionByValue(
+        _distanceUnitOption.value()
+    );
+
+    _connection->send(label, data);
 }
 
 scripting::LuaLibrary NodesTelemetry::luaLibrary() {

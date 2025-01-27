@@ -51,21 +51,7 @@ AngleModeTelemetry::AngleModeTelemetry(const std::string& ip, int port)
     : TelemetryBase(AngleModeTelemetryInfo, ip, port)
 {}
 
-void AngleModeTelemetry::update(const Camera*) {
-    if (!_enabled) {
-        return;
-    }
-
-    bool hasNewData = getData();
-
-    if (hasNewData) {
-        sendData();
-    }
-}
-
-void AngleModeTelemetry::stop() {}
-
-bool AngleModeTelemetry::getData() {
+bool AngleModeTelemetry::updateData(const Camera*) {
     // Get the current angle settings
     TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
     if (!module) {
@@ -78,26 +64,26 @@ bool AngleModeTelemetry::getData() {
     // Check if this data is new, otherwise don't update it
     TelemetryModule::AngleCalculationMode prevAngleMode = _angleMode;
     bool prevIncludeElevation = _includeElevation;
-    bool shouldSendData = false;
+    bool dataWasUpdated = false;
 
     if (angleMode != prevAngleMode) {
         _angleMode = angleMode;
-        shouldSendData = true;
+        dataWasUpdated = true;
     }
 
     if (includeElevation != prevIncludeElevation) {
         _includeElevation = includeElevation;
-        shouldSendData = true;
+        dataWasUpdated = true;
     }
 
-    // Make sure that the first message is sent, even if the values are defualt and no
+    // Make sure that the first message is sent, even if the values are default and no
     // change has been detected
     if (!_isInitialized) {
-        shouldSendData = true;
         _isInitialized = true;
+        return true;
     }
 
-    return shouldSendData;
+    return dataWasUpdated;
 }
 
 void AngleModeTelemetry::sendData() {

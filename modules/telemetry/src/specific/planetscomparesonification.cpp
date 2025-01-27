@@ -68,7 +68,8 @@ namespace {
         "When a planet is selected to be compared, it is also upscaled as a visual "
         "indicator of which planets are currently being compared. This property "
         "determines how much the planet is scaled up as a multiplier of the original "
-        "size."
+        "size.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo
@@ -78,61 +79,71 @@ namespace {
         "Selected Planet Scale Interpolation Time",
         "When a planet is selected to be compared, it is also upscaled as a visual "
         "indicator of which planets are currently being compared. This property "
-        "determines over how many seconds the scaling animation should play."
+        "determines over how many seconds the scaling animation should play.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FirstOptionInfo = {
         "FirstOption",
         "Choose a planet to compare",
-        "Choose a planet in the list to compare to the 'SecondOption'."
+        "Choose a planet in the list to compare to the other selected planet.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SecondOptionInfo = {
         "SecondOption",
-        "Choose a planet to compare",
-        "Choose another planet in the list to compare."
+        "Choose another planet to compare",
+        "Choose another planet in the list to compare to the other selected planet.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "All",
-        "Toggle all comparing sonification varieties for both selected planets."
+        "Toggle all comparing sonification varieties for both selected planets.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
         "SizeDay",
         "Size/Day",
-        "Toggle size/day sonification for both selected planets."
+        "Toggle size/day sonification for both selected planets.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
         "Gravity",
         "Gravity",
-        "Toggle gravity sonification for both selected planets."
+        "Toggle gravity sonification for both selected planets.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TemperatureInfo = {
         "Temperature",
         "Temperature",
-        "Toggle temperature sonification for both selected planets."
+        "Toggle temperature sonification for both selected planets.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
         "Atmosphere",
         "Atmosphere",
-        "Toggle atmosphere sonification for both selected planets."
+        "Toggle atmosphere sonification for both selected planets.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
         "Moons",
         "Moons",
-        "Toggle moons sonification for both selected planets."
+        "Toggle moons sonification for both selected planets.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RingsInfo = {
         "Rings",
         "Rings",
-        "Toggle rings sonification for both selected planets."
+        "Toggle rings sonification for both selected planets.",
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 
@@ -158,41 +169,38 @@ PlanetsCompareSonification::PlanetsCompareSonification(const std::string& ip, in
     addProperty(_selectedUpscale);
     addProperty(_selectedScaleInterpolationTime);
 
+    // Planet selection properties
     for (int i = 0; i < PlanetsOptions.size(); ++i) {
         _firstPlanet.addOption(i, PlanetsOptions[i].data());
         _secondPlanet.addOption(i, PlanetsOptions[i].data());
     }
     _firstPlanet.onChange([this]() { onFirstChanged(); });
     addProperty(_firstPlanet);
-
     _secondPlanet.onChange([this]() { onSecondChanged(); });
     addProperty(_secondPlanet);
 
     // Add the sonifiation aspects properties
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
     addProperty(_toggleAll);
-
-    _sizeDayEnabled.onChange([this]() { sendSettings(); });
+    _sizeDayEnabled.onChange([this]() { sendData(); });
     addProperty(_sizeDayEnabled);
-
-    _gravityEnabled.onChange([this]() { sendSettings(); });
+    _gravityEnabled.onChange([this]() { sendData(); });
     addProperty(_gravityEnabled);
-
-    _temperatureEnabled.onChange([this]() { sendSettings(); });
+    _temperatureEnabled.onChange([this]() { sendData(); });
     addProperty(_temperatureEnabled);
-
-    _atmosphereEnabled.onChange([this]() { sendSettings(); });
+    _atmosphereEnabled.onChange([this]() { sendData(); });
     addProperty(_atmosphereEnabled);
-
-    _moonsEnabled.onChange([this]() { sendSettings(); });
+    _moonsEnabled.onChange([this]() { sendData(); });
     addProperty(_moonsEnabled);
-
-    _ringsEnabled.onChange([this]() { sendSettings(); });
+    _ringsEnabled.onChange([this]() { sendData(); });
     addProperty(_ringsEnabled);
 }
 
-PlanetsCompareSonification::~PlanetsCompareSonification() {
-    stop();
+void PlanetsCompareSonification::stop() {
+    _toggleAll = false;
+
+    _firstPlanet = 0;
+    _secondPlanet = 0;
 }
 
 osc::Blob PlanetsCompareSonification::createSettingsBlob() const {
@@ -210,7 +218,11 @@ osc::Blob PlanetsCompareSonification::createSettingsBlob() const {
     return osc::Blob(settings, NumSettings);
 }
 
-void PlanetsCompareSonification::sendSettings() {
+bool PlanetsCompareSonification::updateData(const Camera*) {
+    return false;
+}
+
+void PlanetsCompareSonification::sendData() {
     if (!_enabled) {
         return;
     }
@@ -228,7 +240,7 @@ void PlanetsCompareSonification::sendSettings() {
 void PlanetsCompareSonification::planetSelectionChanged(
                                                 properties::OptionProperty& changedPlanet,
                                              properties::OptionProperty& notChangedPlanet,
-                                                        std::string& prevChangedPlanet)
+                                                           std::string& prevChangedPlanet)
 {
     if (changedPlanet != 0 && changedPlanet == notChangedPlanet) {
         LINFO("Cannot compare a planet to itself");
@@ -254,7 +266,7 @@ void PlanetsCompareSonification::planetSelectionChanged(
         prevChangedPlanet = "";
     }
 
-    sendSettings();
+    sendData();
 }
 
 void PlanetsCompareSonification::scalePlanet(const std::string& planet, double scale,
@@ -303,15 +315,6 @@ void PlanetsCompareSonification::onToggleAllChanged() {
     _atmosphereEnabled.setValue(_toggleAll);
     _moonsEnabled.setValue(_toggleAll);
     _ringsEnabled.setValue(_toggleAll);
-}
-
-void PlanetsCompareSonification::update(const Camera*) {}
-
-void PlanetsCompareSonification::stop() {
-    _toggleAll = false;
-
-    _firstPlanet = 0;
-    _secondPlanet = 0;
 }
 
 } // namespace openspace

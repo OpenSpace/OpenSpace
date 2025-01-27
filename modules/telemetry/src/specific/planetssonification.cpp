@@ -38,7 +38,7 @@ namespace {
     constexpr std::string_view _loggerCat = "PlanetsSonification";
 
     // Number of data items for planets and moons, which is used to calculate the total
-    // size of the data vector sent over the osc connection
+    // size of the data vector sent to the Open Sound Control receiver.
     constexpr int NumDataItemsPlanet = 4;
     constexpr int NumDataItemsMoon = 3;
 
@@ -72,10 +72,10 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "Toggle All",
-        "Toggle all sonifications for all planets."
+        "Toggle all sonifications for all planets.",
+        openspace::properties::Property::Visibility::User
     };
 
-    // Planets
     static const openspace::properties::PropertyOwner::PropertyOwnerInfo MercuryInfo = {
         "Mercury",
         "Mercury",
@@ -124,50 +124,55 @@ namespace {
         "Settings for the sonification of Neptune."
     };
 
-    // Sonification settings per planet
     constexpr openspace::properties::Property::PropertyInfo PlanetToggleAllInfo = {
         "ToggleAll",
         "Toggle All",
-        "Toggle all sonifications for the planet."
+        "Toggle all sonifications for the planet.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
         "SizeDay",
         "Size/Day",
-        "Toggle the size/day sonification for the planet."
+        "Toggle the size/day sonification for the planet.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
         "Gravity",
         "Gravity",
-        "Toggle the gravity sonification for the planet."
+        "Toggle the gravity sonification for the planet.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TemperatureInfo = {
         "Temperature",
         "Temperature",
-        "Toggle the temperature sonification for the planet."
+        "Toggle the temperature sonification for the planet.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
         "Atmosphere",
         "Atmosphere",
-        "Toggle the atmosphere sonification for the planet."
+        "Toggle the atmosphere sonification for the planet.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
         "Moons",
         "Moons",
-        "Toggle the moons sonification for the planet."
+        "Toggle the moons sonification for the planet.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RingsInfo = {
         "Rings",
         "Rings",
-        "Toggle the rings sonification for the planet."
+        "Toggle the rings sonification for the planet.",
+        openspace::properties::Property::Visibility::User
     };
 
-    // Precision settings
     const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
@@ -178,8 +183,8 @@ namespace {
         "LowDistancePrecision",
         "Distance Precision (Low)",
         "The precision in meters used to determine when to send updated distance data "
-        "over the OSC connection. This is the lower precision used, for planets that are "
-        "not the current focus.",
+        "to the Open Sound Control receiver. This is the lower precision used, for "
+        "planets that are not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -187,8 +192,8 @@ namespace {
         "HighDistancePrecision",
         "Distance Precision (High)",
         "The precision in meters used to determine when to send updated distance data "
-        "over the OSC connection. This is the higher precision used, for the planet that "
-        "is the current focus.",
+        "to the Open Sound Control receiver. This is the higher precision used, for the "
+        "planet that is the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -196,8 +201,8 @@ namespace {
         "LowAnglePrecision",
         "Angle Precision (Low)",
         "The precision in radians used to determine when to send updated angle data "
-        "over the OSC connection. This is the lower precision used, for planets that are "
-        "not the current focus.",
+        "to the Open Sound Control receiver. This is the lower precision used, for "
+        "planets that are not the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -205,8 +210,8 @@ namespace {
         "HighAnglePrecision",
         "Angle Precision (High)",
         "The precision in radians used to determine when to send updated angle data "
-        "over the OSC connection. This is the higher precision used, for the planet that "
-        "is the current focus.",
+        "to the Open Sound Control receiver. This is the higher precision used, for the "
+        "planet that is the current focus.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -236,7 +241,6 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     , _neptuneProperty(PlanetsSonification::PlanetProperties(NeptuneInfo))
     , _precisionProperties(PlanetsSonification::PrecisionProperties(PrecisionInfo))
 {
-    // Toggle all
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
     addProperty(_toggleAll);
 
@@ -320,15 +324,14 @@ PlanetsSonification::PlanetsSonification(const std::string& ip, int port)
     // No rings visible in OpenSpace
     addPropertySubOwner(_neptuneProperty);
 
-    // Precision
     _anglePrecision = _precisionProperties.lowAnglePrecision;
     _distancePrecision = _precisionProperties.lowDistancePrecision;
     addPropertySubOwner(_precisionProperties);
 }
 
-PlanetsSonification::~PlanetsSonification() {
-    stop();
-}
+PlanetsSonification::DataBody::DataBody(std::string inName)
+    : name(std::move(inName))
+{}
 
 PlanetsSonification::PlanetProperties::PlanetProperties(
                                   properties::PropertyOwner::PropertyOwnerInfo planetInfo)
@@ -365,10 +368,6 @@ PlanetsSonification::PlanetProperties::PlanetProperties(
     }
 }
 
-PlanetsSonification::DataBody::DataBody(std::string inName)
-    : name(std::move(inName))
-{}
-
 PlanetsSonification::PrecisionProperties::PrecisionProperties(
                                properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
     : properties::PropertyOwner(precisionInfo)
@@ -379,13 +378,90 @@ PlanetsSonification::PrecisionProperties::PrecisionProperties(
 {
     addProperty(lowDistancePrecision);
     lowDistancePrecision.setExponent(20.f);
-
     addProperty(highDistancePrecision);
     highDistancePrecision.setExponent(20.f);
-
     addProperty(lowAnglePrecision);
-
     addProperty(highAnglePrecision);
+}
+
+void PlanetsSonification::update(const Camera* camera) {
+    TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
+    if (!module) {
+        LERROR("Could not find the TelemetryModule");
+        return;
+    }
+
+    // The compare planets and planets overview sonifications depend on this
+    // sonification. If any of them are enabled, then this sonificaiton sends planetary
+    // data to the Open Sound Control receiver, even if this sonificaiton is disabled.
+    // @NOTE (malej 2024-11-28): Enabeling any combination of these three sonifications
+    // at the same time is not supported, only one will be used by SuperCollider
+    const TelemetryBase* compare = module->telemetry("PlanetsCompareSonification");
+    if (!compare) {
+        LERROR("Could not find the PlanetsCompareSonification");
+        return;
+    }
+    const TelemetryBase* overview = module->telemetry("PlanetsOverviewSonification");
+    if (!overview) {
+        LERROR("Could not find the PlanetsOverviewSonification");
+        return;
+    }
+
+    bool compareEnabled = compare->enabled();
+    bool overviewEnabled = overview->enabled();
+
+    if (!_enabled && !compareEnabled && !overviewEnabled) {
+        return;
+    }
+
+    // Get the angle settings from the module
+    TelemetryModule::AngleCalculationMode angleMode = module->angleCalculationMode();
+    bool includeElevation = module->includeElevationAngle();
+
+    const SceneGraphNode* focusNode =
+        global::navigationHandler->orbitalNavigator().anchorNode();
+
+    if (!focusNode) {
+        // The scene is likely not yet initialized
+        return;
+    }
+
+    // Update data for all planets
+    for (int i = 0; i < _planets.size(); ++i) {
+        // Increase presision if the planet is in focus
+        if (focusNode->identifier() == _planets[i].name) {
+            _anglePrecision = _precisionProperties.highAnglePrecision;
+            _distancePrecision = _precisionProperties.highDistancePrecision;
+        }
+        else {
+            _anglePrecision = _precisionProperties.lowAnglePrecision;
+            _distancePrecision = _precisionProperties.lowDistancePrecision;
+        }
+
+        bool dataWasUpdated = updateData(camera, i, angleMode, includeElevation);
+
+        // Only send data if something new has happened
+        if (dataWasUpdated) {
+            sendData(i);
+        }
+    }
+}
+
+void PlanetsSonification::stop() {
+    _toggleAll = false;
+}
+
+void PlanetsSonification::addPlanet(ghoul::Dictionary dict) {
+    const Parameters p = codegen::bake<Parameters>(dict);
+    DataBody planet = DataBody(p.name);
+
+    if (p.moons.has_value()) {
+        for (const std::string& moon : *p.moons) {
+            planet.moons.push_back(moon);
+        }
+    }
+
+    _planets.push_back(planet);
 }
 
 osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
@@ -393,7 +469,7 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
         global::memoryManager->TemporaryMemory.allocate(NumSettings)
     );
 
-    // Initialize the special settings that does not exist for all planets
+    // Initialize the settings that does not exist for all planets
     settings[AtmosphereIndex] = 0;
     settings[MoonsIndex] = 0;
     settings[RingsIndex] = 0;
@@ -461,8 +537,107 @@ osc::Blob PlanetsSonification::createSettingsBlob(int planetIndex) const {
     return osc::Blob(settings, NumSettings);
 }
 
-void PlanetsSonification::sendPlanetData(int planetIndex) {
-    if (planetIndex < 0 || _planets.size() <= planetIndex) {
+// Empty overidded functions
+bool PlanetsSonification::updateData(const Camera*) {
+    return false;
+}
+void PlanetsSonification::sendData() {}
+
+bool PlanetsSonification::updateData(const Camera* camera, int planetIndex,
+                               TelemetryModule::AngleCalculationMode angleCalculationMode,
+                                                                    bool includeElevation)
+{
+    double distance = calculateDistanceTo(
+        camera,
+        _planets[planetIndex].name,
+        DistanceUnit::Kilometer
+    );
+
+    double horizontalAngle =
+        calculateAngleTo(camera, _planets[planetIndex].name, angleCalculationMode);
+
+    double verticalAngle = 0.0;
+    if (includeElevation) {
+        verticalAngle = calculateElevationAngleTo(
+            camera,
+            _planets[planetIndex].name,
+            angleCalculationMode
+        );
+    }
+
+    if (std::abs(distance) < std::numeric_limits<double>::epsilon()) {
+        // The scene is likely not yet initialized
+        return false;
+    }
+
+    // Also calculate angle to moons
+    bool dataWasUpdated = false;
+    for (DataBody& moon : _planets[planetIndex].moons) {
+        // Distance
+        double dist = calculateDistanceTo(camera, moon.name, DistanceUnit::Kilometer);
+
+        if (std::abs(dist) < std::numeric_limits<double>::epsilon()) {
+            // The scene is likely not yet initialized
+            return false;
+        }
+
+        if (std::abs(moon.distance - dist) > _distancePrecision) {
+            dataWasUpdated = true;
+            moon.distance = dist;
+        }
+
+        // Horizontal angle
+        double moonHAngle = calculateAngleFromAToB(
+            camera,
+            _planets[planetIndex].name,
+            moon.name,
+            angleCalculationMode
+        );
+
+        if (std::abs(moon.horizontalAngle - moonHAngle) > _anglePrecision) {
+            dataWasUpdated = true;
+            moon.horizontalAngle = moonHAngle;
+        }
+
+        // Vertical angle
+        double moonVAngle = 0.0;
+        if (includeElevation) {
+            moonVAngle = calculateElevationAngleFromAToB(
+                camera,
+                _planets[planetIndex].name,
+                moon.name,
+                angleCalculationMode
+            );
+        }
+
+        if (std::abs(moon.verticalAngle - moonVAngle) > _anglePrecision) {
+            dataWasUpdated = true;
+            moon.verticalAngle = moonVAngle;
+        }
+    }
+
+    // Check if this data is new, otherwise don't send it
+    double prevDistance = _planets[planetIndex].distance;
+    double prevHorizontalAngle = _planets[planetIndex].horizontalAngle;
+    double prevVerticalAngle = _planets[planetIndex].verticalAngle;
+
+    if (std::abs(prevDistance - distance) > _distancePrecision ||
+        std::abs(prevHorizontalAngle - horizontalAngle) > _anglePrecision ||
+        std::abs(prevVerticalAngle - verticalAngle) > _anglePrecision ||
+        dataWasUpdated)
+    {
+        // Update the saved data for the planet
+        _planets[planetIndex].distance = distance;
+        _planets[planetIndex].horizontalAngle = horizontalAngle;
+        _planets[planetIndex].verticalAngle = verticalAngle;
+        dataWasUpdated = true;
+    }
+
+    return dataWasUpdated;
+}
+
+void PlanetsSonification::sendData(int planetIndex) {
+    if (planetIndex < 0 || planetIndex > _planets.size() - 1) {
         LWARNING(std::format("Planet list does not include index {}", planetIndex));
         return;
     }
@@ -505,7 +680,6 @@ void PlanetsSonification::sendPlanetData(int planetIndex) {
 }
 
 void PlanetsSonification::onToggleAllChanged() {
-    // Set all the settings
     _mercuryProperty.toggleAll.setValue(_toggleAll);
     _venusProperty.toggleAll.setValue(_toggleAll);
     _earthProperty.toggleAll.setValue(_toggleAll);
@@ -523,7 +697,7 @@ void PlanetsSonification::onMercuryAllChanged() {
     _mercuryProperty.temperatureEnabled.setValue(_mercuryProperty.toggleAll);
 }
 void PlanetsSonification::onMercurySettingChanged() {
-    sendPlanetData(MercuryIndex);
+    sendData(MercuryIndex);
 }
 
 // Venus
@@ -534,7 +708,7 @@ void PlanetsSonification::onVenusAllChanged() {
     _venusProperty.atmosphereEnabled.setValue(_venusProperty.toggleAll);
 }
 void PlanetsSonification::onVenusSettingChanged() {
-    sendPlanetData(VenusIndex);
+    sendData(VenusIndex);
 }
 
 // Earth
@@ -546,7 +720,7 @@ void PlanetsSonification::onEarthAllChanged() {
     _earthProperty.moonsEnabled.setValue(_earthProperty.toggleAll);
 }
 void PlanetsSonification::onEarthSettingChanged() {
-    sendPlanetData(EarthIndex);
+    sendData(EarthIndex);
 }
 
 // Mars
@@ -558,7 +732,7 @@ void PlanetsSonification::onMarsAllChanged() {
     _marsProperty.moonsEnabled.setValue(_marsProperty.toggleAll);
 }
 void PlanetsSonification::onMarsSettingChanged() {
-    sendPlanetData(MarsIndex);
+    sendData(MarsIndex);
 }
 
 // Jupiter
@@ -570,7 +744,7 @@ void PlanetsSonification::onJupiterAllChanged() {
     _jupiterProperty.moonsEnabled.setValue(_jupiterProperty.toggleAll);
 }
 void PlanetsSonification::onJupiterSettingChanged() {
-    sendPlanetData(JupiterIndex);
+    sendData(JupiterIndex);
 }
 
 // Saturn
@@ -583,7 +757,7 @@ void PlanetsSonification::onSaturnAllChanged() {
     _saturnProperty.ringsEnabled.setValue(_saturnProperty.toggleAll);
 }
 void PlanetsSonification::onSaturnSettingChanged() {
-    sendPlanetData(SaturnIndex);
+    sendData(SaturnIndex);
 }
 
 // Uranus
@@ -595,7 +769,7 @@ void PlanetsSonification::onUranusAllChanged() {
     _uranusProperty.moonsEnabled.setValue(_uranusProperty.toggleAll);
 }
 void PlanetsSonification::onUranusSettingChanged() {
-    sendPlanetData(UranusIndex);
+    sendData(UranusIndex);
 }
 
 // Neptune
@@ -607,179 +781,7 @@ void PlanetsSonification::onNeptuneAllChanged() {
     _neptuneProperty.moonsEnabled.setValue(_neptuneProperty.toggleAll);
 }
 void PlanetsSonification::onNeptuneSettingChanged() {
-    sendPlanetData(NeptuneIndex);
-}
-
-bool PlanetsSonification::getData(const Camera* camera, int planetIndex,
-                               TelemetryModule::AngleCalculationMode angleCalculationMode,
-                                  bool includeElevation) {
-    double distance = calculateDistanceTo(
-        camera,
-        _planets[planetIndex].name,
-        DistanceUnit::Kilometer
-    );
-
-    double horizontalAngle =
-        calculateAngleTo(camera, _planets[planetIndex].name, angleCalculationMode);
-
-    double verticalAngle = 0.0;
-    if (includeElevation) {
-        verticalAngle = calculateElevationAngleTo(
-            camera,
-            _planets[planetIndex].name,
-            angleCalculationMode
-        );
-    }
-
-    if (std::abs(distance) < std::numeric_limits<double>::epsilon()) {
-        // The scene is likely not yet initialized
-        return false;
-    }
-
-    // Also calculate angle to moons
-    bool shouldSendData = false;
-    for (DataBody& moon : _planets[planetIndex].moons) {
-        // Distance
-        double dist = calculateDistanceTo(camera, moon.name, DistanceUnit::Kilometer);
-
-        if (std::abs(dist) < std::numeric_limits<double>::epsilon()) {
-            // The scene is likely not yet initialized
-            return false;
-        }
-
-        if (std::abs(moon.distance - dist) > _distancePrecision) {
-            shouldSendData = true;
-            moon.distance = dist;
-        }
-
-        // Horizontal angle
-        double moonHAngle = calculateAngleFromAToB(
-            camera,
-            _planets[planetIndex].name,
-            moon.name,
-            angleCalculationMode
-        );
-
-        if (std::abs(moon.horizontalAngle - moonHAngle) > _anglePrecision) {
-            shouldSendData = true;
-            moon.horizontalAngle = moonHAngle;
-        }
-
-        // Vertical angle
-        double moonVAngle = 0.0;
-        if (includeElevation) {
-            moonVAngle = calculateElevationAngleFromAToB(
-                camera,
-                _planets[planetIndex].name,
-                moon.name,
-                angleCalculationMode
-            );
-        }
-
-        if (std::abs(moon.verticalAngle - moonVAngle) > _anglePrecision) {
-            shouldSendData = true;
-            moon.verticalAngle = moonVAngle;
-        }
-    }
-
-    // Check if this data is new, otherwise don't send it
-    double prevDistance = _planets[planetIndex].distance;
-    double prevHorizontalAngle = _planets[planetIndex].horizontalAngle;
-    double prevVerticalAngle = _planets[planetIndex].verticalAngle;
-
-    if (std::abs(prevDistance - distance) > _distancePrecision ||
-        std::abs(prevHorizontalAngle - horizontalAngle) > _anglePrecision ||
-        std::abs(prevVerticalAngle - verticalAngle) > _anglePrecision ||
-        shouldSendData)
-    {
-        // Update the saved data for the planet
-        _planets[planetIndex].distance = distance;
-        _planets[planetIndex].horizontalAngle = horizontalAngle;
-        _planets[planetIndex].verticalAngle = verticalAngle;
-        shouldSendData = true;
-    }
-
-    return shouldSendData;
-}
-
-void PlanetsSonification::update(const Camera* camera) {
-    TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
-    if (!module) {
-        LERROR("Could not find the TelemetryModule");
-        return;
-    }
-
-    // The compare planets and planets overview sonifications depends on this
-    // sonification. If any of them are enabled, then this sonificaiton sends planetary
-    // data over the osc connection, even if this sonificaiton is disabled.
-    // @NOTE (malej 2024-11-28): Enabeling any combination of these three sonifications
-    // at the same time is not supported, only one will be used by SuperCollider
-    const TelemetryBase* compare = module->telemetry("PlanetsCompareSonification");
-    if (!compare) {
-        LERROR("Could not find the PlanetsCompareSonification");
-        return;
-    }
-    const TelemetryBase* overview = module->telemetry("PlanetsOverviewSonification");
-    if (!overview) {
-        LERROR("Could not find the PlanetsOverviewSonification");
-        return;
-    }
-
-    bool compareEnabled = compare->enabled();
-    bool overviewEnabled = overview->enabled();
-
-    if (!_enabled && !compareEnabled && !overviewEnabled) {
-        return;
-    }
-
-    // Get the angle settings from the module
-    TelemetryModule::AngleCalculationMode angleMode = module->angleCalculationMode();
-    bool includeElevation = module->includeElevationAngle();
-
-    const SceneGraphNode* focusNode =
-        global::navigationHandler->orbitalNavigator().anchorNode();
-
-    if (!focusNode) {
-        // The scene is likely not yet initialized
-        return;
-    }
-
-    // Update data for all planets
-    for (int i = 0; i < _planets.size(); ++i) {
-        // Increase presision if the planet is in focus
-        if (focusNode->identifier() == _planets[i].name) {
-            _anglePrecision = _precisionProperties.highAnglePrecision;
-            _distancePrecision = _precisionProperties.highDistancePrecision;
-        }
-        else {
-            _anglePrecision = _precisionProperties.lowAnglePrecision;
-            _distancePrecision = _precisionProperties.lowDistancePrecision;
-        }
-
-        bool hasNewData = getData(camera, i, angleMode, includeElevation);
-
-        // Only send data if something new has happened
-        if (hasNewData) {
-            sendPlanetData(i);
-        }
-    }
-}
-
-void PlanetsSonification::stop() {
-    _toggleAll = false;
-}
-
-void PlanetsSonification::addPlanet(ghoul::Dictionary dict) {
-    const Parameters p = codegen::bake<Parameters>(dict);
-    DataBody planet = DataBody(p.name);
-
-    if (p.moons.has_value()) {
-        for (const std::string& moon : *p.moons) {
-            planet.moons.push_back(moon);
-        }
-    }
-
-    _planets.push_back(planet);
+    sendData(NeptuneIndex);
 }
 
 scripting::LuaLibrary PlanetsSonification::luaLibrary() {

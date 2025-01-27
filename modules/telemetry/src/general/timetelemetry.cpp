@@ -39,7 +39,7 @@ namespace {
     {
         "TimeTelemetry",
         "Time Telemetry",
-        "Telemetry that sends out time information over the OSC connection."
+        "Telemetry that sends out time information to the Open Sound Control receiver."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeUnitOptionInfo = {
@@ -47,7 +47,8 @@ namespace {
         "Time Unit",
         "The time unit that the telemetry should use for the time speed. For example, if "
         "the unit is set to 'Hour' then the unit for the time speed is simulation hours "
-        "per real life second."
+        "per real life second.",
+        openspace::properties::Property::Visibility::User
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
@@ -59,8 +60,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TimePrecisionInfo = {
         "TimePrecision",
         "TimePrecision",
-        "The precision in seconds used to determine when to send updated time data over "
-        "the OSC connection.",
+        "The precision in seconds used to determine when to send updated time data to "
+        "the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -76,7 +77,6 @@ TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
     )
     , _precisionProperties(TimeTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    // Add all time units as options in the drop down menu
     for (size_t i = 0; i < TimeUnitNamesSingular.size(); ++i) {
         _timeUnitOption.addOption(i, TimeUnitNamesSingular[i].data());
     }
@@ -89,20 +89,6 @@ TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
     addPropertySubOwner(_precisionProperties);
 }
 
-void TimeTelemetry::update(const Camera*) {
-    if (!_enabled) {
-        return;
-    }
-
-    bool hasNewData = getData();
-
-    if (hasNewData) {
-        sendData();
-    }
-}
-
-void TimeTelemetry::stop() {}
-
 TimeTelemetry::PrecisionProperties::PrecisionProperties(
                                properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
     : properties::PropertyOwner(precisionInfo)
@@ -112,7 +98,7 @@ TimeTelemetry::PrecisionProperties::PrecisionProperties(
     addProperty(timePrecision);
 }
 
-bool TimeTelemetry::getData() {
+bool TimeTelemetry::updateData(const Camera*) {
     double timeSpeed = convertTime(
         global::timeManager->deltaTime(),
         TimeUnit::Second,
@@ -124,19 +110,19 @@ bool TimeTelemetry::getData() {
     // Check if this data is new, otherwise don't send it
     double prevTimeSpeed = _timeSpeed;
     double prevTime = _currentTime;
-    bool shouldSendData = false;
+    bool dataWasUpdated = false;
 
     if (abs(prevTimeSpeed - timeSpeed) > _precisionProperties.timePrecision) {
         _timeSpeed = timeSpeed;
-        shouldSendData = true;
+        dataWasUpdated = true;
     }
 
     if (abs(prevTime - currentTime) > _precisionProperties.timePrecision) {
         _currentTime = currentTime;
-        shouldSendData = true;
+        dataWasUpdated = true;
     }
 
-    return shouldSendData;
+    return dataWasUpdated;
 }
 
 void TimeTelemetry::sendData() {

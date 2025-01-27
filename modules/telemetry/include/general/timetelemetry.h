@@ -37,33 +37,21 @@ public:
     TimeTelemetry(const std::string& ip, int port);
     virtual ~TimeTelemetry() override = default;
 
-    /**
-     * Main update function to gather time telemetry information (current deltatime, and
-     * current simulation time in J2000 seconds) and send it via the osc connection.
-     *
-     * \param camera The camera in the scene (not used in this case)
-     */
-    virtual void update(const Camera*) override;
-
-    /**
-     * Function to stop the gathering of time telemetry data.
-     */
-    virtual void stop() override;
-
 private:
     /**
      * Gather time telemetry information (speed, and current time).
      *
+     * \param camera The camera in the scene (not used in this case)
      * \return `true` if the data is new compared to before, otherwise `false`
      */
-    bool getData();
+    virtual bool updateData(const Camera*) override;
 
     /**
-     * Send the current time telemetry information over the osc connection.
-     * Order of data: Time speed, unit of time speed, current simulation time in J2000
-     *                number of seconds.
+     * Send the current time telemetry information to the Open Sound Control receiver. The
+     * order of sent data is as follows: Time speed, unit of time speed, and current
+     ' simulation time in J2000 number of seconds.
      */
-    void sendData();
+    virtual void sendData() override;
 
     struct PrecisionProperties : properties::PropertyOwner {
         PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);

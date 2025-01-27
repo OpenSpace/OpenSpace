@@ -37,12 +37,13 @@ namespace scripting { struct LuaLibrary; }
 class PlanetsSonification : public TelemetryBase {
 public:
     PlanetsSonification(const std::string& ip, int port);
-    virtual ~PlanetsSonification() override;
+    virtual ~PlanetsSonification() override = default;
 
     /**
      * Main update function to gather planets telemetry information (distance, horizontal
      * angle, vertical angle, distance to moons, horizontal angle to moons, and vertical
-     * angle to moons) for the planets sonification and send it via the osc connection.
+     * angle to moons) for the planets sonification and send it to the Open Sound Control
+     * receiver.
      *
      * \param camera The camera in the scene
      */
@@ -87,22 +88,6 @@ private:
     };
 
     /**
-     * Update the distance and angle information for the given planet.
-     *
-     * \param camera The camera in the scene
-     * \param planetIndex The index to the internally stored planet data that should be
-     *        updated
-     * \param angleCalculationMode The angle calculation mode to use. This determines
-     *        which method to use when calculating the angle.
-     * \param includeElevation Whether the additional elevation angle should be calculated
-     *
-     * \return `true` if the data is new compared to before, otherwise `false`
-     */
-    bool getData(const Camera* camera, int planetIndex,
-        TelemetryModule::AngleCalculationMode angleCalculationMode,
-        bool includeElevation);
-
-    /**
      * Create an osc::Blob object with the current sonification settings for the indicated
      * planet.
      * Order of settings: Size/day, gravity, temperature, and optionally atmosphere, moons,
@@ -116,12 +101,45 @@ private:
     osc::Blob createSettingsBlob(int planetIndex) const;
 
     /**
-     * Send the current sonification settings for the indicated planet over the osc
-     * connection.
-     * Order of data: distance, horizontal angle, vertical angle, settings, data for each
-     *                moon (distance, horizontal angle, and vertical angle).
+     * For this sonification, a more advanced custom updateData function is needed with
+     * additional arguments. Therefor, this implementation is left empty and the update
+     * function is overriden to use the custom updateData function instead.
+     *
+     * \param camera The camera in the scene (not used in this case)
+     * \return Always return `false` (this function is empty)
      */
-    void sendPlanetData(int planetIndex);
+    virtual bool updateData(const Camera*) override;
+
+    /**
+     * For this sonification, a more advanced custom sendData function is needed with
+     * additional arguments. Therefor, this implementation is left empty and the update
+     * function is overriden to use the custom updateData function instead.
+     */
+    virtual void sendData() override;
+
+    /**
+     * Update the distance and angle information for the given planet.
+     *
+     * \param camera The camera in the scene
+     * \param planetIndex The index to the internally stored planet data that should be
+     *        updated
+     * \param angleCalculationMode The angle calculation mode to use. This determines
+     *        which method to use when calculating the angle.
+     * \param includeElevation Whether the additional elevation angle should be calculated
+     *
+     * \return `true` if the data is new compared to before, otherwise `false`
+     */
+    bool updateData(const Camera* camera, int planetIndex,
+        TelemetryModule::AngleCalculationMode angleCalculationMode,
+        bool includeElevation);
+
+    /**
+     * Send the current sonification settings for the indicated planet to the Open Sound
+     * Control receiver. The order of sent data is as follows: distance, horizontal angle,
+     * vertical angle, settings, and data for each moon in order of distance to the planet
+     * (distance, horizontal angle, and vertical angle).
+     */
+    void sendData(int planetIndex);
 
     void onToggleAllChanged();
     void onMercuryAllChanged();

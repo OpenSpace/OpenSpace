@@ -51,7 +51,7 @@ public:
      *
      * Horizontal: Calculate the angle to the object in the horizontal direction within
      *             the camera plane. This mode is suitable for flat displays or forward
-     *             facing immersive envierments (such as the Norrköping dome theater).
+     *             facing immersive environments (such as the Norrköping dome theater).
      *             The camera plane is the plane of the camera view direction + camera
      *             left direction (i.e. the negative camera right direction), with the
      *             camera up direction as the normal. The angle goes from -pi to pi in
@@ -115,11 +115,11 @@ public:
     AngleCalculationMode angleCalculationMode() const;
 
     /**
-     * Return whether any elevation angles are being caclulated and sent over the osc
-     * connection or not.
+     * Return whether any elevation angles are being caclulated and sent to the Open Sound
+     * Control receiver or not.
      *
-     * \return `true` if elevation angles are being calculated and sent over the osc
-     *         connection, `false` otherwise
+     * \return `true` if elevation angles are being calculated and sent to the Open Sound
+     * Control receiver, `false` otherwise
      */
     bool includeElevationAngle() const;
 
@@ -158,14 +158,15 @@ private:
      * NodesTelemetry and the PlanetsSonification.
      *
      * `true`: An additional angle in the vertical direction within the camera view + up
-     *         plane is sent over the osc connection. The camera view + up plane is the
-     *         plane of the camera view direction + camera up direction, with the camera
-     *         right direction as the normal. The elevation angle goes from -pi/2 to pi/2
-     *         in radians and zero is straight forward in the camera view direction.
-     *         Positive elevation angles is in the up direction of the camera, and
-     *         negative angles are in the down direction of the camera.
+     *         plane is sent to the Open Sound Control receiver. The camera view + up
+     *         plane is the plane of the camera view direction + camera up direction, with
+     *         the camera right direction as the normal. The elevation angle goes from
+     *         -pi/2 to pi/2 in radians and zero is straight forward in the camera view
+     *         direction. Positive elevation angles is in the up direction of the camera,
+     *         and negative angles are in the down direction of the camera.
      *
-     * `false`: The elevation angle sent over the osc connection is always set to 0.0
+     * `false`: The elevation angle sent to the Open Sound Control receiver is always set
+     *          to 0.0
     */
     properties::BoolProperty _includeElevationAngle;
 

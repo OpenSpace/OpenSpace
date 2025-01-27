@@ -40,16 +40,17 @@ public:
     virtual ~TelemetryBase();
 
     /**
-     * Main update function to gather telemetry data and send it over the osc connection.
+     * Main update function to gather telemetry data and send it to the Open Sound Control
+     * receiver.
      *
      * \param camera The camera in the scene
      */
-    virtual void update(const Camera* camera) = 0;
+    virtual void update(const Camera* camera);
 
     /**
      * Function to stop the gathering of telemetry data.
      */
-    virtual void stop() = 0;
+    virtual void stop();
 
     /**
      * \return The identifier of the telemetry class, the type of data that is gathered
@@ -63,6 +64,19 @@ public:
     bool enabled() const;
 
 protected:
+    /**
+     * Gather telemetry information and update any internal data storage.
+     *
+     * \param camera The camera in the scene
+     * \return `true` if the data was updated, otherwise `false`
+     */
+    virtual bool updateData(const Camera* camera) = 0;
+
+    /**
+     * Send the current telemetry information to the Open Sound Control receiver.
+     */
+    virtual void sendData() = 0;
+
     std::string _identifier;
     properties::BoolProperty _enabled;
     OpenSoundControlConnection* _connection = nullptr;

@@ -32,14 +32,7 @@ namespace openspace {
 class PlanetsOverviewSonification : public TelemetryBase {
 public:
     PlanetsOverviewSonification(const std::string& ip, int port);
-    virtual ~PlanetsOverviewSonification() override;
-
-    /**
-      * Main update function to gather telemetry data and send it over the osc connection.
-     *
-     * \param camera The camera in the scene (not used in this case)
-     */
-    virtual void update(const Camera*) override;
+    virtual ~PlanetsOverviewSonification() override = default;
 
     /**
      * Function to stop the sonification.
@@ -56,10 +49,19 @@ private:
     osc::Blob createSettingsBlob() const;
 
     /**
-     * Send current planets overview sonification settings over the osc connection.
-     * Order of data: Planets overview settings.
+     * For this sonification, this implementiation is empty since the GUI properties keep
+     * track of tha data with the `onChange` function.
+     *
+     * \param camera The camera in the scene (not used in this case)
+     * \return `true` if the data was updated, otherwise `false`
      */
-    void sendData();
+    virtual bool updateData(const Camera*) override;
+
+    /**
+     * Send current planets overview sonification settings to the Open Sound Control
+     * receiver. The order of sent data is as follows: Planets overview settings.
+     */
+    virtual void sendData() override;
 
     void onToggleAllChanged();
 

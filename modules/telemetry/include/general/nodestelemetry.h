@@ -38,21 +38,16 @@ namespace scripting { struct LuaLibrary; }
 class NodesTelemetry : public TelemetryBase {
 public:
     NodesTelemetry(const std::string& ip, int port);
-    virtual ~NodesTelemetry() override;
+    virtual ~NodesTelemetry() override = default;
 
     /**
      * Main update function to gather telemetry information from a list of scene graph
-     * nodes (distance, horizontal angle, vertical angle) and send it via the osc
-     * connection.
+     * nodes (distance, horizontal angle, vertical angle) and send it to the Open Sound
+     * Control receiver.
      *
      * \param camera The camera in the scene
      */
     virtual void update(const Camera* camera) override;
-
-    /**
-     * Function to stop the gathering of nodes telemetry data.
-     */
-    virtual void stop() override;
 
     /**
      * Add the given node to the list of nodes to gather telemetry data for.
@@ -85,6 +80,23 @@ private:
     };
 
     /**
+     * For this telemetry, a more advanced custom updateData function is needed with
+     * additional arguments. Therefor, this implementation is left empty and the update
+     * function is overriden to use the custom updateData function instead.
+     *
+     * \param camera The camera in the scene (not used in this case)
+     * \return Always return `false` (this function is empty)
+     */
+    virtual bool updateData(const Camera*) override;
+
+    /**
+     * For this telemetry, a more advanced custom sendData function is needed with
+     * additional arguments. Therefor, this implementation is left empty and the update
+     * function is overriden to use the custom updateData function instead.
+     */
+    virtual void sendData() override;
+
+    /**
      * Update telemetry data (distance, horizontal angle, vertical angle) for the given
      * node.
      *
@@ -97,14 +109,14 @@ private:
      *
      * \return `true` if the data is new compared to before, otherwise `false`
      */
-    bool getData(const Camera* camera, int nodeIndex,
+    bool updateData(const Camera* camera, int nodeIndex,
         TelemetryModule::AngleCalculationMode angleCalculationMode,
         bool includeElevation);
 
     /**
-     * Send current telemetry data for the indicated node over the osc connection
-     * Order of data: distance, horizontal angle, vertical angle, and the unit used for
-     *                the distance value
+     * Send current telemetry data for the indicated node to the Open Sound Control
+     * receiver. The order of sent data is as follows: distance, horizontal angle,
+     * vertical angle, and the unit used for the distance value
      */
     void sendData(int nodeIndex);
 
@@ -126,8 +138,6 @@ private:
     PrecisionProperties _precisionProperties;
 
     std::vector<TelemetryNode> _nodes;
-
-    // The current precision values for distance and angle
     double _anglePrecision = 0.0;
     double _distancePrecision = 0.0;
 };

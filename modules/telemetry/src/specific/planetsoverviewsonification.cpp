@@ -58,55 +58,64 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "Toggle All",
-        "Toggle the sonification for all planets."
+        "Toggle the sonification for all planets.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableMercuryInfo = {
         "Mercury",
         "Mercury",
-        "Toggle sonification for Mercury."
+        "Toggle sonification for Mercury.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableVenusInfo = {
         "Venus",
         "Venus",
-        "Toggle sonification for Venus."
+        "Toggle sonification for Venus.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableEarthInfo = {
         "Earth",
         "Earth",
-        "Toggle sonification for Earth."
+        "Toggle sonification for Earth.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableMarsInfo = {
         "Mars",
         "Mars",
-        "Toggle sonification for Mars."
+        "Toggle sonification for Mars.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableJupiterInfo = {
         "Jupiter",
         "Jupiter",
-        "Toggle sonification for Jupiter."
+        "Toggle sonification for Jupiter.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableSaturnInfo = {
         "Saturn",
         "Saturn",
-        "Toggle sonification for Saturn."
+        "Toggle sonification for Saturn.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableUranusInfo = {
         "Uranus",
         "Uranus",
-        "Toggle sonification for Uranus."
+        "Toggle sonification for Uranus.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableNeptuneInfo = {
         "Neptune",
         "Neptune",
-        "Toggle sonification for Neptune."
+        "Toggle sonification for Neptune.",
+        openspace::properties::Property::Visibility::User
     };
 } // namespace
 
@@ -126,34 +135,26 @@ PlanetsOverviewSonification::PlanetsOverviewSonification(const std::string& ip, 
 {
     _toggleAll.onChange([this]() { onToggleAllChanged(); });
     addProperty(_toggleAll);
-
     _mercuryEnabled.onChange([this]() { sendData(); });
     addProperty(_mercuryEnabled);
-
     _venusEnabled.onChange([this]() { sendData(); });
     addProperty(_venusEnabled);
-
     _earthEnabled.onChange([this]() { sendData(); });
     addProperty(_earthEnabled);
-
     _marsEnabled.onChange([this]() { sendData(); });
     addProperty(_marsEnabled);
-
     _jupiterEnabled.onChange([this]() { sendData(); });
     addProperty(_jupiterEnabled);
-
     _saturnEnabled.onChange([this]() { sendData(); });
     addProperty(_saturnEnabled);
-
     _uranusEnabled.onChange([this]() { sendData(); });
     addProperty(_uranusEnabled);
-
     _neptuneEnabled.onChange([this]() { sendData(); });
     addProperty(_neptuneEnabled);
 }
 
-PlanetsOverviewSonification::~PlanetsOverviewSonification() {
-    stop();
+void PlanetsOverviewSonification::stop() {
+    _toggleAll = false;
 }
 
 osc::Blob PlanetsOverviewSonification::createSettingsBlob() const {
@@ -171,6 +172,10 @@ osc::Blob PlanetsOverviewSonification::createSettingsBlob() const {
     settings[NeptuneIndex] = _neptuneEnabled;
 
     return osc::Blob(settings, NumPlanets);
+}
+
+bool PlanetsOverviewSonification::updateData(const Camera*) {
+    return false;
 }
 
 void PlanetsOverviewSonification::sendData() {
@@ -195,12 +200,6 @@ void PlanetsOverviewSonification::onToggleAllChanged() {
     _saturnEnabled.setValue(_toggleAll);
     _uranusEnabled.setValue(_toggleAll);
     _neptuneEnabled.setValue(_toggleAll);
-}
-
-void PlanetsOverviewSonification::update(const Camera*) {}
-
-void PlanetsOverviewSonification::stop() {
-    _toggleAll = false;
 }
 
 } // namespace openspace

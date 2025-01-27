@@ -34,7 +34,7 @@ public:
     constexpr static const char* Name = "OpenSoundControlModule";
 
     OpenSoundControlModule();
-    ~OpenSoundControlModule();
+    ~OpenSoundControlModule() = default;
 };
 
 } // namespace openspace

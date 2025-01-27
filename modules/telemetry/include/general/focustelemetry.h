@@ -36,33 +36,20 @@ public:
     FocusTelemetry(const std::string& ip, int port);
     virtual ~FocusTelemetry() override = default;
 
-    /**
-     * Main update function to gather focus telemetry information (current focus node) and
-     * send it via the osc connection.
-     *
-     * \param camera The camera in the scene (not used in this case)
-     */
-    virtual void update(const Camera*) override;
-
-    /**
-     * Function to stop the gathering of focus telemetry data.
-     */
-    virtual void stop() override;
-
 private:
     /**
      * Gather focus telemetry information (current focus node).
      *
-     * \param camera The camera in the scene
+     * \param camera The camera in the scene (not used in this case)
      * \return `true` if the data is new compared to before, otherwise `false`
      */
-    bool getData();
+    virtual bool updateData(const Camera*) override;
 
     /**
-     * Send the current focus telemetry information over the osc connection
-     * Order of data: Current focus node.
+     * Send the current focus telemetry information to the Open Sound Control
+     * receiver. The order of sent data is as follows: Current focus node.
      */
-    void sendData();
+    virtual void sendData() override;
 
     std::string _currentFocus;
 };

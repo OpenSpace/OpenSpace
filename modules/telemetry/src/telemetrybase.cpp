@@ -34,8 +34,10 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Is Enabled",
-        "This setting determines whether this telemetry gathering is enabled or not."
+        "Enabled",
+        "This setting determines whether this telemetry gathering is enabled or not.",
+        openspace::properties::Property::Visibility::User
+
     };
 } // namespace
 
@@ -58,8 +60,23 @@ TelemetryBase::TelemetryBase(properties::PropertyOwner::PropertyOwnerInfo info,
 }
 
 TelemetryBase::~TelemetryBase() {
+    stop();
     delete _connection;
 }
+
+void TelemetryBase::update(const Camera* camera) {
+    if (!_enabled) {
+        return;
+    }
+
+    bool dataWasUpdated = updateData(camera);
+
+    if (dataWasUpdated) {
+        sendData();
+    }
+}
+
+void TelemetryBase::stop() {}
 
 std::string TelemetryBase::identifier() const {
     return _identifier;

@@ -29,6 +29,4 @@ namespace openspace {
 
 OpenSoundControlModule::OpenSoundControlModule() : OpenSpaceModule("OpenSoundControl") {}
 
-OpenSoundControlModule::~OpenSoundControlModule() {}
-
 } // namespace openspace

@@ -44,8 +44,8 @@
 namespace {
     constexpr std::string_view _loggerCat = "TelemetryModule";
 
-    // The default OSC reciver is SuperCollider with these default values.
-    // However, the user can define any reciver in the openspace.cfg file as the
+    // The default Open Sound Control receiver is SuperCollider with these default values.
+    // However, the user can define any receiver in the openspace.cfg file as the
     // ModuleConfiguration for the Telemetry module.
     constexpr std::string_view DefaultSuperColliderIp = "127.0.0.1";
     constexpr int DefaultSuperColliderPort = 57120;
@@ -53,19 +53,23 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Enable or disable all gathering of telemetry information."
+        "Enable or disable all gathering of telemetry information.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo IpAddressInfo = {
         "IpAddress",
-        "Ip address",
-        "The network ip address that the telemetry osc messages is sent to."
+        "IP Address",
+        "The network IP address that the telemetry Open Sound Control messages is sent "
+        "to.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The network port that the telemetry osc messages are sent to."
+        "The network port that the telemetry Open Sound Control messages are sent to.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AngleCalculationModeInfo = {
@@ -74,7 +78,8 @@ namespace {
         "This setting changes the method to calculate any angles in the telemetries. "
         "The Horizontal mode, generally works well for flat displays or forward facing "
         "immersive environments. The Circular mode, generally works well for centered "
-        "fisheye displays or omnidirectional immersive environments."
+        "fisheye displays or omnidirectional immersive environments.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeElevationAngleInfo = {
@@ -82,7 +87,8 @@ namespace {
         "Include Elevation Angle",
         "This setting determines if an additional elevation angle should be calculated "
         "for the telemetries that calculate angles. The method used for this calculation "
-        "also depends on the angle calculation mode."
+        "also depends on the angle calculation mode.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(TelemetryModule)]] Parameters {
@@ -257,7 +263,7 @@ void TelemetryModule::update(std::atomic<bool>& isRunning) {
         std::unique_lock<std::mutex> lk(mutexLock);
         syncToMain.wait(lk);
 
-        // Check if the module is even enabled
+        // No need to update if the module isn't currently enabled
         if (!_enabled) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
             continue;

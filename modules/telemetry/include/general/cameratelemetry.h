@@ -37,19 +37,6 @@ public:
     CameraTelemetry(const std::string& ip, int port);
     virtual ~CameraTelemetry() override = default;
 
-    /**
-     * Main update function to gather camera telemetry information (position, rotation,
-     * and speed) and send it via the osc connection.
-     *
-     * \param camera The camera in the scene
-     */
-    virtual void update(const Camera* camera) override;
-
-    /**
-     * Function to stop the gathering of camera telemetry data.
-     */
-    virtual void stop() override;
-
 private:
     /**
      * Gather camera telemetry information (position, rotation, and speed).
@@ -57,14 +44,14 @@ private:
      * \param camera The camera in the scene
      * \return `true` if the data is new compared to before, otherwise `false`
      */
-    bool getData(const Camera* camera);
+    virtual bool updateData(const Camera* camera) override;
 
     /**
-     * Send the current camera telemetry information over the osc connection
-     * Order of data: Camera position (x, y, z), rotation quaternion (w, x, y z), speed,
-     *                and speed distance unit.
+     * Send the current camera telemetry information to the Open Sound Control
+     * receiver. The order of sent data is as follows: Camera position (x, y, z), rotation
+     * quaternion (w, x, y z), speed, and speed distance unit.
      */
-    void sendData();
+    virtual void sendData() override;
 
     struct PrecisionProperties : properties::PropertyOwner {
         PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);

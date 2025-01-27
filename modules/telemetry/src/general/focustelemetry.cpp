@@ -39,7 +39,8 @@ namespace {
     {
         "FocusTelemetry",
         "Focus Telemetry",
-        "Telemetry that sends out the current focus node over the OSC connection."
+        "Telemetry that sends out the current focus node to the Open Sound Control "
+        "receiver."
     };
 
 } // namespace
@@ -50,21 +51,7 @@ FocusTelemetry::FocusTelemetry(const std::string& ip, int port)
     : TelemetryBase(FocusTelemetryInfo, ip, port)
 {}
 
-void FocusTelemetry::update(const Camera*) {
-    if (!_enabled) {
-        return;
-    }
-
-    bool hasNewData = getData();
-
-    if (hasNewData) {
-        sendData();
-    }
-}
-
-void FocusTelemetry::stop() {}
-
-bool FocusTelemetry::getData() {
+bool FocusTelemetry::updateData(const Camera*) {
     const SceneGraphNode* focusNode =
         global::navigationHandler->orbitalNavigator().anchorNode();
 
@@ -75,14 +62,14 @@ bool FocusTelemetry::getData() {
 
     // Check if this data is new, otherwise don't update it
     std::string prevFocus = _currentFocus;
-    bool shouldSendData = false;
+    bool dataWasUpdated = false;
 
     if (focusNode->identifier() != prevFocus) {
         _currentFocus = focusNode->identifier();
-        shouldSendData = true;
+        dataWasUpdated = true;
     }
 
-    return shouldSendData;
+    return dataWasUpdated;
 }
 
 void FocusTelemetry::sendData() {

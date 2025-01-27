@@ -36,33 +36,22 @@ public:
     AngleModeTelemetry(const std::string& ip, int port);
     virtual ~AngleModeTelemetry() override = default;
 
-    /**
-     * Main update function to gather angle mode telemetry information (Angle calculation
-     * mode, and whether elevation angle is included) and send it via the osc connection.
-     *
-     * \param camera The camera in the scene (not used in this case)
-     */
-    virtual void update(const Camera*) override;
-
-    /**
-     * Function to stop the gathering of telemetry data.
-     */
-    virtual void stop() override;
-
 private:
     /**
      * Gather angle settings telemetry information (Angle calculation mode, and whether
-     * elevation angle is included).
+     * the elevation angle is included).
      *
+     * \param camera The camera in the scene (not used in this case)
      * \return `true` if the data is new compared to before, otherwise `false`
      */
-    bool getData();
+    virtual bool updateData(const Camera*) override;
 
     /**
-     * Send the current angle settings telemetry information over the osc connection
-     * Order of data: Angle calculation mode, whether the elevation angle is included.
+     * Send the current angle settings telemetry information to the Open Sound Control
+     * receiver. The order of sent data is as follows: Angle calculation mode, and whether
+     * the elevation angle is included or not.
      */
-    void sendData();
+    virtual void sendData() override;
 
     TelemetryModule::AngleCalculationMode _angleMode =
         TelemetryModule::AngleCalculationMode::Horizontal;
