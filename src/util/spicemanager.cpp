@@ -37,6 +37,8 @@
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 
+#include "spicemanager_lua.inl"
+
 namespace {
     constexpr std::string_view _loggerCat = "SpiceManager";
 
@@ -63,8 +65,6 @@ namespace {
         }
     }
 } // namespace
-
-#include "spicemanager_lua.inl"
 
 namespace openspace {
 
