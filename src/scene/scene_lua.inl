@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,9 +87,9 @@ openspace::properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* p
 }
 
 std::vector<openspace::properties::Property*> findMatchesInAllProperties(
-                                                                const std::string& regex,
-                         const std::vector<openspace::properties::Property*>& properties,
-                                                            const std::string& groupName)
+                                                                   std::string_view regex,
+                          const std::vector<openspace::properties::Property*>& properties,
+                                                             const std::string& groupName)
 {
     using namespace openspace;
 
@@ -241,8 +241,8 @@ void applyRegularExpression(lua_State* L, const std::string& regex,
             // value from the stack, so we need to push it to the end
             lua_pushvalue(L, -1);
 
-            if (global::sessionRecording->isRecording()) {
-                global::sessionRecording->savePropertyBaseline(*prop);
+            if (global::sessionRecordingHandler->isRecording()) {
+                global::sessionRecordingHandler->savePropertyBaseline(*prop);
             }
             if (interpolationDuration == 0.0) {
                 global::renderEngine->scene()->removePropertyInterpolation(prop);
@@ -312,8 +312,8 @@ int setPropertyCallSingle(properties::Property& prop, const std::string& uri,
         );
     }
     else {
-        if (global::sessionRecording->isRecording()) {
-            global::sessionRecording->savePropertyBaseline(prop);
+        if (global::sessionRecordingHandler->isRecording()) {
+            global::sessionRecordingHandler->savePropertyBaseline(prop);
         }
         if (duration == 0.0) {
             global::renderEngine->scene()->removePropertyInterpolation(&prop);
@@ -1035,30 +1035,51 @@ void createCustomProperty(openspace::properties::Property::PropertyInfo info,
     openspace::global::userPropertyOwner->addProperty(p);
 }
 
+template <>
+void createCustomProperty<openspace::properties::TriggerProperty>(
+                                       openspace::properties::Property::PropertyInfo info,
+                                                      std::optional<std::string> onChange)
+{
+    using namespace openspace::properties;
+    TriggerProperty* p = new TriggerProperty(info);
+    if (onChange.has_value() && !onChange->empty()) {
+        p->onChange(
+            [p, script = *onChange]() {
+                using namespace ghoul::lua;
+                LuaState s;
+                openspace::global::scriptEngine->initializeLuaState(s);
+                ghoul::lua::runScript(s, script);
+            }
+        );
+    }
+    openspace::global::userPropertyOwner->addProperty(p);
+}
+
 enum class [[codegen::enum]] CustomPropertyType {
+    BoolProperty,
+    DoubleProperty,
     DMat2Property,
     DMat3Property,
     DMat4Property,
-    Mat2Property,
-    Mat3Property,
-    Mat4Property,
-    BoolProperty,
-    DoubleProperty,
-    FloatProperty,
-    IntProperty,
-    StringProperty,
-    StringListProperty,
-    LongProperty,
-    ShortProperty,
-    UShortProperty,
-    UIntProperty,
-    ULongProperty,
     DVec2Property,
     DVec3Property,
     DVec4Property,
+    FloatProperty,
+    IntProperty,
     IVec2Property,
     IVec3Property,
     IVec4Property,
+    LongProperty,
+    Mat2Property,
+    Mat3Property,
+    Mat4Property,
+    ShortProperty,
+    StringProperty,
+    StringListProperty,
+    TriggerProperty,
+    UShortProperty,
+    UIntProperty,
+    ULongProperty,
     UVec2Property,
     UVec3Property,
     UVec4Property,
@@ -1121,6 +1142,9 @@ enum class [[codegen::enum]] CustomPropertyType {
         description.has_value() ? description->c_str() : ""
     };
     switch (type) {
+        case CustomPropertyType::BoolProperty:
+            createCustomProperty<BoolProperty>(info, std::move(onChange));
+            return;
         case CustomPropertyType::DMat2Property:
             createCustomProperty<DMat2Property>(info, std::move(onChange));
             return;
@@ -1130,47 +1154,8 @@ enum class [[codegen::enum]] CustomPropertyType {
         case CustomPropertyType::DMat4Property:
             createCustomProperty<DMat4Property>(info, std::move(onChange));
             return;
-        case CustomPropertyType::Mat2Property:
-            createCustomProperty<Mat2Property>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::Mat3Property:
-            createCustomProperty<Mat3Property>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::Mat4Property:
-            createCustomProperty<Mat4Property>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::BoolProperty:
-            createCustomProperty<BoolProperty>(info, std::move(onChange));
-            return;
         case CustomPropertyType::DoubleProperty:
             createCustomProperty<DoubleProperty>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::FloatProperty:
-            createCustomProperty<FloatProperty>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::IntProperty:
-            createCustomProperty<IntProperty>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::StringProperty:
-            createCustomProperty<StringProperty>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::StringListProperty:
-            createCustomProperty<StringListProperty>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::LongProperty:
-            createCustomProperty<LongProperty>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::ShortProperty:
-            createCustomProperty<ShortProperty>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::UIntProperty:
-            createCustomProperty<UIntProperty>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::ULongProperty:
-            createCustomProperty<ULongProperty>(info, std::move(onChange));
-            return;
-        case CustomPropertyType::UShortProperty:
-            createCustomProperty<UShortProperty>(info, std::move(onChange));
             return;
         case CustomPropertyType::DVec2Property:
             createCustomProperty<DVec2Property>(info, std::move(onChange));
@@ -1181,6 +1166,12 @@ enum class [[codegen::enum]] CustomPropertyType {
         case CustomPropertyType::DVec4Property:
             createCustomProperty<DVec4Property>(info, std::move(onChange));
             return;
+        case CustomPropertyType::FloatProperty:
+            createCustomProperty<FloatProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::IntProperty:
+            createCustomProperty<IntProperty>(info, std::move(onChange));
+            return;
         case CustomPropertyType::IVec2Property:
             createCustomProperty<IVec2Property>(info, std::move(onChange));
             return;
@@ -1189,6 +1180,39 @@ enum class [[codegen::enum]] CustomPropertyType {
             return;
         case CustomPropertyType::IVec4Property:
             createCustomProperty<IVec4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::LongProperty:
+            createCustomProperty<LongProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat2Property:
+            createCustomProperty<Mat2Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat3Property:
+            createCustomProperty<Mat3Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::Mat4Property:
+            createCustomProperty<Mat4Property>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::ShortProperty:
+            createCustomProperty<ShortProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::StringProperty:
+            createCustomProperty<StringProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::StringListProperty:
+            createCustomProperty<StringListProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::TriggerProperty:
+            createCustomProperty<TriggerProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UIntProperty:
+            createCustomProperty<UIntProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::ULongProperty:
+            createCustomProperty<ULongProperty>(info, std::move(onChange));
+            return;
+        case CustomPropertyType::UShortProperty:
+            createCustomProperty<UShortProperty>(info, std::move(onChange));
             return;
         case CustomPropertyType::UVec2Property:
             createCustomProperty<UVec2Property>(info, std::move(onChange));

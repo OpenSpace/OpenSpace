@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -96,9 +96,9 @@ documentation::Documentation ScreenSpaceBrowser::Documentation() {
 ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _dimensions(DimensionsInfo, glm::uvec2(0), glm::uvec2(0), glm::uvec2(3000))
+    , _renderHandler(new ScreenSpaceRenderHandler)
     , _url(UrlInfo)
     , _reload(ReloadInfo)
-    , _renderHandler(new ScreenSpaceRenderHandler)
     , _keyboardHandler(new WebKeyboardHandler)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -123,6 +123,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
     addProperty(_url);
     addProperty(_dimensions);
     addProperty(_reload);
+    _useAcceleratedRendering = WebBrowserModule::canUseAcceleratedRendering();
 
     WebBrowserModule* webBrowser = global::moduleEngine->module<WebBrowserModule>();
     if (webBrowser) {
@@ -131,13 +132,7 @@ ScreenSpaceBrowser::ScreenSpaceBrowser(const ghoul::Dictionary& dictionary)
 }
 
 bool ScreenSpaceBrowser::initializeGL() {
-    ghoul::Dictionary dict = ghoul::Dictionary();
-
-    dict.setValue(
-        "useAcceleratedRendering",
-        WebBrowserModule::canUseAcceleratedRendering()
-    );
-    createShaders(dict);
+    createShaders();
 
     _browserInstance->initialize();
     _browserInstance->loadUrl(_url);
@@ -173,7 +168,7 @@ void ScreenSpaceBrowser::render(const RenderData& renderData) {
         translationMatrix() *
         localRotationMatrix() *
         scaleMatrix();
-    draw(mat, renderData);
+    draw(mat, renderData, _useAcceleratedRendering);
 }
 
 void ScreenSpaceBrowser::update() {

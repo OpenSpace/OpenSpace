@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -86,14 +86,15 @@ namespace {
         "If this value is enabled, the distance is displayed in nuanced units, such as "
         "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
         "explicitly requested.",
-        openspace::properties::Property::Visibility::User
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested Unit",
         "If the simplification is disabled, this distance unit is used as a destination "
-        "to convert the meters into."
+        "to convert the meters into.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
@@ -253,13 +254,6 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     addProperty(_destination.nodeName);
 
     _doSimplification = p.simplification.value_or(_doSimplification);
-    _doSimplification.onChange([this]() {
-        _requestedUnit.setVisibility(
-            _doSimplification ?
-            properties::Property::Visibility::Hidden :
-            properties::Property::Visibility::User
-        );
-    });
     addProperty(_doSimplification);
 
     for (const DistanceUnit u : DistanceUnits) {
@@ -273,7 +267,6 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
         const DistanceUnit unit = distanceUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
     }
-    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
     addProperty(_requestedUnit);
 
     _formatString = p.formatString.value_or(_formatString);

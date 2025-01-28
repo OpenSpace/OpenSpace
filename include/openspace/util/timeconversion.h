@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,26 +60,26 @@ enum class TimeUnit {
 };
 
 // Assumption:  Unit names are sequential in memory
-constexpr std::string_view TimeUnitNanosecond   = "nanosecond";
-constexpr std::string_view TimeUnitMicrosecond  = "microsecond";
-constexpr std::string_view TimeUnitMillisecond  = "millisecond";
-constexpr std::string_view TimeUnitSecond       = "second";
-constexpr std::string_view TimeUnitMinute       = "minute";
-constexpr std::string_view TimeUnitHour         = "hour";
-constexpr std::string_view TimeUnitDay          = "day";
-constexpr std::string_view TimeUnitMonth        = "month";
-constexpr std::string_view TimeUnitYear         = "year";
+constexpr std::string_view TimeUnitNanosecond = "Nanosecond";
+constexpr std::string_view TimeUnitMicrosecond = "Microsecond";
+constexpr std::string_view TimeUnitMillisecond = "Millisecond";
+constexpr std::string_view TimeUnitSecond = "Second";
+constexpr std::string_view TimeUnitMinute = "Minute";
+constexpr std::string_view TimeUnitHour = "Hour";
+constexpr std::string_view TimeUnitDay = "Day";
+constexpr std::string_view TimeUnitMonth = "Month";
+constexpr std::string_view TimeUnitYear = "Year";
 
 // Assumption:  Unit names are sequential in memory
-constexpr std::string_view TimeUnitNanoseconds = "nanoseconds";
-constexpr std::string_view TimeUnitMicroseconds = "microseconds";
-constexpr std::string_view TimeUnitMilliseconds = "milliseconds";
-constexpr std::string_view TimeUnitSeconds = "seconds";
-constexpr std::string_view TimeUnitMinutes = "minutes";
-constexpr std::string_view TimeUnitHours = "hours";
-constexpr std::string_view TimeUnitDays = "days";
-constexpr std::string_view TimeUnitMonths = "months";
-constexpr std::string_view TimeUnitYears = "years";
+constexpr std::string_view TimeUnitNanoseconds = "Nanoseconds";
+constexpr std::string_view TimeUnitMicroseconds = "Microseconds";
+constexpr std::string_view TimeUnitMilliseconds = "Milliseconds";
+constexpr std::string_view TimeUnitSeconds = "Seconds";
+constexpr std::string_view TimeUnitMinutes = "Minutes";
+constexpr std::string_view TimeUnitHours = "Hours";
+constexpr std::string_view TimeUnitDays = "Days";
+constexpr std::string_view TimeUnitMonths = "Months";
+constexpr std::string_view TimeUnitYears = "Years";
 
 constexpr std::array<TimeUnit, static_cast<int>(TimeUnit::Year) + 1> TimeUnits = {
     TimeUnit::Nanosecond, TimeUnit::Microsecond, TimeUnit::Millisecond,

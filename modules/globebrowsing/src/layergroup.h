@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,8 +40,6 @@ struct TileProvider;
  */
 struct LayerGroup : public properties::PropertyOwner {
     LayerGroup(layers::Group group);
-
-    void setLayersFromDict(const ghoul::Dictionary& dict);
 
     void initialize();
     void deinitialize();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,6 +79,13 @@ public:
      */
     virtual void keyPressEvent(QKeyEvent* evt) override;
 
+    void reject() override;
+    void closeWithoutSaving();
+    void promptUserOfUnsavedChanges();
+
+signals:
+    void raiseExitWindow();
+
 private slots:
     void duplicateProfile();
     void openMeta();
@@ -91,7 +98,6 @@ private slots:
     void openDeltaTimes();
     void openCamera();
     void openMarkNodes();
-    void cancel();
     void approved();
 
 private:
@@ -119,8 +125,6 @@ private:
     QLabel* _timeLabel = nullptr;
     QLabel* _metaLabel = nullptr;
     QLabel* _additionalScriptsLabel = nullptr;
-
-    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___PROFILEEDIT___H__

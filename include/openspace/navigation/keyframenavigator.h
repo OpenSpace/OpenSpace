@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,6 +57,7 @@ public:
 
         CameraPose() = default;
         CameraPose(datamessagestructures::CameraKeyframe&& kf);
+        auto operator<=>(const CameraPose&) const = default;
     };
 
     /**
@@ -68,8 +69,8 @@ public:
      * \param ignoreFutureKeyframes `true` if only past keyframes are to be used
      * \return true only if a new future keyframe is available to set camera pose
      */
-    bool updateCamera(Camera& camera, bool ignoreFutureKeyframes);
-    static bool updateCamera(Camera* camera, const CameraPose& prevPose,
+    void updateCamera(Camera& camera, bool ignoreFutureKeyframes);
+    static void updateCamera(Camera* camera, const CameraPose& prevPose,
         const CameraPose& nextPose, double t, bool ignoreFutureKeyframes);
 
     Timeline<CameraPose>& timeline();

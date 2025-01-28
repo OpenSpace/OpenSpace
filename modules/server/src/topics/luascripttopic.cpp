@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -190,7 +190,9 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
 void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
                                bool shouldBeSynchronized)
 {
-    scripting::ScriptEngine::ScriptCallback callback;
+    using namespace scripting;
+
+    ScriptEngine::Script::Callback callback;
     if (shouldReturn) {
         callback = [this](const ghoul::Dictionary& data) {
             if (_connection) {
@@ -205,12 +207,12 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
         _waitingForReturnValue = false;
     }
 
-    global::scriptEngine->queueScript(
-        std::move(script),
-        scripting::ScriptEngine::ShouldBeSynchronized(shouldBeSynchronized),
-        scripting::ScriptEngine::ShouldSendToRemote(shouldBeSynchronized),
-        callback
-    );
+    global::scriptEngine->queueScript({
+        .code = std::move(script),
+        .synchronized = ScriptEngine::Script::ShouldBeSynchronized(shouldBeSynchronized),
+        .sendToRemote = ScriptEngine::Script::ShouldSendToRemote(shouldBeSynchronized),
+        .callback = callback
+    });
 }
 
 bool LuaScriptTopic::isDone() const {

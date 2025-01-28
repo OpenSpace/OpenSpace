@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -277,6 +277,48 @@ std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
     if (deleteSource && std::filesystem::is_regular_file(source)) {
         std::filesystem::remove(source);
     }
+}
+
+/**
+ * This function registers another Lua script that will be periodically executed as long
+ * as the application is running. The `identifier` is used to later remove the script. The
+ * `script` is being executed every `timeout` seconds. This timeout is only as accurate as
+ * the framerate at which the application is running. Optionally the `preScript` Lua
+ * script is run when registering the repeated script and the `postScript` is run when
+ * unregistering it or when the application closes.
+ * If the `timeout` is 0, the script will be executed every frame.
+ * The `identifier` has to be a unique name that cannot have been used to register a
+ * repeated script before. A registered script is removed with the #removeRepeatedScript
+ * function.
+ */
+[[codegen::luawrap]] void registerRepeatedScript(std::string identifier,
+                                                 std::string script, double timeout = 0.0,
+                                                 std::string preScript = "",
+                                                 std::string postScript = "")
+{
+    openspace::global::scriptEngine->registerRepeatedScript(
+        std::move(identifier),
+        std::move(script),
+        timeout,
+        std::move(preScript),
+        std::move(postScript)
+    );
+}
+
+/**
+ * Removes a previously registered repeated script (see #registerRepeatedScript)
+ */
+[[codegen::luawrap]] void removeRepeatedScript(std::string identifier) {
+    openspace::global::scriptEngine->removeRepeatedScript(identifier);
+}
+
+/**
+ * Schedules a `script` to be run in `delay` seconds. The delay is measured in wallclock
+ * time, which is seconds that occur in the real world, not in relation to the in-game
+ * time.
+ */
+[[codegen::luawrap]] void scheduleScript(std::string script, double delay) {
+    openspace::global::scriptEngine->scheduleScript(std::move(script), delay);
 }
 
 #include "scriptengine_lua_codegen.cpp"

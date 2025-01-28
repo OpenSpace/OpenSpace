@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -82,10 +82,9 @@ bool BrowserClient::NoContextMenuHandler::RunContextMenu(CefRefPtr<CefBrowser>,
     return true;
 }
 
-bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser,
-                                                  CefCursorHandle cursor,
-                                                  cef_cursor_type_t type,
-                                                  const CefCursorInfo& custom_cursor_info)
+bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser>, CefCursorHandle,
+                                                   cef_cursor_type_t type,
+                                                   const CefCursorInfo&)
 {
     WindowDelegate::Cursor newCursor;
     switch (type) {
@@ -101,13 +100,13 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser
         case cef_cursor_type_t::CT_HAND:
             newCursor = WindowDelegate::Cursor::PointingHand;
             break;
-        case cef_cursor_type_t::CT_EASTWESTRESIZE: 
+        case cef_cursor_type_t::CT_EASTWESTRESIZE:
         case cef_cursor_type_t::CT_COLUMNRESIZE:
         case cef_cursor_type_t::CT_EASTRESIZE:
         case cef_cursor_type_t::CT_WESTRESIZE:
             newCursor = WindowDelegate::Cursor::ResizeEW;
             break;
-        case cef_cursor_type_t::CT_NORTHSOUTHRESIZE: 
+        case cef_cursor_type_t::CT_NORTHSOUTHRESIZE:
         case cef_cursor_type_t::CT_ROWRESIZE:
         case cef_cursor_type_t::CT_NORTHRESIZE:
         case cef_cursor_type_t::CT_SOUTHRESIZE:
@@ -128,6 +127,13 @@ bool BrowserClient::DisplayHandler::OnCursorChange(CefRefPtr<CefBrowser> browser
             break;
         case cef_cursor_type_t::CT_NOTALLOWED:
             newCursor = WindowDelegate::Cursor::NotAllowed;
+            break;
+        case cef_cursor_type_t::CT_GRAB:
+        case cef_cursor_type_t::CT_GRABBING:
+            // There is no "grabbing" cursors in GLFW, so for now the pointing hand to
+            // make web objects that use drag-n-drop look more interactive.
+            // @TODO (emmbr, 2024-12-09) Add custom cursors for these cases
+            newCursor = WindowDelegate::Cursor::PointingHand;
             break;
         default:
             newCursor = WindowDelegate::Cursor::Arrow;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,6 +52,8 @@ namespace {
     // To load an image from a local file on disk, see
     // [`ScreenSpaceImageLocal`](#base_screenspace_image_local).
     struct [[codegen::Dictionary(ScreenSpaceImageOnline)]] Parameters {
+        std::optional<std::string> identifier;
+
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<std::string> url [[codegen::key("URL")]];
     };
@@ -71,15 +73,8 @@ ScreenSpaceImageOnline::ScreenSpaceImageOnline(const ghoul::Dictionary& dictiona
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string identifier;
-    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
-        identifier = dictionary.value<std::string>(KeyIdentifier);
-    }
-    else {
-        identifier = "ScreenSpaceImageOnline";
-    }
-    identifier = makeUniqueIdentifier(identifier);
-    setIdentifier(std::move(identifier));
+    std::string identifier = p.identifier.value_or("ScreenSpaceImageOnline");
+    setIdentifier(makeUniqueIdentifier(std::move(identifier)));
 
     _texturePath.onChange([this]() { _textureIsDirty = true; });
     _texturePath = p.url.value_or(_texturePath);

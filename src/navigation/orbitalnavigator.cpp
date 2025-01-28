@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -1109,6 +1110,7 @@ void OrbitalNavigator::setAnchorNode(const SceneGraphNode* anchorNode,
 
     const bool changedAnchor = _anchorNode != anchorNode;
     _anchorNode = anchorNode;
+    _syncedAnchorNode = anchorNode ? anchorNode->identifier() : "";
 
     // Need to reset velocities after the actual switch in anchor node,
     // since the reset behavior depends on the anchor node.
@@ -2082,6 +2084,21 @@ double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(
     return distFromCenterToSurface > 0.0 ?
         glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
         1.0;
+}
+
+void OrbitalNavigator::updateAnchor() {
+    ghoul_assert(
+        !global::windowDelegate->isMaster(),
+        "Anchor should only be synced on nodes, not on master"
+    );
+
+    if (!_syncedAnchorNode.data().empty()) {
+        setAnchorNode(_syncedAnchorNode);
+    }
+}
+
+std::vector<Syncable*> OrbitalNavigator::syncables() {
+    return { &_syncedAnchorNode };
 }
 
 scripting::LuaLibrary OrbitalNavigator::luaLibrary() {

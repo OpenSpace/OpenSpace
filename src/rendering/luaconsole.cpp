@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -455,11 +455,12 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     if (key == Key::Enter || key == Key::KeypadEnter) {
         const std::string cmd = _commands.at(_activeCommand);
         if (!cmd.empty()) {
-            global::scriptEngine->queueScript(
-                cmd,
-                scripting::ScriptEngine::ShouldBeSynchronized(_shouldBeSynchronized),
-                scripting::ScriptEngine::ShouldSendToRemote(_shouldSendToRemote)
-            );
+            using Script = scripting::ScriptEngine::Script;
+            global::scriptEngine->queueScript({
+                .code = cmd,
+                .synchronized = Script::ShouldBeSynchronized(_shouldBeSynchronized),
+                .sendToRemote = Script::ShouldSendToRemote(_shouldSendToRemote)
+            });
 
             // Only add the current command to the history if it hasn't been
             // executed before. We don't want two of the same commands in a row

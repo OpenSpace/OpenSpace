@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,6 +75,7 @@ void TimeDialog::createWidgets() {
     {
         layout->addWidget(new QLabel("Time Type"));
         _typeCombo = new QComboBox;
+        _typeCombo->setAccessibleName("Time type");
         _typeCombo->setToolTip("Types: Absolute defined time or Relative to actual time");
         connect(
             _typeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
@@ -85,17 +86,19 @@ void TimeDialog::createWidgets() {
     {
         _absoluteLabel = new QLabel("Absolute UTC:");
         layout->addWidget(_absoluteLabel);
-        
+
         _absoluteEdit = new QDateTimeEdit;
         _absoluteEdit->setDisplayFormat("yyyy-MM-dd  T  hh:mm:ss");
         _absoluteEdit->setDateTime(QDateTime::currentDateTime());
+        _absoluteEdit->setAccessibleName("Set absolute time");
         layout->addWidget(_absoluteEdit);
     }
     {
         _relativeLabel = new QLabel("Relative Time:");
         layout->addWidget(_relativeLabel);
-        
+
         _relativeEdit = new QLineEdit;
+        _relativeEdit->setAccessibleName("Set relative time");
         _relativeEdit->setToolTip(
             "String for relative time to actual (e.g. \"-1d\" for back 1 day)"
         );

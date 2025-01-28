@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -219,9 +219,7 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     setRenderBin(RenderBin::Overlay);
     addProperty(Fadeable::_opacity);
 
-    _translation = Translation::createFromDictionary(
-        dictionary.value<ghoul::Dictionary>("Translation")
-    );
+    _translation = Translation::createFromDictionary(p.translation);
     addPropertySubOwner(_translation.get());
 
     _appearance.lineColor = p.color;

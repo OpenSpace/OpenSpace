@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,7 @@ namespace openspace::interaction {
 class ActionManager {
 public:
     BooleanType(ShouldBeSynchronized);
+    BooleanType(ShouldBeLogged);
 
     bool hasAction(const std::string& identifier) const;
     void registerAction(Action action);
@@ -44,7 +45,8 @@ public:
     std::vector<Action> actions() const;
 
     void triggerAction(const std::string& identifier, const ghoul::Dictionary& arguments,
-        ShouldBeSynchronized shouldBeSynchronized) const;
+        ShouldBeSynchronized shouldBeSynchronized,
+        ShouldBeLogged shouldBeLogged = ShouldBeLogged::No) const;
     static scripting::LuaLibrary luaLibrary();
 
 private:

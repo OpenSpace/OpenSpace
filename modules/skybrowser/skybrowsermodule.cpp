@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -159,6 +159,10 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation SkyBrowserModule::Documentation() {
+    return codegen::doc<Parameters>("module_skybrowser");
+}
 
 SkyBrowserModule::SkyBrowserModule()
     : OpenSpaceModule(SkyBrowserModule::Name)
@@ -345,14 +349,9 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
     // Show the circle
     if (useScript) {
         const std::string script = std::format(
-            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);",
-            id
+            "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 1.0);", id
         );
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(script);
     }
     else {
         Renderable* renderable = _hoverCircle->renderable();
@@ -372,11 +371,7 @@ void SkyBrowserModule::moveHoverCircle(const std::string& imageUrl, bool useScri
         "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
         id, ghoul::to_string(pos)
     );
-    global::scriptEngine->queueScript(
-        script,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(script);
 }
 
 void SkyBrowserModule::disableHoverCircle(bool useScript) {
@@ -386,11 +381,7 @@ void SkyBrowserModule::disableHoverCircle(bool useScript) {
                 "openspace.setPropertyValueSingle('Scene.{}.Renderable.Fade', 0.0);",
                 _hoverCircle->identifier()
             );
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript(script);
         }
         else {
             _hoverCircle->renderable()->property("Fade")->set(0.f);

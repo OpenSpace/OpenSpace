@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -97,9 +97,10 @@ std::filesystem::path HttpSynchronization::directory() const {
 }
 
 void HttpSynchronization::start() {
-    if (isSyncing()) {
+    if (isSyncing() || isRejected()) {
         return;
     }
+
     _state = State::Syncing;
 
     const bool isSynced = isEachFileDownloaded();
@@ -108,9 +109,6 @@ void HttpSynchronization::start() {
         return;
     }
 
-    if (isRejected()) {
-        return;
-    }
 
     const std::string query = std::format(
         "?identifier={}&file_version={}&application_version={}",

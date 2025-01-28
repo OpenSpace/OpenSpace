@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <modules/server/include/serverinterface.h>
 #include <modules/server/include/connection.h>
 #include <modules/server/include/topics/topic.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -41,10 +42,19 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    constexpr std::string_view KeyInterfaces = "Interfaces";
+    struct [[codegen::Dictionary(ServerModule)]] Parameters {
+        std::optional<ghoul::Dictionary> interfaces;
+        std::optional<std::vector<std::string>> allowAddresses;
+        std::optional<int> skyBrowserUpdateTime;
+    };
+#include "servermodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation ServerModule::Documentation() {
+    return codegen::doc<Parameters>("module_server");
+}
 
 ServerModule::ServerModule()
     : OpenSpaceModule(ServerModule::Name)
@@ -93,26 +103,17 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
         preSync();
     });
 
-    if (!configuration.hasValue<ghoul::Dictionary>(KeyInterfaces)) {
+    const Parameters p = codegen::bake<Parameters>(configuration);
+    if (!p.interfaces.has_value()) {
         return;
     }
-    const ghoul::Dictionary interfaces =
-        configuration.value<ghoul::Dictionary>(KeyInterfaces);
 
-    for (const std::string_view key : interfaces.keys()) {
-        ghoul::Dictionary interfaceDictionary = interfaces.value<ghoul::Dictionary>(key);
 
-        // @TODO (abock, 2019-09-17);  This is a hack to make the parsing of the
-        // openspace.cfg file not corrupt the heap and cause a potential crash at shutdown
-        // (see ticket https://github.com/OpenSpace/OpenSpace/issues/982)
-        // The AllowAddresses are specified externally and are injected here
-        interfaceDictionary.setValue(
-            "AllowAddresses",
-            configuration.value<ghoul::Dictionary>("AllowAddresses")
-        );
+    for (const std::string_view key : p.interfaces->keys()) {
+        ghoul::Dictionary interface = p.interfaces->value<ghoul::Dictionary>(key);
 
         std::unique_ptr<ServerInterface> serverInterface =
-            ServerInterface::createFromDictionary(interfaceDictionary);
+            ServerInterface::createFromDictionary(interface);
 
         serverInterface->initialize();
 
@@ -122,11 +123,8 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
             _interfaces.push_back(std::move(serverInterface));
         }
     }
-    if (configuration.hasValue<double>("SkyBrowserUpdateTime")) {
-        _skyBrowserUpdateTime = static_cast<int>(
-            configuration.value<double>("SkyBrowserUpdateTime")
-        );
-    }
+
+    _skyBrowserUpdateTime = p.skyBrowserUpdateTime.value_or(_skyBrowserUpdateTime);
 }
 
 void ServerModule::preSync() {

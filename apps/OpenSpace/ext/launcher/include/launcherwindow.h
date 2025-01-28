@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,8 @@
 
 #include "sgctedit/sgctedit.h"
 #include <openspace/scene/profile.h>
+#include <sgct/config.h>
 #include <sgct/error.h>
-#include <sgct/readconfig.h>
 #include <QApplication>
 #include <filesystem>
 #include <optional>
@@ -87,6 +87,13 @@ public:
       * \return `true` if window configuration is a user configuration file
       */
     bool isUserConfigSelected() const;
+
+    /**
+     * Handles keypresses while the Qt launcher window is open.
+     *
+     * \param evt QKeyEevent object of the key press event
+     */
+    void keyPressEvent(QKeyEvent* evt) override;
 
 private:
     QWidget* createCentralWidget();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,11 +49,7 @@ namespace {
             "openspace.setPropertyValueSingle('Scene.{}.Translation.Position', {});",
             id, ghoul::to_string(positionCelestial)
         );
-        openspace::global::scriptEngine->queueScript(
-            script,
-            openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        openspace::global::scriptEngine->queueScript(script);
     }
 } // namespace
 
@@ -328,11 +324,7 @@ void TargetBrowserPair::startFading(float goal, float fadeTime) {
         _targetNode->identifier(), _browser->identifier(), goal, fadeTime
     );
 
-    global::scriptEngine->queueScript(
-        script,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(script);
 }
 
 void TargetBrowserPair::stopAnimations() {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,9 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <openspace/documentation/documentation.h>
@@ -39,6 +41,7 @@
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <filesystem>
 #include <fstream>
+
 #include "scriptengine_lua.inl"
 
 namespace {
@@ -103,6 +106,12 @@ void ScriptEngine::deinitialize() {
     ZoneScoped;
 
     _registeredLibraries.clear();
+    for (const RepeatedScriptInfo& info : _repeatedScripts) {
+        if (info.postScript.empty()) {
+            queueScript(info.postScript);
+        }
+    }
+    _repeatedScripts.clear();
 }
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
@@ -163,78 +172,71 @@ bool ScriptEngine::hasLibrary(const std::string& name) {
     return (it != _registeredLibraries.end());
 }
 
-bool ScriptEngine::runScript(const std::string& script, const ScriptCallback& callback) {
+bool ScriptEngine::runScript(const Script& script) {
     ZoneScoped;
-    ZoneText(script.c_str(), script.size());
+    ZoneText(script.code.c_str(), script.code.size());
 
-    ghoul_assert(!script.empty(), "Script must not be empty");
+    ghoul_assert(!script.code.empty(), "Script must not be empty");
+    ghoul_assert(
+        !(script.addToLog && ghoul::lua::isScriptBinary(script.code)),
+        "Shouldn't try to add a script to a log that is a binary blob"
+    );
 
-    if (_logScripts && script[0] != '\x1b') {
-        // \x1b = A byte in the beginning that Lua uses to represent whether a string is
-        // an ASCII or a binary blob. We don't want to print binary blobs into the log
-        writeLog(script);
+    // Binary scripts should never be logged
+    if (_logScripts && !ghoul::lua::isScriptBinary(script.code)) {
+        if (script.addToLog && !global::configuration->verboseScriptLog) {
+            writeLog(script.code);
+        }
+        else if (global::configuration->verboseScriptLog) {
+            // Even if the script doesn't want to get logged, it will get anyway if
+            // verbose logging is enabled
+            writeLog(std::format(
+                "{}{}{}{}",
+                script.addToLog ? "" : "--[[generated]]",
+                script.synchronized ? "--[[sync]]" : "--[[!sync]]",
+                script.sendToRemote ? "--[[sendRemote]]" : "--[[!sendRemote]]",
+                script.code
+            ));
+        }
     }
 
     try {
-        if (callback) {
+        if (script.callback) {
             ghoul::Dictionary returnValue =
-                ghoul::lua::loadArrayDictionaryFromString(script, _state);
-            callback(std::move(returnValue));
+                ghoul::lua::loadArrayDictionaryFromString(script.code, _state);
+            script.callback(std::move(returnValue));
         }
         else {
-            ghoul::lua::runScript(_state, script);
+            ghoul::lua::runScript(_state, script.code);
         }
     }
     catch (const ghoul::lua::LuaLoadingException& e) {
         LERRORC(e.component, e.message);
-        if (callback) {
-            callback(ghoul::Dictionary());
+        if (script.callback) {
+            script.callback(ghoul::Dictionary());
         }
         return false;
     }
     catch (const ghoul::lua::LuaExecutionException& e) {
         LERRORC(e.component, e.message);
-        if (callback) {
-            callback(ghoul::Dictionary());
+        if (script.callback) {
+            script.callback(ghoul::Dictionary());
         }
         return false;
     }
     catch (const documentation::SpecificationError& e) {
         LERRORC(e.component, e.message);
         documentation::logError(e, e.component);
-        if (callback) {
-            callback(ghoul::Dictionary());
+        if (script.callback) {
+            script.callback(ghoul::Dictionary());
         }
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
-        if (callback) {
-            callback(ghoul::Dictionary());
+        if (script.callback) {
+            script.callback(ghoul::Dictionary());
         }
-        return false;
-    }
-
-    return true;
-}
-
-bool ScriptEngine::runScriptFile(const std::filesystem::path& filename) {
-    ZoneScoped;
-
-    if (!std::filesystem::is_regular_file(filename)) {
-        LERROR(std::format("Script with name {} did not exist", filename));
-        return false;
-    }
-
-    try {
-        ghoul::lua::runScriptFile(_state, filename);
-    }
-    catch (const ghoul::lua::LuaLoadingException& e) {
-        LERRORC(e.component, e.message);
-        return false;
-    }
-    catch (const ghoul::lua::LuaExecutionException& e) {
-        LERRORC(e.component, e.message);
         return false;
     }
 
@@ -451,7 +453,6 @@ void ScriptEngine::writeLog(const std::string& script) {
                 LERROR(std::format(
                     "Could not open file '{}' for logging scripts", _logFilename
                 ));
-
                 return;
             }
         }
@@ -477,34 +478,33 @@ void ScriptEngine::preSync(bool isMaster) {
     std::lock_guard guard(_clientScriptsMutex);
     if (isMaster) {
         while (!_incomingScripts.empty()) {
-            QueueItem item = std::move(_incomingScripts.front());
+            Script item = std::move(_incomingScripts.front());
             _incomingScripts.pop();
 
             // Not really a received script but the master also needs to run the script...
             _masterScriptQueue.push(item);
 
-            if (global::sessionRecording->isRecording()) {
-                global::sessionRecording->saveScriptKeyframeToTimeline(item.script);
+            if (global::sessionRecordingHandler->isRecording()) {
+                global::sessionRecordingHandler->saveScriptKeyframeToTimeline(item.code);
             }
 
             // Sync out to other nodes (cluster)
-            if (!item.shouldBeSynchronized) {
+            if (!item.synchronized) {
                 continue;
             }
-            _scriptsToSync.push_back(item.script);
+            _scriptsToSync.push_back(item.code);
 
             // Send to other peers (parallel connection)
-            const bool shouldSendToRemote = item.shouldSendToRemote;
-            if (global::parallelPeer->isHost() && shouldSendToRemote) {
-                global::parallelPeer->sendScript(item.script);
+            if (global::parallelPeer->isHost() && item.sendToRemote) {
+                global::parallelPeer->sendScript(item.code);
             }
         }
     }
     else {
         while (!_incomingScripts.empty()) {
-            QueueItem item = std::move(_incomingScripts.front());
+            Script item = std::move(_incomingScripts.front());
             _incomingScripts.pop();
-            _clientScriptQueue.push(item.script);
+            _clientScriptQueue.push(item.code);
         }
     }
 }
@@ -539,11 +539,10 @@ void ScriptEngine::postSync(bool isMaster) {
 
     if (isMaster) {
         while (!_masterScriptQueue.empty()) {
-            std::string script = std::move(_masterScriptQueue.front().script);
-            ScriptCallback callback = std::move(_masterScriptQueue.front().callback);
+            Script script = std::move(_masterScriptQueue.front());
             _masterScriptQueue.pop();
             try {
-                runScript(script, callback);
+                runScript(script);
             }
             catch (const ghoul::RuntimeError& e) {
                 LERRORC(e.component, e.message);
@@ -555,7 +554,7 @@ void ScriptEngine::postSync(bool isMaster) {
         std::lock_guard guard(_clientScriptsMutex);
         while (!_clientScriptQueue.empty()) {
             try {
-                runScript(_clientScriptQueue.front());
+                runScript({ _clientScriptQueue.front() });
                 _clientScriptQueue.pop();
             }
             catch (const ghoul::RuntimeError& e) {
@@ -563,26 +562,97 @@ void ScriptEngine::postSync(bool isMaster) {
             }
         }
     }
+
+    double now =
+        global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
+        global::sessionRecordingHandler->currentApplicationInterpolationTime() :
+        global::windowDelegate->applicationTime();
+    for (RepeatedScriptInfo& info : _repeatedScripts) {
+        if (now - info.lastRun >= info.timeout) {
+            runScript({ info.script });
+            info.lastRun = now;
+        }
+    }
+
+    for (size_t i = 0; i < _scheduledScripts.size(); i++) {
+        const ScheduledScriptInfo& info = _scheduledScripts[i];
+        if (now > info.timestamp) {
+            runScript({ info.script });
+            _scheduledScripts.erase(_scheduledScripts.begin() + i);
+            i--;
+        }
+    }
 }
 
-void ScriptEngine::queueScript(std::string script,
-                               ScriptEngine::ShouldBeSynchronized shouldBeSynchronized,
-                               ScriptEngine::ShouldSendToRemote shouldSendToRemote,
-                               ScriptCallback callback)
-{
+void ScriptEngine::queueScript(Script script) {
     ZoneScoped;
 
-    if (script.empty()) {
+    if (script.code.empty()) {
         return;
     }
-    _incomingScripts.push({
-        std::move(script),
-        shouldBeSynchronized,
-        shouldSendToRemote,
-        std::move(callback)
-    });
+    _incomingScripts.push(std::move(script));
 }
 
+void ScriptEngine::queueScript(std::string script) {
+    queueScript({ .code = std::move(script) });
+}
+
+void ScriptEngine::registerRepeatedScript(std::string identifier, std::string script,
+                                          double timeout, std::string preScript,
+                                          std::string postScript)
+{
+    auto it = std::find_if(
+        _repeatedScripts.begin(),
+        _repeatedScripts.end(),
+        [&identifier](const RepeatedScriptInfo& info) {
+            return info.identifier == identifier;
+        }
+    );
+    if (it != _repeatedScripts.end()) {
+        throw ghoul::RuntimeError(
+            std::format("Script with identifier '{}' already registered", identifier),
+            "ScriptEngine"
+        );
+    }
+
+    if (!preScript.empty()) {
+        runScript({ std::move(preScript) });
+    }
+    _repeatedScripts.emplace_back(
+        std::move(script),
+        std::move(postScript),
+        std::move(identifier),
+        timeout
+    );
+}
+
+void ScriptEngine::removeRepeatedScript(std::string_view identifier) {
+    auto it = std::find_if(
+        _repeatedScripts.begin(),
+        _repeatedScripts.end(),
+        [&identifier](const RepeatedScriptInfo& info) {
+            return info.identifier == identifier;
+        }
+    );
+    if (it != _repeatedScripts.end()) {
+        if (!it->postScript.empty()) {
+            queueScript(it->postScript);
+        }
+
+        _repeatedScripts.erase(it);
+    }
+    else {
+        LERROR(std::format("Could not find script with identifier '{}'", identifier));
+    }
+}
+
+void ScriptEngine::scheduleScript(std::string script, double delay) {
+    double now =
+        global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
+        global::sessionRecordingHandler->currentApplicationInterpolationTime() :
+        global::windowDelegate->applicationTime();
+    _scheduledScripts.emplace_back(std::move(script), now + delay);
+}
 
 void ScriptEngine::addBaseLibrary() {
     ZoneScoped;
@@ -661,7 +731,10 @@ void ScriptEngine::addBaseLibrary() {
             codegen::lua::WalkDirectoryFiles,
             codegen::lua::WalkDirectoryFolders,
             codegen::lua::DirectoryForPath,
-            codegen::lua::UnzipFile
+            codegen::lua::UnzipFile,
+            codegen::lua::RegisterRepeatedScript,
+            codegen::lua::RemoveRepeatedScript,
+            codegen::lua::ScheduleScript
         }
     };
     addLibrary(lib);

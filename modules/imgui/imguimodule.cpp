@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/rendering/dashboard.h>
@@ -258,7 +258,7 @@ void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
         global::screenSpaceRootPropertyOwner,
         global::moduleEngine,
         global::navigationHandler,
-        global::sessionRecording,
+        global::sessionRecordingHandler,
         global::timeManager,
         global::renderEngine,
         global::parallelPeer,

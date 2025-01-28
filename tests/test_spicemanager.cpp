@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,198 +37,54 @@ namespace {
     // The remaining methods rely on multiple kernels, loaded as a SPICE 'meta-kernel'
     void loadMetaKernel() {
         const int k1 = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
-        );
-        CHECK(k1 == 1);
-
-        const int k2 = SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/cas00084.tsc")
         );
-        CHECK(k2 == 2);
+        CHECK(k1 == 3);
 
-        const int k3 = SpiceManager::ref().loadKernel(
+        const int k2 = SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/981005_PLTEPH-DE405S.bsp")
         );
-        CHECK(k3 == 3);
+        CHECK(k2 == 4);
 
-        const int k4 = SpiceManager::ref().loadKernel(
+        const int k3 = SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/020514_SE_SAT105.bsp")
         );
-        CHECK(k4 == 4);
+        CHECK(k3 == 5);
 
-        const int k5 = SpiceManager::ref().loadKernel(
+        const int k4 = SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/030201AP_SK_SM546_T45.bsp")
         );
-        CHECK(k5 == 5);
+        CHECK(k4 == 6);
 
-        const int k6 = SpiceManager::ref().loadKernel(
+        const int k5 = SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/cas_v37.tf")
         );
-        CHECK(k6 == 6);
+        CHECK(k5 == 7);
 
-        const int k7 = SpiceManager::ref().loadKernel(
+        const int k6 = SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/04135_04171pc_psiv2.bc")
         );
-        CHECK(k7 == 7);
+        CHECK(k6 == 8);
 
-        const int k8 = SpiceManager::ref().loadKernel(
+        const int k7 = SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
         );
-        CHECK(k8 == 8);
+        CHECK(k7 == 9);
 
-        const int k9 = SpiceManager::ref().loadKernel(
+        const int k8 = SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/cas_iss_v09.ti")
         );
-        CHECK(k9 == 9);
-    }
-
-    int loadLSKKernel() {
-        const int kernelID = SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
-        );
-        CHECK(kernelID == 1);
-        return kernelID;
+        CHECK(k8 == 10);
     }
 
     int loadPCKKernel() {
         const int kernelID = SpiceManager::ref().loadKernel(
             absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
         );
-        CHECK(kernelID == 1);
+        CHECK(kernelID == 3);
         return kernelID;
     }
 } // namespace
-
-TEST_CASE("SpiceManager: Load Single Kernel", "[spicemanager]") {
-    constexpr int FileLength = 128;
-    constexpr int TypeLength = 32;
-    constexpr int SourceLength = 128;
-
-    SpiceManager::initialize();
-
-    loadLSKKernel();
-
-    SpiceInt handle = 0;
-    std::array<char, FileLength> file;
-    std::array<char, TypeLength> filtyp;
-    std::array<char, SourceLength> source;
-    SpiceBoolean found = SPICEFALSE;
-    kdata_c(
-        0,
-        "text",
-        FileLength,
-        TypeLength,
-        SourceLength,
-        file.data(),
-        filtyp.data(),
-        source.data(),
-        &handle,
-        &found
-    );
-    CHECK(found == SPICETRUE);
-
-    SpiceManager::deinitialize();
-}
-
-TEST_CASE("SpiceManager: Unload Kernel String", "[spicemanager]") {
-    constexpr int FileLength = 128;
-    constexpr int TypeLength = 32;
-    constexpr int SourceLength = 128;
-
-    SpiceManager::initialize();
-
-    loadLSKKernel();
-
-    SpiceInt handle = 0;
-    std::array<char, FileLength> file;
-    std::array<char, TypeLength> filtyp;
-    std::array<char, SourceLength> source;
-    SpiceBoolean found = SPICEFALSE;
-    kdata_c(
-        0,
-        "text",
-        FileLength,
-        TypeLength,
-        SourceLength,
-        file.data(),
-        filtyp.data(),
-        source.data(),
-        &handle,
-        &found
-    );
-    CHECK(found == SPICETRUE);
-
-    // unload using string keyword
-    SpiceManager::ref().unloadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
-    );
-
-    found = SPICEFALSE;
-    kdata_c(
-        0,
-        "text",
-        FileLength,
-        TypeLength,
-        SourceLength,
-        file.data(),
-        filtyp.data(),
-        source.data(),
-        &handle,
-        &found
-    );
-    CHECK(found != SPICETRUE);
-
-    SpiceManager::deinitialize();
-}
-
-TEST_CASE("SpiceManager: Unload Kernel Integer", "[spicemanager]") {
-    constexpr int FileLength = 128;
-    constexpr int TypeLength = 32;
-    constexpr int SourceLength = 128;
-
-    SpiceManager::initialize();
-
-    const int kernelID = loadLSKKernel();
-
-    SpiceInt handle = 0;
-    std::array<char, FileLength> file;
-    std::array<char, TypeLength> filtyp;
-    std::array<char, SourceLength> source;
-    SpiceBoolean found = SPICEFALSE;
-    kdata_c(
-        0,
-        "text",
-        FileLength,
-        TypeLength,
-        SourceLength,
-        file.data(),
-        filtyp.data(),
-        source.data(),
-        &handle,
-        &found
-    );
-    CHECK(found == SPICETRUE);
-
-    // unload using unique int ID
-    SpiceManager::ref().unloadKernel(kernelID);
-
-    found = SPICEFALSE;
-    kdata_c(
-        0,
-        "text",
-        FileLength,
-        TypeLength,
-        SourceLength,
-        file.data(),
-        filtyp.data(),
-        source.data(),
-        &handle,
-        &found
-    );
-    CHECK(found != SPICETRUE);
-
-    SpiceManager::deinitialize();
-}
 
 TEST_CASE("SpiceManager: Has Value", "[spicemanager]") {
     SpiceManager::initialize();
@@ -298,8 +154,6 @@ TEST_CASE("SpiceManager: Get Value From ID ND", "[spicemanager]") {
 
 TEST_CASE("SpiceManager: String To Ephemeris Time", "[spicemanager]") {
     SpiceManager::initialize();
-
-    loadLSKKernel();
 
     double control_ephemerisTime = 0.0;
     const std::string date = "Thu Mar 20 12:53:29 PST 1997";
@@ -375,7 +229,7 @@ TEST_CASE("SpiceManager: Get Target State", "[spicemanager]") {
         res = SpiceManager::ref().targetState("EARTH", "CASSINI", "J2000", corr, et)
     );
 
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 3; i++) {
         CHECK(state[i] == Catch::Approx(res.position[i]));
         CHECK(state[i+3] == Catch::Approx(res.velocity[i]));
     }

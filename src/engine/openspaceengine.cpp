@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,8 +40,8 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/keyframerecording.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/interaction/tasks/convertrecformattask.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
@@ -63,6 +63,7 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
@@ -92,6 +93,8 @@
 
 #ifdef WIN32
 #include <Windows.h>
+#include <Pdh.h>
+#include "Psapi.h"
 #endif // WIN32
 
 #ifdef __APPLE__
@@ -106,6 +109,12 @@ namespace {
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     constexpr std::string_view _loggerCat = "OpenSpaceEngine";
+
+#ifdef WIN32
+    // This counter is used to measure the VRAM usage of OpenSpace
+    PDH_HQUERY vramQuery;
+    PDH_HCOUNTER vramCounter;
+#endif // WIN32
 
     constexpr std::string_view stringify(openspace::OpenSpaceEngine::Mode m) {
         using Mode = openspace::OpenSpaceEngine::Mode;
@@ -222,6 +231,27 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     addProperty(_fadeOnEnableDuration);
     addProperty(_disableAllMouseInputs);
+
+
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "No task factory existed");
+    fTask->registerClass<interaction::ConvertRecFormatTask>("ConvertRecFormatTask");
+
+#ifdef WIN32
+    PDH_STATUS status = PdhOpenQueryA(nullptr, 0, &vramQuery);
+    if (status != ERROR_SUCCESS) {
+        LWARNING("Error opening Performance Query for VRAM usage");
+    }
+
+    const std::string queryStr = std::format(
+        "\\GPU Process Memory(pid_{}*)\\Dedicated Usage",
+        GetCurrentProcessId()
+    );
+    status = PdhAddEnglishCounterA(vramQuery, queryStr.c_str(), 0, &vramCounter);
+    if (status != ERROR_SUCCESS) {
+        LWARNING("Error add Performance Query for VRAM usage");
+    }
+#endif // WIN32
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {}
@@ -380,12 +410,15 @@ void OpenSpaceEngine::initialize() {
 
     // After registering the modules, the documentations for the available classes
     // can be added as well
+    for (documentation::Documentation d : global::moduleEngine->moduleDocumentations()) {
+        DocEng.addDocumentation(std::move(d));
+    }
     for (OpenSpaceModule* m : global::moduleEngine->modules()) {
         for (const documentation::Documentation& doc : m->documentations()) {
             DocEng.addDocumentation(doc);
         }
     }
-    DocEng.addDocumentation(Configuration::Documentation);
+    DocEng.addDocumentation(Configuration::Documentation());
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
@@ -807,6 +840,9 @@ void OpenSpaceEngine::loadAssets() {
     global::renderEngine->updateScene();
 
     global::syncEngine->addSyncables(global::timeManager->syncables());
+    global::syncEngine->addSyncables(
+        global::navigationHandler->orbitalNavigator().syncables()
+    );
     if (_scene && _scene->camera()) {
         global::syncEngine->addSyncables(_scene->camera()->syncables());
     }
@@ -845,7 +881,6 @@ void OpenSpaceEngine::deinitialize() {
             global::renderEngine->scene()->camera()->syncables()
         );
     }
-    global::sessionRecording->deinitialize();
     global::versionChecker->cancel();
 
     _assetManager = nullptr;
@@ -914,6 +949,53 @@ void OpenSpaceEngine::createUserDirectoriesIfNecessary() {
     }
 }
 
+uint64_t OpenSpaceEngine::ramInUse() const {
+#ifdef WIN32
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    BOOL success = GetProcessMemoryInfo(
+        GetCurrentProcess(),
+        reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
+        sizeof(PROCESS_MEMORY_COUNTERS_EX)
+    );
+    if (!success) {
+        LERROR("Error retrieving RAM usage");
+        return 0;
+    }
+
+    return pmc.PrivateUsage;
+#else // ^^^^ WIN32 // !WIN32 vvvv
+    LWARNING("Unsupported operating");
+    return 0;
+#endif
+}
+
+uint64_t OpenSpaceEngine::vramInUse() const {
+#ifdef WIN32
+    PDH_STATUS status = PdhCollectQueryData(vramQuery);
+    if (status != ERROR_SUCCESS) {
+        LERROR("Error collecting VRAM query data");
+        return 0;
+    }
+
+    PDH_FMT_COUNTERVALUE value;
+    status = PdhGetFormattedCounterValue(
+        vramCounter,
+        PDH_FMT_LARGE | PDH_FMT_NOSCALE,
+        nullptr,
+        &value
+    );
+    if (status != ERROR_SUCCESS) {
+        LERROR("Error formatting VRAM query data");
+        return 0;
+    }
+    LONGLONG v = value.largeValue;
+    return v;
+#else // ^^^^ WIN32 // !WIN32 vvvv
+    LWARNING("Unsupported operating");
+    return 0;
+#endif
+}
+
 void OpenSpaceEngine::runGlobalCustomizationScripts() {
     ZoneScoped;
 
@@ -974,6 +1056,10 @@ void OpenSpaceEngine::loadFonts() {
 void OpenSpaceEngine::preSynchronization() {
     ZoneScoped;
     TracyGpuZone("preSynchronization");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
 
@@ -1002,8 +1088,8 @@ void OpenSpaceEngine::preSynchronization() {
     global::syncEngine->preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
         const double dt =
-            global::sessionRecording->isSavingFramesDuringPlayback() ?
-            global::sessionRecording->fixedDeltaTimeDuringFrameOutput() :
+            global::sessionRecordingHandler->isSavingFramesDuringPlayback() ?
+            global::sessionRecordingHandler->fixedDeltaTimeDuringFrameOutput() :
             global::windowDelegate->deltaTime();
 
         global::timeManager->preSynchronization(dt);
@@ -1016,11 +1102,7 @@ void OpenSpaceEngine::preSynchronization() {
                 continue;
             }
 
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript(script);
 
             global::eventEngine->publishEvent<events::EventScheduledScriptExecuted>(
                 script
@@ -1036,14 +1118,17 @@ void OpenSpaceEngine::preSynchronization() {
                 camera->invalidateCache();
             }
         }
-        global::sessionRecording->preSynchronization();
-        global::keyframeRecording->preSynchronization(dt);
+        global::sessionRecordingHandler->preSynchronization(dt);
         global::parallelPeer->preSynchronization();
         global::interactionMonitor->updateActivityState();
     }
 
     for (const std::function<void()>& func : *global::callback::preSync) {
         ZoneScopedN("[Module] preSync");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
         func();
     }
@@ -1070,6 +1155,10 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     ZoneScoped;
     TracyGpuZone("postSynchronizationPreDraw");
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
     const bool master = global::windowDelegate->isMaster();
     global::syncEngine->postSynchronization(SyncEngine::IsMaster(master));
@@ -1094,11 +1183,16 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     global::luaConsole->update();
 
     if (!master) {
+        global::navigationHandler->orbitalNavigator().updateAnchor();
         _scene->camera()->invalidateCache();
     }
 
     for (const std::function<void()>& func : *global::callback::postSyncPreDraw) {
         ZoneScopedN("[Module] postSyncPreDraw");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
         func();
     }
@@ -1132,12 +1226,21 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
     TracyGpuZone("Render");
     LTRACE("OpenSpaceEngine::render(begin)");
 
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
+
     viewportChanged();
 
     global::renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
 
     for (const std::function<void()>& func : *global::callback::render) {
         ZoneScopedN("[Module] render");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
         func();
     }
@@ -1149,6 +1252,10 @@ void OpenSpaceEngine::drawOverlays() {
     ZoneScoped;
     TracyGpuZone("Draw2D");
     LTRACE("OpenSpaceEngine::drawOverlays(begin)");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
     viewportChanged();
 
@@ -1160,11 +1267,16 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine->renderOverlays(_shutdown);
         global::luaConsole->render();
-        global::sessionRecording->render();
+        global::sessionRecordingHandler->render();
     }
 
     for (const std::function<void()>& func : *global::callback::draw2D) {
         ZoneScopedN("[Module] draw2D");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
+
         func();
     }
 
@@ -1174,12 +1286,20 @@ void OpenSpaceEngine::drawOverlays() {
 void OpenSpaceEngine::postDraw() {
     ZoneScoped;
     TracyGpuZone("postDraw");
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
     LTRACE("OpenSpaceEngine::postDraw(begin)");
 
     global::renderEngine->postDraw();
 
     for (const std::function<void()>& func : *global::callback::postDraw) {
         ZoneScopedN("[Module] postDraw");
+#ifdef TRACY_ENABLE
+        TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
+        TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
+#endif // TRACY_ENABLE
 
         func();
     }
@@ -1199,7 +1319,6 @@ void OpenSpaceEngine::postDraw() {
     }
     global::eventEngine->triggerActions();
     global::eventEngine->triggerTopics();
-
 
     global::eventEngine->postFrameCleanup();
     global::memoryManager->PersistentMemory.housekeeping();
@@ -1441,11 +1560,7 @@ void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
     }
 
     std::string script = ghoul::lua::value<std::string>(s);
-    global::scriptEngine->queueScript(
-        std::move(script),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(std::move(script));
 }
 
 std::vector<std::byte> OpenSpaceEngine::encode() {
@@ -1559,6 +1674,8 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::LayerServer,
             codegen::lua::LoadJson,
             codegen::lua::ResolveShortcut,
+            codegen::lua::VramInUse,
+            codegen::lua::RamInUse
         },
         {
             absPath("${SCRIPTS}/core_scripts.lua")
@@ -1641,11 +1758,7 @@ void setCameraFromProfile(const Profile& p) {
                         geo.anchor, geo.latitude, geo.longitude
                     );
                 }
-                global::scriptEngine->queueScript(
-                    geoScript,
-                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                    scripting::ScriptEngine::ShouldSendToRemote::Yes
-                );
+                global::scriptEngine->queueScript(geoScript);
             },
             [&checkNodeExists](const Profile::CameraGoToNode& node) {
                 using namespace interaction;
@@ -1673,20 +1786,12 @@ void setModulesFromProfile(const Profile& p) {
             });
         if (it != m.end()) {
             if (mod.loadedInstruction.has_value()) {
-                global::scriptEngine->queueScript(
-                    mod.loadedInstruction.value(),
-                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                    scripting::ScriptEngine::ShouldSendToRemote::Yes
-                );
+                global::scriptEngine->queueScript(mod.loadedInstruction.value());
             }
         }
         else {
             if (mod.notLoadedInstruction.has_value()) {
-                global::scriptEngine->queueScript(
-                    mod.notLoadedInstruction.value(),
-                    scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                    scripting::ScriptEngine::ShouldSendToRemote::Yes
-                );
+                global::scriptEngine->queueScript(mod.notLoadedInstruction.value());
             }
         }
     }
@@ -1747,11 +1852,7 @@ void setMarkInterestingNodesFromProfile(const Profile& p) {
 
 void setAdditionalScriptsFromProfile(const Profile& p) {
     for (const std::string& a : p.additionalScripts) {
-        global::scriptEngine->queueScript(
-            a,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(a);
     }
 }
 

@@ -1,0 +1,20 @@
+-- Basic
+-- This example adds a screen space image that shows the content of an OpenGL texture.
+-- This can be useful for debugging textures.
+--
+-- The texture that is displayed can be changed during runtime. Here it is just set to 1.
+
+local Object = {
+  Identifier = "ScreenSpaceDebugPlane_Example",
+  Type = "ScreenSpaceDebugPlane",
+  Texture = 1,
+  Name = "ScreenSpaceDebugPlane Example - Basic"
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Object)
+end)

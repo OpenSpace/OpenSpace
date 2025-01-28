@@ -359,7 +359,19 @@ end
 
 
 function sgct.makeConfig(config)
-  local configFile = os.tmpname() .. ".json"
+  --
+  -- Create a file in the operating system's `temp` folder
+  --
+
+  -- tmpname returns the name to a randomly chosen file within the `temp` folder
+  local tempFile = os.tmpname()
+  -- `package.config` contains the path separator used on the current platform
+  local directorySeparator = package.config:match("([^\n]*)\n?")
+  -- Remove the filename and only get the path to the temp folder
+  local separatorIdx = tempFile:reverse():find(directorySeparator)
+  local tempFolder = tempFile:sub(1, #tempFile - separatorIdx + 1)
+
+  local configFile = tempFolder .. "openspace-window-configuration.json"
   local file = io.open(configFile, "w+")
   file:write(config)
   io.close(file)

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -152,11 +152,10 @@ void IswaKameleonGroup::updateFieldlineSeeds() {
         if (it == options.end() && std::get<2>(seedPath.second)) {
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
 
-            global::scriptEngine->queueScript(
-                "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+            const std::string script = std::format(
+                "openspace.removeSceneGraphNode('{}')", std::get<0>(seedPath.second)
             );
+            global::scriptEngine->queueScript(script);
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
         }
@@ -180,11 +179,10 @@ void IswaKameleonGroup::clearFieldlines() {
         if (std::get<2>(seedPath.second)) {
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
 
-            global::scriptEngine->queueScript(
-                "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+            const std::string script = std::format(
+                "openspace.removeSceneGraphNode('{}')", std::get<0>(seedPath.second)
             );
+            global::scriptEngine->queueScript(script);
             std::get<2>(seedPath.second) = false;
         }
     }

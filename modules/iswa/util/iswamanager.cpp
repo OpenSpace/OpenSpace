@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,11 +85,10 @@ namespace {
     }
 
     void createScreenSpace(int id) {
+        using namespace openspace;
         std::string idStr = std::to_string(id);
-        openspace::global::scriptEngine->queueScript(
-            "openspace.iswa.addScreenSpaceCygnet({CygnetId =" + idStr + "});",
-            openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
+        global::scriptEngine->queueScript(
+            "openspace.iswa.addScreenSpaceCygnet({CygnetId =" + idStr + "});"
         );
     }
 } // namespace
@@ -546,11 +545,7 @@ void IswaManager::createPlane(MetadataFuture& data) {
     std::string luaTable = jsonPlaneToLuaTable(data);
     if (!luaTable.empty()) {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(script);
     }
 }
 
@@ -558,7 +553,7 @@ void IswaManager::createSphere(MetadataFuture& data) {
     // check if this sphere already exist
     std::string name = _type[data.type] + _geom[data.geom] + std::to_string(data.id);
 
-    if (!data.group.empty()){
+    if (!data.group.empty()) {
         std::string type = typeid(DataSphere).name();
         registerGroup(data.group, type);
 
@@ -580,11 +575,7 @@ void IswaManager::createSphere(MetadataFuture& data) {
     std::string luaTable = jsonSphereToLuaTable(data);
     if (luaTable != "") {
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        global::scriptEngine->queueScript(
-            script,
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript(script);
     }
 }
 
@@ -614,11 +605,7 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut) {
         std::string luaTable = parseKWToLuaTable(info, cut);
         if (!luaTable.empty()) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript(script);
         }
     }
     else {
@@ -656,11 +643,7 @@ void IswaManager::createFieldline(std::string name, std::filesystem::path cdfPat
         "}";
         if (!luaTable.empty()) {
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript(script);
         }
     }
     else {
@@ -710,7 +693,7 @@ void IswaManager::addCdfFiles(std::string cdfpath) {
 
         if (jsonFile.is_open()) {
             nlohmann::json cdfGroups = nlohmann::json::parse(jsonFile);
-            for(size_t i = 0; i < cdfGroups.size(); i++) {
+            for (size_t i = 0; i < cdfGroups.size(); i++) {
                 nlohmann::json cdfGroup = cdfGroups.at(i);
 
                 std::string groupName = cdfGroup["group"];

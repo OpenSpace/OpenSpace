@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -236,12 +236,8 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
             }
             catch (geos::util::IllegalStateException& e) {
                 throw ghoul::RuntimeError(std::format(
-                    "Non-simple (e.g. self-intersecting) polygons not supported yet. "
-                    "GEOS error: {}", e.what()
+                    "GEOS illegal state error: {}", e.what()
                 ));
-
-                // TODO: handle self-intersections points
-                // https://www.sciencedirect.com/science/article/pii/S0304397520304199
             }
             catch (geos::util::GEOSException& e) {
                 throw ghoul::RuntimeError(std::format(

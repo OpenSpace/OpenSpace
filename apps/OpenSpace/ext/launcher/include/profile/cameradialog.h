@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 
 class QLabel;
 class QLineEdit;
+class QMessageBox;
 class QTabWidget;
 
 class CameraDialog final : public QDialog {
@@ -88,7 +89,7 @@ private:
         QLineEdit* altitude = nullptr;
     } _geoState;
 
-    QLabel* _errorMsg = nullptr;
+    QMessageBox* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___CAMERA___H__

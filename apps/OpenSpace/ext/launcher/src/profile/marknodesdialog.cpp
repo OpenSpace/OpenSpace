@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,6 +65,7 @@ void MarkNodesDialog::createWidgets() {
 
     _removeButton = new QPushButton("Remove");
     connect(_removeButton, &QPushButton::clicked, this, &MarkNodesDialog::listItemRemove);
+    _removeButton->setAccessibleName("Remove node");
     layout->addWidget(_removeButton);
 
     {
@@ -78,6 +79,7 @@ void MarkNodesDialog::createWidgets() {
 
         QPushButton* addButton = new QPushButton("Add new");
         connect(addButton, &QPushButton::clicked, this, &MarkNodesDialog::listItemAdded);
+        addButton->setAccessibleName("Add new node");
         box->addWidget(addButton);
         layout->addLayout(box);
     }

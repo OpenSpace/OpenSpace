@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,7 +47,8 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VertexInfo = {
         "File",
         "Vertex File Path",
-        "A file that contains the vertex locations of the constellations bounds.",
+        "A file that contains the vertex locations of the constellations bounds, as RA "
+        "Dec coordinates on the celestial sphere.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -58,6 +59,32 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    // This `Renderable` type can be used to draw bounding shapes on the night sky, where
+    // each shape encapsulates a group of night sky objects, such as the stars of a
+    // constellation.
+    //
+    // The shapes are defined in a file where each line specifies a vertex location in RA
+    // Dec coordinates on the celestial sphere. Each coordinate must also be marked with
+    // an abbreviation for the corresponding constellation that the shapes encapsulates.
+    // This gives each line the following order: `RA Dec Abbreviation`. The units for the
+    // coordinate values are hours for RA, and degrees for Dec. An example of a line
+    // corresponding to a vertex location may look like this:
+    // `23.5357132 +35.1897736 AND`, where `AND` is the identifier of the constellation.
+    // In this case it is short for Andromeda.
+    //
+    // The abbreviations act as identifiers of the individual constellations and can
+    // be mapped to full names in the optional `NamesFile`. The names in this file are
+    // then the ones that will show in the user interface, for example. A line in the
+    // file should first include the abbreviation and then the full name. For example,
+    // for the `AND` abbreviation in the example above, the line would look like this:
+    // `AND Andromeda`.
+    //
+    // If labels were added, the full names in the `NamesFile` may also be used for the
+    // text of the labels. Note that labels are added using a different file, where each
+    // line may or may not include an identifier for that specific label, marked by `id`
+    // in the file. If a row in the label file has an `id` that matches the abbreviation
+    // of the constellation, the text of that label is replaced with the full name from
+    // the `NamesFile`.
     struct [[codegen::Dictionary(RenderableConstellationBounds)]] Parameters {
         // [[codegen::verbatim(VertexInfo.description)]]
         std::filesystem::path file;
@@ -289,7 +316,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
         // Likewise, the declination is stored in degrees and needs to be converted
         dec = glm::radians(dec);
 
-        // Convert the (right ascension, declination) to rectangular coordinates)
+        // Convert the (right ascension, declination) to rectangular coordinates.
         // The 1.0 is the distance of the celestial sphere, we will scale that in the
         // render function
         std::array<double, 3> rectangularValues;

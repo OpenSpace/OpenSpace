@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -91,8 +91,8 @@ namespace {
 
     std::chrono::steady_clock::time_point currentTimeForInterpolation() {
         using namespace openspace::global;
-        if (sessionRecording->isSavingFramesDuringPlayback()) {
-            return sessionRecording->currentPlaybackInterpolationTime();
+        if (sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+            return sessionRecordingHandler->currentPlaybackInterpolationTime();
         }
         else {
             return std::chrono::steady_clock::now();
@@ -554,11 +554,12 @@ void Scene::updateInterpolations() {
                 // triggered when the interpolation of the property was triggered,
                 // therefore it has already been synced and sent to the connected nodes
                 // and peers
-                global::scriptEngine->queueScript(
-                    std::move(i.postScript),
-                    scripting::ScriptEngine::ShouldBeSynchronized::No,
-                    scripting::ScriptEngine::ShouldSendToRemote::No
-                );
+                using Script = scripting::ScriptEngine::Script;
+                global::scriptEngine->queueScript({
+                    .code = std::move(i.postScript),
+                    .synchronized = Script::ShouldBeSynchronized::No,
+                    .sendToRemote = Script::ShouldSendToRemote::No
+                });
             }
 
             global::eventEngine->publishEvent<events::EventInterpolationFinished>(i.prop);
@@ -774,7 +775,7 @@ PropertyValueType Scene::propertyValueType(const std::string& value) {
 }
 
 std::vector<properties::Property*> Scene::propertiesMatchingRegex(
-                                                        const std::string& propertyString)
+                                                          std::string_view propertyString)
 {
     return findMatchesInAllProperties(propertyString, allProperties(), "");
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,12 +45,12 @@ KeyframeNavigator::CameraPose::CameraPose(datamessagestructures::CameraKeyframe&
     , followFocusNodeRotation(kf._followNodeRotation)
 {}
 
-bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
+void KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
     const double now = currentTime();
     bool foundPrevKeyframe = false;
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
-        return false;
+        return;
     }
 
     const Keyframe<CameraPose>* nextKeyframe =
@@ -66,7 +66,7 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         if (ignoreFutureKeyframes) {
             _cameraPoseTimeline.removeKeyframesBefore(now);
         }
-        return false;
+        return;
     }
 
     double prevTime = 0.0;
@@ -87,14 +87,12 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
     const CameraPose nextPose = nextKeyframe->data;
     _cameraPoseTimeline.removeKeyframesBefore(prevTime);
 
-    if (!foundPrevKeyframe && ignoreFutureKeyframes) {
-        return false;
+    if (foundPrevKeyframe || !ignoreFutureKeyframes) {
+        updateCamera(&camera, prevPose, nextPose, t, ignoreFutureKeyframes);
     }
-
-    return updateCamera(&camera, prevPose, nextPose, t, ignoreFutureKeyframes);
 }
 
-bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
+void KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
                                      const CameraPose& nextPose, double t,
                                      bool ignoreFutureKeyframes)
 {
@@ -103,7 +101,7 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
 
     if (!prevFocusNode || !nextFocusNode) {
-        return false;
+        return;
     }
 
     glm::dvec3 prevKeyframeCameraPosition = prevPose.position;
@@ -136,7 +134,7 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
 
     // Linear interpolation
     t = std::max(0.0, std::min(1.0, t));
-    const glm::dvec3 nowCameraPosition =
+    glm::dvec3 nowCameraPosition =
         prevKeyframeCameraPosition * (1.0 - t) + nextKeyframeCameraPosition * t;
     glm::dquat nowCameraRotation = glm::slerp(
         prevKeyframeCameraRotation,
@@ -158,8 +156,6 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
         );
         camera->setScaling(1.f / glm::exp(interpolatedInvScaleExp));
     }
-
-    return true;
 }
 
 double KeyframeNavigator::currentTime() const {

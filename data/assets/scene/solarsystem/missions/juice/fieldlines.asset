@@ -25,7 +25,8 @@ local GanymedeMagnetosphere = {
     Color = { 0.03, 0.0, 0.0, 1.0 },
     ParticleSpacing = 42.0,
     ParticleSize = 30.0,
-    FlowColor = { 1.0, 1.0, 1.0, 0.1 }
+    FlowColor = { 1.0, 1.0, 1.0, 0.1 },
+    DomainEnabled = false
 
   },
   GUI = {

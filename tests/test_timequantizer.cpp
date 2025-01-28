@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,14 +34,6 @@
 using namespace openspace;
 
 namespace {
-    int loadLSKKernel() {
-        const int kernelID = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls")
-        );
-        CHECK(kernelID == 1);
-        return kernelID;
-    }
-
     void singleTimeTest(Time& t, globebrowsing::TimeQuantizer& tq, bool clamp,
                         const std::string& input, const std::string& expected)
     {
@@ -113,7 +105,6 @@ namespace {
 TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
     SpiceManager::initialize();
 
-    loadLSKKernel();
     globebrowsing::TimeQuantizer t1;
     Time testT;
 
@@ -154,7 +145,6 @@ TEST_CASE("TimeQuantizer: Test years resolution", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test days resolution", "[timequantizer]") {
     SpiceManager::initialize();
 
-    loadLSKKernel();
     globebrowsing::TimeQuantizer t1;
     Time testT;
 
@@ -202,7 +192,6 @@ TEST_CASE("TimeQuantizer: Test days resolution", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
     SpiceManager::initialize();
 
-    loadLSKKernel();
     globebrowsing::TimeQuantizer t1;
     Time testT;
 
@@ -249,7 +238,6 @@ TEST_CASE("TimeQuantizer: Test months resolution", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test hours & minutes resolution", "[timequantizer]") {
     SpiceManager::initialize();
 
-    loadLSKKernel();
     globebrowsing::TimeQuantizer t1;
     Time testT;
 
@@ -288,7 +276,6 @@ TEST_CASE("TimeQuantizer: Test hours & minutes resolution", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test pre-2000 dates", "[timequantizer]") {
     SpiceManager::initialize();
 
-    loadLSKKernel();
     globebrowsing::TimeQuantizer t1;
     Time testT;
 
@@ -319,7 +306,6 @@ TEST_CASE("TimeQuantizer: Test pre-2000 dates", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test valid resolutions", "[timequantizer]") {
     SpiceManager::initialize();
 
-    loadLSKKernel();
     globebrowsing::TimeQuantizer t1;
 
     singleResolutionTest(t1, "29d", "(d)ay option.", true);
@@ -342,7 +328,6 @@ TEST_CASE("TimeQuantizer: Test valid resolutions", "[timequantizer]") {
 TEST_CASE("TimeQuantizer: Test start time pre-existing object", "[timequantizer]") {
     SpiceManager::initialize();
 
-    loadLSKKernel();
     globebrowsing::TimeQuantizer t1;
 
     singleStartTimeTest(t1, "2017-01-20T00:00:00", "Invalid start", false);
@@ -356,8 +341,6 @@ TEST_CASE("TimeQuantizer: Test start time pre-existing object", "[timequantizer]
 
 TEST_CASE("TimeQuantizer: Test start time using constructor", "[timequantizer]") {
     SpiceManager::initialize();
-
-    loadLSKKernel();
 
     singleStartTimeTest("2017-01-20T00:00:00", "Invalid start", false);
     singleStartTimeTest("2017-01-32T00:00:00", "For January the day must be at least 1.0D0 and less than 3.2E+01", true);

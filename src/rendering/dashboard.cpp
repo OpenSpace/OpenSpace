@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -148,13 +148,23 @@ glm::vec2 Dashboard::getStartPositionOffset() {
     return _startPositionOffset.value();
 }
 
+std::vector<DashboardItem*> Dashboard::dashboardItems() const {
+    std::vector<DashboardItem*> result;
+    result.reserve(_items.size());
+    for (const std::unique_ptr<DashboardItem>& d : _items) {
+        result.push_back(d.get());
+    }
+    return result;
+}
+
 scripting::LuaLibrary Dashboard::luaLibrary() {
     return {
         "dashboard",
         {
             codegen::lua::AddDashboardItem,
             codegen::lua::RemoveDashboardItem,
-            codegen::lua::ClearDashboardItems
+            codegen::lua::ClearDashboardItems,
+            codegen::lua::DashboardItems
         }
     };
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,12 @@
 
 namespace {
     struct [[codegen::Dictionary(TileProviderByDate)]] Parameters {
+        // The layer needs to know about the LayerGroupID this but we don't want it to be
+        // part of the parameters struct as that would mean it would be visible to the end
+        // user, which we don't want since this value just comes from whoever creates it,
+        // not the user.
+        int layerGroupID [[codegen::private()]];
+
         // Specifies the list of tile providers and for which times they are used for. The
         // tile provider with the earliest time will be used for all dates prior to that
         // date and the provider with the latest time will be used for all dates
@@ -53,16 +59,8 @@ TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {
 
     Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // For now we need to inject the LayerGroupID this way. We don't want it to be part of
-    // the parameters struct as that would mean it would be visible to the end user, which
-    // we don't want since this value just comes from whoever creates it, not the user
-    ghoul_assert(dictionary.hasValue<int>("LayerGroupID"), "No Layer Group ID provided");
-    const layers::Group::ID group = static_cast<layers::Group::ID>(
-        dictionary.value<int>("LayerGroupID")
-    );
-
     for (std::pair<const std::string, ghoul::Dictionary>& prov : p.providers) {
-        prov.second.setValue("LayerGroupID", static_cast<int>(group));
+        prov.second.setValue("LayerGroupID", p.layerGroupID);
 
         // Pass down the caching information from the enclosing dictionary
         if (dictionary.hasValue<std::string>("GlobeName")) {
@@ -70,12 +68,7 @@ TileProviderByDate::TileProviderByDate(const ghoul::Dictionary& dictionary) {
         }
         layers::Layer::ID typeID = layers::Layer::ID::DefaultTileProvider;
 
-        if (prov.second.hasValue<std::string>("Type")) {
-            const std::string type = prov.second.value<std::string>("Type");
-            typeID = ghoul::from_string<layers::Layer::ID>(type);
-        }
-
-        std::unique_ptr<TileProvider> tp = createFromDictionary(typeID, prov.second);
+        std::unique_ptr<TileProvider> tp = createFromDictionary(prov.second);
         const std::string provId = prov.second.value<std::string>("Identifier");
         tp->setIdentifier(provId);
         const std::string providerName = prov.second.value<std::string>("Name");

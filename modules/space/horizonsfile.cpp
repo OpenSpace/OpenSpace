@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -800,7 +800,7 @@ std::pair<std::string, std::string> HorizonsFile::parseValidTimeRange(
                 "{} T {}", words[words.size() - 2], words[words.size() - 1]
             );
         }
-        else if (words.size() > 2){
+        else if (words.size() > 2) {
             // Sometimes the format can be yyyy-mon-dd without time
             startTime = words[words.size() - 2];
             endTime = words[words.size() - 1];

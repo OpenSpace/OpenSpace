@@ -1,0 +1,70 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local band = asset.resource({
+  Name = "JWST band texture",
+  Type = "HttpSynchronization",
+  Identifier = "jwst_band_texture",
+  Version = 1
+})
+
+
+local JWSTBand = {
+  Identifier = "JWSTBand",
+  Parent = transforms.JWSTPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = transforms.LaunchTime
+  },
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "JWSTBand",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      ZAxis = sunTransforms.SolarSystemBarycenter.Identifier
+    }
+  },
+  Renderable = {
+    Type = "RenderableSphereImageLocal",
+    Enabled = asset.enabled,
+    Texture = band .. "JWST-band.png",
+    Size = 9.2E15,
+    Segments = 50,
+    DisableFadeInOut = true,
+    Orientation = "Inside",
+    Opacity = 0.05
+  },
+  Tag = { "mission_jwst_fov" },
+  GUI = {
+    Name = "JWST Safe Viewing Band",
+    Path = "/Solar System/Telescopes/JWST",
+    Description = [[
+      The safe viewing band for the James Webb Space Telescope at its current position.
+    ]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(JWSTBand)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(JWSTBand)
+end)
+
+asset.export(JWSTBand)
+
+
+asset.meta = {
+  Name = "JWST Safe Viewing Band",
+  Description = [[
+    The safe viewing band for the James Webb Space Telescope at its current position.
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

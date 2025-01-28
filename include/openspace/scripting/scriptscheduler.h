@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -120,19 +120,7 @@ public:
     std::vector<ScheduledScript> allScripts(
         std::optional<int> group = std::nullopt) const;
 
-    /**
-     * Sets the mode for how each scheduled script's timestamp will be interpreted.
-     * \param refType reference mode (for exact syntax, see definition of
-     * interaction::KeyframeTimeRef) which is either relative to the application start
-     * time, relative to the recorded session playback start time, or according to the
-     * absolute simulation time in seconds from J2000 epoch.
-     */
-    void setTimeReferenceMode(openspace::interaction::KeyframeTimeRef refType);
-
     static LuaLibrary luaLibrary();
-    void setModeApplicationTime();
-    void setModeRecordedTime();
-    void setModeSimulationTime();
 
     static documentation::Documentation Documentation();
 
@@ -143,9 +131,6 @@ private:
 
     int _currentIndex = 0;
     double _currentTime = 0;
-
-    openspace::interaction::KeyframeTimeRef _timeframeMode
-        = openspace::interaction::KeyframeTimeRef::Absolute_simTimeJ2000;
 };
 
 } // namespace openspace::scripting

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -65,9 +65,9 @@ namespace {
     //
     // To add the axes, create a scene graph node with the RenderableCartesianAxes
     // renderable and add it as a child to the other scene graph node, i.e. specify the
-    // other node as the Parent of the node with this renderable. Also, the axes have to
+    // other node as the `Parent` of the node with this renderable. Also, the axes have to
     // be scaled to match the parent object for the axes to be visible in the scene, for
-    // example using a StaticScale.
+    // example using a [StaticScale](#base_scale_static).
     struct [[codegen::Dictionary(RenderableCartesianAxes)]] Parameters {
         // [[codegen::verbatim(XColorInfo.description)]]
         std::optional<glm::vec3> xColor [[codegen::color()]];
@@ -95,6 +95,9 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     , _zColor(ZColorInfo, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f), glm::vec3(1.f))
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_opacity);
+
     _xColor = p.xColor.value_or(_xColor);
     _xColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_xColor);
@@ -184,7 +187,7 @@ void RenderableCartesianAxes::deinitializeGL() {
     _program = nullptr;
 }
 
-void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
+void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     _program->activate();
 
     const glm::dmat4 modelViewTransform = calcModelViewTransform(data);
@@ -195,6 +198,7 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&){
     _program->setUniform("xColor", _xColor);
     _program->setUniform("yColor", _yColor);
     _program->setUniform("zColor", _zColor);
+    _program->setUniform("opacity", opacity());
 
     // Changes GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,9 +73,7 @@ void renderTooltip(Property* prop, double delay) {
 
 void executeSetPropertyScript(const std::string& id, const std::string& value) {
     global::scriptEngine->queueScript(
-        std::format("openspace.setPropertyValueSingle('{}', {});", id, value),
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
+        std::format("openspace.setPropertyValueSingle('{}', {});", id, value)
     );
 }
 

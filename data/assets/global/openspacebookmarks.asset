@@ -1,5 +1,6 @@
+asset.require("scene/solarsystem/planets/earth/earth")
+asset.require("scene/solarsystem/planets/mars/mars")
 local bookmarkHelper = asset.require("util/generate_bookmarks")
-
 
 
 local dataProvider = "http://data.openspaceproject.com/files/bookmarks/v3/bookmarks.csv"

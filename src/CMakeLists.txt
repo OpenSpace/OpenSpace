@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2024                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -58,16 +58,16 @@ set(OPENSPACE_SOURCE
   interaction/joystickcamerastates.cpp
   interaction/keybindingmanager.cpp
   interaction/keybindingmanager_lua.inl
-  interaction/keyframerecording.cpp
-  interaction/keyframerecording_lua.inl
+  interaction/keyframerecordinghandler.cpp
+  interaction/keyframerecordinghandler_lua.inl
   interaction/keyboardinputstate.cpp
   interaction/mousecamerastates.cpp
   interaction/scriptcamerastates.cpp
   interaction/sessionrecording.cpp
-  interaction/sessionrecording_lua.inl
+  interaction/sessionrecordinghandler.cpp
+  interaction/sessionrecordinghandler_lua.inl
   interaction/websocketinputstate.cpp
   interaction/websocketcamerastates.cpp
-  interaction/tasks/convertrecfileversiontask.cpp
   interaction/tasks/convertrecformattask.cpp
   mission/mission.cpp
   mission/missionmanager.cpp
@@ -252,14 +252,13 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/joystickcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keybindingmanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyboardinputstate.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyframerecording.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyframerecordinghandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mousecamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/scriptcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.inl
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecordinghandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketcamerastates.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/tasks/convertrecfileversiontask.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/mission.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/missionmanager.h
@@ -502,6 +501,9 @@ configure_file(
 
 if (APPLE)
   target_link_libraries(openspace-core INTERFACE external-system-apple)
+endif ()
+if (WIN32)
+  target_link_libraries(openspace-core PUBLIC "pdh")
 endif ()
 
 set_openspace_compile_settings(openspace-core)

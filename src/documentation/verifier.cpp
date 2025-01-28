@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -689,7 +689,13 @@ std::string TableVerifier::type() const {
 
 StringListVerifier::StringListVerifier(std::string elementDocumentation)
     : TableVerifier({
-        { "*", new StringVerifier, Optional::No, std::move(elementDocumentation) }
+        {
+            "*",
+            new StringVerifier,
+            Optional::No,
+            Private::No,
+            std::move(elementDocumentation)
+        }
     })
 {}
 
@@ -699,7 +705,13 @@ std::string StringListVerifier::type() const {
 
 IntListVerifier::IntListVerifier(std::string elementDocumentation)
     : TableVerifier({
-        { "*", new IntVerifier, Optional::No, std::move(elementDocumentation) }
+        {
+            "*",
+            new IntVerifier,
+            Optional::No,
+            Private::No,
+            std::move(elementDocumentation)
+        }
     })
 {}
 

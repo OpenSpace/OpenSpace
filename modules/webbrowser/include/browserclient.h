@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,7 +55,7 @@ public:
         bool OnCursorChange(CefRefPtr<CefBrowser> browser,
             CefCursorHandle cursor,
             cef_cursor_type_t type,
-            const CefCursorInfo& custom_cursor_info) override; 
+            const CefCursorInfo& custom_cursor_info) override;
         IMPLEMENT_REFCOUNTING(DisplayHandler);
     };
     BrowserClient(WebRenderHandler* handler, WebKeyboardHandler* keyboardHandler);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -440,7 +440,7 @@ std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
         // patch it to the full year
         {
             const std::string id = firstLine.substr(9, 6);
-            const std::string prefix = [y = id.substr(0, 2)](){
+            const std::string prefix = [y = id.substr(0, 2)]() {
                 const int year = std::atoi(y.c_str());
                 return year >= 57 ? "19" : "20";
             }();

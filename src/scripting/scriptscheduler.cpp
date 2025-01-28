@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -244,10 +244,6 @@ std::vector<std::string> ScriptScheduler::progressTo(double newTime) {
     }
 }
 
-void ScriptScheduler::setTimeReferenceMode(interaction::KeyframeTimeRef refType) {
-    _timeframeMode = refType;
-}
-
 double ScriptScheduler::currentTime() const {
     return _currentTime;
 }
@@ -259,11 +255,7 @@ void ScriptScheduler::setCurrentTime(double time) {
     if (_shouldRunAllTimeJump) {
         // Queue all scripts for the time jump
         for (const std::string& script : scheduledScripts) {
-            global::scriptEngine->queueScript(
-                script,
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
-            );
+            global::scriptEngine->queueScript(script);
         }
     }
 }
@@ -280,27 +272,12 @@ std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts(
     return result;
 }
 
-void ScriptScheduler::setModeApplicationTime() {
-    _timeframeMode = interaction::KeyframeTimeRef::Relative_applicationStart;
-}
-
-void ScriptScheduler::setModeRecordedTime() {
-    _timeframeMode = interaction::KeyframeTimeRef::Relative_recordedStart;
-}
-
-void ScriptScheduler::setModeSimulationTime() {
-    _timeframeMode = interaction::KeyframeTimeRef::Absolute_simTimeJ2000;
-}
-
 LuaLibrary ScriptScheduler::luaLibrary() {
     return {
         "scriptScheduler",
         {
             codegen::lua::LoadFile,
             codegen::lua::LoadScheduledScript,
-            codegen::lua::SetModeApplicationTime,
-            codegen::lua::SetModeRecordedTime,
-            codegen::lua::SetModeSimulationTime,
             codegen::lua::Clear,
             codegen::lua::ScheduledScripts
         }

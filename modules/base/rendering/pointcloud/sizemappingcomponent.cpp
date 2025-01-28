@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -170,10 +170,10 @@ SizeMappingComponent::SizeMappingComponent(const ghoul::Dictionary& dictionary)
             const Parameters::ScaleUnit scaleUnit =
                 std::get<Parameters::ScaleUnit>(*p.scaleFactor);
             const DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
-            scaleFactor = toMeter(distanceUnit);
+            scaleFactor = static_cast<float>(toMeter(distanceUnit));
         }
         else if (std::holds_alternative<double>(*p.scaleFactor)) {
-            scaleFactor = std::get<double>(*p.scaleFactor);
+            scaleFactor = static_cast<float>(std::get<double>(*p.scaleFactor));
         }
     }
 

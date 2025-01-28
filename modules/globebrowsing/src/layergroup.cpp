@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -55,19 +55,6 @@ LayerGroup::LayerGroup(layers::Group group)
     , _levelBlendingEnabled(BlendTileInfo, true)
 {
     addProperty(_levelBlendingEnabled);
-}
-
-void LayerGroup::setLayersFromDict(const ghoul::Dictionary& dict) {
-    for (size_t i = 1; i <= dict.size(); i++) {
-        const ghoul::Dictionary layer = dict.value<ghoul::Dictionary>(std::to_string(i));
-
-        try {
-            addLayer(layer);
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-        }
-    }
 }
 
 void LayerGroup::initialize() {
@@ -177,10 +164,6 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             // which will no longer be valid once it is deleted
             removePropertySubOwner(it->get());
             (*it)->deinitialize();
-            properties::PropertyOwner* layerGroup = it->get()->owner();
-            properties::PropertyOwner* layerManager = layerGroup->owner();
-            properties::PropertyOwner* globe = layerManager->owner();
-            properties::PropertyOwner* sceneGraphNode = globe->owner();
 
             // We need to keep the name of the layer since we only get it as a reference
             // and the name needs to survive the deletion

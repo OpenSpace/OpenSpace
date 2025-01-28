@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -127,10 +127,10 @@ ParallelPeer::ParallelPeer()
     : properties::PropertyOwner({ "ParallelPeer", "Parallel Peer" })
     , _password(PasswordInfo)
     , _hostPassword(HostPasswordInfo)
+    , _serverName(ServerNameInfo)
     , _port(PortInfo)
     , _address(AddressInfo)
     , _name(NameInfo)
-    , _serverName(ServerNameInfo)
     , _bufferTime(BufferTimeInfo, 0.2f, 0.01f, 5.0f)
     , _timeKeyframeInterval(TimeKeyFrameInfo, 0.1f, 0.f, 1.f)
     , _cameraKeyframeInterval(CameraKeyFrameInfo, 0.1f, 0.f, 1.f)
@@ -415,11 +415,11 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
 
             // No sync or send because this has already been recived by a peer,
             // don't send it back again
-            global::scriptEngine->queueScript(
-                sm._script,
-                scripting::ScriptEngine::ShouldBeSynchronized::No,
-                scripting::ScriptEngine::ShouldSendToRemote::No
-            );
+            global::scriptEngine->queueScript({
+                .code = sm._script,
+                .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+                .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+            });
             break;
         }
         default:

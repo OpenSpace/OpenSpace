@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,7 +49,9 @@ void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
     ghoul_assert(tFactory, "No task factory existed");
     tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
-    tFactory->registerClass<GenerateRawVolumeFromFileTask>("GenerateRawVolumeFromFileTask");
+    tFactory->registerClass<GenerateRawVolumeFromFileTask>(
+        "GenerateRawVolumeFromFileTask"
+    );
 }
 
 std::vector<documentation::Documentation> VolumeModule::documentations() const {

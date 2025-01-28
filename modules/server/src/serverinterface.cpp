@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,20 +23,14 @@
  ****************************************************************************************/
 
 #include <modules/server/include/serverinterface.h>
-#include <ghoul/io/socket/socketserver.h>
 
+#include <openspace/documentation/documentation.h>
+#include <ghoul/io/socket/socketserver.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
 #include <functional>
 
 namespace {
-    constexpr std::string_view KeyIdentifier = "Identifier";
-    constexpr std::string_view TcpSocketType = "TcpSocket";
-    constexpr std::string_view WebSocketType = "WebSocket";
-    constexpr std::string_view DenyAccess = "Deny";
-    constexpr std::string_view RequirePassword = "RequirePassword";
-    constexpr std::string_view AllowAccess = "Allow";
-
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
@@ -94,6 +88,45 @@ namespace {
         "Password for connecting to this interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    struct [[codegen::Dictionary(ServerInterface)]] Parameters {
+        enum class [[codegen::stringify()]] Access {
+            Allow,
+            Deny,
+            RequirePassword
+        };
+
+        // [[codegen::verbatim(DefaultAccessInfo.description)]]
+        std::optional<Access> defaultAccess;
+
+        std::string identifier;
+
+        // [[codegen::verbatim(AllowAddressesInfo.description)]]
+        std::optional<std::vector<std::string>> allowAddresses;
+
+        // [[codegen::verbatim(DenyAddressesInfo.description)]]
+        std::optional<std::vector<std::string>> denyAddresses;
+
+        // [[codegen::verbatim(RequirePasswordAddressesInfo.description)]]
+        std::optional<std::vector<std::string>> requirePasswordAddresses;
+
+        enum class [[codegen::stringify()]] Type {
+            TcpSocket,
+            WebSocket
+        };
+        // [[codegen::verbatim(TypeInfo.description)]]
+        Type type;
+
+        // [[codegen::verbatim(PasswordInfo.description)]]
+        std::optional<std::string> password;
+
+        // [[codegen::verbatim(PortInfo.description)]]
+        int port;
+
+        // [[codegen::verbatim(EnabledInfo.description)]]
+        bool enabled;
+    };
+#include "serverinterface_codegen.cpp"
 } // namespace
 
 namespace openspace {
@@ -117,80 +150,65 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
     , _defaultAccess(DefaultAccessInfo)
     , _password(PasswordInfo)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _socketType.addOption(
         static_cast<int>(InterfaceType::TcpSocket),
-        std::string(TcpSocketType)
+        "TcpSocket"
     );
     _socketType.addOption(
         static_cast<int>(InterfaceType::WebSocket),
-        std::string(WebSocketType)
+        "WebSocket"
     );
 
     _defaultAccess.addOption(
         static_cast<int>(Access::Deny),
-        std::string(DenyAccess)
+        "Deny"
     );
     _defaultAccess.addOption(
         static_cast<int>(Access::RequirePassword),
-        std::string(RequirePassword)
+        "RequirePassword"
     );
     _defaultAccess.addOption(
         static_cast<int>(Access::Allow),
-        std::string(AllowAccess)
+        "Allow"
     );
 
-    if (dictionary.hasKey(DefaultAccessInfo.identifier)) {
-        const std::string access = dictionary.value<std::string>(
-            DefaultAccessInfo.identifier
-        );
-        if (access == DenyAccess) {
-            _defaultAccess.setValue(static_cast<int>(Access::Deny));
+    if (p.defaultAccess.has_value()) {
+        switch (*p.defaultAccess) {
+            case Parameters::Access::Allow:
+                _defaultAccess.setValue(static_cast<int>(Access::Allow));
+                break;
+            case Parameters::Access::Deny:
+                _defaultAccess.setValue(static_cast<int>(Access::Deny));
+                break;
+            case Parameters::Access::RequirePassword:
+                _defaultAccess.setValue(static_cast<int>(Access::RequirePassword));
+                break;
         }
-        else if (access == RequirePassword) {
-            _defaultAccess.setValue(static_cast<int>(Access::RequirePassword));
-        }
-        else if (access == AllowAccess) {
-            _defaultAccess.setValue(static_cast<int>(Access::Allow));
-        }
     }
 
-    const std::string identifier = dictionary.value<std::string>(KeyIdentifier);
+    _allowAddresses = p.allowAddresses.value_or(_allowAddresses);
+    _denyAddresses = p.denyAddresses.value_or(_denyAddresses);
+    _requirePasswordAddresses =
+        p.requirePasswordAddresses.value_or(_requirePasswordAddresses);
 
-    auto readList =
-        [dictionary](const std::string& key, properties::StringListProperty& list) {
-            if (dictionary.hasValue<ghoul::Dictionary>(key)) {
-                const ghoul::Dictionary& dict = dictionary.value<ghoul::Dictionary>(key);
-                std::vector<std::string> v;
-                for (const std::string_view k : dict.keys()) {
-                    v.push_back(dict.value<std::string>(k));
-                }
-                list = v;
-            }
-        };
+    setIdentifier(p.identifier);
+    setGuiName(p.identifier);
+    setDescription("Settings for server interface " + p.identifier);
 
-    readList(AllowAddressesInfo.identifier, _allowAddresses);
-    readList(DenyAddressesInfo.identifier, _denyAddresses);
-    readList(RequirePasswordAddressesInfo.identifier, _requirePasswordAddresses);
-
-    setIdentifier(identifier);
-    setGuiName(identifier);
-    setDescription("Settings for server interface " + identifier);
-
-    const std::string type = dictionary.value<std::string>(TypeInfo.identifier);
-    if (type == TcpSocketType) {
-        _socketType = static_cast<int>(InterfaceType::TcpSocket);
-    }
-    else if (type == WebSocketType) {
-        _socketType = static_cast<int>(InterfaceType::WebSocket);
+    switch (p.type) {
+        case Parameters::Type::TcpSocket:
+            _socketType = static_cast<int>(InterfaceType::TcpSocket);
+            break;
+        case Parameters::Type::WebSocket:
+            _socketType = static_cast<int>(InterfaceType::WebSocket);
+            break;
     }
 
-    if (dictionary.hasValue<std::string>(PasswordInfo.identifier)) {
-        _password = dictionary.value<std::string>(PasswordInfo.identifier);
-    }
-
-    _port = static_cast<int>(dictionary.value<double>(PortInfo.identifier));
-    _enabled = dictionary.value<bool>(EnabledInfo.identifier);
+    _password = p.password.value_or(_password);
+    _port = p.port;
+    _enabled = p.enabled;
 
     auto reinitialize = [this]() {
         deinitialize();
@@ -198,19 +216,18 @@ ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
     };
 
     _socketType.onChange(reinitialize);
-    _port.onChange(reinitialize);
-    _enabled.onChange(reinitialize);
-    _defaultAccess.onChange(reinitialize);
-    _allowAddresses.onChange(reinitialize);
-    _requirePasswordAddresses.onChange(reinitialize);
-    _denyAddresses.onChange(reinitialize);
-
     addProperty(_socketType);
+    _port.onChange(reinitialize);
     addProperty(_port);
+    _enabled.onChange(reinitialize);
     addProperty(_enabled);
+    _defaultAccess.onChange(reinitialize);
     addProperty(_defaultAccess);
+    _allowAddresses.onChange(reinitialize);
     addProperty(_allowAddresses);
+    _requirePasswordAddresses.onChange(reinitialize);
     addProperty(_requirePasswordAddresses);
+    _denyAddresses.onChange(reinitialize);
     addProperty(_denyAddresses);
     addProperty(_password);
 }

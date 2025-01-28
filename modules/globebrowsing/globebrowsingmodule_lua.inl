@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -284,7 +284,8 @@ namespace {
  * \param y The y value of the tile index
  * \param level The level of the tile index
  */
-[[codegen::luawrap]] void goToChunk(std::string globeIdentifier, int x, int y, int level) {
+[[codegen::luawrap]] void goToChunk(std::string globeIdentifier, int x, int y, int level)
+{
     using namespace openspace;
     using namespace globebrowsing;
 
@@ -495,8 +496,8 @@ void flyToGeoInternal(std::string globe, double latitude,
 }
 
  /**
-  * Fly the camera to a geographic coordinate (latitude, longitude and altitude) on a globe,
-  * using the path navigation system.
+  * Fly the camera to a geographic coordinate (latitude, longitude and altitude) on a
+  * globe, using the path navigation system.
   *
   * \param globe The identifier of a scene graph node that has a RenderableGlobe attached.
   *              If an empty string is provided, the current anchor node is used

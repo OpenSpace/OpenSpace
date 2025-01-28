@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -174,30 +174,13 @@ namespace {
         // the Renderable.
         std::filesystem::path geometryFile;
 
-        enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
-            Nanometer,
-            Micrometer,
-            Millimeter,
-            Centimeter,
-            Decimeter,
-            Meter,
-            Kilometer,
-            Thou,
-            Inch,
-            Foot,
-            Yard,
-            Chain,
-            Furlong,
-            Mile
-        };
-
         // The scale of the model. For example, if the model is in centimeters then
         // `ModelScale = 'Centimeter'` or `ModelScale = 0.01`. The value that this needs
         // to be in order for the model to be in the correct scale relative to the rest
         // of OpenSpace can be tricky to find. Essentially, it depends on the model
         // software that the model was created with and the original intention of the
         // modeler.
-        std::optional<std::variant<ScaleUnit, double>> modelScale;
+        std::optional<std::variant<std::string, double>> modelScale;
 
         // By default the given `ModelScale` is used to scale down the model. By setting
         // this setting to true the scaling is inverted to that the model is instead
@@ -215,18 +198,10 @@ namespace {
         // In format `'YYYY MM DD hh:mm:ss'`.
         std::optional<std::string> animationStartTime [[codegen::datetime()]];
 
-        enum class [[codegen::map(openspace::TimeUnit)]] AnimationTimeUnit {
-            Nanosecond,
-            Microsecond,
-            Millisecond,
-            Second,
-            Minute
-        };
-
         // The time scale for the animation relative to seconds. For example, if the
         // animation is in milliseconds then `AnimationTimeScale = 0.001` or
         // `AnimationTimeScale = \"Millisecond\"`.
-        std::optional<std::variant<AnimationTimeUnit, float>> animationTimeScale;
+        std::optional<std::variant<std::string, float>> animationTimeScale;
 
         enum class AnimationMode {
             Once,
@@ -340,11 +315,28 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
 
     if (p.modelScale.has_value()) {
-        if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
-            const Parameters::ScaleUnit scaleUnit =
-                std::get<Parameters::ScaleUnit>(*p.modelScale);
-            const DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
-            _modelScale = toMeter(distanceUnit);
+        if (std::holds_alternative<std::string>(*p.modelScale)) {
+            const std::string stringUnit = std::get<std::string>(*p.modelScale);
+
+            // Find matching unit name in list of supported unit names
+            DistanceUnit distanceUnit;
+            bool wasFound = false;
+            for (int i = 0; i < DistanceUnitNamesSingular.size(); ++i) {
+                if (stringUnit == DistanceUnitNamesSingular[i]) {
+                    wasFound = true;
+                    distanceUnit = DistanceUnits[i];
+                }
+            }
+
+            if (wasFound) {
+                _modelScale = toMeter(distanceUnit);
+            }
+            else {
+                std::string message = std::format("The given unit name '{}' does not "
+                    "match any currently supported unit names", stringUnit);
+                LERROR(message);
+                _modelScale = 1.0;
+            }
         }
         else if (std::holds_alternative<double>(*p.modelScale)) {
             _modelScale = std::get<double>(*p.modelScale);
@@ -367,17 +359,31 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (std::holds_alternative<float>(*p.animationTimeScale)) {
             _animationTimeScale = std::get<float>(*p.animationTimeScale);
         }
-        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(
-                *p.animationTimeScale
-            ))
+        else if (std::holds_alternative<std::string>(*p.animationTimeScale))
         {
-            const Parameters::AnimationTimeUnit animationTimeUnit =
-                std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
-            const TimeUnit timeUnit = codegen::map<TimeUnit>(animationTimeUnit);
+            const std::string stringUnit = std::get<std::string>(*p.animationTimeScale);
 
-            _animationTimeScale = static_cast<double>(
-                convertTime(1.0, timeUnit, TimeUnit::Second)
-            );
+            // Find matching unit name in list of supported unit names
+            TimeUnit timeUnit;
+            bool wasFound = false;
+            for (int i = 0; i < TimeUnitNamesSingular.size(); ++i) {
+                if (stringUnit == TimeUnitNamesSingular[i]) {
+                    wasFound = true;
+                    timeUnit = TimeUnits[i];
+                }
+            }
+
+            if (wasFound) {
+                _animationTimeScale = static_cast<double>(
+                    convertTime(1.0, timeUnit, TimeUnit::Second)
+                );
+            }
+            else {
+                std::string message = std::format("The given unit name '{}' does not "
+                    "match any currently supported unit names", stringUnit);
+                LERROR(message);
+                _animationTimeScale = 1.0;
+            }
         }
         else {
             throw ghoul::MissingCaseException();

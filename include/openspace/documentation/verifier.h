@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -369,7 +369,13 @@ class Vector2ListVerifier : public TableVerifier {
 public:
     Vector2ListVerifier(std::string elementDocumentation = "")
         : TableVerifier({
-            { "*", new Vector2Verifier<T>, Optional::No, std::move(elementDocumentation) }
+            {
+                "*",
+                new Vector2Verifier<T>,
+                Optional::No,
+                Private::No,
+                std::move(elementDocumentation)
+            }
         })
     {}
 
@@ -387,7 +393,13 @@ class Vector3ListVerifier : public TableVerifier {
 public:
     Vector3ListVerifier(std::string elementDocumentation = "")
         : TableVerifier({
-            { "*", new Vector3Verifier<T>, Optional::No, std::move(elementDocumentation) }
+            {
+                "*",
+                new Vector3Verifier<T>,
+                Optional::No,
+                Private::No,
+                std::move(elementDocumentation)
+            }
         })
     {}
 
@@ -405,7 +417,13 @@ class Vector4ListVerifier : public TableVerifier {
 public:
     Vector4ListVerifier(std::string elementDocumentation = "")
         : TableVerifier({
-            { "*", new Vector4Verifier<T>, Optional::No, std::move(elementDocumentation) }
+            {
+                "*",
+                new Vector4Verifier<T>,
+                Optional::No,
+                Private::No,
+                std::move(elementDocumentation)
+            }
         })
     {}
 

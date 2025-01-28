@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -241,7 +241,7 @@ public:
      * \return Vector of Property objs containing property names that matched the regex
      */
     std::vector<properties::Property*> propertiesMatchingRegex(
-        const std::string& propertyString);
+        std::string_view propertyString);
 
     /**
      * Returns a list of all unique tags that are used in the currently loaded scene.

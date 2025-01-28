@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,11 +53,10 @@ ScreenSpaceCygnet::ScreenSpaceCygnet(const ghoul::Dictionary& dictionary)
     _minRealTimeUpdateInterval = 100;
 
     _delete.onChange([this]() {
-        global::scriptEngine->queueScript(
-            "openspace.iswa.removeScreenSpaceCygnet("+std::to_string(_cygnetId)+");",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
+        const std::string script = std::format(
+            "openspace.iswa.removeScreenSpaceCygnet({});", _cygnetId
         );
+        global::scriptEngine->queueScript(script);
     });
 }
 

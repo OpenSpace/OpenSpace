@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,22 +71,16 @@ std::string formatJson(T value) {
         return ghoul::formatJson(value);
     }
     else if constexpr (internal::isGlmVector<T>()) {
-        std::string values;
-        for (glm::length_t i = 0; i < ghoul::glm_components<T>::value; i++) {
-            values += std::to_string(value[i]) + ',';
-        }
-        values.pop_back();
-        return std::format("[{}]", values);
+        std::string v = std::format("{}", value);
+        v.front() = '[';
+        v.back() = ']';
+        return v;
     }
     else if constexpr (internal::isGlmMatrix<T>()) {
-        std::string values;
-        for (glm::length_t i = 0; i < T::type::row_type::length(); i++) {
-            for (glm::length_t j = 0; j < T::type::col_type::length(); j++) {
-                values += std::to_string(value[i][j]) + ',';
-            }
-        }
-        values.pop_back();
-        return std::format("[{}]", values);
+        std::string v = std::format("{}", value);
+        v.front() = '[';
+        v.back() = ']';
+        return v;
     }
     else {
         static_assert(sizeof(T) == 0, "JSON formatting of type T not implemented");

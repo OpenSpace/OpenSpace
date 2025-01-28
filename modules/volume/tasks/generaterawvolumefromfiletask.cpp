@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -71,7 +71,9 @@ documentation::Documentation GenerateRawVolumeFromFileTask::Documentation() {
     return codegen::doc<Parameters>("generate_raw_volume_task");
 }
 
-GenerateRawVolumeFromFileTask::GenerateRawVolumeFromFileTask(const ghoul::Dictionary& dictionary) {
+GenerateRawVolumeFromFileTask::GenerateRawVolumeFromFileTask(
+                                                      const ghoul::Dictionary& dictionary)
+{
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inputFilePath = absPath(p.dataInputPath);
@@ -93,7 +95,7 @@ std::string GenerateRawVolumeFromFileTask::description() {
     );
 }
 
-void GenerateRawVolumeFromFileTask::perform(const Task::ProgressCallback& progressCallback) {
+void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCallback) {
 
     dataloader::Dataset data = dataloader::csv::loadCsvFile(_inputFilePath);
     progressCallback(0.3f);
