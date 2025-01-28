@@ -987,7 +987,11 @@ void RenderableTube::loadSelectedSample() {
     }
 
     // Find information for the scen graph nodes, filenames start from 000001
-    std::string kernelPath = absPath(_kernelsDirectory / std::format("{:06}.bsp", std::stoi(_selectedSample.value()) + 1)).string();
+    std::string filename = std::format(
+        "{:06}.bsp",
+        std::stoi(_selectedSample.value()) + 1
+    );
+    std::string kernelPath = absPath(_kernelsDirectory / filename).string();
     std::replace(kernelPath.begin(), kernelPath.end(), '\\', '/');
 
     // Identifier starts at 000001
@@ -1030,11 +1034,7 @@ void RenderableTube::loadSelectedSample() {
     );
 
     // Add trail
-    global::scriptEngine->queueScript(
-        addTrailNodeScript,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(addTrailNodeScript);
 
     // Head
     std::string addHeadNodeScript = std::format(
@@ -1058,19 +1058,11 @@ void RenderableTube::loadSelectedSample() {
     );
 
     // Add head
-    global::scriptEngine->queueScript(
-        addHeadNodeScript,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(addHeadNodeScript);
 
     // Reload GUI
     std::string reload = "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)";
-    global::scriptEngine->queueScript(
-        reload,
-        scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-        scripting::ScriptEngine::ShouldSendToRemote::Yes
-    );
+    global::scriptEngine->queueScript(reload);
 }
 
 void RenderableTube::initializeTextures() {
