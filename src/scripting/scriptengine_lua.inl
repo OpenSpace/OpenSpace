@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -310,6 +310,15 @@ std::vector<std::filesystem::path> walkCommon(const std::filesystem::path& path,
  */
 [[codegen::luawrap]] void removeRepeatedScript(std::string identifier) {
     openspace::global::scriptEngine->removeRepeatedScript(identifier);
+}
+
+/**
+ * Schedules a `script` to be run in `delay` seconds. The delay is measured in wallclock
+ * time, which is seconds that occur in the real world, not in relation to the in-game
+ * time.
+ */
+[[codegen::luawrap]] void scheduleScript(std::string script, double delay) {
+    openspace::global::scriptEngine->scheduleScript(std::move(script), delay);
 }
 
 #include "scriptengine_lua_codegen.cpp"

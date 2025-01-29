@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -727,7 +727,7 @@ bool HorizonsDialog::handleRequest() {
 
     nlohmann::json answer = sendRequest(url);
     if (answer.empty()) {
-        QMessageBox::critical(this, "Errpr", "Connection error");
+        QMessageBox::critical(this, "Error", "Connection error");
         return false;
     }
 
@@ -795,7 +795,7 @@ std::string HorizonsDialog::constructUrl() {
         const std::string id = observer.toString().toStdString();
         center = "@" + id;
         _observerName = _chooseObserverCombo->currentText().toStdString();
-        _centerEdit->setText(QString::fromStdString(id));
+        _centerEdit->setText(QString::fromStdString(center));
     }
     else {
         center = _centerEdit->text().toStdString();

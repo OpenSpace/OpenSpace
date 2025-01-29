@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,18 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DEBUGGING___RENDERABLEDEBUGPLANE___H__
-#define __OPENSPACE_MODULE_DEBUGGING___RENDERABLEDEBUGPLANE___H__
+#ifndef __OPENSPACE_MODULE_DEBUGGING___SCREENSPACEDEBUGPLANE___H__
+#define __OPENSPACE_MODULE_DEBUGGING___SCREENSPACEDEBUGPLANE___H__
 
-#include <modules/base/rendering/renderableplane.h>
+#include <openspace/rendering/screenspacerenderable.h>
+
+#include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace {
 
-class RenderableDebugPlane : public RenderablePlane {
+class ScreenSpaceDebugPlane : public ScreenSpaceRenderable {
 public:
-    RenderableDebugPlane(const ghoul::Dictionary& dictionary);
-
-    bool isReady() const override;
+    ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary);
 
     static documentation::Documentation Documentation();
 
@@ -45,4 +45,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DEBUGGING___RENDERABLEDEBUGPLANE___H__
+#endif // __OPENSPACE_MODULE_DEBUGGING___SCREENSPACEDEBUGPLANE___H__

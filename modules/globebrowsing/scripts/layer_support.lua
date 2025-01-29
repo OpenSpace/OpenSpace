@@ -135,12 +135,12 @@ openspace.globebrowsing.documentation = {
 
 openspace.globebrowsing.addGibsLayer = function(layerName, resolution, format, startDate, endDate)
   if endDate == "Present" then
-    endDate = ""
+    endDate = "Today"
   end
 
   local layer = {
     Identifier = layerName,
-    Type = "TemporalTileLayer",
+    Type = "TemporalTileProvider",
     Mode = "Prototyped",
     Prototyped = {
       Time = {

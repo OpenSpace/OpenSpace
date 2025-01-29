@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -115,6 +115,8 @@ public:
         double timeout, std::string preScript = "", std::string postScript = "");
     void removeRepeatedScript(std::string_view identifier);
 
+    void scheduleScript(std::string script, double delay);
+
     std::vector<std::string> allLuaFunctions() const;
     const std::vector<LuaLibrary>& allLuaLibraries() const;
 
@@ -157,6 +159,15 @@ private:
         double lastRun = 0.0;
     };
     std::vector<RepeatedScriptInfo> _repeatedScripts;
+
+    struct ScheduledScriptInfo {
+        // The script that should be executed
+        std::string script;
+
+        // The application timestamp at which time the script should be executed
+        double timestamp = 0.0;
+    };
+    std::vector<ScheduledScriptInfo> _scheduledScripts;
 
     // Logging variables
     bool _logFileExists = false;

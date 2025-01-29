@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/debugging/rendering/renderabledebugplane.h>
+#include <modules/debugging/rendering/screenspacedebugplane.h>
 
 #include <openspace/documentation/documentation.h>
 
@@ -34,37 +34,34 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    struct [[codegen::Dictionary(RenderableDebugPlane)]] Parameters {
+    // This `ScreenSpaceRenderable` can be used for debugging OpenGL textures. It renders
+    // the content of an existing texture, based on a provided OpenGL texture name.
+    struct [[codegen::Dictionary(ScreenSpaceDebugPlane)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<int> texture;
     };
-#include "renderabledebugplane_codegen.cpp"
+#include "screenspacedebugplane_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableDebugPlane::Documentation() {
-    return codegen::doc<Parameters>(
-        "debugging_renderable_debugplane",
-        RenderablePlane::Documentation()
-    );
+documentation::Documentation ScreenSpaceDebugPlane::Documentation() {
+    return codegen::doc<Parameters>("debugging_screenspace_debugplane");
 }
 
-RenderableDebugPlane::RenderableDebugPlane(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
-    , _texture(TextureInfo, -1, -1, 512)
+ScreenSpaceDebugPlane::ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary)
+    : ScreenSpaceRenderable(dictionary)
+    , _texture(TextureInfo, -1, -1, 4096)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _texture = p.texture.value_or(_texture);
     addProperty(_texture);
+
+    _objectSize = glm::ivec2(256);
 }
 
-bool RenderableDebugPlane::isReady() const {
-    return _texture >= 0 && RenderablePlane::isReady();
-}
-
-void RenderableDebugPlane::bindTexture() {
+void ScreenSpaceDebugPlane::bindTexture() {
     glBindTexture(GL_TEXTURE_2D, _texture);
 }
 
