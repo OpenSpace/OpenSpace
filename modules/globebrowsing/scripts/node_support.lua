@@ -9,7 +9,7 @@ openspace.globebrowsing.documentation = {
       { "altitude", "Number?" }
     },
     Documentation = [[
-      Sets the position of a SceneGraphNode that has a
+      Sets the position of a scene graph node that has a
       [GlobeTranslation](#globebrowsing_translation_globetranslation) and/or
       [GlobeRotation](#globebrowsing_rotation_globerotation).
 
@@ -20,9 +20,9 @@ openspace.globebrowsing.documentation = {
       )
       ```
 
-      \\param nodeIdentifier The identifier of the SceneGraphNode to move
-      \\param globeIdentifier The identifier of the RenderableGlobe that the object should
-                              be put on
+      \\param nodeIdentifier The identifier of the scene graph node to move
+      \\param globeIdentifier The identifier of the [RenderableGlobe](#globebrowsing_renderableglobe)
+                              that the object should be put on
       \\param latitude The latitude value for the new position, in degrees
       \\param longitude The longitude value for the new position, in degrees
       \\param altitude An optional altitude value for the new position, in meters. If
@@ -36,7 +36,7 @@ openspace.globebrowsing.documentation = {
       { "useAltitude", "Boolean?" }
     },
     Documentation = [[
-      Sets the position of a SceneGraphNode that has a
+      Sets the position of a scene graph node that has a
       [GlobeTranslation](#globebrowsing_translation_globetranslation) and/or
       [GlobeRotation](#globebrowsing_rotation_globerotation) to match the camera. Only
       uses camera position not rotation. If useAltitude is true, then the position
@@ -49,7 +49,7 @@ openspace.globebrowsing.documentation = {
       )
       ```
 
-      \\param nodeIdentifier The identifier of the SceneGraphNode to move
+      \\param nodeIdentifier The identifier of the scene graph node to move
       \\param useAltitude If true, the camera's altitude will also be used for the new
                           positions. Otherwise, it will not.
     ]]

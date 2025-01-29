@@ -78,8 +78,8 @@ openspace.globebrowsing.documentation = {
       Parses the passed info file and return the table with the information provided in
       the info file.
 
-      The return table contains the optional keys: 'Color', 'Height', 'Node', 'Location',
-      'Identifier'.
+      The return table contains the optional keys: `Color`, `Height`, `Node`, `Location`,
+      `Identifier`.
 
       Usage:
       ```
