@@ -14,7 +14,7 @@ openspace.globebrowsing.documentation = {
       [GlobeRotation](#globebrowsing_rotation_globerotation).
 
       Usage:
-      ```
+      ```lua
       openspace.globebrowsing.setNodePosition(
         "Scale_StatueOfLiberty", "Earth", 40.000, -117.5, optionalAltitude
       )
@@ -43,7 +43,7 @@ openspace.globebrowsing.documentation = {
       will also be updated to the camera's altitude.
 
       Usage:
-      ```
+      ```lua
       openspace.globebrowsing.setNodePositionFromCamera(
         "Scale_StatueOfLiberty", optionalUseAltitude
       )

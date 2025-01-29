@@ -28,7 +28,7 @@ openspace.globebrowsing.documentation = {
       [this page](https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products).
 
       Usage:
-      ```
+      ```lua
       openspace.globebrowsing.addLayer(
         "Earth",
         "ColorLayers",
@@ -61,7 +61,7 @@ openspace.globebrowsing.documentation = {
       [this page](https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products).
 
       Usage:
-      ```
+      ```lua
       openspace.globebrowsing.addGibsLayer(
         "AIRS_Temperature_850hPa_Night", "2km", "2013-07-15", "Present", "png"
       )
@@ -82,7 +82,7 @@ openspace.globebrowsing.documentation = {
       `Identifier`.
 
       Usage:
-      ```
+      ```lua
       local t = openspace.globebrowsing.parseInfoFile(file)
       openspace.globebrowsing.addLayer("Earth", "ColorLayers", t.color)
       openspace.globebrowsing.addLayer("Earth", "HeightLayers", t.height)
@@ -101,7 +101,7 @@ openspace.globebrowsing.documentation = {
       then added to the RenderableGlobe identified by name passed to the second argument.
 
       Usage:
-      ```
+      ```lua
       openspace.globebrowsing.addBlendingLayersFromDirectory(directory, "Earth")
       ```
     ]]
@@ -118,7 +118,7 @@ openspace.globebrowsing.documentation = {
       used to create new SceneGraphNodes that can be used as focus nodes.
 
       Usage:
-      ```
+      ```lua
       openspace.globebrowsing.addFocusNodesFromDirectory(directory, "Mars")
       ```
     ]]
@@ -137,7 +137,7 @@ openspace.globebrowsing.documentation = {
       a globe. If no altitude is specified, an altitude of 0 will be used.
 
       Usage:
-      ```
+      ```lua
       openspace.globebrowsing.addFocusNodeFromLatLong(
         "Olympus Mons", "Mars", -18.65, 226.2, optionalAltitude
       )
