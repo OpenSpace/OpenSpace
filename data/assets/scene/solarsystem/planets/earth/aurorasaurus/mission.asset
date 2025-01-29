@@ -123,6 +123,33 @@ local colorLegend = {
   CartesianPosition = { -0.707970, -0.34, -2.2180 },
   Rotation = { 0.0, 0.0, 0.36652 }
 }
+local aurorasaurusLogo = {
+  Identifier = "aurorasaurus-logo",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = "${USER_ASSETS}/aurorasaurus/legends/aurorasaurus.png",
+  FaceCamera = false,
+  Scale = 0.15,
+  CartesianPosition = { -0.0, -0.0, -2.0 },
+  Rotation = { 0.0, 0.0, 0.36652 }
+}
+local OsLogo = {
+  Identifier = "os-logo",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = "${USER_ASSETS}/aurorasaurus/legends/openspace.png",
+  FaceCamera = false,
+  Scale = 0.15,
+  CartesianPosition = { -0.0, -0.34, -2.0 },
+  Rotation = { 0.0, 0.0, 0.36652 }
+}
+local CCMCLogo = {
+  Identifier = "ccmc-logo",
+  Type = "ScreenSpaceImageLocal",
+  TexturePath = "${USER_ASSETS}/aurorasaurus/legends/ccmc.png",
+  FaceCamera = false,
+  Scale = 0.15,
+  CartesianPosition = { -0.707970, -0.0, -2.0 },
+  Rotation = { 0.0, 0.0, 0.36652 }
+}
 
 asset.onInitialize(function()
   openspace.action.registerAction(ToggleLegend)
@@ -130,6 +157,9 @@ asset.onInitialize(function()
   openspace.loadMission(Mission)
   openspace.addScreenSpaceRenderable(Legend)
   openspace.addScreenSpaceRenderable(colorLegend)
+  openspace.addScreenSpaceRenderable(aurorasaurusLogo)
+  openspace.addScreenSpaceRenderable(OsLogo)
+  openspace.addScreenSpaceRenderable(CCMCLogo)
 
   openspace.setPropertyValueSingle("ScreenSpace.color-legend-aurora-oval.CartesianPosition", {-0.730000,-0.140000,-2.780000})
   openspace.setPropertyValueSingle("ScreenSpace.Legend-aurora-oval.CartesianPosition", {-0.820000,-0.350000,-3.140000})
@@ -141,10 +171,16 @@ asset.onDeinitialize(function()
   openspace.unloadMission(Mission.Name)
   openspace.removeScreenSpaceRenderable(Legend)
   openspace.removeScreenSpaceRenderable(colorLegend)
+  openspace.removeScreenSpaceRenderable(aurorasaurusLogo)
+  openspace.removeScreenSpaceRenderable(OsLogo)
+  openspace.removeScreenSpaceRenderable(CCMCLogo)
 end)
 
 asset.export(Legend)
 asset.export(colorLegend)
+asset.export(aurorasaurusLogo)
+asset.export(OsLogo)
+asset.export(CCMCLogo)
 asset.export("ToggleLegend", ToggleLegend.Identifier)
 asset.export("ToggleColorLegend", ToggleColorLegend.Identifier)
 
