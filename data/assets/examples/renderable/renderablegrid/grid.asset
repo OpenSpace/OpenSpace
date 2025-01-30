@@ -1,0 +1,23 @@
+-- Basic
+-- This example adds a planar grid of 100x100 meters to the scene. Per default, the grid
+-- consist of 10x10 segments.
+
+local Node = {
+  Identifier = "RenderableGrid_Example",
+  Renderable = {
+    Type = "RenderableGrid",
+    Size = { 100.0, 100.0 }
+  },
+  GUI = {
+    Name = "RenderableGrid - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
