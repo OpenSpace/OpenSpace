@@ -9,6 +9,13 @@ openspace.debugging.documentation = {
       Creates a new scene graph node that show the coordinate system used for the
       currently selected focus node, or a specified scene graph node.
 
+      Usage:
+      ```lua
+      -- To add coordinate axes for the currently selected focus node, do not specify any
+      -- parameters
+      openspace.debugging.createCoordinateAxes()
+      ```
+
       \\param nodeIdentifier The identifier of the scene graph node for which the axes
                              should be added. If this parameter is not specified, the
                              current focus node is used instead.
