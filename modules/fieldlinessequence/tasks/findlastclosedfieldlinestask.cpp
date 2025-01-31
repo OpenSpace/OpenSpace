@@ -25,6 +25,9 @@
 #include <modules/fieldlinessequence/tasks/findlastclosedfieldlinestask.h>
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
+#include <modules/kameleon/include/kameleonhelper.h>
+#include <modules/kameleon/ext/kameleon/src/ccmc/Tracer.h>
+
 
 
 #include <openspace/documentation/verifier.h>
@@ -83,8 +86,8 @@ FindLastClosedFieldlinesTask::FindLastClosedFieldlinesTask(
     namespace fsm = std::filesystem;
     for (const fsm::directory_entry& e : fsm::directory_iterator(_inputPath)) {
         if (e.path().extension() == ".cdf") {
-            std::string eStr = e.path().string();
-            _sourceFiles.push_back(eStr);
+            std::filesystem::path ePath = e.path();
+            _sourceFiles.push_back(ePath);
         }
     }
     LINFO(std::format("\nFinished initializing"));
@@ -102,62 +105,126 @@ std::string FindLastClosedFieldlinesTask::description() {
 void FindLastClosedFieldlinesTask::perform(
     const Task::ProgressCallback& progressCallback)
 {
-    LINFO(std::format("Reached perform function"));
-    //find positions of initial set of seedpoints
-    std::vector<glm::vec3> listOfSeedPoints = initialCircleOfPoints();
-    // set threshold
-    float progressCallbackValue = 0.0f;
+    for (const std::filesystem::path& cdfPath : _sourceFiles) {
+        std::unique_ptr<ccmc::Kameleon> kameleon =
+            kameleonHelper::createKameleonObject(cdfPath.string());
+        ccmc::Tracer tracer(kameleon.get());
 
-    std::vector<std::string> extraVars;
-    std::vector<std::string> extraMagVars;
 
-    //for each file
-    for (const std::string& cdfPath : _sourceFiles) {
-        progressCallbackValue += (1/ listOfSeedPoints.size());
-        //////////for each seedpoint
-        //trace
-        FieldlinesState newState;
-        bool isSuccessful = fls::traceFromListOfPoints(
-            newState,
-            cdfPath,
-            listOfSeedPoints,
-            0.0, //_manualTimeOffset
-            _tracingVar,
-            extraVars, // _extraVars
-            extraMagVars // _extraMagVars
-        );
+        FieldlinesState state;
+        //for (ccmc::Fieldline& fieldline : fieldlines) {
+        //    std::vector<ccmc::Point3f> vertices = fieldline.getPositions();
+        //    std::vector<glm::vec3> positions;
+        //    for (int i = 0; vertices.size(); ++i) {
+        //        positions[i] = {
+        //            vertices[i].component1,
+        //            vertices[i].component2,
+        //            vertices[i].component3
+        //        };
+        //    }
+        //    state.addLine(positions);
+        //    //addLine(fieldline, state);   // Add the fieldline to the OpenSpace state
+        //    //addExtraQuantities(fieldline, state);  // Add extra quantities to the fieldline
+        //}
 
-        newState.lineStart();
-        const std::vector<GLint>& lineStarts = newState.lineCount();
-        const std::vector<GLsizei>& lineCounts = newState.lineCount();
-
-        LINFO(std::format("Find first and last point on line"));
-        for (int i = 0; i < lineStarts.size(); ++i) {
-            progressCallback(progressCallbackValue);
-            size_t firstIndex = lineStarts[i];
-            size_t lastIndex = firstIndex + lineCounts[i];
-            glm::vec3 firstPos = newState.vertexPositions()[firstIndex];
-            glm::vec3 lastPos = newState.vertexPositions()[lastIndex];
-            LINFO(std::format("First Pos: {}", firstPos));
-            LINFO(std::format("Last Pos: {}", lastPos));
-
-            
+        LINFO(std::format("Model name: {}", kameleon->getModelName()));
+        std::vector<std::string> variableNames;
+        std::vector<std::string> magVariableNames;
+        long nVariables = kameleon->getNumberOfVariables();
+        for (long i = 0; i < nVariables; ++i) {
+            std::string name = kameleon->getVariableName(i);
+            if (name.size() <= 3) {
+                if (name.back() == 'x' && i+2 < nVariables) {
+                    magVariableNames.push_back(name);
+                    magVariableNames.push_back(kameleon->getVariableName(i + 1));
+                    magVariableNames.push_back(kameleon->getVariableName(i + 2));
+                    LINFO(std::format(
+                        "Magnitude variable name : {}, {}, {}",
+                        name,
+                        kameleon->getVariableName(i + 1),
+                        kameleon->getVariableName(i + 2)
+                    ));
+                    i += 2;
+                }
+                else {
+                    variableNames.push_back(name);
+                    LINFO(std::format("Variable name : {}", name));
+                }
+            }
         }
+        std::vector<ccmc::Fieldline> fieldlines =
+            tracer.getLastClosedFieldlines(_numberOfPointsOnBoundary, 1, 300);
 
-
-
-
-            //check if endpoints are close to earth and determain closed vs not closed
-
-            //run iteration:
-
-                //move seedpoint, if closed further, else closer to earth
-                //reduce movement distance
-            //step when movement distance is less than threshold
-
-        // save list of points in .txt file with approriate name correlating with cdf file used
-        // save traced fieldlines in either osfls or json
+        fls::addExtraQuantities(&*kameleon, variableNames, magVariableNames, state);
+        std::string fileName = cdfPath.stem().string() + "_lastClosedFieldlines";
+        state.saveStateToJson(_outputFolder.string() + fileName);
     }
+
+
+
+
+
+
+
+
+
+
+    //LINFO(std::format("Reached perform function"));
+    ////find positions of initial set of seedpoints
+    //std::vector<glm::vec3> listOfSeedPoints = initialCircleOfPoints();
+    //// set threshold
+    //float progressCallbackValue = 0.0f;
+
+    //std::vector<std::string> extraVars;
+    //std::vector<std::string> extraMagVars;
+
+    ////for each file
+    //for (const std::string& cdfPath : _sourceFiles) {
+    //    progressCallbackValue += (1/ listOfSeedPoints.size());
+    //    //////////for each seedpoint
+    //    //trace
+    //    FieldlinesState newState;
+    //    bool isSuccessful = fls::traceFromListOfPoints(
+    //        newState,
+    //        cdfPath,
+    //        listOfSeedPoints,
+    //        0.0, //_manualTimeOffset
+    //        _tracingVar,
+    //        extraVars, // _extraVars
+    //        extraMagVars // _extraMagVars
+    //    );
+
+    //    newState.lineStart();
+    //    const std::vector<GLint>& lineStarts = newState.lineCount();
+    //    const std::vector<GLsizei>& lineCounts = newState.lineCount();
+
+    //    LINFO(std::format("Find first and last point on line"));
+    //    for (int i = 0; i < lineStarts.size(); ++i) {
+    //        progressCallback(progressCallbackValue);
+    //        size_t firstIndex = lineStarts[i];
+    //        size_t lastIndex = firstIndex + lineCounts[i];
+    //        glm::vec3 firstPos = newState.vertexPositions()[firstIndex];
+    //        glm::vec3 lastPos = newState.vertexPositions()[lastIndex];
+    //        LINFO(std::format("First Pos: {}", firstPos));
+    //        LINFO(std::format("Last Pos: {}", lastPos));
+
+    //        
+    //    }
+
+
+
+
+    //        //check if endpoints are close to earth and determain closed vs not closed
+
+    //        //run iteration:
+
+    //            //move seedpoint, if closed further, else closer to earth
+    //            //reduce movement distance
+    //        //step when movement distance is less than threshold
+
+    //    // save list of points in .txt file with approriate name correlating with cdf file used
+    //    // save traced fieldlines in either osfls or json
+    //}
 
     progressCallback(1.0f);
 }

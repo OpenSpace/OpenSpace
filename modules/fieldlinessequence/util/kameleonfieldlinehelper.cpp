@@ -40,7 +40,6 @@
 #pragma warning (disable : 4619)
 #endif // _MSC_VER
 
-#include <ccmc/Kameleon.h>
 #include <ccmc/KameleonInterpolator.h>
 #include <ccmc/Tracer.h>
 #include <modules/kameleon/include/kameleonhelper.h>
@@ -66,9 +65,6 @@ namespace openspace::fls {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& seeds,
         const std::string& tracingVar, FieldlinesState& state);
-    void addExtraQuantities(ccmc::Kameleon* kameleon,
-        std::vector<std::string>& extraScalarVars, std::vector<std::string>& extraMagVars,
-        FieldlinesState& state);
     void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
         std::vector<std::string>& extraScalarVars, std::vector<std::string>& extraMagVars,
         FieldlinesState& state);
@@ -262,7 +258,7 @@ bool traceFromListOfPoints(
         cdfDoubleTime, "YYYYMMDDHRMNSC::RND"
     );
 
-    // use time as string for picking seedpoints from seedm
+    // Only difference is not to use time as string for picking seedpoints from seedmap
     bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);
     if (success) {
         // The line points are in their RAW format (unscaled & maybe spherical)
@@ -337,28 +333,26 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             seed.y,
             seed.z
         );
-        ccmcFieldline.getDs();
-        ccmcFieldline.measure();
-        ccmc::Fieldline mappedFieldline =
-            ccmcFieldline.interpolate(1, ccmcFieldline.getPositions().size());
-        const std::vector<ccmc::Point3f>& fieldlinePositions =
-            mappedFieldline.getPositions();
+        //ccmcFieldline.getDs();
+        //ccmcFieldline.measure();
+        //ccmc::Fieldline mappedFieldline =
+        //    ccmcFieldline.interpolate(1, ccmcFieldline.getPositions().size());
+        //const std::vector<ccmc::Point3f>& fieldlinePositions =
+        //    mappedFieldline.getPositions();
 
 
         std::vector<glm::vec3> vertices;
-        for (const ccmc::Point3f& pt : fieldlinePositions) {
-            vertices.emplace_back(pt.component1, pt.component2, pt.component3);
-        }
-
-
-        //const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
-
-        //const size_t nLinePoints = positions.size();
-
-        //vertices.reserve(nLinePoints);
-        //for (const ccmc::Point3f& p : positions) {
-        //    vertices.emplace_back(p.component1, p.component2, p.component3);
+        //for (const ccmc::Point3f& pt : fieldlinePositions) {
+        //    vertices.emplace_back(pt.component1, pt.component2, pt.component3);
         //}
+
+
+        const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
+
+
+        for (const ccmc::Point3f& p : positions) {
+            vertices.emplace_back(p.component1, p.component2, p.component3);
+        }
         state.addLine(vertices);
         success |= (vertices.size() > 0);
     }

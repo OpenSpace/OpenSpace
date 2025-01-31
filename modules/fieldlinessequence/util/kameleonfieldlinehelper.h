@@ -29,6 +29,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <ccmc/Kameleon.h>
 
 namespace openspace {
 
@@ -39,7 +40,9 @@ std::unordered_map<std::string, std::vector<glm::vec3>>
     extractSeedPointsFromFiles(std::filesystem::path);
 std::vector<std::string>
     extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
-
+void addExtraQuantities(ccmc::Kameleon* kameleon,
+    std::vector<std::string>& extraScalarVars, std::vector<std::string>& extraMagVars,
+    FieldlinesState& state);
 /**
  * Traces field lines from the provided cdf file using kameleon and stores the data in the
  * provided FieldlinesState. Returns `false` if it fails to create a valid state. Requires

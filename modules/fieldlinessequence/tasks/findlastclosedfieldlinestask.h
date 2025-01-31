@@ -44,8 +44,8 @@ namespace openspace {
     private:
         std::string _tracingVar = "b";
         std::filesystem::path _inputPath;
-        std::vector<std::string> _sourceFiles;
-        int _numberOfPointsOnBoundary = 10;
+        std::vector<std::filesystem::path> _sourceFiles;
+        int _numberOfPointsOnBoundary = 1;
         float _threshold = 0.5; //RE
         std::filesystem::path _outputFolder;
         bool _saveLastIterationOfFieldLines = true;
