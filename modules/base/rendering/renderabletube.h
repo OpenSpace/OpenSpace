@@ -128,14 +128,6 @@ private:
     void updateEndingBufferData();
     void setCommonUniforms(ghoul::opengl::ProgramObject* shader, const RenderData& data);
 
-    // Properties
-    struct ColorSettings : properties::PropertyOwner {
-        explicit ColorSettings(const ghoul::Dictionary& dictionary);
-        properties::Vec3Property tubeColor;
-        std::unique_ptr<ColorMappingComponent> colorMapping;
-    };
-    ColorSettings _colorSettings;
-
     struct Shading : properties::PropertyOwner {
         Shading();
         properties::BoolProperty enabled;
@@ -145,22 +137,37 @@ private:
     };
     Shading _shading;
 
+    struct ColorSettings : properties::PropertyOwner {
+        explicit ColorSettings(const ghoul::Dictionary& dictionary);
+        properties::Vec3Property tubeColor;
+        std::unique_ptr<ColorMappingComponent> colorMapping;
+    };
+    ColorSettings _colorSettings;
+
+    struct ColorSettingsCutplane : properties::PropertyOwner {
+        explicit ColorSettingsCutplane(const ghoul::Dictionary& dictionary);
+        properties::Vec3Property fixedColor;
+        std::unique_ptr<ColorMappingComponent> colorMapping;
+    };
+    ColorSettingsCutplane _colorSettingsCutplane;
+    dataloader::Dataset _colorDatasetCutplane;
+
     properties::PropertyOwner _lightSourcePropertyOwner;
+    properties::BoolProperty _addEdges;
+    properties::BoolProperty _useSmoothNormals;
+    properties::OptionProperty _interpolationMethod;
     properties::BoolProperty _drawWireframe;
     properties::FloatProperty _wireLineWidth;
-    properties::BoolProperty _useSmoothNormals;
-    properties::BoolProperty _addEdges;
-    properties::OptionProperty _interpolationMethod;
     properties::BoolProperty _showAllTube;
-    properties::BoolProperty _enableFaceCulling;
+    properties::BoolProperty _useTubeFade;
+    properties::FloatProperty _tubeFadeLength;
+    properties::FloatProperty _tubeFadeAmount;
     properties::TriggerProperty _jumpToPrevPolygon;
     properties::TriggerProperty _jumpToNextPolygon;
     properties::StringProperty _selectedSample;
-    properties::FloatProperty _sampleLineWidth;
     properties::Vec3Property _sampleColor;
-    properties::BoolProperty _useTubeFade;
-    properties::FloatProperty _tubeLength;
-    properties::FloatProperty _tubeFadeAmount;
+    properties::FloatProperty _sampleLineWidth;
+    properties::BoolProperty _enableFaceCulling;
 
     std::vector<float> _lightIntensitiesBuffer;
     std::vector<glm::vec3> _lightDirectionsViewSpaceBuffer;
@@ -180,14 +187,14 @@ private:
     dataloader::Dataset _colorDataset;
     bool _hasColorMapFile = false;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    // Shape containers for the whole tube
     GLuint _vaoId = 0;
     GLuint _vboId = 0;
     GLuint _iboId = 0;
     std::vector<PolygonVertex> _verticies;
     std::vector<unsigned int> _indicies;
 
-    // Ending stuff
+    // Shape containers for the ending of the tube
     GLuint _vaoIdEnding = 0;
     GLuint _vboIdEnding = 0;
     GLuint _iboIdEnding = 0;
@@ -195,22 +202,15 @@ private:
     std::vector<unsigned int> _indiciesEnding;
     std::vector<unsigned int> _indiciesCutplane;
 
-    // Textured cutplane
-    struct ColorSettingsCutplane : properties::PropertyOwner {
-        explicit ColorSettingsCutplane(const ghoul::Dictionary& dictionary);
-        properties::Vec3Property fixedColor;
-        std::unique_ptr<ColorMappingComponent> colorMapping;
-    };
-    ColorSettingsCutplane _colorSettingsCutplane;
-    dataloader::Dataset _colorDatasetCutplane;
-
-    GLuint _texArrayId = 0;
-    bool _hasInterpolationTextures = false;
+    GLuint _textureArrayId = 0;
+    bool _hasTextures = false;
     std::filesystem::path _texturesDirectory;
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
     glm::uvec2 _textureResolution = glm::uvec2(0);
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderCutplane;
     std::filesystem::path _kernelsDirectory;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shaderCutplane;
 };
 
 } // namespace openspace
