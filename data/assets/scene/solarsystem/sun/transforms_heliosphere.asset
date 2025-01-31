@@ -100,7 +100,7 @@ local HeliocentricEarthEcliptic = {
 
 local TransformGONG = {
   Identifier = "TransformGONG",
-  Parent = HEEQ180ReferenceFrame.Identifier,
+  Parent = HeliocentricEarthEquatorial180.Identifier,
   Transform = {
     Rotation = {
       Type = "StaticRotation",
@@ -122,9 +122,11 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial180)
   openspace.addSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.addSceneGraphNode(HeliocentricEarthEcliptic)
+  openspace.addSceneGraphNode(TransformGONG)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TransformGONG)
   openspace.removeSceneGraphNode(HeliocentricEarthEcliptic)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial)
   openspace.removeSceneGraphNode(HeliocentricEarthEquatorial180)
@@ -136,6 +138,7 @@ end)
 asset.export(HeliocentricEarthEquatorial180)
 asset.export(HeliocentricEarthEquatorial)
 asset.export(HeliocentricEarthEcliptic)
+asset.export(TransformGONG)
 
 
 

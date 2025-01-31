@@ -1,4 +1,4 @@
-local transforms = asset.require('../transforms_heliosphere')
+local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
 
 local transferFunctions = asset.resource("transferfunctions")
 local opennessColorTable = transferFunctions .. "/openness_spec.txt"
