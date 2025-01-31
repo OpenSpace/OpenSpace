@@ -36,6 +36,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <optional>
 
+#include "screenspacedashboard_lua.inl"
+
 namespace {
     constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
@@ -59,8 +61,6 @@ namespace {
     };
 #include "screenspacedashboard_codegen.cpp"
 } // namespace
-
-#include "screenspacedashboard_lua.inl"
 
 namespace openspace {
 

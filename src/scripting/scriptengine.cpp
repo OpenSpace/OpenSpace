@@ -41,6 +41,7 @@
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <filesystem>
 #include <fstream>
+
 #include "scriptengine_lua.inl"
 
 namespace {

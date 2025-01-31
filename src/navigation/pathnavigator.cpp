@@ -48,6 +48,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <vector>
+
 #include "pathnavigator_lua.inl"
 
 namespace {

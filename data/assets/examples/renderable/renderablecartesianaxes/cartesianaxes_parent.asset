@@ -1,9 +1,12 @@
--- Basic
--- This example creates a SceneGraphNode that only displays coordinate axes. The
--- parent is not set which defaults to placing the axes at the center of the Sun.
+-- With Parent
+-- This example creates a SceneGraphNode that displays coordinate axes of the given parent
+-- node, in this case Earth.
+
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
 
 local Node = {
-  Identifier = "RenderableCartesianAxes_Example",
+  Identifier = "RenderableCartesianAxes_Example_Parent",
+  Parent = earth.Earth.Identifier,
   Transform = {
     Scale = {
       Type = "StaticScale",
@@ -14,7 +17,7 @@ local Node = {
     Type = "RenderableCartesianAxes"
   },
   GUI = {
-    Name = "RenderableCartesianAxes - Basic",
+    Name = "RenderableCartesianAxes - With Parent",
     Path = "/Examples"
   }
 }

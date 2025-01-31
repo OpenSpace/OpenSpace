@@ -750,7 +750,7 @@ void SceneGraphNode::update(const UpdateData& data) {
     TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
 #endif // TRACY_ENABLE
 
-    if (_state != State::Initialized && _state != State::GLInitialized) {
+    if (_state != State::GLInitialized) {
         return;
     }
     if (!isTimeFrameActive(data.time)) {

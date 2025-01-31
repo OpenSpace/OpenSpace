@@ -22,26 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
-#define __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
+#ifndef __OPENSPACE_MODULE_DEBUGGING___SCREENSPACEDEBUGPLANE___H__
+#define __OPENSPACE_MODULE_DEBUGGING___SCREENSPACEDEBUGPLANE___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/rendering/screenspacerenderable.h>
+
+#include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace {
 
-class VisLabModule : public OpenSpaceModule {
+class ScreenSpaceDebugPlane : public ScreenSpaceRenderable {
 public:
-    constexpr static const char* Name = "VisLab";
+    ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary);
 
-    VisLabModule();
-
-    std::vector<documentation::Documentation> documentations() const override;
-
+    static documentation::Documentation Documentation();
 
 private:
-    void internalInitialize(const ghoul::Dictionary&) override;
+    virtual void bindTexture() override;
+
+    properties::IntProperty _texture;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_VISLAB___VISLABMODULE___H__
+#endif // __OPENSPACE_MODULE_DEBUGGING___SCREENSPACEDEBUGPLANE___H__

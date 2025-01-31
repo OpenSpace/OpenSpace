@@ -22,27 +22,34 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_DEBUGGING___RENDERABLEDEBUGPLANE___H__
-#define __OPENSPACE_MODULE_DEBUGGING___RENDERABLEDEBUGPLANE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEDISTANCELABEL___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEDISTANCELABEL___H__
 
-#include <modules/base/rendering/renderableplane.h>
+#include <modules/base/rendering/renderablelabel.h>
+
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
-class RenderableDebugPlane : public RenderablePlane {
+namespace documentation { struct Documentation; }
+
+class RenderableDistanceLabel : public RenderableLabel {
 public:
-    RenderableDebugPlane(const ghoul::Dictionary& dictionary);
+     RenderableDistanceLabel(const ghoul::Dictionary& dictionary);
 
-    bool isReady() const override;
-
-    static documentation::Documentation Documentation();
+     void update(const UpdateData& data) override;
+     static documentation::Documentation Documentation();
 
 private:
-    virtual void bindTexture() override;
-
-    properties::IntProperty _texture;
+     properties::StringProperty _nodelineId;
+     properties::OptionProperty _distanceUnit;
+     properties::StringProperty _customUnitDescriptor;
+     properties::IntProperty _precision;
+     bool _errorThrown = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_DEBUGGING___RENDERABLEDEBUGPLANE___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEDISTANCELABEL___H__

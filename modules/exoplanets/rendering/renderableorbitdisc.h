@@ -25,11 +25,12 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___RENDERABLEORBITDISC___H__
 
+#include <openspace/rendering/renderable.h>
+
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
 #include <openspace/util/updatestructures.h>
