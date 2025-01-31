@@ -112,22 +112,11 @@ void FindLastClosedFieldlinesTask::perform(
 
 
         FieldlinesState state;
-        //for (ccmc::Fieldline& fieldline : fieldlines) {
-        //    std::vector<ccmc::Point3f> vertices = fieldline.getPositions();
-        //    std::vector<glm::vec3> positions;
-        //    for (int i = 0; vertices.size(); ++i) {
-        //        positions[i] = {
-        //            vertices[i].component1,
-        //            vertices[i].component2,
-        //            vertices[i].component3
-        //        };
-        //    }
-        //    state.addLine(positions);
-        //    //addLine(fieldline, state);   // Add the fieldline to the OpenSpace state
-        //    //addExtraQuantities(fieldline, state);  // Add extra quantities to the fieldline
-        //}
+        const std::string& modelname = kameleon->getModelName();
+        LINFO(std::format("Model name: {}", modelname));
+        state.setModel(fls::stringToModel(modelname));
+        state.setTriggerTime(kameleonHelper::getTime(kameleon.get(),0.0));
 
-        LINFO(std::format("Model name: {}", kameleon->getModelName()));
         std::vector<std::string> variableNames;
         std::vector<std::string> magVariableNames;
         long nVariables = kameleon->getNumberOfVariables();
@@ -153,7 +142,16 @@ void FindLastClosedFieldlinesTask::perform(
             }
         }
         std::vector<ccmc::Fieldline> fieldlines =
-            tracer.getLastClosedFieldlines(_numberOfPointsOnBoundary, 1, 300);
+            tracer.getLastClosedFieldlines(_numberOfPointsOnBoundary, 1, 10.0, 300);
+
+        for (ccmc::Fieldline line : fieldlines) {
+            std::vector<glm::vec3> vertices;
+            const std::vector<ccmc::Point3f>& positions = line.getPositions();
+            for (const ccmc::Point3f& p : positions) {
+                vertices.emplace_back(p.component1, p.component2, p.component3);
+            }
+            state.addLine(vertices);
+        }
 
         fls::addExtraQuantities(&*kameleon, variableNames, magVariableNames, state);
         std::string fileName = cdfPath.stem().string() + "_lastClosedFieldlines";
@@ -208,7 +206,7 @@ void FindLastClosedFieldlinesTask::perform(
     //        LINFO(std::format("First Pos: {}", firstPos));
     //        LINFO(std::format("Last Pos: {}", lastPos));
 
-    //        
+    //
     //    }
 
 

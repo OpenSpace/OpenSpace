@@ -235,7 +235,6 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
 bool traceFromListOfPoints(
                             FieldlinesState& state, const std::string& cdfPath,
                             std::vector<glm::vec3>&seedPoints,
-                            double manualTimeOffset,
                             const std::string& tracingVar,
                             std::vector<std::string>& extraVars,
                             std::vector<std::string>& extraMagVars)
@@ -250,13 +249,7 @@ bool traceFromListOfPoints(
     );
 
     state.setModel(fls::stringToModel(kameleon->getModelName()));
-    double cdfDoubleTime = kameleonHelper::getTime(kameleon.get(), manualTimeOffset);
-    state.setTriggerTime(cdfDoubleTime);
 
-    // get time as string.
-    std::string cdfStringTime = SpiceManager::ref().dateFromEphemerisTime(
-        cdfDoubleTime, "YYYYMMDDHRMNSC::RND"
-    );
 
     // Only difference is not to use time as string for picking seedpoints from seedmap
     bool success = addLinesToState(kameleon.get(), seedPoints, tracingVar, state);

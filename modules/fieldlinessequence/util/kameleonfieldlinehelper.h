@@ -66,8 +66,7 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars);
 
 bool traceFromListOfPoints(FieldlinesState& state, const std::string& cdfPath,
-    std::vector<glm::vec3>& seedpoints,
-    double manualTimeOffset, const std::string& tracingVar,
+    std::vector<glm::vec3>& seedpoints, const std::string& tracingVar,
     std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars);
 
 } // namespace fls
