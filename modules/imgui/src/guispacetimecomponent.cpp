@@ -32,7 +32,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/timeconversion.h>
+#include <openspace/util/timeconstants.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/scripting/scriptengine.h>
 
@@ -486,7 +486,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime(-{})", SecondsPerDay
+            "openspace.time.interpolateDeltaTime(-{})", timeconstants::SecondsPerDay
         ));
     }
     ImGui::SameLine();
@@ -496,7 +496,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime(-{})", SecondsPerHour
+            "openspace.time.interpolateDeltaTime(-{})", timeconstants::SecondsPerHour
         ));
     }
     ImGui::SameLine();
@@ -506,7 +506,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime(-{})", SecondsPerMinute
+            "openspace.time.interpolateDeltaTime(-{})", timeconstants::SecondsPerMinute
         ));
     }
     ImGui::SameLine();
@@ -541,7 +541,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime({})", SecondsPerMinute
+            "openspace.time.interpolateDeltaTime({})", timeconstants::SecondsPerMinute
         ));
     }
     ImGui::SameLine();
@@ -551,7 +551,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime({})", SecondsPerHour
+            "openspace.time.interpolateDeltaTime({})", timeconstants::SecondsPerHour
         ));
     }
     ImGui::SameLine();
@@ -561,7 +561,7 @@ void GuiSpaceTimeComponent::render() {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
         global::scriptEngine->queueScript(std::format(
-            "openspace.time.interpolateDeltaTime({})", SecondsPerDay
+            "openspace.time.interpolateDeltaTime({})", timeconstants::SecondsPerDay
         ));
     }
 

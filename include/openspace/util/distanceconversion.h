@@ -83,7 +83,8 @@ DistanceUnits = {
     DistanceUnit::Furlong, DistanceUnit::Mile, DistanceUnit::League
 };
 
-// Note that the syntax here is required when initializing constexpr std::arrays with structs
+// Note that the syntax here is required when initializing constexpr std::arrays
+// with structs
 constexpr std::array<DistanceUnitName, static_cast<int>(DistanceUnit::League) + 1>
 DistanceUnitNames {{
     { "Nanometer", "Nanometers", "nm" },
