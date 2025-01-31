@@ -100,8 +100,8 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
     )
     , _precisionProperties(CameraTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (int i = 0; i < DistanceUnitNamesSingular.size(); ++i) {
-        _cameraSpeedDistanceUnitOption.addOption(i, DistanceUnitNamesSingular[i].data());
+    for (int i = 0; i < DistanceUnitNames.size(); ++i) {
+        _cameraSpeedDistanceUnitOption.addOption(i, DistanceUnitNames[i].singular.data());
     }
 
     _cameraSpeedDistanceUnitOption.setValue(static_cast<int>(DistanceUnit::Kilometer));

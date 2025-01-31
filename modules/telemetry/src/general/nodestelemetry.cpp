@@ -112,8 +112,8 @@ NodesTelemetry::NodesTelemetry(const std::string& ip, int port)
     )
     , _precisionProperties(NodesTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (int i = 0; i < DistanceUnitNamesSingular.size(); ++i) {
-        _distanceUnitOption.addOption(i, DistanceUnitNamesSingular[i].data());
+    for (int i = 0; i < DistanceUnitNames.size(); ++i) {
+        _distanceUnitOption.addOption(i, DistanceUnitNames[i].singular.data());
     }
 
     _distanceUnitOption.setValue(static_cast<int>(DistanceUnit::Meter));

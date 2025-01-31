@@ -301,11 +301,11 @@ void PlanetsCompareSonification::onUpscaleChanged() {
 }
 
 void PlanetsCompareSonification::onFirstChanged() {
-    planetSelectionChanged(_firstPlanet, _secondPlanet, _oldFirst);
+    onPlanetSelectionChanged(_firstPlanet, _secondPlanet, _oldFirst);
 }
 
 void PlanetsCompareSonification::onSecondChanged() {
-    planetSelectionChanged(_secondPlanet, _firstPlanet, _oldSecond);
+    onPlanetSelectionChanged(_secondPlanet, _firstPlanet, _oldSecond);
 }
 
 void PlanetsCompareSonification::onToggleAllChanged() {
