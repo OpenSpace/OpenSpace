@@ -82,8 +82,9 @@ KameleonVolumeReader::KameleonVolumeReader(std::filesystem::path path)
     if (!std::filesystem::is_regular_file(_path)) {
         throw ghoul::FileNotFoundError(_path);
     }
-
-    const long status = _kameleon->open(_path.string());
+    auto kameleon = std::make_unique<ccmc::Kameleon>();
+    const long status = kameleon->open(_path.string());
+    _kameleon = std::move(kameleon);
     if (status != ccmc::FileReader::OK) {
         throw ghoul::RuntimeError(std::format(
             "Failed to open file '{}' with Kameleon", _path

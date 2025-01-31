@@ -31,14 +31,15 @@
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 
 namespace {
     constexpr std::string_view MainTemplateFilename =
         "${WEB}/kameleondocumentation/main.hbs";
-    constexpr std::string_view HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
+    constexpr std::string_view HandlebarsFilename = "${WEB}/documentation/handlebars-v4.0.5.js";
     constexpr std::string_view JsFilename = "${WEB}/kameleondocumentation/script.js";
     constexpr std::string_view BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    constexpr std::string_view CssFilename = "${WEB}/common/style.css";
+    constexpr std::string_view CssFilename = "${WEB}/documentation/style.css";
 
     struct [[codegen::Dictionary(KameleonDocumentationTask)]] Parameters {
         // The CDF file to extract data from
@@ -124,10 +125,9 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     };
 
     std::ofstream file;
-    file.exceptions(~std::ofstream::goodbit);
+    //file.exceptions(~std::ofstream::goodbit);
     file.open(_outputPath);
-
-     std::stringstream html;
+    std::stringstream html;
         html << "<!DOCTYPE html>\n"
             << "<html>\n"
             << "\t<head>\n"
@@ -148,7 +148,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
             << "\t<body>\n"
             << "\t</body>\n"
             << "</html>\n";
-
+    std::cout << json << std::endl;
     file << html.str();
 
     progressCallback(1.f);
