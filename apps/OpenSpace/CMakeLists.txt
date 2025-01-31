@@ -116,6 +116,10 @@ set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
 
+if (NOT OPENSPACE_HAVE_TESTS)
+  # Unless overriden, disable sgct tests if OpenSpace tests are disabled
+  set(SGCT_BUILD_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
+endif()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
 target_link_libraries(OpenSpace PRIVATE sgct)
 

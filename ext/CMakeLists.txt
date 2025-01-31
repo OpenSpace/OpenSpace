@@ -45,6 +45,10 @@ if (APPLE)
 endif ()
 
 # Ghoul
+if (NOT OPENSPACE_HAVE_TESTS)
+  # Unless overriden, disable ghoul tests if OpenSpace tests are disabled
+  set(GHOUL_HAVE_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
+endif()
 add_subdirectory(ghoul)
 if (TARGET GhoulTest)
   set_target_properties(GhoulTest PROPERTIES FOLDER "Unit Tests")
