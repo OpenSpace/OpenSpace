@@ -977,8 +977,8 @@ void RenderableStars::update(const UpdateData&) {
                         stride,
                         reinterpret_cast<void*>(offsetof(ColorVBOLayout, value))
                     );
-                    break;
                 }
+                break;
             case ColorOption::Velocity:
             {
                 glVertexAttribPointer(
