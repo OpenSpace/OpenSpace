@@ -25,14 +25,14 @@ basename_without_extension = basename:sub(0, #basename - extension:len())
 local is_image_file = function(extension)
   return extension == ".png" or extension == ".jpg" or extension == ".jpeg" or
          extension == ".tif" or extension == ".tga" or extension == ".bmp" or
-         extension == ".psd" or extension == ".gif" or extension == ".hdr" or
+         extension == ".psd"  or extension == ".hdr" or
          extension == ".pic" or extension == ".pnm"
 end
 
 local is_video_file = function(extension)
   return extension == ".mp4" or extension == ".webm" or extension == ".mkv" or
          extension == ".avi" or extension == ".mov" or extension == ".wmv" or
-         extension == ".mpg" or extension == ".m4v"
+         extension == ".mpg" or extension == ".m4v" or extension == ".gif"
 end
 
 local is_asset_file = function(extension)
