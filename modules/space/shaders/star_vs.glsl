@@ -42,7 +42,9 @@ void main() {
   vs_speed = in_speed;
 
   if (properMotion == 1) {
-    vec3 pos = in_position + in_velocity * diffTime;
+    // 1000 to get from km/s to m/s
+    dvec3 offsetInParsec = dvec3(in_velocity) * double(diffTime) * 1000.0;
+    vec3 pos = in_position + vec3(offsetInParsec);
     gl_Position = vec4(pos, 1.0);
   }
   else {
