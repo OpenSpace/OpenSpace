@@ -1496,7 +1496,14 @@ int main(int argc, char* argv[]) {
     LDEBUG("Parsing commandline arguments");
     sgct::Configuration config = parseArguments(arg);
     LDEBUG("Loading cluster information");
-    config::Cluster cluster = loadCluster(absPath(windowConfiguration).string());
+    config::Cluster cluster;
+    try {
+        loadCluster(absPath(windowConfiguration).string());
+    }
+    catch (const std::runtime_error& e) {
+        LFATALC("main", e.what());
+        exit(EXIT_FAILURE);
+    }
 
     LDEBUG("Setting callbacks");
     Engine::Callbacks callbacks = {
