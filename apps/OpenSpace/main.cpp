@@ -1498,7 +1498,7 @@ int main(int argc, char* argv[]) {
     LDEBUG("Loading cluster information");
     config::Cluster cluster;
     try {
-        loadCluster(absPath(windowConfiguration).string());
+        cluster = loadCluster(absPath(windowConfiguration).string());
     }
     catch (const std::runtime_error& e) {
         LFATALC("main", e.what());
