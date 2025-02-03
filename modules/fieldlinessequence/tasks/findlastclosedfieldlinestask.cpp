@@ -156,97 +156,10 @@ void FindLastClosedFieldlinesTask::perform(
         fls::addExtraQuantities(&*kameleon, variableNames, magVariableNames, state);
         std::string fileName = cdfPath.stem().string() + "_lastClosedFieldlines";
         state.saveStateToJson(_outputFolder.string() + fileName);
+        state.saveStateToOsfls(_outputFolder.string() + fileName);
     }
-
-
-
-
-
-
-
-
-
-
-    //LINFO(std::format("Reached perform function"));
-    ////find positions of initial set of seedpoints
-    //std::vector<glm::vec3> listOfSeedPoints = initialCircleOfPoints();
-    //// set threshold
-    //float progressCallbackValue = 0.0f;
-
-    //std::vector<std::string> extraVars;
-    //std::vector<std::string> extraMagVars;
-
-    ////for each file
-    //for (const std::string& cdfPath : _sourceFiles) {
-    //    progressCallbackValue += (1/ listOfSeedPoints.size());
-    //    //////////for each seedpoint
-    //    //trace
-    //    FieldlinesState newState;
-    //    bool isSuccessful = fls::traceFromListOfPoints(
-    //        newState,
-    //        cdfPath,
-    //        listOfSeedPoints,
-    //        0.0, //_manualTimeOffset
-    //        _tracingVar,
-    //        extraVars, // _extraVars
-    //        extraMagVars // _extraMagVars
-    //    );
-
-    //    newState.lineStart();
-    //    const std::vector<GLint>& lineStarts = newState.lineCount();
-    //    const std::vector<GLsizei>& lineCounts = newState.lineCount();
-
-    //    LINFO(std::format("Find first and last point on line"));
-    //    for (int i = 0; i < lineStarts.size(); ++i) {
-    //        progressCallback(progressCallbackValue);
-    //        size_t firstIndex = lineStarts[i];
-    //        size_t lastIndex = firstIndex + lineCounts[i];
-    //        glm::vec3 firstPos = newState.vertexPositions()[firstIndex];
-    //        glm::vec3 lastPos = newState.vertexPositions()[lastIndex];
-    //        LINFO(std::format("First Pos: {}", firstPos));
-    //        LINFO(std::format("Last Pos: {}", lastPos));
-
-    //
-    //    }
-
-
-
-
-    //        //check if endpoints are close to earth and determain closed vs not closed
-
-    //        //run iteration:
-
-    //            //move seedpoint, if closed further, else closer to earth
-    //            //reduce movement distance
-    //        //step when movement distance is less than threshold
-
-    //    // save list of points in .txt file with approriate name correlating with cdf file used
-    //    // save traced fieldlines in either osfls or json
-    //}
 
     progressCallback(1.0f);
-}
-
-std::vector<glm::vec3> FindLastClosedFieldlinesTask::initialCircleOfPoints() {
-    std::vector<glm::vec3> list;
-    float angleDeg = 360.0 / _numberOfPointsOnBoundary;
-    float angleRad = static_cast<float>(angleDeg * std::numbers::pi / 180.0);
-
-    for (int i = 0; i<_numberOfPointsOnBoundary; ++i) {
-        glm::vec3 posSphere;
-        posSphere.x = 10.0;
-        posSphere.y = angleRad * i;
-        posSphere.z = 0.0;
-
-        glm::vec3 posCartesian;
-        posCartesian.x = posSphere.x * cos(posSphere.y);
-        posCartesian.y = posSphere.x * sin(posSphere.y);
-        posCartesian.z = 0.0;
-        LINFO(std::format("\n {}, {} ", posCartesian.x, posCartesian.y));
-
-        list.push_back(posCartesian);
-    }
-    return list;
 }
 
 } //namespace openspace

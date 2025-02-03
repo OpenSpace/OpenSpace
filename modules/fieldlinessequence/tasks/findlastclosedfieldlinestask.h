@@ -48,7 +48,6 @@ namespace openspace {
         int _numberOfPointsOnBoundary = 1;
         float _threshold = 0.5; //RE
         std::filesystem::path _outputFolder;
-        bool _saveLastIterationOfFieldLines = true;
     };
 
 } // namespace openspace
