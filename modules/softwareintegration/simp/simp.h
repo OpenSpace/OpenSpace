@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_SOFTWAREINTEGRATION___SIMP___H__
 
 #include <unordered_map>
+#include <cstring>
+#include <string>
 
 namespace openspace::softwareintegration::simp {
 
@@ -37,7 +39,7 @@ const uint8_t _version_patch = 1;
 
 } // namespace
 
-const std::string protocolVersion = fmt::format("{}.{}.{}", _version_major, _version_minor, _version_patch);
+const std::string protocolVersion = std::format("{}.{}.{}", _version_major, _version_minor, _version_patch);
 
 const char DELIM = ';';
 const std::byte DELIM_BYTES{ DELIM };

@@ -45,7 +45,7 @@ bool handleEnumValue(
         simp::readValue(message, offset, newValue);
     }
     catch (const simp::SimpError& err) {
-        LERRORC("MessageHandler", fmt::format(
+        LERRORC("MessageHandler", std::format(
             "Error when parsing int32_t in DATA.{} message: {}",
             simp::getStringFromDataKey(dataKey), err.message
         ));
@@ -56,7 +56,7 @@ bool handleEnumValue(
         static_cast<T>(newValue);
     }
     catch (const std::exception& err) {
-        LERRORC("MessageHandler", fmt::format(
+        LERRORC("MessageHandler", std::format(
             "Error when casting {} to {} in DATA.{} message: {}",
             newValue, typeid(T).name(), simp::getStringFromDataKey(dataKey), err.what()
         ));
@@ -76,11 +76,10 @@ bool handleEnumValue(
         auto currentValue = std::any_cast<int>(property->get());
         if (newValue != currentValue) {
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.{}', {});",
                     identifier, propertyName, ghoul::to_string(newValue)
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
+                )
             );
         }
     };
@@ -89,7 +88,7 @@ bool handleEnumValue(
         {
             setEnumCallback,
             {},
-            fmt::format("Callback on property {}", propertyName), 
+            std::format("Callback on property {}", propertyName), 
         }
     );
 

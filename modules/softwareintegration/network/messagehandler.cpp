@@ -64,7 +64,7 @@ void checkRenderable(
         simp::readValue(message, messageOffset, guiName);
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format("Error when reading identifier and guiName from message: {}", err.message));
+        LERROR(std::format("Error when reading identifier and guiName from message: {}", err.message));
         return;
     }
 
@@ -77,7 +77,7 @@ void checkRenderable(
         hasCallbacks = callbacks.count(identifier) > 0;
     }
     if (!r && !hasCallbacks) {
-        LDEBUG(fmt::format("No renderable with identifier '{}' was found. Creating it.", identifier));
+        LDEBUG(std::format("No renderable with identifier '{}' was found. Creating it.", identifier));
 
         // Create a renderable, since it didn't exist
         using namespace std::string_literals;
@@ -97,16 +97,14 @@ void checkRenderable(
 
         global::scriptEngine->queueScript(
             "openspace.addSceneGraphNode(" + ghoul::formatLua(node) + ")"
-            "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)", // Reload WebGUI so that SoftwareIntegration GUI appears
-            scripting::ScriptEngine::RemoteScripting::Yes
+            "openspace.setPropertyValueSingle('Modules.CefWebGui.Reload', nil)" // Reload WebGUI so that SoftwareIntegration GUI appears
         );
 
         auto reanchorCallback = [identifier] {
             global::scriptEngine->queueScript(
                 "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)"
                 "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', '" + identifier + "')"
-                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
-                scripting::ScriptEngine::RemoteScripting::Yes
+                "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
             );
         };
         addCallback(identifier, { reanchorCallback, { storage::Key::DataPoints }, "reanchorCallback" });
@@ -239,7 +237,7 @@ void checkAddOnChangeCallback(
         {
             onChangeCallback,
             {},
-            fmt::format("onChangeCallback on property {}", propertyName),
+            std::format("onChangeCallback on property {}", propertyName),
         }
     );
 }
@@ -264,7 +262,7 @@ bool handleSingleFloatValue(
         simp::readValue(message, offset, newValue);
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error when parsing float in {} message: {}",
             simp::getStringFromDataKey(dataKey), err.message
         ));
@@ -284,11 +282,10 @@ bool handleSingleFloatValue(
         auto currentValue = std::any_cast<float>(property->get());
         if (abs(newValue - currentValue) > std::numeric_limits<float>::epsilon()) {
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.{}', {});",
                     identifier, propertyName, ghoul::to_string(newValue)
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
+                )
             );
         }
     };
@@ -297,7 +294,7 @@ bool handleSingleFloatValue(
         {
             setValueCallback,
             {},
-            fmt::format("Callback for {} on property {}", simp::getStringFromDataKey(dataKey), propertyName),
+            std::format("Callback for {} on property {}", simp::getStringFromDataKey(dataKey), propertyName),
         }
     );
 
@@ -343,11 +340,10 @@ bool handleColorValue(
         // Update color of renderable
         if (glm::any(glm::epsilonNotEqual(newColor, currentColor, std::numeric_limits<float>::epsilon()))) {
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.{}', {});",
                     identifier, propertyName, ghoul::to_string(newColor)
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
+                )
             );
         }
     };
@@ -356,7 +352,7 @@ bool handleColorValue(
         {
             setColorCallback, 
             {}, 
-            fmt::format("Callback on property {}", propertyName), 
+            std::format("Callback on property {}", propertyName), 
         }
     );
 
@@ -403,11 +399,10 @@ bool handleDateValue(
         // Update date of renderable
         if (glm::any(glm::notEqual(newDate, currentDate))) {
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.{}', {});",
                     identifier, propertyName, ghoul::to_string(newDate)
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
+                )
             );
         }
     };
@@ -416,7 +411,7 @@ bool handleDateValue(
         {
             setDateCallback, 
             {}, 
-            fmt::format("Callback on property {}", propertyName), 
+            std::format("Callback on property {}", propertyName), 
         }
     );
 
@@ -448,7 +443,7 @@ bool handleBoolValue(
         simp::readValue(message, offset, newValue);
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error when parsing bool in DATA.{} message: {}",
             simp::getStringFromDataKey(dataKey), err.message
         ));
@@ -469,11 +464,10 @@ bool handleBoolValue(
         if (newValue != currentValue) {
             std::string newValueString = newValue ? "true" : "false";
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.{}', {});",
                     identifier, propertyName, newValueString
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
+                )
             );
         }
     };
@@ -486,7 +480,7 @@ bool handleBoolValue(
         {
             setEnabledCallback,
             waitFor,
-            fmt::format("Callback on property {}", propertyName),
+            std::format("Callback on property {}", propertyName),
         }
     );
 
@@ -517,7 +511,7 @@ bool handleStringValue(
         simp::readValue(message, offset, newStringValue);
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Error when parsing string in DATA.{} message: {}",
             simp::getStringFromDataKey(dataKey), err.message
         ));
@@ -537,11 +531,10 @@ bool handleStringValue(
         auto currentStringValue = property->stringValue();
         if (newStringValue != currentStringValue) {
             global::scriptEngine->queueScript(
-                fmt::format(
+                std::format(
                     "openspace.setPropertyValueSingle('Scene.{}.Renderable.{}', \"{}\");",
                     identifier, propertyName, newStringValue
-                ),
-                scripting::ScriptEngine::RemoteScripting::Yes
+                )
             );
         }
     };
@@ -550,7 +543,7 @@ bool handleStringValue(
         {
             setStringCallback,
             {},
-            fmt::format("Callback for {} on property {}", simp::getStringFromDataKey(dataKey), propertyName),
+            std::format("Callback for {} on property {}", simp::getStringFromDataKey(dataKey), propertyName),
         }
     );
 
@@ -582,10 +575,10 @@ void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<So
             dataKey = simp::getDataKey(dataKeyStr);
         }
         catch (const simp::SimpError& err) {
-            LERROR(fmt::format("Error when reading data message: {}", err.message));
+            LERROR(std::format("Error when reading data message: {}", err.message));
             return;
         }
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "Handling '{}':",
             simp::getStringFromDataKey(dataKey)
         ));
@@ -609,7 +602,7 @@ void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<So
             try {
                 simp::readValue(message, offset, nValues);
                 if (nValues < 0) {
-                    throw simp::SimpError(fmt::format(
+                    throw simp::SimpError(std::format(
                         "Number of values should be >0. Got {}",
                         nValues
                     ));
@@ -625,13 +618,13 @@ void handleDataMessage(const std::vector<std::byte>& message, std::shared_ptr<So
             }
             catch (const simp::SimpError& err) {
                 if (nValues != -1) {
-                    LERROR(fmt::format(
+                    LERROR(std::format(
                         "Error when reading {} values in {} message: {}",
                         nValues, dataKeyStr, err.message
                     ));
                 }
                 else {
-                    LERROR(fmt::format(
+                    LERROR(std::format(
                         "Error when parsing number of values in {} message: {}",
                         dataKeyStr, err.message
                     ));
@@ -799,7 +792,7 @@ void handleRemoveSGNMessage(const std::vector<std::byte>& message, std::shared_p
         simp::readValue(message, messageOffset, identifier);
     }
     catch (const simp::SimpError& err) {
-        LERROR(fmt::format("Error when reading message: {}", err.message));
+        LERROR(std::format("Error when reading message: {}", err.message));
         return;
     }
     
@@ -809,18 +802,16 @@ void handleRemoveSGNMessage(const std::vector<std::byte>& message, std::shared_p
 		// If the deleted node is the current anchor, first change focus to the Sun
 		global::scriptEngine->queueScript(
 			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Sun')"
-			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')",
-			scripting::ScriptEngine::RemoteScripting::Yes
+			"openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Aim', '')"
 		);
 	}
 	global::scriptEngine->queueScript(
-		"openspace.removeSceneGraphNode('" + identifier + "');",
-		scripting::ScriptEngine::RemoteScripting::Yes
+		"openspace.removeSceneGraphNode('" + identifier + "');"
 	);
 
     connection->removeSceneGraphNode(identifier);
 
-	LDEBUG(fmt::format("Scene graph node '{}' removed.", identifier));
+	LDEBUG(std::format("Scene graph node '{}' removed.", identifier));
 }
 
 } // namespace
@@ -839,7 +830,7 @@ void addCallback(const std::string& identifier, const Callback& newCallback) {
 
 void handleMessage(IncomingMessage& incomingMessage) {
 	if(incomingMessage.connection.expired()) {
-		LDEBUG(fmt::format("Trying to handle message from disconnected peer. Aborting."));
+		LDEBUG(std::format("Trying to handle message from disconnected peer. Aborting."));
 		return;
 	}
 
@@ -850,9 +841,9 @@ void handleMessage(IncomingMessage& incomingMessage) {
 
 	switch (messageType) {
 		case simp::MessageType::Connection: {
-			LDEBUG(fmt::format("Message recieved... Connection: {}", connectionPtr->id()));
+			LDEBUG(std::format("Message recieved... Connection: {}", connectionPtr->id()));
 			if (connectionPtr->handshakeHasBeenMade()) {
-                LERROR(fmt::format("Connection {} is already connected. Can't connect again.", connectionPtr->id()));
+                LERROR(std::format("Connection {} is already connected. Can't connect again.", connectionPtr->id()));
                 return;
             }
             size_t offset = 0;
@@ -861,7 +852,7 @@ void handleMessage(IncomingMessage& incomingMessage) {
                 simp::readValue(message, offset, software);
             }
             catch (const simp::SimpError& err) {
-                LERROR(fmt::format(
+                LERROR(std::format(
                     "Error when parsing software name in {} message: {}",
                     simp::getStringFromMessageType(simp::MessageType::Connection), err.message
                 ));
@@ -875,22 +866,22 @@ void handleMessage(IncomingMessage& incomingMessage) {
             simp::toByteBuffer(subject, 0, sendBack);
 
 			connectionPtr->sendMessage(messageType, subject);
-			LINFO(fmt::format("OpenSpace has connected with {} through socket", software));
+			LINFO(std::format("OpenSpace has connected with {} through socket", software));
             connectionPtr->setHandshakeHasBeenMade();
             break;
 		}
 		case simp::MessageType::Data: {
-			LINFO(fmt::format("Data message recieved on connection {}.", connectionPtr->id()));
+			LINFO(std::format("Data message recieved on connection {}.", connectionPtr->id()));
 			handleDataMessage(message, connectionPtr);
 			break;
 		}
 		case simp::MessageType::RemoveSceneGraphNode: {
-			LINFO(fmt::format("Remove Scene Graph Node message recieved on connection {}.", connectionPtr->id()));
+			LINFO(std::format("Remove Scene Graph Node message recieved on connection {}.", connectionPtr->id()));
 			handleRemoveSGNMessage(message, connectionPtr);
 			break;
 		}
 		default: {
-			LERROR(fmt::format(
+			LERROR(std::format(
 				"Unsupported message type: {}", incomingMessage.rawMessageType
 			));
 			break;
@@ -907,7 +898,7 @@ void postSyncCallbacks() {
         auto& [identifier, callbackList] = *callbackMapIt;
         
         try {
-            LDEBUG(fmt::format("Callbacks for {}:", identifier));
+            LDEBUG(std::format("Callbacks for {}:", identifier));
             const SceneGraphNode* sgn = global::renderEngine->scene()->sceneGraphNode(identifier);
             if (!sgn) throw std::exception{};
 
@@ -923,7 +914,7 @@ void postSyncCallbacks() {
                 try {
                     for (auto& waitFor : waitForData) {
                         if (!softwareIntegrationModule->dataLoaded(identifier, waitFor)) {
-                            LINFO(fmt::format(
+                            LINFO(std::format(
                                 "Callback '{}' NOT executed. Waiting for '{}':",
                                 description, storage::getStorageKeyString(waitFor)
                             ));
@@ -933,7 +924,7 @@ void postSyncCallbacks() {
 
                     callback();
                     callbacksIt = callbackList.erase(callbacksIt);
-                    LDEBUG(fmt::format("Callback '{}' executed", description));
+                    LDEBUG(std::format("Callback '{}' executed", description));
                 }
                 catch (std::exception&) {
                     ++callbacksIt;
@@ -950,7 +941,7 @@ void postSyncCallbacks() {
         catch(std::exception &err) {
             ++callbacksRetries;
             ghoul_assert(callbacksRetries < 10, "Too many callback retries");
-            LDEBUG(fmt::format("Error when trying to run callback: {}", err.what()));
+            LDEBUG(std::format("Error when trying to run callback: {}", err.what()));
             break;
         }
     }

@@ -44,7 +44,7 @@ SoftwareConnection::SoftwareConnection(std::unique_ptr<ghoul::io::TcpSocket> soc
     : _id{ _nextConnectionId++ }, _socket{ std::move(socket) }, _sceneGraphNodes{},
     _thread{}, _shouldStopThread{ false }
 {
-    LDEBUG(fmt::format("Adding software connection {}", _id));
+    LDEBUG(std::format("Adding software connection {}", _id));
 }
 
 SoftwareConnection::SoftwareConnection(SoftwareConnection&& sc)
@@ -60,7 +60,7 @@ SoftwareConnection::~SoftwareConnection() {
     // shared_ptrs to SoftwareConnection, which can cause
     // bugs if not handled properly.
     // Tips: use weak_ptr instead of shared_ptr in callbacks.
-    LDEBUG(fmt::format("Removing software connection {}", _id));
+    LDEBUG(std::format("Removing software connection {}", _id));
 
     _shouldStopOutgoingMessagesThread = true;
     _outgoingMessagesNotifier.notify_all();
@@ -81,7 +81,7 @@ void SoftwareConnection::addPropertySubscription(
     // Get renderable
     auto r = renderable(identifier);
     if (!r) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Couldn't add property subscription. Renderable \"{}\" doesn't exist",
             identifier
         ));
@@ -90,7 +90,7 @@ void SoftwareConnection::addPropertySubscription(
 
     auto property = r->property(propertyName);
     if (!property) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Couldn't add property subscription. Property \"{}\" doesn't exist on \"{}\"",
             propertyName, identifier
         ));
@@ -102,7 +102,7 @@ void SoftwareConnection::addPropertySubscription(
 
     auto propertySubscriptions = _sceneGraphNodes.find(identifier);
     if (propertySubscriptions == _sceneGraphNodes.end()) {
-        LERROR(fmt::format("Couldn't add property subscription. No SceneGraphNode with identifier {} exists.", identifier));
+        LERROR(std::format("Couldn't add property subscription. No SceneGraphNode with identifier {} exists.", identifier));
         return;
     }
 
@@ -130,7 +130,7 @@ bool SoftwareConnection::hasPropertySubscription(
     // Get renderable
     auto r = renderable(identifier);
     if (!r) {
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "Couldn't check for property subscriptions, renderable {} doesn't exist",
             identifier
         ));
@@ -145,7 +145,7 @@ void SoftwareConnection::removePropertySubscriptions(const std::string& identifi
     // Get renderable
     auto r = renderable(identifier);
     if (!r) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Couldn't remove property subscriptions, renderable {} doesn't exist",
             identifier
         ));
@@ -163,7 +163,7 @@ void SoftwareConnection::removePropertySubscriptions(const std::string& identifi
 
         auto property = r->property(propertySubscriptionCopy.first);
         if (!property) {
-            LWARNING(fmt::format(
+            LWARNING(std::format(
                 "Couldn't remove property subscription. Property \"{}\" doesn't exist on \"{}\"",
                 propertySubscriptionCopy.first, identifier
             ));
@@ -182,7 +182,7 @@ void SoftwareConnection::removePropertySubscription(
     // Get renderable
     auto r = renderable(identifier);
     if (!r) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Couldn't remove property subscription. Renderable \"{}\" doesn't exist",
             identifier
         ));
@@ -190,7 +190,7 @@ void SoftwareConnection::removePropertySubscription(
     }
 
     if (!r->hasProperty(propertyName)) {
-        LWARNING(fmt::format(
+        LWARNING(std::format(
             "Couldn't remove property subscription. Property \"{}\" doesn't exist on \"{}\"",
             propertyName, identifier
         ));
@@ -238,7 +238,7 @@ bool SoftwareConnection::shouldSendData(const std::string& identifier, const std
 void SoftwareConnection::setShouldNotSendData(const std::string& identifier, const std::string& propertyName) {
     auto sgn = _sceneGraphNodes.find(identifier);
     if (sgn == _sceneGraphNodes.end()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Couldn't set shouldNotSendData on property {} on SceneGraphNode {}. SceneGraphNode doesn't exist.",
             propertyName, identifier
         ));
@@ -247,7 +247,7 @@ void SoftwareConnection::setShouldNotSendData(const std::string& identifier, con
 
     auto propertySubscription = sgn->second.propertySubscriptions.find(propertyName);
     if (propertySubscription == sgn->second.propertySubscriptions.end()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Couldn't set shouldNotSendData on property {} on SceneGraphNode {}. No subscription on property.",
             propertyName, identifier
         ));
@@ -259,7 +259,7 @@ void SoftwareConnection::setShouldNotSendData(const std::string& identifier, con
 
 void SoftwareConnection::disconnect() {
     _socket->disconnect();
-    LINFO(fmt::format("OpenSpace has disconnected with external software"));
+    LINFO(std::format("OpenSpace has disconnected with external software"));
 }
 
 bool SoftwareConnection::isConnected() const {
@@ -279,14 +279,14 @@ bool SoftwareConnection::sendMessage(
         if (!_socket || !isConnected()) {
             throw SoftwareConnectionLostError("Connection lost...");
         }
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "sendMessage: messageType={}, subjectBuffer.size()={}", 
             simp::getStringFromMessageType(messageType), 
             subjectBuffer.size()
         ));
         
         std::vector<std::byte> message{};
-        std::string header = fmt::format(
+        std::string header = std::format(
             "{}{}{}",
             simp::protocolVersion,
             simp::getStringFromMessageType(messageType),
@@ -300,13 +300,13 @@ bool SoftwareConnection::sendMessage(
         }
     }
     catch (const SoftwareConnectionLostError& err) {
-        LERROR(fmt::format("Couldn't send message with type \"{}\", due to: {}", simp::getStringFromMessageType(messageType), err.message));
+        LERROR(std::format("Couldn't send message with type \"{}\", due to: {}", simp::getStringFromMessageType(messageType), err.message));
     }
     catch (const std::exception& err) {
-        LERROR(fmt::format("Couldn't send message with type \"{}\", due to: {}", simp::getStringFromMessageType(messageType), err.what()));
+        LERROR(std::format("Couldn't send message with type \"{}\", due to: {}", simp::getStringFromMessageType(messageType), err.what()));
     }
 
-    LDEBUG(fmt::format("Sent message with type {}", simp::getStringFromMessageType(messageType)));
+    LDEBUG(std::format("Sent message with type {}", simp::getStringFromMessageType(messageType)));
     return true;
 }
 
@@ -351,7 +351,7 @@ void SoftwareConnection::addToMessageQueue(
 ) {
     auto sgn = _sceneGraphNodes.find(identifier);
     if (sgn == _sceneGraphNodes.end()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Couldn't add {} to message queue. No SceneGraphNode with identifier {} exists.",
             softwareintegration::simp::getStringFromDataKey(dataKey), identifier
         ));
@@ -370,7 +370,7 @@ void SoftwareConnection::addToMessageQueue(
 void SoftwareConnection::removeMessageQueue(const std::string& identifier) {
     auto sgn = _sceneGraphNodes.find(identifier);
     if (sgn == _sceneGraphNodes.end()) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Couldn't remove message queue. No SceneGraphNode with identifier {} exists.",
             identifier
         ));
@@ -428,7 +428,7 @@ void SoftwareConnection::handleOutgoingMessages() {
 
                 size_t subjectBufferOffset = 0;
                 subjectBuffer.clear();
-                std::string subjectPrefixString = fmt::format(
+                std::string subjectPrefixString = std::format(
                     "{}{}{}{}", identifier, simp::DELIM, guiNameProp->stringValue(), simp::DELIM
                 );
                 simp::toByteBuffer(subjectBuffer, subjectBufferOffset, subjectPrefixString);
@@ -438,12 +438,12 @@ void SoftwareConnection::handleOutgoingMessages() {
                 for (auto& [dataKey, data] : sceneGraphNodeInfo.outgoingMessages) {
                     auto& [dataBuffer, nValues] = data;
 
-                    std::string dataKeyString = fmt::format(
+                    std::string dataKeyString = std::format(
                         "{}{}", simp::getStringFromDataKey(dataKey), simp::DELIM
                     );
 
                     std::string nValuesString = nValues > 1 ? std::to_string(nValues) : "";
-                    LDEBUG(fmt::format("Sending {} {} to OpenSpace", nValuesString, simp::getStringFromDataKey(dataKey)));
+                    LDEBUG(std::format("Sending {} {} to OpenSpace", nValuesString, simp::getStringFromDataKey(dataKey)));
 
                     simp::toByteBuffer(subjectBuffer, subjectBufferOffset, dataKeyString);
                     if (nValues > 1) {
@@ -494,7 +494,7 @@ void eventLoop(
 			if (!networkStateWeakPtr.expired()
 				& (!connectionPtr->_shouldStopThread || !connectionPtr->isConnectedOrConnecting())
 			) {
-				LDEBUG(fmt::format("Connection lost to {}: {}", connectionPtr->id(), err.message));
+				LDEBUG(std::format("Connection lost to {}: {}", connectionPtr->id(), err.message));
 				auto networkState = networkStateWeakPtr.lock();
 				if (networkState->softwareConnections.count(connectionPtr->id())) {
 					networkState->softwareConnections.erase(connectionPtr->id());
@@ -523,7 +523,7 @@ IncomingMessage receiveMessageFromSoftware(std::shared_ptr<SoftwareConnection> c
 
     // Make sure that header matches the protocol version
     if (protocolVersionIn != softwareintegration::simp::protocolVersion) {
-        throw SoftwareConnectionLostError(fmt::format(
+        throw SoftwareConnectionLostError(std::format(
             "Protocol versions do not match. Remote version: {}, Local version: {}",
             protocolVersionIn,
             softwareintegration::simp::protocolVersion

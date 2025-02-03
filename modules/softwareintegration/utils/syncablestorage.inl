@@ -32,10 +32,10 @@ bool SyncableStorage::fetch(
     const storage::Key storageKey,
     T& resultingData
 ) {
-    LDEBUGC("SyncableStorage", fmt::format("Loading data from float data storage: {}-{}", identifier, storage::getStorageKeyString(storageKey)));
+    LDEBUGC("SyncableStorage", std::format("Loading data from float data storage: {}-{}", identifier, storage::getStorageKeyString(storageKey)));
     std::lock_guard guard(_mutex);
     if (!count(identifier)) {
-        LERRORC("SyncableStorage", fmt::format(
+        LERRORC("SyncableStorage", std::format(
             "Could not find any data for SceneGraphNode '{}' in the centralized data storage",
             identifier
         ));
@@ -49,7 +49,7 @@ bool SyncableStorage::fetch(
         case storage::Key::LinearSizeAttrData:
         case storage::Key::VelocityData: {
             if (!std::is_same<T, std::vector<float>>::value) {
-                LERRORC("SyncableStorage", fmt::format(
+                LERRORC("SyncableStorage", std::format(
                     "Can't put {} into a {}.",
                     storage::getStorageKeyString(storageKey), typeid(T).name()
                 ));
@@ -59,7 +59,7 @@ bool SyncableStorage::fetch(
             return fetchDimFloatData(identifier, simpDataKeysFromStorageKey(storageKey), resultingData);
         }
         default: {
-            LERRORC("SyncableStorage", fmt::format(
+            LERRORC("SyncableStorage", std::format(
                 "Could not find data in storage for the key {}",
                 storage::getStorageKeyString(storageKey)
             ));

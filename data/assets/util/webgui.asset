@@ -10,10 +10,10 @@ local frontend = asset.resource({
   Identifier = "WebGuiFrontend",
   Name = "Web Gui Frontend",
   Type = "UrlSynchronization",
-  -- Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
+  Url = "http://data.openspaceproject.com/files/webgui/frontend/" ..  frontendHash .. "/frontend.zip"
   -- TODO: Remove. This was added in order to use the new GUI for saving sessions.
   -- in the Software Integration Module
-  Url = "openspacegui.vlq.se/309e67690d3de3b7ed1800d702d1457a9f0bcb05/frontend.zip"
+  -- Url = "openspacegui.vlq.se/309e67690d3de3b7ed1800d702d1457a9f0bcb05/frontend.zip"
 })
 
 

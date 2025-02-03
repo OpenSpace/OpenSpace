@@ -125,7 +125,7 @@ void stopServer(std::shared_ptr<NetworkState> networkState) {
 }
 
 SoftwareConnectionLostError::SoftwareConnectionLostError(const std::string& msg)
-    : ghoul::RuntimeError(fmt::format("{}{}", "Software connection lost", msg), "SoftwareConnection")
+    : ghoul::RuntimeError(std::format("{}{}", "Software connection lost", msg), "SoftwareConnection")
 {}
 
 } // namespace openspace::softwareintegration::network
